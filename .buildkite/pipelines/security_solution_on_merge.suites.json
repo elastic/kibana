@@ -1,0 +1,161 @@
+{
+  "fallbackSlackChannel": "#sdh-security-team",
+  "suites": [
+    {
+      "label": "Serverless Entity Analytics - Security Cypress Tests",
+      "slackChannel": "#security-entity-analytics-alerts",
+      "owners": ["@elastic/security-entity-analytics"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics"
+    },
+    {
+      "label": "Entity Analytics - Security Solution Cypress Tests",
+      "slackChannel": "#security-entity-analytics-alerts",
+      "owners": ["@elastic/security-entity-analytics"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics"
+    },
+    {
+      "label": "Serverless Explore - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-entity-analytics", "@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore"
+    },
+    {
+      "label": "Explore - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-entity-analytics", "@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore"
+    },
+    {
+      "label": "Serverless Investigations - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations"
+    },
+    {
+      "label": "Investigations - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations"
+    },
+    {
+      "label": "Serverless AI Assistant - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant"
+    },
+    {
+      "label": "AI Assistant - Security Solution Cypress Tests",
+      "slackChannel": "#security-threat-hunting",
+      "owners": ["@elastic/security-threat-hunting"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant"
+    },
+    {
+      "label": "Serverless Rule Management - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management"
+    },
+    {
+      "label": "Rule Management - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management"
+    },
+    {
+      "label": "Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/customization"
+    },
+    {
+      "label": "Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/customization"
+    },
+    {
+      "label": "Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/installation"
+    },
+    {
+      "label": "Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/installation"
+    },
+    {
+      "label": "Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/management"
+    },
+    {
+      "label": "Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/management"
+    },
+    {
+      "label": "Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/upgrade"
+    },
+    {
+      "label": "Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management/prebuilt_rules/upgrade"
+    },
+    {
+      "label": "Serverless Detection Engine - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine"
+    },
+    {
+      "label": "Detection Engine - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine"
+    },
+    {
+      "label": "Serverless Detection Engine - Exceptions - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/exceptions"
+    },
+    {
+      "label": "Detection Engine - Exceptions - Security Solution Cypress Tests",
+      "slackChannel": "#security-detection-engineering-team",
+      "owners": ["@elastic/security-detection-engineering"],
+      "specDir": "x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/exceptions"
+    },
+    {
+      "label": "Osquery Cypress Tests",
+      "slackChannel": "#security-defend-workflows",
+      "owners": ["@elastic/security-defend-workflows"],
+      "specDir": "x-pack/platform/plugins/shared/osquery/cypress/e2e"
+    },
+    {
+      "label": "Osquery Cypress Tests on Serverless",
+      "slackChannel": "#security-defend-workflows",
+      "owners": ["@elastic/security-defend-workflows"],
+      "specDir": "x-pack/platform/plugins/shared/osquery/cypress/e2e"
+    },
+    {
+      "label": "Defend Workflows Cypress Tests",
+      "slackChannel": "#security-defend-workflows",
+      "owners": ["@elastic/security-defend-workflows"],
+      "specDir": "x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e"
+    },
+    {
+      "label": "Defend Workflows Cypress Tests on Serverless",
+      "slackChannel": "#security-defend-workflows",
+      "owners": ["@elastic/security-defend-workflows"],
+      "specDir": "x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e"
+    }
+  ]
+}

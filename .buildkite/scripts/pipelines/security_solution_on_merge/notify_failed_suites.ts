@@ -11,7 +11,12 @@ import { execSync } from 'child_process';
 import path from 'path';
 import { stringify } from 'yaml';
 
-import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels.ts';
+import {
+  DEFAULT_FALLBACK_SLACK_CHANNEL,
+  SUITES_CONFIG_RELATIVE_PATH,
+  findSuiteForStepLabel,
+  getFallbackSlackChannel,
+} from './failed_suite_channels.ts';
 import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
 
@@ -60,22 +65,40 @@ export function collectFailedScriptJobs(
     }));
 }
 
-export function groupJobsByChannel(jobs: FailedJob[]): Map<string, FailedJob[]> {
-  const grouped = new Map<string, FailedJob[]>();
+export interface ChannelGroup {
+  jobs: FailedJob[];
+  /** Step labels with no entry in the suites config; these landed here via fallback. */
+  unmappedLabels: string[];
+}
+
+export function groupJobsByChannel(jobs: FailedJob[]): Map<string, ChannelGroup> {
+  const fallbackChannel = getFallbackSlackChannel();
+  const grouped = new Map<string, ChannelGroup>();
+
   for (const job of jobs) {
-    const channel = getChannelForStepLabel(job.name);
-    const list = grouped.get(channel) ?? [];
-    list.push(job);
-    grouped.set(channel, list);
+    const displayName = displayNameForJob(job.name);
+    const suite = findSuiteForStepLabel(displayName);
+    const channel = suite?.slackChannel ?? fallbackChannel;
+
+    const group = grouped.get(channel) ?? { jobs: [], unmappedLabels: [] };
+    group.jobs.push(job);
+    if (!suite && !group.unmappedLabels.includes(displayName)) {
+      group.unmappedLabels.push(displayName);
+    }
+    grouped.set(channel, group);
   }
+
   return grouped;
 }
 
 export function composeChannelMessage(
   jobs: FailedJob[],
   buildUrl: string,
-  buildNumber: string | number
+  buildNumber: string | number,
+  options: { unmappedLabels?: string[] } = {}
 ): string {
+  const unmappedLabels = options.unmappedLabels ?? [];
+
   const unique = new Map<string, { job: FailedJob; count: number }>();
   for (const job of jobs) {
     const displayName = displayNameForJob(job.name);
@@ -94,12 +117,26 @@ export function composeChannelMessage(
 
   const omissionLine = (count: number) => `• …and ${count} more failed step${count > 1 ? 's' : ''}`;
 
+  // Unmapped steps reach this channel via fallback, so say so. Otherwise the message
+  // is indistinguishable from a real alert for this channel and the gap goes unnoticed.
+  const unmappedNotice =
+    unmappedLabels.length > 0
+      ? [
+          `:grey_question: ${unmappedLabels.length} step${
+            unmappedLabels.length > 1 ? 's have' : ' has'
+          } no owning-team mapping and landed here by fallback.`,
+          `Add ${unmappedLabels.length > 1 ? 'them' : 'it'} to \`${SUITES_CONFIG_RELATIVE_PATH}\`.`,
+          '',
+        ]
+      : [];
+
   const render = (lines: string[]) =>
     [
       ':alert: *kibana-security-solution-on-merge* failed',
       '',
       'Parent kibana-on-merge is `soft_fail`, so treat this as release-blocking for Security.',
       '',
+      ...unmappedNotice,
       ...lines,
       '',
       `<${buildUrl}|View build #${buildNumber}>`,
@@ -224,12 +261,42 @@ function markSlackNotifyUploaded(buildkite: BuildkiteClient): void {
   }
 }
 
+export function annotateUnmappedSteps(buildkite: BuildkiteClient, unmappedLabels: string[]): void {
+  if (unmappedLabels.length === 0) {
+    return;
+  }
+
+  const lines = unmappedLabels.map((label) => `- \`${label}\``).join('\n');
+  console.warn(`Steps with no owning-team mapping: ${unmappedLabels.join(', ')}`);
+
+  const body = [
+    'These failed steps have no owning-team Slack mapping and were sent to the fallback channel.',
+    `Add them to \`${SUITES_CONFIG_RELATIVE_PATH}\`:`,
+    lines,
+  ].join('\n');
+
+  try {
+    buildkite.setAnnotation('security-solution-on-merge-unmapped-steps', 'warning', body);
+  } catch (error) {
+    // Best effort: the Slack messages already carry the same warning.
+    console.error('Failed to annotate unmapped steps', error);
+  }
+}
+
 function notifyFanOutFailure(
   error: unknown,
   buildkite: BuildkiteClient,
   upload: (yaml: string) => void
 ): void {
   const detail = error instanceof Error ? error.message : String(error);
+  // Reading the suites config can itself be what failed, so never let the fallback
+  // lookup throw inside the fallback path.
+  let fallbackChannel: string;
+  try {
+    fallbackChannel = getFallbackSlackChannel();
+  } catch {
+    fallbackChannel = DEFAULT_FALLBACK_SLACK_CHANNEL;
+  }
 
   // Annotate before the Slack upload so Buildkite still surfaces the miss when
   // pipeline upload itself is broken.
@@ -237,19 +304,19 @@ function notifyFanOutFailure(
     buildkite.setAnnotation(
       'security-solution-on-merge-slack-fanout',
       'error',
-      `Owning-team Slack fan-out failed; alerting ${FALLBACK_SLACK_CHANNEL}. ${detail}`
+      `Owning-team Slack fan-out failed; alerting ${fallbackChannel}. ${detail}`
     );
   } catch (annotationError) {
     console.error('Failed to annotate fan-out failure', annotationError);
   }
 
   const message = composeFanOutFailureMessage(error);
-  const yaml = buildNotifyPipelineYaml(new Map([[FALLBACK_SLACK_CHANNEL, message]]), {
+  const yaml = buildNotifyPipelineYaml(new Map([[fallbackChannel, message]]), {
     // Distinct from a successful unmatched-step notify to the same channel.
     stepKey: () => 'notify-owning-team-fanout-failure',
   });
 
-  console.error(`Fan-out failed; uploading fallback Slack notify to ${FALLBACK_SLACK_CHANNEL}`);
+  console.error(`Fan-out failed; uploading fallback Slack notify to ${fallbackChannel}`);
   upload(yaml);
   markSlackNotifyUploaded(buildkite);
 }
@@ -275,16 +342,20 @@ async function runNotifyFailedSuites(
 
   const grouped = groupJobsByChannel(failedJobs);
   const channelToMessage = new Map<string, string>();
-  for (const [channel, jobs] of grouped) {
-    channelToMessage.set(channel, composeChannelMessage(jobs, build.web_url, build.number));
+  const allUnmappedLabels: string[] = [];
+
+  for (const [channel, { jobs, unmappedLabels }] of grouped) {
+    channelToMessage.set(
+      channel,
+      composeChannelMessage(jobs, build.web_url, build.number, { unmappedLabels })
+    );
+    allUnmappedLabels.push(...unmappedLabels);
   }
 
+  annotateUnmappedSteps(buildkite, allUnmappedLabels);
+
   const yaml = buildNotifyPipelineYaml(channelToMessage);
-  console.log(
-    `Uploading Slack notify steps for: ${
-      [...channelToMessage.keys()].join(', ') || FALLBACK_SLACK_CHANNEL
-    }`
-  );
+  console.log(`Uploading Slack notify steps for: ${[...channelToMessage.keys()].join(', ')}`);
   upload(yaml);
 
   // Mark after a successful upload so a retried notify step cannot double-post.
@@ -306,7 +377,7 @@ export async function notifyFailedSuites(
       notifyFanOutFailure(error, buildkite, upload);
     } catch (fallbackError) {
       console.error(
-        `Also failed to notify ${FALLBACK_SLACK_CHANNEL} about the fan-out failure`,
+        'Also failed to notify the fallback channel about the fan-out failure',
         fallbackError
       );
     }

@@ -8,29 +8,112 @@
  */
 
 /**
- * Owning-team Slack channels for kibana-security-solution-on-merge.
+ * Owning-team Slack routing for kibana-security-solution-on-merge.
  *
  * Step-level `SLACK_NOTIFICATIONS_CHANNEL` is ignored by kibana-buildkite-build-bot
- * (it only reads pipeline env). This map is used by a post-build fan-out that
+ * (it only reads pipeline env). This config is used by a post-build fan-out that
  * uploads Buildkite `notify.slack` steps instead.
  *
- * Rule Management goes to `#security-detection-engineering-team` because
- * `#security-detection-rule-management` was archived in June 2026.
+ * Routing lives in `security_solution_on_merge.suites.json` so teams can edit it
+ * without touching code. `specDir` is not read at runtime; it exists so
+ * `failed_suite_channels.test.ts` can assert `owners` still matches CODEOWNERS.
  */
-export const FALLBACK_SLACK_CHANNEL = '#sdh-security-team';
 
-export const STEP_CHANNEL_MATCHERS: Array<{ pattern: RegExp; channel: string }> = [
-  { pattern: /rule management/i, channel: '#security-detection-engineering-team' },
-  { pattern: /detection engine/i, channel: '#security-detection-engineering-team' },
-  { pattern: /entity analytics/i, channel: '#security-entity-analytics-alerts' },
-  { pattern: /explore/i, channel: '#security-threat-hunting' },
-  { pattern: /investigations/i, channel: '#security-threat-hunting' },
-  { pattern: /ai assistant/i, channel: '#security-threat-hunting' },
-  { pattern: /osquery/i, channel: '#security-defend-workflows' },
-  { pattern: /defend workflows/i, channel: '#security-defend-workflows' },
-];
+import Fs from 'fs';
+import Path from 'path';
+
+export const SUITES_CONFIG_RELATIVE_PATH =
+  '.buildkite/pipelines/security_solution_on_merge.suites.json';
+
+/**
+ * Overrides `fallbackSlackChannel` from pipeline env, so the fallback can be
+ * repointed from the pipeline resource definition without a code change.
+ */
+export const FALLBACK_SLACK_CHANNEL_ENV_VAR = 'SECURITY_ONMERGE_FALLBACK_SLACK_CHANNEL';
+
+/** Last resort for the error path, where reading the config may be what failed. */
+export const DEFAULT_FALLBACK_SLACK_CHANNEL = '#sdh-security-team';
+
+export interface SuiteChannel {
+  /** Buildkite step label, matched against the (de-sharded) job name. */
+  label: string;
+  slackChannel: string;
+  /** CODEOWNERS teams for `specDir`, asserted by tests. */
+  owners: string[];
+  /** Repo-relative root of the suite's Cypress specs. */
+  specDir: string;
+}
+
+export interface SuitesConfig {
+  fallbackSlackChannel: string;
+  suites: SuiteChannel[];
+}
+
+let cachedConfig: SuitesConfig | undefined;
+
+/**
+ * Walk up from cwd to find the config: the notify step runs from the repo root,
+ * while Jest runs from `.buildkite`.
+ */
+export function resolveSuitesConfigPath(startDir = process.cwd()): string {
+  let dir = Path.resolve(startDir);
+
+  for (;;) {
+    const candidate = Path.join(dir, SUITES_CONFIG_RELATIVE_PATH);
+    if (Fs.existsSync(candidate)) {
+      return candidate;
+    }
+
+    const parent = Path.dirname(dir);
+    if (parent === dir) {
+      throw new Error(`Could not find ${SUITES_CONFIG_RELATIVE_PATH} above ${startDir}`);
+    }
+    dir = parent;
+  }
+}
+
+export function readSuitesConfig(filePath = resolveSuitesConfigPath()): SuitesConfig {
+  const parsed = JSON.parse(Fs.readFileSync(filePath, 'utf-8')) as Partial<SuitesConfig>;
+
+  if (!parsed.fallbackSlackChannel || !Array.isArray(parsed.suites)) {
+    throw new Error(`${filePath} must define "fallbackSlackChannel" and a "suites" array`);
+  }
+
+  return { fallbackSlackChannel: parsed.fallbackSlackChannel, suites: parsed.suites };
+}
+
+export function getSuitesConfig(): SuitesConfig {
+  if (cachedConfig === undefined) {
+    cachedConfig = readSuitesConfig();
+  }
+  return cachedConfig;
+}
+
+/** Test seam; also lets a caller pin the config instead of resolving from cwd. */
+export function setSuitesConfig(config: SuitesConfig | undefined): void {
+  cachedConfig = config;
+}
+
+export function getFallbackSlackChannel(): string {
+  const override = process.env[FALLBACK_SLACK_CHANNEL_ENV_VAR]?.trim();
+  return override || getSuitesConfig().fallbackSlackChannel;
+}
+
+/**
+ * Resolve the suite owning a Buildkite step label.
+ *
+ * Buildkite decorates parallel jobs (`Label / 3 / 5`), and some labels prefix
+ * others (`Osquery Cypress Tests` vs `… on Serverless`), so match the longest
+ * label the name starts with rather than the first one that fits.
+ */
+export function findSuiteForStepLabel(label: string): SuiteChannel | undefined {
+  const normalized = label.trim();
+
+  return getSuitesConfig()
+    .suites.filter((suite) => normalized.startsWith(suite.label))
+    .sort((a, b) => b.label.length - a.label.length)[0];
+}
 
 export function getChannelForStepLabel(label: string): string {
-  const match = STEP_CHANNEL_MATCHERS.find(({ pattern }) => pattern.test(label));
-  return match?.channel ?? FALLBACK_SLACK_CHANNEL;
+  return findSuiteForStepLabel(label)?.slackChannel ?? getFallbackSlackChannel();
 }

@@ -24,6 +24,10 @@ spec:
         # SLACK_NOTIFICATIONS_CHANNEL and ignores step env. Owning-team routing
         # is the post-build notify_owning_teams step in security_solution_on_merge.yml.
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        # Where notify_owning_teams sends failures for steps with no owning-team
+        # mapping, and where it reports its own failures. Overrides
+        # `fallbackSlackChannel` in security_solution_on_merge.suites.json.
+        SECURITY_ONMERGE_FALLBACK_SLACK_CHANNEL: '#sdh-security-team'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'

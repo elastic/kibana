@@ -22,7 +22,7 @@ import {
   notifyFailedSuites,
 } from './notify_failed_suites.ts';
 
-import { FALLBACK_SLACK_CHANNEL } from './failed_suite_channels.ts';
+import { DEFAULT_FALLBACK_SLACK_CHANNEL } from './failed_suite_channels.ts';
 
 const job = (overrides: Partial<Job>): Job =>
   ({
@@ -95,7 +95,28 @@ describe('groupJobsByChannel', () => {
       '#security-detection-engineering-team',
       '#security-defend-workflows',
     ]);
-    expect(grouped.get('#security-detection-engineering-team')).toHaveLength(2);
+    expect(grouped.get('#security-detection-engineering-team')?.jobs).toHaveLength(2);
+    expect(grouped.get('#security-detection-engineering-team')?.unmappedLabels).toEqual([]);
+  });
+
+  it('records unmapped steps against the fallback channel', () => {
+    const grouped = groupJobsByChannel([
+      {
+        id: 'new',
+        name: 'Brand New Suite - Security Solution Cypress Tests / 1 / 2',
+        webUrl: 'https://example.test/new',
+      },
+      {
+        id: 'new-2',
+        name: 'Brand New Suite - Security Solution Cypress Tests / 2 / 2',
+        webUrl: 'https://example.test/new-2',
+      },
+    ]);
+
+    const group = grouped.get(DEFAULT_FALLBACK_SLACK_CHANNEL);
+    expect(group?.jobs).toHaveLength(2);
+    // De-sharded, so the same suite is reported once rather than per parallel job.
+    expect(group?.unmappedLabels).toEqual(['Brand New Suite - Security Solution Cypress Tests']);
   });
 
   it('routes parallel-suffixed job names to the same channels as bare labels', () => {
@@ -180,6 +201,39 @@ describe('composeChannelMessage', () => {
     const message = composeChannelMessage(realisticJobs(200), BUILD_URL, 473);
 
     expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
+  });
+
+  it('says nothing about mappings when every step is mapped', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473);
+
+    expect(message).not.toContain('no owning-team mapping');
+  });
+
+  it('tells readers to fix the mapping when steps arrived by fallback', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473, {
+      unmappedLabels: ['Brand New Suite - Security Solution Cypress Tests'],
+    });
+
+    expect(message).toContain('1 step has no owning-team mapping');
+    expect(message).toContain('.buildkite/pipelines/security_solution_on_merge.suites.json');
+  });
+
+  it('pluralizes the mapping warning', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473, {
+      unmappedLabels: ['Suite A', 'Suite B'],
+    });
+
+    expect(message).toContain('2 steps have no owning-team mapping');
+  });
+
+  it('keeps the mapping warning inside the Slack budget', () => {
+    const message = composeChannelMessage(realisticJobs(200), BUILD_URL, 473, {
+      unmappedLabels: ['Suite A', 'Suite B'],
+    });
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain('2 steps have no owning-team mapping');
     expect(message).toContain(`<${BUILD_URL}|View build #473>`);
   });
 });
@@ -293,6 +347,31 @@ describe('notifyFailedSuites', () => {
     expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   });
 
+  it('annotates unmapped steps without failing the fan-out', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', name: 'Brand New Suite Cypress Tests', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(buildkite.setAnnotation).toHaveBeenCalledWith(
+      'security-solution-on-merge-unmapped-steps',
+      'warning',
+      expect.stringContaining('Brand New Suite Cypress Tests')
+    );
+    expect(upload).toHaveBeenCalledWith(expect.stringContaining(DEFAULT_FALLBACK_SLACK_CHANNEL));
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
   it('does not false-alarm SDH when meta-data fails after a successful upload', async () => {
     const upload = jest.fn();
     const buildkite = {
@@ -332,14 +411,14 @@ describe('notifyFailedSuites', () => {
 
     expect(upload).toHaveBeenCalledTimes(1);
     const fallbackYaml = upload.mock.calls[0][0] as string;
-    expect(fallbackYaml).toContain(FALLBACK_SLACK_CHANNEL);
+    expect(fallbackYaml).toContain(DEFAULT_FALLBACK_SLACK_CHANNEL);
     expect(fallbackYaml).toContain('owning-team Slack fan-out failed');
     expect(fallbackYaml).toContain('notify-owning-team-fanout-failure');
     expect(fallbackYaml).toContain('Buildkite API 500');
     expect(buildkite.setAnnotation).toHaveBeenCalledWith(
       'security-solution-on-merge-slack-fanout',
       'error',
-      expect.stringContaining(FALLBACK_SLACK_CHANNEL)
+      expect.stringContaining(DEFAULT_FALLBACK_SLACK_CHANNEL)
     );
     expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   });
