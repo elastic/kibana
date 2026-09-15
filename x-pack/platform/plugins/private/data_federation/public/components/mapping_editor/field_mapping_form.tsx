@@ -45,12 +45,6 @@ export interface FieldMappingFormProps {
 const DEFAULT_DATE_TYPE_VALUE: DatasetMappingFieldType = 'date';
 
 const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
-  {
-    value: '',
-    text: i18n.translate('xpack.dataFederation.mappingEditor.typePlaceholder', {
-      defaultMessage: 'Select type',
-    }),
-  },
   { value: 'boolean', text: 'Boolean' },
   { value: 'date', text: 'Date' },
   { value: 'double', text: 'Double' },
@@ -140,10 +134,10 @@ export function FieldMappingForm({
               <EuiSelect
                 isInvalid={Boolean(errors?.type)}
                 fullWidth
-                options={DEFAULT_TYPE_OPTIONS}
+                options={DEFAULT_TYPE_OPTIONS as unknown as Array<{ value: string; text: string }>}
                 value={value.type}
                 onChange={(e) => {
-                  const nextType = e.target.value as '' | DatasetMappingFieldType;
+                  const nextType = e.target.value as DatasetMappingFieldType;
                   onChange({
                     type: nextType,
                     ...(nextType === DEFAULT_DATE_TYPE_VALUE ? {} : { format: '' }),

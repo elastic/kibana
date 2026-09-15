@@ -106,7 +106,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     id: 'draft',
     name: '',
     path: '',
-    type: '',
+    type: 'keyword',
     format: '',
   }));
   const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
@@ -132,7 +132,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           id,
           name: '',
           path: '',
-          type: '',
+          type: 'keyword',
           format: '',
         },
       ],
@@ -240,7 +240,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       id: 'draft',
       name: '',
       path: '',
-      type: '',
+      type: 'keyword',
       format: '',
     });
     setDraftValidationAttempted(false);
