@@ -27,6 +27,7 @@ import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useAlertingLocators } from '../application/locator_context';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
+import { paths } from '../constants';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 import { useCreateRule } from './use_create_rule';
@@ -66,6 +67,16 @@ interface UseComposeDiscoverFlyoutOptions {
    */
   onDismiss?: () => void;
 }
+
+const PAGE_BUILDERS: Record<
+  string,
+  { getEditUrl: (id: string) => string; getCloneUrl: (id: string) => string }
+> = {
+  sequence: {
+    getEditUrl: (id) => paths.sequenceRuleEdit(id),
+    getCloneUrl: (id) => paths.sequenceRuleClone(id),
+  },
+};
 
 export const useComposeDiscoverFlyout = ({
   createSuccessRedirectPath,
@@ -263,13 +274,31 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const openEditFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      const pageBuilder = rule.metadata?.builder_type
+        ? PAGE_BUILDERS[rule.metadata.builder_type]
+        : undefined;
+      if (pageBuilder) {
+        application.navigateToUrl(http.basePath.prepend(pageBuilder.getEditUrl(rule.id)));
+        return;
+      }
+      openRuleFlyout(rule, 'edit');
+    },
+    [openRuleFlyout, application, http]
   );
 
   const openCloneFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'clone'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      const pageBuilder = rule.metadata?.builder_type
+        ? PAGE_BUILDERS[rule.metadata.builder_type]
+        : undefined;
+      if (pageBuilder) {
+        application.navigateToUrl(http.basePath.prepend(pageBuilder.getCloneUrl(rule.id)));
+        return;
+      }
+      openRuleFlyout(rule, 'clone');
+    },
+    [openRuleFlyout, application, http]
   );
 
   const openCreateFromTemplateFlyout = useCallback(
