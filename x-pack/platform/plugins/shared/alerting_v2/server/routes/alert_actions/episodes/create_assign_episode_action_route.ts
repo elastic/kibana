@@ -18,4 +18,5 @@ export const CreateAssignEpisodeActionRoute = createEpisodeActionRouteForType({
   summary: 'Assign an alert episode to a user',
   bodySchema: createAssignEpisodeActionBodySchema,
   oasOperationObject: createAssignEpisodeActionOasExamples,
+  access: 'public' as const,
 });

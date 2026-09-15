@@ -37,6 +37,7 @@ interface CreateSeriesActionRouteForTypeOptions<
     Omit<Extract<CreateSeriesAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
+  access?: RouteConfigOptions<RouteMethod>['access'];
 }
 
 export const createSeriesActionRouteForType = <
@@ -47,6 +48,7 @@ export const createSeriesActionRouteForType = <
   summary,
   bodySchema,
   oasOperationObject,
+  access,
 }: CreateSeriesActionRouteForTypeOptions<TAction>): RouteDefinition<
   SeriesAlertActionParams,
   unknown,
@@ -68,6 +70,7 @@ export const createSeriesActionRouteForType = <
       },
     };
     static routeOptions = {
+      access,
       summary,
       description: 'Create an action for a specific alert episode series.',
       oasOperationObject,

@@ -18,4 +18,5 @@ export const CreateTagEpisodeActionRoute = createEpisodeActionRouteForType({
   summary: 'Tag an alert episode',
   bodySchema: createTagEpisodeActionBodySchema,
   oasOperationObject: createTagEpisodeActionOasExamples,
+  access: 'public' as const,
 });

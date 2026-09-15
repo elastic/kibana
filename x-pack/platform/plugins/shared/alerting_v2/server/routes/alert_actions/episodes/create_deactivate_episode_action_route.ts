@@ -18,4 +18,5 @@ export const CreateDeactivateEpisodeActionRoute = createEpisodeActionRouteForTyp
   summary: 'Deactivate an alert episode',
   bodySchema: createDeactivateEpisodeActionBodySchema,
   oasOperationObject: createDeactivateEpisodeActionOasExamples,
+  access: 'public' as const,
 });

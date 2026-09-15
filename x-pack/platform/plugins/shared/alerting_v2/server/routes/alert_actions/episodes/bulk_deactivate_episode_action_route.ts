@@ -18,4 +18,5 @@ export const BulkDeactivateEpisodeActionRoute = createBulkEpisodeActionRouteForT
   summary: 'Bulk deactivate alert episodes',
   bodySchema: bulkDeactivateEpisodeActionBodySchema,
   oasOperationObject: bulkDeactivateEpisodeActionOasExamples,
+  access: 'public' as const,
 });

@@ -18,4 +18,5 @@ export const CreateAckEpisodeActionRoute = createEpisodeActionRouteForType({
   summary: 'Acknowledge an alert episode',
   bodySchema: createAckEpisodeActionBodySchema,
   oasOperationObject: createAckEpisodeActionOasExamples,
+  access: 'public' as const,
 });

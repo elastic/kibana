@@ -18,4 +18,5 @@ export const BulkAssignEpisodeActionRoute = createBulkEpisodeActionRouteForType(
   summary: 'Bulk assign alert episodes',
   bodySchema: bulkAssignEpisodeActionBodySchema,
   oasOperationObject: bulkAssignEpisodeActionOasExamples,
+  access: 'public' as const,
 });

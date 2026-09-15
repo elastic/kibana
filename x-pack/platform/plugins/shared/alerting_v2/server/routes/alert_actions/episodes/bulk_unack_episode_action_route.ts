@@ -18,4 +18,5 @@ export const BulkUnackEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   summary: 'Bulk unacknowledge alert episodes',
   bodySchema: bulkUnackEpisodeActionBodySchema,
   oasOperationObject: bulkUnackEpisodeActionOasExamples,
+  access: 'public' as const,
 });

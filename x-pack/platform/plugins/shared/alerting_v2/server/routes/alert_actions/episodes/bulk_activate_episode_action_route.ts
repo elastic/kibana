@@ -18,4 +18,5 @@ export const BulkActivateEpisodeActionRoute = createBulkEpisodeActionRouteForTyp
   summary: 'Bulk activate alert episodes',
   bodySchema: bulkActivateEpisodeActionBodySchema,
   oasOperationObject: bulkActivateEpisodeActionOasExamples,
+  access: 'public' as const,
 });

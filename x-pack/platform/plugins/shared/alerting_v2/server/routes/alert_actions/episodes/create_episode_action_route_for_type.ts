@@ -37,6 +37,7 @@ interface CreateEpisodeActionRouteForTypeOptions<
     Omit<Extract<CreateEpisodeAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
+  access?: RouteConfigOptions<RouteMethod>['access'];
 }
 
 export const createEpisodeActionRouteForType = <
@@ -47,6 +48,7 @@ export const createEpisodeActionRouteForType = <
   summary,
   bodySchema,
   oasOperationObject,
+  access,
 }: CreateEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   EpisodeAlertActionParams,
   unknown,
@@ -68,6 +70,7 @@ export const createEpisodeActionRouteForType = <
       },
     };
     static routeOptions = {
+      access,
       summary,
       description: 'Create an action for a specific alert episode.',
       oasOperationObject,

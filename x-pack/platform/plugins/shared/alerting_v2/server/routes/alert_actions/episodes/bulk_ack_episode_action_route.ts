@@ -18,4 +18,5 @@ export const BulkAckEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   summary: 'Bulk acknowledge alert episodes',
   bodySchema: bulkAckEpisodeActionBodySchema,
   oasOperationObject: bulkAckEpisodeActionOasExamples,
+  access: 'public' as const,
 });

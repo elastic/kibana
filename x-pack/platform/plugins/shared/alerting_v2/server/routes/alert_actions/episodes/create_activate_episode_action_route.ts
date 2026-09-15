@@ -18,4 +18,5 @@ export const CreateActivateEpisodeActionRoute = createEpisodeActionRouteForType(
   summary: 'Activate an alert episode',
   bodySchema: createActivateEpisodeActionBodySchema,
   oasOperationObject: createActivateEpisodeActionOasExamples,
+  access: 'public' as const,
 });

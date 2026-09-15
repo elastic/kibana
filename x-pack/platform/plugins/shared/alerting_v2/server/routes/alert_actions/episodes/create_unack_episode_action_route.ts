@@ -18,4 +18,5 @@ export const CreateUnackEpisodeActionRoute = createEpisodeActionRouteForType({
   summary: 'Unacknowledge an alert episode',
   bodySchema: createUnackEpisodeActionBodySchema,
   oasOperationObject: createUnackEpisodeActionOasExamples,
+  access: 'public' as const,
 });
