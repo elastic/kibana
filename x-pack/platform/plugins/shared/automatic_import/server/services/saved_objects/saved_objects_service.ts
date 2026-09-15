@@ -183,12 +183,23 @@ export class AutomaticImportSavedObjectService {
   public async getAllIntegrations(): Promise<IntegrationAttributes[]> {
     try {
       this.logger.debug('Getting all integrations');
-      const integrationsResponse: SavedObjectsFindResponse<IntegrationAttributes> =
-        await this.savedObjectsClient.find<IntegrationAttributes>({
-          type: INTEGRATION_SAVED_OBJECT_TYPE,
-          perPage: 10000,
-        });
-      return integrationsResponse.saved_objects.map((integration) => integration.attributes);
+      const integrations: IntegrationAttributes[] = [];
+      const finder = this.savedObjectsClient.createPointInTimeFinder<IntegrationAttributes>({
+        type: INTEGRATION_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+      });
+
+      try {
+        for await (const { saved_objects: savedObjects } of finder.find()) {
+          for (const { attributes } of savedObjects) {
+            integrations.push(attributes);
+          }
+        }
+      } finally {
+        await finder.close();
+      }
+
+      return integrations;
     } catch (error) {
       // Return empty array if index doesn't exist yet
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -457,6 +468,40 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to get all data streams: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Fetch every data stream in a single point-in-time sweep, grouped by integration ID.
+   * Callers listing many integrations should prefer this over one `getAllDataStreams` call
+   * per integration, which fans out into an unbounded number of concurrent searches.
+   */
+  public async getAllDataStreamsGroupedByIntegrationId(): Promise<
+    Map<string, DataStreamAttributes[]>
+  > {
+    const grouped = new Map<string, DataStreamAttributes[]>();
+    const finder = this.savedObjectsClient.createPointInTimeFinder<DataStreamAttributes>({
+      type: DATA_STREAM_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      sortField: 'updated_at',
+      sortOrder: 'desc',
+    });
+
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        for (const { attributes } of savedObjects) {
+          const existing = grouped.get(attributes.integration_id);
+          if (existing) {
+            existing.push(attributes);
+          } else {
+            grouped.set(attributes.integration_id, [attributes]);
+          }
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return grouped;
   }
 
   /**

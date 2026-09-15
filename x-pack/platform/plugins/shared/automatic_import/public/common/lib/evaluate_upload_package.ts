@@ -7,8 +7,8 @@
 
 import semverGt from 'semver/functions/gt';
 import semverValid from 'semver/functions/valid';
-import type { EpmPackageItem, AutoImportIntegrationName, RequestDeps } from './api';
-import { getAllIntegrationNames, getInstalledPackages } from './api';
+import type { EpmPackageItem, RequestDeps } from './api';
+import { getAllIntegrations, getInstalledPackages } from './api';
 import { normalizeTitleName } from './helper_functions';
 
 export type UploadPackageEvaluation =
@@ -26,6 +26,11 @@ export type UploadPackageEvaluation =
       installedVersion?: string;
       zipVersion?: string;
     };
+
+interface AutoImportIntegrationName {
+  integrationId: string;
+  title: string;
+}
 
 const getInstalledVersion = (catalogItem: EpmPackageItem): string | undefined =>
   catalogItem.installationInfo?.version ?? catalogItem.version;
@@ -80,6 +85,7 @@ const hasAutoImportIntegration = (
       integration.integrationId === normalizedName ||
       normalizeTitleName(integration.integrationId) === normalizedName ||
       normalizeTitleName(integration.title) === normalizedName
+  );
 };
 
 export const evaluateUploadPackage = (
@@ -117,7 +123,7 @@ export const evaluateUploadedZipPackage = async (
 ): Promise<UploadPackageEvaluation> => {
   const [packagesResponse, aiv2Integrations] = await Promise.all([
     getInstalledPackages(deps),
-    getAllIntegrationNames(deps),
+    getAllIntegrations(deps),
   ]);
 
   return evaluateUploadPackage(

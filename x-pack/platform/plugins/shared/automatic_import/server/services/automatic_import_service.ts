@@ -266,51 +266,42 @@ export class AutomaticImportService {
     return integrationResponse;
   }
 
-  public async getAllIntegrationNames(): Promise<Array<{ integrationId: string; title: string }>> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
-    }
-    const integrations = await this.savedObjectService.getAllIntegrations();
-    return integrations.map((integration) => ({
-      integrationId: integration.integration_id,
-      title: integration.metadata.title,
-    }));
-  }
-
   public async getAllIntegrations(): Promise<IntegrationResponse[]> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
     const savedObjectService = this.savedObjectService;
-    const integrations = await savedObjectService.getAllIntegrations();
-    return Promise.all(
-      integrations.map(async (integration) => {
-        const dataStreams = await savedObjectService.getAllDataStreams(integration.integration_id);
-        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => {
-          const phase = getInProgressPhase(dataStream.job_info);
-          return {
-            dataStreamId: dataStream.data_stream_id,
-            title: dataStream.title,
-            description: dataStream.description,
-            inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
-            status: dataStream.job_info.status as TaskStatus,
-            ...(phase ? { phase } : {}),
-          };
-        });
+    const [integrations, dataStreamsByIntegrationId] = await Promise.all([
+      savedObjectService.getAllIntegrations(),
+      savedObjectService.getAllDataStreamsGroupedByIntegrationId(),
+    ]);
+
+    return integrations.map((integration) => {
+      const dataStreams = dataStreamsByIntegrationId.get(integration.integration_id) ?? [];
+      const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => {
+        const phase = getInProgressPhase(dataStream.job_info);
         return {
-          integrationId: integration.integration_id,
-          title: integration.metadata.title,
-          logo: integration.metadata.logo,
-          description: integration.metadata.description,
-          version: integration.metadata.version,
-          connectorId: integration.connector_id,
-          createdBy: integration.created_by,
-          createdByProfileUid: integration.created_by_profile_uid,
-          status: deriveIntegrationStatus(integration, dataStreams),
-          dataStreams: dataStreamsResponses,
+          dataStreamId: dataStream.data_stream_id,
+          title: dataStream.title,
+          description: dataStream.description,
+          inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+          status: dataStream.job_info.status as TaskStatus,
+          ...(phase ? { phase } : {}),
         };
-      })
-    );
+      });
+      return {
+        integrationId: integration.integration_id,
+        title: integration.metadata.title,
+        logo: integration.metadata.logo,
+        description: integration.metadata.description,
+        version: integration.metadata.version,
+        connectorId: integration.connector_id,
+        createdBy: integration.created_by,
+        createdByProfileUid: integration.created_by_profile_uid,
+        status: deriveIntegrationStatus(integration, dataStreams),
+        dataStreams: dataStreamsResponses,
+      };
+    });
   }
 
   public async deleteIntegration(

@@ -10,11 +10,11 @@ import { evaluateUploadPackage, evaluateUploadedZipPackage } from './evaluate_up
 import type { EpmPackageItem } from './api';
 
 const mockGetInstalledPackages = jest.fn();
-const mockGetAllIntegrationNames = jest.fn();
+const mockGetAllIntegrations = jest.fn();
 
 jest.mock('./api', () => ({
   getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
+  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...args),
 }));
 
 const uploadedPackage = (
@@ -235,7 +235,7 @@ describe('evaluateUploadedZipPackage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
-    mockGetAllIntegrationNames.mockResolvedValue([]);
+    mockGetAllIntegrations.mockResolvedValue([]);
   });
 
   it('fetches catalog and Auto Import integrations then classifies', async () => {
@@ -252,11 +252,11 @@ describe('evaluateUploadedZipPackage', () => {
       zipVersion: '1.1.0',
     });
     expect(mockGetInstalledPackages).toHaveBeenCalledWith(deps);
-    expect(mockGetAllIntegrationNames).toHaveBeenCalledWith(deps);
+    expect(mockGetAllIntegrations).toHaveBeenCalledWith(deps);
   });
 
   it('blocks an Automatic Import-only name', async () => {
-    mockGetAllIntegrationNames.mockResolvedValue([{ integrationId: 'mako', title: 'Mako' }]);
+    mockGetAllIntegrations.mockResolvedValue([{ integrationId: 'mako', title: 'Mako' }]);
 
     await expect(evaluateUploadedZipPackage('mako', '1.1.0', deps)).resolves.toEqual({
       kind: 'error',
@@ -267,7 +267,7 @@ describe('evaluateUploadedZipPackage', () => {
 
   it('treats null API responses as empty catalogs', async () => {
     mockGetInstalledPackages.mockResolvedValue(null);
-    mockGetAllIntegrationNames.mockResolvedValue(null);
+    mockGetAllIntegrations.mockResolvedValue(null);
 
     await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).resolves.toEqual({
       kind: 'ok',
@@ -292,7 +292,7 @@ describe('evaluateUploadedZipPackage', () => {
 
   it('rejects when one API call succeeds but the other fails', async () => {
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
-    mockGetAllIntegrationNames.mockRejectedValue(new Error('network error'));
+    mockGetAllIntegrations.mockRejectedValue(new Error('network error'));
 
     await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).rejects.toThrow(
       'network error'
