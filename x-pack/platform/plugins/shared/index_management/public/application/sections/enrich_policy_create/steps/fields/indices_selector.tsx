@@ -128,14 +128,19 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
       // Drop the previous search's options while the new query is in flight so the
       // async ComboBox shows no stale suggestions until the filtered results arrive.
       setIndexOptions([]);
-      const options = await getIndexOptions(indexPattern);
+      try {
+        const options = await getIndexOptions(indexPattern);
 
-      if (currentSearchRequestRef.current !== requestId) {
-        return;
+        if (currentSearchRequestRef.current !== requestId) {
+          return;
+        }
+
+        setIndexOptions(options);
+      } finally {
+        if (currentSearchRequestRef.current === requestId) {
+          setIsIndiciesLoading(false);
+        }
       }
-
-      setIndexOptions(options);
-      setIsIndiciesLoading(false);
     },
     [setIsIndiciesLoading, setIndexOptions]
   );

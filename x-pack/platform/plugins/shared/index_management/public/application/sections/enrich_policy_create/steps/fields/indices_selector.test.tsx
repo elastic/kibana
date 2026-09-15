@@ -37,10 +37,16 @@ jest.mock('@elastic/eui', () => {
       options,
     }: EuiComboBoxProps<string> & { onSearchChange: (search: string) => Promise<void> }) => (
       <div>
-        <button type="button" onClick={() => void onSearchChange('older-search')}>
+        <button
+          type="button"
+          onClick={() => void onSearchChange('older-search').catch(() => undefined)}
+        >
           older-search
         </button>
-        <button type="button" onClick={() => void onSearchChange('newer-search')}>
+        <button
+          type="button"
+          onClick={() => void onSearchChange('newer-search').catch(() => undefined)}
+        >
           newer-search
         </button>
         <div data-test-subj="comboBoxLoading">{String(isLoading)}</div>
@@ -116,5 +122,31 @@ describe('IndicesSelector', () => {
     expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('false');
     expect(screen.getByTestId('comboBoxOptions')).toHaveTextContent('newer-stream');
     expect(screen.getByTestId('comboBoxOptions')).not.toHaveTextContent('older-stream');
+  });
+
+  it('clears the loading state when the latest async search fails', async () => {
+    mockGetMatchingIndices.mockRejectedValue(new Error('request failed'));
+
+    render(
+      <IndicesSelector
+        field={{
+          label: 'Source',
+          value: ['existing-index'],
+          setValue: jest.fn(),
+        }}
+        euiFieldProps={{}}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'newer-search' }));
+
+    expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('true');
+
+    await act(async () => {
+      await flushMicrotasks();
+    });
+
+    expect(screen.getByTestId('comboBoxLoading')).toHaveTextContent('false');
+    expect(screen.getByTestId('comboBoxOptions')).toHaveTextContent('[]');
   });
 });
