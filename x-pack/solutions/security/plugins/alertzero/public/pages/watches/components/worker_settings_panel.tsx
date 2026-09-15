@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import type { Worker } from '@kbn/alertzero-common';
 import { useUpdateWorker } from '../../../hooks/use_workers_api';
-import { AutonomySlider } from './autonomy_slider';
+import { AutonomyLevelControl } from './autonomy_level_control';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { WorkerSkillsTable } from './worker_skills_table';
 import * as settingsI18n from '../settings_translations';
@@ -87,7 +87,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         </EuiText>
       ) : null}
       <EuiSpacer size="m" />
-      <AutonomySlider
+      <AutonomyLevelControl
+        workerId={worker.id}
         current={worker.settings.autonomy}
         isDisabled={settingsLocked}
         onChange={(autonomyLevel) =>
@@ -100,6 +101,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         <>
           <EuiSpacer size="m" />
           <ScheduleIntervalField
+            workerId={worker.id}
             current={worker.settings.scheduleInterval}
             isDisabled={settingsLocked}
             onChange={(scheduleInterval) =>

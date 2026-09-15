@@ -166,7 +166,7 @@ describe('WatchDetailPage', () => {
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
-      expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     }
 
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
@@ -206,7 +206,7 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
-    expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -267,7 +267,7 @@ describe('WatchDetailPage', () => {
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
-      expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     }
     expect(
       screen.queryByTestId(

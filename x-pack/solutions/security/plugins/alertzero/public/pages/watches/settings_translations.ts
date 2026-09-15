@@ -166,6 +166,41 @@ export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Autonomy level control (Sep 11 prototype port)                             */
+/* -------------------------------------------------------------------------- */
+
+export const AUTONOMY_LEVEL_MANUAL_LABEL = AUTONOMY_LEVEL_NAMES.manual;
+export const AUTONOMY_LEVEL_ASSISTED_LABEL = AUTONOMY_LEVEL_NAMES.assisted;
+export const AUTONOMY_LEVEL_SUPERVISED_LABEL = AUTONOMY_LEVEL_NAMES.supervised;
+
+export const AUTONOMY_ACTOR_YOU = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.you',
+  { defaultMessage: 'You' }
+);
+
+export const AUTONOMY_ACTOR_WORKER = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.worker',
+  { defaultMessage: 'Worker' }
+);
+
+export const AUTONOMY_TRACK_ARIA_LABEL = AUTONOMY_RANGE_ARIA_LABEL;
+
+export const AUTONOMY_SCALE_LEFT = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.scaleLeft',
+  { defaultMessage: 'You do more' }
+);
+
+export const AUTONOMY_SCALE_RIGHT = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.scaleRight',
+  { defaultMessage: 'Worker does more' }
+);
+
+export const SCHEDULE_PRESETS_LEGEND = i18n.translate(
+  'xpack.alertzero.watches.settings.scheduleInterval.presetsLegend',
+  { defaultMessage: 'Interval presets' }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Schedule interval                                                          */
 /* -------------------------------------------------------------------------- */
 

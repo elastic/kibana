@@ -9,8 +9,14 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
-const renderField = (current = '24h', onChange: jest.Mock = jest.fn()) => {
-  const { rerender } = render(<ScheduleIntervalField current={current} onChange={onChange} />);
+const renderField = (
+  current = '24h',
+  onChange: jest.Mock = jest.fn(),
+  workerId = 'system-security-floor-attack-discovery'
+) => {
+  const { rerender } = render(
+    <ScheduleIntervalField workerId={workerId} current={current} onChange={onChange} />
+  );
   return {
     onChange,
     rerender,
@@ -80,7 +86,13 @@ describe('ScheduleIntervalField', () => {
   it('re-syncs when the server echoes a different value', () => {
     const { rerender, value } = renderField('24h');
 
-    rerender(<ScheduleIntervalField current="15m" onChange={jest.fn()} />);
+    rerender(
+      <ScheduleIntervalField
+        workerId="system-security-floor-attack-discovery"
+        current="15m"
+        onChange={jest.fn()}
+      />
+    );
 
     expect(value().value).toBe('15');
     expect(screen.getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
