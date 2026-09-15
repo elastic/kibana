@@ -20,7 +20,10 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false' # temporary: reducing noise in #sdh-security-team
+        # Build-bot only reads pipeline env; owning-team routing is notify_owning_teams.
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        # Unmapped steps + fan-out failures; overrides suites.json fallbackSlackChannel.
+        SECURITY_ONMERGE_FALLBACK_SLACK_CHANNEL: '#sdh-security-team'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'

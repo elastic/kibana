@@ -1,0 +1,519 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { parse as parseYaml } from 'yaml';
+
+import type { Job } from '#pipeline-utils';
+
+import {
+  SLACK_NOTIFY_UPLOADED_META_KEY,
+  buildNotifyPipelineYaml,
+  collectFailedScriptJobs,
+  composeChannelMessage,
+  composeFanOutFailureMessage,
+  displayNameForJob,
+  groupJobsByChannel,
+  hasUploadedNotifySteps,
+  notifyFailedSuites,
+  slackNotifyStepKey,
+  summarizeErrorDetail,
+} from './notify_failed_suites.ts';
+
+import { DEFAULT_FALLBACK_SLACK_CHANNEL } from './failed_suite_channels.ts';
+
+const job = (overrides: Partial<Job>): Job =>
+  ({
+    id: 'job-1',
+    type: 'script',
+    name: 'Detection Engine - Security Solution Cypress Tests',
+    step_key: null,
+    state: 'failed',
+    retried: false,
+    soft_failed: false,
+    web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/1#job-1',
+    ...overrides,
+  } as Job);
+
+const BUILD_URL = 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473';
+
+/** Realistic label / URL lengths for Slack budget tests. */
+const realisticJobs = (count: number) =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `0199e2bb-6f4c-4a1b-9d3e-${String(index).padStart(12, '0')}`,
+    name: `Rule Management - Prebuilt Rules Upgrade ${index} - Security Solution Cypress Tests`,
+    webUrl: `${BUILD_URL}#0199e2bb-6f4c-4a1b-9d3e-${String(index).padStart(12, '0')}`,
+  }));
+
+describe('collectFailedScriptJobs', () => {
+  it('keeps failed script jobs and drops passed, retried, and wait jobs', () => {
+    const jobs = [
+      job({ id: 'failed', state: 'failed' }),
+      job({
+        id: 'passed',
+        state: 'passed',
+        name: 'Explore - Security Solution Cypress Tests',
+      }),
+      job({ id: 'retried', retried: true, retried_in_job_id: 'retry' }),
+      job({ id: 'wait', type: 'waiter', name: 'wait' }),
+      job({
+        id: 'notify',
+        step_key: 'notify_owning_teams',
+        name: ':slack: Notify owning teams of Security on-merge failures',
+        state: 'failed',
+      }),
+    ];
+
+    const failed = collectFailedScriptJobs(jobs, (candidate) => candidate.state === 'passed');
+    expect(failed.map((item) => item.id)).toEqual(['failed']);
+  });
+});
+
+describe('groupJobsByChannel', () => {
+  it('groups failed jobs by owning team channel', () => {
+    const grouped = groupJobsByChannel([
+      {
+        id: 'de',
+        name: 'Detection Engine - Security Solution Cypress Tests',
+        webUrl: 'https://example.test/de',
+      },
+      {
+        id: 'rm',
+        name: 'Rule Management - Security Solution Cypress Tests',
+        webUrl: 'https://example.test/rm',
+      },
+      {
+        id: 'dw',
+        name: 'Defend Workflows Cypress Tests',
+        webUrl: 'https://example.test/dw',
+      },
+    ]);
+
+    expect([...grouped.keys()]).toEqual([
+      '#security-detection-engineering-team',
+      '#security-defend-workflows',
+    ]);
+    expect(grouped.get('#security-detection-engineering-team')?.jobs).toHaveLength(2);
+    expect(grouped.get('#security-detection-engineering-team')?.unmappedLabels).toEqual([]);
+  });
+
+  it('records unmapped steps against the fallback channel', () => {
+    const grouped = groupJobsByChannel([
+      {
+        id: 'new',
+        name: 'Brand New Suite - Security Solution Cypress Tests / 1 / 2',
+        webUrl: 'https://example.test/new',
+      },
+      {
+        id: 'new-2',
+        name: 'Brand New Suite - Security Solution Cypress Tests / 2 / 2',
+        webUrl: 'https://example.test/new-2',
+      },
+    ]);
+
+    const group = grouped.get(DEFAULT_FALLBACK_SLACK_CHANNEL);
+    expect(group?.jobs).toHaveLength(2);
+    expect(group?.unmappedLabels).toEqual(['Brand New Suite - Security Solution Cypress Tests']);
+  });
+
+  it('routes parallel-suffixed job names to the same channels as bare labels', () => {
+    const grouped = groupJobsByChannel([
+      {
+        id: 'dw-1',
+        name: 'Defend Workflows Cypress Tests (3/24)',
+        webUrl: 'https://example.test/dw-1',
+      },
+      {
+        id: 'de-1',
+        name: 'Detection Engine - Security Solution Cypress Tests / 2/8',
+        webUrl: 'https://example.test/de-1',
+      },
+    ]);
+
+    expect([...grouped.keys()]).toEqual([
+      '#security-defend-workflows',
+      '#security-detection-engineering-team',
+    ]);
+  });
+});
+
+describe('displayNameForJob', () => {
+  it('strips parallelism suffixes', () => {
+    expect(displayNameForJob('Defend Workflows Cypress Tests (3/24)')).toBe(
+      'Defend Workflows Cypress Tests'
+    );
+    expect(displayNameForJob('Defend Workflows Cypress Tests / 3/24')).toBe(
+      'Defend Workflows Cypress Tests'
+    );
+  });
+});
+
+describe('composeChannelMessage', () => {
+  it('collapses parallel shards and includes the build link', () => {
+    const message = composeChannelMessage(
+      [
+        {
+          id: 'a',
+          name: 'Defend Workflows Cypress Tests (1/24)',
+          webUrl: 'https://example.test/a',
+        },
+        {
+          id: 'b',
+          name: 'Defend Workflows Cypress Tests (2/24)',
+          webUrl: 'https://example.test/b',
+        },
+      ],
+      'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+      473
+    );
+
+    expect(message).toContain(':alert: *kibana-security-solution-on-merge* failed');
+    expect(message).toContain('Defend Workflows Cypress Tests (2 failed jobs)');
+    expect(message).toContain(
+      '<https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473|View build #473>'
+    );
+  });
+
+  it('lists every failed step when the message fits in the Slack budget', () => {
+    const message = composeChannelMessage(realisticJobs(5), BUILD_URL, 473);
+
+    expect(message).toContain('Rule Management - Prebuilt Rules Upgrade 4');
+    expect(message).not.toContain('more failed step');
+  });
+
+  it('drops entries to stay under the Slack block limit and reports the remainder', () => {
+    const jobs = realisticJobs(40);
+
+    const message = composeChannelMessage(jobs, BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+
+    const listed = message.split('\n').filter((line) => line.includes('|[job]>')).length;
+    expect(listed).toBeGreaterThan(0);
+    expect(listed).toBeLessThan(jobs.length);
+    expect(message).toContain(`…and ${jobs.length - listed} more failed steps`);
+  });
+
+  it('keeps the build link when almost everything is dropped', () => {
+    const message = composeChannelMessage(realisticJobs(200), BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
+  });
+
+  it('says nothing about mappings when every step is mapped', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473);
+
+    expect(message).not.toContain('no owning-team mapping');
+  });
+
+  it('tells readers to fix the mapping when steps arrived by fallback', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473, {
+      unmappedLabels: ['Brand New Suite - Security Solution Cypress Tests'],
+    });
+
+    expect(message).toContain('1 step has no owning-team mapping');
+    expect(message).toContain('.buildkite/pipelines/security_solution_on_merge.suites.json');
+  });
+
+  it('pluralizes the mapping warning', () => {
+    const message = composeChannelMessage(realisticJobs(2), BUILD_URL, 473, {
+      unmappedLabels: ['Suite A', 'Suite B'],
+    });
+
+    expect(message).toContain('2 steps have no owning-team mapping');
+  });
+
+  it('keeps the mapping warning inside the Slack budget', () => {
+    const message = composeChannelMessage(realisticJobs(200), BUILD_URL, 473, {
+      unmappedLabels: ['Suite A', 'Suite B'],
+    });
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain('2 steps have no owning-team mapping');
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
+  });
+});
+
+describe('summarizeErrorDetail', () => {
+  it('flattens stack traces onto one line', () => {
+    const error = new Error('Buildkite API 500\n    at fetch (node:internal/foo:1:1)\n    at run');
+
+    const detail = summarizeErrorDetail(error);
+
+    expect(detail).not.toContain('\n');
+    expect(detail).toBe('Buildkite API 500 at fetch (node:internal/foo:1:1) at run');
+  });
+
+  it('caps long error bodies with an ellipsis', () => {
+    const detail = summarizeErrorDetail(new Error('x'.repeat(5000)));
+
+    expect(detail).toHaveLength(500);
+    expect(detail.endsWith('…')).toBe(true);
+  });
+
+  it('handles non-Error throws and empty messages', () => {
+    expect(summarizeErrorDetail('plain string')).toBe('plain string');
+    expect(summarizeErrorDetail(new Error('   '))).toBe('unknown error');
+  });
+});
+
+describe('composeFanOutFailureMessage', () => {
+  it('keeps a huge error from blowing the Slack block limit', () => {
+    const message = composeFanOutFailureMessage(new Error('boom\n'.repeat(2000)), BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
+  });
+
+  it('asks SDH to page teams manually and links the build', () => {
+    const message = composeFanOutFailureMessage(
+      new Error('Buildkite API 401'),
+      'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+      473
+    );
+
+    expect(message).toContain('owning-team Slack fan-out failed');
+    expect(message).toContain('team channels were not notified');
+    expect(message).toContain('Buildkite API 401');
+    expect(message).toContain(
+      '<https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473|View build #473>'
+    );
+  });
+});
+
+describe('buildNotifyPipelineYaml', () => {
+  it('opens with a continue_on_failure boundary so the steps run on a red build', () => {
+    const yaml = buildNotifyPipelineYaml(new Map([['#security-threat-hunting', 'failed']]));
+    const parsed = parseYaml(yaml) as { steps: Array<Record<string, unknown>> };
+
+    expect(parsed.steps[0]).toEqual({ wait: null, continue_on_failure: true });
+  });
+
+  it('uploads one non-preemptible notify.slack step per channel with a stable key', () => {
+    const yaml = buildNotifyPipelineYaml(
+      new Map([
+        ['#security-threat-hunting', 'threat hunting failed'],
+        ['#security-defend-workflows', 'defend workflows failed'],
+      ])
+    );
+    const parsed = parseYaml(yaml) as {
+      steps: Array<{
+        key?: string;
+        env?: Record<string, string>;
+        agents?: { preemptible?: boolean };
+        retry?: { automatic: Array<{ exit_status: string | number; limit: number }> };
+        notify?: Array<{ slack: { channels: string[]; message: string } }>;
+      }>;
+    };
+    const notifySteps = parsed.steps.filter((step) => step.notify);
+
+    expect(notifySteps).toHaveLength(2);
+    expect(notifySteps[0].key).toBe('notify-owning-team-security-threat-hunting');
+    expect(notifySteps[1].key).toBe('notify-owning-team-security-defend-workflows');
+    expect(notifySteps[0].agents?.preemptible).toBe(false);
+    expect(notifySteps[1].agents?.preemptible).toBe(false);
+    expect(notifySteps[0].retry).toEqual({
+      automatic: [{ exit_status: -1, limit: 3 }],
+    });
+    expect(notifySteps[0].env).toEqual({ SKIP_NODE_SETUP: 'true' });
+    expect(notifySteps[0].notify?.[0].slack.channels).toEqual(['#security-threat-hunting']);
+    expect(notifySteps[0].notify?.[0].slack.message).toBe('threat hunting failed');
+    expect(notifySteps[1].notify?.[0].slack.channels).toEqual(['#security-defend-workflows']);
+    expect(yaml).toMatch(/step\.outcome == ["']passed["']/);
+    expect(yaml).not.toContain('#sdh-security-team');
+  });
+});
+
+describe('notifyFailedSuites', () => {
+  const ORIGINAL_ENV = process.env;
+
+  beforeEach(() => {
+    process.env = { ...ORIGINAL_ENV, BUILDKITE: 'true' };
+  });
+
+  afterEach(() => {
+    process.env = ORIGINAL_ENV;
+  });
+
+  it('skips upload when slack notify meta-data is already set', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue('true'),
+      setMetadata: jest.fn(),
+      getCurrentBuild: jest.fn(),
+      getJobStatus: jest.fn(),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(buildkite.getMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY);
+    expect(buildkite.getCurrentBuild).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
+    expect(buildkite.setMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not re-upload when the agent died between upload and meta-data', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [
+          job({ id: 'failed', state: 'failed' }),
+          job({
+            id: 'queued-notify',
+            state: 'scheduled',
+            step_key: slackNotifyStepKey('#security-detection-engineering-team'),
+          }),
+        ],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(upload).not.toHaveBeenCalled();
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
+  it('detects a previously uploaded fan-out failure notice too', () => {
+    expect(
+      hasUploadedNotifySteps([job({ id: 'x', step_key: 'notify-owning-team-fanout-failure' })])
+    ).toBe(true);
+    expect(hasUploadedNotifySteps([job({ id: 'x', step_key: 'notify_owning_teams' })])).toBe(false);
+    expect(hasUploadedNotifySteps([job({ id: 'x' })])).toBe(false);
+  });
+
+  it('marks meta-data after a successful fan-out so retries cannot double-post', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(upload).toHaveBeenCalledWith(
+      expect.stringContaining('#security-detection-engineering-team')
+    );
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
+  it('annotates unmapped steps without failing the fan-out', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', name: 'Brand New Suite Cypress Tests', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(buildkite.setAnnotation).toHaveBeenCalledWith(
+      'security-solution-on-merge-unmapped-steps',
+      'warning',
+      expect.stringContaining('Brand New Suite Cypress Tests')
+    );
+    expect(upload).toHaveBeenCalledWith(expect.stringContaining(DEFAULT_FALLBACK_SLACK_CHANNEL));
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
+  it('does not false-alarm SDH when meta-data fails after a successful upload', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn().mockImplementation(() => {
+        throw new Error('meta-data write failed');
+      }),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await expect(notifyFailedSuites(buildkite as any, { upload })).resolves.toBeUndefined();
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    expect(upload.mock.calls[0][0]).toContain('#security-detection-engineering-team');
+    expect(buildkite.setAnnotation).not.toHaveBeenCalled();
+  });
+
+  it('posts to #sdh-security-team when fan-out fails, then rethrows', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockRejectedValue(new Error('Buildkite API 500')),
+      getJobStatus: jest.fn(),
+    };
+
+    await expect(notifyFailedSuites(buildkite as any, { upload })).rejects.toThrow(
+      'Buildkite API 500'
+    );
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    const fallbackYaml = upload.mock.calls[0][0] as string;
+    expect(fallbackYaml).toContain(DEFAULT_FALLBACK_SLACK_CHANNEL);
+    expect(fallbackYaml).toContain('owning-team Slack fan-out failed');
+    expect(fallbackYaml).toContain('notify-owning-team-fanout-failure');
+    expect(fallbackYaml).toContain('Buildkite API 500');
+    expect(buildkite.setAnnotation).toHaveBeenCalledWith(
+      'security-solution-on-merge-slack-fanout',
+      'error',
+      expect.stringContaining(DEFAULT_FALLBACK_SLACK_CHANNEL)
+    );
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
+  it('annotates even when the SDH fallback upload also fails, then rethrows', async () => {
+    const upload = jest.fn().mockImplementation(() => {
+      throw new Error('pipeline upload failed');
+    });
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await expect(notifyFailedSuites(buildkite as any, { upload })).rejects.toThrow(
+      'pipeline upload failed'
+    );
+    expect(upload).toHaveBeenCalledTimes(2);
+    expect(buildkite.setAnnotation).toHaveBeenCalledWith(
+      'security-solution-on-merge-slack-fanout',
+      'error',
+      expect.stringContaining('pipeline upload failed')
+    );
+    expect(buildkite.setMetadata).not.toHaveBeenCalled();
+  });
+});

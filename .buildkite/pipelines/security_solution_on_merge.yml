@@ -491,3 +491,25 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  # Fan out owning-team Slack after suites. Build-bot stays disabled (step env ignored).
+  - wait: ~
+    continue_on_failure: true
+
+  # Retry -1 only (agent loss). Other exits can double-post. soft_fail: setup/timeout
+  # before the script starts still produce no Slack — watchdog is a follow-up.
+  - command: node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
+    label: ':slack: Notify owning teams of Security on-merge failures'
+    key: notify_owning_teams
+    timeout_in_minutes: 10
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: false
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
