@@ -19,7 +19,10 @@ import {
   isAlertAttachmentType,
   isEventAttachmentType,
 } from '../../../common/utils/attachments';
-import type { AttachmentAttributes, Case   UserCommentAttachmentPayload,
+import type {
+  AttachmentAttributes,
+  Case,
+  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
   CaseRt,
