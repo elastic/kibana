@@ -354,7 +354,7 @@ export const allowedExperimentalValues = Object.freeze({
    * per-operating-system protection configuration.
    * Release: 9.5
    */
-  perOsPolicySettings: false,
+  perOsPolicySettings: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
