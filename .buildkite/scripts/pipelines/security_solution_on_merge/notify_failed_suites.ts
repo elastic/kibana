@@ -30,8 +30,22 @@ const MAX_ERROR_DETAIL_CHARS = 500;
 export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
 
+const NOTIFY_STEP_KEY_PREFIX = 'notify-owning-team-';
+
 export function slackNotifyStepKey(channel: string): string {
-  return `notify-owning-team-${channel.replace(/^#/, '').replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
+  return `${NOTIFY_STEP_KEY_PREFIX}${channel.replace(/^#/, '').replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
+}
+
+/**
+ * Whether a previous attempt already queued notify steps into this build.
+ *
+ * The meta-data marker is written after the upload, so an agent lost in between
+ * leaves no marker behind. Re-uploading the same deterministic keys would either
+ * duplicate the messages or be rejected as duplicates and raise a false SDH
+ * alarm, so treat the build's own steps as the source of truth.
+ */
+export function hasUploadedNotifySteps(jobs: Job[]): boolean {
+  return jobs.some((job) => job.step_key?.startsWith(NOTIFY_STEP_KEY_PREFIX));
 }
 
 export interface FailedJob {
@@ -352,6 +366,15 @@ async function runNotifyFailedSuites(
   }
 
   const build = await buildkite.getCurrentBuild();
+
+  // Covers the agent-loss window the `-1` retry exists for: upload succeeded,
+  // then the agent died before the marker was written.
+  if (hasUploadedNotifySteps(build.jobs)) {
+    console.log('Notify steps are already present in this build; skipping');
+    markSlackNotifyUploaded(buildkite);
+    return;
+  }
+
   const failedJobs = collectFailedScriptJobs(build.jobs, (job) => {
     return buildkite.getJobStatus(build, job).success;
   });

@@ -19,7 +19,9 @@ import {
   composeFanOutFailureMessage,
   displayNameForJob,
   groupJobsByChannel,
+  hasUploadedNotifySteps,
   notifyFailedSuites,
+  slackNotifyStepKey,
   summarizeErrorDetail,
 } from './notify_failed_suites.ts';
 
@@ -355,6 +357,44 @@ describe('notifyFailedSuites', () => {
     expect(buildkite.getCurrentBuild).not.toHaveBeenCalled();
     expect(upload).not.toHaveBeenCalled();
     expect(buildkite.setMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not re-upload when the agent died between upload and meta-data', async () => {
+    // The window the `-1` retry exists for: the previous attempt queued the
+    // notify steps, then died before writing the marker. Re-uploading would
+    // duplicate messages or be rejected for duplicate step keys.
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [
+          job({ id: 'failed', state: 'failed' }),
+          job({
+            id: 'queued-notify',
+            state: 'scheduled',
+            step_key: slackNotifyStepKey('#security-detection-engineering-team'),
+          }),
+        ],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await notifyFailedSuites(buildkite as any, { upload });
+
+    expect(upload).not.toHaveBeenCalled();
+    // Heal the missing marker so later attempts short-circuit on meta-data.
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  });
+
+  it('detects a previously uploaded fan-out failure notice too', () => {
+    expect(
+      hasUploadedNotifySteps([job({ id: 'x', step_key: 'notify-owning-team-fanout-failure' })])
+    ).toBe(true);
+    expect(hasUploadedNotifySteps([job({ id: 'x', step_key: 'notify_owning_teams' })])).toBe(false);
+    expect(hasUploadedNotifySteps([job({ id: 'x' })])).toBe(false);
   });
 
   it('marks meta-data after a successful fan-out so retries cannot double-post', async () => {
