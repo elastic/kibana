@@ -189,6 +189,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     parts.push('severity IS NULL');
   }
   if (!parts.length) {
+    // No selected severity is a v2 value — exclude all v2 rows
+    query.pipe('WHERE false');
     return;
   }
   query.pipe(`WHERE ${parts.join(' OR ')}`);
