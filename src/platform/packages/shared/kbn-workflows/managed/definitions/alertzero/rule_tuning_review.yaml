@@ -665,7 +665,7 @@ steps:
       updates:
         status: closed
         close_reason: other
-        verdict: "Analyst dismissed the tuning proposal."
+        verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
 
