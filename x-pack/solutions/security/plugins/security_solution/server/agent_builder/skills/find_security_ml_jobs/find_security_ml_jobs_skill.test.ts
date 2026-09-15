@@ -49,15 +49,37 @@ describe('findSecurityMlJobsSkill', () => {
       );
     });
 
-    it('bounds the ES|QL query loop to one pass', () => {
+    it('requires generation and execution to wait for find.security.ml.jobs to return', () => {
+      expect(content).toContain(
+        "Never call 'platform.core.generate_esql' or 'platform.core.execute_esql' before 'find.security.ml.jobs' has returned"
+      );
+    });
+
+    it('bounds the ES|QL query loop to one initial pair plus at most one zero-row retry', () => {
       expect(content).toContain('One query pass, bounded');
-      expect(content).toContain('At most one');
-      expect(content).toContain('do not rephrase the query and retry');
+      expect(content).toContain('At most one initial');
+      expect(content).toContain('plus at most one retry pair');
+      expect(content).toContain(
+        'retry is allowed ONLY when the initial execution succeeds but returns zero rows'
+      );
+      expect(content).toContain('do not rephrase the query');
+      expect(content).toContain('that failure is terminal');
     });
 
     it('forbids post-run tool calls after the summary', () => {
       expect(content).toContain('No post-run calls');
       expect(content).toContain('unless the user asks a follow-up question');
+    });
+
+    it('limits the no-extra-info rationale to redundant calls and preserves v2 enrichment', () => {
+      expect(content).toContain('This rationale covers redundant or repeated calls only');
+      if (flag) {
+        expect(content).toContain(
+          "It does NOT apply to the mandatory entity-store-v2 enrichment calls in steps 5-6 above ('find.security.ml.jobs.extract_euid' and 'security.get_entity')"
+        );
+      } else {
+        expect(content).not.toContain('mandatory entity-store-v2 enrichment');
+      }
     });
   });
 });

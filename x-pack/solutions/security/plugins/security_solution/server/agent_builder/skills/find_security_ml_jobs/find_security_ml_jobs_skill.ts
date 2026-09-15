@@ -135,11 +135,15 @@ ${
 
 ## Tool Discipline (no speculative calls)
 
-The 'find.security.ml.jobs' tool and the anomaly query return everything this skill needs: activeJobIds, allJobs, the score threshold, and the anomaly records themselves. Every extra tool call costs a turn, latency, and input tokens that are re-read on every subsequent step — and cannot add information the earlier calls already returned.
+The 'find.security.ml.jobs' tool and the anomaly query return everything this skill needs to identify jobs and anomaly records: activeJobIds, allJobs, the score threshold, and the anomaly records themselves. Every extra tool call costs a turn, latency, and input tokens that are re-read on every subsequent step — repeating a call with the same inputs cannot add information the earlier call already returned. This rationale covers redundant or repeated calls only.${
+  ctx.isEntityStoreV2Enabled
+    ? ` It does NOT apply to the mandatory entity-store-v2 enrichment calls in steps 5-6 above ('find.security.ml.jobs.extract_euid' and 'security.get_entity'), which derive EUIDs, risk scores, and asset criticality that the job lookup and anomaly query never return and that the step 6 summary is required to include.`
+    : ''
+}
 
 - **Reuse results already in the conversation.** If the 'find.security.ml.jobs' output (activeJobIds, allJobs, scoreThreshold) or anomaly records from 'platform.core.execute_esql' are already present from an earlier step, use them directly — never call the same tool again with the same inputs to double-check a result.
 - **No speculative ES|QL calls.** Never call 'platform.core.generate_esql' or 'platform.core.execute_esql' before 'find.security.ml.jobs' has returned, and never call them at all when activeJobIds is empty — an empty activeJobIds list means step 3 (recommend jobs) is the answer, not a signal to explore indices. Do not generate or execute ES|QL against any index other than .ml-anomalies-* for this skill.
-- **One query pass, bounded.** At most one 'platform.core.generate_esql' call and one 'platform.core.execute_esql' call per user question. If the executed query fails or returns zero rows, report that outcome (and recommend jobs per step 3) — do not rephrase the query and retry, and do not fan out into exploratory queries to confirm the absence of anomalies. At most one retry is allowed: widening the time range on the same query shape.
+- **One query pass, bounded.** At most one initial 'platform.core.generate_esql'/'platform.core.execute_esql' pair per user question, plus at most one retry pair. The retry is allowed ONLY when the initial execution succeeds but returns zero rows, and the retry must widen the time range on the same query shape — do not rephrase the query, and do not fan out into exploratory queries to confirm the absence of anomalies. If the initial execution fails outright (as opposed to succeeding with zero rows), that failure is terminal: report it and recommend jobs per step 3 without retrying.
 - **No post-run calls.** Once the summary table is rendered, the task is complete. Do not issue further tool calls — including re-querying anomalies, re-extracting EUIDs, or re-fetching entity details — unless the user asks a follow-up question.
 
 ## Examples
