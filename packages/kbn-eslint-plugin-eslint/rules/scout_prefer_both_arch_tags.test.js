@@ -110,6 +110,14 @@ ruleTester.run('@kbn/eslint/scout_prefer_both_arch_tags', rule, {
         });
       `,
     },
+    // Computed property access on tags (e.g. tags[architecture]) — unresolvable, suppress
+    {
+      code: dedent`
+        test.describe('my suite', { tag: [...tags.stateful.classic, ...tags[architecture]] }, () => {
+          test('works', () => {});
+        });
+      `,
+    },
     // apiTest.describe with both archs
     {
       code: dedent`

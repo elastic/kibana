@@ -11,11 +11,13 @@
 
 // Walk a MemberExpression chain into an array of name parts.
 // e.g. tags.stateful.classic → ['tags', 'stateful', 'classic']
+// Returns null when any step is computed (e.g. tags[architecture]) — caller treats null as unresolvable.
 const getMemberChain = (node) => {
   const chain = [];
   let current = node;
   while (current.type === 'MemberExpression') {
-    if (current.property.type === 'Identifier') chain.unshift(current.property.name);
+    if (current.computed || current.property.type !== 'Identifier') return null;
+    chain.unshift(current.property.name);
     current = current.object;
   }
   if (current.type === 'Identifier') chain.unshift(current.name);
@@ -53,6 +55,7 @@ const getArchInfo = (node) => {
 
   if (node.type === 'MemberExpression') {
     const chain = getMemberChain(node);
+    if (!chain) return { hasStateful: false, hasServerless: false, hasUnknown: true };
     if (chain[0] === 'tags') {
       // Known tags.* shapes — none are unknown
       if (chain[1] === 'deploymentAgnostic')
