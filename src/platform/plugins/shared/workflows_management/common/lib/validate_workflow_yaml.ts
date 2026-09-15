@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  collectIgnoredKibanaFetcherStepNames,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  validateStepNameUniqueness,
+} from '@kbn/workflows';
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
-import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import {
@@ -121,6 +125,16 @@ export function validateWorkflowYaml(
       const message =
         isGraphBuildError(error) || error instanceof Error ? error.message : String(error);
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
+    }
+
+    for (const stepName of collectIgnoredKibanaFetcherStepNames(parsedWorkflow.steps)) {
+      diagnostics.push({
+        severity: 'warning',
+        message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+        source: 'deprecation',
+        path: ['steps', stepName, 'with', 'fetcher'],
+        ruleId: 'ignoredFetcherSetting',
+      });
     }
   }
 

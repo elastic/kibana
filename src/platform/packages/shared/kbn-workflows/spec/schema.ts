@@ -389,6 +389,9 @@ export const DataSetStepSchema = BaseStepSchema.extend({
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
+export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
+  'The "fetcher" setting is deprecated and currently ignored by the system. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+
 export const FetcherConfigSchema = z
   .object({
     skip_ssl_verification: z
@@ -408,7 +411,11 @@ export const FetcherConfigSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
+  .meta({
+    $id: 'fetcher',
+    deprecated: true,
+    description: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  })
   .optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's

@@ -10,7 +10,11 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
+import {
+  buildKibanaRequest,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  KibanaHttpMethods,
+} from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -130,8 +134,15 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     target?: 'local'
   ): Promise<any> {
     const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
-    // Core's scoped self client owns redirect/TLS/dispatcher policy; workflows owners own future
-    // YAML fetcher deprecation/removal UX, so this legacy transport field is intentionally ignored.
+    if (params.fetcher !== undefined) {
+      this.workflowLogger.logWarn(IGNORED_KIBANA_FETCHER_SETTING_MESSAGE, {
+        event: { action: 'kibana-action' },
+        tags: ['kibana', 'deprecated'],
+        labels: { step_type: stepType },
+      });
+    }
+    // Core's scoped self client owns redirect/TLS/dispatcher policy. YAML `fetcher` is
+    // accepted for compatibility and warned above; it is never applied.
     const { fetcher: _fetcherOptions, ...cleanParams } = params;
     // `callKibanaApi` owns the workflow-space prefix, so strip an existing current-space prefix
     // from paths that already carry one (raw `request`/`form_data` paths were historically

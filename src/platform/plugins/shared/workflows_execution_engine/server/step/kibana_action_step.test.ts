@@ -19,6 +19,7 @@ describe('KibanaActionStepImpl', () => {
   let contextManager: any;
   let runtime: StepExecutionRuntime;
   let step: KibanaActionStepImpl;
+  let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
 
   const createStep = (withValue: any) => {
     const node = {
@@ -30,12 +31,17 @@ describe('KibanaActionStepImpl', () => {
       node,
       runtime,
       {} as WorkflowExecutionRuntimeManager,
-      { logInfo: jest.fn(), logError: jest.fn(), logWarn: jest.fn() } as unknown as IWorkflowEventLogger
+      workflowLogger as unknown as IWorkflowEventLogger
     );
   };
 
   beforeEach(() => {
     global.fetch = jest.fn();
+    workflowLogger = {
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logWarn: jest.fn(),
+    };
     contextManager = {
       renderValueAccordingToContext: jest.fn((value) => value),
       getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
@@ -126,5 +132,18 @@ describe('KibanaActionStepImpl', () => {
     const call = contextManager.callKibanaApi.mock.calls[0][0];
     expect(call.rawBody).toBeInstanceOf(FormData);
     expect(call.body).toBeUndefined();
+  });
+
+  it('warns when YAML fetcher is present and still calls the adapter', async () => {
+    step = createStep({
+      request: { method: 'GET', path: '/api/test' },
+      fetcher: { skip_ssl_verification: true },
+    });
+    await (step as any)._run();
+    expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({ tags: expect.arrayContaining(['deprecated']) })
+    );
+    expect(contextManager.callKibanaApi).toHaveBeenCalled();
   });
 });

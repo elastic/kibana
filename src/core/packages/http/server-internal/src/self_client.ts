@@ -107,13 +107,14 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const signal = this.createSignal(options, cleanup);
       const fetchInit: SelfFetchInit = {
         signal,
-        redirect: 'error',
+        redirect: 'manual',
         dispatcher: this.dispatcherProvider.get(
           new URL(request.url),
           this.getEffectiveTarget(options.target)
         ),
       };
-      const response = await fetch(request, fetchInit);
+      const maxRedirects = this.params.getHttpConfig().selfHttp.maxRedirects ?? 0;
+      const response = await followSameOriginRedirects(request, fetchInit, maxRedirects);
 
       if (options.rawResponse) {
         return { fetchOptions, request, response };
@@ -324,6 +325,107 @@ const createHttpSelfFetchError = <TResponseBody>(
 
 const isHttpSelfFetchError = (error: unknown): error is HttpSelfFetchError => {
   return error instanceof Error && error.name === 'HttpSelfFetchError';
+};
+
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
+const discardResponseBody = (response: Response): void => {
+  void response.body?.cancel();
+};
+
+const redirectUsesGet = (method: string, status: number): boolean => {
+  if (status === 303) {
+    return true;
+  }
+  return (status === 301 || status === 302) && method !== 'GET' && method !== 'HEAD';
+};
+
+const headersWithoutBodyMetadata = (headers: Headers): Headers => {
+  const next = new Headers(headers);
+  next.delete('content-encoding');
+  next.delete('content-language');
+  next.delete('content-length');
+  next.delete('content-location');
+  next.delete('content-type');
+  next.delete('transfer-encoding');
+  return next;
+};
+
+const followSameOriginRedirects = async (
+  initialRequest: Request,
+  fetchInit: SelfFetchInit,
+  maxRedirects: number
+): Promise<Response> => {
+  const origin = new URL(initialRequest.url).origin;
+  const visited = new Set<string>();
+  let currentRequest = initialRequest;
+  let hops = 0;
+  let response = await fetchRedirectHop(currentRequest, fetchInit, visited);
+
+  while (REDIRECT_STATUSES.has(response.status)) {
+    if (hops >= maxRedirects) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        maxRedirects === 0
+          ? `Kibana self HTTP call received a redirect (${response.status}) but server.selfHttp.maxRedirects is 0.`
+          : `Kibana self HTTP call exceeded server.selfHttp.maxRedirects (${maxRedirects}).`,
+        currentRequest,
+        response
+      );
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        'Kibana self HTTP call received a redirect without a Location header.',
+        currentRequest,
+        response
+      );
+    }
+
+    const nextUrl = new URL(location, currentRequest.url);
+    if (nextUrl.origin !== origin) {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        'Kibana self HTTP call refused a cross-origin redirect.',
+        currentRequest,
+        response
+      );
+    }
+
+    hops += 1;
+    discardResponseBody(response);
+
+    if (redirectUsesGet(currentRequest.method, response.status)) {
+      currentRequest = new Request(nextUrl, {
+        method: 'GET',
+        headers: headersWithoutBodyMetadata(currentRequest.headers),
+      });
+    } else {
+      currentRequest = new Request(nextUrl, currentRequest);
+    }
+
+    response = await fetchRedirectHop(currentRequest, fetchInit, visited);
+  }
+
+  return response;
+};
+
+const fetchRedirectHop = async (
+  currentRequest: Request,
+  fetchInit: SelfFetchInit,
+  visited: Set<string>
+): Promise<Response> => {
+  const visitKey = `${currentRequest.method}:${currentRequest.url}`;
+  if (visited.has(visitKey)) {
+    throw createHttpSelfFetchError(
+      'Kibana self HTTP call detected a redirect loop.',
+      currentRequest
+    );
+  }
+  visited.add(visitKey);
+  return fetch(currentRequest.clone(), fetchInit);
 };
 
 const validateFetchArguments = <TRequestBody>(

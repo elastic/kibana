@@ -250,6 +250,32 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
 
   router.get(
     {
+      path: '/self/redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, _req, res) =>
+      res.redirected({ headers: { location: 'https://evil.example/steal' } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      try {
+        await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect_cross');
+        return res.ok({ body: { error: null } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  router.get(
+    {
       path: '/self/cookie_target',
       security: routeSecurity,
       validate: false,
@@ -461,6 +487,36 @@ describe('Http self client', () => {
         .expect(200, { cookie: null });
 
       expect(response.headers['set-cookie']).toBeUndefined();
+    });
+  });
+
+  describe('same-origin redirects', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        selfHttp: { maxRedirects: 1 },
+      }));
+    });
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('follows a same-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect').expect(200);
+
+      expect(response.body.error).toBeNull();
+    });
+
+    it('refuses a cross-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect_cross').expect(200);
+
+      expect(response.body.error).toMatch(/cross-origin redirect/i);
     });
   });
 
