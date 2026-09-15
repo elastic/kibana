@@ -8,7 +8,8 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
+import type { AlertTriggerInput } from '../../../../common/types/alert_types';
+import type { DocumentSelection } from '../../../../common/types/document_types';
 
 export function buildAlertTriggerInputFromRecords(
   selectedRecords: DataTableRecord[]
@@ -17,7 +18,7 @@ export function buildAlertTriggerInputFromRecords(
     return null;
   }
 
-  const alertIds: AlertSelection[] = selectedRecords
+  const alertIds: DocumentSelection[] = selectedRecords
     .map((record) => {
       const id = record.raw._id;
       const index = record.raw._index;
@@ -26,7 +27,7 @@ export function buildAlertTriggerInputFromRecords(
       }
       return { _id: id, _index: index };
     })
-    .filter((entry): entry is AlertSelection => entry !== null);
+    .filter((entry): entry is DocumentSelection => entry !== null);
 
   if (alertIds.length === 0) {
     return null;
