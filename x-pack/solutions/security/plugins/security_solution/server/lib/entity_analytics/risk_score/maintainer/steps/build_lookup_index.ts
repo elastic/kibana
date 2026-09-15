@@ -165,7 +165,10 @@ const fetchNextEntityStorePage = async ({
   searchAfter: Array<string | number> | undefined;
 }) =>
   crudClient.listEntities({
-    filter: { terms: { 'entity.EngineMetadata.Type': entityTypes } },
+    filter: [
+      { terms: { 'entity.EngineMetadata.Type': entityTypes } },
+      { exists: { field: 'entity.relationships.resolution.resolved_to' } },
+    ],
     size: LOOKUP_BUILD_PAGE_SIZE,
     searchAfter,
     source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
