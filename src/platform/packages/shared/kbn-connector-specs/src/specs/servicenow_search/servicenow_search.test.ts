@@ -1325,9 +1325,9 @@ describe('ServicenowSearch', () => {
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(
-        ServicenowSearch.actions.whoAmI.handler(mockContext, {})
-      ).rejects.toThrow('Unauthorized');
+      await expect(ServicenowSearch.actions.whoAmI.handler(mockContext, {})).rejects.toThrow(
+        'Unauthorized'
+      );
     });
   });
 
