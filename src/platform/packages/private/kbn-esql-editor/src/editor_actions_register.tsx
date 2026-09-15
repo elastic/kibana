@@ -24,7 +24,7 @@ const noop = () => {};
  * without the full `ESQLEditor`) can drive whichever actions the host wires —
  * e.g. `currentQuery` + `submitEsqlQuery` to enable recommended queries. Handlers
  * left unset default to no-ops, so their menu buttons stay visible but inert.
-*/
+ */
 export const EsqlEditorActionsRegister = (props: EsqlEditorActionsRegisterProps): null => {
   const propsRef = useRef(props);
   propsRef.current = props;
