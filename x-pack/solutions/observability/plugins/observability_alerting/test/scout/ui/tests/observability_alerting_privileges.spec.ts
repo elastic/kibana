@@ -124,18 +124,13 @@ const assertEpisodesInboxHappyPath = async (
       });
     }
   });
-
-  await test.step('page fetch error callout is absent', async () => {
-    await expect(observabilityAlerting.fetchErrorCallout).toHaveCount(0);
-  });
 };
 
 /*
  * Verifies that the observability alerting inbox page is fully accessible
  * when the user holds the v1 logs privilege or the v2 alerting_v2_alerts
  * privilege. Each privileged test asserts that the KPI panels, histogram,
- * list item count, and tags filter render, and the page-level fetch-error
- * callout is absent. Logs read can RAC classic custom-threshold alerts, so
+ * list item count, and tags filter render. Logs read can RAC classic custom-threshold alerts, so
  * both seeded tags appear. `alerting_v2_alerts` + discover cannot RAC those
  * classic alerts, so only the v2 tag appears.
  * A user with none of these privileges is blocked by the RequiredPrivilegesPrompt.

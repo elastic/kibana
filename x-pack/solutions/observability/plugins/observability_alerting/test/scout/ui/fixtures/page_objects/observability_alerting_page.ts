@@ -66,7 +66,6 @@ export class ObservabilityAlertingPage {
   public readonly tagsFilterButton: Locator;
   public readonly tagsFilterListbox: Locator;
   public readonly tagsFilterSearch: Locator;
-  public readonly fetchErrorCallout: Locator;
   public readonly v1RulesTab: Locator;
   public readonly v2RulesTab: Locator;
   public readonly inboxPage: Locator;
@@ -95,7 +94,6 @@ export class ObservabilityAlertingPage {
     this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
     this.tagsFilterListbox = this.page.getByRole('listbox', { name: 'Filter options' });
     this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
-    this.fetchErrorCallout = this.page.testSubj.locator('alertingV2EpisodesListFetchError');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
     this.inboxPage = this.page.testSubj.locator('alertingV2EpisodesListPage');

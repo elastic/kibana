@@ -45,7 +45,7 @@ const isAbortError = (error: unknown): boolean =>
 
 /**
  * True for abort, privilege (401/403), and 503 (index/service not ready) errors
- * that should not surface on the episodes page callout.
+ * that should not surface as episodes fetch toasts.
  */
 export const shouldSwallowFetchError = (error: unknown): boolean => {
   if (isAbortError(error)) {

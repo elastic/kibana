@@ -84,10 +84,6 @@ const assertEpisodesManagementHappyPath = async ({
       timeout: 30_000,
     });
   });
-
-  await test.step('page fetch error callout is absent', async () => {
-    await expect(alertEpisodesList.fetchErrorCallout).toHaveCount(0);
-  });
 };
 
 /*
@@ -101,8 +97,7 @@ const assertEpisodesManagementHappyPath = async ({
  * covers the v1 privilege path.
  *
  * Each privileged test asserts the full page structure: KPI panels, histogram
- * chart, episodes table item count, and tags filter all render, and the
- * page-level fetch-error callout is absent.
+ * chart, episodes table item count, and tags filter all render.
  *
  * A recent active episode plus a tag action are seeded so the table toolbar
  * and tags filter mount. `alerting:v2:enabled` is turned on for the default

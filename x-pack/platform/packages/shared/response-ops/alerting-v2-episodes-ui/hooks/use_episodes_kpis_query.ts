@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
@@ -25,6 +26,7 @@ import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_tim
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
+import { useToastSourceErrors } from './use_toast_source_errors';
 
 export interface EpisodesKpisData {
   alertsCount: number;
@@ -50,6 +52,7 @@ export interface UseEpisodesKpisQueryOptions {
     spaces: SpacesPluginStart;
     userProfile: CoreStart['userProfile'];
     http: HttpStart;
+    notifications?: NotificationsStart;
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -126,6 +129,9 @@ export const useEpisodesKpisQuery = ({
     enabled: !isCurrentUserLoading,
   });
 
+  const sourceErrors = data?.sourceErrors ?? EMPTY_SOURCE_ERRORS;
+  useToastSourceErrors(sourceErrors, services.notifications?.toasts, 'kpis');
+
   const row = data?.row;
   return {
     data: row
@@ -140,6 +146,6 @@ export const useEpisodesKpisQuery = ({
       : undefined,
     isLoading: isCurrentUserLoading || isKpisLoading,
     isError: !!error,
-    sourceErrors: data?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
+    sourceErrors,
   };
 };

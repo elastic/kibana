@@ -29,7 +29,6 @@ export class AlertEpisodesListPage {
   public readonly tagsFilterButton: Locator;
   public readonly tagsFilterListbox: Locator;
   public readonly tagsFilterSearch: Locator;
-  public readonly fetchErrorCallout: Locator;
   /** Inline "Open in Discover" leading control (the only read-safe episode action). */
   public readonly openInDiscoverRowControl: Locator;
   /**
@@ -52,7 +51,6 @@ export class AlertEpisodesListPage {
     this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
     this.tagsFilterListbox = this.page.getByRole('listbox', { name: 'Filter options' });
     this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
-    this.fetchErrorCallout = this.page.testSubj.locator('alertingV2EpisodesListFetchError');
     this.openInDiscoverRowControl = this.page.testSubj.locator(
       `unifiedDataTable_rowControl_${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
     );

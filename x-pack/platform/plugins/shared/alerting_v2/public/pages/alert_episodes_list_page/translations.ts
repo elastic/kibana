@@ -20,13 +20,6 @@ export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_FETCH_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.listFetchErrorTitle',
-  {
-    defaultMessage: 'Unable to load some alerts',
-  }
-);
-
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {

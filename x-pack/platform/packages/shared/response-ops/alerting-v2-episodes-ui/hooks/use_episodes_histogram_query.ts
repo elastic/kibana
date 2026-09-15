@@ -12,6 +12,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
@@ -26,6 +27,7 @@ import {
 } from '../utils/fetch_from_sources';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import { useToastSourceErrors } from './use_toast_source_errors';
 import {
   generateTimeBuckets,
   computeOverlapCounts,
@@ -44,6 +46,7 @@ export interface UseEpisodesHistogramQueryOptions {
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     http: HttpStart;
+    notifications?: NotificationsStart;
   };
   filterState: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -150,12 +153,15 @@ export const useEpisodesHistogramQuery = ({
     return formatHistogramDatatable(counts, breakdownField);
   }, [rawEpisodes, timeRange, bucketInterval, breakdownField]);
 
+  const sourceErrors = queryResult?.sourceErrors ?? EMPTY_SOURCE_ERRORS;
+  useToastSourceErrors(sourceErrors, services.notifications?.toasts, 'histogram');
+
   return {
     table,
     isLoading,
     error: error ?? undefined,
     isCapHit,
     refetch,
-    sourceErrors: queryResult?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
+    sourceErrors,
   };
 };

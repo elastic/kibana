@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
@@ -24,6 +25,7 @@ import {
   fetchFromV2AndSource,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
+import { useToastSourceErrors } from './use_toast_source_errors';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
@@ -38,6 +40,7 @@ export interface UseFetchAlertingEpisodesQueryOptions {
   services: UseAlertingEpisodesDataViewOptions['services'] & {
     expressions: ExpressionsStart;
     http: HttpStart;
+    notifications?: NotificationsStart;
   };
 }
 
@@ -107,10 +110,13 @@ export const useFetchAlertingEpisodesQuery = ({
     keepPreviousData: true,
   });
 
+  const sourceErrors = query.data?.sourceErrors ?? EMPTY_SOURCE_ERRORS;
+  useToastSourceErrors(sourceErrors, services.notifications?.toasts, 'list');
+
   return {
     ...query,
     data: query.data?.episodes,
-    sourceErrors: query.data?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
+    sourceErrors,
     dataView,
   };
 };

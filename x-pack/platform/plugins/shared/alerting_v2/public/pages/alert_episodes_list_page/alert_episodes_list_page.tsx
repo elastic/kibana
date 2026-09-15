@@ -40,11 +40,6 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
 import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
-import {
-  EpisodesPageErrorsProvider,
-  EPISODES_LIST_ERROR_PREFIX,
-  useReportSourceErrors,
-} from '@kbn/alerting-v2-episodes-ui/context/episodes_page_errors_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import {
@@ -77,7 +72,6 @@ import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
-import { EpisodesListFetchErrorCallout } from './components/episodes_list_fetch_error_callout';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
@@ -172,9 +166,7 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 
 export const AlertEpisodesListPage = () => (
   <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE}>
-    <EpisodesPageErrorsProvider>
-      <AlertEpisodesListPageContent />
-    </EpisodesPageErrorsProvider>
+    <AlertEpisodesListPageContent />
   </EpisodeDataSourceProvider>
 );
 
@@ -248,7 +240,6 @@ const AlertEpisodesListPageContent = () => {
     data: episodesData,
     dataView,
     isLoading,
-    sourceErrors,
   } = useFetchAlertingEpisodesQuery({
     pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
@@ -256,8 +247,6 @@ const AlertEpisodesListPageContent = () => {
     sortState,
     timeRange,
   });
-
-  useReportSourceErrors(EPISODES_LIST_ERROR_PREFIX, sourceErrors);
 
   const loadedEpisodesCount = episodesData?.length ?? 0;
   const isEpisodeListCapped = loadedEpisodesCount >= ALERT_EPISODES_LIST_PAGE_SIZE;
@@ -561,7 +550,6 @@ const AlertEpisodesListPageContent = () => {
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />
-      <EpisodesListFetchErrorCallout />
 
       <EuiFlexGroup
         direction="column"

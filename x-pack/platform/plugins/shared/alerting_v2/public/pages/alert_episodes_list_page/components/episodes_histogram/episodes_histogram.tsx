@@ -28,16 +28,12 @@ import {
 } from '@kbn/unified-histogram';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
-import {
-  EPISODES_HISTOGRAM_ERROR_PREFIX,
-  useReportSourceErrors,
-} from '@kbn/alerting-v2-episodes-ui/context/episodes_page_errors_context';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
 import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -62,6 +58,7 @@ interface EpisodesHistogramServices {
   expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
+  notifications?: CoreStart['notifications'];
   lens: LensPublicStart;
   spaces: SpacesPluginStart;
   storage: Storage;
@@ -113,16 +110,18 @@ export const EpisodesHistogram = ({
     isCapHit,
     error,
     refetch,
-    sourceErrors,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
+    services: {
+      expressions: services.expressions,
+      spaces: services.spaces,
+      http: services.http,
+      notifications: services.notifications,
+    },
     filterState,
     timeRange,
     bucketInterval,
     breakdownField,
   });
-
-  useReportSourceErrors(EPISODES_HISTOGRAM_ERROR_PREFIX, sourceErrors);
 
   const unifiedHistogramServices = useMemo(
     () => ({
