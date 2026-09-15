@@ -109,7 +109,10 @@ export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
 export { getRunbookContent, getDashboardId } from './form';
 export type { RunbookArtifactData, DashboardArtifactData } from './form';
 
-export { composeFormToCreateRequest } from './flyout/compose_discover/compose_mappers';
+export {
+  composeFormToCreateRequest,
+  mapRuleToComposeFormValues,
+} from './flyout/compose_discover/compose_mappers';
 
 // Sequence builder
 export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
@@ -129,3 +132,13 @@ export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
 export type { SequenceEdgeType } from './sequence/sequence_edge';
 export { layoutSequence } from './sequence/layout_sequence';
 export type { LayoutSequenceOptions } from './sequence/layout_sequence';
+export { parseSequenceEsql } from './sequence/parse_esql';
+
+// Compose form sub-steps — re-exported for sequence builder sidebar
+export { DetailsAndArtifactsStep } from './flyout/compose_discover/compose_discover_form/details_and_artifacts_step';
+export { NotificationsStep } from './flyout/compose_discover/compose_discover_form/notifications_step';
+export { LinkedActionPoliciesStep } from './flyout/compose_discover/compose_discover_form/linked_action_policies_step';
+
+// Form fields
+export { ScheduleField } from './form/fields/schedule_field';
+export { LookbackWindow } from './form/fields/lookback_window';
