@@ -69,7 +69,7 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
@@ -212,28 +212,27 @@ export interface BulkScheduleWorkflowItem {
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
 
-export type AlertPreprocessingContext = Pick<
+export type TriggerInputPreprocessingContext = Pick<
   CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
   'core' | 'alerting'
 >;
 
-export interface RunWorkflowWithAlertPreprocessingParams {
+export interface RunWorkflowWithPreprocessingParams {
   workflow: WorkflowExecutionEngineModel;
   spaceId: string;
   inputs: Record<string, unknown>;
   request: KibanaRequest;
-  preprocessingContext: AlertPreprocessingContext;
+  preprocessingContext: TriggerInputPreprocessingContext;
   metadata?: Record<string, unknown>;
   /**
-   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
-   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
-   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
-   * the expanded alert-event shape.
+   * Fields to merge into `event` *after* trigger-input preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that preprocessing would otherwise overwrite when
+   * replacing the whole `event` object with an expanded event.
    */
   eventOverrides?: Record<string, unknown>;
 }
 
-export interface RunWorkflowWithAlertPreprocessingResult {
+export interface RunWorkflowWithPreprocessingResult {
   workflowExecutionId: string;
 }
 
@@ -547,7 +546,7 @@ export class WorkflowsManagementApi {
    * This is needed because `preprocessTriggerInputs` replaces the whole `event` object with the
    * expanded event shape, so any caller-owned event fields must be re-applied afterwards.
    */
-  public async runWorkflowWithAlertPreprocessing({
+  public async runWorkflowWithPreprocessing({
     workflow,
     spaceId,
     inputs,
@@ -555,7 +554,7 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     metadata,
     eventOverrides,
-  }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+  }: RunWorkflowWithPreprocessingParams): Promise<RunWorkflowWithPreprocessingResult> {
     const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,

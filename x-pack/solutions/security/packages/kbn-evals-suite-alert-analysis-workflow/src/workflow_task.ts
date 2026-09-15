@@ -109,7 +109,7 @@ const readAgentVerdict = (
  *
  * Uses the production `alert` trigger path: passing `triggerType: 'alert'` + `alertIds`
  * makes the run route fetch the alert from ES and build the standardized event
- * (see `preprocessAlertInputs`), exactly as the `.workflows` rule connector does.
+ * (see `preprocessTriggerInputs`), exactly as the `.workflows` rule connector does.
  */
 export const runAlertAnalysisWorkflow = async ({
   fetch,

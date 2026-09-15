@@ -29,9 +29,9 @@
  * observable fields, which is what this suite measures.
  *
  * Fields are stored as flattened (dotted) keys, matching how detection alerts are indexed;
- * the run route's `preprocessAlertInputs` expands them before the agent sees them. The rule
+ * the run route's `preprocessTriggerInputs` expands them before the agent sees them. The rule
  * identity fields (`consumer`, `producer`, `rule_type_id`) are required for
- * `preprocessAlertInputs` to build the trigger event.
+ * `preprocessTriggerInputs` to build the trigger event.
  *
  * Realistic noise (see `buildNoiseEnvelope`): every alert is padded with the bulky, low-signal
  * ECS + alert-framework fields a real Elastic Defend / SIEM alert carries (agent, ecs, host.os,

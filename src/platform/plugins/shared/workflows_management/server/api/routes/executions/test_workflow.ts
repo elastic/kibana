@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import { preprocessTriggerInputs } from './utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './utils/preprocess_trigger_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
