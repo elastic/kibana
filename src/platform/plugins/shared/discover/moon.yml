@@ -167,6 +167,8 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
   - '@kbn/field-formats-common'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
 tags:
   - plugin
