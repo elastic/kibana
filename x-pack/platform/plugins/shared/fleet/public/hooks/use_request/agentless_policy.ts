@@ -25,11 +25,17 @@ import type {
   UpdateAgentlessPolicyResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
-import { persistPendingCloudConnectorIac } from './pending_cloud_connector_iac';
+import {
+  type CloudConnectorIacPersistOptions,
+  persistPendingCloudConnectorIac,
+} from './pending_cloud_connector_iac';
 import { sendRequestForRq } from './use_request';
 import type { RequestError } from './use_request';
 
-export const sendCreateAgentlessPolicy = async (body: CreateAgentlessPolicyRequest['body']) => {
+export const sendCreateAgentlessPolicy = async (
+  body: CreateAgentlessPolicyRequest['body'],
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
   const result = await sendRequestForRq<CreateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getCreatePath(),
     method: 'post',
@@ -39,13 +45,15 @@ export const sendCreateAgentlessPolicy = async (body: CreateAgentlessPolicyReque
   await persistPendingCloudConnectorIac({
     policyName: body.name,
     cloudConnectorId: result.item.cloud_connector?.cloud_connector_id,
+    onError: onIacPersistError,
   });
   return result;
 };
 
 export const sendUpdateAgentlessPolicy = async (
   policyId: string,
-  body: UpdateAgentlessPolicyRequest['body']
+  body: UpdateAgentlessPolicyRequest['body'],
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const result = await sendRequestForRq<UpdateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getUpdatePath(policyId),
@@ -57,6 +65,7 @@ export const sendUpdateAgentlessPolicy = async (
     policyName: body.name,
     cloudConnectorId:
       result.item.cloud_connector?.cloud_connector_id ?? body.cloud_connector?.cloud_connector_id,
+    onError: onIacPersistError,
   });
   return result;
 };

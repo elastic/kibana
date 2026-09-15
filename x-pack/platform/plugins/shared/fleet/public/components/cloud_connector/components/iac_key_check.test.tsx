@@ -111,6 +111,7 @@ beforeEach(() => {
     launchButtonProps: { onClick: mockLaunchOnClick },
     isDisabled: false,
     isGeneratingTemplate: false,
+    clearIacConfirm: jest.fn(),
     isIacProvisionerEnabled: true,
   });
 
@@ -425,6 +426,7 @@ describe('IacKeyCheck', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -467,6 +469,7 @@ describe('IacKeyCheck', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -520,6 +523,7 @@ describe('IacKeyCheck', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -542,6 +546,7 @@ describe('IacKeyCheck', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });

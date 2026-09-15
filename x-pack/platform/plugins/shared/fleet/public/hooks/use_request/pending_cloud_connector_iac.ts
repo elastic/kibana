@@ -14,6 +14,15 @@ import { sendUpdateCloudConnector } from './cloud_connector';
 
 const pendingByPolicyName = new Map<string, CloudConnectorIacState>();
 
+/** Options the policy save helpers forward so a caller can surface a failed provenance write. */
+export interface CloudConnectorIacPersistOptions {
+  /**
+   * Called when the policy saved but its cloud connector could not record the template
+   * provenance; the payload is kept so the next save of the same policy retries.
+   */
+  onIacPersistError?: (error: Error) => void;
+}
+
 export const hasPendingIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
   Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
 
@@ -46,12 +55,17 @@ export const takePendingCloudConnectorIac = (
   return value;
 };
 
+const toError = (thrown: unknown): Error =>
+  thrown instanceof Error ? thrown : new Error(String(thrown));
+
 export const persistPendingCloudConnectorIac = async ({
   policyName,
   cloudConnectorId,
+  onError,
 }: {
   policyName?: string;
   cloudConnectorId?: string | null;
+  onError?: (error: Error) => void;
 }): Promise<void> => {
   if (!cloudConnectorId || !policyName) {
     return;
@@ -61,13 +75,25 @@ export const persistPendingCloudConnectorIac = async ({
     return;
   }
   // Policy save already succeeded; a failed IAC write must not fail the save.
-  // Keep the pending payload so a later save can retry.
+  // Keep the pending payload so a later save can retry, and tell the caller
+  // so the user learns the identity is missing its template provenance.
+  let failure: Error | undefined;
   try {
     const { error } = await sendUpdateCloudConnector(cloudConnectorId, iac);
     if (error) {
-      return;
+      failure = error;
     }
-  } catch {
+  } catch (thrown) {
+    failure = toError(thrown);
+  }
+  if (failure) {
+    // Called exactly once, outside the write's try/catch; a throwing handler
+    // must not escape and fail the already-successful save either.
+    try {
+      onError?.(failure);
+    } catch {
+      // The toast is best-effort; nothing else can be done here.
+    }
     return;
   }
   if (pendingByPolicyName.get(policyName) === iac) {

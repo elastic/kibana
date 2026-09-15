@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
@@ -29,7 +28,6 @@ import type {
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,
 } from '../../../../common/types/rest_spec/iac_provisioner';
-import { CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
 import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
@@ -159,13 +157,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // upgrade check can later compare the deployed template against what the identity's
   // integrations need (https://github.com/elastic/ingest-dev/issues/9415).
   // No stale-render guard here: see the `integrations` prop contract.
+  // The hook's `templateAlreadyCurrent` is not consumed: it only fires when a stored digest is
+  // sent, and New Identity never has one.
   const {
     launchButtonProps,
     isDisabled: isLaunchDisabled,
     isGeneratingTemplate,
     templateGenerationError,
-    templateAlreadyCurrent,
     iacConfirm,
+    clearIacConfirm,
   } = useCloudConnectorTemplate({
     provider: 'aws',
     cloud,
@@ -185,6 +185,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setRoleArn('');
       setConnectorName('');
       setStackArn('');
+      // The provenance belongs to the identity just created; a second Create without a new
+      // Launch must not re-post it.
+      clearIacConfirm();
     }
   );
 
@@ -267,17 +270,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
           />
-          {templateAlreadyCurrent && (
-            <>
-              <EuiSpacer size="m" />
-              <KbnSuccessCallout
-                announceOnMount
-                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
-                title={templateAlreadyCurrent}
-                size="s"
-              />
-            </>
-          )}
           {isIacProvisionerEnabled && (
             <>
               <EuiSpacer size="m" />

@@ -132,6 +132,11 @@ export interface UseCloudConnectorTemplateResult {
   templateAlreadyCurrent?: string;
   /** Persisted on the cloud connector when the package policy is saved. */
   iacConfirm?: CloudConnectorIacState;
+  /**
+   * Drops `iacConfirm` once a consumer has stored it, so a later save without a new Launch
+   * cannot re-post the previous render's provenance.
+   */
+  clearIacConfirm: () => void;
   isIacProvisionerEnabled: boolean;
 }
 
@@ -158,6 +163,7 @@ export const useCloudConnectorTemplate = ({
     undefined
   );
   const [iacConfirm, setIacConfirm] = useState<CloudConnectorIacState | undefined>(undefined);
+  const clearIacConfirm = useCallback(() => setIacConfirm(undefined), []);
 
   // The static URL doubles as the quick-create scaffold for the rendered
   // artifact (console host plus any quick-create params the package's URL
@@ -309,6 +315,7 @@ export const useCloudConnectorTemplate = ({
       launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
       isDisabled: !staticTemplateUrl,
       isGeneratingTemplate: false,
+      clearIacConfirm,
       isIacProvisionerEnabled,
     };
   }
@@ -320,6 +327,7 @@ export const useCloudConnectorTemplate = ({
     templateGenerationError,
     templateAlreadyCurrent,
     iacConfirm,
+    clearIacConfirm,
     isIacProvisionerEnabled,
   };
 };

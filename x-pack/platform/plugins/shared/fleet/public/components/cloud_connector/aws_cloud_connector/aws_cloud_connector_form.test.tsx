@@ -75,6 +75,7 @@ const iacEnabledResult: UseCloudConnectorTemplateResult = {
   isDisabled: false,
   isGeneratingTemplate: false,
   templateGenerationError: undefined,
+  clearIacConfirm: jest.fn(),
   isIacProvisionerEnabled: true,
 };
 
@@ -83,6 +84,7 @@ const iacDisabledResult: UseCloudConnectorTemplateResult = {
   isDisabled: true,
   isGeneratingTemplate: false,
   templateGenerationError: undefined,
+  clearIacConfirm: jest.fn(),
   isIacProvisionerEnabled: false,
 };
 

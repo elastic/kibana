@@ -154,6 +154,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       launchButtonProps: { onClick: mockLaunchOnClick },
       isDisabled: false,
       isGeneratingTemplate: false,
+      clearIacConfirm: jest.fn(),
       isIacProvisionerEnabled: true,
     });
 
@@ -1083,6 +1084,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -1119,6 +1121,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -1188,6 +1191,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1205,6 +1209,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });

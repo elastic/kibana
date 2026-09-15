@@ -130,6 +130,7 @@ beforeEach(() => {
     launchButtonProps: { onClick: mockLaunchOnClick },
     isDisabled: false,
     isGeneratingTemplate: false,
+    clearIacConfirm: jest.fn(),
     isIacProvisionerEnabled: false,
   });
 });

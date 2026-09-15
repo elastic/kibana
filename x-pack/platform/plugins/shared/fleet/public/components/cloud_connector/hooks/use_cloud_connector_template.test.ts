@@ -327,6 +327,27 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.iacConfirm).toBeUndefined();
     });
 
+    it('drops the confirm once the consumer clears it, until the next launch', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue(RENDERED as never);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+      expect(result.current.iacConfirm).toBeDefined();
+
+      act(() => {
+        result.current.clearIacConfirm();
+      });
+      expect(result.current.iacConfirm).toBeUndefined();
+
+      // A new launch records its own provenance again.
+      await launch(result);
+      expect(result.current.iacConfirm).toEqual({
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: 'v1',
+      });
+    });
+
     it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
 
