@@ -171,7 +171,8 @@ steps:
           or inapplicable for this rule, and (c) a concrete recommendation for what the
           analyst should do manually in the Detection Rules UI.
       schema:
-        type: object
+        # Omit the root type so Agent Builder wraps this union under a property;
+        # the LangChain-to-inference adapter drops root-level oneOf constraints.
         oneOf:
           - type: object
             properties:
