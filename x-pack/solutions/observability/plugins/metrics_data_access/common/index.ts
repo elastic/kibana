@@ -40,6 +40,13 @@ export type {
   DataSchemaFormat,
 } from './inventory_models/types';
 
+export {
+  CPU_USAGE_LABEL,
+  MEMORY_USAGE_LABEL,
+  NORMALIZED_LOAD_LABEL,
+  DISK_USAGE_LABEL,
+} from './inventory_models/shared/charts/labels';
+
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export {
   METRICS_EXPLORER_API_MAX_METRICS,
@@ -55,7 +62,7 @@ export {
   METRICSET_MODULE,
   METRICSET_NAME,
   DATASTREAM_DATASET,
-  OS_NAME,
+  OS_TYPE,
   SYSTEM_INTEGRATION,
   HOST_METRICS_RECEIVER_OTEL,
 } from './constants';

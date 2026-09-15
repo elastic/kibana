@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-types'
   - '@kbn/alerting-types'
   - '@kbn/actions-types'
+  - '@kbn/connector-specs'
   - '@kbn/data-views-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
@@ -36,12 +37,12 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/search-types'
   - '@kbn/utility-types'
-  - '@kbn/safer-lodash-set'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/presentation-publishing'
+  - '@kbn/response-ops-form-generator'
   - '@kbn/response-ops-rules-apis'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -49,6 +50,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/kql'
   - '@kbn/es-ui-shared-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-browser
   - package
@@ -61,26 +65,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

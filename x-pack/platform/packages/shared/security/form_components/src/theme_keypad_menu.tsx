@@ -46,7 +46,7 @@ export const ThemeKeyPadMenu: FunctionComponent<ThemeKeyPadMenuProps> = ({
         isDisabled={isDisabled}
         onChange={() => helpers.setValue(id)}
       >
-        <EuiIcon type={icon} size="l" />
+        <EuiIcon type={icon} size="l" aria-hidden={true} />
       </EuiKeyPadMenuItem>
     );
   };
@@ -76,7 +76,7 @@ export const ThemeKeyPadMenu: FunctionComponent<ThemeKeyPadMenuProps> = ({
         label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.systemLabel', {
           defaultMessage: 'System',
         }),
-        icon: 'desktop',
+        icon: 'display',
       })}
       {themeItem({
         id: 'light',

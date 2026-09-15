@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { ColorByValueType } from '../color';
-import type { GaugeState } from './gauge';
-import { gaugeStateSchema } from './gauge';
+import type { GaugeConfig } from './gauge';
+import { gaugeConfigSchema } from './gauge';
 
 describe('Gauge Schema', () => {
   const baseGaugeConfig = {
     type: 'gauge',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
-  } satisfies Partial<GaugeState>;
+  } satisfies Partial<GaugeConfig>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  } satisfies Partial<GaugeState>;
+  } satisfies Partial<GaugeConfig>;
 
-  type GaugeInput = Omit<GaugeState, keyof typeof defaultValues>;
+  type GaugeInput = Omit<GaugeConfig, keyof typeof defaultValues>;
 
   it('validates minimal configuration', () => {
     const input = {
@@ -38,8 +40,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates full configuration with bullet shape', () => {
@@ -71,7 +73,7 @@ describe('Gauge Schema', () => {
           field: 'performance_score',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           title: { text: 'Score' },
-          sub_title: 'with 80% target',
+          subtitle: 'with 80% target',
           color,
           ticks: { mode: 'bands' as const },
           min: {
@@ -87,14 +89,16 @@ describe('Gauge Schema', () => {
             value: 80,
           },
         },
-        shape: {
-          type: 'bullet',
-          orientation: 'vertical',
+        styling: {
+          shape: {
+            type: 'bullet',
+            orientation: 'vertical',
+          },
         },
       } satisfies GaugeInput;
 
-      const validated = gaugeStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = gaugeConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     }
   });
 
@@ -106,13 +110,15 @@ describe('Gauge Schema', () => {
         field: 'cpu_usage',
         ticks: { mode: 'auto' as const },
       },
-      shape: {
-        type: 'circle',
+      styling: {
+        shape: {
+          type: 'circle',
+        },
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates default values are applied', () => {
@@ -123,14 +129,16 @@ describe('Gauge Schema', () => {
         field: 'test_field',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'horizontal',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'horizontal',
+        },
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated.shape).toEqual({
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated.styling?.shape).toEqual({
       type: 'bullet',
       orientation: 'horizontal',
     });
@@ -140,34 +148,32 @@ describe('Gauge Schema', () => {
   it('validates ESQL configuration', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       metric: {
-        operation: 'value',
         column: 'score',
-        sub_title: 'Performance',
+        subtitle: 'Performance',
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates ES|QL full configuration with bullet shape', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value',
         column: 'score',
         title: { text: 'Score' },
-        sub_title: 'with 80% target',
+        subtitle: 'with 80% target',
         color: {
           type: 'dynamic',
           range: 'absolute',
@@ -178,52 +184,53 @@ describe('Gauge Schema', () => {
         },
         ticks: { mode: 'bands' as const },
         min: {
-          operation: 'value',
           column: 'min',
         },
         max: {
-          operation: 'value',
           column: 'max',
         },
         goal: {
-          operation: 'value',
           column: 'goal',
         },
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'vertical',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'vertical',
+        },
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('throws on mixed DSL and ES|QL configs', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value',
         column: 'score',
+        // @ts-expect-error
         min: {
-          // @ts-expect-error
           operation: 'static',
           value: 5,
         },
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'vertical',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'vertical',
+        },
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
   });
 
   it('throws on invalid operations as metric', () => {
@@ -232,7 +239,7 @@ describe('Gauge Schema', () => {
       { operation: 'moving_average', window: 5, field: 'bytes' },
     ];
     for (const op of invalidOps) {
-      expect(() => gaugeStateSchema.validate({ ...baseGaugeConfig, metric: op })).toThrow();
+      expect(() => gaugeConfigSchema.parse({ ...baseGaugeConfig, metric: op })).toThrow();
     }
   });
 
@@ -244,13 +251,16 @@ describe('Gauge Schema', () => {
         operation: 'count',
         field: 'test_field',
       },
-      shape: {
-        // @ts-expect-error
-        type: 'invalid',
+      styling: {
+        shape: {
+          // @ts-expect-error
+          type: 'invalid',
+        },
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
   });
 
   it('throws on invalid ticks value', () => {
@@ -261,11 +271,45 @@ describe('Gauge Schema', () => {
         field: 'test_field',
         ticks: {
           // @ts-expect-error
-          style: 'invalid',
+          mode: 'invalid',
         },
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeStateSchema.validate(input)).toThrow();
+    const result = gaugeConfigSchema.safeParse(input);
+    expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+  });
+
+  it('throws on reference-based operations for min, max, and goal', () => {
+    const refBasedOps = [
+      {
+        operation: 'differences',
+        of: { operation: 'sum', field: 'bytes', empty_as_null: true },
+      },
+      {
+        operation: 'moving_average',
+        of: { operation: 'sum', field: 'bytes', empty_as_null: true },
+        window: 5,
+      },
+      { operation: 'cumulative_sum', field: 'bytes' },
+      { operation: 'counter_rate', field: 'bytes' },
+    ];
+
+    const validMetric = {
+      operation: 'count',
+      field: 'test_field',
+      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+    };
+
+    for (const op of refBasedOps) {
+      for (const dimension of ['min', 'max', 'goal']) {
+        expect(() =>
+          gaugeConfigSchema.parse({
+            ...baseGaugeConfig,
+            metric: { ...validMetric, [dimension]: op },
+          })
+        ).toThrow();
+      }
+    }
   });
 });

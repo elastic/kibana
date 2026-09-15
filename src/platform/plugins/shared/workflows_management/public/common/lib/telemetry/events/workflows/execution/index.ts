@@ -9,8 +9,10 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
 } from './types';
@@ -22,6 +24,8 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: 'Workflow step test run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: 'Workflow run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: 'Workflow run cancelled',
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: 'Workflow executions cancelled',
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: 'Workflow run resumed',
 };
 
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
@@ -101,7 +105,15 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
     type: 'keyword',
     _meta: {
       description:
-        'The trigger tab selected in the Test Workflow modal: manual, alert, index, or historical',
+        'The trigger tab selected in the Test Workflow modal: manual, alert, index, event, or historical',
+      optional: true,
+    },
+  },
+  hasCustomEventTrigger: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the workflow defines extension (event-driven) triggers at test-run time',
       optional: true,
     },
   },
@@ -178,7 +190,15 @@ const workflowRunInitiatedSchema: RootSchema<ReportWorkflowRunInitiatedActionPar
   triggerTab: {
     type: 'keyword',
     _meta: {
-      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      description:
+        'The trigger tab selected in the Run Workflow modal: manual, alert, index, event, or historical',
+      optional: true,
+    },
+  },
+  hasCustomEventTrigger: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the workflow defines extension (event-driven) triggers at run time',
       optional: true,
     },
   },
@@ -210,9 +230,60 @@ const workflowRunCancelledSchema: RootSchema<ReportWorkflowRunCancelledActionPar
   },
 };
 
+const workflowExecutionsCancelledSchema: RootSchema<ReportWorkflowExecutionsCancelledActionParams> =
+  {
+    ...baseResultActionSchema,
+    ...eventNameSchema,
+    workflowId: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The workflow whose non-terminal executions were requested to be cancelled in bulk (current space).',
+        optional: false,
+      },
+    },
+  };
+
+const workflowRunResumedSchema: RootSchema<ReportWorkflowRunResumedActionParams> = {
+  ...baseResultActionSchema,
+  ...eventNameSchema,
+  workflowExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow execution ID being resumed',
+      optional: false,
+    },
+  },
+  workflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow ID if available',
+      optional: true,
+    },
+  },
+  timeInModalMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Time in milliseconds from when the resume modal was opened until the user submitted (UX)',
+      optional: true,
+    },
+  },
+  timeSinceStepStartedMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the step execution startedAt (server) until submit; proxy for human-wait duration for waitForInput steps',
+      optional: true,
+    },
+  },
+};
+
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionEventTypes.WorkflowTestRunInitiated]: workflowTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: workflowStepTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: workflowRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: workflowRunCancelledSchema,
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: workflowExecutionsCancelledSchema,
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: workflowRunResumedSchema,
 };

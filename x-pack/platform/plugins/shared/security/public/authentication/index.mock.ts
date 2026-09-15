@@ -18,11 +18,13 @@ export const authenticationMock = {
     lazyObject({
       getCurrentUser: jest.fn(),
       areAPIKeysEnabled: jest.fn(),
+      isUIAMEnabled: jest.fn(),
     }),
   createStart: (): jest.Mocked<AuthenticationServiceStart> =>
     lazyObject({
       getCurrentUser: jest.fn(),
       areAPIKeysEnabled: jest.fn(),
+      isUIAMEnabled: jest.fn(),
     }),
 };
 

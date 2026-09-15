@@ -18,13 +18,13 @@ interface Props {
   isSetup?: boolean;
 }
 
-export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
+export const useShowFileUploadFlyout = () => {
   const {
     services: { uiActions },
   } = useKibana();
   const { setIndices: setSelectedIndices } = useSourceIndicesFields();
 
-  const showFileUploadFlyout = React.useCallback(() => {
+  return React.useCallback(() => {
     if (uiActions !== null) {
       uiActions.executeTriggerActions(OPEN_FILE_UPLOAD_LITE_TRIGGER, {
         autoAddInference: '.elser-2-elasticsearch',
@@ -35,13 +35,17 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
       });
     }
   }, [setSelectedIndices, uiActions]);
+};
+
+export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
+  const showFileUploadFlyout = useShowFileUploadFlyout();
 
   return (
     <>
       {isSetup ? (
         <EuiButtonEmpty
           flush="right"
-          iconType="importAction"
+          iconType="download"
           onClick={() => showFileUploadFlyout()}
           data-test-subj="uploadFileButtonEmpty"
           aria-label={i18n.translate(
@@ -61,7 +65,7 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
           color="text"
           size="s"
           fill={false}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => showFileUploadFlyout()}
           data-test-subj="uploadFileButton"
         >

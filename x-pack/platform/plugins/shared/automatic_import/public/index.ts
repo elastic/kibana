@@ -8,7 +8,10 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { AutomaticImportPlugin } from './plugin';
 export type { AutomaticImportPluginSetup, AutomaticImportPluginStart } from './types';
+export type { DataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout/types';
+export { AutomaticImportTelemetryEventType } from '../common/telemetry/types';
+export type { DataStreamResponse, TaskStatus } from '../common';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new AutomaticImportPlugin(initializerContext);
+export function plugin(_initializerContext: PluginInitializerContext) {
+  return new AutomaticImportPlugin();
 }

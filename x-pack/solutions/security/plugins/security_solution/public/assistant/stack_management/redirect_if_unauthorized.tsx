@@ -24,7 +24,7 @@ export function RedirectIfUnauthorized({
 
   const chatExperience = coreStart.settings.client.get<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    AIChatExperience.Agent
   );
 
   const securityAIAssistantEnabled =

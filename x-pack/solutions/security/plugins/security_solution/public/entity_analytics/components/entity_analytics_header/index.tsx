@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { capitalize, sumBy } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
@@ -34,7 +34,7 @@ import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../entity_analytics_anomalies'
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
-import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_risk_score_kpi';
 import type { SeverityCount } from '../severity/types';
 
 const StyledEuiTitle = styled(EuiTitle)`
@@ -61,10 +61,11 @@ export const EntityAnalyticsHeader = () => {
     loading: hostRiskLoading,
     inspect: inspectHostRiskScore,
     refetch: refetchHostRiskScore,
-  } = useRiskScoreKpi({
+  } = useEntityStoreRiskScoreKpi({
     timerange,
     riskEntity: EntityType.host,
     filterQuery,
+    skip: false,
   });
 
   const {
@@ -72,10 +73,11 @@ export const EntityAnalyticsHeader = () => {
     loading: userRiskLoading,
     refetch: refetchUserRiskScore,
     inspect: inspectUserRiskScore,
-  } = useRiskScoreKpi({
+  } = useEntityStoreRiskScoreKpi({
     filterQuery,
     timerange,
     riskEntity: EntityType.user,
+    skip: false,
   });
 
   const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });

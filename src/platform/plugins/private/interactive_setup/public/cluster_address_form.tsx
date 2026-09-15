@@ -106,6 +106,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         fullWidth
       >
         <EuiFieldText
+          data-test-subj="interactiveSetupClusterAddressInput"
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
@@ -117,7 +118,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterAddressForm.cancelButton"
               defaultMessage="Back"
@@ -126,6 +127,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupCheckAddressButton"
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}

@@ -171,6 +171,48 @@ describe('SettingsPage - Advanced Configuration', () => {
     });
   });
 
+  describe('when agent is OTel central-config-supported agent', () => {
+    it('should show advanced configuration section', () => {
+      renderSettingsPage({
+        newConfig: {
+          ...defaultProps.newConfig,
+          agent_name: 'opentelemetry/java/opentelemetry-java-instrumentation',
+        },
+      });
+
+      expect(screen.getByText('Advanced Configuration')).toBeInTheDocument();
+      expect(screen.getByTestId('apmSettingsAddAdvancedConfigurationButton')).toBeInTheDocument();
+    });
+
+    it('should show the OTel documentation message in create mode', () => {
+      renderSettingsPage({
+        newConfig: {
+          ...defaultProps.newConfig,
+          agent_name: 'opentelemetry/java/opentelemetry-java-instrumentation',
+        },
+      });
+
+      expect(screen.getByTestId('apmOtelCentralConfigDocumentationCallout')).toBeInTheDocument();
+      expect(
+        screen.getByText('OpenTelemetry central configuration documentation')
+      ).toBeInTheDocument();
+    });
+
+    it('should hide the OTel documentation message in edit mode', () => {
+      renderSettingsPage({
+        isEditMode: true,
+        newConfig: {
+          ...defaultProps.newConfig,
+          agent_name: 'opentelemetry/java/opentelemetry-java-instrumentation',
+        },
+      });
+
+      expect(
+        screen.queryByTestId('apmOtelCentralConfigDocumentationCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('when agent is not EDOT agent', () => {
     it('should not show advanced configuration section', () => {
       renderSettingsPage({

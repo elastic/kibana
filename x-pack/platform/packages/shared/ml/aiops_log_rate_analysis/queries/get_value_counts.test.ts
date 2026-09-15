@@ -7,22 +7,47 @@
 
 import { frequentItemSets } from '@kbn/aiops-test-utils/artificial_logs/frequent_item_sets';
 
-import { getValueCounts } from './get_value_counts';
+import { getValueCountsForItemSetIndexes } from './get_value_counts';
 
-describe('getValueCounts', () => {
+describe('getValueCountsForItemSetIndexes', () => {
   it('get value counts for field response_code', () => {
-    expect(getValueCounts(frequentItemSets, 'response_code')).toEqual({
+    expect(
+      getValueCountsForItemSetIndexes(
+        frequentItemSets,
+        frequentItemSets.map((_, index) => index),
+        'response_code'
+      )
+    ).toEqual({
       '500': 3,
     });
   });
 
   it('get value counts for field url', () => {
-    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 2, 'login.php': 2 });
+    expect(
+      getValueCountsForItemSetIndexes(
+        frequentItemSets,
+        frequentItemSets.map((_, index) => index),
+        'url'
+      )
+    ).toEqual({ 'home.php': 2, 'login.php': 2 });
   });
 
   it('get value counts for field user', () => {
-    expect(getValueCounts(frequentItemSets, 'user')).toEqual({
+    expect(
+      getValueCountsForItemSetIndexes(
+        frequentItemSets,
+        frequentItemSets.map((_, index) => index),
+        'user'
+      )
+    ).toEqual({
       Peter: 3,
+    });
+  });
+
+  it('gets value counts for field from selected itemset indexes', () => {
+    expect(getValueCountsForItemSetIndexes(frequentItemSets, [0, 1], 'url')).toEqual({
+      'home.php': 1,
+      'login.php': 1,
     });
   });
 });

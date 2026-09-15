@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useState } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+import { Navigation } from '../components/navigation';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
+
+interface TestComponentProps {
+  isCollapsed?: boolean;
+  initialActiveItemId?: string;
+  items: NavigationStructure;
+}
+
+export const TestComponent = ({
+  isCollapsed: isCollapsedProp = false,
+  initialActiveItemId,
+  items,
+}: TestComponentProps) => {
+  const [activeItemId, setActiveItemId] = useState(initialActiveItemId);
+  const [isCollapsed, setIsCollapsed] = useState(isCollapsedProp);
+
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem) => {
+    setActiveItemId(item.id);
+  };
+
+  usePreventLinkNavigation();
+
+  return (
+    <I18nProvider>
+      <Navigation
+        activeItemId={activeItemId}
+        isCollapsed={isCollapsed}
+        items={items}
+        onItemClick={handleItemClick}
+        onToggleCollapsed={setIsCollapsed}
+        setWidth={() => {}}
+      />
+    </I18nProvider>
+  );
+};

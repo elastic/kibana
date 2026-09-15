@@ -82,7 +82,11 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
           );
         }
 
-        return <EuiText size="s">{String(value)}</EuiText>;
+        return (
+          <EuiText size="s" className="eui-textBreakWord" style={{ whiteSpace: 'pre-wrap' }}>
+            {String(value)}
+          </EuiText>
+        );
       },
       [formatBytes]
     );

@@ -28,18 +28,32 @@ export const getTestTagsForTarget = (target: string): string[] => {
   }
 };
 
-// Collects unique tags from spec files that have 'passed' expectedStatus (it means test is not skipped)
+const isScoutHookFile = (filePath: string | undefined): boolean => {
+  return (
+    filePath?.endsWith('global.setup.ts') === true ||
+    filePath?.endsWith('global.teardown.ts') === true
+  );
+};
+
+/** Runnable Scout tests, including those registered from a shared factory instead of a `*.spec.ts`. */
+export const isScoutTestFile = (test: {
+  expectedStatus?: string;
+  location?: { file?: string };
+}): boolean => {
+  return (
+    test.expectedStatus === 'passed' &&
+    Boolean(test.location?.file) &&
+    !isScoutHookFile(test.location?.file)
+  );
+};
+
+// Collects unique tags from runnable tests (skip global setup/teardown hooks)
 export const collectUniqueTags = (
   tests: Array<{ tags?: string[]; expectedStatus?: string; location?: { file?: string } }>
 ): string[] => {
   const tagSet = new Set<string>();
   for (const test of tests) {
-    // Only collect tags from tests that have passed status and are spec files (e.g. skip global.setup.ts)
-    if (
-      test.expectedStatus === 'passed' &&
-      test.location?.file?.endsWith('.spec.ts') &&
-      test.tags
-    ) {
+    if (isScoutTestFile(test) && test.tags) {
       for (const testTag of test.tags) {
         tagSet.add(testTag);
       }
@@ -48,21 +62,25 @@ export const collectUniqueTags = (
   return Array.from(tagSet);
 };
 
-// Converts tags to server run flags
+// Converts tags to server run flags. The result is deduplicated by (arch, domain) because
+// multiple tag aliases (e.g. `@local-stateful-classic` and `@cloud-stateful-classic`) can
+// resolve to the same target; consumers iterate the flags to fan out test runs and would
+// otherwise execute the same (arch, domain) twice.
 export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
   const supportedArchDomainCombos: [ScoutTargetArch, ScoutTargetDomain][] = [
     ['stateful', 'classic'],
     ['serverless', 'search'],
     ['serverless', 'observability_complete'],
-    // ['serverless', 'observability_logs_essentials'],
+    ['serverless', 'observability_logs_essentials'],
     ['serverless', 'security_complete'],
     // ['serverless', 'security_essentials'],
     // ['serverless', 'security_ease'],
     // ['serverless', 'workplaceai'],
+    // ['serverless', 'vectordb'],
   ];
   // TODO: Uncomment above to run tests for these targets in CI
 
-  return [...new Set(testTags)]
+  const flags = [...new Set(testTags)]
     .map((tag) => ScoutTestTarget.fromPlaywrightTag(tag))
     .filter((target) =>
       supportedArchDomainCombos.some(
@@ -70,4 +88,6 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
       )
     )
     .map((target) => `--arch ${target.arch} --domain ${target.domain}`);
+
+  return [...new Set(flags)];
 };

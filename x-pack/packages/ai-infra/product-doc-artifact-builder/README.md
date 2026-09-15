@@ -81,6 +81,8 @@ Example:
 
 ```
 node scripts/build_openapi_artifacts.js --stack-version=9.4 --embedding-cluster-url=http://localhost:9200 --embedding-cluster-username=elastic --embedding-cluster-password=changeme
+--inference-id=.multilingual-e5-small-elasticsearch
+
 ```
 
 For multilingual, add

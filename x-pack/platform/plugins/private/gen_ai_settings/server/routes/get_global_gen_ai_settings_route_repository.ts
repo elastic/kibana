@@ -6,10 +6,14 @@
  */
 
 import { connectorRoutes } from './connectors/route';
+import { installTokenUsageDashboardRoutes } from './install_token_usage_dashboard/route';
+import { agentBuilderTracingRoutes } from './agent_builder_tracing/route';
 
 export function getGlobalGenAiSettingsServerRouteRepository() {
   return {
     ...connectorRoutes,
+    ...installTokenUsageDashboardRoutes,
+    ...agentBuilderTracingRoutes,
   };
 }
 

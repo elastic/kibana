@@ -31,9 +31,6 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -99,9 +96,6 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -165,9 +159,6 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -297,9 +288,6 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -407,9 +395,6 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
         title="Border color"
       >

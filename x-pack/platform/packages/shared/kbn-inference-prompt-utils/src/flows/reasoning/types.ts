@@ -18,6 +18,12 @@ import type {
 
 export type ReasoningPower = 'low' | 'medium' | 'high';
 
+/** Additive reasoning-loop diagnostics surfaced to consumers of the shared agent. */
+export interface ReasoningPromptDiagnostics {
+  /** Turns where external text and pending task tools were correctly continued. */
+  externalContentToolContinuations: number;
+}
+
 export interface ReasoningPromptOptions {
   inferenceClient: BoundInferenceClient;
   /**
@@ -33,6 +39,12 @@ export interface ReasoningPromptOptions {
   maxSteps?: number;
   prevMessages?: undefined;
   power?: ReasoningPower;
+  /**
+   * An optional AbortSignal that allows cancellation of the reasoning agent loop.
+   * When the signal is aborted, the agent will stop between reasoning steps
+   * and forward the signal to inference calls so in-progress requests are cancelled.
+   */
+  abortSignal?: AbortSignal;
 }
 
 export type ReasoningPromptResponseOf<
@@ -50,6 +62,10 @@ export type ReasoningPromptResponseOf<
       }
     >
   >;
+  diagnostics: ReasoningPromptDiagnostics;
 };
 
-export type ReasoningPromptResponse = PromptResponse & { input: Message[] };
+export type ReasoningPromptResponse = PromptResponse & {
+  input: Message[];
+  diagnostics: ReasoningPromptDiagnostics;
+};

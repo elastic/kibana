@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
 import {
+  AnalyzeMetricButton,
   MetricsNodeDetailsLink,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
@@ -24,8 +25,8 @@ import {
   StepwisePagination,
 } from '../shared';
 import {
-  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
 } from '../shared/constants';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
@@ -75,6 +76,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     setCurrentPageIndex(0);
   };
 
+  const rows = data.state === 'data' ? data.rows : undefined;
+  const podNames = useMemo(() => rows?.map((row) => row.name), [rows]);
+
   if (data.state === 'error') {
     return (
       <>
@@ -92,6 +96,15 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
   } else if (data.state === 'data') {
     return (
       <>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <AnalyzeMetricButton
+            ids={podNames ?? []}
+            nodeType="pod"
+            timerange={timerange}
+            metricsIndices={metricIndices}
+          />
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.metricsData.metricsTable.pod.tableCaption', {
             defaultMessage: 'Infrastructure metrics for pods',
@@ -152,33 +165,11 @@ function podNodeColumns(
       },
     },
     {
-      name: (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate(
-              'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
-              {
-                defaultMessage: 'CPU usage (avg.)',
-              }
-            )}
-          </EuiFlexItem>
-          {isOtel ? (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
-                  {
-                    defaultMessage:
-                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
-                    values: {
-                      metricName: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
-                    },
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+      name: i18n.translate(
+        'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
+        {
+          defaultMessage: 'CPU usage (avg.)',
+        }
       ),
       field: 'averageCpuUsagePercent',
       align: 'right',
@@ -201,12 +192,13 @@ function podNodeColumns(
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 content={i18n.translate(
-                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
+                  'xpack.metricsData.metricsTable.pod.memoryMetricSourceTooltip',
                   {
                     defaultMessage:
-                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
+                      'Displays {limitMetric} as a percentage when available, otherwise falls back to {workingSetMetric} in MB.',
                     values: {
-                      metricName: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+                      limitMetric: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+                      workingSetMetric: SEMCONV_K8S_POD_MEMORY_WORKING_SET,
                     },
                   }
                 )}
@@ -217,8 +209,8 @@ function podNodeColumns(
       ),
       field: 'averageMemoryUsagePercent',
       align: 'right',
-      render: (averageMemoryUsagePercent: number) => (
-        <NumberCell value={averageMemoryUsagePercent} unit="%" />
+      render: (averageMemoryUsagePercent: number, row: PodNodeMetricsRow) => (
+        <NumberCell value={averageMemoryUsagePercent} unit={row.memoryUnit} />
       ),
     },
   ];

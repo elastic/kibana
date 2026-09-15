@@ -38,7 +38,7 @@ export const ExperimentalMapLayerInfo = () => (
         }}
       />
     }
-    iconType="beaker"
+    iconType="flask"
   />
 );
 

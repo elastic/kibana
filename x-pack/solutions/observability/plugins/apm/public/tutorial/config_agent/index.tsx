@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import type { CustomComponentProps } from '@kbn/home-plugin/public';
-import type { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AgentConfigInstructions } from './agent_config_instructions';
 import type { PolicyOption } from './get_policy_options';
 import { getPolicyOptions } from './get_policy_options';
@@ -89,7 +89,11 @@ export function TutorialConfigAgent({
         }
       } catch (e) {
         setIsLoading(false);
-        console.error('Error while fetching fleet agents.', e);
+
+        // A 403 response is expected if the user does not have permission to read fleet agents.
+        if (e.response?.status !== 403) {
+          console.error('Error while fetching fleet agents.', e);
+        }
       }
     }
     fetchData();

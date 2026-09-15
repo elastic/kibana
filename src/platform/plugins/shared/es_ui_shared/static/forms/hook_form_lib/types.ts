@@ -14,6 +14,10 @@ import type { Subject, Subscription } from './lib';
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
 type Required<T> = T extends FormData ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FormHook<T extends FormData = FormData, I extends FormData = T> {
   /**  Flag that indicates if the form has been submitted at least once. It is set to `true` when we call `submit()`. */
   readonly isSubmitted: boolean;
@@ -108,10 +112,18 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __getFieldsRemoved: () => FieldsMap;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type FormSchema<T extends FormData = FormData> = {
   [K in keyof T]?: FieldConfig<T[K], T, any> | FormSchema<T[K]>;
 };
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FormConfig<T extends FormData = FormData, I extends FormData = T> {
   onSubmit?: FormSubmitHandler<T>;
   schema?: FormSchema<I>;
@@ -122,6 +134,10 @@ export interface FormConfig<T extends FormData = FormData, I extends FormData = 
   id?: string;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface OnFormUpdateArg<T extends FormData, I extends FormData = T> {
   data: {
     internal: I;
@@ -131,10 +147,18 @@ export interface OnFormUpdateArg<T extends FormData, I extends FormData = T> {
   isValid?: boolean;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type OnUpdateHandler<T extends FormData = FormData, I extends FormData = T> = (
   arg: OnFormUpdateArg<T, I>
 ) => void;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FormOptions {
   valueChangeDebounceTime?: number;
   /**
@@ -147,6 +171,10 @@ export interface FormOptions {
   stripUnsetFields?: boolean;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FieldHook<T = unknown, I = T> {
   readonly path: string;
   readonly label?: string;
@@ -213,9 +241,13 @@ export interface FieldHook<T = unknown, I = T> {
   __serializeValue: (internalValue?: I) => T;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
-  readonly labelAppend?: string | ReactNode;
+  readonly labelAppend?: string | ReactNode | (() => ReactNode);
   readonly helpText?: string | ReactNode | (() => ReactNode);
   readonly type?: string;
   readonly defaultValue?: T;
@@ -227,20 +259,36 @@ export interface FieldConfig<T = unknown, FormType extends FormData = FormData, 
   readonly valueChangeDebounceTime?: number;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FieldValidationData {
   validationData?: unknown;
   validationDataProvider?: () => Promise<unknown>;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FieldsMap {
   [key: string]: FieldHook;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type FormSubmitHandler<T extends FormData = FormData> = (
   formData: T,
   isValid: boolean
 ) => Promise<void>;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface ValidationError<T = string> {
   message: string;
   code?: T;
@@ -249,6 +297,10 @@ export interface ValidationError<T = string> {
   [key: string]: any;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface ValidationFuncArg<I extends FormData, V = unknown> {
   path: string;
   value: V;
@@ -265,6 +317,10 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
   };
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type ValidationFunc<
   I extends FormData = FormData,
   E extends string = string,
@@ -273,20 +329,40 @@ export type ValidationFunc<
   data: ValidationFuncArg<I, V>
 ) => ValidationError<E> | void | undefined | ValidationCancelablePromise<E>;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type ValidationResponsePromise<E extends string = string> = Promise<
   ValidationError<E> | void | undefined
 >;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type ValidationCancelablePromise<E extends string = string> =
   ValidationResponsePromise<E> & { cancel?(): void };
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FieldValidateResponse {
   isValid: boolean;
   errors: ValidationError[];
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type SerializerFunc<O = unknown, I = any> = (value: I) => O;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FormData {
   [key: string]: any;
 }
@@ -297,6 +373,10 @@ type FormatterFunc<I = unknown> = (value: any, formData: FormData) => I;
 // string | number | boolean | string[] ...
 type FieldValue = unknown;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface ValidationConfig<
   I extends FormData = FormData,
   E extends string = string,

@@ -14,18 +14,33 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
 
+export const GetExampleScoresRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter scores to a specific dataset. When omitted, scores from all datasets matching the example ID are returned.
+     */
+    dataset_id: z.string().min(1).max(1024).optional(),
+  })
+);
+export type GetExampleScoresRequestQuery = z.infer<typeof GetExampleScoresRequestQuery>;
+export type GetExampleScoresRequestQueryInput = z.input<typeof GetExampleScoresRequestQuery>;
+
+export const GetExampleScoresRequestParams = lazySchema(() =>
+  z.object({
+    exampleId: z.string().max(1024),
+  })
+);
 export type GetExampleScoresRequestParams = z.infer<typeof GetExampleScoresRequestParams>;
-export const GetExampleScoresRequestParams = z.object({
-  exampleId: z.string(),
-});
 export type GetExampleScoresRequestParamsInput = z.input<typeof GetExampleScoresRequestParams>;
 
+export const GetExampleScoresResponse = lazySchema(() =>
+  z.object({
+    scores: z.array(EvaluationScoreDocument),
+    total: z.number().int(),
+  })
+);
 export type GetExampleScoresResponse = z.infer<typeof GetExampleScoresResponse>;
-export const GetExampleScoresResponse = z.object({
-  scores: z.array(EvaluationScoreDocument),
-  total: z.number().int(),
-});

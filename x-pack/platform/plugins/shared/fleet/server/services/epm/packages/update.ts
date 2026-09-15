@@ -18,14 +18,34 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
 
+export interface NamespaceCustomizationDiff {
+  addedNamespaces: string[];
+  removedNamespaces: string[];
+}
+
+export interface IlmPolicyChange {
+  namespace: string;
+  ilmPolicy: string | undefined;
+}
+
 export async function updatePackage(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
-) {
-  const { savedObjectsClient, pkgName, keepPoliciesUpToDate } = options;
+): Promise<{
+  packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
+  namespaceCustomizationDiff: NamespaceCustomizationDiff;
+  ilmPolicyChanges: IlmPolicyChange[];
+}> {
+  const {
+    savedObjectsClient,
+    pkgName,
+    keepPoliciesUpToDate,
+    namespace_customization_enabled_for: newNamespaceCustomization,
+    namespace_customization_settings: newNamespaceCustomizationSettings,
+  } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
@@ -39,17 +59,101 @@ export async function updatePackage(
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const updateAttrs: Partial<Installation> = {
-    keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
+  const updateAttrs: Partial<Installation> = {};
+  const namespaceCustomizationDiff: NamespaceCustomizationDiff = {
+    addedNamespaces: [],
+    removedNamespaces: [],
   };
-  if (keepPoliciesUpToDate === false) {
-    updateAttrs.pending_upgrade_review = undefined;
+  const ilmPolicyChanges: IlmPolicyChange[] = [];
+
+  if (keepPoliciesUpToDate !== undefined) {
+    updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;
+    if (keepPoliciesUpToDate === false) {
+      updateAttrs.pending_upgrade_review = undefined;
+    }
   }
-  await savedObjectsClient.update<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    installedPackage.id,
-    updateAttrs
-  );
+
+  if (newNamespaceCustomization) {
+    const oldList = installedPackage.attributes.namespace_customization_enabled_for ?? [];
+    const newList = [...new Set(newNamespaceCustomization)];
+    namespaceCustomizationDiff.addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
+    namespaceCustomizationDiff.removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
+    updateAttrs.namespace_customization_enabled_for = newList;
+
+    // When a namespace is opted out, automatically clear its ILM policy setting.
+    if (namespaceCustomizationDiff.removedNamespaces.length > 0) {
+      const currentSettings = installedPackage.attributes.namespace_customization_settings ?? {};
+      const patchedSettings = { ...currentSettings };
+      for (const ns of namespaceCustomizationDiff.removedNamespaces) {
+        if (patchedSettings[ns]?.ilm_policy) {
+          ilmPolicyChanges.push({ namespace: ns, ilmPolicy: undefined });
+          const { ilm_policy: _removed, ...rest } = patchedSettings[ns];
+          if (Object.keys(rest).length > 0) {
+            patchedSettings[ns] = rest;
+          } else {
+            delete patchedSettings[ns];
+          }
+        }
+      }
+      if (ilmPolicyChanges.length > 0) {
+        updateAttrs.namespace_customization_settings = patchedSettings;
+      }
+    }
+  }
+
+  if (newNamespaceCustomizationSettings) {
+    const oldSettings = installedPackage.attributes.namespace_customization_settings ?? {};
+
+    // Namespaces already scheduled for ILM clearing (e.g. from the opt-out path above).
+    const alreadyScheduled = new Set(ilmPolicyChanges.map((c) => c.namespace));
+
+    // Per-namespace merge: the client sends only the namespace(s) that changed. Namespaces
+    // absent from the payload are preserved unchanged, preventing a stale client snapshot
+    // from silently overwriting concurrent changes made by another user or tab.
+    // An empty settings object ({}) for a namespace clears all managed settings for it.
+    const baseSettings =
+      updateAttrs.namespace_customization_settings ??
+      installedPackage.attributes.namespace_customization_settings ??
+      {};
+    const mergedSettings: NonNullable<Installation['namespace_customization_settings']> = {
+      ...baseSettings,
+    };
+    for (const [namespace, nsSettings] of Object.entries(newNamespaceCustomizationSettings)) {
+      if (alreadyScheduled.has(namespace)) {
+        continue;
+      }
+      const oldIlmPolicy = oldSettings[namespace]?.ilm_policy;
+      const newIlmPolicy = nsSettings?.ilm_policy;
+      if (oldIlmPolicy !== newIlmPolicy) {
+        ilmPolicyChanges.push({ namespace, ilmPolicy: newIlmPolicy });
+      }
+      if (nsSettings && Object.keys(nsSettings).length > 0) {
+        mergedSettings[namespace] = nsSettings;
+      } else {
+        delete mergedSettings[namespace];
+      }
+    }
+    updateAttrs.namespace_customization_settings = mergedSettings;
+  }
+
+  if (updateAttrs.namespace_customization_settings !== undefined) {
+    // ES's partial-update merges nested objects rather than replacing them, so saving
+    // { production: {...} } would keep a pre-existing staging key intact. Using
+    // mergeAttributes: false makes Kibana do a full document replacement instead.
+    // We spread the current attributes first so no other fields are lost.
+    await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      installedPackage.id,
+      { ...installedPackage.attributes, ...updateAttrs },
+      { mergeAttributes: false }
+    );
+  } else {
+    await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      installedPackage.id,
+      updateAttrs
+    );
+  }
 
   const packageInfo = await getPackageInfo({
     savedObjectsClient,
@@ -57,7 +161,7 @@ export async function updatePackage(
     pkgVersion: installedPackage.attributes.version,
   });
 
-  return packageInfo;
+  return { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges };
 }
 
 export async function reviewUpgrade(options: {

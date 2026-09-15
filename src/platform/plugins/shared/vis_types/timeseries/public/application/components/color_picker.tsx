@@ -80,6 +80,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         secondaryInputDisplay="top"
         showAlpha
         button={<EuiColorPickerSwatch color={color} aria-label={label} />}
+        aria-label={label}
       />
       {!disableTrash && (
         <div

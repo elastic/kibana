@@ -31,12 +31,15 @@ export function findSubquery(
   Walker.walk(queryAst, {
     visitParens: (node, parent) => {
       const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
+      const isNonBinaryRhsSubquery =
+        parent?.type === 'function' &&
+        !(parent.subtype === 'binary-expression' && parent.args[1] === node);
 
-      if (isSubQuery(node) && within(offset, node) && !isForkBranch) {
+      if (isSubQuery(node) && within(offset, node) && !isForkBranch && !isNonBinaryRhsSubquery) {
         const candidate = node.child;
 
         // Skip non-ES|QL subqueries (e.g. PromQL nodes) which don't have commands.
-        if (candidate?.commands && candidate.commands.length > 0) {
+        if (candidate?.commands) {
           subQuery = candidate;
         }
       }

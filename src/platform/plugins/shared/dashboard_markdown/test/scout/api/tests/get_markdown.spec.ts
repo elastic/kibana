@@ -51,7 +51,7 @@ apiTest.describe('markdown - get', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should return 200 with an existing markdown panel', async ({ apiClient }) => {
+  apiTest('should return 200 with an existing markdown library item', async ({ apiClient }) => {
     const response = await apiClient.get(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -70,7 +70,7 @@ apiTest.describe('markdown - get', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest(
-    'should return 200 with an existing markdown panel in a specific space',
+    'should return 200 with an existing markdown library in a specific space',
     async ({ apiClient }) => {
       const response = await apiClient.get(
         `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
@@ -93,7 +93,7 @@ apiTest.describe('markdown - get', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
-  apiTest('should return 404 with a non-existing markdown panel', async ({ apiClient }) => {
+  apiTest('should return 404 with a non-existing markdown library item', async ({ apiClient }) => {
     const response = await apiClient.get(`${MARKDOWN_API_PATH}/does-not-exist`, {
       headers: {
         ...COMMON_HEADERS,

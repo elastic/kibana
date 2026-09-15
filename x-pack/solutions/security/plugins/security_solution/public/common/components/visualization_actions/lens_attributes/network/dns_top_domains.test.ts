@@ -20,15 +20,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -142,6 +133,11 @@ describe('getDnsTopDomainsLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],

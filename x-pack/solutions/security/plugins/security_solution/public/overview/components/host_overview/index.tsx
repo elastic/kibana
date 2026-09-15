@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -44,6 +45,7 @@ import { RiskScoreDocTooltip } from '../common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { InspectQuery } from '../../../common/store/inputs/model';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -61,6 +63,8 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.host>;
   /** When using Entity Store v2: first seen from entity lifecycle. */
@@ -69,6 +73,12 @@ interface HostSummaryProps {
   lastSeenFromEntityStore?: string;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
+   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
+   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -79,6 +89,10 @@ const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
 `;
 
 export const HOST_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
+/** Stable references for useQueryInspector when risk data comes from the entity store (avoids render loops). */
+const ENTITY_STORE_RISK_INSPECT_PLACEHOLDER: InspectQuery = { dsl: [], response: [] };
+const noopRiskScoreRefetch = (): void => {};
 
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
@@ -97,10 +111,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
     hostName,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
     showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -130,10 +146,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
 
     useQueryInspector({
       deleteQuery,
-      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      inspect: riskScoreStateFromEntityStore
+        ? ENTITY_STORE_RISK_INSPECT_PLACEHOLDER
+        : inspectRiskScore,
       loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? noopRiskScoreRefetch : refetchRiskScore,
       setQuery,
     });
 
@@ -297,18 +315,26 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  if (renderIpLink) {
+                    return renderIpLink(ip);
+                  }
+                  return LinkRenderer ? (
+                    <LinkRenderer field="host.ip" value={ip}>
+                      {ip}
+                    </LinkRenderer>
+                  ) : (
                     <FlyoutLink
                       field={'host.ip'}
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
-                  ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                  );
+                }}
               />
             ),
           },
@@ -343,7 +369,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [
+        contextID,
+        scopeId,
+        data,
+        firstColumn,
+        getDefaultRenderer,
+        isFlyoutOpen,
+        renderIpLink,
+        LinkRenderer,
+      ]
     );
     return (
       <>

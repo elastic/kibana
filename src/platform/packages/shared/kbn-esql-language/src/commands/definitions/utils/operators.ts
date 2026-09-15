@@ -29,7 +29,6 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
     documentation: {
       value: fn.description,
     },
-    sortText: 'D',
   };
   return hasArgs ? withAutoSuggest(suggestion) : suggestion;
 }

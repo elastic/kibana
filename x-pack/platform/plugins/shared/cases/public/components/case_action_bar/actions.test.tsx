@@ -14,8 +14,12 @@ import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
 import * as api from '../../containers/api';
 import { waitFor } from '@testing-library/react';
+import { KibanaServices } from '../../common/lib/kibana';
 
 jest.mock('../../containers/api');
+jest.mock('./apply_template_modal', () => ({
+  ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
+}));
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -121,6 +125,73 @@ describe('CaseView actions', () => {
 
     await waitFor(() => {
       expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
+    });
+  });
+
+  describe('Apply template action', () => {
+    const enableTemplatesV2 = () =>
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+    it('does not show the apply template action when templates v2 is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+
+      expect(
+        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('shows the apply template action when templates v2 is enabled', () => {
+      enableTemplatesV2();
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+
+      expect(
+        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
+      ).toBeTruthy();
+    });
+
+    it('clicking apply template opens the modal', () => {
+      enableTemplatesV2();
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeFalsy();
+
+      wrapper
+        .find('button[data-test-subj="property-actions-case-ellipses"]')
+        .first()
+        .simulate('click');
+      wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').simulate('click');
+
+      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeTruthy();
     });
   });
 

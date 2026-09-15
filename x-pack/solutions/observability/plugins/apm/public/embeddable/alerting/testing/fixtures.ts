@@ -7,12 +7,19 @@
 
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ApmEmbeddableContextProps } from '../../embeddable_context';
 import { mockApmPluginContextValue } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 export const MOCK_DEPS: ApmEmbeddableContextProps['deps'] = {
   pluginsSetup: mockApmPluginContextValue.plugins,
-  pluginsStart: mockApmPluginContextValue.corePlugins,
+  pluginsStart: {
+    ...mockApmPluginContextValue.corePlugins,
+    licensing: licensingMock.createStart(),
+    apmSourcesAccess: {
+      getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
+    },
+  },
   coreSetup: mockApmPluginContextValue.core,
   coreStart: mockApmPluginContextValue.core,
 } as unknown as ApmEmbeddableContextProps['deps'];

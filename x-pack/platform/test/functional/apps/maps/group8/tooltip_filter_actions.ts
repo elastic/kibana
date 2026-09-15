@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Tooltip actions smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, discover, header, maps } = getPageObjects([
     'dashboard',
@@ -80,6 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('mapFilterActionButton__drilldown1');
 
         // Assert on new dashboard with filter from action
+        await dashboard.expectOnDashboard('map embeddable example');
         await dashboard.waitForRenderComplete();
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.equal(2);

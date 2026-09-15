@@ -22,27 +22,27 @@ const getCallOutInfo = (
     case 'mapped':
       return {
         title: i18n.CALLOUT_MAPPED_TRANSLATED_RULE_TITLE,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
       };
     case 'full':
       return {
         title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
       };
     case 'partial':
       return {
         title: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION,
-        icon: 'warningFilled',
+        icon: 'warningFill',
         color: 'warning',
       };
     case 'untranslatable':
       return {
         title: i18n.CALLOUT_NOT_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'danger',
       };
   }

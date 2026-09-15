@@ -13,32 +13,30 @@ import type {
   TextBasedLayerColumn,
   DataType,
 } from '@kbn/lens-common';
-import type { $Values } from 'utility-types';
+
 import { ACCESSOR } from './constants';
-import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
+import { getReversibleMappings } from '../utils';
 
-const COLOR_MODE_TO_API = {
-  text: 'value',
-  badge: 'badge',
-  cell: 'background',
-} as const;
+const colorModeCompat = getReversibleMappings([
+  ['value', 'text'],
+  ['badge', 'badge'],
+  ['background', 'cell'],
+]);
 
-const API_TO_COLOR_MODE = {
-  value: 'text',
-  badge: 'badge',
-  background: 'cell',
-} as const;
+type ApiColorTarget = 'value' | 'badge' | 'background';
 
-type ApiColorTarget = $Values<typeof COLOR_MODE_TO_API>;
+// 'progress' is a numeric-only cell decoration and is rejected at the as-code export boundary
+// until the datatable API grows an explicit representation for it.
+type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none' | 'progress'>;
 
-export const colorModeToApplyColorTo = (
-  mode: Exclude<NonNullable<ColumnState['colorMode']>, 'none'>
-): ApiColorTarget => COLOR_MODE_TO_API[mode];
+export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
+  colorModeCompat.toAPI(mode);
 
 export const applyColorToToColorMode = (
   target: ApiColorTarget
-): NonNullable<ColumnState['colorMode']> => API_TO_COLOR_MODE[target];
+): NonNullable<ColumnState['colorMode']> => colorModeCompat.toState(target);
 
 /**
  * Checks if the column is a metric column in a formBased layer
@@ -88,7 +86,7 @@ export function getAccessorName(
  * - No color → uses the provided default
  */
 export function inferDatatypeFromColor(
-  color: ColorByValueType | ColorMappingType | undefined,
+  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
   defaultType: Extract<DataType, 'number' | 'string'>
 ): Extract<DataType, 'number' | 'string'> {
   if (isColorByValueColor(color)) {

@@ -1,0 +1,31 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postBulkUpgradePackagesRequestExample:
+          description: 'Upgrade multiple packages to their latest versions'
+          value:
+            packages:
+              - name: 'system'
+              - name: 'elastic_agent'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postBulkUpgradePackagesExample:
+            description: 'Bulk upgrade task initiated'
+            value:
+              taskId: 'task-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { buildRequestPreviewCodeContent } from '../data_management/shared/utils';
+import { buildRequestPreviewCodeContent } from '../stream_management/data_management/shared/utils';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamDeleteModal({
@@ -100,7 +100,7 @@ export function StreamDeleteModal({
           title={
             <FormattedMessage
               id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
+              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
               values={{
                 stream: (
                   <EuiLink
@@ -109,7 +109,7 @@ export function StreamDeleteModal({
                       copyToClipboard(name);
                     }}
                   >
-                    {name} <EuiIcon type="copy" />
+                    {name} <EuiIcon type="copy" aria-hidden={true} />
                   </EuiLink>
                 ),
               }}

@@ -7,6 +7,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { useSelector } from 'react-redux-v7';
 import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
 import { CREATED_BY_SELECT_TEST_ID } from './test_ids';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
@@ -18,12 +19,13 @@ jest.mock('../../common/hooks/use_license');
 jest.mock('../../common/hooks/use_upselling');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
+    useSelector: jest.fn(),
   };
 });
 
@@ -45,6 +47,7 @@ describe('UserFilterDropdown', () => {
     });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     (useUpsellingMessage as jest.Mock).mockReturnValue('upsellingMessage');
+    (useSelector as jest.Mock).mockReturnValue(''); // no stored filter by default
   });
 
   it('should render the component enabled', () => {
@@ -74,5 +77,21 @@ describe('UserFilterDropdown', () => {
     fireEvent.click(option);
 
     expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should restore the previously selected user from the store on mount', () => {
+    (useSelector as jest.Mock).mockReturnValue('1'); // uid matching 'test' user
+
+    render(<CreatedByFilterDropdown />);
+
+    expect(screen.getByDisplayValue('test')).toBeInTheDocument();
+  });
+
+  it('should show no selection when the stored filter is cleared', () => {
+    (useSelector as jest.Mock).mockReturnValue('');
+
+    const { getByTestId } = render(<CreatedByFilterDropdown />);
+
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 });

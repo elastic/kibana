@@ -10,6 +10,14 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. See individual tests. The cancel button itself is covered
+ * in src/platform/plugins/shared/unified_search/public/query_string_input/query_bar_top_row.test.tsx.
+ * The unique value is cancelling a live CCS search and still getting local partial results
+ * without a timeout toast. Scout's default servers have no CCS — keep one smoke on a CCS
+ * stack. CCS-only file (see ./index.ts).
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
@@ -54,6 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('classic mode', () => {
+      /**
+       * Migration recommendation: MIXED. Keep one CCS smoke that cancel shows the warning
+       * callout, inspector "incomplete" details, no timeout toast, and still returns the full
+       * local 14,004 hits. Drop the hardcoded 5s sleep (wait for `queryCancelButton`).
+       */
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
@@ -117,13 +130,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('esql mode', () => {
+      /**
+       * Migration recommendation: MIXED. Same as classic. Merge as a `test.step` of the CCS
+       * cancel smoke. Keep the 746 hit count. Drop the hardcoded 5s sleep.
+       */
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
+        await timePicker.setDefaultAbsoluteRange();
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
-        await timePicker.setDefaultAbsoluteRange();
+        await testSubjects.click('querySubmitButton');
 
         // Wait for the async search to be established on ES so that cancellation can retrieve
         // partial results via the async search ID

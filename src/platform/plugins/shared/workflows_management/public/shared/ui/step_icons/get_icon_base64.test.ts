@@ -9,13 +9,13 @@
 
 import type React from 'react';
 
+import { getStepIconType, HardcodedIconDataUrls, HardcodedIcons } from '@kbn/workflows-ui';
 import {
   getDataUrlFromReactComponent,
   getIconBase64,
   getTriggerBoltFallbackDataUrl,
   resolveIconToDataUrl,
 } from './get_icon_base64';
-import { HardcodedIcons } from './hardcoded_icons';
 
 // Mock renderToStaticMarkup from react-dom/server
 jest.mock('react-dom/server', () => ({
@@ -28,6 +28,9 @@ jest.mock('./icons/elasticsearch.svg', () => ({
 }));
 jest.mock('./icons/kibana.svg', () => ({
   KibanaLogo: () => 'KibanaLogo',
+}));
+jest.mock('@kbn/connector-specs/icons', () => ({
+  ConnectorIconsMap: new Map([['.notion', () => null]]),
 }));
 
 const { renderToStaticMarkup } = jest.requireMock('react-dom/server') as {
@@ -62,13 +65,14 @@ describe('getDataUrlFromReactComponent', () => {
     expect(result).toBe(dataUrl);
   });
 
-  it('returns fallback when img tag has a non-data src', () => {
-    renderToStaticMarkup.mockReturnValue('<img src="https://example.com/icon.png" alt="icon"/>');
+  it('returns the actual src URL from img tags with non-data src', () => {
+    const fileUrl = '/bundles/kbn-connector-specs/assets/notion.png';
+    renderToStaticMarkup.mockReturnValue(`<img src="${fileUrl}" alt="icon"/>`);
 
     const DummyComponent: React.FC<{ width: number; height: number }> = () => null;
     const result = getDataUrlFromReactComponent(DummyComponent, FALLBACK_URL);
 
-    expect(result).toBe(FALLBACK_URL);
+    expect(result).toBe(fileUrl);
   });
 
   it('replaces fill="none" with fill="currentColor" on the root SVG', () => {
@@ -150,6 +154,26 @@ describe('resolveIconToDataUrl', () => {
     expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
     expect(lazyComponent._payload._result).toHaveBeenCalledTimes(1);
   });
+
+  it('resolves an already-initialized lazy exotic component to a data URL', async () => {
+    const svgMarkup = '<svg><path d="M0 0"/></svg>';
+    renderToStaticMarkup.mockReturnValue(svgMarkup);
+
+    const InnerComponent: React.FC<{ width: number; height: number }> = () => null;
+    const lazyComponent = {
+      $$typeof: Symbol.for('react.lazy'),
+      _payload: {
+        _result: { default: InnerComponent },
+      },
+    };
+
+    const result = await resolveIconToDataUrl(
+      lazyComponent as unknown as React.ComponentType,
+      FALLBACK_URL
+    );
+
+    expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
+  });
 });
 
 describe('getIconBase64', () => {
@@ -171,13 +195,13 @@ describe('getIconBase64', () => {
       expect(result).toBe(dataUrl);
     });
 
-    it('returns HardcodedIcons.trigger as fallback when no icon is provided for a trigger', async () => {
+    it('returns the hardcoded trigger data URL when no icon is provided', async () => {
       const result = await getIconBase64({
         actionTypeId: 'unique-trigger-id-2',
         kind: 'trigger',
       });
 
-      expect(result).toBe(HardcodedIcons.trigger);
+      expect(result).toBe(HardcodedIconDataUrls.trigger);
     });
 
     it('caches trigger icons by actionTypeId', async () => {
@@ -203,10 +227,10 @@ describe('getIconBase64', () => {
   });
 
   describe('step icons', () => {
-    it('returns the resolved icon when icon is provided', async () => {
+    it('returns the resolved icon when icon is provided for unknown actionTypeId', async () => {
       const dataUrl = 'data:image/svg+xml;base64,c3RlcA==';
       const result = await getIconBase64({
-        actionTypeId: '.slack',
+        actionTypeId: '.custom-connector',
         icon: dataUrl,
         kind: 'step',
       });
@@ -214,33 +238,74 @@ describe('getIconBase64', () => {
       expect(result).toBe(dataUrl);
     });
 
-    it('returns hardcoded icon when actionTypeId matches a known type', async () => {
+    it('prefers hardcoded icon over icon param for known actionTypeIds', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.slack',
+        icon: 'logoSlack',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIconDataUrls['.slack']);
+    });
+
+    it('prefers hardcoded icon for email over EUI name string', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.email',
+        icon: 'mail',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIconDataUrls['.email']);
+    });
+
+    it('prefers hardcoded icon for inference over EUI name string', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.inference',
+        icon: 'sparkles',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIconDataUrls['.inference']);
+    });
+
+    it('returns hardcoded icon when actionTypeId matches a known type without icon', async () => {
       const result = await getIconBase64({
         actionTypeId: '.slack',
         kind: 'step',
       });
 
-      expect(result).toBe(HardcodedIcons['.slack']);
+      expect(result).toBe(HardcodedIconDataUrls['.slack']);
     });
 
-    it('returns DEFAULT_CONNECTOR_DATA_URL for unknown actionTypeId without icon', async () => {
+    it('returns connector spec icon for v2 actionTypeIds', async () => {
+      const svgMarkup = '<svg><path d="M0 0"/></svg>';
+      renderToStaticMarkup.mockReturnValue(svgMarkup);
+
+      const result = await getIconBase64({
+        actionTypeId: '.notion',
+        kind: 'step',
+      });
+
+      expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
+    });
+
+    it('returns plugs fallback for unknown actionTypeId without icon', async () => {
       const result = await getIconBase64({
         actionTypeId: 'unknown-action-type',
         kind: 'step',
       });
 
-      // Should be the default connector fallback (no fromRegistry)
-      expect(result).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(result).toBe(HardcodedIconDataUrls.default);
     });
 
-    it('returns HardcodedIcons.kibana as fallback when fromRegistry is true', async () => {
+    it('returns the hardcoded Kibana data URL when fromRegistry is true', async () => {
       const result = await getIconBase64({
         actionTypeId: 'some-registry-step',
         kind: 'step',
         fromRegistry: true,
       });
 
-      expect(result).toBe(HardcodedIcons.kibana);
+      expect(result).toBe(HardcodedIconDataUrls.kibana);
     });
 
     it('handles elasticsearch actionTypeId', async () => {
@@ -268,7 +333,176 @@ describe('getIconBase64', () => {
 });
 
 describe('getTriggerBoltFallbackDataUrl', () => {
-  it('returns HardcodedIcons.trigger', () => {
-    expect(getTriggerBoltFallbackDataUrl()).toBe(HardcodedIcons.trigger);
+  it('returns the hardcoded trigger data URL', () => {
+    expect(getTriggerBoltFallbackDataUrl()).toBe(HardcodedIconDataUrls.trigger);
+  });
+});
+
+describe('getIconBase64 – every hardcoded step icon resolves to its data URL', () => {
+  const NON_STEP_KEYS = ['trigger', 'flask', 'beta', 'default'];
+  const REACT_COMPONENT_KEYS = ['elasticsearch', 'kibana'];
+
+  const stepEntries = Object.entries(HardcodedIconDataUrls).filter(
+    ([key]) => !NON_STEP_KEYS.includes(key) && !REACT_COMPONENT_KEYS.includes(key)
+  );
+
+  it.each(stepEntries)(
+    'returns the hardcoded data URL for actionTypeId "%s"',
+    async (actionTypeId, expectedIcon) => {
+      const result = await getIconBase64({ actionTypeId, kind: 'step' });
+      expect(result).toBe(expectedIcon);
+    }
+  );
+});
+
+describe('getIconBase64 – hardcoded icon wins over EUI name strings', () => {
+  const casesWithEuiNames: Array<[string, string]> = [
+    ['.slack', 'logoSlack'],
+    ['.slack_api', 'logoSlack'],
+    ['.email', 'mail'],
+    ['.inference', 'sparkles'],
+    ['console', 'commandLine'],
+    ['if', 'branch'],
+    ['foreach', 'refresh'],
+    ['while', 'refresh'],
+    ['switch', 'productStreamsWired'],
+    ['wait', 'clock'],
+    ['waitForInput', 'user'],
+    ['alert', 'warning'],
+    ['scheduled', 'clock'],
+    ['manual', 'user'],
+    ['data.set', 'database'],
+  ];
+
+  it.each(casesWithEuiNames)(
+    'prefers hardcoded icon for "%s" over EUI icon name "%s"',
+    async (actionTypeId, euiIconName) => {
+      const result = await getIconBase64({
+        actionTypeId,
+        icon: euiIconName,
+        kind: 'step',
+      });
+      expect(result).toBe(HardcodedIconDataUrls[actionTypeId]);
+      expect(result).not.toBe(euiIconName);
+    }
+  );
+
+  it('every value is a data URL or the jest svg stub, never a bare EUI glyph name', () => {
+    // In jest, *.svg imports resolve to either 'test-file-stub' (kbn-test file_mock.js) or
+    // a module object depending on Babel's CJS interop. In a real build they resolve to
+    // data: URLs. In all cases the value is NOT a bare EUI glyph name string like 'logoSlack'
+    // or 'commandLine'. An EUI name would be typeof 'string' but not a data URL or stub.
+    const failures: string[] = [];
+    for (const [key, value] of Object.entries(HardcodedIconDataUrls)) {
+      const isValid =
+        typeof value !== 'string' || value === 'test-file-stub' || value.startsWith('data:');
+      if (!isValid) {
+        failures.push(`["${key}"] = "${String(value).slice(0, 60)}" (type: ${typeof value})`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+});
+
+describe('getIconBase64 – error handling', () => {
+  it('returns plugs fallback for unknown connector with non-resolvable EUI icon name', async () => {
+    const result = await getIconBase64({
+      actionTypeId: '.some-broken-connector',
+      icon: 'nonExistentEuiIcon',
+      kind: 'step',
+    });
+
+    expect(result).toBe(HardcodedIconDataUrls.default);
+  });
+
+  it('returns kibana fallback for registry step with non-resolvable icon', async () => {
+    const result = await getIconBase64({
+      actionTypeId: 'some-registry-step',
+      icon: 'nonExistentEuiIcon',
+      kind: 'step',
+      fromRegistry: true,
+    });
+
+    expect(result).toBe(HardcodedIconDataUrls.kibana);
+  });
+
+  it('returns bolt fallback for trigger with non-resolvable icon', async () => {
+    const result = await getIconBase64({
+      actionTypeId: 'broken-trigger-unique-2',
+      icon: 'nonExistentEuiIcon',
+      kind: 'trigger',
+    });
+
+    expect(result).toBe(HardcodedIconDataUrls.trigger);
+  });
+
+  it('returns plugs fallback when icon is a throwing function component', async () => {
+    renderToStaticMarkup.mockImplementation(() => {
+      throw new Error('render failed');
+    });
+
+    const BrokenComponent: React.FC = () => null;
+    const result = await getIconBase64({
+      actionTypeId: '.another-broken-connector',
+      icon: BrokenComponent,
+      kind: 'step',
+    });
+
+    expect(result).toBe(HardcodedIconDataUrls.default);
+  });
+});
+
+describe('getStepIconType and getIconBase64 consistency', () => {
+  const stepTypesInBothPaths = [
+    'console',
+    'http',
+    'data.set',
+    'foreach',
+    'while',
+    'switch',
+    'if',
+    'wait',
+    'waitForInput',
+    'merge',
+    'loop.break',
+    'loop.continue',
+    'workflow.execute',
+    'workflow.executeAsync',
+    'workflow.output',
+    'workflow.fail',
+  ];
+
+  it.each(stepTypesInBothPaths)(
+    '"%s" resolves to a non-fallback icon in both getStepIconType and getIconBase64',
+    async (stepType) => {
+      const euiIcon = getStepIconType(stepType);
+      expect(euiIcon).not.toBe('plugs');
+      expect(euiIcon).not.toBe('info');
+
+      const dataUrl = await getIconBase64({ actionTypeId: stepType, kind: 'step' });
+      expect(dataUrl).toBe(HardcodedIconDataUrls[stepType]);
+      expect(HardcodedIconDataUrls[stepType]).toBeDefined();
+    }
+  );
+
+  const triggerOnlyTypes = ['alert', 'scheduled', 'manual'];
+
+  it.each(triggerOnlyTypes)(
+    '"%s" has a hardcoded icon but is not in getStepIconType (trigger-only type)',
+    async (stepType) => {
+      expect(HardcodedIconDataUrls[stepType]).toBeDefined();
+
+      const dataUrl = await getIconBase64({ actionTypeId: stepType, kind: 'step' });
+      expect(dataUrl).toBe(HardcodedIconDataUrls[stepType]);
+    }
+  );
+
+  // `globe` is an EUI icon name, which renders nothing in a CSS `url()` — so the CSS
+  // path needs the SVG data URL, the same override `console` / `if` / `foreach` use.
+  it('http maps to the globe glyph as a name for EuiIcon and as a data URL for CSS', () => {
+    expect(getStepIconType('http')).toBe('globe');
+    expect(HardcodedIcons.http).toBe('globe');
+    expect(HardcodedIconDataUrls.http).not.toBe('globe');
+    expect(HardcodedIconDataUrls.http).toBeDefined();
   });
 });

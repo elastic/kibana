@@ -25,24 +25,20 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
+jest.mock('../../containers/configure/use_get_case_configuration');
+
 const mockLocation = { search: '' };
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
-
-jest.mock('../../containers/configure/use_get_case_configuration');
+let mockHistory: unknown = {
+  replace: mockReplace,
+  push: mockPush,
+  location: mockLocation,
+};
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockImplementation(() => {
-    return mockLocation;
-  }),
-  useHistory: jest.fn().mockImplementation(() => ({
-    replace: mockReplace,
-    push: mockPush,
-    location: {
-      search: '',
-    },
-  })),
+  useHistory: () => mockHistory,
 }));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
@@ -53,6 +49,11 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
+    mockHistory = {
+      replace: mockReplace,
+      push: mockPush,
+      location: mockLocation,
+    };
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
@@ -205,6 +206,7 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        extendedFieldFilters: [],
         from: DEFAULT_FROM_DATE,
         to: DEFAULT_TO_DATE,
       },
@@ -529,6 +531,79 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
+  describe('setFilterOptions resets page to 1', () => {
+    it('resets the page to 1 when filter options change', () => {
+      // Seed the page via setQueryParams so the in-memory + localStorage state has
+      // page: 3.  We do NOT seed via mockLocation.search here because the mock
+      // history.push does not actually mutate mockLocation, so the URL would be
+      // re-read as page: 3 even after the filter change.
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.queryParams.page).toBe(1);
+      expect(result.current.filterOptions.status).toStrictEqual([CaseStatuses.closed]);
+    });
+
+    it('writes page:1 to the URL when changing filter options from a non-first page', () => {
+      mockLocation.search = stringifyUrlParams({ page: 3 });
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      const lastCall = mockPush.mock.calls[mockPush.mock.calls.length - 1][0];
+      expect(lastCall.search).toContain('page:1');
+    });
+
+    it('writes page:1 to localStorage when changing filter options from a non-first page', () => {
+      mockLocation.search = stringifyUrlParams({ page: 3 });
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+      expect(localStorageState.queryParams.page).toBe(1);
+    });
+
+    it('does not affect setQueryParams — paging still works', () => {
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      expect(result.current.queryParams.page).toBe(3);
+    });
+  });
+
   it('updates the local storage when navigating to a URL and the query params are not empty', () => {
     mockLocation.search = stringifyUrlParams({
       severity: [CaseSeverity.HIGH],
@@ -575,7 +650,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(1);
+    expect(lsSpy).toHaveBeenCalledTimes(1);
   });
 
   it('does not update the local storage on the second run', () => {
@@ -595,7 +670,7 @@ describe('useAllCasesQueryParams', () => {
     rerender();
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(2);
+    expect(lsSpy).toHaveBeenCalledTimes(2);
   });
 
   it('does not update the local storage when the URL and the local storage are the same', async () => {
@@ -622,7 +697,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(2);
+    expect(lsSpy).toHaveBeenCalledTimes(2);
   });
 
   it('does not update the local storage when the custom field configuration is loading', async () => {
@@ -645,7 +720,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(1);
+    expect(lsSpy).toHaveBeenCalledTimes(1);
   });
 
   describe('validation', () => {
@@ -715,6 +790,30 @@ describe('useAllCasesQueryParams', () => {
   });
 
   describe('Modal', () => {
+    it('does not require router context', () => {
+      mockHistory = undefined;
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.filterOptions).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
     it('returns default state with empty URL and local storage', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -762,6 +861,27 @@ describe('useAllCasesQueryParams', () => {
         ...DEFAULT_CASES_TABLE_STATE.filterOptions,
         status: [CaseStatuses.closed],
       });
+    });
+
+    it('resets the page to 1 when filter options change in modal view', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.queryParams.page).toBe(1);
+      expect(result.current.filterOptions.status).toStrictEqual([CaseStatuses.closed]);
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it('does not update the URL when changing the state of the table', () => {

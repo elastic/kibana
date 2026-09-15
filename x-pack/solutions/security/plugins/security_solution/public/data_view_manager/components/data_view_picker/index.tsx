@@ -7,11 +7,11 @@
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SourcererUrlState } from '../../../sourcerer/store/model';
+import type { DataViewManagerUrlState } from '../../redux/types';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
@@ -66,7 +66,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
   const isDefaultSourcerer = scope === PageScope.default;
   const isExploreSourcerer = scope === PageScope.explore;
-  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
+  const updateUrlParam = useUpdateUrlParam<DataViewManagerUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataView?.id;
 

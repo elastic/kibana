@@ -12,6 +12,7 @@ export type ActionsCommon = ProvidedType<typeof ActionsCommonServiceProvider>;
 
 export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async openNewConnectorForm(name: string) {
@@ -23,7 +24,10 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
         await testSubjects.click('createFirstActionButton');
       }
 
-      await testSubjects.click(`.${name}-card`);
+      await retry.try(async () => {
+        await testSubjects.click(`.${name}-card`);
+        await testSubjects.existOrFail('create-connector-flyout-save-btn');
+      });
     },
 
     async cancelConnectorForm() {

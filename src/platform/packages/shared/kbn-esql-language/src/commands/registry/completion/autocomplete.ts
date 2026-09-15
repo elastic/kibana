@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { uniqBy } from 'lodash';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { isFunctionExpression, isLiteral } from '@elastic/esql';
 import type {
   ESQLAstCompletionCommand,
@@ -19,23 +19,16 @@ import type {
 import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
-import { EDITOR_MARKER } from '../../definitions/constants';
 import {
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
   withCompleteItem,
   withMapCompleteItem,
 } from '../complete_items';
 import {
-  getFieldsSuggestions,
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
-} from '../../definitions/utils';
-import {
   columnExists,
   createInferenceEndpointToCompletionItem,
-  withAutoSuggest,
   withinQuotes,
 } from '../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
@@ -46,8 +39,7 @@ import {
   type ICommandCallbacks,
 } from '../types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
-
-const ENDS_WITH_NON_WHITESPACE = /\S$/;
+import { endsWithNonWhitespace } from '../../definitions/utils/regex';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -85,7 +77,7 @@ function getPosition(
     return { position: CompletionPosition.AFTER_COMMAND };
   }
 
-  const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
+  const expressionRoot = prompt;
 
   // (function, literal, or existing column) - handle as primaryExpression
   if (isFunctionExpression(expressionRoot) || isLiteral(prompt) || isExistingColumn) {
@@ -113,7 +105,7 @@ export async function autocomplete(
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
-  const hasTypedFragment = ENDS_WITH_NON_WHITESPACE.test(innerText);
+  const hasTypedFragment = endsWithNonWhitespace(innerText);
   const { prompt } = command as ESQLAstCompletionCommand;
   const isExistingColumn = columnExists(prompt?.text, context);
   const { position, expressionRoot } = getPosition(innerText, command, isExistingColumn);
@@ -127,47 +119,23 @@ export async function autocomplete(
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
     case CompletionPosition.AFTER_TARGET_ASSIGNMENT: {
-      const types = ['text', 'keyword', 'unknown'];
-      const allSuggestions: ISuggestionItem[] = [];
+      const { suggestions: expressionSuggestions } = await suggestForExpression({
+        query,
+        command,
+        cursorPosition,
+        location: Location.COMPLETION,
+        context,
+        callbacks,
+        options: {
+          preferredExpressionType: ['text', 'keyword', 'unknown'],
+          controlType: ESQLVariableType.VALUES,
+        },
+      });
 
-      // Fields
-      allSuggestions.push(
-        ...(await getFieldsSuggestions(types, callbacks?.getByType, {
-          ignoreColumns: [],
-          values: false,
-          addSpaceAfterField: false,
-          openSuggestions: false,
-          promoteToTop: true,
-        }))
-      );
-
-      // Date literals (policy-gated in helpers) with explicit UI options
-      allSuggestions.push(
-        ...getLiteralsSuggestions(types, Location.COMPLETION, {
-          includeDateLiterals: true,
-          includeCompatibleLiterals: false,
-          addComma: false,
-          advanceCursorAndOpenSuggestions: false,
-        })
-      );
-
-      // Functions
-      allSuggestions.push(
-        ...getFunctionsSuggestions({
-          location: Location.COMPLETION,
-          types,
-          options: { ignored: [] },
-          context,
-          callbacks,
-        })
-      );
-
-      const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
-      const suggestions = fieldsAndFunctionsSuggestions.map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          text: `${suggestion.text} `,
-        })
+      const suggestions = expressionSuggestions.map((suggestion) =>
+        suggestion.kind !== 'Issue' && suggestion.text && !suggestion.text.endsWith(' ')
+          ? { ...suggestion, text: `${suggestion.text} ` }
+          : suggestion
       );
 
       if (!hasTypedFragment) {
@@ -175,7 +143,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [promptSnippetText],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
@@ -242,7 +209,7 @@ export async function autocomplete(
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
 
     case CompletionPosition.AFTER_COMMAND:
-      return [pipeCompleteItem];
+      return newLineAndPipeCompleteItems;
 
     default:
       return [];

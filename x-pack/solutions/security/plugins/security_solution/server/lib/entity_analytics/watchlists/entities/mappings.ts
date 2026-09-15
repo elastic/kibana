@@ -31,6 +31,9 @@ export const WATCHLIST_ENTITY_INDEX_MAPPING: MappingProperties = {
   'labels.source_ids': {
     type: 'keyword',
   },
+  'watchlist.id': {
+    type: 'keyword',
+  },
 };
 
 export const generateWatchlistEntityIndexMappings = (): MappingTypeMapping => ({

@@ -1,0 +1,50 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateSkillRequestExample:
+          description: "Example request to update a user-defined skill"
+          value:
+            name: Updated Skill Name
+            description: Updated description for the skill.
+            content: "Updated skill instructions content."
+            tool_ids:
+              - platform.core.search
+              - platform.core.execute_esql
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          updateSkillResponseExample:
+            description: "Example response returning the updated skill"
+            value:
+              id: my-custom-skill
+              name: Updated Skill Name
+              description: Updated description for the skill.
+              content: "Updated skill instructions content."
+              tool_ids:
+                - platform.core.search
+                - platform.core.execute_esql
+              readonly: false
+              experimental: false
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X PUT "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Updated Skill Name",
+        "description": "Updated description for the skill."
+      }'
+- lang: Console
+  source: |
+    PUT kbn:/api/agent_builder/skills/{skillId}
+    {
+      "name": "Updated Skill Name",
+      "description": "Updated description for the skill."
+    }

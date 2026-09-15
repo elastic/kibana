@@ -129,7 +129,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
               connector_id: defaultSingleFileConnectorId,
               status: 'error',
               retry: false,
-              message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+              message: `error validating action params: ✖ Invalid discriminator value. Expected 'testHandlerParams' | 'validateAuthentication' | 'validateHeaders' | 'validateParams' | 'throwError'\n  → at subAction`,
               errorSource: TaskErrorSource.USER,
             });
           });

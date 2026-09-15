@@ -11,12 +11,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
@@ -107,7 +107,6 @@ import type {
   CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
-import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 const ELASTIC_RESPONSE_ACTION_MESSAGE = (
@@ -295,7 +294,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const policyInfo: LogsEndpointAction['agent']['policy'] = [];
 
     // Get a list of Agent records so we can identify the Agent Policy ID
-    const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
+    const agents = await fleetServices.fetchAgentsById(agentIds).catch(catchAndWrapError);
 
     this.log.debug(
       () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`
@@ -334,6 +333,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     for (const agent of agents) {
       if (agent.policy_id) {
+        if (!agentPolicyToIntegrationPolicyMap[agent.policy_id]) {
+          throw new ResponseActionsClientError(
+            `Data inconsistency detected. Agent [${agent.id}][${agent.local_metadata?.host?.hostname}] has agent policy_id [${agent.policy_id}] but no integration policy was found associated with that agent policy id.`,
+            400
+          );
+        }
+
         policyInfo.push({
           agentId: agent.id,
           elasticAgentId: agent.id,
@@ -406,24 +412,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
-    const attachments: CaseAttachments = [
+    const targets = hosts.map(({ hostId: endpointId, hostname }) => ({
+      endpointId,
+      hostname,
+      agentType: this.agentType,
+    }));
+
+    const attachments: BulkCreateAttachmentsRequestV2 = [
       {
-        type: AttachmentType.externalReference,
-        externalReferenceId: actionId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
-        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-        externalReferenceMetadata: {
-          targets: hosts.map(({ hostId: endpointId, hostname }) => {
-            return {
-              endpointId,
-              hostname,
-              agentType: this.agentType,
-            };
-          }),
+        type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        attachmentId: actionId,
+        data: { content: comment || EMPTY_COMMENT },
+        metadata: {
+          targets,
           command,
-          comment: comment || EMPTY_COMMENT,
         },
         owner: APP_ID,
       },
@@ -526,6 +528,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
     });
@@ -589,6 +592,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     try {
       await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
     } catch (err) {
+      this.log.debug(`Error retrieving agent policy info: ${err.message}`, { error: err });
       return { isValid: false, error: err };
     }
 
@@ -866,6 +870,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);
@@ -944,7 +949,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           responseActions: {
             actionId: response.EndpointActions.action_id,
             agentType: this.agentType,
-            actionStatus: response.error ? 'failed' : 'successful',
+            actionStatus: response.EndpointActions.data?.output?.content.canceled_by
+              ? 'canceled'
+              : response.error
+              ? 'failed'
+              : 'successful',
             command: response.EndpointActions.data.command,
           },
         });

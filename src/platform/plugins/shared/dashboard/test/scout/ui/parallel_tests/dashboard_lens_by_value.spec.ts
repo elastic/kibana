@@ -37,7 +37,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
   });
 
@@ -85,6 +84,7 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.deploymentAgn
       });
 
       await spaceTest.step('verify partition chart renders', async () => {
+        await pageObjects.dashboard.waitForRenderComplete();
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
       });
     }

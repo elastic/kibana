@@ -130,7 +130,7 @@ export const ControlsRenderer = ({
               parentApi={parentApi}
               control={{
                 ...control,
-                uid: control.id!,
+                id: control.id!,
               }}
               setControlPanelRef={setControlPanelRef}
             />

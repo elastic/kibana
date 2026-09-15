@@ -42,6 +42,7 @@ interface CreateTestConfigOptions {
   maxAlerts?: number;
   emailMaximumBodyLength?: number;
   indexRefreshInterval?: string | false;
+  ruleChangeTrackingEnabled?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -93,6 +94,8 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
   'test.deprecated',
   'test.single_file_connector',
+  'test.oauth-connector',
+  'test.oauth-executor',
 ];
 
 export const getPreConfiguredActions = (
@@ -233,6 +236,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     experimentalFeatures = [],
     maxAlerts = 20,
     indexRefreshInterval,
+    ruleChangeTrackingEnabled = false,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -328,6 +332,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? []
         : [`--xpack.actions.email.maximum_body_length=${options.emailMaximumBodyLength}`];
 
+    const ruleChangeTrackingSettings = ruleChangeTrackingEnabled
+      ? [
+          '--xpack.alerting.ruleChangeTracking.enabled=true',
+          `--xpack.alerting.ruleChangeTracking.scope=${JSON.stringify(['stack'])}`,
+        ]
+      : [];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -363,6 +374,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
+          // Task Manager keeps the keys it granted queued for an hour by default, which is longer
+          // than any test can wait for a key to actually be revoked.
+          '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           `--xpack.alerting.rules.run.alerts.max=${maxAlerts}`,
@@ -381,6 +395,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
+          ...ruleChangeTrackingSettings,
           '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',

@@ -10,27 +10,29 @@ import React, { useEffect, useRef } from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-  EuiText,
-  EuiCallOut,
   EuiCodeBlock,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
@@ -107,7 +109,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                           data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-generateApiKeyButton"
                           data-test-subj="generateApiKeyButton"
                           iconSide="left"
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           fill
                           onClick={() => {
                             makeRequest({
@@ -128,7 +130,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiCallOut
+                      <KbnSuccessCallout
                         announceOnMount
                         title={
                           <FormattedMessage
@@ -139,8 +141,6 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                             }}
                           />
                         }
-                        color="success"
-                        iconType="check"
                         role="alert"
                       />
                       <EuiFlexGroup alignItems="center">
@@ -156,18 +156,26 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                           </EuiCodeBlock>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            buttonRef={copyApiKeyRef}
-                            data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalButton"
-                            data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-csvDownloadButton"
-                            aria-label={i18n.translate(
+                          <EuiToolTip
+                            content={i18n.translate(
                               'xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.csvDownloadButton',
                               { defaultMessage: 'Download API key' }
                             )}
-                            iconType="download"
-                            href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
-                            download={`${keyName}.csv`}
-                          />
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              buttonRef={copyApiKeyRef}
+                              data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalButton"
+                              data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-csvDownloadButton"
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.csvDownloadButton',
+                                { defaultMessage: 'Download API key' }
+                              )}
+                              iconType="download"
+                              href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                              download={`${keyName}.csv`}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

@@ -6,7 +6,14 @@
  */
 
 import { ConnectorTypes } from '../../../common/types/domain';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
+import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../../common/bundled-types.gen';
+import {
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+  resolveActionSourceFromStepContext,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 import { createStepHandlerContext } from './test_utils';
 
 describe('normalizeCaseStepUpdatesForBulkPatch', () => {
@@ -44,6 +51,41 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
   });
 });
 
+describe('resolveActionSourceFromStepContext', () => {
+  it('uses a valid actionSource from step config', () => {
+    const context = createStepHandlerContext({
+      config: {
+        actionSource: { type: 'agent', id: 'elastic-ai-agent', name: 'Elastic AI Agent' },
+      },
+    });
+
+    expect(resolveActionSourceFromStepContext(context)).toEqual({
+      type: 'agent',
+      id: 'elastic-ai-agent',
+      name: 'Elastic AI Agent',
+    });
+  });
+
+  it('falls back to the workflow context when config has no source', () => {
+    const context = createStepHandlerContext();
+    (context.contextManager.getContext as jest.Mock).mockReturnValue({
+      workflow: { id: 'wf-1', name: 'Escalate' },
+      execution: { id: 'exec-1' },
+    });
+
+    expect(resolveActionSourceFromStepContext(context)).toEqual({
+      type: 'workflow',
+      id: 'wf-1',
+      name: 'Escalate',
+      run_id: 'exec-1',
+    });
+  });
+
+  it('returns undefined when getContext throws', () => {
+    expect(resolveActionSourceFromStepContext(createStepHandlerContext())).toBeUndefined();
+  });
+});
+
 describe('createCasesStepHandler', () => {
   const createContext = (params?: { input?: unknown; config?: Record<string, unknown> }) =>
     createStepHandlerContext({
@@ -67,11 +109,29 @@ describe('createCasesStepHandler', () => {
     const result = await handler(context);
 
     expect(operation).toHaveBeenCalledWith(expect.any(Object), { foo: 'bar' }, {});
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything());
     expect(result).toEqual({
       output: {
         case: createdCase,
       },
     });
+  });
+
+  it('passes actionSource from step config to getCasesClient', async () => {
+    const actionSource = { type: 'agent', id: 'elastic-ai-agent', name: 'Elastic AI Agent' };
+    const operation = jest.fn().mockResolvedValue({ id: 'case-1', connector: { id: 'none' } });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { push: jest.fn() },
+    });
+
+    const handler = createCasesStepHandler(getCasesClient, operation);
+    await handler(
+      createContext({
+        config: { actionSource },
+      })
+    );
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), { actionSource });
   });
 
   it('calls push when push-case is enabled', async () => {
@@ -106,5 +166,93 @@ describe('createCasesStepHandler', () => {
     const result = await handler(createContext());
 
     expect(result).toEqual({ error: operationError });
+  });
+
+  it('maps errors via onError callback when provided', async () => {
+    const operationError = new Error('operation failed');
+    const operation = jest.fn().mockRejectedValue(operationError);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { push: jest.fn() },
+    });
+
+    const handler = createCasesStepHandler(getCasesClient, operation, {
+      onError: () => new Error('mapped error'),
+    });
+    const result = await handler(createContext());
+
+    expect(result).toEqual({
+      error: new Error('mapped error'),
+    });
+  });
+});
+
+describe('safeParseCaseForWorkflowOutput', () => {
+  it('preserves supported comment variants and nullable alert rule fields', () => {
+    const eventComment = {
+      id: 'event-comment-id',
+      type: 'event' as const,
+      eventId: ['event-1'],
+      index: ['.ds-logs-*'],
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const alertCommentWithNullRule = {
+      id: 'alert-comment-id',
+      type: 'alert' as const,
+      alertId: ['alert-1'],
+      index: ['.alerts-security.alerts-default'],
+      owner: createCaseResponseFixture.owner,
+      rule: { id: null, name: null },
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const actionsComment = {
+      id: 'actions-comment-id',
+      type: 'actions' as const,
+      comment: 'Isolated host from response action',
+      actions: {
+        targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+        type: 'isolate',
+      },
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const result = safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, {
+      ...createCaseResponseFixture,
+      comments: [eventComment, actionsComment, alertCommentWithNullRule],
+    });
+
+    expect(result.comments).toEqual([eventComment, actionsComment, alertCommentWithNullRule]);
+  });
+
+  it('does not throw when output cannot be parsed', () => {
+    const invalidCasePayload = {
+      id: createCaseResponseFixture.id,
+      comments: [],
+    };
+
+    expect(() =>
+      safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, invalidCasePayload)
+    ).not.toThrow();
   });
 });

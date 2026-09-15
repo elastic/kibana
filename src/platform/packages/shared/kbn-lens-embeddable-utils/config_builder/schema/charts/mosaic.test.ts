@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './mosaic';
-import { mosaicStateSchema } from './mosaic';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
+import { mosaicConfigSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
   const baseMosaicConfig: Pick<
-    MosaicStateNoESQL,
-    'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+    MosaicConfigNoESQL,
+    'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
   > = {
     type: 'mosaic',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
     ignore_global_filters: false,
     sampling: 0,
@@ -26,7 +28,7 @@ describe('Mosaic Schema', () => {
 
   describe('Non-ES|QL Schema', () => {
     it('validates minimal configuration with single outer grouping', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         metric: {
           operation: 'count',
@@ -35,15 +37,15 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
       };
 
-      const validated = mosaicStateSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.type).toBe('mosaic');
-      expect(validated.metric.operation).toBe('count');
+      expect(validated.metric).toHaveProperty('operation', 'count');
       expect(validated.group_by).toHaveLength(1);
     });
 
@@ -56,11 +58,14 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+      );
     });
 
     it('validates configuration with both outer and inner grouping', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         metric: {
           operation: 'sum',
@@ -70,7 +75,7 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -85,14 +90,14 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicStateSchema.validate(input);
-      expect(validated.metric.operation).toBe('sum');
+      const validated = mosaicConfigSchema.parse(input);
+      expect(validated.metric).toHaveProperty('operation', 'sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
 
     it('validates configuration with collapsed dimensions', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         metric: {
           operation: 'count',
@@ -101,13 +106,13 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['region'],
             collapse_by: 'sum',
           },
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -123,13 +128,13 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicStateSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
 
     it('validates full configuration with legend and value display', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         title: 'Sales Mosaic',
         description: 'Sales data visualization',
@@ -141,14 +146,14 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
         group_breakdown_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['subcategory'],
           },
         ],
@@ -156,21 +161,23 @@ describe('Mosaic Schema', () => {
           nested: true,
           truncate_after_lines: 5,
           visibility: 'visible',
-          size: 'small',
+          size: 's',
         },
-        values: {
-          visible: false,
+        styling: {
+          values: {
+            visible: false,
+          },
         },
       };
 
-      const validated = mosaicStateSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.values?.visible).toBe(false);
+      expect(validated.styling?.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         metric: {
           operation: 'count',
@@ -179,11 +186,16 @@ describe('Mosaic Schema', () => {
         group_by: [],
       };
 
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Either a group_by or a group_breakdown_by dimension must be specified
+        ✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     it('throws on empty group_breakdown_by array', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseMosaicConfig,
         metric: {
           operation: 'count',
@@ -192,19 +204,23 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
         group_breakdown_by: [],
       };
 
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_breakdown_by"
+      `);
     });
 
     describe('Grouping Cardinality Validation', () => {
       it('allows single non-collapsed dimension in group_by', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -213,17 +229,17 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_by', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -232,29 +248,29 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_by has multiple non-collapsed dimensions', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -263,24 +279,25 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
       it('throws when group_by has multiple non-collapsed dimensions with some collapsed', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -289,30 +306,31 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
       it('allows single non-collapsed dimension in group_breakdown_by', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -321,7 +339,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -336,11 +354,11 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_breakdown_by', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -349,7 +367,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -371,17 +389,17 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_breakdown_by has multiple non-collapsed dimensions', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -390,7 +408,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -411,13 +429,14 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
         );
       });
 
       it('throws when group_breakdown_by has multiple non-collapsed dimensions with some collapsed', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -426,7 +445,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -447,19 +466,20 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
         );
       });
 
       it('throws when no grouping dimension are defined', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -467,13 +487,14 @@ describe('Mosaic Schema', () => {
           },
         };
 
-        expect(() => mosaicStateSchema.validate(input)).toThrow(
-          /Either a group_by or a group_breakdown_by dimension must be specified/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
         );
       });
 
       it('allows only the group_breakdown_by definition without group_by', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'count',
@@ -497,17 +518,17 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
-        const input: MosaicState = {
+        const input: MosaicConfig = {
           ...baseMosaicConfig,
           metric: {
             operation: 'sum',
@@ -517,19 +538,19 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -551,24 +572,24 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
         };
 
-        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
     });
   });
 
   describe('ES|QL Schema', () => {
     const baseESQLMosaicConfig: Pick<
-      MosaicStateESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+      MosaicConfigESQL,
+      'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
     > = {
       type: 'mosaic',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM blah | KEEP foo, bar',
       },
@@ -577,45 +598,41 @@ describe('Mosaic Schema', () => {
     };
 
     it('throws when no grouping dimension are defined', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
       };
 
-      expect(() => mosaicStateSchema.validate(input)).toThrow(
-        /Either a group_by or a group_breakdown_by dimension must be specified/i
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
       );
     });
 
     it('allows only the group_breakdown_by definition without group_by', () => {
-      const input: MosaicState = {
+      const input: MosaicConfig = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
         group_breakdown_by: [
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
           },
         ],
       };
 
-      expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
     });
   });
 });

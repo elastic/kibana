@@ -14,6 +14,7 @@ export const OAUTH_CALLBACK_QUERY_PARAMS = {
   CONNECTOR_ID: 'connector_id',
   AUTHORIZATION_STATUS: 'oauth_authorization',
   ERROR: 'error',
+  STATUS_CODE: 'status_code',
   AUTO_CLOSE: 'auto_close',
 } as const;
 

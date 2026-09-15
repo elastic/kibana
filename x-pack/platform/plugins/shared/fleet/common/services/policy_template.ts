@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
   dataTypes,
   OTEL_COLLECTOR_INPUT_TYPE,
   USE_APM_VAR_NAME,
@@ -28,7 +29,7 @@ import type {
   PackagePolicyInput,
 } from '../types';
 
-const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
   title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {
@@ -43,7 +44,22 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   show_user: true,
 };
 
-const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_TYPE_VAR: RegistryVarsEntry = {
+  name: DATA_STREAM_TYPE_VAR_NAME,
+  type: 'text',
+  title: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.title', {
+    defaultMessage: 'Data stream type',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.description', {
+    defaultMessage:
+      'Set the type for your data stream. Valid values are logs, metrics, traces, and synthetics.',
+  }),
+  multi: false,
+  required: false,
+  show_user: false,
+};
+
+export const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
   title: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.title', {
@@ -131,6 +147,29 @@ export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boo
 }
 
 /**
+ * Returns true when any policy template in the package contains an input that
+ * declares dynamic signal types (dynamic_signal_types: true).
+ *
+ * Optionally, you can scope the query to a specific policy template and/or input type.
+ *
+ * Covers both:
+ *   - Input-only packages (top-level `input` key on the policy template)
+ *   - Composable integration packages (nested `inputs[]` entries)
+ */
+export const hasDynamicSignalTypes = (
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
+  scope?: { policyTemplateName?: string; inputType?: string }
+): boolean =>
+  (packageInfo?.policy_templates ?? []).some((template) => {
+    if (scope?.policyTemplateName && template.name !== scope.policyTemplateName) return false;
+    const inputs = getNormalizedInputs(template);
+    const relevant = scope?.inputType
+      ? inputs.filter((input) => input.type === scope.inputType)
+      : inputs;
+    return relevant.some(registryInputAllowsDynamicSignalTypes);
+  });
+
+/**
  * Returns true when the given package policy input corresponds to a registry input
  * that allows undefined data_stream.type (i.e. dynamic_signal_types).
  *
@@ -142,27 +181,10 @@ export function packagePolicyInputAllowsUndefinedDataStreamType(
   packageInfo: PackageInfo,
   packagePolicyInput: Pick<NewPackagePolicyInput | PackagePolicyInput, 'type' | 'policy_template'>
 ): boolean {
-  const templates = packageInfo.policy_templates ?? [];
-  for (const template of templates) {
-    if (isInputOnlyPolicyTemplate(template)) {
-      if (template.input === packagePolicyInput.type) {
-        const def = getPolicyTemplateInputDefinition(template);
-        return def ? registryInputAllowsDynamicSignalTypes(def) : false;
-      }
-    } else {
-      if (
-        packagePolicyInput.policy_template &&
-        template.name !== packagePolicyInput.policy_template
-      ) {
-        continue;
-      }
-      const def = getPolicyTemplateInputDefinition(template, packagePolicyInput.type);
-      if (def) {
-        return registryInputAllowsDynamicSignalTypes(def);
-      }
-    }
-  }
-  return false;
+  return hasDynamicSignalTypes(packageInfo, {
+    policyTemplateName: packagePolicyInput.policy_template,
+    inputType: packagePolicyInput.type,
+  });
 }
 
 export function getNormalizedDataStreams(
@@ -196,11 +218,15 @@ export function getNormalizedDataStreams(
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
-    const isOtelTraces = (dataStreamType || policyTemplate.type) === dataTypes.Traces;
-    const isOtelDynamicSignalTypes = policyTemplate.dynamic_signal_types === true;
+    if (shouldIncludeDataStreamTypeVar(policyTemplate.dynamic_signal_types === true)) {
+      vars = addDataStreamTypeVarIfNotPresent(vars, policyTemplate.type);
+    }
     if (
-      policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      (isOtelTraces || isOtelDynamicSignalTypes)
+      shouldIncludeUseAPMVar(
+        policyTemplate.input,
+        dataStreamType || policyTemplate.type,
+        policyTemplate.dynamic_signal_types === true
+      )
     ) {
       vars = addUseAPMVarIfNotPresent(vars);
     }
@@ -259,7 +285,15 @@ const addDatasetVarIfNotPresent = (
   }
 };
 
-const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+export const shouldIncludeUseAPMVar = (
+  inputType: string,
+  dataStreamType: string | undefined,
+  isDynamicSignalTypes: boolean
+): boolean =>
+  inputType === OTEL_COLLECTOR_INPUT_TYPE &&
+  (dataStreamType === dataTypes.Traces || isDynamicSignalTypes);
+
+export const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
   const isUseAPMVarAlreadyAdded = newVars.find(
@@ -273,10 +307,49 @@ const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry
   }
 };
 
+export const shouldIncludeDataStreamTypeVar = (isDynamicSignalTypes: boolean): boolean =>
+  !isDynamicSignalTypes;
+
+export const addDataStreamTypeVarIfNotPresent = (
+  vars?: RegistryVarsEntry[],
+  defaultType?: string
+): RegistryVarsEntry[] => {
+  const newVars = vars ?? [];
+
+  const isDataStreamTypeVarAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_TYPE_VAR_NAME
+  );
+
+  if (isDataStreamTypeVarAlreadyAdded) {
+    return newVars;
+  } else {
+    return [...newVars, { ...DATA_STREAM_TYPE_VAR, ...(defaultType && { default: defaultType }) }];
+  }
+};
+
 const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+/**
+ * Returns the data stream paths that scope stream resolution to a single policy template.
+ *
+ * - Integration templates: the explicit `data_streams` declared on the template (an empty
+ *   list means "all data streams" to the stream resolvers).
+ * - Input-only templates: each template synthesizes exactly one data stream whose `path`
+ *   equals the template's default dataset name (see `getNormalizedDataStreams`). Returning that
+ *   single path prevents templates that share the same input type (e.g. several `otelcol`
+ *   templates in one input package) from each picking up every template's stream, which would
+ *   otherwise duplicate stream-level vars such as `data_stream.dataset`.
+ */
+export const getPolicyTemplateDataStreamPaths = (
+  packageInfo: Pick<PackageInfo | InstallablePackage, 'name'>,
+  policyTemplate: RegistryPolicyTemplate
+): string[] =>
+  isIntegrationPolicyTemplate(policyTemplate)
+    ? policyTemplate.data_streams ?? []
+    : [createDefaultDatasetName(packageInfo, policyTemplate)];
 
 export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
   const enabledPolicyTemplates = new Set(

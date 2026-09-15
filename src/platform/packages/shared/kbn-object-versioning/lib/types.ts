@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type, ValidationError } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
+import type { Type } from '@kbn/config-schema';
 
 export type Version = number;
 
@@ -19,7 +20,11 @@ export interface VersionableObject<
   DownIn = unknown,
   DownOut = unknown
 > {
-  schema?: Type<any>;
+  /**
+   * Schema used to validate a versioned object before up/down transforms.
+   * Supports `@kbn/config-schema` or `@kbn/zod` schemas.
+   */
+  schema?: Type<any> | z.ZodTypeAny;
   down?: ObjectTransform<DownIn, DownOut>;
   up?: ObjectTransform<UpIn, UpOut>;
 }
@@ -35,7 +40,7 @@ export type TransformReturn<T = unknown> =
     }
   | {
       value: null;
-      error: ValidationError | Error;
+      error: Error;
     };
 
 export interface ObjectTransforms<
@@ -60,5 +65,5 @@ export interface ObjectTransforms<
       validate?: boolean;
     }
   ) => TransformReturn<O>;
-  validate: (obj: any, version?: Version) => ValidationError | null;
+  validate: (obj: any, version?: Version) => Error | null;
 }

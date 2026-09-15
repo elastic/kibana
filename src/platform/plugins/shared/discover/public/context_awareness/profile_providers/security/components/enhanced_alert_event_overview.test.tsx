@@ -53,7 +53,15 @@ describe('EnhancedAlertEventOverview', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => expect(renderFeature).toHaveBeenCalledWith(hit));
+    await waitFor(() =>
+      expect(renderFeature).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hit,
+          dataView: dataViewMock,
+          onAlertUpdated: expect.any(Function),
+        })
+      )
+    );
 
     expect(screen.getByText('OverviewTab')).toBeInTheDocument();
   });

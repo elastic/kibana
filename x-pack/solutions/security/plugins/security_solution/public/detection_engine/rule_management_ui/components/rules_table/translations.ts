@@ -15,6 +15,13 @@ export const ML_RULE_JOBS_WARNING_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ML_RULE_JOBS_WARNING_ICON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.mlJobsWarning.iconLabel',
+  {
+    defaultMessage: 'ML jobs warning',
+  }
+);
+
 export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.mlJobsWarning.popover.buttonLabel',
   {
@@ -69,6 +76,13 @@ export const GAP_STATUS_FILLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_STATUS_ERROR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 

@@ -19,19 +19,19 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
-import { getProxyRouteHandlerDeps } from './mocks';
-
-import * as requestModule from '../../../../lib/proxy_request';
+import { getProxyRouteHandlerDeps, getRequestHandlerContext } from './mocks';
 
 import { createHandler } from './create_handler';
 
-import { createResponseStub } from './stubs';
-
 describe('Console Proxy Route', () => {
   let handler: ReturnType<typeof createHandler>;
+  let core: ReturnType<typeof getRequestHandlerContext>['core'];
+  let transportRequest: ReturnType<typeof getRequestHandlerContext>['transportRequest'];
 
   beforeEach(() => {
-    (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(''));
+    const context = getRequestHandlerContext('');
+    core = context.core;
+    transportRequest = context.transportRequest;
     handler = createHandler(getProxyRouteHandlerDeps({}));
   });
 
@@ -56,7 +56,7 @@ describe('Console Proxy Route', () => {
       });
 
       await handler(
-        {} as any,
+        { core } as any,
         {
           headers: {},
           query: {
@@ -67,8 +67,8 @@ describe('Console Proxy Route', () => {
         kibanaResponseFactory
       );
 
-      expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
-      const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
+      expect(transportRequest).toHaveBeenCalledTimes(1);
+      const headers = transportRequest.mock.calls[0][1]!.headers!;
       expect(headers).toHaveProperty('x-forwarded-for');
       expect(headers['x-forwarded-for']).toBe('0.0.0.0');
       expect(headers).toHaveProperty('x-forwarded-port');
@@ -81,7 +81,7 @@ describe('Console Proxy Route', () => {
 
     it('sends product-origin header when withProductOrigin query param is set', async () => {
       await handler(
-        {} as any,
+        { core } as any,
         {
           headers: {},
           query: {
@@ -93,14 +93,32 @@ describe('Console Proxy Route', () => {
         kibanaResponseFactory
       );
 
-      const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
+      const headers = transportRequest.mock.calls[0][1]!.headers!;
       expect(headers).toHaveProperty('x-elastic-product-origin');
       expect(headers['x-elastic-product-origin']).toBe('kibana');
     });
 
+    it('clears the ES client product-origin header for user requests', async () => {
+      await handler(
+        { core } as any,
+        {
+          headers: {},
+          query: {
+            method: 'POST',
+            path: '/api/console/proxy?path=_aliases&method=GET',
+          },
+        } as any,
+        kibanaResponseFactory
+      );
+
+      const headers = transportRequest.mock.calls[0][1]!.headers!;
+      expect(headers).toHaveProperty('x-elastic-product-origin');
+      expect(headers['x-elastic-product-origin']).toBe('');
+    });
+
     it('sends es status code and status text as headers', async () => {
       const response = await handler(
-        {} as any,
+        { core } as any,
         {
           headers: {},
           query: {

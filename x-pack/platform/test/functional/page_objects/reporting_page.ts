@@ -21,11 +21,13 @@ export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly exports = this.ctx.getPageObject('exports');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
     await this.browser.execute(`
@@ -117,13 +119,13 @@ export class ReportingPageObject extends FtrService {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
     const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
     if (!isShareMenuOpen) {
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     } else {
       // there is no easy way to ensure the menu is at the top level
       // so just close the existing menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
       // and then re-open the menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     }
     const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
     await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
@@ -151,7 +153,7 @@ export class ReportingPageObject extends FtrService {
   }
 
   async getQueueReportError() {
-    return await this.testSubjects.exists('errorToastMessage');
+    return await this.testSubjects.exists('errorToastBtn');
   }
 
   async getGenerateReportButton() {
@@ -173,12 +175,18 @@ export class ReportingPageObject extends FtrService {
   }
 
   async checkUsePrintLayout() {
-    // The print layout checkbox slides in as part of an animation, and tests can
-    // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
-    // the animation to complete before we attempt a click.
-    const menuAnimationDelay = 500;
-    await this.retry.tryForTime(menuAnimationDelay, () =>
-      this.testSubjects.click('usePrintLayout')
+    // `selectExportItem` opens the export flyout without waiting for it to finish rendering, so a click can land before the switch is interactive and silently no-op; wait for it to be displayed, toggle it once, then confirm the toggle registered.
+    const switchSubj = 'usePrintLayout';
+    const printLayoutSwitch = await this.find.displayedByCssSelector(
+      `[data-test-subj="${switchSubj}"]`
+    );
+    await printLayoutSwitch.moveMouseTo();
+    if ((await printLayoutSwitch.getAttribute('aria-checked')) !== 'true') {
+      await printLayoutSwitch.click();
+    }
+    await this.retry.waitFor(
+      'print format switch to be enabled',
+      async () => (await this.testSubjects.getAttribute(switchSubj, 'aria-checked')) === 'true'
     );
   }
 
@@ -198,11 +206,8 @@ export class ReportingPageObject extends FtrService {
     });
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
-      await this.retry.try(async () => {
-        await this.testSubjects.click('completeReportSuccess > toastCloseButton');
-        // Wait for toast to disappear to confirm it was closed
-        await this.testSubjects.waitForDeleted('completeReportSuccess');
-      });
+      // If close button fails to be clicked, the toast should dismiss regardless.
+      await this.toasts.dismissAll();
     }
 
     return isToastPresent;
@@ -273,6 +278,25 @@ export class ReportingPageObject extends FtrService {
   }
 
   async copyReportingPOSTURLValueToClipboard() {
+    // The export flyout renders the POST URL into the `exportAssetValue` code block and the copy
+    // button copies whatever that block currently shows. `selectExportItem` opens the flyout
+    // before the URL for the newly selected export renders, so a copy click that lands too early
+    // leaves the previous export's value on the clipboard. Wait for the URL to render, copy it
+    // once, then confirm the clipboard reflects the rendered value before returning.
+    let renderedUrl = '';
+    await this.retry.waitFor('export asset URL to render in the flyout', async () => {
+      renderedUrl = (
+        await this.browser.execute(
+          () => document.querySelector('[data-test-subj="exportAssetValue"]')?.textContent ?? ''
+        )
+      ).trim();
+      return renderedUrl.length > 0;
+    });
+
     await this.exports.copyExportAssetText();
+
+    await this.retry.waitFor('clipboard to hold the rendered export URL', async () => {
+      return (await this.browser.getClipboardValue()).trim() === renderedUrl;
+    });
   }
 }

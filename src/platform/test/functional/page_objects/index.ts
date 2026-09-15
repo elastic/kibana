@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AppMenuPageObject } from './app_menu';
 import { CommonPageObject } from './common_page';
 import { ConsolePageObject } from './console_page';
 import { ContextPageObject } from './context_page';
@@ -37,7 +38,6 @@ import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { UnifiedTabsPageObject } from './unified_tabs';
-import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
@@ -47,6 +47,7 @@ import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
+  appMenu: AppMenuPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,
@@ -79,7 +80,6 @@ export const pageObjects = {
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
   unifiedTabs: UnifiedTabsPageObject,
-  filesManagement: FilesManagementPageObject,
   spaceSettings: SpaceSettingsPageObject,
   markdownVis: MarkdownVisPageObject,
   indexEditor: IndexEditorObject,

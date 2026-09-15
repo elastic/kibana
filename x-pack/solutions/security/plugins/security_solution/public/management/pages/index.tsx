@@ -26,23 +26,19 @@ import {
   MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
-import { TrustedAppsContainer } from './trusted_apps';
 import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
-import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
-import { TrustedDevicesContainer } from './trusted_devices';
-import { EndpointExceptionsContainer } from './endpoint_exceptions';
+import { ArtifactsPage } from './artifacts';
 import { ScriptLibraryContainer } from './script_library';
 
 const EndpointTelemetry = () => (
@@ -56,41 +52,6 @@ const PolicyTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.policies}>
     <PolicyContainer />
     <SpyRoute pageName={SecurityPageName.policies} />
-  </TrackApplicationView>
-);
-
-const EndpointExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.endpointExceptions}>
-    <EndpointExceptionsContainer />
-    <SpyRoute pageName={SecurityPageName.endpointExceptions} />
-  </TrackApplicationView>
-);
-
-const TrustedAppTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.trustedApps}>
-    <TrustedAppsContainer />
-    <SpyRoute pageName={SecurityPageName.trustedApps} />
-  </TrackApplicationView>
-);
-
-const TrustedDevicesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.trustedDevices}>
-    <TrustedDevicesContainer />
-    <SpyRoute pageName={SecurityPageName.trustedDevices} />
-  </TrackApplicationView>
-);
-
-const EventFilterTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.eventFilters}>
-    <EventFiltersContainer />
-    <SpyRoute pageName={SecurityPageName.eventFilters} />
-  </TrackApplicationView>
-);
-
-const HostIsolationExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <HostIsolationExceptionsContainer />
-    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
   </TrackApplicationView>
 );
 
@@ -116,6 +77,9 @@ const Notes = () => (
 
 export const ManagementContainer = memo(() => {
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -127,6 +91,7 @@ export const ManagementContainer = memo(() => {
     loading,
     canReadPolicyManagement,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
@@ -173,37 +138,51 @@ export const ManagementContainer = memo(() => {
       {endpointExceptionsMovedUnderManagement && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
-          component={EndpointExceptionsTelemetry}
+          component={ArtifactsPage}
           hasPrivilege={canReadEndpointExceptions}
+          exact
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
-        component={TrustedAppTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadTrustedApplications}
+        exact
       />
       {trustedDevicesEnabled && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
-          component={TrustedDevicesTelemetry}
+          component={ArtifactsPage}
           hasPrivilege={canReadTrustedDevices}
+          exact
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
-        component={EventFilterTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadEventFilters}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
-        component={HostIsolationExceptionsTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadHostIsolationExceptions}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
-        component={BlocklistContainer}
+        component={ArtifactsPage}
         hasPrivilege={canReadBlocklist}
+        exact
       />
+      {customYaraSignaturesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH}
+          component={ArtifactsPage}
+          hasPrivilege={canReadCustomYaraSignatures}
+          exact
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         component={ResponseActionsTelemetry}

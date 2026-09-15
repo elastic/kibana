@@ -50,4 +50,19 @@ describe('<ExpandableSection />', () => {
       expect(getByTestId(contentTestId)).toBeInTheDocument();
     });
   });
+
+  it('should render extraAction in the accordion header', () => {
+    const { getByTestId } = render(
+      <ExpandableSection
+        expanded={true}
+        title={title}
+        data-test-subj={testId}
+        extraAction={<button type="button" data-test-subj="extra-action-sentinel" />}
+      >
+        {children}
+      </ExpandableSection>
+    );
+
+    expect(getByTestId('extra-action-sentinel')).toBeInTheDocument();
+  });
 });

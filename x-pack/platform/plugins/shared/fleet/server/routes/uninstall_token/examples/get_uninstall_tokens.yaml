@@ -1,0 +1,36 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getUninstallTokensExample:
+            description: 'List of uninstall token metadata for agent policies'
+            value:
+              items:
+                - id: 'token-id-1'
+                  policy_id: 'policy-id-1'
+                  policy_name: 'Default policy'
+                  created_at: '2024-01-01T00:00:00.000Z'
+                  namespaces:
+                    - default
+                - id: 'token-id-2'
+                  policy_id: 'policy-id-2'
+                  policy_name: 'Production policy'
+                  created_at: '2024-01-02T00:00:00.000Z'
+                  namespaces:
+                    - production
+              total: 2
+              page: 1
+              perPage: 20
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          conflictingQueryParamsExample:
+            description: 'Both policyId and search query parameters were provided'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'Query parameters `policyId` and `search` cannot be used at the same time.'

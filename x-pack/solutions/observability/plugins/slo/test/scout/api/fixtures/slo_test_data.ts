@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateCompositeSLOInput, CreateSLOInput } from '@kbn/slo-schema';
 import type { EsSummaryDocument } from '../../../../server/services/summary_transform_generator/helpers/create_temp_summary';
 
 export const TEST_SPACE_ID = 'default';
@@ -33,6 +33,26 @@ export const DEFAULT_SLO: CreateSLOInput = {
   },
   tags: ['test'],
   groupBy: 'tags',
+};
+
+export const DEFAULT_COMPOSITE_SLO: CreateCompositeSLOInput = {
+  name: 'Test Composite SLO for api integration',
+  description: 'Fixture for composite SLO api integration tests',
+  members: [
+    { sloId: 'member-slo-1', weight: 1 },
+    { sloId: 'member-slo-2', weight: 2 },
+    { sloId: 'member-slo-3', weight: 3 },
+  ],
+  compositeMethod: 'weightedAverage',
+  timeWindow: {
+    duration: '7d',
+    type: 'rolling',
+  },
+  budgetingMethod: 'occurrences',
+  objective: {
+    target: 0.99,
+  },
+  tags: ['composite-test'],
 };
 
 export function createDummySummaryDoc(
@@ -278,6 +298,53 @@ export function createApmSummaryDoc(
         name: serviceName,
         environment,
       },
+    }
+  );
+}
+
+/**
+ * Helper to create grouped-by-service.name APM SLO summary docs. Sibling of
+ * `createApmSummaryDoc` for the grouped case: the instance carries no top-level
+ * `service.name`, the service is targeted via `slo.groupings.service.name`, and
+ * the indicator uses `service: '*'`.
+ */
+export function createGroupedApmSummaryDoc(
+  sloId: string,
+  serviceName: string,
+  status: 'HEALTHY' | 'DEGRADING' | 'VIOLATED' | 'NO_DATA',
+  summaryUpdatedAt: string,
+  options: {
+    environment?: string;
+    indicatorType?: 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
+    spaceId?: string;
+  } = {}
+): EsSummaryDocument {
+  const {
+    environment = 'production',
+    indicatorType = 'sli.apm.transactionDuration',
+    spaceId,
+  } = options;
+
+  return createGroupedSummaryDoc(
+    sloId,
+    ['service.name'],
+    { 'service.name': serviceName },
+    summaryUpdatedAt,
+    {
+      spaceId,
+      status,
+      indicator: {
+        type: indicatorType,
+        params: {
+          service: '*',
+          environment,
+          transactionType: 'request',
+          transactionName: '',
+          threshold: 500,
+          index: 'metrics-apm*',
+        },
+      },
+      service: { name: null, environment: null },
     }
   );
 }

@@ -20,7 +20,7 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
-import { selectTabRuntimeState } from '../runtime_state';
+import { selectTabRuntimeState, selectTabTypeForPersistence } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
@@ -34,8 +34,6 @@ export interface SaveDiscoverSessionThunkParams {
   newCopyOnSave: boolean;
   newDescription: string;
   newTags: string[];
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
@@ -47,8 +45,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTimeRestore,
       newDescription,
       newTags,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
     }: SaveDiscoverSessionThunkParams,
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
@@ -78,6 +74,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             overridenTimeRestore: newTimeRestore,
             currentDataView,
             services,
+            tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
           })
         );
 
@@ -205,9 +202,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
-      onTitleDuplicate,
       copyOnSave: newCopyOnSave,
-      isTitleDuplicateConfirmed,
     };
 
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);

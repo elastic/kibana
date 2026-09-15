@@ -47,11 +47,8 @@ const createTestCases = (currentSpace: string, crossSpaceSearch?: string[]) => {
   };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = findTestSuiteFactory(context);
   const createTests = (spaceId: string, user: TestUser) => {
     const currentSpaceCases = createTestCases(spaceId);
 

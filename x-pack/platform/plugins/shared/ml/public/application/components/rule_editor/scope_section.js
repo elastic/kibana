@@ -18,7 +18,7 @@ import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { MANAGEMENT_SECTION_IDS } from '../../management';
 import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 

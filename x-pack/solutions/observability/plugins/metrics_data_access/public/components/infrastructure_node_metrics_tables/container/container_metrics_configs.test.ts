@@ -8,10 +8,11 @@
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  otelDatasetFilter,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
-  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_CONTAINER_CPU_USAGE,
+  SEMCONV_CONTAINER_MEMORY_WORKING_SET,
 } from '../shared/constants';
 import { getOptionsForSchema } from './container_metrics_configs';
 
@@ -35,7 +36,7 @@ describe('container_metrics_configs', () => {
       const { options } = getOptionsForSchema(true, false);
 
       expect(options.groupBy).toBe('container.id');
-      expect(options.kuery).toBe('event.dataset: "dockerstatsreceiver.otel"');
+      expect(options.kuery).toBe(otelDatasetFilter('dockerstatsreceiver.otel'));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
           { field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION, aggregation: 'avg' },
@@ -49,7 +50,7 @@ describe('container_metrics_configs', () => {
       const { options } = getOptionsForSchema(true);
 
       expect(options.groupBy).toBe('container.id');
-      expect(options.kuery).toBe('event.dataset: "dockerstatsreceiver.otel"');
+      expect(options.kuery).toBe(otelDatasetFilter('dockerstatsreceiver.otel'));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
           { field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION, aggregation: 'avg' },
@@ -63,11 +64,11 @@ describe('container_metrics_configs', () => {
       const { options } = getOptionsForSchema(true, true);
 
       expect(options.groupBy).toBe('container.id');
-      expect(options.kuery).toBe('event.dataset: "kubeletstatsreceiver.otel"');
+      expect(options.kuery).toBe(otelDatasetFilter('kubeletstatsreceiver.otel'));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
-          { field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION, aggregation: 'avg' },
-          { field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_CPU_USAGE, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_MEMORY_WORKING_SET, aggregation: 'avg' },
         ])
       );
       expect(options.metrics).toHaveLength(2);
@@ -84,14 +85,16 @@ describe('container_metrics_configs', () => {
       const kuery = 'container.id: "abc-123"';
       const { options } = getOptionsForSchema(true, false, kuery);
 
-      expect(options.kuery).toBe(`event.dataset: "dockerstatsreceiver.otel" AND (${kuery})`);
+      expect(options.kuery).toBe(`${otelDatasetFilter('dockerstatsreceiver.otel')} AND (${kuery})`);
     });
 
     it('combines kuery with SemConv K8s when isOtel is true, isK8sContainer true, and kuery is provided', () => {
       const kuery = 'container.id: "abc-123"';
       const { options } = getOptionsForSchema(true, true, kuery);
 
-      expect(options.kuery).toBe(`event.dataset: "kubeletstatsreceiver.otel" AND (${kuery})`);
+      expect(options.kuery).toBe(
+        `${otelDatasetFilter('kubeletstatsreceiver.otel')} AND (${kuery})`
+      );
     });
   });
 });

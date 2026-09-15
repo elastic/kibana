@@ -14,207 +14,298 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The type of history source to include.
  */
+export const SourceFilter = lazySchema(() => z.enum(['live', 'rule', 'scheduled']));
 export type SourceFilter = z.infer<typeof SourceFilter>;
-export const SourceFilter = z.enum(['live', 'rule', 'scheduled']);
 export type SourceFilterEnum = typeof SourceFilter.enum;
 export const SourceFilterEnum = SourceFilter.enum;
 
 /**
  * The display label for the history source.
  */
+export const UnifiedHistorySource = lazySchema(() => z.enum(['Live', 'Scheduled', 'Rule']));
 export type UnifiedHistorySource = z.infer<typeof UnifiedHistorySource>;
-export const UnifiedHistorySource = z.enum(['Live', 'Scheduled', 'Rule']);
 export type UnifiedHistorySourceEnum = typeof UnifiedHistorySource.enum;
 export const UnifiedHistorySourceEnum = UnifiedHistorySource.enum;
 
+export const GetUnifiedHistoryRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The number of results to return per page.
+     */
+    pageSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(20)
+      .describe('The number of results to return per page.'),
+    /**
+     * A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
+     */
+    nextPage: z
+      .string()
+      .optional()
+      .describe(
+        'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
+      ),
+    /**
+     * A search string to filter history entries by pack name, query text, or query ID.
+     */
+    kuery: z
+      .string()
+      .optional()
+      .describe('A search string to filter history entries by pack name, query text, or query ID.'),
+    /**
+     * Comma-separated list of user IDs to filter live query history.
+     */
+    userIds: z
+      .string()
+      .optional()
+      .describe('Comma-separated list of user IDs to filter live query history.'),
+    /**
+     * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+     */
+    sourceFilters: z
+      .string()
+      .optional()
+      .describe(
+        'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+      ),
+    /**
+     * The start of the time range filter (ISO 8601).
+     */
+    startDate: z.string().optional().describe('The start of the time range filter (ISO 8601).'),
+    /**
+     * The end of the time range filter (ISO 8601).
+     */
+    endDate: z.string().optional().describe('The end of the time range filter (ISO 8601).'),
+  })
+);
 export type GetUnifiedHistoryRequestQuery = z.infer<typeof GetUnifiedHistoryRequestQuery>;
-export const GetUnifiedHistoryRequestQuery = z.object({
-  /**
-   * The number of results to return per page.
-   */
-  pageSize: z.number().int().min(1).max(100).optional().default(20),
-  /**
-   * A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
-   */
-  nextPage: z.string().optional(),
-  /**
-   * A search string to filter history entries by pack name, query text, or query ID.
-   */
-  kuery: z.string().optional(),
-  /**
-   * Comma-separated list of user IDs to filter live query history.
-   */
-  userIds: z.string().optional(),
-  /**
-   * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
-   */
-  sourceFilters: z.string().optional(),
-  /**
-   * The start of the time range filter (ISO 8601).
-   */
-  startDate: z.string().optional(),
-  /**
-   * The end of the time range filter (ISO 8601).
-   */
-  endDate: z.string().optional(),
-});
 
+export const UnifiedHistoryRowBase = lazySchema(() =>
+  z.object({
+    /**
+     * Unique identifier for the history row.
+     */
+    id: z.string().describe('Unique identifier for the history row.'),
+    /**
+     * The timestamp of the query execution.
+     */
+    timestamp: z.string().describe('The timestamp of the query execution.'),
+    /**
+     * The SQL query that was executed.
+     */
+    queryText: z.string().describe('The SQL query that was executed.'),
+    /**
+     * The name of the query, if available.
+     */
+    queryName: z.string().optional().describe('The name of the query, if available.'),
+    /**
+     * The name of the pack containing the query.
+     */
+    packName: z.string().optional().describe('The name of the pack containing the query.'),
+    /**
+     * The ID of the pack containing the query.
+     */
+    packId: z.string().optional().describe('The ID of the pack containing the query.'),
+    /**
+     * The Kibana space ID where the query was executed.
+     */
+    spaceId: z.string().optional().describe('The Kibana space ID where the query was executed.'),
+    /**
+     * For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
+     */
+    agentCount: z
+      .number()
+      .int()
+      .describe(
+        'For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.'
+      ),
+    /**
+     * The number of successful agent responses.
+     */
+    successCount: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe('The number of successful agent responses.'),
+    /**
+     * The number of agent responses with errors.
+     */
+    errorCount: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe('The number of agent responses with errors.'),
+    /**
+     * The total number of result rows returned across all agents.
+     */
+    totalRows: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe('The total number of result rows returned across all agents.'),
+  })
+);
 export type UnifiedHistoryRowBase = z.infer<typeof UnifiedHistoryRowBase>;
-export const UnifiedHistoryRowBase = z.object({
-  /**
-   * Unique identifier for the history row.
-   */
-  id: z.string(),
-  /**
-   * The timestamp of the query execution.
-   */
-  timestamp: z.string(),
-  /**
-   * The SQL query that was executed.
-   */
-  queryText: z.string(),
-  /**
-   * The name of the query, if available.
-   */
-  queryName: z.string().optional(),
-  /**
-   * The name of the pack containing the query.
-   */
-  packName: z.string().optional(),
-  /**
-   * The ID of the pack containing the query.
-   */
-  packId: z.string().optional(),
-  /**
-   * The Kibana space ID where the query was executed.
-   */
-  spaceId: z.string().optional(),
-  /**
-   * The number of agents targeted by the query.
-   */
-  agentCount: z.number().int(),
-  /**
-   * The number of successful agent responses.
-   */
-  successCount: z.number().int().nullable().optional(),
-  /**
-   * The number of agent responses with errors.
-   */
-  errorCount: z.number().int().nullable().optional(),
-  /**
-   * The total number of result rows returned across all agents.
-   */
-  totalRows: z.number().int().nullable().optional(),
-});
 
+export const LiveHistoryRow = lazySchema(() =>
+  UnifiedHistoryRowBase.merge(
+    z.object({
+      /**
+       * Identifies this as a live query history row.
+       */
+      sourceType: z.literal('live').describe('Identifies this as a live query history row.'),
+      /**
+       * Whether this was a manually run live query or triggered by a rule.
+       */
+      source: z
+        .enum(['Live', 'Rule'])
+        .describe('Whether this was a manually run live query or triggered by a rule.'),
+      /**
+       * The Fleet action ID for the live query.
+       */
+      actionId: z.string().optional().describe('The Fleet action ID for the live query.'),
+      /**
+       * The ID of the user who ran the query.
+       */
+      userId: z.string().optional().describe('The ID of the user who ran the query.'),
+      /**
+       * The user profile UID of the user who ran the query.
+       */
+      userProfileUid: z
+        .string()
+        .optional()
+        .describe('The user profile UID of the user who ran the query.'),
+      /**
+       * The number of sub-queries that returned results.
+       */
+      queriesWithResults: z
+        .number()
+        .int()
+        .optional()
+        .describe('The number of sub-queries that returned results.'),
+      /**
+       * The total number of sub-queries in the live action.
+       */
+      queriesTotal: z
+        .number()
+        .int()
+        .optional()
+        .describe('The total number of sub-queries in the live action.'),
+      /**
+       * ECS mapping configuration used for the query.
+       */
+      ecsMapping: z
+        .object({})
+        .catchall(z.unknown())
+        .optional()
+        .describe('ECS mapping configuration used for the query.'),
+      /**
+       * The saved query ID, if the live query was based on a saved query.
+       */
+      savedQueryId: z
+        .string()
+        .optional()
+        .describe('The saved query ID, if the live query was based on a saved query.'),
+      /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional().describe('The query timeout in seconds.'),
+      /**
+       * List of targeted agent IDs.
+       */
+      agentIds: z.array(z.string()).optional().describe('List of targeted agent IDs.'),
+      /**
+       * Whether the query targeted all agents.
+       */
+      agentAll: z.boolean().optional().describe('Whether the query targeted all agents.'),
+      /**
+       * List of targeted agent platforms.
+       */
+      agentPlatforms: z.array(z.string()).optional().describe('List of targeted agent platforms.'),
+      /**
+       * List of targeted agent policy IDs.
+       */
+      agentPolicyIds: z.array(z.string()).optional().describe('List of targeted agent policy IDs.'),
+    })
+  )
+);
 export type LiveHistoryRow = z.infer<typeof LiveHistoryRow>;
-export const LiveHistoryRow = UnifiedHistoryRowBase.merge(
-  z.object({
-    /**
-     * Identifies this as a live query history row.
-     */
-    sourceType: z.literal('live'),
-    /**
-     * Whether this was a manually run live query or triggered by a rule.
-     */
-    source: z.enum(['Live', 'Rule']),
-    /**
-     * The Fleet action ID for the live query.
-     */
-    actionId: z.string().optional(),
-    /**
-     * The ID of the user who ran the query.
-     */
-    userId: z.string().optional(),
-    /**
-     * The user profile UID of the user who ran the query.
-     */
-    userProfileUid: z.string().optional(),
-    /**
-     * The number of sub-queries that returned results.
-     */
-    queriesWithResults: z.number().int().optional(),
-    /**
-     * The total number of sub-queries in the live action.
-     */
-    queriesTotal: z.number().int().optional(),
-    /**
-     * ECS mapping configuration used for the query.
-     */
-    ecsMapping: z.object({}).catchall(z.unknown()).optional(),
-    /**
-     * The saved query ID, if the live query was based on a saved query.
-     */
-    savedQueryId: z.string().optional(),
-    /**
-     * The query timeout in seconds.
-     */
-    timeout: z.number().int().optional(),
-    /**
-     * List of targeted agent IDs.
-     */
-    agentIds: z.array(z.string()).optional(),
-    /**
-     * Whether the query targeted all agents.
-     */
-    agentAll: z.boolean().optional(),
-    /**
-     * List of targeted agent platforms.
-     */
-    agentPlatforms: z.array(z.string()).optional(),
-    /**
-     * List of targeted agent policy IDs.
-     */
-    agentPolicyIds: z.array(z.string()).optional(),
-  })
-);
 
+export const ScheduledHistoryRow = lazySchema(() =>
+  UnifiedHistoryRowBase.merge(
+    z.object({
+      /**
+       * Identifies this as a scheduled query history row.
+       */
+      sourceType: z
+        .literal('scheduled')
+        .describe('Identifies this as a scheduled query history row.'),
+      /**
+       * Indicates this is a scheduled query execution.
+       */
+      source: z.literal('Scheduled').describe('Indicates this is a scheduled query execution.'),
+      /**
+       * The schedule ID for the scheduled query.
+       */
+      scheduleId: z.string().optional().describe('The schedule ID for the scheduled query.'),
+      /**
+       * The execution count for this scheduled query run.
+       */
+      executionCount: z
+        .number()
+        .int()
+        .optional()
+        .describe('The execution count for this scheduled query run.'),
+      /**
+       * The planned execution time for the scheduled query.
+       */
+      plannedTime: z
+        .string()
+        .optional()
+        .describe('The planned execution time for the scheduled query.'),
+    })
+  )
+);
 export type ScheduledHistoryRow = z.infer<typeof ScheduledHistoryRow>;
-export const ScheduledHistoryRow = UnifiedHistoryRowBase.merge(
+
+export const UnifiedHistoryRow = lazySchema(() =>
+  z.discriminatedUnion('sourceType', [LiveHistoryRow, ScheduledHistoryRow])
+);
+export type UnifiedHistoryRow = z.infer<typeof UnifiedHistoryRow>;
+
+export const GetUnifiedHistoryResponse = lazySchema(() =>
   z.object({
     /**
-     * Identifies this as a scheduled query history row.
+     * The list of unified history rows for the current page.
      */
-    sourceType: z.literal('scheduled'),
+    data: z
+      .array(UnifiedHistoryRow)
+      .describe('The list of unified history rows for the current page.'),
     /**
-     * Indicates this is a scheduled query execution.
+     * A base64-encoded cursor to fetch the next page. Absent when there are no more results.
      */
-    source: z.literal('Scheduled'),
+    nextPage: z
+      .string()
+      .optional()
+      .describe(
+        'A base64-encoded cursor to fetch the next page. Absent when there are no more results.'
+      ),
     /**
-     * The schedule ID for the scheduled query.
+     * Whether there are more results beyond the current page.
      */
-    scheduleId: z.string().optional(),
-    /**
-     * The execution count for this scheduled query run.
-     */
-    executionCount: z.number().int().optional(),
-    /**
-     * The planned execution time for the scheduled query.
-     */
-    plannedTime: z.string().optional(),
+    hasMore: z.boolean().describe('Whether there are more results beyond the current page.'),
   })
 );
-
-export type UnifiedHistoryRow = z.infer<typeof UnifiedHistoryRow>;
-export const UnifiedHistoryRow = z.union([LiveHistoryRow, ScheduledHistoryRow]);
-
 export type GetUnifiedHistoryResponse = z.infer<typeof GetUnifiedHistoryResponse>;
-export const GetUnifiedHistoryResponse = z.object({
-  /**
-   * The list of unified history rows for the current page.
-   */
-  data: z.array(UnifiedHistoryRow),
-  /**
-   * A base64-encoded cursor to fetch the next page. Absent when there are no more results.
-   */
-  nextPage: z.string().optional(),
-  /**
-   * Whether there are more results beyond the current page.
-   */
-  hasMore: z.boolean(),
-});

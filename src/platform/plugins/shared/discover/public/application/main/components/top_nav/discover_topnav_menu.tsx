@@ -18,9 +18,10 @@ import React, {
 import { BehaviorSubject } from 'rxjs';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
-import type { useDiscoverTopNav } from './use_discover_topnav';
+import type { DiscoverTopNavHookResult } from './use_discover_topnav';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getReadOnlyBadge } from '../../../discover_router';
@@ -34,6 +35,7 @@ import { getReadOnlyBadge } from '../../../discover_router';
 
 const createTopNavMenuContext = () => ({
   topNavMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
+  topNavShare$: new BehaviorSubject<AppHeaderShareAction | undefined>(undefined),
   topNavBadges$: new BehaviorSubject<ChromeBreadcrumbsBadge[] | undefined>(undefined),
 });
 
@@ -73,6 +75,7 @@ export const DiscoverTopNavMenuProvider = ({
   useUnmount(() => {
     topNavMenuContext.topNavBadges$.next(undefined);
     topNavMenuContext.topNavMenu$.next(undefined);
+    topNavMenuContext.topNavShare$.next(undefined);
   });
 
   return (
@@ -85,8 +88,9 @@ export const DiscoverTopNavMenuProvider = ({
 export const DiscoverTopNavMenu = ({
   topNavBadges,
   topNavMenu,
-}: ReturnType<typeof useDiscoverTopNav>) => {
-  const { topNavBadges$, topNavMenu$ } = useContext(discoverTopNavMenuContext);
+  shareAction,
+}: DiscoverTopNavHookResult) => {
+  const { topNavBadges$, topNavMenu$, topNavShare$ } = useContext(discoverTopNavMenuContext);
 
   useLayoutEffect(() => {
     topNavBadges$.next(topNavBadges);
@@ -95,6 +99,10 @@ export const DiscoverTopNavMenu = ({
   useLayoutEffect(() => {
     topNavMenu$.next(topNavMenu);
   }, [topNavMenu, topNavMenu$]);
+
+  useLayoutEffect(() => {
+    topNavShare$.next(shareAction);
+  }, [shareAction, topNavShare$]);
 
   return null;
 };

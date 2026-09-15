@@ -31,6 +31,9 @@ export const registerPutScriptedFieldRoute = (
     .put({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field',
       access: 'public',
+      summary: 'Create or update a scripted field',
+      description:
+        'Deprecated. Scripted fields are superseded by runtime fields. Use the runtime field endpoints instead.',
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],

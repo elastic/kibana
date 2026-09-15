@@ -23,8 +23,8 @@ describe('isEventDocument', () => {
     expect(isEventDocument(buildRecord({ 'event.kind': 'event' }))).toBe(true);
   });
 
-  it('returns true when event.kind is absent', () => {
-    expect(isEventDocument(buildRecord({}))).toBe(true);
+  it('returns false when event.kind is absent', () => {
+    expect(isEventDocument(buildRecord({}))).toBe(false);
   });
 });
 

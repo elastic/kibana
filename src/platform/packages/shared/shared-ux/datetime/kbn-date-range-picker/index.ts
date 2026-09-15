@@ -16,9 +16,11 @@ export type {
 } from './date_range_picker';
 export type {
   DateRangePickerSettings,
+  TimePrecision,
   AutoRefreshSettings,
   AutoRefreshIntervalUnit,
 } from './types';
+export { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
 export { useDateRangePickerContext } from './date_range_picker_context';
 export type { DateRangePickerContextValue } from './date_range_picker_context';
 export { useDateRangePickerPanelNavigation } from './date_range_picker_panel_navigation';

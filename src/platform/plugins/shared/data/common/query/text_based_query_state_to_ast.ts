@@ -18,6 +18,7 @@ interface Args extends QueryState {
   inputQuery?: Query;
   titleForInspector?: string;
   descriptionForInspector?: string;
+  ignoreGlobalFilters?: boolean;
 }
 
 /**
@@ -38,6 +39,7 @@ export function textBasedQueryStateToExpressionAst({
   timeFieldName,
   titleForInspector,
   descriptionForInspector,
+  ignoreGlobalFilters,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -57,6 +59,7 @@ export function textBasedQueryStateToExpressionAst({
       timeField: timeFieldName,
       titleForInspector,
       descriptionForInspector,
+      ignoreGlobalFilters,
     });
 
     if (esql) {

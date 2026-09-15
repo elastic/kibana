@@ -6,18 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useCanManageRules } from '../../../../hooks/use_capabilities';
 import { RuleNameWithLoading } from './rule_name_with_loading';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
 import { ManageRulesLink } from '../common/links/manage_rules_link';
-import type { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
 import { useSyntheticsRules } from './hooks/use_synthetics_rules';
 import {
@@ -30,8 +29,7 @@ export const ToggleAlertFlyoutButton = () => {
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { application } = useKibana<ClientPluginsStart>().services;
-  const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
+  const canManageRules = useCanManageRules();
 
   const { EditAlertFlyout, loading, NewRuleFlyout, defaultRules } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
@@ -69,7 +67,9 @@ export const ToggleAlertFlyoutButton = () => {
         {
           name: CREATE_STATUS_RULE,
           'data-test-subj': 'createNewStatusRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -83,12 +83,12 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite
+          toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !statusRuleExists
             ? statusRuleNotAvailableTooltipContent
             : null,
-          disabled: !hasUptimeWrite || loading || !statusRuleExists,
+          disabled: !canManageRules || loading || !statusRuleExists,
           icon: 'bell',
         },
       ],
@@ -100,7 +100,9 @@ export const ToggleAlertFlyoutButton = () => {
         {
           name: CREATE_TLS_RULE_NAME,
           'data-test-subj': 'createNewTLSRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -114,12 +116,12 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite
+          toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !tlsRuleExists
             ? tlsRuleNotAvailableTooltipContent
             : null,
-          disabled: !hasUptimeWrite || loading || !tlsRuleExists,
+          disabled: !canManageRules || loading || !tlsRuleExists,
           icon: 'bell',
         },
       ],
@@ -136,7 +138,7 @@ export const ToggleAlertFlyoutButton = () => {
             color="primary"
             aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
             data-test-subj="syntheticsAlertsRulesButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsOpen(!isOpen)}
             disabled={!hasMonitors}
@@ -148,6 +150,9 @@ export const ToggleAlertFlyoutButton = () => {
         isOpen={isOpen}
         ownFocus
         panelPaddingSize="none"
+        aria-label={i18n.translate('xpack.synthetics.toggleAlertFlyoutButton.popoverAriaLabel', {
+          defaultMessage: 'Alerts and rules menu',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

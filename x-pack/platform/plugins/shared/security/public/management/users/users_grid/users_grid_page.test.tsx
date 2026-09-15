@@ -9,7 +9,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
-import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -17,11 +18,16 @@ import { UsersGridPage } from './users_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
-  let coreStart: CoreStart;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -330,6 +336,114 @@ describe('UsersGridPage', () => {
     });
   });
 
+  it('restores pagination from URL query params', async () => {
+    history = scopedHistoryMock.create({ search: '?page=1&perPage=10' });
+    history.createHref = (location: LocationDescriptorObject) => {
+      return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+    };
+
+    const users = Array.from({ length: 15 }, (_, i) => ({
+      username: `user_${String(i).padStart(2, '0')}`,
+      email: `user${i}@test.com`,
+      full_name: `User ${i}`,
+      roles: ['viewer'],
+      enabled: true,
+    }));
+
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockResolvedValue(users);
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    await waitFor(() => {
+      // Page 2 (index 1) with 10 per page should show users 10-14
+      expect(screen.getByText('user_10')).toBeInTheDocument();
+      expect(screen.queryByText('user_00')).not.toBeInTheDocument();
+    });
+  });
+
+  it('updates URL query params when page changes', async () => {
+    const users = Array.from({ length: 25 }, (_, i) => ({
+      username: `user_${String(i).padStart(2, '0')}`,
+      email: `user${i}@test.com`,
+      full_name: `User ${i}`,
+      roles: ['viewer'],
+      enabled: true,
+    }));
+
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockResolvedValue(users);
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('user_00')).toBeInTheDocument();
+    });
+
+    // Navigate to page 2
+    const nextPageButton = screen.getByLabelText('Next page');
+    fireEvent.click(nextPageButton);
+
+    expect(history.replace).toHaveBeenCalledWith({ search: 'page=1' });
+  });
+
+  it('restores search filter from URL query params', async () => {
+    history = scopedHistoryMock.create({ search: '?q=reserved' });
+    history.createHref = (location: LocationDescriptorObject) => {
+      return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+    };
+
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockResolvedValue([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+      {
+        username: 'reserved',
+        email: 'reserved@bar.net',
+        full_name: '',
+        roles: ['superuser'],
+        enabled: true,
+        metadata: { _reserved: true },
+      },
+    ]);
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('reserved')).toBeInTheDocument();
+      expect(screen.queryByText('foo')).not.toBeInTheDocument();
+    });
+  });
+
   it('hides controls when readOnly is enabled', async () => {
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.getUsers.mockResolvedValue([
@@ -357,5 +471,41 @@ describe('UsersGridPage', () => {
       expect(screen.getByText('foo')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the create action until the first load settles', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    let resolveUsers: (value: Awaited<ReturnType<typeof apiClientMock.getUsers>>) => void;
+    apiClientMock.getUsers.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUsers = resolve;
+      })
+    );
+
+    renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(screen.queryByTestId('createUserButton')).not.toBeInTheDocument();
+
+    resolveUsers!([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createUserButton')).toBeInTheDocument();
+    });
   });
 });

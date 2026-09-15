@@ -29,6 +29,7 @@ export interface UserDetailsPanelProps extends Record<string, unknown> {
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasNonClosedAlerts?: boolean;
+  entityStoreEntityId?: string;
 }
 export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'user_details';
@@ -45,6 +46,7 @@ export const UserDetailsPanel = ({
   scopeId,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
+  entityStoreEntityId,
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
 
@@ -58,7 +60,8 @@ export const UserDetailsPanel = ({
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     identityFields,
-    entityId
+    entityId,
+    entityStoreEntityId
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
@@ -70,7 +73,8 @@ export const UserDetailsPanel = ({
     path,
     scopeId,
     hasMisconfigurationFindings,
-    hasNonClosedAlerts
+    hasNonClosedAlerts,
+    entityStoreEntityId
   );
 
   if (!selectedTabId) {
@@ -98,7 +102,8 @@ const useSelectedTab = (
   path: PanelPath | undefined,
   scopeId: string,
   hasMisconfigurationFindings?: boolean,
-  hasNonClosedAlerts?: boolean
+  hasNonClosedAlerts?: boolean,
+  entityStoreEntityId?: string
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -119,6 +124,7 @@ const useSelectedTab = (
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasNonClosedAlerts,
+        entityStoreEntityId,
         path: {
           tab: tabId,
         },

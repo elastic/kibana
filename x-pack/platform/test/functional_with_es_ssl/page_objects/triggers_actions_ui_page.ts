@@ -71,9 +71,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await searchBox.clearValue();
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
-      await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
-      );
+      await retry.waitFor('connectors list filtered to the search text', async () => {
+        const rows = await this.getConnectorsList();
+        return rows.length > 0 && rows.every((row) => row.name.includes(searchText));
+      });
     },
     async searchAlerts(searchText: string) {
       const searchBox = await testSubjects.find('ruleSearchField');
@@ -147,7 +148,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(
+        `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${name}"]`
+      );
     },
     async maybeClickOnAlertTab() {
       if (await testSubjects.exists('ruleDetailsTabbedContent')) {
@@ -190,9 +193,8 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async saveAlert() {
       await testSubjects.click('rulePageFooterSaveButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmCreateRuleModal');
-      expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
     },
     async ensureRuleActionStatusApplied(
       ruleName: string,

@@ -93,7 +93,7 @@ describe('CSV Export Search Cursor', () => {
 
       await cursor.initialize();
 
-      expect(openPointInTimeSpy).toBeCalledTimes(1);
+      expect(openPointInTimeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('supports pit and max_concurrent_shard_requests', async () => {
@@ -104,8 +104,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
             pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
@@ -152,7 +152,7 @@ describe('CSV Export Search Cursor', () => {
 
       await cursor.initialize();
 
-      expect(openPointInTimeSpy).toBeCalledTimes(1);
+      expect(openPointInTimeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('suppresses max_concurrent_shard_requests from search body', async () => {
@@ -163,8 +163,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],

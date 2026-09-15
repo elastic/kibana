@@ -201,7 +201,7 @@ function RangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortRight" color="subdued" />
+                  <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldNumber
@@ -223,14 +223,15 @@ function RangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    title={deleteBtnTitle}
-                    aria-label={deleteBtnTitle}
-                    disabled={value.length === 1}
-                    color="danger"
-                    iconType="trash"
-                    onClick={() => onRemoveRange(id)}
-                  />
+                  <EuiToolTip content={deleteBtnTitle} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={deleteBtnTitle}
+                      disabled={value.length === 1}
+                      color="danger"
+                      iconType="trash"
+                      onClick={() => onRemoveRange(id)}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="xs" />
@@ -244,7 +245,7 @@ function RangesParamEditor({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj={`${dataTestSubj}__addRangeButton`}
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={onAddRange}
             size="xs"
           >

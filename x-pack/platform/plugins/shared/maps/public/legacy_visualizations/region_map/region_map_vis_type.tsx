@@ -31,7 +31,7 @@ const LazyRegionMapEditor = function (props: VisEditorOptionsProps) {
 export const regionMapVisType = {
   name: REGION_MAP_VIS_TYPE,
   title,
-  icon: 'visMapRegion',
+  icon: 'map',
   description: i18n.translate('xpack.maps.regionMap.vis.description', {
     defaultMessage: 'Show metrics on a thematic map.',
   }),

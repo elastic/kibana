@@ -67,6 +67,8 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
+        connectedChildren: {},
+        scrollAnchorItemIndex: null,
       });
     });
 
@@ -99,6 +101,7 @@ describe('useExposePublicApi', () => {
         range: { startIndex: 0, endIndex: 10 },
         scrollOffset: 100,
         isScrolling: false,
+        getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
         // it's fine to cast to unknown
         // because we only need a minimal implementation of the virtualizer instance for the test
       } as unknown as UseVirtualizerReturnType;
@@ -118,6 +121,7 @@ describe('useExposePublicApi', () => {
       expect(updatedUISnapshot).toHaveProperty('scrollOffset', virtualizerInstance.scrollOffset);
       expect(updatedUISnapshot).toHaveProperty('range', virtualizerInstance.range);
       expect(updatedUISnapshot).toHaveProperty('isScrolling', virtualizerInstance.isScrolling);
+      expect(updatedUISnapshot).toHaveProperty('scrollAnchorItemIndex', 10);
 
       // these properties did not change because we did not provide updates for them
       expect(updatedUISnapshot).toHaveProperty('activeStickyIndex', null);
@@ -169,6 +173,8 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
+        connectedChildren: {},
+        scrollAnchorItemIndex: null,
       });
 
       act(() => {
@@ -178,6 +184,7 @@ describe('useExposePublicApi', () => {
           isScrolling: false,
           scrollRect: { width: 0, height: 0 },
           getTotalSize: () => 0,
+          getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
         } as unknown as UseVirtualizerReturnType);
       });
 
@@ -192,6 +199,8 @@ describe('useExposePublicApi', () => {
           expanded: {},
           rowSelection: {},
           scrollRect: { width: 0, height: 0 },
+          connectedChildren: {},
+          scrollAnchorItemIndex: 10,
         });
       });
     });

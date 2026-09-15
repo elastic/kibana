@@ -59,6 +59,7 @@ import type {
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
   PointVisibilityOptions,
+  AreaFillOptions,
 } from '../constants';
 import type { XYRender } from './expression_renderers';
 
@@ -77,6 +78,7 @@ export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
 export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 export type PointVisibility = $Values<typeof PointVisibilityOptions>;
+export type AreaFillOption = $Values<typeof AreaFillOptions>;
 
 export interface AxesSettingsConfig {
   yLeft: boolean;
@@ -216,11 +218,6 @@ export interface LegendConfig {
   maxLines?: number;
 
   /**
-   * Maximum label width in pixels for "list" layout truncation
-   */
-  maxPixels?: number;
-
-  /**
    * Flag whether the legend items are truncated or not
    */
   shouldTruncate?: boolean;
@@ -249,6 +246,7 @@ export interface XYArgs extends DataLayerArgs {
   referenceLines: ReferenceLineConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -299,6 +297,7 @@ export interface LayeredXYArgs {
   annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -324,6 +323,7 @@ export interface XYProps {
   layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];

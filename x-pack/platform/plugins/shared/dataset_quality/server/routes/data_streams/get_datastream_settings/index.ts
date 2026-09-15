@@ -13,14 +13,16 @@ import { getDataStreamCreatedOn } from './get_datastream_created_on';
 export async function getDataStreamSettings({
   esClient,
   dataStream,
+  isSecurityEnabled,
 }: {
   esClient: ElasticsearchClient;
   dataStream: string;
+  isSecurityEnabled: boolean;
 }): Promise<DataStreamSettings> {
   const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
     getDataStreamCreatedOn(esClient, dataStream),
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
-    datasetQualityPrivileges.getDatasetPrivileges(esClient, [dataStream]),
+    datasetQualityPrivileges.getDatasetPrivileges(esClient, [dataStream], isSecurityEnabled),
   ]);
 
   const integration = dataStreamInfo?._meta?.package?.name;

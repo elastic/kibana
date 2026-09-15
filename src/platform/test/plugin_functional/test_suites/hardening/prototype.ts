@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('prototype', function () {
     it('does not allow polluting most prototypes on the server', async () => {
       const response = await supertest
-        .get('/api/hardening/_pollute_prototypes')
+        .get('/internal/hardening/_pollute_prototypes')
         .set('kbn-xsrf', 'true')
         .expect(200);
 

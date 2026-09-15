@@ -128,7 +128,7 @@ export const SystemGenericLine = React.memo<Props>(
           <EuiSpacer size="xs" />
           <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
             <TokensFlexItem grow={false} component="span">
-              <Badge iconType="editorComment" color="hollow" title="">
+              <Badge iconType="comment" color="hollow" title="">
                 <OverflowField value={message} />
               </Badge>
             </TokensFlexItem>

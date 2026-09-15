@@ -14,9 +14,9 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { WatchlistObject } from './common.gen';
 
+export const ListWatchlistsResponse = lazySchema(() => z.array(WatchlistObject));
 export type ListWatchlistsResponse = z.infer<typeof ListWatchlistsResponse>;
-export const ListWatchlistsResponse = z.array(WatchlistObject);

@@ -16,6 +16,7 @@ import * as i18n from './translations';
 interface NameComboBoxProps {
   field: FieldHook<RequiredFieldInput>;
   itemId: string;
+  autoFocus?: boolean;
   availableFieldNames: string[];
   typesByFieldName: Record<string, string[] | undefined>;
   nameWarning: string;
@@ -25,6 +26,7 @@ interface NameComboBoxProps {
 export function NameComboBox({
   field,
   itemId,
+  autoFocus,
   availableFieldNames,
   typesByFieldName,
   nameWarning,
@@ -100,6 +102,7 @@ export function NameComboBox({
 
   return (
     <EuiComboBox
+      autoFocus={autoFocus}
       data-test-subj={`requiredFieldNameSelect-${value.name || 'empty'}`}
       aria-label={i18n.FIELD_NAME}
       placeholder={i18n.FIELD_NAME}

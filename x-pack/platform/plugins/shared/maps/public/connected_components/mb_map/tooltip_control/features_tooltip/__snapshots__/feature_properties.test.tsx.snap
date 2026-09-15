@@ -42,17 +42,12 @@ exports[`FeatureProperties should render 1`] = `
 `;
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
-<EuiCallOut
+<KbnDangerCallout
   announceOnMount={true}
-  color="danger"
-  iconType="warning"
   size="s"
+  text="Simulated load properties error"
   title="Unable to load tooltip content"
->
-  <p>
-    Simulated load properties error
-  </p>
-</EuiCallOut>
+/>
 `;
 
 exports[`FeatureProperties should show filter button for filterable properties 1`] = `
@@ -84,6 +79,7 @@ exports[`FeatureProperties should show filter button for filterable properties 1
             title="Filter on property"
           >
             <EuiIcon
+              aria-hidden={true}
               type="filter"
             />
           </EuiButtonEmpty>
@@ -140,6 +136,7 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="Filter on property"
             >
               <EuiIcon
+                aria-hidden={true}
                 type="filter"
               />
             </EuiButtonEmpty>
@@ -151,7 +148,8 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="View filter actions"
             >
               <EuiIcon
-                type="arrowRight"
+                aria-hidden={true}
+                type="chevronSingleRight"
               />
             </EuiButtonEmpty>
           </span>

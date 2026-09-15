@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { usePhaseColors } from '../../../../lib';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();

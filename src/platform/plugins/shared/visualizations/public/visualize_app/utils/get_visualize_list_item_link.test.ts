@@ -21,7 +21,7 @@ const mockItem: VisualizeUserContent = {
   managed: false,
   references: [],
   type: 'visualization',
-  icon: 'visBarVertical',
+  icon: 'chartBarVertical',
   savedObjectType: 'visualization',
   typeTitle: 'Vertical bar',
   title: '[Flights] Delay Buckets',

@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewOutputSchema, OutputSchema, UpdateOutputSchema } from '../models';
+import { NewOutputSchema, OutputResponseItemSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
@@ -32,11 +32,7 @@ export const GenerateLogstashApiKeyResponseSchema = schema.object({
 
 export const GetOutputsRequestSchema = {};
 
-export const GetOutputsResponseSchema = ListResponseSchema(
-  OutputSchema.extendsDeep({
-    unknowns: 'allow',
-  })
-);
+export const GetOutputsResponseSchema = ListResponseSchema(OutputResponseItemSchema);
 
 export const PostOutputRequestSchema = {
   body: NewOutputSchema,
@@ -44,14 +40,14 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
   body: UpdateOutputSchema,
 };
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 

@@ -36,6 +36,9 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-chrome-browser'
   - '@kbn/autoops-promotion-callout'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
+  - '@kbn/core-application-browser-mocks'
 tags:
   - plugin
   - prod
@@ -48,26 +51,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

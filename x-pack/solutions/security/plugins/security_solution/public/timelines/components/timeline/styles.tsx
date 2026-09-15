@@ -5,62 +5,38 @@
  * 2.0.
  */
 
-import { rgba } from 'polished';
-import styled, { createGlobalStyle } from 'styled-components';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 
 /**
  * TIMELINE BODY
  */
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
-export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
-  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
-}))`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: scroll;
-`;
 
-/**
- * TIMELINE BODY
- */
-export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
+type TimelineContainerProps = React.HTMLAttributes<HTMLDivElement>;
 
-// SIDE EFFECT: the following creates a global class selector
-export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
-    overflow: hidden;
-  }
-`;
-
-export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
-  className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
-}))`
-  height: auto;
-  overflow: auto;
-  scrollbar-width: thin;
-  flex: 1;
-  display: block;
-
-  &::-webkit-scrollbar {
-    height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiScrollBar};
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-clip: content-box;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
-    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
-  }
-
-  &::-webkit-scrollbar-corner,
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-`;
-TimelineBody.displayName = 'TimelineBody';
+export const TimelineContainer = React.forwardRef<HTMLDivElement, TimelineContainerProps>(
+  ({ className, ...rest }, ref) => (
+    <div
+      ref={ref}
+      className={
+        className
+          ? `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`
+          : SELECTOR_TIMELINE_GLOBAL_CONTAINER
+      }
+      css={css`
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: scroll;
+      `}
+      {...rest}
+    />
+  )
+);
+TimelineContainer.displayName = 'TimelineContainer';
 
 /**
  * EVENTS TABLE
@@ -68,75 +44,80 @@ TimelineBody.displayName = 'TimelineBody';
 
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
 
-export const EventsTh = styled.div.attrs<{ role: string }>(
-  ({ className = '', role = 'columnheader' }) => ({
-    className: `siemEventsTable__th ${className}`,
-    role,
-  })
-)`
-  align-items: center;
-  display: flex;
-  flex-shrink: 0;
-  min-width: 0;
+interface EventsTrSupplementProps extends React.HTMLAttributes<HTMLDivElement> {
+  $display?: 'block' | 'inline-block';
+}
 
-  .siemEventsTable__thGroupActions &:first-child:last-child {
-    flex: 1;
-  }
+export const EventsTrSupplement: React.FC<EventsTrSupplementProps> = ({
+  className,
+  $display,
+  ...rest
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      className={
+        className ? `siemEventsTable__trSupplement ${className}` : 'siemEventsTable__trSupplement'
+      }
+      css={css`
+        display: ${$display ?? 'inline-block'};
+        font-size: ${euiTheme.font.scale.xs}rem;
+        line-height: ${euiTheme.font.lineHeightMultiplier};
+        padding-left: ${euiTheme.size.m};
 
-  .siemEventsTable__thGroupData &:hover {
-    background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
-    cursor: move; /* Fallback for IE11 */
-    cursor: grab;
-  }
+        .euiAccordion + div {
+          background-color: ${euiTheme.colors.emptyShade};
+          padding: 0 ${euiTheme.size.s};
+          border: 1px solid ${euiTheme.colors.lightShade};
+          border-radius: ${euiTheme.size.xs};
+        }
+      `}
+      {...rest}
+    />
+  );
+};
 
-  > div:focus {
-    outline: 0; /* disable focus on Resizable element */
-  }
+interface EventsTdContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  textAlign?: string;
+  width?: number;
+}
 
-  /* don't display Draggable placeholder */
+export const EventsTdContent: React.FC<EventsTdContentProps> = ({
+  className,
+  textAlign,
+  width,
+  ...rest
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      className={
+        className ? `siemEventsTable__tdContent ${className}` : 'siemEventsTable__tdContent'
+      }
+      css={css`
+        font-size: ${euiTheme.font.scale.xs}rem;
+        line-height: ${euiTheme.font.lineHeightMultiplier};
+        min-width: 0;
+        text-align: ${textAlign};
+        width: ${width != null
+          ? `${width}px`
+          : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
-  [data-rbd-placeholder-context-id] {
-    display: none !important;
-  }
-`;
+        button.euiButtonIcon {
+          margin-left: -${euiTheme.size.xs};
+        }
+      `}
+      {...rest}
+    />
+  );
+};
 
-export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trSupplement ${className}` as string,
-}))<{ className: string; $display?: 'block' | 'inline-block' }>`
-  display: ${({ $display }) => $display ?? 'inline-block'};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
+interface HideShowContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+  $isVisible: boolean;
+}
 
-  .euiAccordion + div {
-    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
-    padding: 0 ${({ theme }) => theme.eui.euiSizeS};
-    border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-    border-radius: ${({ theme }) => theme.eui.euiSizeXS};
-  }
-`;
-
-export const EventsTdContent = styled.div.attrs(({ className }) => ({
-  className: `siemEventsTable__tdContent ${className != null ? className : ''}`,
-}))<{ textAlign?: string; width?: number }>`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  min-width: 0;
-  text-align: ${({ textAlign }) => textAlign};
-  width: ${({ width }) =>
-    width != null
-      ? `${width}px`
-      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
-
-  button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
-  }
-`;
-
-export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
-  ({ $isVisible = false }) => ({
-    style: {
-      display: $isVisible ? 'block' : 'none',
-    },
-  })
-)<{ $isVisible: boolean }>``;
+export const HideShowContainer: React.FC<HideShowContainerProps> = ({
+  $isVisible,
+  style,
+  ...rest
+}) => <div style={{ display: $isVisible ? 'block' : 'none', ...style }} {...rest} />;

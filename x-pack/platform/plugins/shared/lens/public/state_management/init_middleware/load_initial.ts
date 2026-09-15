@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 
-import type { MiddlewareAPI } from '@reduxjs/toolkit';
+import type { MiddlewareAPI } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -24,7 +24,7 @@ import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { getEditPath, getFullPath } from '../../../common/constants';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -62,7 +62,6 @@ export const getFromPreloaded = async ({
       return {
         doc: {
           ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
           savedObjectId: initialInput.ref_id,
         },
         sharingSavedObjectProps: {
@@ -92,7 +91,6 @@ export const getFromPreloaded = async ({
     return {
       doc: {
         ...attributes,
-        type: LENS_EMBEDDABLE_TYPE,
         savedObjectId: initialInput.ref_id,
       },
       sharingSavedObjectProps: {
@@ -152,6 +150,7 @@ async function loadFromLocatorState(
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews || initialState.dataViewSpecs,
       references: locatorReferences,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -210,6 +209,7 @@ async function loadFromEmptyState(
       datasourceStates: lens.datasourceStates,
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -298,6 +298,7 @@ async function loadFromSavedObject(
       references: [...doc.references, ...(doc.state.internalReferences || [])],
       adHocDataViews: doc.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     { isFullEditor: true }
   );
@@ -307,7 +308,10 @@ async function loadFromSavedObject(
       isSaveable: true,
       sharingSavedObjectProps,
       filters: data.query.filterManager.getFilters(),
-      query: doc.state.query,
+      // For text-based documents the editor's in-flight query is seeded from
+      // the authoritative layer query (with a fallback to a legacy aggregate
+      // slot value); for form-based documents from the chart-scoped filter.
+      query: getRepresentativeQuery(doc) ?? EMPTY_KQL_QUERY,
       searchSessionId:
         !savedObjectId && currentSessionId
           ? currentSessionId

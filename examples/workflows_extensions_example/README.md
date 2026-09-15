@@ -70,7 +70,7 @@ You can emit events in two ways: **via the request-scoped client** (from a route
 
 ### Emit an event (request context)
 
-From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type the route context with `workflows: WorkflowsRouteHandlerContext`):
+From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type your HTTP router with `WorkflowsExtensionsRequestHandlerContext` from `@kbn/workflows-extensions/server`, as in `server/plugin.ts`):
 
 ```ts
 const client = context.workflows.getWorkflowsClient();
@@ -92,6 +92,54 @@ curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
 The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
 
 For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
+
+## Managed Workflows
+
+The plugin also demonstrates **managed workflow** registration — a code-owned lifecycle where a workflow ships with the plugin, is kept in sync by the platform, and is installed/executed across spaces.
+
+### How it works
+
+1. **Define** the workflow in the plugin's definition file under `@kbn/workflows/managed/definitions/` with `yamlTemplate` for install-time parameterization.
+2. **Register** in the central `@kbn/workflows/managed` registry in `managed/definitions/index.ts` (required for orphan cleanup and auto-update reconciliation).
+3. **Declare ownership** during setup via `registerManagedWorkflowOwner(pluginId)`.
+4. **Install** during start via `initManagedWorkflowsClient(pluginId)` → `client.install(id, { spaceId, values })`.
+
+### Example definition
+
+```ts
+import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+
+export const EXAMPLE_MANAGED_WORKFLOW: ManagedWorkflowDefinition = {
+  id: 'system-example-greeting',
+  pluginId: 'workflowsExtensionsExample',
+  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
+enabled: true
+triggers:
+  - type: workflows.failed
+    on:
+      # Filter the subscription by using KQL, use event.* to target event properties
+      condition: not event.workflow.isErrorHandler:true
+steps:
+  - name: greet
+    type: console
+    with:
+      message: "Hello, ${recipient}! This is a managed workflow example."
+`,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+};
+```
+
+### Key concepts
+
+- **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
+- **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
+- **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 
 ## Key Points
 

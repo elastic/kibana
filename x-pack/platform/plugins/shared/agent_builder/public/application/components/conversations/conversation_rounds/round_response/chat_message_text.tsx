@@ -30,6 +30,7 @@ import type {
 import {
   visualizationElement,
   renderAttachmentElement,
+  renderElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -41,6 +42,8 @@ import {
   visualizationTagParser,
   renderAttachmentTagParser,
   createRenderAttachmentRenderer,
+  renderTagParser,
+  createRenderRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
@@ -52,6 +55,7 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  isStreaming?: boolean;
 }
 
 /**
@@ -64,6 +68,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -78,13 +83,19 @@ export function ChatMessageText({
     ol > li > p {
       margin-bottom: ${euiTheme.size.s};
     }
+
+    .euiMarkdownFormat > ul > li,
+    .euiMarkdownFormat > ol > li {
+      line-height: ${euiTheme.size.l};
+    }
   `;
 
-  const { attachmentsService, startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, renderersService, conversationsService, startDependencies } =
+    useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
-    services: { http, application },
+    services: { http, application, uiSettings },
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
@@ -104,6 +115,50 @@ export function ChatMessageText({
       // Internal link in full page: target="_blank" handles navigation
     },
     [isSidebar, http?.externalUrl, application]
+  );
+
+  const visualizationRenderer = useMemo(
+    () =>
+      createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
+        startDependencies,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
+    [application, http, uiSettings, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+  );
+
+  const renderAttachmentRenderer = useMemo(
+    () =>
+      createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
+        isStreaming,
+      }),
+    [
+      conversationAttachments,
+      attachmentRefs,
+      conversationId,
+      isSidebar,
+      attachmentsService,
+      isStreaming,
+    ]
+  );
+
+  const renderRenderer = useMemo(
+    () =>
+      createRenderRenderer({
+        renderersService,
+        conversationsService,
+        conversationId,
+        isStreaming,
+      }),
+    [renderersService, conversationsService, conversationId, isStreaming]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -185,18 +240,9 @@ export function ChatMessageText({
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
-      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
-        conversationAttachments,
-        attachmentRefs,
-        conversationId,
-        isSidebar,
-        attachmentsService,
-      }),
+      [visualizationElement.tagName]: visualizationRenderer,
+      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
+      [renderElement.tagName]: renderRenderer,
     };
 
     return {
@@ -205,27 +251,18 @@ export function ChatMessageText({
         esqlLanguagePlugin,
         visualizationTagParser,
         renderAttachmentTagParser,
+        renderTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [
-    startDependencies,
-    stepsFromCurrentRound,
-    stepsFromPrevRounds,
-    conversationAttachments,
-    attachmentRefs,
-    conversationId,
-    isSidebar,
-    attachmentsService,
-    handleLinkClick,
-  ]);
+  }, [visualizationRenderer, renderAttachmentRenderer, renderRenderer, handleLinkClick]);
 
   return (
     <>
-      <EuiText size="m" className={containerClassName}>
+      <EuiText size="s" className={containerClassName}>
         <EuiMarkdownFormat
-          textSize="m"
+          textSize="s"
           parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
         >

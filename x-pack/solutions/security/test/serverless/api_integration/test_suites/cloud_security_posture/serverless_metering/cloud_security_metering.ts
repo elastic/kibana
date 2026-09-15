@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     let roleAuthc: RoleCredentials;
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
     before(async () => {
-      mockUsageApiServer = mockUsageApiApp.listen(8081); // Start the usage api mock server on port 8081
+      mockUsageApiServer = mockUsageApiApp.listen(8089); // Start the usage api mock server on port 8089
     });
 
     beforeEach(async () => {

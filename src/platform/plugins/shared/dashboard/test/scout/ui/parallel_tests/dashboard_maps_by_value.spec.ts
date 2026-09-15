@@ -25,7 +25,6 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
     dashboardUrl = page.url();
   });
@@ -58,7 +57,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   };
 
   const saveMapToLibraryAndReturn = async (pageObjects: PageObjects) => {
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: true,
     });
@@ -66,7 +65,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   };
 
   const saveMapToLibraryAndStay = async (pageObjects: PageObjects, page: ScoutPage) => {
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: false,
     });

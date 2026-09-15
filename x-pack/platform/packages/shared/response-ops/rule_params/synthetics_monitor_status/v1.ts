@@ -52,6 +52,13 @@ const StatusRuleConditionSchema = schema.object({
   ]),
   includeRetests: schema.maybe(schema.boolean()),
   alertOnNoData: schema.maybe(schema.boolean()),
+  pendingThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 2,
+      min: 1,
+      max: 100,
+    })
+  ),
   recoveryStrategy: schema.maybe(
     schema.oneOf([schema.literal('firstUp'), schema.literal('conditionNotMet')])
   ),
@@ -68,7 +75,11 @@ export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
     kqlQuery: schema.maybe(schema.string()),
   },
   {
-    meta: { description: 'The parameters for the rule.' },
+    meta: {
+      title: 'Synthetics Monitor Status Rule Params',
+      description:
+        'The parameters for the synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.monitorStatus`.',
+    },
   }
 );
 

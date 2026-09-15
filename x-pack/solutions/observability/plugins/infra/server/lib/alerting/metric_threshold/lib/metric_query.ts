@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { DataViewBase } from '@kbn/es-query';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
 import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { Aggregators } from '../../../../../common/alerting/metrics';
@@ -84,7 +85,8 @@ export const getElasticsearchMetricQuery = (
   groupBy?: string | string[],
   filterQuery?: string,
   afterKey?: Record<string, string>,
-  fieldsExisted?: Record<string, boolean> | null
+  fieldsExisted?: Record<string, boolean> | null,
+  dataView?: DataViewBase
 ) => {
   const { aggType } = metricParams;
   if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
@@ -108,7 +110,8 @@ export const getElasticsearchMetricQuery = (
       ? createCustomMetricsAggregations(
           'aggregatedValue',
           metricParams.customMetrics,
-          metricParams.equation
+          metricParams.equation,
+          dataView
         )
       : {
           aggregatedValue: {

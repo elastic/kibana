@@ -82,6 +82,10 @@ describe(`#runUiamContainer()`, () => {
             "3s",
             "--net",
             "elastic",
+            "--memory",
+            "1g",
+            "--memory-swap",
+            "1g",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
@@ -99,7 +103,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "LOG_LEVEL=error",
             "--health-cmd",
-            "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
+            "curl -sk http://127.0.0.1:8080/ready | grep -q '\\"overall\\": true' && [ \\"$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1:8081/)\\" = \\"200\\" ]",
             "--name",
             "uiam-cosmosdb",
             "docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified",
@@ -151,6 +155,10 @@ describe(`#runUiamContainer()`, () => {
             "3s",
             "--net",
             "elastic",
+            "--memory",
+            "2g",
+            "--memory-swap",
+            "2g",
             "--volume",
             "/some_path/run_java_with_custom_ca.sh:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z",
             "--volume",
@@ -165,6 +173,8 @@ describe(`#runUiamContainer()`, () => {
             "127.0.0.1:8443:8443",
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
+            "--env",
+            "JAVA_OPTS_APPEND=-Xms256m -Xmx1g",
             "--env",
             "uiam.apikey.convert.validation.endpoint.enabled=false",
             "--env",
@@ -190,6 +200,8 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
             "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
+            "--env",
             "quarkus.log.console.json.enabled=false",
             "--env",
             "quarkus.log.level=INFO",
@@ -207,6 +219,16 @@ describe(`#runUiamContainer()`, () => {
             "uiam.cosmos.account.endpoint=https://uiam-cosmosdb:8081",
             "--env",
             "uiam.cosmos.container.apikey=api-keys",
+            "--env",
+            "uiam.cosmos.container.oauth_authorization_code=oauth-authorization-codes",
+            "--env",
+            "uiam.cosmos.container.oauth_client=oauth-clients",
+            "--env",
+            "uiam.cosmos.container.oauth_app_connection=oauth-app-connections",
+            "--env",
+            "uiam.cosmos.container.organization_service_account=organization-service-accounts",
+            "--env",
+            "uiam.cosmos.organization_service_account.enabled=true",
             "--env",
             "uiam.cosmos.container.token_invalidation=token-invalidation",
             "--env",
@@ -350,11 +372,11 @@ describe(`#runUiamContainer()`, () => {
     await expect(
       runUiamContainer(new ToolingLog(), cosmosDbContainer)
     ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+      `[Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+    expect(execa.mock.calls.slice(1)).toHaveLength(91);
 
     execa.mockClear();
 
@@ -364,11 +386,11 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValue({ stdout: ` running ` });
 
     await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+      `[Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+    expect(execa.mock.calls.slice(1)).toHaveLength(91);
   });
 });
 
@@ -392,7 +414,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
     expect(mockUndiciFetch.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -463,6 +485,74 @@ describe('#initializeUiamContainers', () => {
             "method": "POST",
           },
         ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-clients\\",\\"partitionKey\\":{\\"paths\\":[\\"/creator_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-authorization-codes\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-app-connections\\",\\"partitionKey\\":{\\"paths\\":[\\"/client_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"organization-service-accounts\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
       ]
     `);
   });
@@ -475,7 +565,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
   });
 
   test('fails if cannot create database', async () => {

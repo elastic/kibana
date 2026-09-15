@@ -5,20 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
-import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
+import { selectOverviewPageState, setOverviewPageStateAction } from '../../../../state/overview';
 import { SortMenu } from './sort_menu';
 
 export const SortFields = () => {
-  const {
-    pageState: { sortOrder, sortField },
-  } = useSelector(selectOverviewState);
+  const { sortOrder, sortField } = useSelector(selectOverviewPageState);
   const dispatch = useDispatch();
   const { asc, desc, label } = getOrderContent(sortField);
   const handleSortChange = (payloadAction: PayloadAction<unknown>) => {
@@ -34,6 +32,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -46,6 +45,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'desc',
+            page: 1,
           })
         );
       },
@@ -62,6 +62,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'status',
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -76,6 +77,37 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: `${ConfigKey.NAME}.keyword`,
             sortOrder: 'asc',
+            page: 1,
+          })
+        );
+      },
+    },
+    {
+      label: URL_LABEL,
+      value: 'urls',
+      checked: sortField === 'urls',
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleSortChange(
+          setOverviewPageStateAction({
+            sortField: 'urls',
+            sortOrder: 'asc',
+            page: 1,
+          })
+        );
+      },
+    },
+    {
+      label: MONITOR_TYPE_LABEL,
+      value: `${ConfigKey.MONITOR_TYPE}.keyword`,
+      checked: sortField === `${ConfigKey.MONITOR_TYPE}.keyword`,
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleSortChange(
+          setOverviewPageStateAction({
+            sortField: `${ConfigKey.MONITOR_TYPE}.keyword`,
+            sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -90,6 +122,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'updated_at',
             sortOrder: 'desc',
+            page: 1,
           })
         );
       },
@@ -133,6 +166,18 @@ const getOrderContent = (sortField: MonitorListSortField) => {
         asc: SORT_STATUS_ASC,
         desc: SORT_STATUS_DESC,
         label: STATUS_LABEL,
+      };
+    case 'urls':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: URL_LABEL,
+      };
+    case `${ConfigKey.MONITOR_TYPE}.keyword`:
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_TYPE_LABEL,
       };
     default:
       return {
@@ -193,6 +238,17 @@ const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.d
 const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.status.label', {
   defaultMessage: 'Status',
 });
+
+const URL_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.url.label', {
+  defaultMessage: 'URL',
+});
+
+const MONITOR_TYPE_LABEL = i18n.translate(
+  'xpack.synthetics.overview.sortPopover.monitorType.label',
+  {
+    defaultMessage: 'Monitor type',
+  }
+);
 
 const ALPHABETICAL_LABEL = i18n.translate(
   'xpack.synthetics.overview.sortPopover.alphabetical.label',

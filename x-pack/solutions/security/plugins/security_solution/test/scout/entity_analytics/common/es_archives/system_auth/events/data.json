@@ -1,0 +1,347 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-freq-001",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:00:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-a",
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12345
+      },
+      "source": {
+        "ip": "10.0.0.1",
+        "address": "10.0.0.1"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-freq-002",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:01:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-a",
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12346
+      },
+      "source": {
+        "ip": "10.0.0.1",
+        "address": "10.0.0.1"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-freq-003",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:02:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-a",
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12347
+      },
+      "source": {
+        "ip": "10.0.0.1",
+        "address": "10.0.0.1"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-freq-004",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:03:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-a",
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12348
+      },
+      "source": {
+        "ip": "10.0.0.1",
+        "address": "10.0.0.1"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-freq-005",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:04:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-a",
+        "hostname": "test-linux-a",
+        "name": "test-linux-a"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12349
+      },
+      "source": {
+        "ip": "10.0.0.1",
+        "address": "10.0.0.1"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.auth-default",
+    "id": "scout-sysauth-infreq-001",
+    "index": ".ds-logs-system.auth-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "filebeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.auth",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "ssh_login",
+        "category": [
+          "authentication"
+        ],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "id": "test-linux-host-id-b",
+        "hostname": "test-linux-b",
+        "name": "test-linux-b"
+      },
+      "process": {
+        "name": "sshd",
+        "pid": 12350
+      },
+      "source": {
+        "ip": "10.0.0.2",
+        "address": "10.0.0.2"
+      },
+      "system": {
+        "auth": {
+          "ssh": {
+            "event": "Accepted"
+          }
+        }
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b"
+      }
+    }
+  }
+}

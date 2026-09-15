@@ -5,41 +5,23 @@
  * 2.0.
  */
 
+import type { RootTransactionByTraceIdResponse } from '@kbn/apm-api-shared';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { maybe } from '../../../../common/utils/maybe';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
-  TRACE_ID,
-  PARENT_ID,
   AT_TIMESTAMP,
+  PARENT_ID,
+  SERVICE_NAME,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { maybe } from '../../../../common/utils/maybe';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface TransactionDetailRedirectInfo {
-  [AT_TIMESTAMP]: string;
-  trace: {
-    id: string;
-  };
-  transaction: {
-    id: string;
-    type: string;
-    name: string;
-
-    duration: {
-      us: number;
-    };
-  };
-  service: {
-    name: string;
-  };
-}
 
 export async function getRootTransactionByTraceId({
   traceId,
@@ -51,9 +33,7 @@ export async function getRootTransactionByTraceId({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<{
-  transaction: TransactionDetailRedirectInfo | undefined;
-}> {
+}): Promise<RootTransactionByTraceIdResponse> {
   const requiredFields = asMutableArray([
     TRACE_ID,
     TRANSACTION_ID,

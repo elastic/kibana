@@ -10,6 +10,7 @@ import { ClassicStream } from './classic_stream';
 import type { StateDependencies, StreamChange } from '../types';
 import type { State } from '../state';
 import type { StreamChangeStatus } from '../stream_active_record/stream_active_record';
+import type { ElasticsearchAction } from '../execution_plan/types';
 
 interface ClassicStreamChanges {
   processing: boolean;
@@ -27,15 +28,28 @@ interface ClassicStreamTestable {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
+  doDetermineUpdateActions(
+    desiredState: State,
+    startingState: State,
+    startingStateStream: ClassicStream
+  ): Promise<ElasticsearchAction[]>;
 }
 
 describe('ClassicStream', () => {
-  const createMockDependencies = (): StateDependencies =>
+  const createMockDependencies = (
+    overrides?: Partial<{ replicated: boolean }>
+  ): StateDependencies =>
     ({
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
       isWiredStreamViewsEnabled: true,
       isDev: false,
+      streamsClient: {
+        getDataStream: jest.fn().mockResolvedValue({
+          name: 'logs-test-default',
+          replicated: overrides?.replicated ?? false,
+        }),
+      },
       esClient: {
         indices: {
           getDataStreamSettings: jest.fn().mockResolvedValue({
@@ -542,6 +556,244 @@ describe('ClassicStream', () => {
       );
 
       expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
+    });
+  });
+
+  describe('doDetermineUpdateActions - field overrides', () => {
+    const existingDefinitionWithOverride = () =>
+      createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: { 'foo.bar': { type: 'keyword' } } },
+          failure_store: { inherit: {} },
+        },
+      });
+
+    const determineUpdateActions = async (
+      existingDefinition: Streams.ClassicStream.Definition,
+      newDefinition: Streams.ClassicStream.Definition
+    ) => {
+      const dependencies = createMockDependencies();
+      const startingStream = new ClassicStream(existingDefinition, dependencies);
+      const stream = new ClassicStream(existingDefinition, dependencies);
+      const state = createMockState(
+        new Map([['logs-test-default', { definition: existingDefinition }]])
+      );
+
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        state,
+        state
+      );
+
+      return (stream as unknown as ClassicStreamTestable).doDetermineUpdateActions(
+        state,
+        state,
+        startingStream
+      );
+    };
+
+    it('emits update_data_stream_mappings with the new mappings when overrides change', async () => {
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: { 'foo.baz': { type: 'long' } } },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinitionWithOverride(), newDefinition);
+
+      expect(actions).toContainEqual({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: 'logs-test-default',
+          mappings: { 'foo.baz': { type: 'long' } },
+        },
+      });
+    });
+
+    it('emits a reset update_data_stream_mappings action when all overrides are removed', async () => {
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: {} },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinitionWithOverride(), newDefinition);
+
+      expect(actions).toContainEqual({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: 'logs-test-default',
+          mappings: undefined,
+        },
+      });
+    });
+
+    it('emits a reset action when only system fields remain', async () => {
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: { 'foo.bar': { type: 'system' } } },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinitionWithOverride(), newDefinition);
+
+      expect(actions).toContainEqual({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: 'logs-test-default',
+          mappings: undefined,
+        },
+      });
+    });
+
+    it('does not emit update_data_stream_mappings when overrides are unchanged', async () => {
+      const actions = await determineUpdateActions(
+        existingDefinitionWithOverride(),
+        existingDefinitionWithOverride()
+      );
+
+      expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
+    });
+
+    it('does not emit update_data_stream_mappings for undefined to empty object', async () => {
+      const existingDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      });
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: {} },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinition, newDefinition);
+
+      expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
+    });
+
+    it('emits a reset action when overrides are removed as undefined', async () => {
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: undefined },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinitionWithOverride(), newDefinition);
+
+      expect(actions).toContainEqual({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: 'logs-test-default',
+          mappings: undefined,
+        },
+      });
+    });
+
+    it('does not emit update_data_stream_mappings when only system fields are cleared', async () => {
+      const existingDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: { 'foo.bar': { type: 'system' } } },
+          failure_store: { inherit: {} },
+        },
+      });
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: {} },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinition, newDefinition);
+
+      expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
+    });
+  });
+
+  describe('getEffectiveSettings - replicated streams', () => {
+    it('returns empty settings for replicated data streams without calling getDataStreamSettings', async () => {
+      const deps = createMockDependencies({ replicated: true });
+      const definition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: { 'index.refresh_interval': { value: '5s' } },
+          classic: { field_overrides: undefined },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const stream = new ClassicStream(definition, deps);
+      const existingState = createMockState(new Map([['logs-test-default', { definition }]]));
+
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        existingState,
+        existingState
+      );
+
+      // getDataStreamSettings should NOT have been called for replicated streams
+      expect(
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+          .getDataStreamSettings
+      ).not.toHaveBeenCalled();
+
+      // settings should be detected as changed since effective settings are empty
+      // for replicated streams but definition has settings
+      expect((stream as unknown as ClassicStreamTestable)._changes.settings).toBe(true);
+    });
+
+    it('calls getDataStreamSettings for non-replicated data streams', async () => {
+      const deps = createMockDependencies({ replicated: false });
+      const definition = createBaseClassicStreamDefinition();
+
+      const stream = new ClassicStream(definition, deps);
+      const existingState = createMockState(new Map([['logs-test-default', { definition }]]));
+
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        existingState,
+        existingState
+      );
+
+      // getDataStreamSettings SHOULD have been called for non-replicated streams
+      expect(
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+          .getDataStreamSettings
+      ).toHaveBeenCalled();
     });
   });
 });

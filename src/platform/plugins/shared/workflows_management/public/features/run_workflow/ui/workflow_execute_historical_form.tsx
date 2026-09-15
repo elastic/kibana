@@ -14,16 +14,19 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiSuperDatePicker,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isPlainObject } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -31,7 +34,6 @@ import { useWorkflowExecutions } from '../../../entities/workflows/model/use_wor
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 /**
  * Sentinel error value used to signal "not ready" to the parent (no execution
@@ -61,12 +63,20 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
+    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] = useState(
+      !!initialExecutionId
+    );
+
+    const [startedAfter, setStartedAfter] = useState('now-1w'); // default to 1 week ago
+    const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
 
-    const { data: executionsList } = useWorkflowExecutions({
+    const { data: executionsList, isInitialLoading: isLoadingExecutions } = useWorkflowExecutions({
       workflowId: workflowId ?? null,
       omitStepRuns: true,
       size: 100,
+      startedAfter,
+      startedBefore,
     });
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
@@ -100,28 +110,56 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       enabled: selectedExecutionId !== null,
     });
 
-    const replayInputsFromContext = useMemo((): Record<string, unknown> => {
-      if (!selectedExecution?.context) return {};
-      const ctx = selectedExecution.context as Record<string, unknown>;
-      return {
-        ...(typeof ctx.inputs === 'object' && ctx.inputs !== null ? (ctx.inputs as object) : {}),
-        ...(ctx.event !== undefined ? { event: ctx.event } : {}),
-      };
-    }, [selectedExecution?.context]);
-
-    // Signal "not ready" to the parent when no execution is selected or still loading
+    // Consistency check to changing filters still includes the selected execution
     useEffect(() => {
-      if (!selectedExecutionId || isLoadingExecution) {
+      if (
+        !selectedExecutionId ||
+        needsInitialExecutionDate ||
+        isLoadingExecution ||
+        !executionsList
+      ) {
+        return;
+      }
+      if (!executionsList.results.some((r) => r.id === selectedExecutionId)) {
+        setSelectedExecutionId(null);
+      }
+    }, [selectedExecutionId, executionsList, isLoadingExecution, needsInitialExecutionDate]);
+
+    useEffect(() => {
+      if (!needsInitialExecutionDate || selectedExecutionId !== initialExecutionId) {
+        return;
+      }
+      const startedAt = selectedExecution?.startedAt;
+      if (!startedAt) {
+        return;
+      }
+      // Set the time range to the execution time and start 1 week in the past
+      setStartedBefore(startedAt);
+      setStartedAfter(moment(startedAt).subtract(1, 'week').toISOString());
+      setNeedsInitialExecutionDate(false);
+    }, [
+      needsInitialExecutionDate,
+      initialExecutionId,
+      selectedExecutionId,
+      selectedExecution?.startedAt,
+    ]);
+
+    // Populate the loaded execution data and manage not-ready sentinel
+    useEffect(() => {
+      if (selectedExecution && selectedExecution.id === selectedExecutionId) {
+        setErrors(null);
+        if (selectedExecution.context) {
+          const ctx = selectedExecution.context as Record<string, unknown>;
+          const replayInputsFromContext = {
+            ...(isPlainObject(ctx.inputs) && (ctx.inputs as object)),
+            ...(ctx.event !== undefined && { event: ctx.event }),
+          };
+          setValue(JSON.stringify(replayInputsFromContext, null, 2));
+        }
+      } else {
         setErrors(NOT_READY_SENTINEL);
       }
-    }, [selectedExecutionId, isLoadingExecution, setErrors]);
-
-    // Populate the editor when execution data arrives
-    useEffect(() => {
-      if (selectedExecution) {
-        setValue(JSON.stringify(replayInputsFromContext, null, 2));
-      }
-    }, [selectedExecution, replayInputsFromContext, setValue]);
+    }, [selectedExecution, selectedExecutionId, setValue, setErrors]);
 
     useEffect(() => {
       if (value) {
@@ -137,6 +175,14 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         }
       }
     }, [inputsValidator, value, setErrors]);
+
+    const handleTimeChange = useCallback(
+      ({ start: nextStartedAfter, end: nextStartedBefore }: { start: string; end: string }) => {
+        setStartedAfter(nextStartedAfter);
+        setStartedBefore(nextStartedBefore);
+      },
+      []
+    );
 
     const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
       const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
@@ -169,51 +215,113 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          flex: 1;
+          min-height: 0;
+          align-self: stretch;
+        `}
+      >
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
-            <EuiComboBox
-              singleSelection={{ asPlainText: true }}
-              options={executionOptions}
-              selectedOptions={
-                selectedExecutionId && executionOptions.length > 0
-                  ? executionOptions.filter((o) => o.key === selectedExecutionId)
-                  : []
-              }
-              onChange={handleExecutionChange}
-              isClearable
-              fullWidth
-              isLoading={!executionsList && !!workflowId}
-              placeholder={translations.selectExecutionPlaceholder}
-              data-test-subj="workflowExecuteModalReplayExecutionComboBox"
-            />
-          </EuiFormRow>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd" responsive={false}>
+            <EuiFlexItem grow>
+              <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
+                <EuiComboBox
+                  singleSelection={{ asPlainText: true }}
+                  options={executionOptions}
+                  selectedOptions={
+                    selectedExecutionId && executionOptions.length > 0
+                      ? executionOptions.filter((o) => o.key === selectedExecutionId)
+                      : []
+                  }
+                  onChange={handleExecutionChange}
+                  isClearable
+                  fullWidth
+                  isLoading={isLoadingExecutions}
+                  placeholder={translations.selectExecutionPlaceholder}
+                  data-test-subj="workflowExecuteModalReplayExecutionComboBox"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiSuperDatePicker
+                  start={startedAfter}
+                  end={startedBefore}
+                  onTimeChange={handleTimeChange}
+                  showUpdateButton={false}
+                  width="auto"
+                  data-test-subj="workflowExecuteModalReplayTimeRange"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-
-        {selectedExecution && (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
+        {selectedExecutionId && !isLoadingExecutions && isLoadingExecution && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {translations.loadingExecution}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {selectedExecution && selectedExecution.id === selectedExecutionId && (
+          <EuiFlexItem
+            grow
+            css={css`
+              flex: 1;
+              min-height: 0;
+              overflow: hidden;
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="s"
+              css={css`
+                flex: 1;
+                min-height: 0;
+              `}
+            >
               {errors && errors !== NOT_READY_SENTINEL && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} />
                 </EuiFlexItem>
               )}
 
-              <EuiFlexItem>
+              <EuiFlexItem
+                grow
+                css={css`
+                  flex: 1;
+                  min-height: 0;
+                  overflow: hidden;
+                `}
+              >
                 <EuiFormRow
                   label={translations.getInputDataLabel(
                     getTriggerTypeLabel(selectedExecution.context)
                   )}
                   fullWidth
+                  css={css`
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                    .euiFormRow__fieldWrapper {
+                      flex: 1;
+                      min-height: 0;
+                      display: flex;
+                      flex-direction: column;
+                    }
+                  `}
                 >
                   <CodeEditor
                     languageId="json"
                     value={value}
-                    fitToContent={{
-                      minLines: 5,
-                      maxLines: 15,
-                    }}
                     width="100%"
+                    height="100%"
                     onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj={'workflow-historical-json-editor'}
@@ -248,13 +356,6 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        {selectedExecutionId && isLoadingExecution && (
-          <EuiFlexItem>
-            <EuiText size="s" color="subdued">
-              {translations.loadingExecution}
-            </EuiText>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     );
   }
@@ -268,7 +369,6 @@ function getTriggerTypeLabel(context?: Record<string, unknown>): string {
   if (event?.documents) return TRIGGER_TABS_LABELS.index;
   return TRIGGER_TABS_LABELS.manual;
 }
-
 const translations = {
   getRunLabel: (dateTime: string, timeAgo: string, stepDuration: string, stepId?: string) => {
     return i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {

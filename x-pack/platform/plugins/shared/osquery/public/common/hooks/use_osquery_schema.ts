@@ -16,7 +16,7 @@ import {
 import type { OsquerySchemaResponse, OsqueryTable } from '../../../common/types/schema';
 import { useKibana } from '../lib/kibana';
 // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
-import fallbackSchemaJson from '../schemas/osquery/v5.19.0.json';
+import fallbackSchemaJson from '../../../common/schemas/osquery/v5.19.0.json';
 
 let fallbackOsquerySchema: OsqueryTable[] | null = null;
 const getFallbackOsquerySchema = (): OsqueryTable[] => {

@@ -24,8 +24,6 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { AttachmentType } from '../../../common/types/domain';
-import { KibanaServices } from '../../common/lib/kibana';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
 import type { MarkdownEditorRef } from '../markdown_editor';
@@ -58,12 +56,21 @@ export interface AddCommentProps {
   onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
+      {
+        id,
+        caseId,
+        onCommentPosted,
+        onCommentSaving,
+        showLoading = true,
+        statusActionButton,
+        attachActionButton,
+      },
       ref
     ) => {
       const editorRef = useRef<MarkdownEditorRef>(null);
@@ -116,10 +123,9 @@ export const AddComment = React.memo(
             onCommentSaving();
           }
 
-          const attachmentsEnabled = KibanaServices.getConfig()?.attachments?.enabled ?? false;
-          const attachments: CaseAttachmentsWithoutOwner = attachmentsEnabled
-            ? [{ type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } }]
-            : [{ type: AttachmentType.user, comment: data.comment }];
+          const attachments: CaseAttachmentsWithoutOwner = [
+            { type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } },
+          ];
 
           createAttachments(
             {
@@ -239,6 +245,9 @@ export const AddComment = React.memo(
                     <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
                       {statusActionButton && (
                         <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
+                      )}
+                      {attachActionButton && (
+                        <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
                       )}
                       <EuiFlexItem grow={false}>
                         <EuiButton

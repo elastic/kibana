@@ -69,6 +69,14 @@ export const FilePickerStep: StoryFn = () => {
               errorMessage="An error message"
             />
           </EuiPanel>
+          <EuiSpacer size="xl" />
+
+          <b>{'Default'}</b>
+          <EuiSpacer size="s" />
+
+          <EuiPanel>
+            <AssetCriticalityFilePickerStep onFileChange={() => {}} isLoading={false} />
+          </EuiPanel>
         </div>
       </TestProvider>
     </StorybookProviders>

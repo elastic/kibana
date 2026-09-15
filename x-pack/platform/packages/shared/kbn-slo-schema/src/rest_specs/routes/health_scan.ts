@@ -80,7 +80,7 @@ interface GetHealthScanResultsResponse {
   results: HealthScanResultResponse[];
   scan: HealthScanSummary;
   total: number;
-  searchAfter?: Array<string | number | null | boolean>;
+  searchAfter?: string;
 }
 
 export { getHealthScanParamsSchema, listHealthScanParamsSchema, postHealthScanParamsSchema };

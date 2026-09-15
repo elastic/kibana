@@ -19,6 +19,7 @@ import type {
   DataSourceProfileService,
 } from '../profiles/data_source_profile';
 import type { AppliedProfile } from '../composable_profile';
+import type { ContextAwarenessToolkit } from '../toolkit';
 import type {
   DocumentContext,
   DocumentProfileProviderParams,
@@ -58,11 +59,16 @@ export interface ResolveDataSourceProfileResult {
    * Whether the resolved data source profile differs from the previously active profile.
    */
   didProfileChange: boolean;
+  /**
+   * Whether it's the first data source profile resolved since the manager was created.
+   */
+  isFirstResolution: boolean;
 }
 
 export class ScopedProfilesManager {
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-
+  private cachedRootContext: ContextWithProfileId<RootContext>;
+  private cachedRootProfile: AppliedProfile;
   private dataSourceProfile: AppliedProfile;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private dataSourceProfileAbortController?: AbortController;
@@ -72,16 +78,31 @@ export class ScopedProfilesManager {
     private readonly getRootProfile: () => AppliedProfile,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly scopedEbtManager: ScopedDiscoverEBTManager
+    private readonly scopedEbtManager: ScopedDiscoverEBTManager,
+    private readonly toolkit: ContextAwarenessToolkit
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+    this.cachedRootContext = this.rootContext$.getValue();
+    this.cachedRootProfile = this.getRootProfile();
+
     this.dataSourceProfile = dataSourceProfileService.getProfile({
       context: this.dataSourceContext$.getValue(),
+      toolkit,
     });
 
     this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
-      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
+      this.dataSourceProfile = dataSourceProfileService.getProfile({
+        context,
+        toolkit,
+      });
     });
+  }
+
+  /**
+   * Whether this manager has completed at least one data source profile resolution
+   */
+  public hasResolvedDataSourceProfile() {
+    return this.prevDataSourceProfileParams !== undefined;
   }
 
   /**
@@ -94,10 +115,10 @@ export class ScopedProfilesManager {
     onBeforeChange?: () => void
   ): Promise<ResolveDataSourceProfileResult> {
     const serializedParams = serializeDataSourceProfileParams(params);
-    const isFirstResolution = this.prevDataSourceProfileParams === undefined;
+    const isFirstResolution = !this.hasResolvedDataSourceProfile();
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
-      return { didProfileChange: false };
+      return { didProfileChange: false, isFirstResolution };
     }
 
     const abortController = new AbortController();
@@ -116,7 +137,7 @@ export class ScopedProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return { didProfileChange: false };
+      return { didProfileChange: false, isFirstResolution };
     }
 
     const didProfileChange =
@@ -127,7 +148,7 @@ export class ScopedProfilesManager {
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
 
-    return { didProfileChange };
+    return { didProfileChange, isFirstResolution };
   }
 
   /**
@@ -180,13 +201,21 @@ export class ScopedProfilesManager {
    * @returns The resolved profiles
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
+    const rootContext = this.rootContext$.getValue();
+
+    if (this.cachedRootContext !== rootContext) {
+      this.cachedRootContext = rootContext;
+      this.cachedRootProfile = this.getRootProfile();
+    }
+
     return [
-      this.getRootProfile(),
+      this.cachedRootProfile,
       this.dataSourceProfile,
       this.documentProfileService.getProfile({
         context: recordHasContext(record)
           ? record.context
           : this.documentProfileService.defaultContext,
+        toolkit: this.toolkit,
       }),
     ];
   }

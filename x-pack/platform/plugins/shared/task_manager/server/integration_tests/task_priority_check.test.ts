@@ -23,7 +23,7 @@ jest.mock('../task_type_dictionary', () => {
   };
 });
 
-// Notify response-ops if a task sets a priority to something other than `Normal`
+// Notify response-ops if a task sets a priority to something other than `Standard`
 describe('Task priority checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -57,7 +57,7 @@ describe('Task priority checks', () => {
         )
         .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
 
-      expect(taskTypesWithPriority.length).toEqual(3);
+      expect(taskTypesWithPriority.length).toEqual(4);
       expect(taskTypesWithPriority).toMatchSnapshot();
     });
   });

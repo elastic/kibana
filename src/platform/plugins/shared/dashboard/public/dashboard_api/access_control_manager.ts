@@ -23,6 +23,12 @@ export function initializeAccessControlManager(
     accessMode: savedObjectResult?.data?.access_control?.access_mode,
   });
 
+  const getState = () => {
+    const { accessMode } = accessControl$.value;
+    if (!accessMode) return;
+    return { access_control: { access_mode: accessMode } };
+  };
+
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {
     const dashboardId = savedObjectId$?.value;
     if (!dashboardId) {
@@ -52,6 +58,9 @@ export function initializeAccessControlManager(
     api: {
       accessControl$,
       changeAccessMode,
+    },
+    internalApi: {
+      getState,
     },
   };
 }

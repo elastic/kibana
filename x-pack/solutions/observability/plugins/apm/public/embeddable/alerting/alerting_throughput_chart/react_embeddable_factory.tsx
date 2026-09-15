@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import type { EmbeddableDeps } from '../../types';
-import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '../constants';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import { APMAlertingThroughputChart } from './chart';
 
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
@@ -39,8 +42,10 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<EmbeddableApmAlertingVizProps>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           serviceName: serviceName$.getValue(),
           transactionType: transactionType$.getValue(),
@@ -52,26 +57,50 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
           alert: alert$.getValue(),
           kuery: kuery$.getValue(),
           filters: filters$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          serviceName$,
-          transactionType$,
-          transactionName$,
-          environment$,
-          rangeFrom$,
-          rangeTo$,
-          rule$,
-          alert$,
-          kuery$,
-          filters$
-        ).pipe(map(() => undefined)),
+          serviceName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionType$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          environment$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeFrom$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeTo$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rule$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          alert$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          kuery$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
           ...titleComparators,
           serviceName: 'referenceEquality',
@@ -85,25 +114,24 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
           kuery: 'referenceEquality',
           filters: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          serviceName$.next(lastSaved?.serviceName ?? '');
-          transactionType$.next(lastSaved?.transactionType);
-          transactionName$.next(lastSaved?.transactionName);
-          environment$.next(lastSaved?.environment);
-          rangeFrom$.next(lastSaved?.rangeFrom);
-          rangeTo$.next(lastSaved?.rangeTo);
-          rule$.next(lastSaved?.rule as EmbeddableApmAlertingVizProps['rule']);
-          alert$.next(lastSaved?.alert as EmbeddableApmAlertingVizProps['alert']);
-          kuery$.next(lastSaved?.kuery);
-          filters$.next(lastSaved?.filters);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState.serviceName ?? '');
+          transactionType$.next(nextState.transactionType);
+          transactionName$.next(nextState.transactionName);
+          environment$.next(nextState.environment);
+          rangeFrom$.next(nextState.rangeFrom);
+          rangeTo$.next(nextState.rangeTo);
+          rule$.next(nextState.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(nextState.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(nextState.kuery);
+          filters$.next(nextState.filters);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
       });
 
       return {

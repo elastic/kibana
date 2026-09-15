@@ -12,36 +12,48 @@ node scripts/scout.js start-server --arch serverless --domain [search|observabil
 
 Then you can run the tests in another terminal:
 
+### API tests (sequential)
+
+```bash
+// ESS
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/playwright.config.ts --project=local --grep stateful-classic
+
+// Serverless
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/playwright.config.ts --project=local --grep serverless-observability_complete
+```
+
+### UI tests
+
 Some tests are designed to run sequentially:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_complete
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_complete
 
 // Serverless Logs-Essentials
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_logs_essentials
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_logs_essentials
 ```
 
 Some tests are designed to run concurrently (preferred option):
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability_complete
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability_complete
 
 // Serverless Logs-Essentials
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability_logs_essentials
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability_logs_essentials
 ```
 
 You can also run tests in UI mode by passing the `--ui` flag to the test command:
 
 ```
-npx playwright test --ui --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --ui --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/output`

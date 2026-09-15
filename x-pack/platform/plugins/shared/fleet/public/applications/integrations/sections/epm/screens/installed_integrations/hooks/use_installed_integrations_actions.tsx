@@ -42,7 +42,7 @@ export function useInstalledIntegrationsActions() {
     async (items: InstalledPackageUIPackageListItem[], updatePolicies?: boolean) => {
       try {
         const res = await sendBulkUpgradePackagesForRq({
-          packages: items.map((item) => ({ name: item.name })),
+          packages: items.map((item) => ({ name: item.name, version: item.version })),
           upgrade_package_policies: updatePolicies,
         });
 

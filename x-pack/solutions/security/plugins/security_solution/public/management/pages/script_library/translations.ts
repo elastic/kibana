@@ -47,7 +47,8 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   // table labels
   table: {
     noItemsMessage: i18n.translate('xpack.securitySolution.scriptLibrary.table.noItemsMessage', {
-      defaultMessage: 'No scripts found',
+      defaultMessage:
+        'No results match your search criteria! Try modifying your search or filter set.',
     }),
     columns: {
       name: i18n.translate('xpack.securitySolution.scriptLibrary.table.nameColumnTitle', {
@@ -57,7 +58,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         defaultMessage: 'Operating systems',
       }),
       tags: i18n.translate('xpack.securitySolution.scriptLibrary.table.tagsColumnTitle', {
-        defaultMessage: 'Types',
+        defaultMessage: 'Categories',
       }),
       updatedBy: i18n.translate(
         'xpack.securitySolution.scriptLibrary.table.modifiedByColumnTitle',
@@ -259,13 +260,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           archive: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
             {
-              defaultMessage: 'Archive (.zip, .rar, .gz, etc.)',
+              defaultMessage: 'Archive (.zip or .gz only)',
             }
           ),
           script: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
             {
-              defaultMessage: 'Script file (.py, .sh, .ps1, etc.)',
+              defaultMessage: 'Script file (.bat, .ps1 or .sh)',
             }
           ),
           validationErrorMessage: i18n.translate(
@@ -398,7 +399,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           label: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.tagsLabel',
             {
-              defaultMessage: 'Types',
+              defaultMessage: 'Categories',
             }
           ),
         },

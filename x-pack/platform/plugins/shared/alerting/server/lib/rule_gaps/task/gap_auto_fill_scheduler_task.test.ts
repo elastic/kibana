@@ -24,6 +24,7 @@ import {
   gapStatus,
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from '../../../../common/constants';
+import { gapReasonType } from '../../../../common/constants/gap_reason';
 import * as gapAutoFillSchedulerTask from './gap_auto_fill_scheduler_task';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import { rulesClientMock } from '../../../rules_client.mock';
@@ -115,6 +116,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
     maxBackfills: 100,
     numRetries: 3,
     ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
+    excludedReasons: [gapReasonType.RULE_DISABLED],
     scheduledTaskId: 'test-task-id',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
@@ -277,11 +279,12 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
       const registeredTask =
         taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
-      taskRunner = registeredTask.createTaskRunner({
-        taskInstance: mockTaskInstance,
-        fakeRequest: mockRequest,
-        abortController: new AbortController(),
-      });
+      taskRunner = registeredTask.createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: mockTaskInstance,
+          fakeRequest: mockRequest,
+        })
+      );
     });
 
     afterEach(() => {
@@ -674,11 +677,13 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
           const registeredTask =
             taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
-          const taskRunnerWithAbort = registeredTask.createTaskRunner({
-            taskInstance: mockTaskInstance,
-            fakeRequest: mockRequest,
-            abortController,
-          });
+          const taskRunnerWithAbort = registeredTask.createTaskRunner(
+            taskManagerMock.createRunContext({
+              taskInstance: mockTaskInstance,
+              fakeRequest: mockRequest,
+              signal: abortController.signal,
+            })
+          );
 
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 50, page: 1, perPage: 1 });
           (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
@@ -997,11 +1002,12 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
         const registeredTask =
           taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
-        const taskRunnerWithoutRequest = registeredTask.createTaskRunner({
-          taskInstance: mockTaskInstance,
-          fakeRequest: undefined,
-          abortController: new AbortController(),
-        });
+        const taskRunnerWithoutRequest = registeredTask.createTaskRunner(
+          taskManagerMock.createRunContext({
+            taskInstance: mockTaskInstance,
+            fakeRequest: undefined,
+          })
+        );
 
         const result = await taskRunnerWithoutRequest.run();
 
@@ -1128,7 +1134,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         });
 
       const result = await processRuleBatches({
-        abortController,
+        signal: abortController.signal,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
         gapFetchMaxIterations: 10,
         logger,
@@ -1211,7 +1217,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
 
       const result = await processRuleBatches({
-        abortController,
+        signal: abortController.signal,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
         gapFetchMaxIterations: 10,
         logger,
@@ -1236,7 +1242,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
     it('honors cancellation before processing any batch', async () => {
       abortController.abort();
       const result = await processRuleBatches({
-        abortController,
+        signal: abortController.signal,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
         gapFetchMaxIterations: 10,
         logger,
@@ -1283,7 +1289,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
 
       const result = await processGapsForRules({
-        abortController,
+        signal: abortController.signal,
         aggregatedByRule: new Map(),
         endISO,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
@@ -1335,7 +1341,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
 
       const result = await processGapsForRules({
-        abortController,
+        signal: abortController.signal,
         aggregatedByRule: new Map(),
         endISO,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
@@ -1392,7 +1398,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
 
       const result = await processGapsForRules({
-        abortController,
+        signal: abortController.signal,
         aggregatedByRule: new Map(),
         endISO,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
@@ -1432,7 +1438,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       ]);
 
       const result = await processGapsForRules({
-        abortController,
+        signal: abortController.signal,
         aggregatedByRule,
         endISO,
         gapsPerPage: DEFAULT_GAPS_PER_PAGE,
@@ -1512,7 +1518,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         });
 
       const result = await processGapsForRules({
-        abortController,
+        signal: abortController.signal,
         aggregatedByRule: new Map(),
         endISO,
         gapsPerPage: 1,

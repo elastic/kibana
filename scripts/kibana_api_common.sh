@@ -14,6 +14,17 @@
 KIBANA_URL="${KIBANA_URL:-}"
 KIBANA_AUTH="${KIBANA_AUTH:-}"
 
+# Set KIBANA_USE_SESSION=true to authenticate via the 'basic' auth provider
+# (session cookie) instead of the default HTTP Basic auth (__http__ provider).
+#
+# Why this matters: the browser uses the 'basic' auth provider, while HTTP
+# Basic auth uses the '__http__' provider. These are separate auth realms.
+# Any per-user state tied to a browser session (OAuth tokens, user-specific
+# settings, etc.) is invisible to API calls made via HTTP Basic auth.
+# Session cookie auth uses the same 'basic' provider as the browser.
+KIBANA_USE_SESSION="${KIBANA_USE_SESSION:-false}"
+_SESSION_COOKIE_JAR=""
+
 # Candidates to try: protocol x auth permutations
 _URLS=("http://localhost:5601" "https://localhost:5601")
 _AUTHS=("elastic:changeme" "elastic_serverless:changeme")
@@ -34,7 +45,7 @@ _try_kibana() {
   http_code="$(curl -s -o /dev/null -w "%{http_code}" -k -u "$auth" \
     -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: Kibana" \
-    "$url/api/data_sources" 2>/dev/null || echo "000")"
+    "$url/api/security/v1/me" 2>/dev/null || echo "000")"
   [[ "$http_code" != "000" && "$http_code" != "401" ]]
 }
 
@@ -81,14 +92,64 @@ detect_kibana() {
   return 1
 }
 
+# Logs in via the 'basic' auth provider to obtain a session cookie.
+# This puts API calls in the same auth realm as the browser.
+_acquire_session() {
+  local username="${KIBANA_AUTH%%:*}"
+  local password="${KIBANA_AUTH#*:}"
+  _SESSION_COOKIE_JAR="$(mktemp -t kibana_session.XXXXXX)"
+
+  local tls_flag=""
+  if [[ "$KIBANA_URL" == https://* ]]; then
+    tls_flag="-k"
+  fi
+
+  local payload
+  if command -v jq &>/dev/null; then
+    payload="$(jq -n \
+      --arg u "$username" \
+      --arg p "$password" \
+      --arg url "$KIBANA_URL/" \
+      '{providerType:"basic",providerName:"basic",currentURL:$url,params:{username:$u,password:$p}}')"
+  else
+    payload="{\"providerType\":\"basic\",\"providerName\":\"basic\",\"currentURL\":\"${KIBANA_URL}/\",\"params\":{\"username\":\"${username}\",\"password\":\"${password}\"}}"
+  fi
+
+  local http_code
+  http_code="$(curl -s $tls_flag -o /dev/null -w "%{http_code}" \
+    -c "$_SESSION_COOKIE_JAR" \
+    -H "kbn-xsrf: true" \
+    -H "x-elastic-internal-origin: Kibana" \
+    -H "Content-Type: application/json" \
+    -X POST "$KIBANA_URL/internal/security/login" \
+    -d "$payload" 2>/dev/null)"
+
+  if [[ "$http_code" != "200" ]]; then
+    echo "Warning: Session login failed (HTTP $http_code). Falling back to HTTP Basic auth." >&2
+    rm -f "$_SESSION_COOKIE_JAR"
+    _SESSION_COOKIE_JAR=""
+    KIBANA_USE_SESSION="false"
+  else
+    echo "Session acquired via 'basic' auth provider (cookie auth)" >&2
+  fi
+}
+
 # Wrapper around curl with Kibana auth, required headers, and TLS handling.
 kibana_curl() {
   local tls_flag=""
   if [[ "$KIBANA_URL" == https://* ]]; then
     tls_flag="-k"
   fi
+
+  local auth_flags=()
+  if [[ -n "$_SESSION_COOKIE_JAR" ]]; then
+    auth_flags+=(-b "$_SESSION_COOKIE_JAR")
+  else
+    auth_flags+=(-u "$KIBANA_AUTH")
+  fi
+
   curl -s $tls_flag \
-    -u "$KIBANA_AUTH" \
+    "${auth_flags[@]}" \
     -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: Kibana" \
     "$@"
@@ -96,3 +157,8 @@ kibana_curl() {
 
 # Run detection on source
 detect_kibana
+
+# Acquire session cookie if requested
+if [[ "$KIBANA_USE_SESSION" == "true" ]]; then
+  _acquire_session
+fi

@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { EsQueryConfig } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 function excludeTiersQuery(
@@ -30,13 +31,17 @@ export function excludeFrozenQuery(): estypes.QueryDslQueryContainer[] {
   return excludeTiersQuery(['data_frozen']);
 }
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(
+  kql?: string,
+  esQueryConfig?: EsQueryConfig
+): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = fromKueryExpression(kql);
-  return [toElasticsearchQuery(ast)];
+  const allowLeadingWildcards = esQueryConfig?.allowLeadingWildcards ?? false;
+  const ast = fromKueryExpression(kql, { allowLeadingWildcards });
+  return [toElasticsearchQuery(ast, undefined, esQueryConfig ?? {})];
 }
 
 export function rangeQuery(
@@ -57,13 +62,15 @@ export function rangeQuery(
   ];
 }
 
-export function isKqlQueryValid(kql?: string): boolean {
+export function isKqlQueryValid(kql?: string, esQueryConfig?: EsQueryConfig): boolean {
   if (!kql) {
     return false;
   }
 
   try {
-    fromKueryExpression(kql);
+    fromKueryExpression(kql, {
+      allowLeadingWildcards: esQueryConfig?.allowLeadingWildcards ?? false,
+    });
     return true;
   } catch (error) {
     return false;
@@ -79,15 +86,17 @@ export function buildEsqlFilter({
   kuery,
   start,
   end,
+  esQueryConfig,
 }: {
   filter?: estypes.QueryDslQueryContainer;
   kuery?: string;
   start?: number;
   end?: number;
+  esQueryConfig?: EsQueryConfig;
 }): estypes.QueryDslQueryContainer {
   const filters: estypes.QueryDslQueryContainer[] = [
     filter || { match_all: {} },
-    ...kqlQuery(kuery),
+    ...kqlQuery(kuery, esQueryConfig),
     ...excludeFrozenQuery(),
   ];
 

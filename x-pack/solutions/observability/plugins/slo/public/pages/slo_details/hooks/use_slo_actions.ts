@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';

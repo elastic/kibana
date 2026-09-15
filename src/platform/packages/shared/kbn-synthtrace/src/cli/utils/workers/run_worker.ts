@@ -47,7 +47,7 @@ export function runWorker<TWorkerData>({
 
     worker.on('error', (error) => {
       logger.error(error);
-      reject();
+      reject(error);
     });
 
     worker.on('exit', (code) => {

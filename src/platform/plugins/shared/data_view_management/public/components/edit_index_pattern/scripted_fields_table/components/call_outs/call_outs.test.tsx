@@ -8,27 +8,34 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { CallOuts } from '.';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('CallOuts', () => {
-  test('should render normally', () => {
-    const component = shallow(
+  it('should render normally', () => {
+    renderWithI18n(
       <CallOuts
         deprecatedLangsInUse={['php']}
         painlessDocLink="http://www.elastic.co/painlessDocs"
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Deprecated languages in use')).toBeVisible();
+    expect(
+      screen.getByText('The following deprecated languages are in use: php.', { exact: false })
+    ).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Painless' })).toHaveAttribute(
+      'href',
+      'http://www.elastic.co/painlessDocs'
+    );
   });
 
-  test('should render without any call outs', () => {
-    const component = shallow(
+  it('should render without any call outs', () => {
+    const { container } = renderWithI18n(
       <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.elastic.co/painlessDocs" />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 });

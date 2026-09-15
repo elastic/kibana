@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
 
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,6 +19,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import { ServiceAccountsService } from './service_accounts';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('Security Plugin', () => {
@@ -54,13 +56,6 @@ describe('Security Plugin', () => {
       security: { operator_privileges: { enabled: false, available: false } },
     } as Awaited<ReturnType<Client['xpack']['usage']>>);
 
-    mockCoreSetup.http.getServerInfo.mockReturnValue({
-      hostname: 'localhost',
-      name: 'kibana',
-      port: 80,
-      protocol: 'https',
-    });
-
     mockSetupDependencies = {
       licensing: {
         license$: of({ getUnavailableReason: jest.fn() }),
@@ -71,6 +66,12 @@ describe('Security Plugin', () => {
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
+    mockCoreStart.http.getServerInfo.mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
     mockCoreSetup.getStartServices.mockResolvedValue([
       // @ts-expect-error only mocking the client we use
@@ -102,8 +103,14 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
+              },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
               },
               "api": ApiActions {
                 "prefix": "api:",
@@ -181,6 +188,13 @@ describe('Security Plugin', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
+      mockCoreSetup.http.getServerInfo.mockReturnValue({
+        hostname: 'localhost',
+        name: 'kibana',
+        port: 80,
+        protocol: 'https',
+      });
+
       await plugin.setup(mockCoreSetup, mockSetupDependencies);
       expect(plugin.start(mockCoreStart, mockStartDependencies)).toMatchInlineSnapshot(`
         Object {
@@ -188,6 +202,7 @@ describe('Security Plugin', () => {
             "apiKeys": Object {
               "areAPIKeysEnabled": [Function],
               "areCrossClusterAPIKeysEnabled": [Function],
+              "cloneAsInternalUser": [Function],
               "create": [Function],
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
@@ -199,8 +214,14 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
+              },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
               },
               "api": ApiActions {
                 "prefix": "api:",
@@ -232,11 +253,45 @@ describe('Security Plugin', () => {
           "userProfiles": Object {
             "bulkGet": [Function],
             "getCurrent": [Function],
+            "getCurrentProfileId": [Function],
             "suggest": [Function],
           },
         }
       `);
     });
+  });
+
+  describe('service account project context', () => {
+    it.each([
+      [
+        'complete',
+        'organization-id',
+        'project-id',
+        'workplaceai',
+        { organizationId: 'organization-id', projectId: 'project-id', projectType: 'workplaceai' },
+      ],
+      ['missing organization', undefined, 'project-id', 'workplaceai', undefined],
+      ['missing project', 'organization-id', undefined, 'workplaceai', undefined],
+      ['missing type', 'organization-id', 'project-id', undefined, undefined],
+    ] as const)(
+      'passes %s context to the service',
+      (_label, organizationId, projectId, projectType, expected) => {
+        const cloud = cloudMock.createSetup();
+        cloud.organizationId = organizationId;
+        cloud.serverless = { ...cloud.serverless, projectId, projectType };
+        mockSetupDependencies.cloud = cloud;
+        const start = jest.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
+        try {
+          plugin.setup(mockCoreSetup, mockSetupDependencies);
+          plugin.start(mockCoreStart, mockStartDependencies);
+          expect(start).toHaveBeenCalledWith(
+            expect.objectContaining({ cloudProjectContext: expected })
+          );
+        } finally {
+          start.mockRestore();
+        }
+      }
+    );
   });
 
   describe('stop()', () => {

@@ -7,8 +7,9 @@
 
 import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
+import type { FormBasedPrivateState, TextBasedPrivateState } from '@kbn/lens-common';
 import type { DashboardFileName } from './dashboards/dashboard_catalog';
 import { loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
@@ -27,7 +28,22 @@ export interface MetricsDashboardProps extends DashboardFileProps {
   apmIndices?: APMIndices;
 }
 
-function getDashboardFileNameFromProps({
+interface FormBasedDatasourceState extends Partial<Pick<FormBasedPrivateState, 'layers'>> {
+  [key: string]: unknown;
+}
+
+interface TextBasedDatasourceState
+  extends Partial<Pick<TextBasedPrivateState, 'layers' | 'indexPatternRefs'>> {
+  [key: string]: unknown;
+}
+
+interface DatasourceStates {
+  formBased?: FormBasedDatasourceState;
+  textBased?: TextBasedDatasourceState;
+  [key: string]: unknown;
+}
+
+export function getDashboardFileNameFromProps({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
@@ -57,11 +73,79 @@ const getAdhocDataView = (dataView: DataView) => {
   };
 };
 
+const syncDatasourceStatesWithDataView = (
+  datasourceStates: DatasourceStates,
+  dataView: DataView
+): DatasourceStates => {
+  const dataViewId = dataView.id!;
+  const textBased = datasourceStates.textBased;
+  const formBased = datasourceStates.formBased;
+
+  return {
+    ...datasourceStates,
+    ...(textBased && {
+      textBased: {
+        ...textBased,
+        layers: Object.fromEntries(
+          Object.entries(textBased.layers ?? {}).map(([layerId, layer]) => [
+            layerId,
+            { ...layer, index: dataViewId },
+          ])
+        ),
+        indexPatternRefs: textBased.indexPatternRefs?.map((reference) => ({
+          ...reference,
+          id: dataViewId,
+          title: dataView.getIndexPattern(),
+          timeField: reference.timeField ?? dataView.timeFieldName ?? '@timestamp',
+        })),
+      },
+    }),
+    ...(formBased && {
+      formBased: {
+        ...formBased,
+        layers: Object.fromEntries(
+          Object.entries(formBased.layers ?? {}).map(([layerId, layer]) => [
+            layerId,
+            {
+              ...layer,
+              ...(layer.indexPatternId && { indexPatternId: dataViewId }),
+            },
+          ])
+        ),
+      },
+    }),
+  };
+};
+
+export function getMetricIndexPattern(
+  dashboardFilename: DashboardFileName,
+  apmIndices: APMIndices | undefined,
+  dataView: DataView
+): string {
+  const fullPattern = apmIndices?.metric ?? dataView.getIndexPattern();
+  const patterns = fullPattern.split(',').map((p) => p.trim());
+
+  if (dashboardFilename.startsWith('otel_native-')) {
+    const otelPatterns = patterns.filter((p) => p.includes('.otel-'));
+    if (otelPatterns.length > 0) {
+      return otelPatterns.join(',');
+    }
+  }
+
+  if (dashboardFilename.startsWith('classic_apm-')) {
+    const classicPatterns = patterns.filter((p) => !p.includes('.otel-'));
+    if (classicPatterns.length > 0) {
+      return classicPatterns.join(',');
+    }
+  }
+
+  return fullPattern;
+}
+
 export async function convertSavedDashboardToPanels(
-  props: MetricsDashboardProps,
-  apmIndices?: APMIndices
+  props: MetricsDashboardProps
 ): Promise<DashboardState['panels'] | undefined> {
-  const { dataView } = props;
+  const { dataView, apmIndices } = props;
   const dashboardFilename = getDashboardFileNameFromProps(props);
   const unreplacedDashboardJSON = dashboardFilename
     ? await loadDashboardFile(dashboardFilename)
@@ -75,7 +159,7 @@ export async function convertSavedDashboardToPanels(
   const dashboardString = JSON.stringify(unreplacedDashboardJSON);
   // Replace indexPattern placeholder
   const dashboardStringWithReplacements = Mustache.render(dashboardString, {
-    indexPattern: apmIndices?.metric ?? dataView.getIndexPattern(),
+    indexPattern: getMetricIndexPattern(dashboardFilename, apmIndices, dataView),
   });
   // Convert to JSON object
   const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
@@ -101,6 +185,7 @@ export async function convertSavedDashboardToPanels(
           references: [],
           state: {
             ...(attributes?.state ?? {}),
+            datasourceStates: syncDatasourceStatesWithDataView(datasourceStates, dataView),
             adHocDataViews: getAdhocDataView(dataView),
             internalReferences: Object.keys(layers).map((layerId) => ({
               id: dataView.id,

@@ -26,8 +26,20 @@ class DatasetQualityPrivileges {
   public async getHasIndexPrivileges(
     esClient: ElasticsearchClient,
     indexes: string[],
-    privileges: SecurityIndexPrivilege[]
+    privileges: SecurityIndexPrivilege[],
+    isSecurityEnabled: boolean
   ): Promise<Awaited<Record<string, SecurityHasPrivilegesPrivileges>>> {
+    if (!isSecurityEnabled) {
+      return Object.fromEntries(
+        indexes.map((index) => [
+          index,
+          Object.fromEntries(
+            privileges.map((p) => [p, true])
+          ) as unknown as SecurityHasPrivilegesPrivileges,
+        ])
+      );
+    }
+
     try {
       const indexPrivileges = await esClient.security.hasPrivileges({
         index: indexes.map((dataStream) => ({ names: dataStream, privileges })),
@@ -79,8 +91,13 @@ class DatasetQualityPrivileges {
 
   public async getCanViewIntegrations(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     space = '*'
   ): Promise<boolean> {
+    if (!isSecurityEnabled) {
+      return true;
+    }
+
     const applicationPrivileges = await esClient.security.hasPrivileges({
       application: [
         {
@@ -100,6 +117,7 @@ class DatasetQualityPrivileges {
   public async getDatasetPrivileges(
     esClient: ElasticsearchClient,
     dataset: string[],
+    isSecurityEnabled: boolean,
     space = '*'
   ): Promise<{
     datasetsPrivilages: Record<
@@ -113,13 +131,18 @@ class DatasetQualityPrivileges {
     >;
     canViewIntegrations: boolean;
   }> {
-    const indexPrivileges = await this.getHasIndexPrivileges(esClient, dataset, [
-      'read',
-      'monitor',
-      'view_index_metadata',
-      FAILURE_STORE_PRIVILEGE,
-      MANAGE_FAILURE_STORE_PRIVILEGE,
-    ]);
+    const indexPrivileges = await this.getHasIndexPrivileges(
+      esClient,
+      dataset,
+      [
+        'read',
+        'monitor',
+        'view_index_metadata',
+        FAILURE_STORE_PRIVILEGE,
+        MANAGE_FAILURE_STORE_PRIVILEGE,
+      ],
+      isSecurityEnabled
+    );
 
     const datasetsPrivilages = Object.fromEntries(
       Object.entries(indexPrivileges).map(([index, privileges]) => [
@@ -133,13 +156,18 @@ class DatasetQualityPrivileges {
       ])
     );
 
-    const canViewIntegrations = await this.getCanViewIntegrations(esClient, space);
+    const canViewIntegrations = await this.getCanViewIntegrations(
+      esClient,
+      isSecurityEnabled,
+      space
+    );
 
     return { datasetsPrivilages, canViewIntegrations };
   }
 
   public async canReadDataset(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     type = DEFAULT_DATASET_TYPE,
     datasetQuery = '*-*',
     space = '*'
@@ -152,6 +180,7 @@ class DatasetQualityPrivileges {
     const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
       esClient,
       [datasetName],
+      isSecurityEnabled,
       space
     );
 
@@ -160,11 +189,12 @@ class DatasetQualityPrivileges {
 
   public async throwIfCannotReadDataset(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     type = DEFAULT_DATASET_TYPE,
     datasetQuery = '*-*',
     space = '*'
   ): Promise<void> {
-    if (!(await this.canReadDataset(esClient, type, datasetQuery, space))) {
+    if (!(await this.canReadDataset(esClient, isSecurityEnabled, type, datasetQuery, space))) {
       const datasetName = streamPartsToIndexPattern({
         typePattern: type,
         datasetPattern: datasetQuery,

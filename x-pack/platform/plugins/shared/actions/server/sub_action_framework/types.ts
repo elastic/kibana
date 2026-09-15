@@ -123,6 +123,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
+  isDeprecated?: boolean;
   subFeature?: SubFeature;
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };

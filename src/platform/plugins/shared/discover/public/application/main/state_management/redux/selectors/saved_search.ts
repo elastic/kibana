@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/common';
+import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToSavedSearch,
@@ -38,8 +44,33 @@ export const selectTabSavedSearch = async ({
       tab: tabState,
       currentDataView,
       services,
+      tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState }),
     }),
     discoverSession: currentState.persistedDiscoverSession,
     services,
   });
+};
+
+export const selectTabSavedSearchByValueAttributes = async ({
+  getState,
+  runtimeStateManager,
+  services,
+  tabId,
+}: {
+  getState: () => DiscoverInternalState;
+  runtimeStateManager: RuntimeStateManager;
+  services: DiscoverServices;
+  tabId: string;
+}): Promise<SavedSearchByValueAttributes> => {
+  const savedSearch = await selectTabSavedSearch({
+    getState,
+    runtimeStateManager,
+    services,
+    tabId,
+  });
+
+  const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+  const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
+
+  return { ...attributes, references };
 };

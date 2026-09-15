@@ -16,6 +16,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
     | 'match_only_text'
+    | 'search_as_you_type'
     | 'keyword'
     | 'boolean'
     | 'date'
@@ -69,6 +70,7 @@ const types = {
   keyword: createFactory('keyword', { ignore_above: 1024 }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
+  search_as_you_type: createFactory('search_as_you_type'),
   double: createFactory('double'),
   long: createFactory('long'),
   boolean: createFactory('boolean'),
@@ -91,6 +93,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     : string | string[];
   match_only_text: string;
   text: string;
+  search_as_you_type: string;
   boolean: boolean;
   date: TProperty extends { format: 'strict_date_optional_time' } ? string : string | number;
   double: number;

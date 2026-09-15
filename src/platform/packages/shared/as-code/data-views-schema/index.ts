@@ -7,5 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runtimeFieldSchema } from './src/schema_runtime_field';
-export type { AsCodeRuntimeField } from './src/types';
+export {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from './src/data_views/constants';
+export { AS_CODE_ESQL_DATA_SOURCE_TYPE } from './src/constants';
+export {
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+  PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_TYPES,
+} from './src/runtime_fields/common';
+export type {
+  RuntimeFieldCompositeType,
+  PrimitiveRuntimeFieldTypes,
+} from './src/runtime_fields/common';
+export {
+  dataViewReferenceSchema,
+  dataViewSchema,
+  dataViewSpecSchema,
+} from './src/data_views/schema_embedded_data_view';
+export { savedDataViewSpecSchema } from './src/data_views/schema_saved_data_view';
+export { esqlDataSourceSchema } from './src/schema_esql_data_source';
+export type {
+  AsCodeCompositeRuntimeField,
+  AsCodeRuntimeBaseField,
+  AsCodeFieldSettings,
+  AsCodeFieldFormat,
+  AsCodeDurationFormat,
+  AsCodeHistogramFormat,
+  AsCodeColorFormat,
+  AsCodeDataView,
+  AsCodeDataViewReference,
+  AsCodeDataViewSpec,
+  AsCodeEsqlDataSource,
+  AsCodeRuntimeField,
+  AsCodeSavedCompositeRuntimeField,
+  AsCodeSavedPrimitiveRuntimeField,
+  AsCodeSavedRuntimeField,
+  AsCodeSavedDataView,
+  AsCodeSavedFieldSettings,
+} from './src/types';
+
+// Schemas that are needed individually
+export { formatSchema } from './src/field_settings/formats/format_schema';

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListHumanId,
@@ -29,19 +29,21 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const CreateExceptionListRequestBody = lazySchema(() =>
+  z.object({
+    list_id: ExceptionListHumanId.optional(),
+    name: ExceptionListName,
+    description: ExceptionListDescription,
+    type: ExceptionListType,
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    os_types: ExceptionListOsTypeArray.optional(),
+    tags: ExceptionListTags.optional().default([]),
+    meta: ExceptionListMeta.optional(),
+    version: ExceptionListVersion.optional().default(1),
+  })
+);
 export type CreateExceptionListRequestBody = z.infer<typeof CreateExceptionListRequestBody>;
-export const CreateExceptionListRequestBody = z.object({
-  list_id: ExceptionListHumanId.optional(),
-  name: ExceptionListName,
-  description: ExceptionListDescription,
-  type: ExceptionListType,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListOsTypeArray.optional(),
-  tags: ExceptionListTags.optional().default([]),
-  meta: ExceptionListMeta.optional(),
-  version: ExceptionListVersion.optional().default(1),
-});
 export type CreateExceptionListRequestBodyInput = z.input<typeof CreateExceptionListRequestBody>;
 
+export const CreateExceptionListResponse = lazySchema(() => ExceptionList);
 export type CreateExceptionListResponse = z.infer<typeof CreateExceptionListResponse>;
-export const CreateExceptionListResponse = ExceptionList;

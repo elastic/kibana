@@ -1,13 +1,16 @@
 # @kbn/otel-demo
 
-Development tool for running the OpenTelemetry Demo on Kubernetes (minikube) with container logs exported to Elasticsearch.
+Development tool for running OpenTelemetry demo applications on Kubernetes (minikube) with full APM-compatible telemetry exported to Elasticsearch.
+
+By default the **EDOT Collector** (Elastic Distribution of OpenTelemetry) is used, which produces APM-compatible documents (`processor.event`, service transaction metrics) so demo services appear correctly in the APM UI with infrastructure correlation. Pass `--vanilla` to use the upstream `otel-collector-contrib` instead.
 
 ## Prerequisites
 
 1. **minikube** - Install from https://minikube.sigs.k8s.io/docs/start/
 2. **kubectl** - Usually installed with minikube, or install separately
-3. **Elasticsearch** running locally on `localhost:9200`
-4. **Kibana** running locally
+3. **Docker** - Required for minikube and EDOT image version resolution
+4. **Elasticsearch** running locally on `localhost:9200`
+5. **Kibana** running locally
 
 ## Quick Start
 
@@ -15,8 +18,11 @@ Development tool for running the OpenTelemetry Demo on Kubernetes (minikube) wit
 # Start minikube (if not already running)
 minikube start --driver=docker --memory=4096 --cpus=4
 
-# Start the OTel Demo
+# Start the OTel Demo (EDOT Collector, APM-compatible)
 node scripts/otel_demo.js
+
+# Use vanilla otel-collector-contrib instead
+node scripts/otel_demo.js --vanilla
 
 # Stop the demo
 node scripts/otel_demo.js --teardown
@@ -26,12 +32,22 @@ node scripts/otel_demo.js --teardown
 
 1. **Ensures minikube is running** - Starts it if needed
 2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs.otel index
-3. **Deploys OTel Demo to Kubernetes** - Creates namespace, deployments, services
-4. **Configures OTel Collector** with:
-   - `filelog` receiver to collect container logs from `/var/log/pods`
-   - `k8sattributes` processor for pod/container metadata enrichment
-   - `recombine` operator for multiline log grouping (stack traces)
-   - `elasticsearchexporter` to send logs to Elasticsearch
+3. **Resolves host.minikube.internal** - Injects `hostAliases` so pods can reach host Elasticsearch
+4. **Deploys demo to Kubernetes** - Creates namespace, deployments, services, RBAC
+5. **Configures OTel Collector**:
+   - **EDOT (default):** `elasticapm` connector for APM data, `kubeletstats`/`k8s_cluster`/`hostmetrics` for infrastructure, `filelog` for container logs, `k8sobjects` for K8s events
+   - **Vanilla (`--vanilla`):** `filelog` receiver, `k8sattributes` processor, `elasticsearchexporter`
+
+## Collector Comparison
+
+| Feature | EDOT (default) | Vanilla (`--vanilla`) |
+|---------|----------------|----------------------|
+| APM-compatible traces | Yes | No |
+| Service transaction metrics | Yes | No |
+| Infrastructure metrics (host/pod/container) | Yes | No |
+| Container logs | Yes | Yes |
+| K8s events | Yes | No |
+| Custom `logsIndex` | Yes (via `elasticsearch.index` attribute) | Yes (via fixed `logs_index`) |
 
 ## Log Collection
 
@@ -75,7 +91,8 @@ node scripts/otel_demo.js [options]
 
 Options:
   --config, -c         Path to Kibana config file (default: config/kibana.dev.yml)
-  --logs-index         Index name for logs (default: "logs.otel")
+  --vanilla            Use vanilla otel-collector-contrib instead of EDOT Collector
+  --logs-index         Index name for logs (default: "logs.otel", vanilla only)
   --teardown           Stop and remove the OTel Demo from Kubernetes
   --scenario, -s       Apply a failure scenario (can be repeated)
   --patch, -p          Patch scenarios onto running cluster (no redeploy)
@@ -233,6 +250,8 @@ The collector connects via `host.minikube.internal`. Ensure Elasticsearch is run
 
 Key files:
 - `src/ensure_otel_demo.ts` - Main orchestration logic
-- `src/get_kubernetes_manifests.ts` - Generates Kubernetes YAML
-- `src/get_otel_collector_config.ts` - OTel Collector config with filelog + k8sattributes
+- `src/get_edot_k8s_collector_config.ts` - EDOT Collector config with K8s receivers and APM pipelines
+- `src/get_otel_collector_config.ts` - Vanilla OTel Collector config with filelog + k8sattributes
+- `src/util/resolve_edot_collector_version.ts` - Resolves latest available EDOT Collector image tag
 - `src/util/assert_minikube_available.ts` - Minikube/kubectl utilities
+- `src/demos/*/` - Per-demo configurations and manifest generators

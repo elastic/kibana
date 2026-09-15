@@ -31,6 +31,7 @@ const EntrySchema = schema.object({
   operator: schema.literal('included'),
   type: schema.literal('match'),
   value: schema.string({
+    maxLength: 64,
     validate: validateIp,
   }),
 });
@@ -80,7 +81,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validatePreImportItems(items, async (item) => {
       // import specific validations
       await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
-      await this.validateCanCreateGlobalArtifacts(item);
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
       await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
 
       // usual validators from pre-create

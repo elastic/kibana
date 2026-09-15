@@ -20,12 +20,14 @@ export function getFullOtelCollectorConfig({
   password,
   logsIndex = 'logs.otel',
   namespace = 'otel-demo',
+  demoId = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   logsIndex?: string;
   namespace?: string;
+  demoId?: string;
 }): string {
   const configYaml = `
 receivers:
@@ -310,10 +312,13 @@ processors:
   resource:
     attributes:
       - key: service.namespace
-        value: otel-demo
+        value: ${namespace}
         action: upsert
       - key: deployment.environment
-        value: local-minikube
+        value: ${demoId}
+        action: upsert
+      - key: deployment.environment.name
+        value: ${demoId}
         action: upsert
 
   # Convert cumulative histograms to delta (required by Elasticsearch exporter)

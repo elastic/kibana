@@ -92,7 +92,9 @@ export class GcsFileSystem extends AbstractFileSystem {
 
       const contentLength = Number(response.headers.get('content-length')) || undefined;
 
-      const { meter, stop: stopBar } = createDownloadProgressBar(contentLength);
+      const { meter, stop: stopBar } = createDownloadProgressBar(contentLength, (msg) =>
+        this.log.info(msg)
+      );
 
       try {
         await pipeline(

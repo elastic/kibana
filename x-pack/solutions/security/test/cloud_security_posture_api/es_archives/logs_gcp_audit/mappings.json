@@ -594,6 +594,10 @@
                 "containerized": {
                   "type": "boolean"
                 },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -616,6 +620,18 @@
                 },
                 "target": {
                   "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "hostname": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {
@@ -699,6 +715,10 @@
             },
             "service": {
               "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -709,6 +729,10 @@
                 },
                 "target": {
                   "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {
@@ -735,6 +759,14 @@
             },
             "user": {
               "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -745,6 +777,22 @@
                 },
                 "target": {
                   "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "email": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {

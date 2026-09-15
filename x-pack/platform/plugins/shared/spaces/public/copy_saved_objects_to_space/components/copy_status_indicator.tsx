@@ -48,7 +48,7 @@ export const CopyStatusIndicator = (props: Props) => {
         defaultMessage="Object was copied."
       />
     );
-    return <EuiIconTip type={'checkInCircleFilled'} color={'success'} content={message} />;
+    return <EuiIconTip type={'checkCircleFill'} color={'success'} content={message} />;
   }
 
   if (successful && pendingObjectRetry) {
@@ -77,7 +77,7 @@ export const CopyStatusIndicator = (props: Props) => {
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
-        type={'alert'}
+        type={'warning'}
         color={'danger'}
         data-test-subj={`cts-object-result-error-${objectResult.id}`}
         content={
@@ -95,7 +95,7 @@ export const CopyStatusIndicator = (props: Props) => {
       case 'conflict':
         return (
           <EuiIconTip
-            type={'alert'}
+            type={'warning'}
             color={'warning'}
             content={
               <Fragment>
@@ -110,7 +110,7 @@ export const CopyStatusIndicator = (props: Props) => {
       case 'ambiguous_conflict':
         return (
           <EuiIconTip
-            type={'alert'}
+            type={'warning'}
             color={'warning'}
             content={
               <Fragment>

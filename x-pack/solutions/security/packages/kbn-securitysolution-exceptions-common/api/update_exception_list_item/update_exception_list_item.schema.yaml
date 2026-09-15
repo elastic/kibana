@@ -30,6 +30,14 @@ paths:
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistWindows'
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistLinux'
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistMac'
+            examples:
+              updateItem:
+                value:
+                  id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                  name: Updated name
+                  type: simple
+                  description: Updated description
+                  namespace_type: single
       responses:
         200:
           description: Successful response

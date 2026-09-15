@@ -14,40 +14,64 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WatchlistObject = lazySchema(() =>
+  z.object({
+    /**
+     * The unique ID of the watchlist
+     */
+    id: z.string().optional().describe('The unique ID of the watchlist'),
+    /**
+     * The name of the watchlist
+     */
+    name: z.string().describe('The name of the watchlist'),
+    /**
+     * Description of the watchlist
+     */
+    description: z.string().optional().describe('Description of the watchlist'),
+    /**
+     * Indicates if the watchlist is managed by the system
+     */
+    managed: z.boolean().describe('Indicates if the watchlist is managed by the system'),
+    /**
+     * Risk score modifier associated with the watchlist
+     */
+    riskModifier: z.number().describe('Risk score modifier associated with the watchlist'),
+    /**
+     * List of entity source IDs associated with the watchlist
+     */
+    entitySourceIds: z
+      .array(z.string())
+      .optional()
+      .describe('List of entity source IDs associated with the watchlist'),
+    /**
+     * Number of entities in the watchlist
+     */
+    entityCount: z.number().optional().describe('Number of entities in the watchlist'),
+    /**
+     * Indicates whether the watchlist contains manually assigned entities
+     */
+    hasManualEntities: z
+      .boolean()
+      .optional()
+      .describe('Indicates whether the watchlist contains manually assigned entities'),
+    /**
+     * Timestamp indicating when the watchlist was created
+     */
+    createdAt: z
+      .string()
+      .datetime()
+      .optional()
+      .describe('Timestamp indicating when the watchlist was created'),
+    /**
+     * Timestamp indicating when the watchlist was last updated
+     */
+    updatedAt: z
+      .string()
+      .datetime()
+      .optional()
+      .describe('Timestamp indicating when the watchlist was last updated'),
+  })
+);
 export type WatchlistObject = z.infer<typeof WatchlistObject>;
-export const WatchlistObject = z.object({
-  /**
-   * The unique ID of the watchlist
-   */
-  id: z.string().optional(),
-  /**
-   * The name of the watchlist
-   */
-  name: z.string(),
-  /**
-   * Description of the watchlist
-   */
-  description: z.string().optional(),
-  /**
-   * Indicates if the watchlist is managed by the system
-   */
-  managed: z.boolean(),
-  /**
-   * Risk score modifier associated with the watchlist
-   */
-  riskModifier: z.number(),
-  /**
-   * List of entity source IDs associated with the watchlist
-   */
-  entitySourceIds: z.array(z.string()).optional(),
-  /**
-   * Timestamp indicating when the watchlist was created
-   */
-  createdAt: z.string().datetime().optional(),
-  /**
-   * Timestamp indicating when the watchlist was last updated
-   */
-  updatedAt: z.string().datetime().optional(),
-});

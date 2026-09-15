@@ -43,7 +43,6 @@ export class TestingEmbeddedLensPlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/testing_embedded_lens',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

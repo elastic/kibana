@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/esql",
-  "owner": "@elastic/kibana-esql",
+  "owner": "@elastic/kibana-discover",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -9,9 +9,11 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
+      "cps",
       "fieldsMetadata",
       "usageCollection",
-      "licensing"
+      "licensing",
+      "searchInferenceEndpoints"
     ],
     "requiredPlugins": [
       "data",

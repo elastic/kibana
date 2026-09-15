@@ -10,7 +10,7 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { AreaFillOptions, FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
 import type {
@@ -81,8 +81,11 @@ export function getSuggestions({
   datasourceId,
   query,
 }: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
+  // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
+  // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
+  const isTextBased = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
   const incompleteTable =
-    !table.isMultiRow ||
+    (!isTextBased && !table.isMultiRow) ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));
@@ -499,8 +502,14 @@ function getSeriesType(
   const oldLayer = getExistingLayer(currentState, layerId);
   const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
+  const firstSeriesTypeInDataLayer = currentState
+    ? getDataLayers(currentState.layers)[0]?.seriesType
+    : undefined;
   const closestSeriesType =
-    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultSeriesType;
+    oldLayerSeriesType ||
+    firstSeriesTypeInDataLayer ||
+    (currentState && currentState.preferredSeriesType) ||
+    defaultSeriesType;
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
@@ -638,6 +647,7 @@ function buildSuggestion({
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
+    areaFill: currentState ? currentState.areaFill : AreaFillOptions.SOLID,
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,

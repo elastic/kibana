@@ -11,7 +11,10 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+import { toBulkCloseRuntimeMappings } from '../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../common/store';
@@ -37,7 +40,6 @@ import * as i18n from '../translations';
 import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/telemetry';
 import type { StartServices } from '../../../types';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 const getTelemetryEvent = {
@@ -74,12 +76,12 @@ export const useGroupTakeActionsItems = ({
 }: UseGroupTakeActionsItemsParams): GroupTakeActionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
-  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
@@ -139,7 +141,7 @@ export const useGroupTakeActionsItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
       refetchQuery();
     },
     [addError, refetchQuery]
@@ -153,6 +155,7 @@ export const useGroupTakeActionsItems = ({
       tableId,
       selectedGroup,
       reason,
+      runtimeMappings,
     }: {
       groupNumber: number;
       query?: string;
@@ -160,6 +163,7 @@ export const useGroupTakeActionsItems = ({
       tableId: string;
       selectedGroup: string;
       reason?: AlertClosingReason;
+      runtimeMappings?: MappingRuntimeFields;
     }) => {
       if (status === 'closed' && query && !(await promptAlertCloseConfirmation({ query }))) {
         return;
@@ -186,6 +190,8 @@ export const useGroupTakeActionsItems = ({
           status,
           query: query ? JSON.parse(query) : {},
           reason,
+          // Convert to the narrower shape the route accepts, preserving scripts.
+          runtimeMappings: toBulkCloseRuntimeMappings(runtimeMappings),
         });
 
         onAlertStatusUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0, status);
@@ -202,10 +208,12 @@ export const useGroupTakeActionsItems = ({
     ]
   );
   const { item: alertClosingReasonItem, getPanels: getAlertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems();
+    useBulkClosingReasonItems({
+      isEnabled: hasAlertsUpdate ?? false,
+    });
 
   return useCallback(
-    ({ query, tableId, groupNumber, selectedGroup }) => {
+    ({ query, tableId, groupNumber, selectedGroup, runtimeMappings }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
       if (!hasAlertsUpdate || !showAlertStatusActions) {
@@ -220,6 +228,7 @@ export const useGroupTakeActionsItems = ({
             renderItem: () => (
               <EuiContextMenuItem
                 key="open"
+                role="menuitem"
                 data-test-subj="open-alert-status"
                 onClick={() =>
                   onClickUpdate({
@@ -228,6 +237,7 @@ export const useGroupTakeActionsItems = ({
                     selectedGroup,
                     status: FILTER_OPEN as AlertWorkflowStatus,
                     tableId,
+                    runtimeMappings,
                   })
                 }
               >
@@ -242,6 +252,7 @@ export const useGroupTakeActionsItems = ({
             renderItem: () => (
               <EuiContextMenuItem
                 key="acknowledge"
+                role="menuitem"
                 data-test-subj="acknowledged-alert-status"
                 onClick={() =>
                   onClickUpdate({
@@ -250,6 +261,7 @@ export const useGroupTakeActionsItems = ({
                     selectedGroup,
                     status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
                     tableId,
+                    runtimeMappings,
                   })
                 }
               >
@@ -285,6 +297,7 @@ export const useGroupTakeActionsItems = ({
               renderItem: () => (
                 <EuiContextMenuItem
                   key={workflowStatus}
+                  role="menuitem"
                   data-test-subj={`${workflowStatus}-alert-status`}
                   onClick={() =>
                     onClickUpdate({
@@ -293,6 +306,7 @@ export const useGroupTakeActionsItems = ({
                       selectedGroup,
                       status: workflowStatus as AlertWorkflowStatus,
                       tableId,
+                      runtimeMappings,
                     })
                   }
                 >
@@ -313,6 +327,7 @@ export const useGroupTakeActionsItems = ({
             status: FILTER_CLOSED as AlertWorkflowStatus,
             tableId,
             reason,
+            runtimeMappings,
           });
         },
       }).map((panel) => ({

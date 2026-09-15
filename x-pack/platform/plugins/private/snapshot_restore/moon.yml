@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/snapshot_restore
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
@@ -41,6 +42,9 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
+  - '@kbn/core-http-browser'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -55,26 +59,6 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

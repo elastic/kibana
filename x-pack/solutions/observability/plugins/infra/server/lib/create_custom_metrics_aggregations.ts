@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import type { MetricExpressionCustomMetric } from '../../common/alerting/metrics';
 import type { MetricsExplorerCustomMetric } from '../../common/http_api';
@@ -19,7 +20,8 @@ const isMetricExpressionCustomMetric = (
 export const createCustomMetricsAggregations = (
   id: string,
   customMetrics: Array<MetricsExplorerCustomMetric | MetricExpressionCustomMetric>,
-  equation?: string
+  equation?: string,
+  dataView?: DataViewBase
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
@@ -34,7 +36,7 @@ export const createCustomMetricsAggregations = (
         ...acc,
         [key]: {
           filter: metric.filter
-            ? toElasticsearchQuery(fromKueryExpression(metric.filter))
+            ? toElasticsearchQuery(fromKueryExpression(metric.filter), dataView)
             : { match_all: {} },
         },
       };

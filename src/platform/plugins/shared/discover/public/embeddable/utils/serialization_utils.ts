@@ -10,52 +10,71 @@
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
-import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
+import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
-import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
   EditableSavedSearchAttributes,
   SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
-  SearchEmbeddableState,
+  SearchEmbeddablePanelApiState,
+  StoredSearchEmbeddableByValueState,
 } from '../../../common/embeddable/types';
+import {
+  fromStoredSearchEmbeddable,
+  fromStoredSearchEmbeddableByRef,
+  fromStoredSearchEmbeddableByValue,
+  isDiscoverSessionEmbeddableByReferenceState,
+  isSearchEmbeddableLegacyPanelState,
+  toStoredSearchEmbeddableByValue,
+  fromDiscoverSessionPanelOverrides,
+} from '../../../common/embeddable';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
-import type { SearchEmbeddableRuntimeState } from '../types';
+import type { SearchEmbeddableInputState, SearchEmbeddableRuntimeState } from '../types';
 import { isTabDeleted } from './is_tab_deleted';
 
 export const deserializeState = async ({
   serializedState,
   discoverServices,
 }: {
-  serializedState: SearchEmbeddableState;
+  serializedState: SearchEmbeddableInputState;
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
-  const savedObjectId = (serializedState as SearchEmbeddableByReferenceState).savedObjectId;
-  if (savedObjectId) {
+  const apiState = isSearchEmbeddableLegacyPanelState(serializedState)
+    ? fromStoredSearchEmbeddable(serializedState)
+    : serializedState;
+
+  if (isDiscoverSessionEmbeddableByReferenceState(apiState)) {
     // by reference
+    const { ref_id: savedObjectId, selected_tab_id: selectedTabId } = apiState;
     const { getDiscoverSession } = discoverServices.savedSearch;
     const session = await getDiscoverSession(savedObjectId);
-
-    const selectedTabId = (serializedState as SearchEmbeddableByReferenceState).selectedTabId;
     const selectedTab = selectedTabId
       ? session.tabs.find((t) => t.id === selectedTabId)
       : undefined;
-
     const resolvedTab = selectedTab ?? session.tabs[0];
-
     const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
-
     const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
-
-    const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
+    const savedObjectOverride = fromDiscoverSessionPanelOverrides(apiState.overrides ?? {});
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
+    // Panel overrides replace the resolved tab's values wholesale, so an override can drop entries
+    // (e.g. a removed grid column or sort field). jsonModeSettings is the exception: it partial-
+    // merges with the source, so overriding only one JSON display option keeps the others.
     const runtimeSavedSearchState = isSelectedTabDeleted
       ? {}
-      : { ...omit(resolvedTab, 'timeRange'), ...savedObjectOverride };
+      : {
+          ...omit(resolvedTab, 'timeRange'),
+          ...savedObjectOverride,
+          ...(savedObjectOverride.jsonModeSettings && {
+            jsonModeSettings: {
+              ...resolvedTab?.jsonModeSettings,
+              ...savedObjectOverride.jsonModeSettings,
+            },
+          }),
+        };
 
     return {
       ...runtimeSavedSearchState,
@@ -70,10 +89,13 @@ export const deserializeState = async ({
     };
   } else {
     // by value
+    const [tab] = apiState.tabs;
+    const savedObjectOverride = fromDiscoverSessionPanelOverrides(tab ?? {});
     const { byValueToSavedSearch } = discoverServices.savedSearch;
 
+    const { state: storedState, references } = toStoredSearchEmbeddableByValue(apiState);
     const savedSearch = await byValueToSavedSearch(
-      serializedState as SearchEmbeddableByValueState,
+      { attributes: { ...storedState.attributes, references } },
       true
     );
 
@@ -82,6 +104,7 @@ export const deserializeState = async ({
     return {
       ...savedSearchWithoutTabs,
       ...panelState,
+      ...savedObjectOverride,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }
@@ -105,7 +128,7 @@ export const serializeState = ({
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
-}): SearchEmbeddableState => {
+}): SearchEmbeddablePanelApiState => {
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
@@ -134,21 +157,34 @@ export const serializeState = ({
       }, {});
     }
 
-    return {
-      // Serialize the current dashboard state into the panel state **without** updating the saved object
+    const stored: SearchEmbeddableByReferenceState = {
       ...serializeTitles(),
       ...serializeTimeRange(),
       ...serializeDynamicActions?.(),
       ...overwriteState,
+      ...(selectedTabId !== undefined && { selectedTabId }),
       savedObjectId,
-      ...(selectedTabId ? { selectedTabId } : {}),
     };
+    return fromStoredSearchEmbeddableByRef(stored);
   }
 
-  return {
-    ...serializeTitles(),
+  const { title, description, ...titleOptions } = serializeTitles() ?? {};
+
+  const serializedTitles = {
+    title: title || initialState.savedObjectTitle,
+    description: description || initialState.savedObjectDescription,
+  };
+
+  const stored: StoredSearchEmbeddableByValueState = {
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    attributes: savedSearchAttributes,
+    ...serializedTitles,
+    ...titleOptions,
+    attributes: {
+      ...savedSearchAttributes,
+      ...(serializedTitles.title && { title: serializedTitles.title }),
+      ...(serializedTitles.description && { description: serializedTitles.description }),
+    },
   };
+  return fromStoredSearchEmbeddableByValue(stored, []);
 };

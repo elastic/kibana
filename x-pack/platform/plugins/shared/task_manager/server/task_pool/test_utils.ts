@@ -20,6 +20,7 @@ export function mockRun() {
 export function mockTask(overrides = {}, definitionOverrides = {}) {
   return {
     isExpired: false,
+    taskType: 'test',
     taskExecutionId: uuidv4(),
     id: uuidv4(),
     cancel: async () => undefined,
@@ -47,6 +48,9 @@ export function mockTask(overrides = {}, definitionOverrides = {}) {
     },
     isSameTask() {
       return false;
+    },
+    get cost(): number {
+      return this.definition.cost ?? TaskCost.Normal;
     },
     ...overrides,
   };

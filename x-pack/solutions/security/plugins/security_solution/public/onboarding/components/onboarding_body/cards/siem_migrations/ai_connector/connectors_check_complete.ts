@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { loadConnectors } from '@kbn/inference-connectors';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../../../../../../../common/siem_migrations/constants';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
@@ -21,7 +22,7 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
 
   const aiConnectors = await loadConnectors({
     http,
-    featureId: 'siem_migrations',
+    featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
     settings,
   });
 

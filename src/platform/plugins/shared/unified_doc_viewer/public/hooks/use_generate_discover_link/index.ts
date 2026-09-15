@@ -6,21 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { from, where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import {
+  applyUnmappedFieldsPolicy,
+  type UnmappedFieldsPolicy,
+} from '../../utils/esql_unmapped_fields';
 
-type WhereClause = ReturnType<typeof where>;
-
-export interface GenerateDiscoverLink {
-  (whereClause?: Record<string, any>): string | undefined;
-  (...clauses: WhereClause[]): string | undefined;
-}
+export type GenerateDiscoverLink = (whereClause?: ESQLAstExpression) => string | undefined;
 
 export function useGetGenerateDiscoverLink({
   indexPattern,
+  unmappedFieldsPolicy,
 }: {
   indexPattern?: string | (string | undefined)[];
+  unmappedFieldsPolicy?: UnmappedFieldsPolicy;
 }) {
   const {
     data,
@@ -30,52 +32,25 @@ export function useGetGenerateDiscoverLink({
   } = getUnifiedDocViewerServices();
   const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
   const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
-  const indices = castArray(indexPattern).filter(Boolean);
+  const indices = castArray(indexPattern).filter((index): index is string => Boolean(index));
 
-  const generateDiscoverLink: GenerateDiscoverLink = (
-    first?: Record<string, any> | WhereClause,
-    ...rest: WhereClause[]
-  ) => {
+  const generateDiscoverLink: GenerateDiscoverLink = (whereClause?: ESQLAstExpression) => {
     if (!discoverLocator || !indices.length) {
       return undefined;
     }
 
-    let esql: string;
-    const _from = from(indices.join());
-
-    if (typeof first === 'function') {
-      esql = _from.pipe(first as WhereClause, ...rest).toString();
-    } else if (first && typeof first === 'object') {
-      const whereClause = first as Record<string, any>;
-      const paramKeysMap = new Map<string, string>();
-      const params: Array<Record<string, any>> = [];
-
-      Object.keys(whereClause)
-        .filter((key) => whereClause[key] !== undefined)
-        .forEach((key) => {
-          const paramKey = toESQLParamName(key);
-          paramKeysMap.set(key, paramKey);
-          params.push({ [paramKey]: whereClause[key] });
-        });
-
-      esql = _from
-        .pipe(
-          where(
-            Array.from(paramKeysMap.keys())
-              .map((key) => `${key} == ?${paramKeysMap.get(key)}`)
-              .join(' AND '),
-            params
-          )
-        )
-        .toString();
-    } else {
-      esql = _from.toString();
+    const query = esql.from(indices.join());
+    if (unmappedFieldsPolicy) {
+      applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
+    }
+    if (whereClause) {
+      query.where`${whereClause}`;
     }
 
     const url = discoverLocator.getRedirectUrl({
       timeRange,
       filters: [],
-      query: { language: 'kuery', esql },
+      query: { language: 'kuery', esql: query.print('pipe-multiline') },
     });
 
     return url;
@@ -85,5 +60,3 @@ export function useGetGenerateDiscoverLink({
     generateDiscoverLink,
   };
 }
-
-export const toESQLParamName = (str: string): string => str.replaceAll('.', '_');

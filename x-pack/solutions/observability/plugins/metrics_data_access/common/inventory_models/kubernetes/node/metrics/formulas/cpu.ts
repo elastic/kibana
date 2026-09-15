@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils';
 
 export const nodeCpuCapacity: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {

@@ -45,7 +45,6 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
@@ -53,7 +52,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  ExportShareDerivatives,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -74,11 +77,12 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
+import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
-import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -103,7 +107,6 @@ export interface DashboardStartDependencies {
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -183,6 +186,14 @@ export class DashboardPlugin
           },
         })
       );
+      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
+        id: 'exportJson',
+        groupId: 'exportDerivatives',
+        getShareIntegrationConfig: async () => {
+          const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
+          return exportJsonConfig;
+        },
+      });
     }
 
     const {
@@ -329,6 +340,30 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     registerActions(plugins);
+
+    plugins.navigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDashboardRecentlyAccessedService()
+            .get$()
+            .pipe(
+              map((items) =>
+                items.slice(0, 5).map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
+    });
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
       const { searchAction } = await import('./dashboard_client');

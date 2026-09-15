@@ -12,9 +12,15 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
+  SO_SEARCH_LIMIT,
 } from '../../common/constants';
+import {
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
+} from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type {
@@ -24,6 +30,7 @@ import type {
 import type {
   AwsCloudConnectorVars,
   CloudConnector,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
@@ -46,6 +53,9 @@ describe('CloudConnectorService', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
+    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+      useSpaceAwareness: false,
+    });
 
     mockSoClient = createSavedObjectClientMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -285,8 +295,8 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should throw error when AWS external_id is missing', async () => {
-      const invalidRequest: CreateCloudConnectorRequest = {
+    it('should create successfully when AWS external_id is absent (identity federation without external ID)', async () => {
+      const requestWithoutExternalId: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
         vars: {
@@ -294,12 +304,39 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        } as any, // Intentionally invalid for testing validation
+        },
       };
 
-      await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        /Package policy must contain valid external_id secret reference/
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+          },
+        },
+      });
+
+      const result = await service.create(mockSoClient, requestWithoutExternalId);
+
+      expect(result.name).toBe('test-connector');
+      const [soType, soAttributes] = mockSoClient.create.mock.calls[0];
+      expect(soType).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+      expect(soAttributes).toEqual(
+        expect.objectContaining({
+          cloudProvider: 'aws',
+        })
       );
+      expect((soAttributes as any).vars.external_id).toBeUndefined();
     });
 
     describe('duplicate name validation', () => {
@@ -541,17 +578,17 @@ describe('CloudConnectorService', () => {
       ],
       total: 1,
       page: 1,
-      per_page: 20,
+      per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
     };
 
-    // Mock aggregation response for package policy counts (perPage: 0 means no docs returned)
+    // Mock package policy aggregation (getPackagePolicyCountsMap uses terms agg on cloud_connector_id)
     const mockPackagePolicies = {
       saved_objects: [],
       total: 1,
       page: 1,
       per_page: 0,
       aggregations: {
-        packagePolicyCounts: {
+        count_by_cloud_connector: {
           buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
         },
       },
@@ -572,10 +609,29 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       });
+
+      expect(mockSoClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter: buildPackagePolicyFilterExcludingHiddenPackages(
+            `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+          ),
+          perPage: 0,
+          aggs: {
+            count_by_cloud_connector: {
+              terms: {
+                field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+                size: SO_SEARCH_LIMIT,
+              },
+            },
+          },
+        })
+      );
 
       expect(result).toEqual([
         {
@@ -668,7 +724,7 @@ describe('CloudConnectorService', () => {
         ],
         total: 2,
         page: 1,
-        per_page: 20,
+        per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
       };
 
       mockSoClient.find.mockResolvedValue(mockConnectorsWithFields);
@@ -678,7 +734,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
         fields: ['name'],
@@ -1009,7 +1065,8 @@ describe('CloudConnectorService', () => {
       expect(result.id).toEqual('cloud-connector-123');
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+      const externalId1 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId1.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -1054,7 +1111,8 @@ describe('CloudConnectorService', () => {
 
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+      const externalId2 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId2.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {
@@ -1121,24 +1179,24 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.update).not.toHaveBeenCalled();
     });
 
-    it('should require both role_arn and external_id when updating vars', async () => {
+    it('should allow updating vars with role_arn only (identity federation without external ID)', async () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockExistingSavedObject);
 
-      const incompleteVars = {
+      const varsWithoutExternalId = {
         role_arn: {
           value: 'arn:aws:iam::123456789012:role/ValidRole',
           type: 'text' as const,
         },
-        // Missing external_id
-      } as any; // Intentionally invalid for testing validation
+      };
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
-          vars: incompleteVars,
+          vars: varsWithoutExternalId,
         })
-      ).rejects.toThrow('Package policy must contain valid external_id secret reference');
+      ).resolves.toBeDefined();
 
-      expect(mockSoClient.update).not.toHaveBeenCalled();
+      expect(mockSoClient.update).toHaveBeenCalled();
     });
 
     it('should throw error when cloud connector not found', async () => {
@@ -1737,8 +1795,8 @@ describe('CloudConnectorService', () => {
         );
       });
 
-      it('should throw error when external_id is missing', () => {
-        const invalidRequest: CreateCloudConnectorRequest = {
+      it('should validate successfully when external_id is absent (identity federation without external ID)', () => {
+        const validRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
           cloudProvider: 'aws',
           vars: {
@@ -1746,12 +1804,10 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          } as any, // Intentionally invalid for testing validation
+          },
         };
 
-        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain valid external_id secret reference'
-        );
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should throw error when external_id value is missing', () => {

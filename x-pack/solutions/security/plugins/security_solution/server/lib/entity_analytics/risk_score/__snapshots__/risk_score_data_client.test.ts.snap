@@ -32,6 +32,9 @@ Object {
               "calculated_score_norm": Object {
                 "type": "float",
               },
+              "calculation_run_id": Object {
+                "type": "keyword",
+              },
               "category_1_count": Object {
                 "type": "long",
               },
@@ -88,6 +91,20 @@ Object {
                 "type": "object",
               },
               "notes": Object {
+                "type": "keyword",
+              },
+              "related_entities": Object {
+                "properties": Object {
+                  "entity_id": Object {
+                    "type": "keyword",
+                  },
+                  "relationship_type": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "object",
+              },
+              "score_type": Object {
                 "type": "keyword",
               },
             },
@@ -111,6 +128,9 @@ Object {
               "calculated_score_norm": Object {
                 "type": "float",
               },
+              "calculation_run_id": Object {
+                "type": "keyword",
+              },
               "category_1_count": Object {
                 "type": "long",
               },
@@ -167,6 +187,20 @@ Object {
                 "type": "object",
               },
               "notes": Object {
+                "type": "keyword",
+              },
+              "related_entities": Object {
+                "properties": Object {
+                  "entity_id": Object {
+                    "type": "keyword",
+                  },
+                  "relationship_type": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "object",
+              },
+              "score_type": Object {
                 "type": "keyword",
               },
             },
@@ -190,6 +224,9 @@ Object {
               "calculated_score_norm": Object {
                 "type": "float",
               },
+              "calculation_run_id": Object {
+                "type": "keyword",
+              },
               "category_1_count": Object {
                 "type": "long",
               },
@@ -246,6 +283,20 @@ Object {
                 "type": "object",
               },
               "notes": Object {
+                "type": "keyword",
+              },
+              "related_entities": Object {
+                "properties": Object {
+                  "entity_id": Object {
+                    "type": "keyword",
+                  },
+                  "relationship_type": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "object",
+              },
+              "score_type": Object {
                 "type": "keyword",
               },
             },

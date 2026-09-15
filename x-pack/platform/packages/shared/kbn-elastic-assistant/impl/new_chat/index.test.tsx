@@ -48,12 +48,12 @@ describe('NewChat', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the default New Chat button with a discuss icon', () => {
+  it('renders the default New Chat button with an assistant (AiButton) icon', () => {
     render(<NewChat {...defaultProps} />);
 
     const newChatButton = screen.getByTestId('plusCircle');
 
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(newChatButton.querySelector('[data-euiicon-type="comment"]')).toBeInTheDocument();
   });
 
   it('does not render the default New Chat button with a discuss icon when assistant is not visible', () => {
@@ -73,7 +73,7 @@ describe('NewChat', () => {
 
     const newChatButton = screen.getByTestId('plusCircle');
 
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(newChatButton.querySelector('[data-euiicon-type="comment"]')).toBeInTheDocument();
   });
 
   it('renders the default "New Chat" text when children are NOT provided', () => {

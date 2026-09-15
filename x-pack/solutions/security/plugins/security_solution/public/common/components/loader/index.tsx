@@ -9,45 +9,10 @@ import type {
   // @ts-expect-error
   EuiLoadingSpinnerSize,
 } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { rgba } from 'polished';
 import React from 'react';
-import styled, { css } from 'styled-components';
-
-const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
-  padding: ${({ theme }) => theme.eui.euiSizeM};
-
-  ${({ overlay, overlayBackground, theme }) =>
-    overlay &&
-    css`
-      background: ${overlayBackground
-        ? rgba(overlayBackground, 0.9)
-        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
-      bottom: 0;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      z-index: ${theme.eui.euiZLevel1};
-    `}
-`;
-
-Aside.displayName = 'Aside';
-
-const FlexGroup = styled(EuiFlexGroup).attrs(() => ({
-  alignItems: 'center',
-  direction: 'column',
-  gutterSize: 's',
-  justifyContent: 'center',
-}))<{ overlay: { overlay?: boolean } }>`
-  ${({ overlay }) =>
-    overlay &&
-    css`
-      height: 100%;
-    `}
-`;
-
-FlexGroup.displayName = 'FlexGroup';
 
 export interface LoaderProps {
   overlay?: boolean;
@@ -56,22 +21,54 @@ export interface LoaderProps {
   children?: React.ReactChild;
 }
 
-export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
-  <Aside overlay={overlay} overlayBackground={overlayBackground}>
-    <FlexGroup overlay={{ overlay }}>
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner data-test-subj="loading-spinner" size={size} />
-      </EuiFlexItem>
+export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackground, size }) => {
+  const { euiTheme } = useEuiTheme();
 
-      {children && (
+  const asideStyles = css`
+    padding: ${euiTheme.size.m};
+    ${overlay &&
+    css`
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(euiTheme.colors.emptyShade, 0.9)};
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: ${euiTheme.levels.flyout};
+    `}
+  `;
+
+  const flexGroupStyles = overlay
+    ? css`
+        height: 100%;
+      `
+    : undefined;
+
+  return (
+    <aside css={asideStyles}>
+      <EuiFlexGroup
+        alignItems="center"
+        direction="column"
+        gutterSize="s"
+        justifyContent="center"
+        css={flexGroupStyles}
+      >
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            <p>{children}</p>
-          </EuiText>
+          <EuiLoadingSpinner data-test-subj="loading-spinner" size={size} />
         </EuiFlexItem>
-      )}
-    </FlexGroup>
-  </Aside>
-));
+
+        {children && (
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="s">
+              <p>{children}</p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </aside>
+  );
+});
 
 Loader.displayName = 'Loader';

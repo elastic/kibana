@@ -25,6 +25,8 @@ Container for filter presets. Accepts children to control order; auto-renders de
 |--------|-----------|--------|-------------|
 | `sort` | `Filters.Sort` | Available | Sort dropdown populated from the provider's sorting config. |
 | `tags` | `Filters.Tags` | Available | Tag include/exclude popover. Requires `services.tags` on the provider. |
+| `starred` | `Filters.Starred` | Available | Starred toggle (`is:starred`). Requires `services.favorites` on the provider. |
+| `createdBy` | `Filters.CreatedBy` | Available | User popover with profile avatars. Requires `services.userProfiles` on the provider. |
 
 #### Default filter order
 
@@ -60,58 +62,67 @@ const { Filters } = ContentListToolbar;
 Adding a filter involves two independent concerns:
 
 1. **Popover UI** — what appears when the user clicks the filter button.
-2. **Query parser** — how typed filter syntax (e.g. `createdBy:alice`) is extracted from the search bar and mapped to `ActiveFilters`.
+2. **Field / flag definition** — how typed filter syntax (e.g. `createdBy:alice`) is parsed from `queryText` into the `ContentListQueryModel` and converted to `ActiveFilters` for the data source.
 
-The two concerns are implemented separately and composed in the toolbar.
+The popover lives in this package. The query parsing lives in `@kbn/content-list-provider`'s query model pipeline (see [`HOW_IT_WORKS.md`](../HOW_IT_WORKS.md) for the full flow).
 
 ---
 
-### Step 1 — Implement the popover renderer
+### Step 1 — Register a field or flag definition
 
-A filter renderer is a React component that renders the popover UI. Use `SelectableFilterPopover` from this package for include/exclude-style filters.
+The query model pipeline in `@kbn/content-list-provider` parses `queryText` into a structured `ContentListQueryModel` using registered `FieldDefinition` and `FlagDefinition` entries.
+
+For **built-in** dimensions, add the definition in `query_model/field_definitions.ts`. For **consumer-specific** dimensions, pass them via the `features.fields` or `features.flags` props on `ContentListProvider`:
 
 ```tsx
-// kbn-content-list-toolbar/src/filters/users/user_filter_renderer.tsx
+<ContentListProvider
+  features={{
+    fields: [{
+      fieldName: 'updatedBy',
+      resolveIdToDisplay: (uid) => store.resolve(uid)?.email ?? uid,
+      resolveDisplayToId: (display) => store.getAll().find(u => u.email === display)?.uid,
+      resolveFuzzyDisplayToIds: (partial) =>
+        store.getAll()
+          .filter(u => u.email.includes(partial) || u.fullName.includes(partial))
+          .map(u => u.uid),
+    }],
+    flags: [{
+      flagName: 'managed',
+      modelKey: 'managed',
+    }],
+  }}
+/>
+```
 
-import React, { useMemo } from 'react';
-import { Query } from '@elastic/eui';
-import { SelectableFilterPopover, useFieldQueryFilter } from '@kbn/content-list-toolbar';
-import { useUserProfileService } from '@kbn/content-management-user-profiles';
+The `toFindItemsFilters()` bridge is generic — it maps any `model.filters[fieldName]` to `activeFilters[fieldName]` automatically. No changes needed unless the field requires special mapping.
 
-export const UserFilterRenderer = ({
-  query,
-  onChange,
-}: {
-  query?: Query;
-  onChange?: (query: Query) => void;
-}) => {
-  const userService = useUserProfileService();
-  const { selection, toggle, clearAll, activeCount } = useFieldQueryFilter({
-    fieldName: 'createdBy',
-    query,
-    onChange,
-  });
+---
 
-  const options = useMemo(
-    () =>
-      (userService?.getUserList() ?? []).map((user) => ({
-        key: user.uid,
-        label: user.displayName,
-        value: user.username,
-      })),
-    [userService]
-  );
+### Step 2 — Implement the popover renderer
 
-  if (!userService) return null;
+A filter renderer is a React component that renders the popover UI. Use `SelectableFilterPopover` from this package for include/exclude-style filters, and `useFilterFacets` from `@kbn/content-list-provider` to lazily fetch display-ready facets.
+
+```tsx
+// kbn-content-list-toolbar/src/filters/my_field/my_field_filter_renderer.tsx
+
+import React from 'react';
+import { useFilterFacets, useFilterToggle } from '@kbn/content-list-provider';
+import { SelectableFilterPopover } from '../selectable_filter_popover';
+
+export const MyFieldFilterRenderer = () => {
+  const facetsQuery = useFilterFacets('myField');
+  const toggle = useFilterToggle('myField');
 
   return (
     <SelectableFilterPopover
-      title="Created by"
-      options={options}
-      selection={selection}
-      onToggle={toggle}
-      onClearAll={clearAll}
-      activeCount={activeCount}
+      title="My Field"
+      isLoading={facetsQuery.isLoading}
+      options={(facetsQuery.data ?? []).map((facet) => ({
+        key: facet.key,
+        label: facet.label,
+        count: facet.count,
+      }))}
+      onToggle={(key) => toggle(key)}
     />
   );
 };
@@ -120,16 +131,16 @@ export const UserFilterRenderer = ({
 Then declare it as a `Filters` preset so consumers can include it declaratively:
 
 ```ts
-// kbn-content-list-toolbar/src/filters/users/user_filter.ts
+// kbn-content-list-toolbar/src/filters/my_field/my_field_filter.ts
 
 import { filter } from '../part';
-import { UserFilterRenderer } from './user_filter_renderer';
+import { MyFieldFilterRenderer } from './my_field_filter_renderer';
 
-export const UserFilter = filter.createPreset({
-  name: 'users',
-  resolve: (_attributes, { hasUsers }) => {
-    if (!hasUsers) return undefined;
-    return { type: 'custom_component', component: UserFilterRenderer };
+export const MyFieldFilter = filter.createPreset({
+  name: 'myField',
+  resolve: (_attributes, { hasMyField }) => {
+    if (!hasMyField) return undefined;
+    return { type: 'custom_component', component: MyFieldFilterRenderer };
   },
 });
 ```
@@ -138,134 +149,58 @@ Wire it into the auto-render defaults in `use_filters.ts` so it appears without 
 
 ---
 
-### Step 2 — Implement a `QueryParser`
+### Step 3 — Supply a `FilterFacetConfig` (for popover counts)
 
-When a user types `createdBy:alice` directly into the search bar, the toolbar must extract that clause, resolve `alice` to a user ID, and merge it into `ActiveFilters.createdBy`. This is the job of a `QueryParser`.
+To populate the popover with counts, supply a `FilterFacetConfig` for the feature. The client provider (`@kbn/content-list-provider-client`) auto-builds these for tags and user profiles. For custom fields, pass the config via `features`:
 
-A `QueryParser` receives the raw `EuiSearchBar` query text (already cleaned by any preceding parsers in the chain) and returns:
-
-- `searchQuery` — the text with its field clauses removed (passed to the next parser and ultimately to `findItems`).
-- `filters` — a partial `ActiveFilters` object. Return an empty object `{}` when no clauses are found — this clears the filter dimension, which is correct since the search bar is the authoritative source of truth.
-
-```ts
-// kbn-content-list-toolbar/src/filters/users/use_user_query_parser.ts
-
-import { useMemo } from 'react';
-import { useUserProfileService } from '@kbn/content-management-user-profiles';
-import type { QueryParser, QueryParserResult } from '@kbn/content-list-toolbar';
-
-export const useUserQueryParser = (): QueryParser | null => {
-  const userService = useUserProfileService();
-
-  return useMemo((): QueryParser | null => {
-    if (!userService?.parseSearchQuery) return null;
-
-    const { parseSearchQuery } = userService;
-
-    return {
-      parse(queryText: string): QueryParserResult {
-        const { searchQuery, userIds } = parseSearchQuery(queryText);
-        return {
-          searchQuery,
-          filters: userIds?.length ? { createdBy: { include: userIds } } : {},
-        };
+```tsx
+<ContentListProvider
+  features={{
+    myField: {
+      getFacets: async ({ filters }) => {
+        const items = filterItems(getItems(), filters);
+        return computeMyFieldFacets(items);
       },
-    };
-  }, [userService]);
-};
+    },
+  }}
+/>
 ```
 
-> The `QueryParser` interface and `parseFiltersFromQuery` pipeline are exported from `@kbn/content-list-toolbar`. Import them to implement or test a parser outside this package.
+`useFilterFacets('myField')` in the popover renderer will call this `getFacets` lazily when the popover opens.
 
 ---
 
-### Step 3 — Register the parser in the toolbar
+### How the query model pipeline works
 
-Open [`content_list_toolbar.tsx`](src/content_list_toolbar.tsx) and add the new parser to the `queryParsers` array. This is the **only file that needs to change** when adding a new filter type.
-
-```ts
-// content_list_toolbar.tsx
-
-const tagParser = useTagQueryParser();
-const userParser = useUserQueryParser();          // ← add this
-
-const queryParsers = useMemo(
-  (): ReadonlyArray<QueryParser> =>
-    [tagParser, userParser].filter((p): p is QueryParser => p !== null),   // ← add userParser
-  [tagParser, userParser]
-);
-```
-
-Parsers run in the order listed. Each receives the cleaned text from the previous. Order matters when field names might overlap — but for disjoint field names, order is irrelevant.
-
----
-
-### How the pipeline works
-
-`parseFiltersFromQuery(queryText, parsers)` reduces over the parsers array:
+`queryText` flows through a single pipeline in `@kbn/content-list-provider`:
 
 ```
 queryText = "my query tag:(Production) createdBy:alice"
-
-tag parser:
-  → extracts tag:(Production), resolves to tag-1
-  → searchQuery = "my query createdBy:alice"
-  → filters = { tag: { include: ['tag-1'] } }
-
-user parser:
-  → extracts createdBy:alice, resolves to uid-42
-  → searchQuery = "my query"
-  → filters = { createdBy: { include: ['uid-42'] } }
-
-result:
-  → setSearch(queryText, { search: 'my query', tag: { include: ['tag-1'] }, createdBy: { include: ['uid-42'] } })
+         ↓
+    useQueryModel(queryText)
+         ↓
+    parseQueryText(queryText, fields, flags, schema)
+         ↓  extracts known fields/flags via EUI Query AST
+    ContentListQueryModel {
+      search: "my query",
+      filters: { tag: { include: ['tag-1'], exclude: [] }, createdBy: { include: ['uid-42'], exclude: [] } },
+      flags: {}
+    }
+         ↓
+    toFindItemsFilters(model)
+         ↓
+    ActiveFilters { search: "my query", tag: { include: ['tag-1'] }, createdBy: { include: ['uid-42'] } }
 ```
 
-Each parser only removes its own field syntax. The final `searchQuery` is sent to `findItems` as plain text.
-
----
-
-### Testing a `QueryParser`
-
-`parseFiltersFromQuery` is a pure function — test it directly without React or a toolbar:
-
-```ts
-import { parseFiltersFromQuery } from '@kbn/content-list-toolbar';
-
-describe('useCreatedByQueryParser', () => {
-  it('extracts createdBy clauses and resolves to IDs', () => {
-    const parser = {
-      parse: (queryText: string) => {
-        // minimal inline implementation for the test
-        const match = queryText.match(/createdBy:(\S+)/);
-        return {
-          searchQuery: queryText.replace(/createdBy:\S+\s*/g, '').trim(),
-          filters: match ? { createdBy: { include: [`uid-${match[1]}`] } } : {},
-        };
-      },
-    };
-
-    const result = parseFiltersFromQuery('my query createdBy:alice', [parser]);
-
-    expect(result.searchQuery).toBe('my query');
-    expect(result.filters).toEqual({ createdBy: { include: ['uid-alice'] } });
-  });
-
-  it('clears createdBy filter when no clause is present', () => {
-    const parser = { parse: (q: string) => ({ searchQuery: q, filters: {} }) };
-    const result = parseFiltersFromQuery('plain search', [parser]);
-    expect(result.filters).toEqual({});
-  });
-});
-```
+Unknown field syntax (e.g. `owner:(alice or bob)`) is preserved verbatim in `search` and passed through to `findItems` untouched.
 
 ---
 
 ### Checklist for a new filter
 
-- [ ] Renderer component using `SelectableFilterPopover` + `useFieldQueryFilter`.
+- [ ] `FieldDefinition` or `FlagDefinition` registered (built-in in `field_definitions.ts`, or consumer-specific via `features.fields`/`features.flags`).
+- [ ] Renderer component using `SelectableFilterPopover` + `useFilterFacets`.
 - [ ] Preset declared with `filter.createPreset` and wired into the auto-render defaults.
-- [ ] `useXxxQueryParser` hook implementing `QueryParser`, calling the service's own `parseSearchQuery`.
-- [ ] Parser added to the `queryParsers` array in `content_list_toolbar.tsx`.
-- [ ] `filterDisplay` flag (`hasUsers`, `hasStarred`, etc.) added to `useFilterDisplay`.
+- [ ] `FilterFacetConfig` supplied (auto-built by client provider for tags/profiles, or via `features` prop).
+- [ ] Feature flag added to `ContentListSupports` (e.g. `myField: true`).
 - [ ] `findItems` updated in the consumer (or mock datasource) to act on the new filter dimension.

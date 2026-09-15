@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  *  Simple legacy metric generated from kibana
@@ -62,7 +63,7 @@ export const simpleLegacyMetricAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -149,7 +150,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsLegacyMetric',
   references: [
     {
@@ -237,7 +238,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsLegacyMetric',
   references: [
     {
@@ -294,7 +295,7 @@ export const customColorByValueAttributes: LensAttributes = {
           rangeMin: 0,
           rangeMax: null,
           rangeType: 'number',
-          stops: [
+          colorStops: [
             {
               color: '#24c292',
               stop: 0,
@@ -306,6 +307,20 @@ export const customColorByValueAttributes: LensAttributes = {
             {
               color: '#f6726a',
               stop: 4696,
+            },
+          ],
+          stops: [
+            {
+              color: '#24c292',
+              stop: 3130.66,
+            },
+            {
+              color: '#fcd883',
+              stop: 4696,
+            },
+            {
+              color: '#f6726a',
+              stop: 6261,
             },
           ],
           continuity: 'above',
@@ -321,7 +336,7 @@ export const customColorByValueAttributes: LensAttributes = {
     },
     filters: [],
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',

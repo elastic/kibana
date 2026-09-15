@@ -111,7 +111,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/agent?start=${start}&end=${end}`,
+        url: `/internal/apm/services/foo/agent?start=${start}&end=${end}&environment=ENVIRONMENT_ALL`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -132,7 +132,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
+        url: `/internal/apm/unified_traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { MouseEvent } from 'react';
@@ -22,8 +22,7 @@ export interface Props {
 
 export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
   const {
-    application: { navigateToUrl },
-    http: { basePath },
+    application: { navigateToApp },
   } = useKibana().services;
 
   const handleActiveAlertsClick = () => {
@@ -37,7 +36,10 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         rangeTo: 'now',
         status: 'active',
       });
-      navigateToUrl(`${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`);
+      void navigateToApp(observabilityAppId, {
+        path: `/alerts?_a=${encodedKuery}`,
+        openInNewTab: true,
+      });
     }
   };
 
@@ -51,7 +53,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         position="top"
         content={i18n.translate('xpack.slo.slo.activeAlertsBadge.tooltip', {
           defaultMessage:
-            '{count, plural, one {# burn rate alert} other {# burn rate alerts}}, click to view.',
+            '{count, plural, one {# burn rate alert} other {# burn rate alerts}}. Opens in a new browser tab.',
           values: { count: activeAlerts },
         })}
         display="block"
@@ -61,7 +63,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
           color="danger"
           onClick={handleActiveAlertsClick}
           onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
-            defaultMessage: 'active alerts badge',
+            defaultMessage: 'View active alerts in a new browser tab',
           })}
           data-test-subj="o11ySloActiveAlertsBadge"
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {

@@ -13,10 +13,13 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
   ClientAuthentication,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -50,7 +53,7 @@ export interface ConstructorOptions {
   uiam?: UiamServicePublic;
 }
 
-type GrantAPIKeyParams =
+type GrantAPIKeyParams = (
   | {
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'password';
@@ -61,7 +64,8 @@ type GrantAPIKeyParams =
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'access_token';
       access_token: string;
-    };
+    }
+) & { refresh?: boolean | 'wait_for' };
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -171,7 +175,13 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({
           method: 'POST',
           path: '/_security/cross_cluster/api_key',
-          body: { name, expiration, metadata, access: createParams.access },
+          body: {
+            name,
+            expiration,
+            metadata,
+            access: createParams.access,
+            certificate_identity: createParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
@@ -225,7 +235,11 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<UpdateAPIKeyResult>({
           method: 'PUT',
           path: `/_security/cross_cluster/api_key/${id}`,
-          body: { metadata, access: updateParams.access },
+          body: {
+            metadata,
+            access: updateParams.access,
+            certificate_identity: updateParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
@@ -261,7 +275,8 @@ export class APIKeys implements NativeAPIKeysType {
    */
   async grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ) {
     if (!this.license.isEnabled()) {
       return null;
@@ -311,6 +326,9 @@ export class APIKeys implements NativeAPIKeysType {
       authorizationHeader,
       clientAuthentication
     );
+    if (options?.refresh !== undefined) {
+      params.refresh = options.refresh;
+    }
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
@@ -322,6 +340,58 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     return result;
+  }
+
+  /**
+   * Clones an existing API key using the internal user. Extracts the source key credential
+   * from the request's Authorization header and calls the ES clone endpoint to create a new
+   * independent key with the same role descriptors and no expiration.
+   */
+  async cloneAsInternalUser(
+    request: KibanaRequest,
+    cloneParams: CloneAPIKeyParams
+  ): Promise<CloneAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug('Trying to clone an API key');
+
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        'Unable to clone an API key, request does not contain an authorization header'
+      );
+    }
+
+    if (authorizationHeader.scheme.toLowerCase() !== 'apikey') {
+      throw new Error(
+        `Unable to clone an API key, expected ApiKey authorization scheme but got "${authorizationHeader.scheme}"`
+      );
+    }
+
+    try {
+      const result = await this.clusterClient.asInternalUser.transport.request<CloneAPIKeyResult>({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: authorizationHeader.credentials,
+          name: cloneParams.name,
+          // `metadata` MUST come before `expiration`. ES's RestCloneApiKeyAction
+          // over-advances the parser on `expiration: null`, silently dropping the next field.
+          // Remove this ordering constraint once the ES fix ships: https://github.com/elastic/elasticsearch/pull/152874
+          ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+          expiration: null,
+        },
+      });
+
+      this.logger.debug('API key was cloned successfully');
+      return result;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.debug(`Failed to clone API key: ${message}`);
+      throw e;
+    }
   }
 
   /**

@@ -16,13 +16,22 @@ const searchConfigSchema = schema.object({
   index: schema.string(),
 });
 
-export const degradedDocsParamsSchema = schema.object({
-  timeUnit: schema.string(),
-  timeSize: schema.number(),
-  threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(comparators),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
-  searchConfiguration: searchConfigSchema,
-});
+export const degradedDocsParamsSchema = schema.object(
+  {
+    timeUnit: schema.string(),
+    timeSize: schema.number(),
+    threshold: schema.arrayOf(schema.number()),
+    comparator: oneOfLiterals(comparators),
+    groupBy: schema.maybe(schema.arrayOf(schema.string())),
+    searchConfiguration: searchConfigSchema,
+  },
+  {
+    meta: {
+      title: 'Degraded Docs Rule Params',
+      description:
+        'The parameters for the degraded docs rule. These parameters are appropriate when `rule_type_id` is `datasetQuality.degradedDocs`.',
+    },
+  }
+);
 
 export type DegradedDocsRuleParams = TypeOf<typeof degradedDocsParamsSchema>;

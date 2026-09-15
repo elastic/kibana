@@ -25,13 +25,14 @@ import { EMPTY } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
+import { isClosedIndexStatus } from '../../../../lib/is_closed_index_status';
 import {
   INDEX_OPEN,
   IndexDetailsSection,
   MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
   MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
 } from '../../../../../../common/constants';
-import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
 import { type DocCountApi, RequestResultType } from '../index_table/get_doc_count';
@@ -116,7 +117,7 @@ export const IndexActionsContextMenu = ({
   const {
     services: { extensionsService },
     plugins: { reindexService },
-    core: { getUrlForApp, application, http },
+    core: { getUrlForApp },
     history,
     config: { enableIndexActions, isServerless },
   } = useAppContext();
@@ -149,7 +150,12 @@ export const IndexActionsContextMenu = ({
     if (!isPopoverOpen && indexNames.length === 1 && docCountApi) {
       const indexName = indexNames[0];
       const selectedIndex = indices.find((index) => index.name === indexName);
-      if (selectedIndex?.documents === undefined && !docCountMap?.[indexName]) {
+      const indexStatus = indexStatusByName[indexName] ?? selectedIndex?.status;
+      if (
+        selectedIndex?.documents === undefined &&
+        !docCountMap?.[indexName] &&
+        !isClosedIndexStatus(indexStatus)
+      ) {
         docCountApi.getByName(indexName);
       }
     }
@@ -218,16 +224,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Overview
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
+          );
         },
       });
       items.push({
@@ -236,16 +235,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Settings
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
+          );
         },
       });
       items.push({
@@ -254,16 +246,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Mappings
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
+          );
         },
       });
       if (allOpen && enableIndexActions) {
@@ -485,8 +470,7 @@ export const IndexActionsContextMenu = ({
         reloadIndices={reloadIndices}
         extensionsService={extensionsService}
         getUrlForApp={getUrlForApp}
-        application={application}
-        http={http}
+        history={history}
       />
       <EuiPopover
         id="contextMenuIndices"

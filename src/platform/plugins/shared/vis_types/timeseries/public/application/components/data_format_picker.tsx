@@ -301,7 +301,6 @@ export const DataFormatPicker = ({
             onChange={handleChange}
             data-test-subj="tsvbDataFormatPicker"
             fullWidth
-            hasDividers
           />
         </EuiFormRow>
       </EuiFlexItem>

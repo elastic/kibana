@@ -12,8 +12,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/250508
-  describe.skip('Endpoint plugin', function () {
+  describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');
@@ -53,6 +52,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./agent_type_support'));
+    loadTestFile(require.resolve('./actions_list_types'));
     loadTestFile(require.resolve('./execute'));
   });
 }

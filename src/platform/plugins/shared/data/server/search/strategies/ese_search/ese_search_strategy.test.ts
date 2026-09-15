@@ -19,27 +19,6 @@ import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 
-const mockAsyncStatusResponse = (isComplete = false) => ({
-  body: {
-    id: 'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
-    is_running: !isComplete,
-    is_partial: !isComplete,
-    start_time_in_millis: 1710451842532,
-    expiration_time_in_millis: 1710451907469,
-    _shards: {
-      total: 10,
-      successful: 0,
-      skipped: 0,
-      failed: 0,
-    },
-  },
-  headers: {
-    'x-elasticsearch-async-id':
-      'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
-    'x-elasticsearch-async-is-running': isComplete ? '?0' : '?1',
-  },
-});
-
 const mockAsyncResponse = {
   body: {
     id: 'foo',
@@ -72,7 +51,6 @@ const mockRollupResponse = {
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockRollupSearchCaller = jest.fn();
-  const mockStatusCaller = jest.fn();
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
   const mockDeleteCaller = jest.fn();
@@ -87,7 +65,6 @@ describe('ES search strategy', () => {
     esClient: {
       asCurrentUser: {
         asyncSearch: {
-          status: mockStatusCaller,
           get: mockGetCaller,
           submit: mockSubmitCaller,
           delete: mockDeleteCaller,
@@ -115,7 +92,6 @@ describe('ES search strategy', () => {
 
   beforeEach(() => {
     mockApiCaller.mockClear();
-    mockStatusCaller.mockClear();
     mockGetCaller.mockClear();
     mockSubmitCaller.mockClear();
     mockDeleteCaller.mockClear();
@@ -145,33 +121,14 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
-      it('returns status if incomplete', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(false));
-
-        const params = { index: 'logstash-*', query: {} };
-        const esSearch = await enhancedEsSearchStrategyProvider(
-          mockLegacyConfig$,
-          mockSearchConfig,
-          mockLogger
-        );
-
-        const response = await firstValueFrom(esSearch.search({ id: 'foo', params }, {}, mockDeps));
-
-        expect(mockGetCaller).not.toBeCalled();
-        expect(response).toHaveProperty('id');
-        expect(response).toHaveProperty('isPartial', true);
-        expect(response).toHaveProperty('isRunning', true);
-      });
-
       it('makes a GET request to async search with ID', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', query: {} };
@@ -183,15 +140,15 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '60000ms');
+        expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
       it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
@@ -208,11 +165,32 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
         expect(request).toHaveProperty('keep_alive', '5m');
+        expect(request).toHaveProperty('return_intermediate_results', false);
+      });
+
+      it('sets return_intermediate_results to true when returnIntermediateResults is true', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'logstash-*', query: {} };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch
+          .search({ id: 'foo', params }, { returnIntermediateResults: true }, mockDeps)
+          .toPromise();
+
+        expect(mockGetCaller).toHaveBeenCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('return_intermediate_results', true);
       });
 
       it('sets transport options on POST requests', async () => {
@@ -247,7 +225,6 @@ describe('ES search strategy', () => {
       });
 
       it('sets transport options on GET requests', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
         const params = { index: 'logstash-*', query: {} };
         const esSearch = enhancedEsSearchStrategyProvider(
@@ -260,14 +237,25 @@ describe('ES search strategy', () => {
           esSearch.search({ id: 'foo', params }, { transport: { maxRetries: 1 } }, mockDeps)
         );
 
-        expect(mockGetCaller).toHaveBeenNthCalledWith(
-          1,
+        expect(mockGetCaller).toHaveBeenCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        const transportOptions = mockGetCaller.mock.calls[0][1];
+
+        expect(request).toEqual(
           expect.objectContaining({
             id: 'foo',
             keep_alive: '60000ms',
-            wait_for_completion_timeout: '100ms',
-          }),
-          expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
+            return_intermediate_results: false,
+          })
+        );
+        expect(transportOptions).toEqual(
+          expect.objectContaining({
+            maxRetries: 1,
+            meta: true,
+            signal: undefined,
+            requestTimeout: 600000,
+            asStream: undefined,
+          })
         );
       });
 
@@ -283,7 +271,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
@@ -310,7 +298,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockRollupSearchCaller).toBeCalled();
+        expect(mockRollupSearchCaller).toHaveBeenCalled();
         expect(mockRollupSearchCaller).toHaveBeenCalledWith(
           {
             index: 'foo-程',
@@ -347,7 +335,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalledTimes(0);
+        expect(mockApiCaller).toHaveBeenCalledTimes(0);
       });
 
       it('should delete when aborted', async () => {
@@ -381,9 +369,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).toBeCalled();
+        expect(mockDeleteCaller).toHaveBeenCalled();
       });
 
       it('should not throw when encountering an error deleting', async () => {
@@ -426,9 +414,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).toBeCalled();
+        expect(mockDeleteCaller).toHaveBeenCalled();
       });
     });
 
@@ -445,7 +433,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
@@ -465,7 +453,7 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1', isStored: true }, mockDeps).toPromise();
 
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.query).toEqual(params.query);
@@ -474,7 +462,6 @@ describe('ES search strategy', () => {
       });
 
       it('makes a GET request to async search with short keepalive, if session is not saved', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', query: {} };
@@ -486,15 +473,15 @@ describe('ES search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '60000ms');
+        expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
       it('makes a GET request to async search with long keepalive, if session is saved', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', query: {} };
@@ -508,15 +495,15 @@ describe('ES search strategy', () => {
           .search({ id: 'foo', params }, { sessionId: '1', isStored: true }, mockDeps)
           .toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '604800000ms');
+        expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
       it('makes a GET request to async search with no keepalive, if session is session saved and search is stored', async () => {
-        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', query: {} };
@@ -534,11 +521,12 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockGetCaller).toBeCalled();
+        expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).not.toHaveProperty('keep_alive');
+        expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
       it('should not delete a saved session when aborted', async () => {
@@ -578,9 +566,9 @@ describe('ES search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockSubmitCaller).toBeCalled();
+        expect(mockSubmitCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockDeleteCaller).not.toBeCalled();
+        expect(mockDeleteCaller).not.toHaveBeenCalled();
       });
     });
 
@@ -608,7 +596,7 @@ describe('ES search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSubmitCaller).toBeCalled();
+      expect(mockSubmitCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
@@ -633,7 +621,7 @@ describe('ES search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSubmitCaller).toBeCalled();
+      expect(mockSubmitCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
@@ -654,7 +642,7 @@ describe('ES search strategy', () => {
 
       await esSearch.cancel!(id, {}, mockDeps);
 
-      expect(mockDeleteCaller).toBeCalled();
+      expect(mockDeleteCaller).toHaveBeenCalled();
       const request = mockDeleteCaller.mock.calls[0][0];
       expect(request).toEqual({ id });
     });
@@ -683,7 +671,7 @@ describe('ES search strategy', () => {
         err = e;
       }
 
-      expect(mockDeleteCaller).toBeCalled();
+      expect(mockDeleteCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
@@ -705,14 +693,13 @@ describe('ES search strategy', () => {
 
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
-      expect(mockGetCaller).toBeCalled();
+      expect(mockGetCaller).toHaveBeenCalled();
       const request = mockGetCaller.mock.calls[0][0];
       expect(request).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {
       const errResponse = new errors.ElasticsearchClientError('something is wrong with EsClient');
-      mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
       mockGetCaller.mockRejectedValue(errResponse);
 
       const id = 'some_other_id';
@@ -730,7 +717,7 @@ describe('ES search strategy', () => {
         err = e;
       }
 
-      expect(mockGetCaller).toBeCalled();
+      expect(mockGetCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);

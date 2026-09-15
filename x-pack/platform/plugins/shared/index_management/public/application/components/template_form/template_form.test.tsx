@@ -8,11 +8,15 @@
 import React, { useEffect } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { TemplateDeserialized } from '../../../../common';
 import { Forms, GlobalFlyout } from '../../../shared_imports';
 import type { WizardContent } from './template_form';
 import { TemplateForm } from './template_form';
+import { AppContextProvider } from '../../app_context';
+import type { AppDependencies } from '../../app_context';
 
 jest.mock('@kbn/code-editor');
 
@@ -155,6 +159,10 @@ jest.mock('../index_templates', () => ({
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
+const appCtx = {
+  config: { enableIndexMode: true },
+} as unknown as AppDependencies;
+
 const renderTemplateForm = (props: Partial<React.ComponentProps<typeof TemplateForm>> = {}) => {
   const defaultProps: React.ComponentProps<typeof TemplateForm> = {
     title: props.title ?? 'Test Form',
@@ -168,11 +176,15 @@ const renderTemplateForm = (props: Partial<React.ComponentProps<typeof TemplateF
   };
 
   return render(
-    <I18nProvider>
-      <GlobalFlyoutProvider>
-        <TemplateForm {...defaultProps} />
-      </GlobalFlyoutProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider {...coreMock.createStart()}>
+      <I18nProvider>
+        <AppContextProvider value={appCtx}>
+          <GlobalFlyoutProvider>
+            <TemplateForm {...defaultProps} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
+      </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -252,6 +264,7 @@ describe('TemplateForm wizard integration', () => {
         settings,
         mappings,
         aliases,
+        lifecycle: { enabled: true },
       });
     });
   });
@@ -355,6 +368,7 @@ describe('TemplateForm wizard integration', () => {
           },
         },
         aliases: { updated_alias: { is_write_index: true } },
+        lifecycle: { enabled: true },
       });
       // dataStream is preserved from logistics
       expect(savedTemplate.dataStream).toEqual({
@@ -426,7 +440,10 @@ describe('TemplateForm wizard integration', () => {
       expect(savedTemplate.name).toBe('original-copy');
       expect(savedTemplate.composedOf).toEqual(['component_1']);
       expect(savedTemplate._kbnMeta).toEqual(originalTemplate._kbnMeta);
-      expect(savedTemplate.template).toEqual(originalTemplate.template);
+      expect(savedTemplate.template).toEqual({
+        ...originalTemplate.template,
+        lifecycle: { enabled: true },
+      });
     });
   });
 

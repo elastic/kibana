@@ -21,7 +21,6 @@ export const mockEncryptedSO = ({
     { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] },
   ];
   return {
-    __testCreateDangerousExtension: jest.fn(),
     isEncryptionError: jest.fn(),
     getClient: jest.fn().mockReturnValue({
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue(monitors),

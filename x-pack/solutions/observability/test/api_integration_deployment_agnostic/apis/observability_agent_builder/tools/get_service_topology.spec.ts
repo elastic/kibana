@@ -51,9 +51,9 @@ const END = 'now';
  * (e.g., "checkout-proxy:5050" instead of "checkout-service") to prevent heuristic matching.
  */
 interface ServiceTopologyConnection {
-  source: { 'service.name': string };
+  source: { 'service.name': string; 'agent.name'?: string };
   target:
-    | { 'service.name': string }
+    | { 'service.name': string; 'agent.name'?: string }
     | {
         'span.destination.service.resource': string;
         'span.type': string;
@@ -182,7 +182,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
         );
 
-        expect(traceBasedImmediate).to.eql(metricsBasedConnections);
+        // The trace-based path includes agent.name on nodes for now; the metrics
+        // fast path does not. Compare service names and metrics only.
+        expect(traceBasedImmediate.map(getSourceName)).to.eql(
+          metricsBasedConnections.map(getSourceName)
+        );
+        expect(traceBasedImmediate.map(getTargetName)).to.eql(
+          metricsBasedConnections.map(getTargetName)
+        );
+        expect(traceBasedImmediate.map((c) => c.metrics)).to.eql(
+          metricsBasedConnections.map((c) => c.metrics)
+        );
         expect(metricsBasedConnections.map((c) => ({ source: c.source, target: c.target }))).to.eql(
           [
             {
@@ -191,7 +201,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             {
               source: { 'service.name': FRONTEND_SERVICE.serviceName },
-              target: { 'service.name': RECOMMENDATION_SERVICE.serviceName },
+              target: {
+                'service.name': RECOMMENDATION_SERVICE.serviceName,
+              },
             },
           ]
         );

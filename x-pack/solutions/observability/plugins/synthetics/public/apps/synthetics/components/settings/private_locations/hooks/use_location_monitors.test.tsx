@@ -6,7 +6,7 @@
  */
 
 import { createElement } from 'react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 

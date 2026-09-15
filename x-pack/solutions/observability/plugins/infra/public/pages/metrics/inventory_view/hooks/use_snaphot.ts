@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -79,7 +80,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
-    schema: schema ?? 'ecs',
+    schema: schema ?? DEFAULT_SCHEMA,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

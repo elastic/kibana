@@ -62,7 +62,7 @@ const getSloChartData = ({
         }}
       />
     ),
-    icon: () => <EuiIcon type="visGauge" size="l" />,
+    icon: () => <EuiIcon type="chartGauge" size="l" aria-hidden={true} />,
     color: cardColor,
   };
 };
@@ -156,7 +156,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div data-shared-item="" style={{ width: '100%', overflow: 'auto' }}>
+      <div style={{ width: '100%', overflow: 'auto' }}>
         <Chart
           size={{
             height,

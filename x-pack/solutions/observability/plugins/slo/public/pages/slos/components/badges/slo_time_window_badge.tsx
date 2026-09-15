@@ -43,7 +43,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
             defaultMessage: 'Click to filter by {timeWindow} SLOs',
             values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
           })}
-          iconType="editorItemAlignRight"
+          iconType="alignRight"
           iconSide="left"
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
             if (isSloPage) e.stopPropagation(); // stops propagation of metric onElementClick

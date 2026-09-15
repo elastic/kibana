@@ -13,3 +13,13 @@ export {
   type BrushSettings,
 } from './src/document_count_chart';
 export type { DocumentCountChartProps } from './src/document_count_chart';
+export {
+  MlDataSourcePicker,
+  MlOpenSessionFlyout,
+  type MlDataSourcePickerProps,
+  type MlDataSourcePickerServices,
+  type MlOpenSessionFlyoutProps,
+  type MlOpenSessionFlyoutServices,
+  type DataViewPickerProps,
+  type SavedObjectFinderProps,
+} from './src/ml_data_source_picker';

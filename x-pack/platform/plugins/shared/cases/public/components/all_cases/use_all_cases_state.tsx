@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { History } from 'history';
+import { useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
@@ -15,6 +16,7 @@ import {
   DEFAULT_CASES_TABLE_STATE,
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
+  DEFAULT_TABLE_ACTIVE_PAGE,
 } from '../../containers/constants';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
@@ -37,7 +39,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
   const isStateLoadedFromLocalStorage = useRef(false);
   const isFirstRun = useRef(false);
   const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);
-  const [urlState, setUrlState] = useAllCasesUrlState();
+  const [urlState, setUrlState] = useAllCasesUrlState(isModalView);
   const [localStorageState, setLocalStorageState] = useAllCasesLocalStorage();
   const { isFetching: isLoadingCasesConfiguration } = useGetCaseConfiguration();
 
@@ -106,36 +108,45 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
     setFilterOptions: (newFilterOptions: Partial<FilterOptions>) => {
       setState({
         filterOptions: { ...allCasesTableState.filterOptions, ...newFilterOptions },
-        queryParams: allCasesTableState.queryParams,
+        // Filtering changes the size of the result set, so a stale page index can
+        // land past the end of it — ES returns `total > 0` with zero hits and the
+        // list renders empty while the stats still show a count.  Reset to page 1.
+        queryParams: { ...allCasesTableState.queryParams, page: DEFAULT_TABLE_ACTIVE_PAGE },
       });
     },
   };
 }
 
-const useAllCasesUrlState = (): [
-  AllCasesURLState,
-  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void
-] => {
-  const history = useHistory();
-  const location = useLocation();
+const useAllCasesUrlState = (
+  isModalView: boolean
+): [AllCasesURLState, (updated: AllCasesTableState, mode?: 'push' | 'replace') => void] => {
+  // react-router@5.3 returns undefined outside a <Router>; keep that optional behavior
+  // for modal / non-routed hosts instead of assuming a navigation context exists.
+  const history = useHistory() as History | undefined;
+
   const {
     data: { customFields: customFieldsConfiguration },
   } = useGetCaseConfiguration();
 
-  const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(location.search)));
+  const search = history?.location?.search ?? '';
+  const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(search)));
   const parsedUrlParams = allCasesUrlStateDeserializer(urlParams, customFieldsConfiguration);
 
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
+      if (history == null || isModalView) {
+        return;
+      }
+
       const updatedQuery = allCasesUrlStateSerializer(updated);
-      const search = stringifyUrlParams(updatedQuery, location.search);
+      const updatedSearch = stringifyUrlParams(updatedQuery, history.location.search);
 
       history[mode]({
-        ...location,
-        search,
+        ...history.location,
+        search: updatedSearch,
       });
     },
-    [history, location]
+    [history, isModalView]
   );
 
   return [parsedUrlParams, updateQueryParams];

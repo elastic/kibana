@@ -14,54 +14,79 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../../../common_attributes.gen';
 import { AttackDiscoveryApiSchedule } from '../schedules_api.gen';
 
+export const FindAttackDiscoverySchedulesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Page number to return (used for pagination). Defaults to 1.
+     */
+    page: z.coerce
+      .number()
+      .optional()
+      .describe('Page number to return (used for pagination). Defaults to 1.'),
+    /**
+     * Number of Attack Discovery schedules to return per page (used for pagination). Defaults to 10.
+     */
+    per_page: z.coerce
+      .number()
+      .optional()
+      .describe(
+        'Number of Attack Discovery schedules to return per page (used for pagination). Defaults to 10.'
+      ),
+    /**
+     * Field used to sort results. Common fields include 'name', 'created_at', 'updated_at', and 'enabled'.
+     */
+    sort_field: NonEmptyString.optional().describe(
+      "Field used to sort results. Common fields include 'name', 'created_at', 'updated_at', and 'enabled'."
+    ),
+    /**
+     * Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'.
+     */
+    sort_direction: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe(
+        "Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'."
+      ),
+  })
+);
 export type FindAttackDiscoverySchedulesRequestQuery = z.infer<
   typeof FindAttackDiscoverySchedulesRequestQuery
 >;
-export const FindAttackDiscoverySchedulesRequestQuery = z.object({
-  /**
-   * Page number to return (used for pagination). Defaults to 1.
-   */
-  page: z.coerce.number().optional(),
-  /**
-   * Number of Attack discovery schedules to return per page (used for pagination). Defaults to 10.
-   */
-  per_page: z.coerce.number().optional(),
-  /**
-   * Field used to sort results. Common fields include 'name', 'created_at', 'updated_at', and 'enabled'.
-   */
-  sort_field: NonEmptyString.optional(),
-  /**
-   * Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'.
-   */
-  sort_direction: z.enum(['asc', 'desc']).optional(),
-});
 export type FindAttackDiscoverySchedulesRequestQueryInput = z.input<
   typeof FindAttackDiscoverySchedulesRequestQuery
 >;
 
+export const FindAttackDiscoverySchedulesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Current page number of the paginated result set.
+     */
+    page: z.number().describe('Current page number of the paginated result set.'),
+    /**
+     * Number of items requested per page.
+     */
+    per_page: z.number().describe('Number of items requested per page.'),
+    /**
+     * Total number of Attack Discovery schedules matching the query (across all pages).
+     */
+    total: z
+      .number()
+      .describe(
+        'Total number of Attack Discovery schedules matching the query (across all pages).'
+      ),
+    /**
+     * Array of matched Attack Discovery schedule objects.
+     */
+    data: z
+      .array(AttackDiscoveryApiSchedule)
+      .describe('Array of matched Attack Discovery schedule objects.'),
+  })
+);
 export type FindAttackDiscoverySchedulesResponse = z.infer<
   typeof FindAttackDiscoverySchedulesResponse
 >;
-export const FindAttackDiscoverySchedulesResponse = z.object({
-  /**
-   * Current page number of the paginated result set.
-   */
-  page: z.number(),
-  /**
-   * Number of items requested per page.
-   */
-  per_page: z.number(),
-  /**
-   * Total number of Attack discovery schedules matching the query (across all pages).
-   */
-  total: z.number(),
-  /**
-   * Array of matched Attack discovery schedule objects.
-   */
-  data: z.array(AttackDiscoveryApiSchedule),
-});

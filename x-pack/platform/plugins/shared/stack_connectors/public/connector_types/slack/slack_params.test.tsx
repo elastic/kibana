@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import SlackParamsFields from './slack_params';
 
 describe('SlackParamsFields renders', () => {
@@ -15,7 +17,7 @@ describe('SlackParamsFields renders', () => {
       message: 'test message',
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <SlackParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -23,10 +25,8 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').first().prop('value')).toStrictEqual(
-      'test message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('test message');
   });
 
   test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
@@ -35,7 +35,7 @@ describe('SlackParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <SlackParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -44,13 +44,20 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: true,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <SlackParamsFields
+          actionParams={actionParams}
+          errors={{ message: [] }}
+          editAction={editAction}
+          useDefaultMessage={true}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
@@ -61,7 +68,7 @@ describe('SlackParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <SlackParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -70,13 +77,20 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: false,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <SlackParamsFields
+          actionParams={actionParams}
+          errors={{ message: [] }}
+          editAction={editAction}
+          useDefaultMessage={false}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).not.toHaveBeenCalled();
   });

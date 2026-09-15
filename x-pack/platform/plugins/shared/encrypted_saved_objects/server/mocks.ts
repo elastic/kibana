@@ -21,7 +21,8 @@ function createEncryptedSavedObjectsSetupMock(
     __legacyCompat: { registerLegacyAPI: jest.fn() },
     canEncrypt,
     createMigration: jest.fn(),
-    createModelVersion: jest.fn(),
+    createModelVersion: jest.fn(({ modelVersion }) => modelVersion),
+    __testCreateDangerousExtension: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }
 
@@ -29,7 +30,6 @@ function createEncryptedSavedObjectsStartMock() {
   return {
     isEncryptionError: jest.fn(),
     getClient: jest.fn((opts) => createEncryptedSavedObjectsClientMock(opts)),
-    __testCreateDangerousExtension: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 }
 

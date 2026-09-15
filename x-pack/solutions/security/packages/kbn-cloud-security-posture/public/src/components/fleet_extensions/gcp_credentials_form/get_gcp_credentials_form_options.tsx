@@ -155,7 +155,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (): Omit<
       label: i18n.translate(
         'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudConnectorsLabel',
         {
-          defaultMessage: 'Cloud Connectors (recommended)',
+          defaultMessage: 'Federated Identity (recommended)',
         }
       ),
       info: <></>,

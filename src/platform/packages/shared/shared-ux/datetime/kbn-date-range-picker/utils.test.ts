@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
+
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from './constants';
 import type { TimeRange } from './types';
+import { textToTimeRange } from './parse';
 import {
   toLocalPreciseString,
   isValidTimeRange,
+  hasRoundedOffset,
   getOptionDisplayLabel,
   getOptionShorthand,
   getOptionInputText,
@@ -92,20 +96,121 @@ describe('isValidTimeRange', () => {
 });
 
 describe('getOptionDisplayLabel', () => {
-  it('returns the label when present', () => {
+  it('keeps a natural-language label verbatim', () => {
     expect(getOptionDisplayLabel({ start: 'now-15m', end: 'now', label: 'Last 15 minutes' })).toBe(
       'Last 15 minutes'
     );
   });
 
+  it.each([
+    ['This week until now', 'now/w'],
+    ['This month until now', 'now/M'],
+    ['This year until now', 'now/y'],
+  ])('keeps the "%s" quick-range label (named range, not regenerated bounds)', (label, start) => {
+    // Regression: these "…until now" quick ranges are named ranges, so the curated
+    // label must survive instead of falling back to regenerated absolute bounds
+    // (e.g. "Jul 12, 2026 @ 00:00 → now").
+    expect(getOptionDisplayLabel({ start, end: 'now', label })).toBe(label);
+  });
+
+  it('keeps a custom label from timepicker:quickRanges', () => {
+    expect(
+      getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' })
+    ).toBe('Financial Year to Date');
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [
+      { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+    ];
+
+    expect(getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+    expect(getOptionDisplayLabel({ start: 'now/d', end: 'now/d' }, { presets })).toBe('Today');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' }, { presets })).toBe('Last 7 days');
+  });
+
+  it('regenerates a display-form label from bounds, honouring timePrecision', () => {
+    const start = '2026-05-25T00:00:00.000Z';
+    const end = '2026-05-27T23:59:59.999Z';
+
+    // A frozen, full-precision display label is ignored in favour of the bounds,
+    // so the list uses the → delimiter and respects the current timePrecision.
+    expect(
+      getOptionDisplayLabel(
+        { start, end, label: 'May 25, 00:00:00.000 → May 27, 23:59:59.999' },
+        { timePrecision: 'none' }
+      )
+    ).toBe(
+      `${moment.utc(start).local().format('MMM D, HH:mm')} → ${moment
+        .utc(end)
+        .local()
+        .format('MMM D, HH:mm')}`
+    );
+  });
+
+  it('regenerates an input-form label into display form (→ delimiter)', () => {
+    // A stale, input-form label ("-15m to …") is regenerated as display text.
+    expect(getOptionDisplayLabel({ start: 'now-15m', end: 'now', label: '-15m to now' })).toBe(
+      'Last 15 minutes'
+    );
+  });
+
   it('generates a label from relative bounds when no label is provided', () => {
-    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('7 days ago → now');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('Last 7 days');
   });
 
   it('generates a label from absolute bounds when no label is provided', () => {
     expect(getOptionDisplayLabel({ start: '2025-01-01', end: '2025-01-31' })).toBe(
-      'Jan 1 2025, 00:00 → Jan 31 2025, 00:00'
+      'Jan 1, 2025, 00:00:00 → Jan 31, 2025, 00:00:00'
     );
+  });
+});
+
+describe('hasRoundedOffset', () => {
+  it('is true when a relative offset bound has a rounding suffix', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y/y'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('now to +1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d', { roundRelativeTime: true }))).toBe(true);
+  });
+
+  it('is true when a rounded range spans more than one calendar bucket', () => {
+    expect(hasRoundedOffset(textToTimeRange('-7d/d to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-1M/M to -1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d to -1d', { roundRelativeTime: true }))).toBe(true);
+  });
+
+  it('is false without rounding, for named ranges, and for absolute bounds', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('now/w to now'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('2024-01-01 to 2024-02-01'))).toBe(false);
+  });
+
+  it('is false for whole calendar buckets, however they are expressed', () => {
+    for (const named of [
+      'today',
+      'yesterday',
+      'tomorrow',
+      'this week',
+      'this month',
+      'this year',
+      'last week',
+      'last month',
+      'last year',
+      'next week',
+    ]) {
+      expect(hasRoundedOffset(textToTimeRange(named))).toBe(false);
+    }
+
+    expect(hasRoundedOffset({ start: 'now-1d/d', end: 'now-1d/d' })).toBe(false);
+    expect(hasRoundedOffset({ start: 'now-3M/M', end: 'now-3M/M' })).toBe(false);
+  });
+
+  it('is true for a bucket rounded to a unit other than its own offset', () => {
+    expect(hasRoundedOffset({ start: 'now-1y/d', end: 'now-1y/d' })).toBe(true);
+    expect(hasRoundedOffset({ start: 'now-1d/h', end: 'now-1d/h' })).toBe(true);
   });
 });
 
@@ -113,7 +218,7 @@ describe('getOptionShorthand', () => {
   it('returns the start offset when end is now', () => {
     expect(getOptionShorthand({ start: 'now-15m', end: 'now' })).toBe('-15m');
     expect(getOptionShorthand({ start: 'now-7d', end: 'now' })).toBe('-7d');
-    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1M');
+    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1mo');
   });
 
   it('returns the end offset when start is now', () => {
@@ -121,13 +226,26 @@ describe('getOptionShorthand', () => {
   });
 
   it('combines both offsets when neither is now', () => {
-    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
-  it('returns null when a bound has rounding', () => {
-    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBeNull();
-    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBeNull();
+  it('returns named range alias when bounds match a known named range', () => {
+    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBe('td');
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now-1d/d' })).toBe('yd');
+    expect(getOptionShorthand({ start: 'now+1d/d', end: 'now+1d/d' })).toBe('tmr');
+  });
+
+  it('strips start rounding when end is now', () => {
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBe('-1d');
+    expect(getOptionShorthand({ start: 'now-24h/h', end: 'now' })).toBe('-24h');
+  });
+
+  it('returns null when end has rounding (not strippable)', () => {
     expect(getOptionShorthand({ start: 'now', end: 'now+1d/d' })).toBeNull();
+  });
+
+  it('returns null when both bounds have rounding', () => {
+    expect(getOptionShorthand({ start: 'now-7d/d', end: 'now-1d/d' })).toBeNull();
   });
 
   it('returns null when a bound is absolute', () => {
@@ -147,10 +265,44 @@ describe('getOptionInputText', () => {
     );
   });
 
-  it('falls back to shorthand when label does not parse', () => {
-    expect(getOptionInputText({ start: 'now-15m', end: 'now', label: 'My custom preset' })).toBe(
-      '-15m'
+  it('derives readable input from bounds when the label is display-only', () => {
+    const start = '2026-05-01T00:00:00.000Z';
+    const end = '2026-05-02T23:59:00.000Z';
+
+    expect(getOptionInputText({ start, end, label: 'May 1, 00:00 → May 2, 23:59' })).toBe(
+      `${moment.utc(start).local().format('MMM D, YYYY, HH:mm:ss.SSS')} to ${moment
+        .utc(end)
+        .local()
+        .format('MMM D, YYYY, HH:mm:ss.SSS')}`
     );
+  });
+
+  it('derives readable input for a mixed relative/absolute range, preserving rounding', () => {
+    const end = '2026-06-29T13:55:55.000Z';
+
+    // Rounding is kept (`-15m/m`, not `-15m`) so re-applying the text reproduces the
+    // stored bound exactly; only the absolute end becomes readable instead of raw ISO.
+    expect(
+      getOptionInputText({ start: 'now-15m/m', end, label: '15 minutes ago → 15:55:55' })
+    ).toBe(`-15m/m to ${moment.utc(end).local().format('MMM D, YYYY, HH:mm:ss.SSS')}`);
+  });
+
+  it('returns a custom label so the input round-trips through the preset match', () => {
+    expect(getOptionInputText({ start: 'now-15m', end: 'now', label: 'My custom preset' })).toBe(
+      'My custom preset'
+    );
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(getOptionInputText({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+  });
+
+  it('derives shorthand when the label is the raw input form of the bounds', () => {
+    expect(getOptionInputText({ start: 'now-15m', end: 'now', label: '-15m to now' })).toBe('-15m');
   });
 
   it('generates shorthand from bounds when no label is provided', () => {
@@ -159,11 +311,11 @@ describe('getOptionInputText', () => {
   });
 
   it('joins both fragments with delimiter when neither bound is now', () => {
-    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
   it('keeps bounds as-is when now prefix cannot be stripped', () => {
-    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d - now/d');
+    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d to now/d');
   });
 
   it('returns now when both bounds are now', () => {
@@ -224,23 +376,25 @@ describe('getEndDate', () => {
 });
 
 describe('formatDateRange', () => {
-  it('formats two dates with the standard delimiter', () => {
+  it('formats two dates with the standard delimiter (default precision = s)', () => {
     const start = new Date(2026, 1, 10, 10, 15, 30, 500);
     const end = new Date(2026, 1, 11, 23, 30, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-02-10T10:15:30.500 - 2026-02-11T23:30:00.000');
+    expect(formatDateRange(start, end)).toBe('Feb 10, 2026, 10:15:30 to Feb 11, 2026, 23:30:00');
   });
 
-  it('uses local time (no Z suffix)', () => {
-    const start = new Date(2026, 0, 1, 0, 0, 0, 0);
-    const end = new Date(2026, 0, 2, 0, 0, 0, 0);
-    const result = formatDateRange(start, end);
-    expect(result).not.toMatch(/Z/);
+  it('respects timePrecision', () => {
+    const start = new Date(2026, 1, 10, 10, 15, 30, 500);
+    const end = new Date(2026, 1, 11, 23, 30, 0, 0);
+    expect(formatDateRange(start, end, 'ms')).toBe(
+      'Feb 10, 2026, 10:15:30.500 to Feb 11, 2026, 23:30:00.000'
+    );
+    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 to Feb 11, 2026, 23:30');
   });
 
   it('handles same-day ranges', () => {
     const start = new Date(2026, 2, 5, 9, 0, 0, 0);
     const end = new Date(2026, 2, 5, 17, 0, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-03-05T09:00:00.000 - 2026-03-05T17:00:00.000');
+    expect(formatDateRange(start, end)).toBe('Mar 5, 2026, 09:00:00 to Mar 5, 2026, 17:00:00');
   });
 });
 

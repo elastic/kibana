@@ -41,6 +41,7 @@ export const ConfigSchema = z.object({
   proxy: z.object({
     id: z.string(),
     url: z.string().optional(),
+    ssl: z.boolean().optional().describe('When true, only HTTPS proxies are shown'),
   }),
 });
 

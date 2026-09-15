@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -19,6 +20,9 @@ import type {
 } from '../../../../schemas/maintenance_window/external/request/get';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
+
+const getMaintenanceWindowExamples = () =>
+  path.join(__dirname, 'get_maintenance_window_examples.yaml');
 
 export const getMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -56,6 +60,7 @@ export const getMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Get maintenance window details.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: getMaintenanceWindowExamples,
         availability: {
           since: '9.1.0',
           stability: 'stable',

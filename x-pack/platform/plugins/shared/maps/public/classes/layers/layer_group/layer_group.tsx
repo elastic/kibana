@@ -168,7 +168,7 @@ export class LayerGroup implements ILayer {
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
-      icon: <EuiIcon size="m" type="layers" />,
+      icon: <EuiIcon size="m" type="layers" aria-hidden={true} />,
       tooltipContent: '',
     };
   }

@@ -11,13 +11,13 @@ import { isLiteral, isInlineCast, isOptionNode } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstAllCommands,
-  ESQLMessage,
   ESQLCommandOption,
   ESQLAst,
 } from '@elastic/esql/types';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import type { ESQLMessage } from '../../definitions/types';
 
 const validateColumnForGrokDissect = (command: ESQLAstAllCommands, context?: ICommandContext) => {
   const acceptedColumnTypes: EsqlFieldType[] = ['keyword', 'text'];

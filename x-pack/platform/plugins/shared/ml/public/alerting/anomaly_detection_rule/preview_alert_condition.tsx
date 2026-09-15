@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiDescriptionList,
   EuiFieldText,
@@ -29,8 +28,9 @@ import {
   requiredValidator,
   timeIntervalInputValidator,
 } from '@kbn/ml-validators';
+import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '@kbn/ml-common-types/alerts';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AlertingApiService } from '../../application/services/ml_api_service/alerting';
-import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../common/types/alerts';
 import { invalidTimeIntervalMessage } from '../../application/jobs/new_job/common/job_validator/util';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 
@@ -215,7 +215,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       {previewError !== undefined && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -223,11 +223,8 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 defaultMessage="Unable to load the preview"
               />
             }
-            color="danger"
-            iconType="warning"
-          >
-            <p>{previewError.message}</p>
-          </EuiCallOut>
+            text={previewError.message}
+          />
         </>
       )}
 

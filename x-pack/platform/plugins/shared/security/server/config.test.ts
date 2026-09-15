@@ -245,6 +245,10 @@ describe('config schema', () => {
         "public": Object {},
         "roleManagementEnabled": true,
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -672,6 +676,14 @@ describe('config schema', () => {
           }
         `);
       });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { basic: { ['a'.repeat(1025)]: { order: 0 } } } },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
+      });
     });
 
     describe('`token` provider', () => {
@@ -977,6 +989,16 @@ describe('config schema', () => {
           }
         `);
       });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { oidc: { ['a'.repeat(1025)]: { order: 0, realm: 'oidc1' } } },
+            },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
+      });
     });
 
     describe('`saml` provider', () => {
@@ -1104,6 +1126,16 @@ describe('config schema', () => {
             },
           }
         `);
+      });
+
+      it('rejects provider names longer than 1024 characters', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { saml: { ['a'.repeat(1025)]: { order: 0, realm: 'saml1' } } },
+            },
+          })
+        ).toThrow(/maximum length of \[1024\]/);
       });
     });
 
@@ -1689,6 +1721,64 @@ describe('config schema', () => {
         ).roleManagementEnabled
       ).toEqual(false);
     });
+  });
+
+  describe('serviceAccounts', () => {
+    it('should not allow xpack.security.serviceAccounts to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: true },
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[serviceAccounts]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.serviceAccounts.enabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: true },
+          },
+          { serverless: true }
+        ).serviceAccounts
+      ).toMatchObject({ enabled: true });
+    });
+
+    it('should be disabled by default inside of the serverless context', () => {
+      expect(ConfigSchema.validate({}, { serverless: true }).serviceAccounts).toMatchObject({
+        enabled: false,
+      });
+    });
+    it('defaults to a ten-minute request refresh lifetime', () => {
+      expect(
+        ConfigSchema.validate(
+          {},
+          { serverless: true }
+        ).serviceAccounts?.requestLifetime.asMilliseconds()
+      ).toBe(600_000);
+    });
+
+    it('accepts a configured request refresh lifetime', () => {
+      expect(
+        ConfigSchema.validate(
+          { serviceAccounts: { requestLifetime: '20m' } },
+          { serverless: true }
+        ).serviceAccounts?.requestLifetime.asMilliseconds()
+      ).toBe(1_200_000);
+    });
+
+    it.each([0, -1, Infinity, -Infinity, NaN, '0m', '-1m', 'invalid'])(
+      'rejects invalid request lifetime %s',
+      (requestLifetime) => {
+        expect(() =>
+          ConfigSchema.validate({ serviceAccounts: { requestLifetime } }, { serverless: true })
+        ).toThrow('serviceAccounts.requestLifetime');
+      }
+    );
   });
 
   describe('session', () => {

@@ -18,7 +18,7 @@ import type { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
@@ -42,6 +42,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const { uiMetricService } = useServices();
+  const { privs } = useAppContext();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean; type?: string }>
@@ -119,7 +120,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       width: '6.5em',
       minWidth: '6.5em',
       render: (template: TemplateListItem) =>
-        template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
+        template._kbnMeta.hasDatastream ? <EuiIcon type="check" aria-hidden={true} /> : null,
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {
@@ -142,60 +143,65 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         />
       ),
     },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
-        defaultMessage: 'Actions',
-      }),
-      width: '7.5em',
-      minWidth: '7.5em',
-      actions: [
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
-            defaultMessage: 'Edit',
-          }),
-          isPrimary: true,
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
-            defaultMessage: 'Edit this template',
-          }),
-          icon: 'pencil',
-          type: 'icon',
-          onClick: ({ name }: TemplateListItem) => {
-            editTemplate(name);
-          },
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-        {
-          type: 'icon',
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
-            defaultMessage: 'Clone',
-          }),
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
-            defaultMessage: 'Clone this template',
-          }),
-          icon: 'copy',
-          onClick: ({ name }: TemplateListItem) => {
-            cloneTemplate(name);
-          },
-        },
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
-            defaultMessage: 'Delete this template',
-          }),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: ({ name, _kbnMeta: { isLegacy, type } }: TemplateListItem) => {
-            setTemplatesToDelete([{ name, isLegacy, type }]);
-          },
-          isPrimary: true,
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-      ],
-    },
   ];
+
+  const actions: EuiBasicTableColumn<TemplateListItem> = {
+    name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
+      defaultMessage: 'Actions',
+    }),
+    width: '7.5em',
+    minWidth: '7.5em',
+    actions: [
+      {
+        name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
+          defaultMessage: 'Edit',
+        }),
+        isPrimary: true,
+        description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
+          defaultMessage: 'Edit this template',
+        }),
+        icon: 'pencil',
+        type: 'icon',
+        onClick: ({ name }: TemplateListItem) => {
+          editTemplate(name);
+        },
+        enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+      },
+      {
+        type: 'icon',
+        name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
+          defaultMessage: 'Clone',
+        }),
+        description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
+          defaultMessage: 'Clone this template',
+        }),
+        icon: 'copy',
+        onClick: ({ name }: TemplateListItem) => {
+          cloneTemplate(name);
+        },
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
+          defaultMessage: 'Delete this template',
+        }),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: ({ name, _kbnMeta: { isLegacy, type } }: TemplateListItem) => {
+          setTemplatesToDelete([{ name, isLegacy, type }]);
+        },
+        isPrimary: true,
+        enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+      },
+    ],
+  };
+
+  if (privs.manageIndexTemplates) {
+    columns.push(actions);
+  }
 
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<TemplateListItem>({
     tableId: 'indexTemplates',
@@ -233,7 +239,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 ? (
+      selection.length > 0 && privs.manageIndexTemplates ? (
         <EuiButton
           data-test-subj="deleteTemplatesButton"
           onClick={() =>
@@ -254,20 +260,22 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           />
         </EuiButton>
       ) : undefined,
-    toolsRight: [
-      <EuiButton
-        iconType="plusCircle"
-        data-test-subj="createTemplateButton"
-        key="createTemplateButton"
-        fill
-        {...reactRouterNavigate(history, '/create_template')}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-          defaultMessage="Create template"
-        />
-      </EuiButton>,
-    ],
+    toolsRight: privs.manageIndexTemplates
+      ? [
+          <EuiButton
+            iconType="plusCircle"
+            data-test-subj="createTemplateButton"
+            key="createTemplateButton"
+            fill
+            {...reactRouterNavigate(history, '/create_template')}
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
+              defaultMessage="Create template"
+            />
+          </EuiButton>,
+        ]
+      : [],
   };
 
   const goToList = () => {
@@ -295,7 +303,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         columns={columns}
         search={searchConfig}
         sorting={sorting}
-        selection={selectionConfig}
+        selection={privs.manageIndexTemplates ? selectionConfig : undefined}
         pagination={pagination}
         onTableChange={onTableChange}
         rowProps={() => ({

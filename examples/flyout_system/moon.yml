@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-mount-utils-browser'
   - '@kbn/react-kibana-mount'
+  - '@kbn/scout'
+  - '@kbn/shared-url-state'
 tags:
   - plugin
   - prod
@@ -34,5 +36,6 @@ fileGroups:
     - common/**/*.ts
     - public/**/*.ts
     - public/**/*.tsx
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

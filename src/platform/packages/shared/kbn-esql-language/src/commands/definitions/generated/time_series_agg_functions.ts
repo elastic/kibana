@@ -38,7 +38,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.absent_over_time', {
     defaultMessage: 'Calculates the absence of a field in the output result over time range.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -429,7 +429,7 @@ const avgOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.avg_over_time', {
     defaultMessage: 'Calculates the average over time of a numeric field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -548,7 +548,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.count_distinct_over_time', {
     defaultMessage: 'Calculates the count of distinct values over time for a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -574,6 +574,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -592,6 +595,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -610,6 +616,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -639,6 +648,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -657,6 +669,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -675,6 +690,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -704,6 +722,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -722,6 +743,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -740,6 +764,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -769,6 +796,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -787,6 +817,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -805,6 +838,305 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -834,6 +1166,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -852,6 +1187,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -870,6 +1208,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -899,6 +1240,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -917,6 +1261,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -935,6 +1282,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -964,6 +1314,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -982,6 +1335,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1000,6 +1356,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1029,6 +1388,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1047,6 +1409,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1065,6 +1430,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1094,6 +1462,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1112,6 +1483,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1130,6 +1504,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1159,6 +1536,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'integer',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1177,6 +1557,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1195,6 +1578,9 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'precision',
           type: 'unsigned_long',
           optional: true,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
         },
@@ -1215,7 +1601,7 @@ const countOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.count_over_time', {
     defaultMessage: 'Calculates the count over time value of a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1555,7 +1941,7 @@ const deltaDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.delta', {
     defaultMessage: 'Calculates the absolute change of a gauge field in a time window.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1624,7 +2010,7 @@ const derivDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the derivative over time of a numeric field using linear regression.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1634,6 +2020,12 @@ const derivDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the derivative over time',
         },
       ],
       returnType: 'double',
@@ -1646,6 +2038,12 @@ const derivDefinition: FunctionDefinition = {
           optional: false,
           description: 'the metric field to calculate the value for',
         },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the derivative over time',
+        },
       ],
       returnType: 'double',
     },
@@ -1656,6 +2054,12 @@ const derivDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the derivative over time',
         },
       ],
       returnType: 'double',
@@ -1675,7 +2079,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the earliest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1733,6 +2137,40 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -1767,6 +2205,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'flattened',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: 'the metric field to calculate the value for',
@@ -1779,6 +2234,40 @@ const firstOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1814,6 +2303,23 @@ const firstOverTimeDefinition: FunctionDefinition = {
       ],
       returnType: 'tdigest',
     },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'the metric field to calculate the value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to compute the first over time value',
+        },
+      ],
+      returnType: 'keyword',
+    },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
@@ -1829,7 +2335,7 @@ const ideltaDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the idelta of a gauge. idelta is the absolute change between the last two data points (it ignores all but the last two data points in each time period). This function is very similar to delta, but is more responsive to recent changes.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1897,7 +2403,7 @@ const increaseDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.increase', {
     defaultMessage: 'Calculates the absolute increase of a counter field in a time window.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1966,7 +2472,7 @@ const irateDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the irate of a counter field. irate is the per-second rate of increase between the last two data points (it ignores all but the last two data points in each time period). This function is very similar to rate, but is more responsive to recent changes in the rate of increase.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2035,7 +2541,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the latest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2093,6 +2599,40 @@ const lastOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'the metric field to calculate the latest value for',
@@ -2127,6 +2667,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'flattened',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: 'the metric field to calculate the latest value for',
@@ -2139,6 +2696,40 @@ const lastOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'keyword',
     },
     {
       params: [
@@ -2174,6 +2765,23 @@ const lastOverTimeDefinition: FunctionDefinition = {
       ],
       returnType: 'tdigest',
     },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'the metric field to calculate the latest value for',
+        },
+        {
+          name: 'window',
+          type: 'time_duration',
+          optional: true,
+          description: 'the time window over which to find the latest value',
+        },
+      ],
+      returnType: 'keyword',
+    },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
@@ -2188,7 +2796,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.max_over_time', {
     defaultMessage: 'Calculates the maximum over time value of a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2443,7 +3051,7 @@ const minOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.min_over_time', {
     defaultMessage: 'Calculates the minimum over time value of a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2698,7 +3306,7 @@ const percentileOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.percentile_over_time', {
     defaultMessage: 'Calculates the percentile over time of a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2713,6 +3321,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2730,6 +3341,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2747,6 +3361,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2764,6 +3381,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2781,6 +3401,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2798,6 +3421,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2815,6 +3441,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2832,6 +3461,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2849,6 +3481,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2866,6 +3501,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2883,6 +3521,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2900,6 +3541,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2917,6 +3561,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2934,6 +3581,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'integer',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2951,6 +3601,9 @@ const percentileOverTimeDefinition: FunctionDefinition = {
           name: 'percentile',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'the percentile value to compute (between 0 and 100)',
         },
       ],
@@ -2970,7 +3623,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.present_over_time', {
     defaultMessage: 'Calculates the presence of a field in the output result over time range.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3362,7 +4015,7 @@ const rateDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the per-second average rate of increase of a counter. Rate calculations account for breaks in monotonicity, such as counter resets when a service restarts, and extrapolate values within each bucketed time interval. Rate is the most appropriate aggregate function for counters. It is only allowed in a STATS command under a `TS` source command, to be properly applied per time series.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3430,7 +4083,7 @@ const stddevOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.stddev_over_time', {
     defaultMessage: 'Calculates the population standard deviation over time of a numeric field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3498,7 +4151,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.sum_over_time', {
     defaultMessage: 'Calculates the sum over time value of a field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3617,7 +4270,7 @@ const varianceOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.variance_over_time', {
     defaultMessage: 'Calculates the population variance over time of a numeric field.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

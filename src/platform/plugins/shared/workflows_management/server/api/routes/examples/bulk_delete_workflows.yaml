@@ -22,9 +22,21 @@ responses:
               failures: []
 x-codeSamples:
   - lang: curl
+    label: 'Soft delete (default)'
     source: |
       curl \
         -X DELETE "${KIBANA_URL}/api/workflows" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
+        }'
+  - lang: curl
+    label: 'Hard delete (permanent)'
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/workflows?force=true" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \

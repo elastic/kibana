@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   EmbeddableApiContext,
   CanOverrideHoverActions,
   HasEditCapabilities,
@@ -19,6 +20,7 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDescription,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesSavedObjectId,
   PublishesWritableTitle,
@@ -38,8 +40,17 @@ import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/in
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
-  SearchEmbeddableState,
+  SearchEmbeddablePanelApiState,
 } from '../../common/embeddable/types';
+
+export type { SearchEmbeddablePanelApiState };
+
+/**
+ * Input state accepted by the search embeddable factory.
+ */
+export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
+  nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+};
 
 export type SearchEmbeddablePublicState = Pick<
   SerializableSavedSearch,
@@ -52,6 +63,8 @@ export type SearchEmbeddablePublicState = Pick<
   | 'viewMode'
   | 'grid'
   | 'density'
+  | 'documentsDisplayMode'
+  | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
@@ -83,7 +96,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     tabs?: DiscoverSessionTab[];
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
@@ -93,10 +106,12 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
+  PublishesEsql &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
   PublishesSelectedTabId &
+  CanCancelRequests &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &

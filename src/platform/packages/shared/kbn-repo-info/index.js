@@ -31,11 +31,11 @@ const readKibanaPkgJson = (path) => {
   }
 };
 
-const findKibanaPackageJson = () => {
-  // search for the kibana directory, since this file is moved around it might
-  // not be where we think but should always be a relatively close parent
-  // of this directory
-  const startDir = __dirname;
+/**
+ * @param {string} startDir
+ * @returns {{ kibanaDir: string, kibanaPkgJson: KibanaPackageJson } | undefined}
+ */
+const searchForKibanaPackageJson = (startDir) => {
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {
@@ -53,10 +53,29 @@ const findKibanaPackageJson = () => {
 
     const parent = Path.dirname(cursor);
     if (parent === rootDir) {
-      throw new Error(`unable to find kibana directory from ${startDir}`);
+      return undefined;
     }
     cursor = parent;
   }
+};
+
+const findKibanaPackageJson = () => {
+  // In a git worktree, node_modules are shared with the primary worktree, so __dirname
+  // always resolves into the primary worktree's tree. Check process.cwd() first: if it
+  // is inside a *different* kibana root, prefer that root so REPO_ROOT matches the active
+  // working tree rather than the primary checkout.
+  const cwdResult = searchForKibanaPackageJson(process.cwd());
+  const dirnameResult = searchForKibanaPackageJson(__dirname);
+
+  if (!dirnameResult) {
+    throw new Error(`unable to find kibana directory from ${__dirname}`);
+  }
+
+  if (cwdResult && cwdResult.kibanaDir !== dirnameResult.kibanaDir) {
+    return cwdResult;
+  }
+
+  return dirnameResult;
 };
 
 const { kibanaDir, kibanaPkgJson } = findKibanaPackageJson();

@@ -10,6 +10,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { gapReasonType } from '../../../../../common/constants/gap_reason';
 import { getRuleIdsWithGapsRoute } from './get_rule_ids_with_gaps_route';
 
 const rulesClient = rulesClientMock.create();
@@ -35,11 +36,13 @@ describe('getRuleIdsWithGapsRoute', () => {
       totalUnfilledDurationMs: 1000,
       totalInProgressDurationMs: 0,
       totalFilledDurationMs: 0,
+      totalErrorDurationMs: 0,
       totalDurationMs: 1000,
       rulesByGapFillStatus: {
         unfilled: 1,
         inProgress: 0,
         filled: 0,
+        error: 0,
       },
     },
   };
@@ -52,11 +55,13 @@ describe('getRuleIdsWithGapsRoute', () => {
       totalUnfilledDurationMs: 3600000,
       totalInProgressDurationMs: 1800000,
       totalFilledDurationMs: 900000,
+      totalErrorDurationMs: 0,
       totalDurationMs: 6300000,
       rulesByGapFillStatus: {
         unfilled: 1,
         inProgress: 1,
         filled: 0,
+        error: 0,
       },
     },
   };
@@ -84,11 +89,13 @@ describe('getRuleIdsWithGapsRoute', () => {
           total_unfilled_duration_ms: 1000,
           total_in_progress_duration_ms: 0,
           total_filled_duration_ms: 0,
+          total_error_duration_ms: 0,
           total_duration_ms: 1000,
           rules_by_gap_fill_status: {
             unfilled: 1,
             in_progress: 0,
             filled: 0,
+            error: 0,
           },
         },
       },
@@ -122,6 +129,33 @@ describe('getRuleIdsWithGapsRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
+  test('should pass excluded_reasons through to rulesClient', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const excludedReasons = [gapReasonType.RULE_DISABLED];
+
+    getRuleIdsWithGapsRoute(router, licenseState);
+
+    rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResult);
+    const bodyWithExcludedReasons = {
+      ...mockBody,
+      excluded_reasons: excludedReasons,
+    };
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: bodyWithExcludedReasons }
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.getRuleIdsWithGaps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        excludedReasons,
+      })
+    );
+  });
+
   test('should transform response with summary correctly', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -143,11 +177,13 @@ describe('getRuleIdsWithGapsRoute', () => {
           total_unfilled_duration_ms: 3600000,
           total_in_progress_duration_ms: 1800000,
           total_filled_duration_ms: 900000,
+          total_error_duration_ms: 0,
           total_duration_ms: 6300000,
           rules_by_gap_fill_status: {
             unfilled: 1,
             in_progress: 1,
             filled: 0,
+            error: 0,
           },
         },
       },

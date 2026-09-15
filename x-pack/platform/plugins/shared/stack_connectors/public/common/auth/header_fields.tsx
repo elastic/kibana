@@ -8,19 +8,20 @@
 import React from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiPanel,
-  EuiSuperSelect,
-  useEuiTheme,
   EuiFormRow,
-  EuiText,
-  EuiBadge,
   EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -78,7 +79,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                 </EuiText>
               )}
               <EuiSpacer size="s" />
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <UseField
                   key={item.id}
                   path={`${item.path}.type`}
@@ -88,7 +89,11 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                     const headerTypeValue = typeField.value;
 
                     return (
-                      <EuiFlexGroup direction="column" gutterSize="s">
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="s"
+                        data-test-subj={`webhookHeaderRow-${index}`}
+                      >
                         {headerTypeValue === 'secret' && (
                           <EuiFlexGroup>
                             <EuiFlexItem grow={false}>
@@ -222,24 +227,25 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                                   options={headerTypeOptions}
                                   valueOfSelected={headerTypeValue}
                                   onChange={(val) => typeField.setValue(val)}
-                                  hasDividers
                                   fullWidth
                                   data-test-subj="webhookHeaderTypeSelect"
                                 />
                               </EuiFormRow>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                color="danger"
-                                onClick={() => removeItem(item.id)}
-                                iconType="minusCircle"
-                                aria-label={i18n.DELETE_BUTTON}
-                                data-test-subj="webhookRemoveHeaderButton"
-                                css={{
-                                  marginTop: '28px',
-                                  background: euiTheme.colors.backgroundBaseDanger,
-                                }}
-                              />
+                              <EuiToolTip content={i18n.DELETE_BUTTON} disableScreenReaderOutput>
+                                <EuiButtonIcon
+                                  color="danger"
+                                  onClick={() => removeItem(item.id)}
+                                  iconType="minusCircle"
+                                  aria-label={i18n.DELETE_BUTTON}
+                                  data-test-subj="webhookRemoveHeaderButton"
+                                  css={{
+                                    marginTop: '28px',
+                                    background: euiTheme.colors.backgroundBaseDanger,
+                                  }}
+                                />
+                              </EuiToolTip>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiPanel>

@@ -7,7 +7,15 @@
 
 import { BehaviorSubject, Subject, type Subscription, filter as rxFilter } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { addFilter, removeFilter, containsFilter } from './search_filters';
+import {
+  addFilter,
+  removeFilter,
+  containsFilter,
+  addEntityFilter,
+  removeEntityFilter,
+  containsEntityFilter,
+} from './search_filters';
+import type { NamespaceSourcePrefixResolver } from './search_filters';
 
 // =============================================================================
 // Filter Toggle Event Bus
@@ -19,9 +27,43 @@ import { addFilter, removeFilter, containsFilter } from './search_filters';
  * FilterStore instances subscribe and handle events for their scopeId.
  */
 export interface FilterToggleEvent {
+  type: 'equals';
   scopeId: string;
   field: string;
   value: string;
+  action: 'show' | 'hide';
+}
+
+export interface IsOneOfFilterToggleEvent {
+  type: 'isOneOf';
+  scopeId: string;
+  field: string;
+  values: string[];
+  action: 'show' | 'hide';
+}
+
+/**
+ * Event emitted when a KQL entity filter toggle is requested.
+ * Entity filters are boolean expressions produced by the Entity Store's EUID logic, so they are
+ * keyed on the entity id rather than a field/value pair.
+ */
+export interface EntityFilterToggleEvent {
+  type: 'entityDsl';
+  scopeId: string;
+  entityId: string;
+  /** ES DSL produced by the Entity Store EUID logic; translated to Kibana filters on apply. */
+  dsl: object;
+  /**
+   * Raw namespace source field values from the document's sourceFields (e.g.
+   * `{ 'data_stream.dataset': 'gcp.audit' }`). Used to replace prefix clauses in the DSL with
+   * exact phrase filters so every filter uses a standard UI operator.
+   */
+  namespaceSourceValues?: Record<string, string | string[]>;
+  /**
+   * Reduces an observed namespace value to its derived prefix. Comes from the Entity Store so the
+   * translation never reimplements its chunking rules.
+   */
+  getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver;
   action: 'show' | 'hide';
 }
 
@@ -37,10 +79,30 @@ export interface EntityRelationshipEvent {
 }
 
 // Global event bus for filter toggle actions
-const filterToggleEvents$ = new Subject<FilterToggleEvent>();
+const filterToggleEvents$ = new Subject<
+  FilterToggleEvent | IsOneOfFilterToggleEvent | EntityFilterToggleEvent
+>();
 
 // Global event bus for entity relationship toggle actions
 const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
+
+// =============================================================================
+// Pinned EUID Event Bus
+// =============================================================================
+
+/**
+ * Event emitted when a pinned EUID toggle action is requested.
+ * When an entity filter is toggled, the entity's EUID is also pinned/unpinned
+ * so the server can prioritize it in ES|QL query results.
+ */
+export interface PinnedEuidEvent {
+  scopeId: string;
+  entityId: string;
+  action: 'show' | 'hide';
+}
+
+// Global event bus for pinned EUID toggle actions
+const pinnedEuidEvents$ = new Subject<PinnedEuidEvent>();
 
 /**
  * Emit a filter toggle event. Any FilterStore listening for this scopeId
@@ -67,7 +129,46 @@ export const emitFilterToggle = (
   value: string,
   action: 'show' | 'hide'
 ): void => {
-  const event: FilterToggleEvent = { scopeId, field, value, action };
+  const event: FilterToggleEvent = { type: 'equals', scopeId, field, value, action };
+  filterToggleEvents$.next(event);
+};
+
+export const emitIsOneOfFilterToggle = (
+  scopeId: string,
+  field: string,
+  values: string[],
+  action: 'show' | 'hide'
+): void => {
+  const event: IsOneOfFilterToggleEvent = { type: 'isOneOf', scopeId, field, values, action };
+  filterToggleEvents$.next(event);
+};
+
+/**
+ * Emit an entity filter toggle event. Any FilterStore listening for this scopeId will
+ * add/remove the entity's filter.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity EUID the filter belongs to (used as the filter key)
+ * @param dsl - ES DSL produced by the Entity Store EUID logic
+ * @param action - 'show' to add the filter, 'hide' to remove it
+ */
+export const emitEntityFilterToggle = (
+  scopeId: string,
+  entityId: string,
+  dsl: object,
+  action: 'show' | 'hide',
+  namespaceSourceValues?: Record<string, string | string[]>,
+  getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver
+): void => {
+  const event: EntityFilterToggleEvent = {
+    type: 'entityDsl',
+    scopeId,
+    entityId,
+    dsl,
+    namespaceSourceValues,
+    getNamespaceSourcePrefix,
+    action,
+  };
   filterToggleEvents$.next(event);
 };
 
@@ -89,6 +190,23 @@ export const emitEntityRelationshipToggle = (
 };
 
 /**
+ * Emit a pinned EUID toggle event. Any FilterStore listening for this scopeId
+ * will receive the event and update its pinned EUIDs state.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity EUID to pin/unpin
+ * @param action - 'show' to pin, 'hide' to unpin
+ */
+export const emitPinnedEuidToggle = (
+  scopeId: string,
+  entityId: string,
+  action: 'show' | 'hide'
+): void => {
+  const event: PinnedEuidEvent = { scopeId, entityId, action };
+  pinnedEuidEvents$.next(event);
+};
+
+/**
  * Check if an entity's relationships are expanded for the given scope.
  * Returns false gracefully if no store exists.
  *
@@ -104,24 +222,51 @@ export const isEntityRelationshipExpandedForScope = (
   return store?.isEntityRelationshipExpanded(entityId) ?? false;
 };
 
+export const isInitialEntityForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isInitialEntity(entityId) ?? false;
+};
+
 /**
- * Check if a filter is active for the given scope, field, and value.
+ * Check if an entity EUID is pinned for the given scope.
+ * Returns false gracefully if no store exists.
+ */
+export const isPinnedForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isPinned(entityId) ?? false;
+};
+
+/**
+ * Check if a filter is active for the given scope, field, and value(s).
  * Returns false gracefully if no store exists (no warning logged).
  *
  * @param scopeId - Unique identifier for the graph instance
  * @param field - The field to check
- * @param value - The value to check
+ * @param value - The value or values to check
  * @returns true if the filter is active, false otherwise (including when no store exists)
  *
  * @example
  * ```typescript
  * // In a component or hook - no FilterStore needed
  * const isActive = isFilterActiveForScope(scopeId, 'user.entity.id', 'user-123');
+ * const isActive = isFilterActiveForScope(scopeId, 'event.action', ['login', 'logout']);
  * ```
  */
-export const isFilterActiveForScope = (scopeId: string, field: string, value: string): boolean => {
+export const isFilterActiveForScope = (
+  scopeId: string,
+  field: string,
+  value: string | string[]
+): boolean => {
   const store = stores.get(scopeId);
   return store?.isFilterActive(field, value) ?? false;
+};
+
+/**
+ * Check whether the entity filter for this entity id is active in a scope.
+ */
+export const isEntityFilterActiveForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isEntityFilterActive(entityId) ?? false;
 };
 
 // =============================================================================
@@ -142,10 +287,13 @@ const stores = new Map<string, FilterStore>();
 export class FilterStore {
   readonly scopeId: string;
   private dataViewId?: string;
+  private initialEntityIds: Array<{ id: string; isOrigin: boolean }> = [];
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
   private readonly expandedEntityIds$ = new BehaviorSubject<Set<string>>(new Set());
+  private readonly pinnedEuids$ = new BehaviorSubject<Set<string>>(new Set());
   private readonly filterEventSubscription: Subscription;
   private readonly entityRelationshipEventSubscription: Subscription;
+  private readonly pinnedEuidEventSubscription: Subscription;
 
   constructor(scopeId: string) {
     this.scopeId = scopeId;
@@ -154,7 +302,18 @@ export class FilterStore {
     this.filterEventSubscription = filterToggleEvents$
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
-        this.toggleFilter(event.field, event.value, event.action);
+        if (event.type === 'entityDsl') {
+          this.toggleEntityFilter(
+            event.entityId,
+            event.dsl,
+            event.action,
+            event.namespaceSourceValues,
+            event.getNamespaceSourcePrefix
+          );
+          return;
+        }
+        const value = event.type === 'isOneOf' ? event.values : event.value;
+        this.toggleFilter(event.field, value, event.action);
       });
 
     // Subscribe to entity relationship toggle events for this scopeId
@@ -162,6 +321,13 @@ export class FilterStore {
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
         this.toggleEntityRelationship(event.entityId, event.action);
+      });
+
+    // Subscribe to pinned EUID toggle events for this scopeId
+    this.pinnedEuidEventSubscription = pinnedEuidEvents$
+      .pipe(rxFilter((event) => event.scopeId === this.scopeId))
+      .subscribe((event) => {
+        this.togglePinnedEuid(event.entityId, event.action);
       });
   }
 
@@ -172,6 +338,10 @@ export class FilterStore {
     if (dataViewId) {
       this.dataViewId = dataViewId;
     }
+  }
+
+  setInitialEntityIds(initialEntityIds: Array<{ id: string; isOrigin: boolean }>): void {
+    this.initialEntityIds = initialEntityIds;
   }
 
   /**
@@ -201,10 +371,10 @@ export class FilterStore {
   /**
    * Toggle a filter on or off.
    * @param field - The field to filter on
-   * @param value - The value to filter for
+   * @param value - The value or values to filter for
    * @param action - 'show' to add filter, 'hide' to remove
    */
-  toggleFilter(field: string, value: string, action: 'show' | 'hide'): void {
+  toggleFilter(field: string, value: string | string[], action: 'show' | 'hide'): void {
     if (action === 'show') {
       const newFilters = addFilter(this.dataViewId ?? '', this.filters$.value, field, value);
       this.filters$.next(newFilters);
@@ -215,10 +385,40 @@ export class FilterStore {
   }
 
   /**
-   * Check if a filter with the given field and value is currently active.
+   * Toggle the KQL entity filter for an entity id.
+   * Adding replaces any existing graph-owned KQL filter for the same entity.
    */
-  isFilterActive(field: string, value: string): boolean {
+  toggleEntityFilter(
+    entityId: string,
+    dsl: object,
+    action: 'show' | 'hide',
+    namespaceSourceValues?: Record<string, string | string[]>,
+    getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver
+  ): void {
+    const next =
+      action === 'show'
+        ? addEntityFilter(
+            this.dataViewId ?? '',
+            this.filters$.value,
+            entityId,
+            dsl,
+            namespaceSourceValues,
+            getNamespaceSourcePrefix
+          )
+        : removeEntityFilter(this.filters$.value, entityId);
+    this.filters$.next(next);
+  }
+
+  /**
+   * Check if a filter with the given field and value(s) is currently active.
+   */
+  isFilterActive(field: string, value: string | string[]): boolean {
     return containsFilter(this.filters$.value, field, value);
+  }
+
+  /** Check if the entity filter for this entity id is currently active. */
+  isEntityFilterActive(entityId: string): boolean {
+    return containsEntityFilter(this.filters$.value, entityId);
   }
 
   // ===========================================================================
@@ -244,7 +444,14 @@ export class FilterStore {
    * Check if an entity's relationships are currently expanded.
    */
   isEntityRelationshipExpanded(entityId: string): boolean {
-    return this.expandedEntityIds$.value.has(entityId);
+    return this.expandedEntityIds$.value.has(entityId) || this.isInitialEntity(entityId);
+  }
+
+  /**
+   * Check if an entity ID is part of the initial set of entities (e.g. from the original graph request).
+   */
+  isInitialEntity(entityId: string): boolean {
+    return this.initialEntityIds.find((entity) => entity.id === entityId)?.isOrigin ?? false;
   }
 
   /**
@@ -263,12 +470,56 @@ export class FilterStore {
     return this.expandedEntityIds$.subscribe(callback);
   }
 
+  // ===========================================================================
+  // Pinned EUID State
+  // ===========================================================================
+
+  /**
+   * Toggle an entity EUID's pinned state.
+   * Pinned EUIDs are sent to the server to prioritize matching events in query results.
+   * @param entityId - The entity EUID to pin/unpin
+   * @param action - 'show' to pin, 'hide' to unpin
+   */
+  togglePinnedEuid(entityId: string, action: 'show' | 'hide'): void {
+    const next = new Set(this.pinnedEuids$.value);
+    if (action === 'show') {
+      next.add(entityId);
+    } else {
+      next.delete(entityId);
+    }
+    this.pinnedEuids$.next(next);
+  }
+
+  /**
+   * Check if an entity EUID is currently pinned.
+   */
+  isPinned(entityId: string): boolean {
+    return this.pinnedEuids$.value.has(entityId);
+  }
+
+  /**
+   * Get the current set of pinned EUIDs.
+   */
+  getPinnedEuids(): Set<string> {
+    return this.pinnedEuids$.value;
+  }
+
+  /**
+   * Subscribe to pinned EUID changes.
+   * @param callback - Function called when pinned EUIDs change
+   * @returns Subscription that should be unsubscribed on cleanup
+   */
+  subscribeToPinnedEuids(callback: (pinnedEuids: Set<string>) => void): Subscription {
+    return this.pinnedEuids$.subscribe(callback);
+  }
+
   /**
    * Reset the filter store to empty state.
    */
   reset(): void {
     this.filters$.next([]);
     this.expandedEntityIds$.next(new Set());
+    this.pinnedEuids$.next(new Set());
   }
 
   /**
@@ -278,8 +529,10 @@ export class FilterStore {
   destroy(): void {
     this.filterEventSubscription.unsubscribe();
     this.entityRelationshipEventSubscription.unsubscribe();
+    this.pinnedEuidEventSubscription.unsubscribe();
     this.filters$.complete();
     this.expandedEntityIds$.complete();
+    this.pinnedEuids$.complete();
   }
 }
 

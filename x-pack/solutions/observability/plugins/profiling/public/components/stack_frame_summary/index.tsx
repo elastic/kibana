@@ -9,6 +9,9 @@ import React from 'react';
 import { getCalleeFunction, getCalleeSource } from '@kbn/profiling-utils';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 
+// Aria-hidden zero-width space used to maintain the line height when the source is empty
+const EMPTY_SOURCE = '\u200E';
+
 interface Props {
   frame: StackFrameMetadata;
   onFrameClick?: (functionName: string) => void;
@@ -24,6 +27,7 @@ function CalleeFunctionText({ calleeFunctionName }: { calleeFunctionName: string
 
 export function StackFrameSummary({ frame, onFrameClick }: Props) {
   const calleeFunctionName = getCalleeFunction(frame);
+  const calleeSource = getCalleeSource(frame);
 
   function handleOnClick() {
     if (onFrameClick) {
@@ -45,7 +49,9 @@ export function StackFrameSummary({ frame, onFrameClick }: Props) {
         </div>
       </EuiFlexItem>
       <EuiFlexItem style={{ overflowWrap: 'anywhere' }}>
-        <EuiText size="s">{getCalleeSource(frame) || '‎'}</EuiText>
+        <EuiText size="s" aria-hidden={!calleeSource}>
+          {calleeSource || EMPTY_SOURCE}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

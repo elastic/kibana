@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import { useEndpointActionItems } from '../../hooks';
@@ -64,8 +65,12 @@ export const ActionsMenu = memo<{ hostInfo: HostInfo }>(({ hostInfo }) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
       data-test-subj="endpointDetailsActionsPopover"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.endpoint.detailsActions.popover.ariaLabel',
+        { defaultMessage: 'Endpoint actions' }
+      )}
     >
-      <EuiContextMenuPanel size="s" items={takeActionItems} />
+      <EuiContextMenuPanel items={takeActionItems} />
     </EuiPopover>
   );
 });

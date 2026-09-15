@@ -12,23 +12,28 @@ import {
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
+  isList,
   isParamLiteral,
+  singleItems,
 } from '@elastic/esql';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
   ESQLAstItem,
+  ESQLColumn,
   ESQLFunction,
-  ESQLMessage,
+  ESQLIdentifier,
+  ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
+import { isTypeConversionFunction } from '../functions';
 import { FunctionDefinitionTypes } from '../../../../..';
 import { getLocationInfo } from '../../../registry/location';
-import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { Location } from '../../../registry/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
+  ESQLMessage,
   FunctionDefinition,
   PromQLFunctionDefinition,
   PromQLFunctionParamType,
@@ -38,6 +43,15 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
+
+const getArgumentsToValidate = (
+  args: ESQLAstItem[]
+): Array<{ argument: ESQLSingleAstItem; index: number }> =>
+  [...singleItems(args)].flatMap((argument, index) =>
+    isList(argument)
+      ? argument.values.map((value) => ({ argument: value, index }))
+      : [{ argument, index }]
+  );
 
 export function validateFunction({
   fn,
@@ -117,6 +131,14 @@ class FunctionValidator {
       return;
     }
 
+    // Return early so the source-incompatibility error takes priority over the generic
+    // "not allowed here" check below — the location may technically match, but the function
+    // is invalid regardless because the pipeline source is TS.
+    if (this.isTimeseriesSource && this.definition.tsdbCompatible === false) {
+      this.report(errors.tsdbIncompatibleFunction(this.fn));
+      return;
+    }
+
     if (!this.allowedHere) {
       this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
@@ -127,6 +149,42 @@ class FunctionValidator {
     }
 
     this.validateArguments();
+  }
+
+  /** Resolves the `hint.kind` at a given positional index across all signatures. */
+  private hintKindAt(position: number): string | undefined {
+    for (const sig of this.definition?.signatures ?? []) {
+      const kind = sig.params[position]?.hint?.kind;
+      if (kind !== undefined) return kind;
+    }
+    return undefined;
+  }
+
+  private expectsAggregationAt(position: number): boolean {
+    return this.hintKindAt(position) === 'aggregation';
+  }
+
+  private validateAggregationArg(arg: ESQLAstItem, rawArg: ESQLAstItem): void {
+    const isAggCall =
+      isFunctionExpression(arg) &&
+      getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
+
+    if (!isAggCall) {
+      const location = Array.isArray(rawArg) ? this.fn.location : rawArg.location;
+      this.report(errors.expectedAggregationArgument(this.fn, location));
+    }
+
+    if (isFunctionExpression(arg)) {
+      const child = new FunctionValidator(
+        arg,
+        this.parentCommand,
+        this.ast,
+        this.context,
+        this.callbacks
+      );
+      child.validate();
+      this.report(...child.messages);
+    }
   }
 
   /**
@@ -155,10 +213,12 @@ class FunctionValidator {
     }
 
     // Validate column arguments
-    const columnsToValidate = [];
-    const flatArgs = this.fn.args.flat();
-    for (let i = 0; i < flatArgs.length; i++) {
-      const arg = flatArgs[i];
+    const columnsToValidate: Array<ESQLColumn | ESQLIdentifier> = [];
+    const flatArgs = getArgumentsToValidate(this.fn.args);
+    const skipUnsupportedOrConflictingColumnValidation = isTypeConversionFunction(
+      this.definition.name
+    );
+    for (const { argument: arg, index: i } of flatArgs) {
       if (
         (isColumn(arg) || isIdentifier(arg)) &&
         !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
@@ -169,7 +229,9 @@ class FunctionValidator {
     }
 
     const columnMessages = columnsToValidate.flatMap((arg) => {
-      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+      return new ColumnValidator(arg, this.context, this.parentCommand.name, {
+        skipUnsupportedOrConflictingColumnValidation,
+      }).validate();
     });
 
     this.report(...columnMessages);
@@ -187,7 +249,12 @@ class FunctionValidator {
   }
 
   /**
-   * Validates the nested functions within the current function
+   * Validates the nested functions within the current function.
+   *
+   * Positions marked `hint.kind === 'aggregation'` are handled
+   * by `validateAggregationArg` and reported inline.
+   * All other positions use the legacy path where nested-agg / license errors
+   * collect in `nestedErrors` and short-circuit further parent validation.
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
@@ -198,8 +265,15 @@ class FunctionValidator {
       ? this.definition?.name
       : undefined;
 
-    for (const _arg of this.fn.args.flat()) {
-      const arg = removeInlineCasts(_arg);
+    const flatArgs = getArgumentsToValidate(this.fn.args);
+    for (const { argument: rawArg, index: i } of flatArgs) {
+      const arg = removeInlineCasts(rawArg);
+
+      if (this.expectsAggregationAt(i)) {
+        this.validateAggregationArg(arg, rawArg);
+        continue;
+      }
+
       if (isFunctionExpression(arg)) {
         const validator = new FunctionValidator(
           arg,
@@ -246,7 +320,7 @@ class FunctionValidator {
     if (
       this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
       locationId === Location.STATS &&
-      isTimeseriesSourceCommand(this.ast)
+      this.isTimeseriesSource
     ) {
       return true;
     }
@@ -254,11 +328,21 @@ class FunctionValidator {
     return false;
   }
 
+  /** Whether the function belongs to a TS pipeline. */
+  private get isTimeseriesSource(): boolean {
+    return this.context.isTimeseriesSource === true;
+  }
+
   /**
    * Gets information about the location of the current function
    */
   private get location(): { displayName: string; id: Location } {
-    return getLocationInfo(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
+    return getLocationInfo(
+      this.fn,
+      this.parentCommand,
+      this.isTimeseriesSource,
+      !!this.parentAggFunction
+    );
   }
 
   /**

@@ -81,13 +81,11 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         undefined
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('case-view-title');
+      await cases.common.waitForCaseViewToLoad();
       await pageObjects.svlCommonNavigation.sidenav.toggle(true);
       await svlCommonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
       const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
       await attachmentsTab.click();
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
       await testSubjects.getVisibleText('cases-files-name-link');
       await svlCommonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);

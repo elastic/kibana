@@ -196,7 +196,33 @@ function mergeWithSubFeatures(
         mergedConfig.cases?.assign ?? [],
         subFeaturePrivilege.cases?.assign ?? []
       ),
+      ...(mergedConfig.cases?.manageTemplates !== undefined ||
+      subFeaturePrivilege.cases?.manageTemplates !== undefined
+        ? {
+            manageTemplates: mergeArrays(
+              mergedConfig.cases?.manageTemplates ?? [],
+              subFeaturePrivilege.cases?.manageTemplates ?? []
+            ),
+          }
+        : {}),
     };
+
+    // `aiIndex.read` is a list of KI types, so a sub-feature privilege included in the primary
+    // privilege widens the set of readable types without ever revoking a type the primary privilege
+    // already grants.
+    if (subFeaturePrivilege.aiIndex?.read) {
+      mergedConfig.aiIndex = {
+        ...mergedConfig.aiIndex,
+        read: mergeArrays(mergedConfig.aiIndex?.read, subFeaturePrivilege.aiIndex.read),
+      };
+    }
+
+    // `alerts.read` is a boolean flag, so a sub-feature privilege included in the primary
+    // privilege grants alerts read access to it without ever revoking access the primary
+    // privilege already grants on its own.
+    if (subFeaturePrivilege.alerts?.read) {
+      mergedConfig.alerts = { ...mergedConfig.alerts, read: true };
+    }
   }
   return mergedConfig;
 }

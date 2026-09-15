@@ -9,17 +9,26 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
-export const transactionErrorRateParamsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  transactionType: schema.maybe(schema.string()),
-  transactionName: schema.maybe(schema.string()),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
-  useKqlFilter: schema.maybe(schema.boolean()),
-  searchConfiguration: schema.maybe(searchConfigurationSchema),
-});
+export const transactionErrorRateParamsSchema = schema.object(
+  {
+    windowSize: schema.number(),
+    windowUnit: schema.string(),
+    threshold: schema.number(),
+    transactionType: schema.maybe(schema.string()),
+    transactionName: schema.maybe(schema.string()),
+    serviceName: schema.maybe(schema.string()),
+    environment: schema.string(),
+    groupBy: schema.maybe(schema.arrayOf(schema.string())),
+    useKqlFilter: schema.maybe(schema.boolean()),
+    searchConfiguration: schema.maybe(searchConfigurationSchema),
+  },
+  {
+    meta: {
+      title: 'Transaction Error Rate Rule Params',
+      description:
+        'The parameters for the transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.',
+    },
+  }
+);
 
 export type TransactionErrorRateRuleParams = TypeOf<typeof transactionErrorRateParamsSchema>;

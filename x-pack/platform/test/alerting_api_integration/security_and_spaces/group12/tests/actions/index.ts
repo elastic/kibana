@@ -28,6 +28,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('../../../group2/tests/actions/delete'));
     loadTestFile(require.resolve('../../../group2/tests/actions/execute'));
     loadTestFile(require.resolve('../../../group2/tests/actions/get_all'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/auth_status'));
     loadTestFile(require.resolve('../../../group2/tests/actions/get_all_system'));
     loadTestFile(require.resolve('../../../group2/tests/actions/get'));
     loadTestFile(require.resolve('../../../group2/tests/actions/connector_types'));

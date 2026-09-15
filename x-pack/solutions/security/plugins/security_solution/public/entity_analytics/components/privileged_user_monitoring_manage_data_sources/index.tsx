@@ -36,7 +36,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
     <>
       <EuiButtonEmpty
         flush="left"
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         iconSide="left"
         onClick={onBackToDashboardClicked}
         aria-label={i18n.translate(
@@ -90,6 +90,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
 
       {!fleetRead && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.noAccessMessage"

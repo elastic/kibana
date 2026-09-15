@@ -20,6 +20,7 @@ interface GetFilterParams {
   authenticatedUser: AuthenticatedUser;
   filter?: string;
   shared?: boolean;
+  includeAllAuthors?: boolean;
 }
 
 export const getSharedFilter = (shared?: boolean): string => {
@@ -63,7 +64,14 @@ export const getCombinedFilter = ({
   authenticatedUser,
   filter,
   shared,
+  includeAllAuthors,
 }: GetFilterParams): string => {
+  // If includeAllAuthors is true, we bypass the user and shared filters
+  // to include all attack discoveries regardless of who created them or their shared status.
+  if (includeAllAuthors) {
+    return filter ?? '';
+  }
+
   const sharedFilter = getSharedFilter(shared);
   const userFilter = getUserFilter({ authenticatedUser, shared });
   const additionalFilter = getAdditionalFilter(filter);

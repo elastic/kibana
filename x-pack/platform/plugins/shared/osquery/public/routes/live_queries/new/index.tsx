@@ -5,33 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
 import { isArray } from 'lodash';
-import { WithHeaderLayout } from '../../../components/layouts';
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { useGoBack } from '../../../common/use_go_back';
-import type { LocationStateWithFromHistory } from '../../../common/use_go_back';
+import { fullWidthFormContentCss } from '../../../components/layouts';
+import { pagePathGetters } from '../../../common/page_paths';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
-interface LocationState extends LocationStateWithFromHistory {
+interface LocationState {
   form: Record<string, unknown>;
 }
 
 const NewLiveQueryPageComponent = () => {
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
-  useBreadcrumbs(isHistoryEnabled ? 'new_query' : 'live_query_new');
-  const { replace } = useHistory();
+  useBreadcrumbs('new_query');
+  const { replace, push } = useHistory();
   const location = useLocation<LocationState>();
-  const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
-  const handleGoBack = useGoBack(backNavigationTarget);
-  const backNavigationProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
   const agentPolicyIds = useMemo(() => {
@@ -51,48 +42,22 @@ const NewLiveQueryPageComponent = () => {
     }
   }, [location.state?.form, replace]);
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="chevronSingleLeft"
-            {...backNavigationProps}
-            flush="left"
-            size="xs"
-          >
-            {isHistoryEnabled ? (
-              <FormattedMessage
-                id="xpack.osquery.newLiveQuery.viewHistoryTitle"
-                defaultMessage="View history"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.osquery.newLiveQuery.viewLiveQueriesHistoryTitle"
-                defaultMessage="View live queries history"
-              />
-            )}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.newLiveQuery.pageTitle"
-                defaultMessage="New live query"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [backNavigationProps, isHistoryEnabled]
+  const handleSuccess = useCallback(
+    (actionId: string) => {
+      push(pagePathGetters.history_details({ liveQueryId: actionId }));
+    },
+    [push]
   );
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery {...initialFormData} agentPolicyIds={agentPolicyIds} />
-    </WithHeaderLayout>
+    <div css={fullWidthFormContentCss}>
+      <LiveQuery
+        {...initialFormData}
+        agentPolicyIds={agentPolicyIds}
+        onSuccess={handleSuccess}
+        redirectsOnSuccess
+      />
+    </div>
   );
 };
 

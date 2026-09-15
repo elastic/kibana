@@ -14,7 +14,9 @@ import {
   MAX_DOCS_PER_PAGE,
   MAX_TITLE_LENGTH,
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES,
+  ABSOLUTE_MAX_CASES_PER_RUN,
+  MAX_TEMPLATE_KEY_LENGTH,
+  MAX_TEMPLATE_VERSION_STRING_LENGTH,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -93,7 +95,6 @@ export const CasesConnectorRunParamsSchema = schema.object({
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
       minSize: 0,
-      maxSize: MAX_OPEN_CASES,
     })
   ),
   groupingBy: GroupingSchema,
@@ -104,10 +105,15 @@ export const CasesConnectorRunParamsSchema = schema.object({
   maximumCasesToOpen: schema.number({
     defaultValue: DEFAULT_MAX_OPEN_CASES,
     min: 1,
-    max: MAX_OPEN_CASES,
+    max: ABSOLUTE_MAX_CASES_PER_RUN,
   }),
-  templateId: schema.nullable(schema.string()),
-  internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
+  templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+  templateVersion: schema.nullable(
+    schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
+  ),
+  /** Pre-upgrade tasks may omit this and send `internallyManagedAlerts`. */
+  source: schema.maybe(schema.oneOf([schema.literal('attack'), schema.literal('rule')])),
+  internallyManagedAlerts: schema.maybe(schema.nullable(schema.boolean())),
 });
 
 const ZAlertSchema = z.record(z.string(), z.any()).superRefine((value, ctx) => {
@@ -189,12 +195,7 @@ export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
     autoPushCase: z.boolean().nullable().default(false),
-    groupedAlerts: z
-      .array(ZCasesGroupedAlertsSchema)
-      .min(0)
-      .max(MAX_OPEN_CASES)
-      .default([])
-      .nullable(),
+    groupedAlerts: z.array(ZCasesGroupedAlertsSchema).min(0).default([]).nullable(),
     groupingBy: ZGroupingSchema,
     owner: z.string(),
     rule: ZRuleSchema,
@@ -203,12 +204,30 @@ export const ZCasesConnectorRunParamsSchema = z
     maximumCasesToOpen: z.coerce
       .number()
       .min(1)
-      .max(MAX_OPEN_CASES)
+      .max(ABSOLUTE_MAX_CASES_PER_RUN)
       .default(DEFAULT_MAX_OPEN_CASES),
-    templateId: z.string().nullable().default(null),
-    internallyManagedAlerts: z.boolean().default(false).nullable(),
+    templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
+    templateVersion: z.string().max(MAX_TEMPLATE_VERSION_STRING_LENGTH).nullable().default(null),
+    source: z.enum(['attack', 'rule']).optional(),
+    internallyManagedAlerts: z.boolean().nullable().optional(),
   })
   .strict();
+
+export type CasesConnectorActionSource = 'attack' | 'rule';
+
+export const resolveCasesConnectorActionSource = ({
+  source,
+  internallyManagedAlerts,
+}: {
+  source?: CasesConnectorActionSource | null;
+  internallyManagedAlerts?: boolean | null;
+}): CasesConnectorActionSource => {
+  if (source === 'attack' || source === 'rule') {
+    return source;
+  }
+
+  return internallyManagedAlerts === true ? 'attack' : 'rule';
+};
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),
@@ -217,9 +236,16 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
-    templateId: schema.nullable(schema.string()),
+    templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+    templateVersion: schema.nullable(
+      schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
+    ),
     maximumCasesToOpen: schema.nullable(
-      schema.number({ min: 1, max: MAX_OPEN_CASES, defaultValue: DEFAULT_MAX_OPEN_CASES })
+      schema.number({
+        min: 1,
+        max: ABSOLUTE_MAX_CASES_PER_RUN,
+        defaultValue: DEFAULT_MAX_OPEN_CASES,
+      })
     ),
   }),
 });

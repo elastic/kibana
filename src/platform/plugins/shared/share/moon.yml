@@ -26,8 +26,6 @@ dependsOn:
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/core-analytics-browser'
-  - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-browser'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/react-kibana-mount'
@@ -45,6 +43,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/es-query'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -58,26 +57,6 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

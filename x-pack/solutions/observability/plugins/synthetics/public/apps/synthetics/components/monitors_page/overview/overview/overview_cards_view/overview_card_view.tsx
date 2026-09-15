@@ -5,162 +5,311 @@
  * 2.0.
  */
 
-import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  type EuiAutoSize,
+  EuiAutoSizer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
-import React, { useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
-import { useOverviewStatus } from '../../../hooks/use_overview_status';
 import { METRIC_ITEM_HEIGHT, MetricItem } from '../metric_item/metric_item';
 import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
-import { selectOverviewState, selectOverviewTrends } from '../../../../../state';
+import {
+  selectOverviewGroupBy,
+  selectOverviewPageState,
+  selectOverviewTrends,
+  selectOverviewView,
+} from '../../../../../state';
+import { appendOverviewStatusAction } from '../../../../../state/overview_status';
+import { getNextOverviewAppendPage } from '../../../../../state/overview_status/window_refresh';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
+import { useOverviewStatusState } from '../../../hooks/use_overview_status';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
 const MIN_CARD_WIDTH = 400;
 
-// Minimum number of rows to fetch in a batch
 const MIN_BATCH_SIZE = 20;
-// When there are less than this number of rows remaining to be scrolled, fetch more
 const LIST_THRESHOLD = 12;
 
-interface ListItem {
-  configId: string;
-  locationId: string;
-}
+// Extra placeholder rows rendered past the loaded ones while more monitors are
+// still available. They give `InfiniteLoader` (with `LIST_THRESHOLD`) something
+// unloaded to aim at ahead of the viewport, so the next page is prefetched
+// before the user reaches the bottom.
+const PREFETCH_ROWS = 4;
 
-export const OverviewCardView = ({
+/**
+ * The server paginates by monitor, but a card is rendered per location. Split
+ * multi-location monitors into one entry per location (matching the shape the
+ * non-paginated path produces via `formatStatus`) so each location gets its own
+ * card and its own trend sparkline. Single-location monitors pass through
+ * untouched, which also makes this a no-op for the already-split legacy path.
+ */
+const expandByLocation = (monitors: OverviewStatusMetaData[]): OverviewStatusMetaData[] => {
+  const expanded: OverviewStatusMetaData[] = [];
+  for (const monitor of monitors) {
+    if ((monitor.locations?.length ?? 0) <= 1) {
+      expanded.push(monitor);
+      continue;
+    }
+    for (const location of monitor.locations) {
+      expanded.push({ ...monitor, overallStatus: location.status, locations: [location] });
+    }
+  }
+  return expanded;
+};
+
+const MetricItemPlaceholder = () => (
+  <EuiPanel hasShadow={false} hasBorder={true} style={{ height: METRIC_ITEM_HEIGHT }}>
+    <EuiFlexGroup css={{ height: '100%' }} alignItems="center" justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingChart />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+const UnGroupedCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
+  loaded,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  loaded: boolean;
 }) => {
-  const {
-    groupBy: { field: groupField },
-  } = useSelector(selectOverviewState);
-  const isUnGrouped = groupField === 'none';
+  const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
-  const { view } = useSelector(selectOverviewState);
+  const pageState = useSelector(selectOverviewPageState);
+  const perPage = pageState.perPage ?? 20;
+  const { total, allConfigs, loading, lastRequest, refreshThrough, fillThrough } =
+    useOverviewStatusState();
   const [rowCount, setRowCount] = useState(5);
   const [sliceToFetch, setSliceToFetch] = useState<{
     startIndex: number;
     endIndex: number;
   } | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const rowCountRef = useRef(rowCount);
+
+  // Per-location cards for the monitors currently loaded from the server.
+  const expandedItems = useMemo(
+    () => expandByLocation(monitorsSortedByStatus),
+    [monitorsSortedByStatus]
+  );
+
+  // Pagination is driven by monitor count (what the server pages on), not the
+  // expanded card count. `total` is the server-side total for the active filter.
+  const loadedMonitors = allConfigs.length;
+  const hasMore = typeof total === 'number' && loadedMonitors < total;
 
   useInfiniteOverviewTrendsRequests({
-    monitorsSortedByStatus,
+    monitorsSortedByStatus: expandedItems,
     sliceToFetch,
     numOfColumns: rowCount,
   });
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const updateRowCount = useCallback((width: number) => {
+    const newCount = Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH)));
+    if (newCount !== rowCountRef.current) {
+      rowCountRef.current = newCount;
+      setRowCount(newCount);
+    }
+  }, []);
 
-  const { loaded } = useOverviewStatus({
-    scopeStatusByLocation: true,
+  // Read the latest values from a ref so the scroll callback below never closes
+  // over a stale window and never over-fetches during a burst of scroll events.
+  const loadMoreRef = useRef({
+    hasMore,
+    loading,
+    loadedMonitors,
+    perPage,
+    total,
+    pageState,
+    lastRequest,
+    refreshThrough,
+    fillThrough,
   });
+  loadMoreRef.current = {
+    hasMore,
+    loading,
+    loadedMonitors,
+    perPage,
+    total,
+    pageState,
+    lastRequest,
+    refreshThrough,
+    fillThrough,
+  };
 
-  const listHeight = Math.min(
-    ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / rowCount),
-    MAX_LIST_HEIGHT
-  );
+  const loadMoreMonitors = useCallback(() => {
+    const s = loadMoreRef.current;
+    if (!s.hasMore || s.loading || s.refreshThrough || s.fillThrough) {
+      return;
+    }
+    const nextPage = getNextOverviewAppendPage(s.loadedMonitors, s.perPage, s.total ?? 0);
+    if (nextPage == null) {
+      return;
+    }
+    dispatch(
+      appendOverviewStatusAction.get({
+        pageState: { ...s.pageState, page: nextPage, perPage: s.perPage },
+        scopeStatusByLocation: s.lastRequest?.scopeStatusByLocation,
+        statusFilter: s.lastRequest?.statusFilter,
+      })
+    );
+  }, [dispatch]);
 
-  const listItems: ListItem[][] = useMemo(() => {
-    const acc: ListItem[][] = [];
-    for (let i = 0; i < monitorsSortedByStatus.length; i += rowCount) {
-      acc.push(monitorsSortedByStatus.slice(i, i + rowCount));
+  const listItems: OverviewStatusMetaData[][] = useMemo(() => {
+    const acc: OverviewStatusMetaData[][] = [];
+    for (let i = 0; i < expandedItems.length; i += rowCount) {
+      acc.push(expandedItems.slice(i, i + rowCount));
     }
     return acc;
-  }, [monitorsSortedByStatus, rowCount]);
+  }, [expandedItems, rowCount]);
+
+  const loadedRows = listItems.length;
+  // Append sentinel rows so the loader has an unloaded region to prefetch into.
+  const itemCount = hasMore ? loadedRows + PREFETCH_ROWS : loadedRows;
+  const listHeight = Math.min(ITEM_HEIGHT * itemCount, MAX_LIST_HEIGHT);
 
   return (
     <>
-      <div style={isUnGrouped ? { height: listHeight } : undefined}>
-        {isUnGrouped ? (
-          loaded && monitorsSortedByStatus.length ? (
-            <EuiAutoSizer>
-              {({ width }: EuiAutoSize) => (
-                <InfiniteLoader
-                  isItemLoaded={(idx: number) =>
-                    listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
+      <div style={{ height: listHeight, paddingLeft: 5 }}>
+        {loaded && expandedItems.length ? (
+          <EuiAutoSizer>
+            {({ width }: EuiAutoSize) => (
+              <InfiniteLoader
+                isItemLoaded={(idx: number) =>
+                  idx < loadedRows &&
+                  listItems[idx].every((m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')])
+                }
+                itemCount={itemCount}
+                loadMoreItems={(start, stop: number) => {
+                  const clampedStop = Math.min(stop, loadedRows - 1);
+                  if (loadedRows > 0 && clampedStop >= start) {
+                    setSliceToFetch({ startIndex: start, endIndex: clampedStop });
                   }
-                  itemCount={listItems.length}
-                  loadMoreItems={(start, stop: number) =>
-                    setSliceToFetch({ startIndex: start, endIndex: stop })
+                  // Nearing the loaded rows means the sentinel region is in view:
+                  // pull the next page of monitors from the server.
+                  if (stop >= loadedRows - 1) {
+                    loadMoreMonitors();
                   }
-                  minimumBatchSize={MIN_BATCH_SIZE}
-                  threshold={LIST_THRESHOLD}
-                >
-                  {({ onItemsRendered, ref }) => {
-                    // set min row count to based on width to ensure cards are not too small
-                    // min is 1 and max is 5
-                    setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
+                }}
+                minimumBatchSize={MIN_BATCH_SIZE}
+                threshold={LIST_THRESHOLD}
+              >
+                {({ onItemsRendered, ref }) => {
+                  updateRowCount(width);
 
-                    return (
-                      <FixedSizeList
-                        // pad computed height to avoid clipping last row's drop shadow
-                        height={listHeight + 16}
-                        width={width}
-                        onItemsRendered={onItemsRendered}
-                        itemSize={ITEM_HEIGHT}
-                        itemCount={listItems.length}
-                        itemData={listItems}
-                        ref={ref}
-                      >
-                        {({
-                          index: listIndex,
-                          style,
-                          data: listData,
-                        }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
-                          setCurrentIndex(listIndex);
+                  return (
+                    <FixedSizeList
+                      height={listHeight + 16}
+                      width={width}
+                      onItemsRendered={onItemsRendered}
+                      itemSize={ITEM_HEIGHT}
+                      itemCount={itemCount}
+                      itemData={listItems}
+                      ref={ref}
+                    >
+                      {({
+                        index: listIndex,
+                        style,
+                        data: listData,
+                      }: React.PropsWithChildren<
+                        ListChildComponentProps<OverviewStatusMetaData[][]>
+                      >) => {
+                        const row = listData[listIndex];
+                        if (!row) {
                           return (
                             <EuiFlexGroup
-                              data-test-subj={`overview-grid-row-${listIndex}`}
+                              data-test-subj={`overview-grid-row-${listIndex}-loading`}
                               gutterSize="m"
-                              css={{ ...style, marginLeft: 5 }}
+                              css={{ ...style }}
                             >
-                              {listData[listIndex].map((_, idx) => (
-                                <EuiFlexItem
-                                  data-test-subj="syntheticsOverviewGridItem"
-                                  key={listIndex * rowCount + idx}
-                                >
-                                  <MetricItem
-                                    monitor={monitorsSortedByStatus[listIndex * rowCount + idx]}
-                                    onClick={setFlyoutConfigCallback}
-                                  />
+                              {Array.from({ length: rowCount }).map((_, idx) => (
+                                <EuiFlexItem key={idx}>
+                                  <MetricItemPlaceholder />
                                 </EuiFlexItem>
                               ))}
-                              {listData[listIndex].length % rowCount !== 0 &&
-                                // Adds empty items to fill out row
-                                Array.from({
-                                  length: rowCount - listData[listIndex].length,
-                                }).map((_, idx) => <EuiFlexItem key={idx} />)}
                             </EuiFlexGroup>
                           );
-                        }}
-                      </FixedSizeList>
-                    );
-                  }}
-                </InfiniteLoader>
-              )}
-            </EuiAutoSizer>
-          ) : (
-            <OverviewLoader />
-          )
+                        }
+                        setCurrentIndex(listIndex);
+                        return (
+                          <EuiFlexGroup
+                            data-test-subj={`overview-grid-row-${listIndex}`}
+                            gutterSize="m"
+                            css={{ ...style }}
+                          >
+                            {row.map((monitor, idx) => (
+                              <EuiFlexItem
+                                data-test-subj="syntheticsOverviewGridItem"
+                                key={listIndex * rowCount + idx}
+                              >
+                                <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+                              </EuiFlexItem>
+                            ))}
+                            {row.length % rowCount !== 0 &&
+                              Array.from({
+                                length: rowCount - row.length,
+                              }).map((_, idx) => <EuiFlexItem key={`filler-${idx}`} />)}
+                          </EuiFlexGroup>
+                        );
+                      }}
+                    </FixedSizeList>
+                  );
+                }}
+              </InfiniteLoader>
+            )}
+          </EuiAutoSizer>
         ) : (
-          <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
+          <OverviewLoader />
         )}
         <EuiSpacer size="m" />
       </div>
-      <CardsViewFooter
+      <CardsViewFooter monitorsSortedByStatus={expandedItems} currentIndex={currentIndex} />
+    </>
+  );
+};
+
+export const OverviewCardView = ({
+  monitorsSortedByStatus,
+  setFlyoutConfigCallback,
+  loaded,
+}: {
+  monitorsSortedByStatus: OverviewStatusMetaData[];
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  loaded: boolean;
+}) => {
+  const { field: groupField } = useSelector(selectOverviewGroupBy);
+  const view = useSelector(selectOverviewView);
+  const isUnGrouped = groupField === 'none' || groupField === 'monitor';
+
+  if (isUnGrouped) {
+    return (
+      <UnGroupedCardView
         monitorsSortedByStatus={monitorsSortedByStatus}
-        currentIndex={currentIndex}
+        setFlyoutConfigCallback={setFlyoutConfigCallback}
+        loaded={loaded}
       />
+    );
+  }
+
+  return (
+    <>
+      <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
+      <EuiSpacer size="m" />
     </>
   );
 };

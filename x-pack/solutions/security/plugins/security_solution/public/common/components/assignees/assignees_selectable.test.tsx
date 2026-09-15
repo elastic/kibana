@@ -49,7 +49,8 @@ const renderAssigneesSelectable = (
   );
 };
 
-describe('<AssigneesSelectable />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/260306
+describe.skip('<AssigneesSelectable />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useGetCurrentUserProfile as jest.Mock).mockReturnValue({

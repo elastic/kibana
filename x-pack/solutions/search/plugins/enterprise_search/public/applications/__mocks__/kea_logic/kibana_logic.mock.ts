@@ -10,6 +10,7 @@ import { of } from 'rxjs';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -18,6 +19,7 @@ import { searchNavigationMock } from '@kbn/search-navigation/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
@@ -62,6 +64,7 @@ export const mockKibanaValues = {
   } as unknown as LensPublicStart,
   ml: mlPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
+  notifications: notificationServiceMock.createStartContract(),
   productFeatures: {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
@@ -75,6 +78,7 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
+  spaces: spacesPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),

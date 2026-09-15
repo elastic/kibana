@@ -10,8 +10,7 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import type { Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
-type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
@@ -78,7 +77,8 @@ export interface ServicesItemsItem {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
+  anomalySeverity?: ML_ANOMALY_SEVERITY;
   alertsCount?: number;
 }
 
@@ -127,11 +127,13 @@ interface InfraHostsResponse {
 
 export interface ExitSpanSample {
   serviceName: string;
+  agentName?: string;
   spanDestinationServiceResource: string;
   spanType: string;
   spanSubtype: string;
   destinationService?: {
     serviceName: string;
+    agentName?: string;
   };
 }
 
@@ -288,4 +290,29 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     request: KibanaRequest;
     configId: string;
   }) => Promise<SyntheticsMonitorDetailsResponse>;
+
+  servicesAlertsAndSlo: (params: {
+    request: KibanaRequest;
+    serviceNames: string[];
+    environment?: string;
+    kuery?: string;
+    start: string;
+    end: string;
+  }) => Promise<ServiceNodeMetadataMap>;
 }
+
+/**
+ * Per-service alert/SLO/anomaly badge data, keyed by `service.name`.
+ * Shaped to drop straight into the service-map attachment's `nodeMetadata`.
+ */
+export type ServiceNodeMetadataMap = Record<
+  string,
+  {
+    alertsCount?: number;
+    sloStatus?: string;
+    sloCount?: number;
+    /** Max ML anomaly severity for the service (`warning` | `minor` | `major` | `critical`). */
+    anomalySeverity?: string;
+    anomalyScore?: number;
+  }
+>;

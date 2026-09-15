@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  MappingTimeSeriesMetricType,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { MappingField } from './types';
 
 interface MappingProperties {
@@ -15,6 +18,8 @@ interface MappingProperties {
     properties?: MappingProperties; // Nested object fields
     fields?: MappingProperties; // Multi-fields (alternative analyzers/types)
     meta?: Record<string, string>; // meta
+    time_series_dimension?: boolean;
+    time_series_metric?: MappingTimeSeriesMetricType;
   };
 }
 
@@ -31,13 +36,19 @@ export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
       const fieldPath = prefix ? `${prefix}.${key}` : key;
 
       if (value.type) {
-        // If it's a leaf field, add it
-        fields.push({
+        const field: MappingField = {
           type: value.type,
           path: fieldPath,
           meta: value.meta ?? {},
           searchable: value.index !== false,
-        });
+        };
+        if (value.time_series_dimension === true) {
+          field.tsDimension = true;
+        }
+        if (typeof value.time_series_metric === 'string') {
+          field.tsMetric = value.time_series_metric;
+        }
+        fields.push(field);
       }
       if (value.properties) {
         fields = fields.concat(extractFields(value.properties, fieldPath));

@@ -35,6 +35,8 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
@@ -46,27 +48,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+    - '!test/plugins/**/*'
+  jest-config:
+    - jest.config.js
+tasks: {}

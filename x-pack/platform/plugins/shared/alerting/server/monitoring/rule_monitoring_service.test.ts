@@ -98,6 +98,7 @@ describe('RuleMonitoringService', () => {
               duration: 100000,
               gap_duration_s: null,
               gap_range: null,
+              gap_reason: null,
               total_indexing_duration_ms: null,
               total_search_duration_ms: null,
             },

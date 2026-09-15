@@ -104,10 +104,11 @@ function createGetPromqlFields(
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
-  const metadata = await getEcsMetadata(resourceRetriever);
-  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
-  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
-  return fieldsWithMetadata;
+  const [metadata, fieldsOfType] = await Promise.all([
+    getEcsMetadata(resourceRetriever),
+    resourceRetriever?.getColumnsFor?.({ query }),
+  ]);
+  return enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
 }
 
 /**
@@ -125,8 +126,8 @@ export function getUnmappedFields(
   previousPipeFields: ESQLColumnData[],
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLColumnData[] {
-  // Not collect unmmaped fields if the strategy is FAIL or undefined
-  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.FAIL) {
+  // Not collect unmmaped fields if the strategy is DEFAULT or undefined
+  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.DEFAULT) {
     return [];
   }
 
@@ -206,7 +207,7 @@ export async function getCurrentQueryAvailableColumns(
       fields,
       originalQueryText,
       additionalFields,
-      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.FAIL
+      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.DEFAULT
     );
   }
   return fields;

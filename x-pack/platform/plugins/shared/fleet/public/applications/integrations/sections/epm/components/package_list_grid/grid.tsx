@@ -56,12 +56,12 @@ export const GridColumn = ({
     })
   );
 
-  // Reset the row measurement cache when the list changes
+  // Reset the row measurement cache, update position, and recompute row height when the list changes
   useEffect(() => {
     rowMeasurementCache?.current?.clearAll();
-
     windowScrollerRef.current?.updatePosition();
-  }, [list.length, columnCount, isLoading]);
+    listRef.current?.recomputeRowHeights(0);
+  }, [list, columnCount, isLoading]);
 
   // Use to work on small screen when categories are loaded
   useEffect(() => {

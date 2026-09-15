@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { AlertFieldsTableProps } from '.';
 import { AlertFieldsTable } from '.';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 
 describe('AlertFieldsTable', () => {
   const defaultProps = {
@@ -82,22 +83,17 @@ describe('AlertFieldsTable', () => {
       _index: '.internal.alerts-stack.alerts-default-000001',
     },
   } as unknown as AlertFieldsTableProps;
-  let wrapper: ReactWrapper;
 
-  beforeEach(async () => {
-    wrapper = mount(<AlertFieldsTable {...defaultProps} />);
-  });
-
-  it('should paginate the results', () => {
-    expect(wrapper.find('tbody tr')).toHaveLength(25);
-    wrapper.find(`[data-test-subj="pagination-button-next"]`).last().simulate('click');
-    expect(wrapper.find('tbody tr')).toHaveLength(8);
+  it('should paginate the results', async () => {
+    const { container } = renderWithKibanaRenderContext(<AlertFieldsTable {...defaultProps} />);
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(25);
+    await userEvent.click(screen.getByTestId('pagination-button-next'));
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(8);
   });
 
   it('should filter the rows according to the search string', async () => {
-    wrapper
-      .find('input[type="search"]')
-      .simulate('keyup', { target: { value: 'kibana.alert.status' } });
-    expect(wrapper.find('tbody tr')).toHaveLength(1);
+    const { container } = renderWithKibanaRenderContext(<AlertFieldsTable {...defaultProps} />);
+    await userEvent.type(screen.getByRole('searchbox'), 'kibana.alert.status');
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(1);
   });
 });

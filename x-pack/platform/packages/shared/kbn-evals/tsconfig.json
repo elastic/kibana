@@ -24,6 +24,11 @@
     "@kbn/tracing-utils",
     "@kbn/dev-cli-errors",
     "@kbn/config-schema",
-    "@kbn/evals-common"
+    "@kbn/evals-common",
+    "@kbn/safer-lodash-set",
+    "@kbn/test",
+    "@kbn/es-errors",
+    "@kbn/es",
+    "@kbn/dot-text"
   ]
 }

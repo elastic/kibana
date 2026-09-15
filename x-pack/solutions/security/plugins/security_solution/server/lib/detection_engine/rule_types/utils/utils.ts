@@ -7,12 +7,13 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge } from 'lodash';
+import { get, invert, isArray, isEmpty, isEqual, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -306,7 +307,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  addSpanLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, { isString: false });
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };
@@ -627,6 +628,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -636,6 +638,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -648,6 +651,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -661,6 +665,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -701,6 +706,7 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -715,6 +721,7 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -729,6 +736,7 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
@@ -781,15 +789,53 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
+// stringified Java Long.MAX_VALUE, used as a sentinel sort value when Elasticsearch expects one
+const LONG_MAX_VALUE = '9223372036854775807';
+
 export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
     if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
+};
+
+/**
+ * Same Long.MAX_VALUE clamping as {@link getSafeSortIds}, for cursors that mix formatted
+ * date_nanos values with plain date ones. Null and empty values are left as they are so callers
+ * can stop paging via {@link getUnusableCursorWarning}: replacing them with the sentinel would
+ * put the cursor outside the range a date_nanos field accepts.
+ */
+export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return LONG_MAX_VALUE;
+    }
+    return sortId;
+  });
+};
+
+// in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+// on date-mapped shards yield cursors that either format to null or never advance
+// (the same docs match again every page); callers stop paging instead of failing or looping
+export const getUnusableCursorWarning = (
+  sortIds: estypes.SortResults | undefined,
+  prevSortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (sortIds == null) {
+    return undefined;
+  }
+  const unusable =
+    sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds);
+  if (!unusable) {
+    return undefined;
+  }
+  return `Pagination stopped: the last document's sort values ${JSON.stringify(
+    sortIds
+  )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {

@@ -24,6 +24,7 @@ interface UseNavigateToUserDetailsParams {
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   isPreviewMode: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToUserDetails = ({
@@ -36,6 +37,7 @@ export const useNavigateToUserDetails = ({
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   isPreviewMode,
+  entityStoreEntityId,
 }: UseNavigateToUserDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
@@ -56,6 +58,7 @@ export const useNavigateToUserDetails = ({
           entityId,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
+          entityStoreEntityId,
         },
       };
 
@@ -89,6 +92,7 @@ export const useNavigateToUserDetails = ({
       contextID,
       userName,
       entityId,
+      entityStoreEntityId,
     ]
   );
 };

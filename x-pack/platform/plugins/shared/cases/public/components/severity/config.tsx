@@ -8,25 +8,35 @@
 import React from 'react';
 
 import { useEuiTheme, EuiHealth } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
+
+interface SeverityConfig {
+  label: string;
+  badgeColor: NonNullable<AppHeaderBadge['color']>;
+}
 
 interface Props {
   severity: CaseSeverity;
 }
 
-export const severities = {
+export const severities: Record<CaseSeverity, SeverityConfig> = {
   [CaseSeverity.LOW]: {
     label: LOW,
+    badgeColor: 'default',
   },
   [CaseSeverity.MEDIUM]: {
     label: MEDIUM,
+    badgeColor: 'warning',
   },
   [CaseSeverity.HIGH]: {
     label: HIGH,
+    badgeColor: 'danger',
   },
   [CaseSeverity.CRITICAL]: {
     label: CRITICAL,
+    badgeColor: 'danger',
   },
 };
 

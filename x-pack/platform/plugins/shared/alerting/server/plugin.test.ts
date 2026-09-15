@@ -165,6 +165,7 @@ describe('Alerting Plugin', () => {
             isUsingSecurity: false,
             minimumScheduleInterval: { value: '1m', enforce: false },
             run: { alerts: { max: 1000 }, actions: { max: 1000 } },
+            apiKeyType: 'es',
           });
 
           expect(setupContract.frameworkAlerts.enabled()).toEqual(false);

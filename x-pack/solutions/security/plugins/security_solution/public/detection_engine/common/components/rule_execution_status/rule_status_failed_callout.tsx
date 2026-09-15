@@ -20,7 +20,10 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 
 interface RuleStatusFailedCallOutProps {
   ruleNameForChat: string;
@@ -56,6 +59,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const ruleAttachment = useMemo(
     () => ({
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text:

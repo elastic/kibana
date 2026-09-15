@@ -26,7 +26,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.absent_over_time', {
         defaultMessage: 'ABSENT_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -54,7 +54,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.avg_over_time', {
         defaultMessage: 'AVG_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -81,7 +81,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.count_distinct_over_time', {
         defaultMessage: 'COUNT_DISTINCT_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -110,7 +110,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.count_over_time', {
         defaultMessage: 'COUNT_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -138,7 +138,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.delta', {
         defaultMessage: 'DELTA',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.delta.markdown', {
@@ -163,7 +163,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.deriv', {
         defaultMessage: 'DERIV',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.deriv.markdown', {
@@ -188,7 +188,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.first_over_time', {
         defaultMessage: 'FIRST_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -215,7 +215,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.idelta', {
         defaultMessage: 'IDELTA',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.idelta.markdown', {
@@ -239,7 +239,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.increase', {
         defaultMessage: 'INCREASE',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -267,7 +267,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.irate', {
         defaultMessage: 'IRATE',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.irate.markdown', {
@@ -291,7 +291,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.last_over_time', {
         defaultMessage: 'LAST_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -318,7 +318,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.max_over_time', {
         defaultMessage: 'MAX_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -345,7 +345,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.min_over_time', {
         defaultMessage: 'MIN_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -372,7 +372,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.percentile_over_time', {
         defaultMessage: 'PERCENTILE_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -399,7 +399,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.present_over_time', {
         defaultMessage: 'PRESENT_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -427,7 +427,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.rate', {
         defaultMessage: 'RATE',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.rate.markdown', {
@@ -451,7 +451,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.stddev_over_time', {
         defaultMessage: 'STDDEV_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -478,7 +478,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.sum_over_time', {
         defaultMessage: 'SUM_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -505,7 +505,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.variance_over_time', {
         defaultMessage: 'VARIANCE_OVER_TIME',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(

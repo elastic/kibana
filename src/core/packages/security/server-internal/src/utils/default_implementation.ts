@@ -12,6 +12,8 @@ import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
 
+const SERVICE_ACCOUNTS_DISABLED_ERROR = new Error('Service accounts are disabled');
+
 export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
     authc: {
@@ -23,6 +25,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         create: REJECT_WHEN_API_KEYS_DISABLED,
         update: REJECT_WHEN_API_KEYS_DISABLED,
         grantAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
+        cloneAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
         validate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidateAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
@@ -39,5 +42,11 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         includeSavedObjectNames: false,
       },
     },
+    serviceAccounts: {
+      isEnabled: () => false,
+      create: () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR),
+    },
+    // No security delegate registered, so there are no user profiles to bind.
+    fakeRequestEnricher: () => undefined,
   };
 };

@@ -37,9 +37,63 @@ describe('createInferenceEndpointExecutor', () => {
       {
         method: 'POST',
         path: `/_inference/chat_completion/${inferenceId}/_stream`,
+        querystring: { timeout: '3m' },
         body,
       },
-      { asStream: true }
+      {
+        asStream: true,
+        requestTimeout: 180_000,
+        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+      }
+    );
+  });
+
+  it('sets the inference timeout to 3m when no timeout is provided', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {} });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '3m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to the next minute when timeout is provided', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    // 95s -> next minute = 2m
+    await executor.invoke({ body: {}, timeout: 95_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '2m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to 1m for a timeout under 60s', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {}, timeout: 30_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '1m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to exact minute when timeout is an exact multiple', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {}, timeout: 120_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '2m' } }),
+      expect.anything()
     );
   });
 
@@ -68,13 +122,16 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
-  it('does not include requestTimeout when timeout is not provided', async () => {
+  it('uses the default requestTimeout when timeout is not provided', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);
 
     await executor.invoke({ body: {} });
 
-    expect(mockTransportRequest).toHaveBeenCalledWith(expect.anything(), { asStream: true });
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ requestTimeout: 180_000 })
+    );
   });
 
   it('returns the stream from the response', async () => {

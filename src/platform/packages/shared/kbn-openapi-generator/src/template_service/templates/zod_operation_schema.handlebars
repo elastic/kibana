@@ -7,7 +7,7 @@
 
  {{> disclaimer}}
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 {{#if useZodHelpers}}
 import { isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 {{/if}}
@@ -30,18 +30,18 @@ import {
 {{#if (isCircularSchema @key)}}
 export type {{transformSchemaName @key}} = {{> ts_type}};
 export type {{transformSchemaName @key}}Input = {{> ts_input_type }};
-export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, {{transformSchemaName @key}}Input> = {{> zod_schema_item }};
+export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, {{transformSchemaName @key}}Input> = lazySchema(() => {{> zod_schema_item }} as z.ZodType<{{transformSchemaName @key}}, {{transformSchemaName @key}}Input>);
 {{else}}
 {{#if (shouldCastExplicitly this)}}
 {{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{transformSchemaName @key}} type --}}
 {{!-- error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. --}}
-export const {{transformSchemaName @key}}Internal = {{> zod_schema_item}};
+export const {{transformSchemaName @key}}Internal = lazySchema(() => {{> zod_schema_item}});
 
 export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}Internal>;
 export const {{transformSchemaName @key}} = {{transformSchemaName @key}}Internal as z.ZodType<{{transformSchemaName @key}}>;
 {{else}}
+export const {{transformSchemaName @key}} = lazySchema(() => {{> zod_schema_item}});
 export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}>;
-export const {{transformSchemaName @key}} = {{> zod_schema_item}};
 {{/if }}
 {{/if}}
 {{#if enum}}
@@ -60,8 +60,8 @@ export const {{transformSchemaName @key}}Enum = {{transformSchemaName @key}}.enu
 * {{{requestQuery.description}}}
 */
 {{/if}}
+export const {{operationId}}RequestQuery = lazySchema(() => {{> zod_query_item requestQuery }});
 export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
-export const {{operationId}}RequestQuery = {{> zod_query_item requestQuery }};
 export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
 {{/if}}
 
@@ -71,8 +71,8 @@ export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}Req
 * {{{requestParams.description}}}
 */
 {{/if}}
+export const {{operationId}}RequestParams = lazySchema(() => {{> zod_schema_item requestParams }});
 export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
-export const {{operationId}}RequestParams = {{> zod_schema_item requestParams }};
 export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
 {{/if}}
 
@@ -82,8 +82,8 @@ export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}Re
 * {{{requestBody.description}}}
 */
 {{/if}}
+export const {{operationId}}RequestBody = lazySchema(() => {{> zod_schema_item requestBody }});
 export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
-export const {{operationId}}RequestBody = {{> zod_schema_item requestBody }};
 export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;
 {{/if}}
 
@@ -93,7 +93,7 @@ export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}Requ
 * {{{response.description}}}
 */
 {{/if}}
+export const {{operationId}}Response = lazySchema(() => {{> zod_schema_item response }});
 export type {{operationId}}Response = z.infer<typeof {{operationId}}Response>;
-export const {{operationId}}Response = {{> zod_schema_item response }};
 {{/if}}
 {{/each}}

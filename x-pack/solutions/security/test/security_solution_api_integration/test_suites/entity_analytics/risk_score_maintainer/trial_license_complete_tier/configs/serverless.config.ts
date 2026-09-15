@@ -7,9 +7,11 @@
 
 import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
+import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 
 const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
   'entityAnalyticsEntityStoreV2',
+  'entityAnalyticsWatchlistEnabled',
 ];
 
 export default createTestConfig({
@@ -22,7 +24,11 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify(
       securitySolutionEnableExperimental
     )}`,
+    `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
   ],
+  // Risk score tests do not exercise prebuilt-rule management endpoints,
+  // so there is no need to install the mock prebuilt rules package.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

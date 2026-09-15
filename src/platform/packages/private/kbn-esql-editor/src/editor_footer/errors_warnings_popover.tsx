@@ -22,7 +22,7 @@ import { css as classNameCss } from '@emotion/css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
 import { DataErrorsSwitch } from './data_errors_switch';
@@ -89,6 +89,8 @@ function ErrorsWarningsContent({
           return (
             <EuiDescriptionListDescription
               key={index}
+              role="button"
+              tabIndex={0}
               className={classNameCss`
                 &:hover {
                   cursor: pointer;
@@ -97,12 +99,15 @@ function ErrorsWarningsContent({
                 user-select: text;
               `}
               onClick={() => handleClick(item)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleClick(item);
+              }}
             >
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={color} size="s" />
+                      <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('esqlEditor.query.lineNumber', {
@@ -155,13 +160,14 @@ export function ErrorsWarningsFooterPopover({
     return items;
   }, [items, dataErrorsControl]);
 
-  const { color, message } = getConstsByType(type, visibleItems.length);
+  const { color, message, label } = getConstsByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiPopover
+          aria-label={label}
           anchorPosition="downLeft"
           hasArrow={false}
           panelPaddingSize="none"
@@ -180,7 +186,7 @@ export function ErrorsWarningsFooterPopover({
               {isSpaceReduced ? visibleItems.length : message}
             </EuiButtonEmpty>
           }
-          ownFocus={false}
+          ownFocus={true}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >

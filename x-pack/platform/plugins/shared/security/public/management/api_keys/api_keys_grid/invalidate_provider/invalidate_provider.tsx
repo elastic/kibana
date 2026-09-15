@@ -188,7 +188,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
                 }
               )}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               size="s"
             >
               <p>

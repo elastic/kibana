@@ -36,7 +36,7 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
   return (
     <EuiFormRow
       label={i18n.translate('xpack.fleet.cloudConnector.nameField.label', {
-        defaultMessage: 'Cloud Connector Name',
+        defaultMessage: 'Federated Identity Name',
       })}
       isInvalid={!!error}
       error={error}

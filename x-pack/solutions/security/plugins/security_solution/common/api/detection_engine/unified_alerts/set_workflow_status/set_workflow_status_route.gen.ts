@@ -14,17 +14,17 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SetAlertsStatusByIds } from '../../signals/set_signal_status/set_signals_status_route.gen';
 
 /**
  * Set alerts status by IDs request
  */
+export const SetUnifiedAlertsWorkflowStatusRequestBody = lazySchema(() => SetAlertsStatusByIds);
 export type SetUnifiedAlertsWorkflowStatusRequestBody = z.infer<
   typeof SetUnifiedAlertsWorkflowStatusRequestBody
 >;
-export const SetUnifiedAlertsWorkflowStatusRequestBody = SetAlertsStatusByIds;
 export type SetUnifiedAlertsWorkflowStatusRequestBodyInput = z.input<
   typeof SetUnifiedAlertsWorkflowStatusRequestBody
 >;
@@ -32,7 +32,9 @@ export type SetUnifiedAlertsWorkflowStatusRequestBodyInput = z.input<
 /**
  * Elasticsearch update by IDs response
  */
+export const SetUnifiedAlertsWorkflowStatusResponse = lazySchema(() =>
+  z.object({}).catchall(z.unknown())
+);
 export type SetUnifiedAlertsWorkflowStatusResponse = z.infer<
   typeof SetUnifiedAlertsWorkflowStatusResponse
 >;
-export const SetUnifiedAlertsWorkflowStatusResponse = z.object({}).catchall(z.unknown());

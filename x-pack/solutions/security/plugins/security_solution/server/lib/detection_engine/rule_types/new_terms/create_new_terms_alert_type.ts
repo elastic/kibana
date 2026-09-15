@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject, chunk } from 'lodash';
+import { isObject, chunk, sum } from 'lodash';
 
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -14,6 +14,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
+import { createNewTermsFieldCardinalityTracker } from '../utils/telemetry/new_terms_field_cardinality_tracker';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { getFilter } from '../utils/get_filter';
@@ -104,6 +105,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       const {
         ruleExecutionLogger,
         completeRule,
+        analytics,
         tuple,
         inputIndex,
         runtimeMappings,
@@ -158,6 +160,14 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         result.warningMessages.push(exceptionsWarning);
       }
       let pageNumber = 0;
+      let alertsCandidateCount: number | undefined;
+      // Telemetry: size how many distinct grouping-key combinations real New Terms rules produce, and
+      // how long the grouped values are, over the rule run window.
+      const newTermsTelemetry = createNewTermsFieldCardinalityTracker({
+        analytics,
+        logger,
+        ruleParams: params,
+      });
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -218,9 +228,11 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
         if (searchResult.aggregations.new_terms.after_key == null) {
+          newTermsTelemetry.markReachedEndOfStream();
           break;
         }
         const bucketsForField = searchResult.aggregations.new_terms.buckets;
+        newTermsTelemetry.accumulate(bucketsForField);
 
         const createAlertsHook: CreateAlertsHook = async (aggResult) => {
           const eventsAndTerms: EventsAndTerms[] = (
@@ -413,6 +425,12 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               throw new Error('Aggregations were missing on document fetch search result');
             }
 
+            // Collect rule execution metrics
+            alertsCandidateCount = sum([
+              alertsCandidateCount,
+              docFetchSearchResult.aggregations.new_terms.buckets.length,
+            ]);
+
             const bulkCreateResult = await createAlertsHook(docFetchSearchResult);
 
             if (bulkCreateResult.alertsWereTruncated) {
@@ -429,13 +447,20 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         afterKey = searchResult.aggregations.new_terms.after_key;
       }
 
+      newTermsTelemetry.send();
+
       scheduleNotificationResponseActionsService({
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
         responseActions: completeRule.ruleParams.responseActions,
       });
 
-      return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+      return {
+        ...result,
+        state,
+        alertsCandidateCount,
+        ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+      };
     },
   };
 };

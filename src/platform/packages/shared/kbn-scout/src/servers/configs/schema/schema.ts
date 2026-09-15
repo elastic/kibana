@@ -64,6 +64,14 @@ const dockerServerSchema = () =>
 export const schema = Joi.object()
   .keys({
     serverless: Joi.boolean().default(false),
+    http2: Joi.boolean().default(false),
+    /**
+     * Set when the test servers boot Kibana into the `preboot` stage on purpose and it never
+     * reaches the `available` status (first-boot / interactive setup suites). Scout skips the
+     * post-startup steps that require a fully booted, security-enabled Kibana, such as
+     * pre-creating the Elasticsearch Security indexes via SAML authentication.
+     */
+    prebootOnly: Joi.boolean().default(false),
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
@@ -99,6 +107,7 @@ export const schema = Joi.object()
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
+        uiamOAuth: Joi.boolean().default(false),
         cps: Joi.boolean().default(false),
       })
       .default(),

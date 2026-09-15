@@ -35,6 +35,7 @@ interface MarkdownEditorProps {
   setIsMarkdownInvalid: (value: boolean) => void;
   includePlugins?: boolean;
   placeholder?: string;
+  isReadOnly?: boolean;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -58,6 +59,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       setIsMarkdownInvalid,
       includePlugins = true,
       placeholder,
+      isReadOnly = false,
     },
     ref
   ) => {
@@ -121,6 +123,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         data-test-subj={dataTestSubj}
         height={height}
         placeholder={placeholder}
+        readOnly={isReadOnly}
       />
     );
   }

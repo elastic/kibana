@@ -6,7 +6,7 @@
  */
 import { useCallback } from 'react';
 
-import { AttachmentType } from '../../common';
+import { isEventAttachmentType } from '../../common/utils/attachments';
 import { CASE_ATTACH_EVENTS_EVENT_TYPE } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
@@ -23,7 +23,7 @@ export const useAttachEventsEBT = () => {
   return useCallback(
     (attachmentSource: string, attachments: CaseAttachmentWithoutOwner[]) => {
       // NOTE: we just want to track case event attachments
-      if (!attachments.some((attachment) => attachment.type === AttachmentType.event)) {
+      if (!attachments.some((attachment) => isEventAttachmentType(attachment.type))) {
         return;
       }
 

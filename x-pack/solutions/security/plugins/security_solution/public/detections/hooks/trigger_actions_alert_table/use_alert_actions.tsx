@@ -12,10 +12,13 @@ import type {
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { toBulkCloseRuntimeMappings } from '../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -24,7 +27,6 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
 export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -36,6 +38,8 @@ export interface UseBulkAlertActionItemsArgs {
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
+  /* Runtime mappings from the active data view, forwarded to bulk-close so unmapped fields can be resolved */
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export const useBulkAlertActionItems = ({
@@ -43,9 +47,19 @@ export const useBulkAlertActionItems = ({
   from,
   to,
   refetch: refetchProp,
+  runtimeMappings,
 }: UseBulkAlertActionItemsArgs) => {
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
+
+  // Convert data view runtime mappings to the narrower shape the route accepts,
+  // preserving each field's type and Painless script so the close query can
+  // evaluate scripted fields at query time rather than falling back to a
+  // _source read (which misses scripted/computed values entirely).
+  const bulkCloseRuntimeMappings = useMemo(
+    () => toBulkCloseRuntimeMappings(runtimeMappings),
+    [runtimeMappings]
+  );
 
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -90,7 +104,7 @@ export const useBulkAlertActionItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
     },
     [addError]
   );
@@ -135,6 +149,10 @@ export const useBulkAlertActionItems = ({
             query,
             signalIds: ids,
             reason,
+            // runtimeMappings is only used by the query path (select-all). When ids is
+            // defined the by-IDs path is taken and this prop is ignored — that path
+            // doesn't send a filter query, so runtime mappings aren't needed.
+            runtimeMappings: bulkCloseRuntimeMappings,
           });
 
           setAlertLoading(false);
@@ -167,11 +185,13 @@ export const useBulkAlertActionItems = ({
       to,
       refetchProp,
       promptAlertCloseConfirmation,
+      bulkCloseRuntimeMappings,
     ]
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({
+    useBulkClosingReasonItems({
+      isEnabled: hasAlertsUpdate ?? false,
       onSubmitCloseReason({
         reason,
         alertItems,

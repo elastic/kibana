@@ -23,10 +23,16 @@ import {
 import { css } from '@emotion/react';
 
 import { useAppContext } from '../../../../../app_context';
+import { isClosedIndexStatus } from '../../../../../lib/is_closed_index_status';
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 import type { DocCountState } from './quick_stats';
-import { docCountErrorTooltip, docCountErrorLabel } from './translations';
+import {
+  docCountErrorTooltip,
+  docCountErrorLabel,
+  docCountApproximateTooltip,
+  docCountClosedIndexTooltip,
+} from './translations';
 
 type NormalizedHealth = 'green' | 'red' | 'yellow';
 const healthToBadgeMapping: Record<
@@ -61,13 +67,18 @@ export const StatusDetails: FunctionComponent<{
 }> = ({ docCount, documentsDeleted, status, health }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
+  const isClosed = isClosedIndexStatus(status);
 
   if (!config.enableIndexStats || !health) {
     return null;
   }
 
   const badgeConfig = healthToBadgeMapping[health.toLowerCase() as NormalizedHealth];
-  const healthBadge = <EuiBadge color={badgeConfig.color}>{badgeConfig.label}</EuiBadge>;
+  const healthBadge = (
+    <EuiBadge color={badgeConfig.color} data-test-subj="indexDetailsHealthBadge">
+      {badgeConfig.label}
+    </EuiBadge>
+  );
 
   const renderDocCountFooter = () => {
     if (docCount.isLoading) {
@@ -94,8 +105,15 @@ export const StatusDetails: FunctionComponent<{
       );
     }
 
-    return (
-      <EuiFlexGroup gutterSize="xs">
+    const approximateHint =
+      docCount.approximateReason === 'closed_index'
+        ? docCountClosedIndexTooltip
+        : docCount.approximateReason === 'requires_read'
+        ? docCountApproximateTooltip
+        : undefined;
+
+    const docCountContent = (
+      <EuiFlexGroup gutterSize="xs" data-test-subj="indexDetailsStatusDocCount">
         <EuiFlexItem grow={false}>
           <EuiIcon type="documents" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
@@ -111,8 +129,19 @@ export const StatusDetails: FunctionComponent<{
             })}
           </EuiTextColor>
         </EuiFlexItem>
+        {approximateHint && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="info" size="s" color="subdued" aria-label={approximateHint} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
+
+    if (approximateHint) {
+      return <EuiToolTip content={approximateHint}>{docCountContent}</EuiToolTip>;
+    }
+
+    return docCountContent;
   };
 
   return (
@@ -124,12 +153,12 @@ export const StatusDetails: FunctionComponent<{
       content={{
         left: (
           <EuiText
-            color={status === 'close' ? 'danger' : 'success'}
+            color={isClosed ? 'danger' : 'success'}
             css={css`
               font-size: ${largeFontSize};
             `}
           >
-            {status === 'close'
+            {isClosed
               ? i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.closedLabel', {
                   defaultMessage: 'Closed',
                 })

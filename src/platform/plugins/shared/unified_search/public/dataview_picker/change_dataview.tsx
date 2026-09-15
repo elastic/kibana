@@ -23,6 +23,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
@@ -51,6 +52,39 @@ const shrinkableContainerCss = css`
   flex-direction: row;
 `;
 
+const dataViewLabelWrapperCss = css`
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+`;
+
+const dataViewLabelGhostCss = css`
+  visibility: hidden;
+  white-space: nowrap;
+`;
+
+const dataViewLabelVisibleCss = css`
+  position: absolute;
+  inset: 0;
+`;
+
+/**
+ * A hidden "ghost" copy of the data view label sizes the wrapper via normal flow,
+ * giving EuiTextTruncate a real, non-circular width to truncate against.
+ */
+const DataViewLabelTruncate = ({ text }: { text: string }) => (
+  <span css={dataViewLabelWrapperCss}>
+    <span aria-hidden="true" css={dataViewLabelGhostCss}>
+      {text}
+    </span>
+    <span css={dataViewLabelVisibleCss}>
+      <EuiTextTruncate text={text} truncation="middle" />
+    </span>
+  </span>
+);
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -66,6 +100,9 @@ export function ChangeDataView({
   onCreateDefaultAdHocDataView,
   onClosePopover,
   getDataViewHelpText,
+  compressed = true,
+  showDataViewLabel = true,
+  showDropdownIcon = true,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -126,10 +163,9 @@ export function ChangeDataView({
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
       <EuiFormControlButton
-        compressed
+        compressed={compressed}
         css={styles.trigger}
         isInvalid={isMissingCurrent}
-        title={trigger.label}
         disabled={isDisabled}
         data-test-subj={dataTestSubj}
         aria-expanded={isPopoverOpen}
@@ -147,8 +183,8 @@ export function ChangeDataView({
           css={{ maxWidth: '100%' }}
         >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" />}
-          <span className="eui-textTruncate">{trigger.label}</span>
+          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" aria-hidden={true} />}
+          <DataViewLabelTruncate text={label} />
         </EuiFlexGroup>
       </EuiFormControlButton>
     );
@@ -279,7 +315,7 @@ export function ChangeDataView({
               <EuiButtonEmpty
                 onClick={onCreate}
                 size="xs"
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 iconSide="left"
                 data-test-subj="dataview-create-new"
               >
@@ -328,11 +364,15 @@ export function ChangeDataView({
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
           <EuiFormControlLayout
-            compressed
-            isDropdown
-            prepend={i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-              defaultMessage: 'Data view',
-            })}
+            compressed={compressed}
+            isDropdown={showDropdownIcon}
+            prepend={
+              showDataViewLabel
+                ? i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                    defaultMessage: 'Data view',
+                  })
+                : undefined
+            }
             {...(trigger.fullWidth && { fullWidth: true })}
           >
             <EuiPopover
@@ -348,10 +388,16 @@ export function ChangeDataView({
               initialFocus={`[id="${searchListInputId}"]`}
               display="block"
               buffer={8}
+              aria-label={i18n.translate(
+                'unifiedSearch.dataViewPicker.changeDataViewPopoverAriaLabel',
+                {
+                  defaultMessage: 'Data view selector',
+                }
+              )}
               css={{ inlineSize: '100%' }}
             >
               <div css={styles.popoverContent}>
-                <EuiContextMenuPanel size="s" items={items} />
+                <EuiContextMenuPanel items={items} />
               </div>
             </EuiPopover>
           </EuiFormControlLayout>

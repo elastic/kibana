@@ -18,14 +18,29 @@ This package wraps `tsc --build` and adds several performance features on top:
   per-project archives it actually needs. This avoids downloading and extracting the full
   ~180 MB archive when only a handful of projects changed.
 
+- **Smart archive selection**: The CI produces two kinds of archives — `on_merge` commit
+  archives (built after a PR is squash-merged into main) and PR archives (built during CI on
+  each PR branch). Both are candidates for restoration. The CLI compares them using estimated
+  rebuild cost: source-file staleness (`git diff archiveSha HEAD`) plus, for PR archives, a
+  fixed `PR_OVERHEAD` penalty (currently 0 — experiments showed no measurable inherent overhead
+  from using a PR archive vs a commit archive) and a per-package graph-staleness penalty for
+  any `kibana.jsonc` packages added after the archive was built. The archive with the lowest
+  total cost is selected.
+
 - **Effective rebuild count**: Staleness is measured not just by which projects changed directly,
   but by how many projects would need rebuilding in total (including all transitive dependents).
   A foundational package touched by just one commit can cascade into hundreds of dependent
   rebuilds, so raw stale count is a poor signal. When the effective rebuild count exceeds the
-  threshold (currently 10 projects; not configurable), the CLI finds the best available GCS
-  archive and runs a second `git diff` to check how many projects would still be stale *after*
-  a restore. The restore only happens if it genuinely reduces the work — so changing a
-  foundational package intentionally does not trigger a pointless 2-minute download.
+  threshold (currently 10 projects), the CLI finds the best available GCS archive and runs a
+  second `git diff` to check how many projects would still be stale *after* a restore. The
+  restore only happens if it genuinely reduces the work — so changing a foundational package
+  intentionally does not trigger a pointless 2-minute download.
+
+- **Automatic bootstrap repair**: Before any network I/O, the CLI validates that every
+  `kbn_references` entry in the project graph resolves to a known TypeScript project. If any
+  reference is broken (e.g. a new package was added to main but `yarn kbn bootstrap` hasn't
+  run yet), the CLI runs `yarn kbn bootstrap` automatically and re-execs itself to pick up the
+  updated module state — avoiding a cryptic crash after a multi-minute GCS download.
 
 - **Fail-fast pass**: When running locally without a project filter, the CLI first type-checks
   only the projects containing locally modified files (~10-15 s), giving immediate feedback
@@ -51,10 +66,13 @@ node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_che
 node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --restore-artifacts
 
 # Restore a specific commit's archive without running the type check
-node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --restore-artifacts 8b2b01245a74921cdea9d149f9e894c8d3cce046
+node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --restore-artifacts=8b2b01245a74921cdea9d149f9e894c8d3cce046
 
 # Show extended TypeScript compiler diagnostics
 node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --extended-diagnostics
+
+# Show verbose output including internal timing breakdowns
+node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --verbose
 ```
 
 ## CLI Flags
@@ -63,8 +81,9 @@ node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_che
 |------|-------------|
 | `--project <path>` | Path to a `tsconfig.json` file; limits type checking to that project only. |
 | `--clean-cache` | Deletes all TypeScript caches and generated config files. |
-| `--restore-artifacts [sha]` | Only restores cached build artifacts without running the type check. When a SHA is provided, restores that exact commit's archive; otherwise runs full candidate discovery. Useful for pre-populating the cache or testing a specific archive. |
+| `--restore-artifacts [=sha]` | Only restores cached build artifacts without running the type check. When a SHA is provided (e.g. `--restore-artifacts=<sha>`), restores that exact commit's archive; otherwise runs full candidate discovery. Useful for pre-populating the cache or testing a specific archive. |
 | `--extended-diagnostics` | Passes `--extendedDiagnostics` to `tsc` for detailed compiler performance output. |
+| `--verbose` | Enables verbose logging, including internal timing breakdowns for download, extraction, and scan phases. |
 
 ## Cache server (optional)
 
@@ -104,12 +123,16 @@ On each run the CLI goes through the following steps:
 3. **Decide on restore**: If the effective rebuild count is within the threshold (10 projects),
    proceed with the local artifacts — `tsc` will handle the small set of stale projects
    incrementally. If it exceeds the threshold:
-   - Find the best available GCS archive SHA (most recent ancestor present in the bucket).
-   - Run a second `git diff <gcsSha>..HEAD` and compute the effective rebuild count from
-     that baseline. This is a cheap local operation — no download yet.
-   - Only restore if the GCS archive would actually reduce the rebuild count. If the archive
-     is equally stale (e.g. the user intentionally changed a foundational package), skip the
-     restore and let `tsc` handle it locally.
+   - Discover candidate GCS archives: the most recent `on_merge` commit ancestor and the most
+     recent PR archive (if available), both in parallel.
+   - Run `git diff <archiveSha>..HEAD` for each candidate to measure source-file staleness.
+     This is a cheap local operation — no download yet.
+   - Select the best archive using `selectBestArchive`: commit archives are preferred by
+     default, but a PR archive wins when it is more recent after accounting for graph-diff
+     overhead (see **Smart archive selection** above).
+   - Only restore if the selected archive would actually reduce the rebuild count. If both
+     archives are equally stale (e.g. the user intentionally changed a foundational package),
+     skip the restore and let `tsc` handle it locally.
 
 4. **Restore** *(when needed)*: If a local cache server is running and the stale project list
    is known, request only those project archives via the selective restore protocol. Otherwise
@@ -136,6 +159,28 @@ All log lines are prefixed with a category in brackets:
 | `[Cache]` | Cache server communication, archive download, and extraction progress. |
 | `[TypeCheck]` | TypeScript compiler invocations and overall elapsed time. |
 | `[timing]` | Verbose-only internal timing breakdowns (download, extraction, scan). |
+
+### Progress reporting
+
+When running interactively (`process.stdout.isTTY`), downloads and type-check progress are
+shown as in-place animated bars. In non-TTY environments (CI, piped output, agents), these
+are replaced with periodic log lines:
+
+```
+info [Cache] Downloading: 45.0 MB / 180.0 MB (25%) at 5.9 MB/s
+info [TypeCheck] [Full pass] 500 / 1313 projects (38%) — 2 rebuilt, 498 up-to-date | 5s elapsed
+```
+
+### Rebuild summary
+
+After each type-check pass, a per-project timing summary is printed for any projects that
+were rebuilt. Duplicate short names are disambiguated by prepending the parent directory:
+
+```
+info [TypeCheck] [Full pass] Rebuilt 2 project(s):
+info [TypeCheck] [Full pass]   platform/test (25.3s)
+info [TypeCheck] [Full pass]   observability/test (8.1s)
+```
 
 ## Artifact storage
 

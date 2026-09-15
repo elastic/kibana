@@ -24,6 +24,8 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
+import { useStatusAction } from '../actions/status/use_status_action';
+import { CaseChatActions } from '../../agent_builder/case_chat_actions';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -46,14 +48,25 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   const title = getStatusTitle(caseData.status);
 
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const statusAction = useStatusAction({
+    isDisabled: false,
+    onAction: () => {},
+    onActionSuccess: refreshCaseViewPage,
+    selectedStatus: caseData.status,
+  });
 
   const onStatusChanged = useCallback(
-    (status: CaseStatuses) =>
-      onUpdateField({
-        key: 'status',
-        value: status,
-      }),
-    [onUpdateField]
+    (status: CaseStatuses, closeReason?: string) => {
+      if (status !== 'closed') {
+        onUpdateField({
+          key: 'status',
+          value: status,
+        });
+      } else {
+        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
+      }
+    },
+    [caseData, onUpdateField, statusAction]
   );
 
   const currentExternalIncident =
@@ -89,8 +102,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <ActionBarStatusItem title={i18n.STATUS} dataTestSubj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
+            totalAlerts={caseData.totalAlerts}
+            syncAlertsEnabled={caseData.settings.syncAlerts}
             disabled={isStatusMenuDisabled}
-            isLoading={isLoading}
+            isLoading={isLoading || statusAction.isUpdatingStatus}
             onStatusChanged={onStatusChanged}
           />
         </ActionBarStatusItem>
@@ -146,6 +161,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
         <EuiFlexItem grow={false}>
           <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <CaseChatActions caseData={caseData} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>

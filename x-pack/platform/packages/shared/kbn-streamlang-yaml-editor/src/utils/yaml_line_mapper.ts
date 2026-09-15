@@ -75,20 +75,33 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
         };
 
         // Handle nested condition blocks recursively
-        if (isConditionBlock(dslStep) && dslStep.condition?.steps && YAML.isMap(stepNode)) {
+        if (isConditionBlock(dslStep) && YAML.isMap(stepNode)) {
           const conditionNode = stepNode.get('condition', true);
-          const nestedStepsNode =
-            YAML.isMap(conditionNode) &&
-            (conditionNode.get('steps', true) as YAML.YAMLSeq | undefined);
 
-          if (nestedStepsNode && nestedStepsNode.items) {
-            processSteps(
-              nestedStepsNode.items as YAML.ParsedNode[],
-              dslStep.condition.steps,
-              lineMap,
-              yamlValue,
-              stepPath
-            );
+          if (YAML.isMap(conditionNode)) {
+            // Process if-branch steps
+            const nestedStepsNode = conditionNode.get('steps', true) as YAML.YAMLSeq | undefined;
+            if (nestedStepsNode?.items && dslStep.condition?.steps) {
+              processSteps(
+                nestedStepsNode.items as YAML.ParsedNode[],
+                dslStep.condition.steps,
+                lineMap,
+                yamlValue,
+                stepPath
+              );
+            }
+
+            // Process else-branch steps
+            const elseStepsNode = conditionNode.get('else', true) as YAML.YAMLSeq | undefined;
+            if (elseStepsNode?.items && dslStep.condition?.else) {
+              processSteps(
+                elseStepsNode.items as YAML.ParsedNode[],
+                dslStep.condition.else,
+                lineMap,
+                yamlValue,
+                `${stepPath}.else`
+              );
+            }
           }
         }
       });

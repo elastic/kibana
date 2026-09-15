@@ -11,7 +11,7 @@ import type {
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentDiff,
-  VersionedAttachmentInput,
+  AttachmentInput,
   AttachmentType,
   AttachmentRefActor,
   AttachmentRefOperation,
@@ -29,7 +29,11 @@ import {
   isAttachmentActive,
   isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+  AttachmentValidateContext,
+} from './type_definition';
 
 /**
  * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
@@ -75,6 +79,18 @@ export interface ResolvedAttachmentRef {
 }
 
 /**
+ * Snapshot of an attachment at a specific version, returned by
+ * {@link AttachmentStateManager.get}. Carries the attachment id, the
+ * resolved version number, the type discriminator, and the version data.
+ */
+export interface AttachmentSnapshot {
+  id: string;
+  version: number;
+  type: string;
+  data: AttachmentVersion;
+}
+
+/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -86,14 +102,7 @@ export interface AttachmentStateManager {
       actor?: AttachmentRefActor;
       version?: number;
     }
-  ):
-    | {
-        id: string;
-        version: number;
-        type: AttachmentType;
-        data: AttachmentVersion;
-      }
-    | undefined;
+  ): AttachmentSnapshot | undefined;
   /** Get the raw stored attachment record (all versions, metadata). */
   getAttachmentRecord(id: string): VersionedAttachment | undefined;
   /** Get all active (non-deleted) attachments */
@@ -105,15 +114,17 @@ export interface AttachmentStateManager {
 
   /** Add a new attachment. If only `origin` is provided (no `data`), resolves content via the type's resolve(). */
   add<TType extends string>(
-    input: VersionedAttachmentInput<TType>,
+    input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
   update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined>;
   /** Soft delete an attachment (sets active=false) */
   delete(id: string, actor?: AttachmentRefActor): boolean;
@@ -183,14 +194,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return definition?.isReadonly ?? false;
   }
 
-  private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
+  private async validateAttachmentData(
+    type: string,
+    data: unknown,
+    context?: AttachmentValidateContext
+  ): Promise<unknown> {
     const typeDefinition = this.options.getTypeDefinition(type);
     if (!typeDefinition) {
       throw new Error(`Unknown attachment type: ${type}`);
     }
 
     try {
-      const validationResult = await typeDefinition.validate(data);
+      const validationResult = await typeDefinition.validate(data, context);
       if (validationResult.valid) {
         return validationResult.data;
       }
@@ -290,9 +305,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   }
 
   async add<TType extends string>(
-    input: VersionedAttachmentInput<TType>,
+    input: AttachmentInput<TType>,
     actor?: AttachmentRefActor,
-    resolveContext?: AttachmentResolveContext
+    resolveContext?: AttachmentResolveContext,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
@@ -300,7 +316,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     let validatedData: unknown;
 
     if (input.data !== undefined) {
-      validatedData = await this.validateAttachmentData(input.type, input.data);
+      validatedData = await this.validateAttachmentData(input.type, input.data, validateContext);
     } else if (input.origin !== undefined) {
       const typeDefinition = this.options.getTypeDefinition(input.type);
       if (!typeDefinition) {
@@ -344,13 +360,14 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       versions: [version],
       current_version: 1,
       active: true,
-      ...(input.description && { description: input.description }),
+      ...(input.description !== undefined && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
       // When created with origin (by-reference), record snapshot time for isStale comparison.
       // By-value attachments leave this undefined.
       ...(input.origin !== undefined && { origin_snapshot_at: now }),
+      ...(input.group_id !== undefined && { group_id: input.group_id }),
     };
 
     this.attachments.set(id, attachment);
@@ -363,7 +380,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async update(
     id: string,
     input: AttachmentUpdateInput,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    validateContext?: AttachmentValidateContext
   ): Promise<VersionedAttachment | undefined> {
     const attachment = this.attachments.get(id);
     if (!attachment) {
@@ -388,7 +406,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     if (input.data !== undefined) {
-      const validatedData = await this.validateAttachmentData(attachment.type, input.data);
+      const validatedData = await this.validateAttachmentData(
+        attachment.type,
+        input.data,
+        validateContext
+      );
       const newHash = hashContent(validatedData);
       const currentVersion = getLatestVersion(attachment);
 

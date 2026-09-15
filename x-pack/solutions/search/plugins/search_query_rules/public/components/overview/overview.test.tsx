@@ -12,6 +12,25 @@ import { QueryRulesOverview } from './overview';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      console: undefined,
+      history: { push: jest.fn(), location: { search: '' } },
+      searchNavigation: {
+        useClassicNavigation: jest.fn(),
+        breadcrumbs: {
+          setSearchBreadCrumbs: jest.fn(),
+          clearBreadcrumbs: jest.fn(),
+        },
+      },
+      chrome: {
+        getChromeStyle: jest.fn().mockReturnValue('classic'),
+      },
+    },
+  }),
+}));
+
 jest.mock('../../hooks/use_fetch_query_rules_sets', () => ({
   useFetchQueryRulesSets: jest.fn(() => ({
     data: undefined,

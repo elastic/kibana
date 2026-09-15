@@ -7,18 +7,11 @@
 
 import React from 'react';
 import { RedirectTo } from '../redirect_to';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 /**
- * Redirects to the default stream management tab: Overview when enabled, otherwise Retention.
- * Query streams without a Retention tab redirect again to Schema from QueryStreamDetailManagement.
+ * Redirects to the default stream management tab: Overview.
+ * Query streams without an Overview tab redirect again to Schema from QueryStreamDetailManagement.
  */
 export function StreamManagementDefaultRedirect() {
-  const {
-    features: { overviewPage },
-  } = useStreamsPrivileges();
-
-  const tab = overviewPage.enabled ? 'overview' : 'retention';
-
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'overview' } }} />;
 }

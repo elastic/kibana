@@ -12,15 +12,16 @@ import { fetchSnapshot, takeSnapshot } from '../../snapshots';
 import type { Task, TaskContext } from '../types';
 
 export const getSnapshots: Task = async (ctx, task) => {
+  const baselineTitle =
+    ctx.requestedGitRev && ctx.requestedGitRev !== ctx.gitRev
+      ? `Obtain snapshot for baseline '${ctx.requestedGitRev}' (resolved to '${ctx.gitRev}')`
+      : `Obtain snapshot for baseline '${ctx.gitRev}'`;
+
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Obtain snapshot for baseline '${ctx.gitRev}'`,
+      title: baselineTitle,
       task: async () => {
         ctx.from = await fetchSnapshot(ctx.gitRev);
-      },
-      retry: {
-        delay: 2000,
-        tries: 5,
       },
     },
     {
@@ -29,10 +30,6 @@ export const getSnapshots: Task = async (ctx, task) => {
         ctx.serverlessFrom = await fetchSnapshot(ctx.serverlessGitRev!);
       },
       enabled: () => Boolean(ctx.serverlessGitRev) && ctx.serverlessGitRev !== ctx.gitRev,
-      retry: {
-        delay: 2000,
-        tries: 5,
-      },
     },
     {
       title: `Take snapshot of current SO type definitions`,

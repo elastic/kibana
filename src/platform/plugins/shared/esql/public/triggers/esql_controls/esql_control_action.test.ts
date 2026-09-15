@@ -42,6 +42,7 @@ describe('CreateESQLControlAction', () => {
     onCancelControl: jest.fn(),
     parentApi: {},
     triggerSource: ControlTriggerSource.QUESTION_MARK,
+    returnFocus: jest.fn(),
   };
 
   beforeEach(() => {
@@ -93,15 +94,24 @@ describe('CreateESQLControlAction', () => {
       expect(mockOpenLazyFlyout).toHaveBeenCalledWith({
         core: mockCore,
         parentApi: {},
+        returnFocus: mockContext.returnFocus,
         loadContent: expect.any(Function),
         flyoutProps: {
           'data-test-subj': 'create_esql_control_flyout',
           isResizable: true,
           maxWidth: 800,
-          triggerId: 'dashboard-controls-menu-button',
           onClose: expect.any(Function),
         },
       });
+    });
+
+    it('should open lazy flyout with correct configuration when no cancel is provided', async () => {
+      await action.execute({ ...mockContext, onCancelControl: undefined });
+      expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flyoutProps: expect.not.objectContaining({ onClose: expect.any(Function) }),
+        })
+      );
     });
   });
 

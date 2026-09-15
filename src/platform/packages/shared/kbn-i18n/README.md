@@ -11,6 +11,15 @@ is built around [intl-messageformat](https://github.com/yahoo/intl-messageformat
 so both React and AngularJS frameworks use the same engine and the same
 message syntax.
 
+## Supported locales
+
+The canonical list of supported locales is defined in this package and exported as:
+
+- `SUPPORTED_LOCALE_IDS` — A `readonly string[]` of locale codes (e.g., `['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']`).
+- `SUPPORTED_LOCALES` — An array of `{ id, label }` objects pairing each locale code with its human-readable name.
+
+All code that needs to enumerate or validate supported locales should import from `@kbn/i18n` rather than maintaining its own list.
+
 ## Localization files
 
 Localization files are JSON files.

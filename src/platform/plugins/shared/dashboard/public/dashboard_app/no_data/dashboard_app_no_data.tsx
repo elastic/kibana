@@ -16,10 +16,12 @@ import {
   getIndexForESQLQuery,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   coreServices,
   dataService,
@@ -103,7 +105,7 @@ export const DashboardAppNoDataPage = ({
             .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
-                  type: 'lens',
+                  type: LENS_EMBEDDABLE_TYPE,
                   serializedState: {
                     attributes: getLensAttributesFromSuggestion({
                       filters: [],
@@ -142,6 +144,12 @@ export const DashboardAppNoDataPage = ({
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+      <span
+        data-test-subj={
+          lensHelpersAsync.loading ? 'dashboardNoDataPageLoading' : 'dashboardNoDataPageLoaded'
+        }
+        hidden
+      />
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
     </AnalyticsNoDataPageKibanaProvider>
   );
@@ -151,12 +159,20 @@ export const isDashboardAppInNoDataState = async () => {
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
   if (hasUserDataView) return false;
 
+  // consider has data if there is at least one dataset
+  const hasDatasets = await coreServices.http
+    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+    .then((res) => res.datasets.length > 0)
+    .catch(() => false);
+  if (hasDatasets) return false;
+
   // consider has data if there is unsaved dashboard with edits
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
   const { total } = await dashboardClient
     .search({ query: '', per_page: 1 })
+    .then(({ meta }) => meta)
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

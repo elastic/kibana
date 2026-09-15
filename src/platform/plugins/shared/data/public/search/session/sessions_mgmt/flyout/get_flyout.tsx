@@ -8,11 +8,9 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { htmlIdGenerator } from '@elastic/eui';
 import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import type { SearchUsageCollector } from '../../../collectors';
@@ -21,8 +19,6 @@ import { Flyout } from './flyout';
 import type { BackgroundSearchOpenedHandler } from '../types';
 import { FLYOUT_WIDTH } from './constants';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
-
-const flyoutIdGenerator = htmlIdGenerator('searchSessionsFlyout');
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -53,42 +49,40 @@ export function openSearchSessionsFlyout({
       usageCollector,
       featureFlags: coreStart.featureFlags,
     });
-    const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
-    const flyoutId = flyoutIdGenerator();
     const closeFlyout = async () => {
       await flyout.close();
       attrs.onClose?.();
     };
 
-    const flyout = coreStart.overlays.openFlyout(
-      toMountPoint(
-        coreStart.rendering.addContext(
-          <KibanaReactContextProvider>
-            <Flyout
-              flyoutId={flyoutId}
-              onClose={closeFlyout}
-              onBackgroundSearchOpened={(params) => {
-                attrs.onBackgroundSearchOpened?.(params);
-                closeFlyout();
-              }}
-              appId={attrs.appId}
-              api={api}
-              coreStart={coreStart}
-              usageCollector={usageCollector}
-              ebtManager={ebtManager}
-              config={config}
-              kibanaVersion={kibanaVersion}
-              locators={share.url.locators}
-              trackingProps={{ openedFrom: attrs.trackingProps.openedFrom }}
-            />
-          </KibanaReactContextProvider>
-        ),
-        coreStart
-      ),
+    const flyout = coreStart.overlays.openSystemFlyout(
+      <Flyout
+        onClose={closeFlyout}
+        onBackgroundSearchOpened={(params) => {
+          attrs.onBackgroundSearchOpened?.(params);
+          closeFlyout();
+        }}
+        appId={attrs.appId}
+        api={api}
+        coreStart={coreStart}
+        usageCollector={usageCollector}
+        ebtManager={ebtManager}
+        config={config}
+        kibanaVersion={kibanaVersion}
+        locators={share.url.locators}
+        trackingProps={{ openedFrom: attrs.trackingProps.openedFrom }}
+      />,
       {
+        id: 'backgroundSearchesFlyout',
+        title: i18n.translate('data.sessions.management.backgroundSearchesFlyoutTitle', {
+          defaultMessage: 'Background searches',
+        }),
+        flyoutMenuProps: { hideTitle: false },
         size: FLYOUT_WIDTH,
-        ['aria-labelledby']: flyoutId,
+        session: 'start',
+        type: 'overlay',
+        ownFocus: true,
+        outsideClickCloses: true,
         onClose: closeFlyout,
       }
     );

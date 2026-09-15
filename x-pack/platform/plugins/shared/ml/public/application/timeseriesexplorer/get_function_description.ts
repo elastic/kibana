@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { type MlResultsService } from '../services/results_service';
 import type { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import type { MlEntity } from '../../embeddables';
 
@@ -64,7 +64,7 @@ export const getFunctionDescription = async (
       return highestScoringAnomaly?.function_description;
     }
     // if there's no anomaly found, auto default to plotting the mean
-    return ES_AGGREGATION.AVG;
+    return ML_JOB_AGGREGATION.MEAN;
   } catch (error) {
     toastNotificationService.displayErrorToast(
       error,

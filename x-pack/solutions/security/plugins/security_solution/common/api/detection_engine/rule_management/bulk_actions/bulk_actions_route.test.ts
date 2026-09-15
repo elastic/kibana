@@ -465,7 +465,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"edit.0.value.group_by: Too big: expected array to have <=3 items"`
         );
       });
 
@@ -487,7 +487,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"edit.0.value.group_by: Too small: expected array to have >=1 items"`
         );
       });
 
@@ -510,7 +510,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 22 more"`
+          `"edit.0.value.duration.value: Too small: expected number to be >=1"`
         );
       });
     });
@@ -610,7 +610,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"action: Invalid input: expected \\"delete\\", action: Invalid input: expected \\"disable\\", action: Invalid input: expected \\"enable\\", action: Invalid input: expected \\"export\\", action: Invalid input: expected \\"duplicate\\", and 21 more"`
+          `"edit.0.value.interval: Invalid string: must match pattern /^[1-9]\\\\d*[smh]$/"`
         );
       });
 

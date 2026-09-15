@@ -122,7 +122,6 @@ export const MiddleTruncatedText = ({
           <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
         }
         data-test-subj="middleTruncatedTextToolTip"
-        delay="long"
         position="top"
       >
         <>

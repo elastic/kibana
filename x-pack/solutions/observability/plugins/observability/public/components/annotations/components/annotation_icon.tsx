@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { annotationsIconSet } from '@kbn/event-annotation-components';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
@@ -25,9 +26,12 @@ function AnnotationIcon({ annotation }: AnnotationIconProps) {
 
   return (
     <EuiIcon
+      aria-label={i18n.translate('xpack.observability.annotationIcon.ariaLabel', {
+        defaultMessage: 'Annotation',
+      })}
       type={
         eventEnd
-          ? 'stopFilled'
+          ? 'stopFill'
           : (annotationsIconSet.find((icon) => icon.value === iconValue)?.icon as IconType) ??
             (iconValue as IconType)
       }

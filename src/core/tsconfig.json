@@ -9,6 +9,7 @@
     "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
+    "test/scout/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -104,7 +105,6 @@
     "@kbn/utils",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/core-http-context-server-internal",
-    "@kbn/core-test-helpers-so-type-serializer",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/doc-links",
     "@kbn/core-status-server-internal",
@@ -176,6 +176,9 @@
     "@kbn/migrator-test-kit",
     "@kbn/core-user-activity-server-mocks",
     "@kbn/core-user-activity-server-internal",
+    "@kbn/scout",
+    "@kbn/core-user-storage-server-internal",
+    "@kbn/core-user-storage-common",
   ],
   "exclude": [
     "target/**/*",

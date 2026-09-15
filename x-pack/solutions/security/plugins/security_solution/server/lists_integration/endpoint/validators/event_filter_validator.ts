@@ -19,17 +19,18 @@ import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_FIELD_MAX_LENGTH } from './constants';
 
 const EventFilterDataSchema = schema.object(
   {
     entries: schema.arrayOf(
       schema.object(
         {
-          field: schema.string(),
+          field: schema.string({ maxLength: ENTRY_FIELD_MAX_LENGTH }),
         },
         { unknowns: 'ignore' }
       ),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
   },
   {
@@ -56,7 +57,7 @@ export class EventFilterValidator extends BaseValidator {
     await this.validatePreImportItems(items, async (item) => {
       // import specific validations
       await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
-      await this.validateCanCreateGlobalArtifacts(item);
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
       await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
 
       // usual validators from pre-create

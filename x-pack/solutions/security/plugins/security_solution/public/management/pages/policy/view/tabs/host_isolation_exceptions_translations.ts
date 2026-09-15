@@ -139,7 +139,7 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.empty.unexisting.importAction',
-    { defaultMessage: 'Import host isolation exception list' }
+    { defaultMessage: 'Import host isolation exceptions' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate(

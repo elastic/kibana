@@ -68,6 +68,9 @@ export const registerProfileRoutes = (
         },
       },
       async (context, request, response) => {
+        if (!options.active) {
+          return response.notFound({ body: { message: 'Anonymization feature is not enabled' } });
+        }
         try {
           const parseResult = createAnonymizationProfileRequestSchema.safeParse(request.body);
           if (!parseResult.success) {
@@ -147,6 +150,9 @@ export const registerProfileRoutes = (
         },
       },
       async (context, request, response) => {
+        if (!options.active) {
+          return response.notFound({ body: { message: 'Anonymization feature is not enabled' } });
+        }
         try {
           const query = request.query as FindAnonymizationProfilesRequestQuery;
           const { coreContext, namespace, esClient, repo } = await resolveRouteContext(context);
@@ -206,6 +212,9 @@ export const registerProfileRoutes = (
         },
       },
       async (context, request, response) => {
+        if (!options.active) {
+          return response.notFound({ body: { message: 'Anonymization feature is not enabled' } });
+        }
         try {
           const { namespace, repo } = await resolveRouteContext(context);
           const profile = await repo.get(namespace, request.params.id);
@@ -247,6 +256,9 @@ export const registerProfileRoutes = (
         },
       },
       async (context, request, response) => {
+        if (!options.active) {
+          return response.notFound({ body: { message: 'Anonymization feature is not enabled' } });
+        }
         try {
           const parseResult = updateAnonymizationProfileRequestSchema.safeParse(request.body);
           if (!parseResult.success) {
@@ -311,6 +323,9 @@ export const registerProfileRoutes = (
         },
       },
       async (context, request, response) => {
+        if (!options.active) {
+          return response.notFound({ body: { message: 'Anonymization feature is not enabled' } });
+        }
         try {
           const { namespace, repo } = await resolveRouteContext(context);
           const deleted = await repo.delete(namespace, request.params.id);

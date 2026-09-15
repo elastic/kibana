@@ -14,17 +14,17 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A string that does not contain only whitespace characters
  */
+export const NonEmptyString = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * A universally unique identifier
  */
+export const UUID = lazySchema(() => z.string().uuid());
 export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();

@@ -89,8 +89,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await common.navigateToUrlWithBrowserHistory('observability', `/cases/${caseIdMonitoring}`);
       const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
       await attachmentsTab.click();
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
+      await testSubjects.existOrFail('case-view-attachment-accordion-file');
       await commonScreenshots.takeScreenshot(
         'observabiity-case-files',
         screenshotDirectories,

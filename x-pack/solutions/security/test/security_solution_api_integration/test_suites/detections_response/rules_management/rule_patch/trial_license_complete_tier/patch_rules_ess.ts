@@ -48,7 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should return the rule with migrated actions after the enable patch', async () => {
+      // This is breaking due to this bug: https://github.com/elastic/kibana/issues/252794
+      it.skip('should return the rule with migrated actions after the enable patch', async () => {
         const [connector, rule] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)

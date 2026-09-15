@@ -81,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('installs parent package and resolves then installs dependency', async () => {
-      await installPackage(PARENT_PACKAGE, VERSION).expect(200);
+      await installPackage(PARENT_PACKAGE, VERSION, { force: true }).expect(200);
 
       const depInstallation = await getInstallationSavedObject(DEP_PACKAGE);
       expect(depInstallation).toBeDefined();
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
     it('does not install package when a newer incompatible version of the dependency is already installed', async () => {
       await installPackage(DEP_PACKAGE, DEP_VERSION_NEWER).expect(200);
 
-      const parentInstallResult = await installPackage(PARENT_PACKAGE, VERSION);
+      const parentInstallResult = await installPackage(PARENT_PACKAGE, VERSION, { force: true });
       expect(parentInstallResult.status).toBe(400);
       const body = parentInstallResult.body as { message?: string; error?: string };
       const message =
@@ -117,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('cleans up dependency package when parent is uninstalled', async () => {
-      await installPackage(PARENT_PACKAGE, VERSION).expect(200);
+      await installPackage(PARENT_PACKAGE, VERSION, { force: true }).expect(200);
 
       expect(await installationExists(DEP_PACKAGE)).toBe(true);
       expect(await installationExists(PARENT_PACKAGE)).toBe(true);
@@ -137,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(DEP_PACKAGE, VERSION);
 
       const [res1, res2] = await Promise.all([
-        installPackage(PARENT_PACKAGE, VERSION),
+        installPackage(PARENT_PACKAGE, VERSION, { force: true }),
         installPackage(PARENT_WITH_DEP_ALT, VERSION),
       ]);
 

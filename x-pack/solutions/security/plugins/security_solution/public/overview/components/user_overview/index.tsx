@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -45,6 +46,7 @@ import type { UserItem } from '../../../../common/search_strategy/security_solut
 import { RiskScoreDocTooltip } from '../common';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { InspectQuery } from '../../../common/store/inputs/model';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -62,6 +64,8 @@ export interface UserSummaryProps {
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.user>;
   /** When using Entity Store v2: first seen from entity lifecycle. */
@@ -70,6 +74,12 @@ export interface UserSummaryProps {
   lastSeenFromEntityStore?: string;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
+   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
+   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -80,6 +90,10 @@ const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
 `;
 
 export const USER_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
+/** Stable references for useQueryInspector when risk data comes from the entity store (avoids render loops). */
+const ENTITY_STORE_RISK_INSPECT_PLACEHOLDER: InspectQuery = { dsl: [], response: [] };
+const noopRiskScoreRefetch = (): void => {};
 
 export const UserOverview = React.memo<UserSummaryProps>(
   ({
@@ -98,10 +112,12 @@ export const UserOverview = React.memo<UserSummaryProps>(
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
     showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -132,10 +148,12 @@ export const UserOverview = React.memo<UserSummaryProps>(
 
     useQueryInspector({
       deleteQuery,
-      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      inspect: riskScoreStateFromEntityStore
+        ? ENTITY_STORE_RISK_INSPECT_PLACEHOLDER
+        : inspectRiskScore,
       loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? noopRiskScoreRefetch : refetchRiskScore,
       setQuery,
     });
 
@@ -298,18 +316,26 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  if (renderIpLink) {
+                    return renderIpLink(ip);
+                  }
+                  return LinkRenderer ? (
+                    <LinkRenderer field="host.ip" value={ip}>
+                      {ip}
+                    </LinkRenderer>
+                  ) : (
                     <FlyoutLink
                       field="host.ip"
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
-                  ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                  );
+                }}
               />
             ),
           },
@@ -326,6 +352,8 @@ export const UserOverview = React.memo<UserSummaryProps>(
         lastSeenFromEntityStore,
         firstColumn,
         isFlyoutOpen,
+        renderIpLink,
+        LinkRenderer,
       ]
     );
     return (

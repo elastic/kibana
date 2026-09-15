@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cps-common'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchains:
   default: node
 language: typescript
@@ -14,9 +14,10 @@ project:
   title: '@kbn/cps-common'
   description: Moon project for @kbn/cps-common
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/private/kbn-cps-common
-dependsOn: []
+dependsOn:
+  - '@kbn/core-pricing-common'
 tags:
   - shared-common
   - package
@@ -28,26 +29,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

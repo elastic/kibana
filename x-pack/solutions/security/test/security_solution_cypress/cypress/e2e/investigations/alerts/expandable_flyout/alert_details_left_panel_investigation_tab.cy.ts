@@ -13,6 +13,7 @@ import { openInvestigationTab } from '../../../../tasks/expandable_flyout/alert_
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -25,6 +26,7 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(getNewRule());

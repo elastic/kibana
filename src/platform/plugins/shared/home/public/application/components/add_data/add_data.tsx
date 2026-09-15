@@ -10,24 +10,21 @@
 import { i18n } from '@kbn/i18n';
 import type { FC, MouseEvent } from 'react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  mathWithUnits,
-  useEuiMinBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
+import { layoutRowOrStackCss } from '@kbn/css-utils/public/layout_css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { MoveData } from '../move_data';
 import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
@@ -41,21 +38,8 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, addDataService } = getServices();
-  const euiBreakpointM = useEuiMinBreakpoint('m');
-  const euiBreakpointL = useEuiMinBreakpoint('l');
-  const styles = ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'block',
-      marginBlock: `0 -${mathWithUnits([euiTheme.size.xl, euiTheme.size.xs], (x, y) => x + y)}`,
-      marginInline: 'auto',
-      [euiBreakpointM]: {
-        marginBlockEnd: euiTheme.size.xl,
-      },
-      [euiBreakpointL]: {
-        inlineSize: '80%',
-      },
-    });
+  const { trackUiMetric, addDataService, notifications } = getServices();
+  const { euiTheme } = useEuiTheme();
 
   // Check cloud connect status
   const useCloudConnectStatus = useMemo(
@@ -66,10 +50,12 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     useCloudConnectStatus();
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const hideAnnouncements = !notifications.tours.isEnabled();
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
   );
-  const shouldShowCloudConnectCallout = hasCloudConnectPermission && !isAlreadyConnected;
+  const shouldShowCloudConnectCallout =
+    hasCloudConnectPermission && !isAlreadyConnected && !hideAnnouncements;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -77,8 +63,8 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         paddingSize="xl"
         aria-labelledby="homeDataAdd__title"
       >
-        <EuiFlexGroup alignItems="flexEnd">
-          <EuiFlexItem>
+        <div css={layoutRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}>
+          <div>
             <EuiTitle size="s">
               <h2 id="homeDataAdd__title">
                 <FormattedMessage
@@ -101,56 +87,50 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiSpacer />
 
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem grow={false}>
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiButton
-                  data-test-subj="homeAddData"
-                  fill={false}
-                  href={addBasePath('/app/integrations/browse')}
-                  iconType="plusCircle"
-                  onClick={(event: MouseEvent) => {
-                    trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
-                    createAppNavigationHandler('/app/integrations/browse')(event);
-                  }}
-                  fullWidth
-                >
-                  <FormattedMessage
-                    id="home.addData.addDataButtonLabel"
-                    defaultMessage="Add integrations"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+            <div css={layoutRowOrStackCss({ threshold: '36rem', gap: euiTheme.size.m })}>
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiButton
+                data-test-subj="homeAddData"
+                fill={false}
+                href={addBasePath('/app/integrations/browse')}
+                iconType="plusCircle"
+                onClick={(event: MouseEvent) => {
+                  if (hasActiveModifierKey(event)) return;
+                  trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                  createAppNavigationHandler('/app/integrations/browse')(event);
+                }}
+              >
+                <FormattedMessage
+                  id="home.addData.addDataButtonLabel"
+                  defaultMessage="Add integrations"
+                />
+              </EuiButton>
 
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="addSampleData"
-                  href={addBasePath('#/tutorial_directory/sampleData')}
-                  iconType="documents"
-                >
-                  <FormattedMessage
-                    id="home.addData.sampleDataButtonLabel"
-                    defaultMessage="Try sample data"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              <EuiButtonEmpty
+                data-test-subj="addSampleData"
+                href={addBasePath('#/tutorial_directory/sampleData')}
+                iconType="documents"
+              >
+                <FormattedMessage
+                  id="home.addData.sampleDataButtonLabel"
+                  defaultMessage="Try sample data"
+                />
+              </EuiButtonEmpty>
 
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="uploadFile"
-                  href={addBasePath('#/tutorial_directory/fileDataViz')}
-                  iconType="download"
-                >
-                  <FormattedMessage
-                    id="home.addData.uploadFileButtonLabel"
-                    defaultMessage="Upload a file"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+              <EuiButtonEmpty
+                data-test-subj="uploadFile"
+                href={addBasePath('#/tutorial_directory/fileDataViz')}
+                iconType="download"
+              >
+                <FormattedMessage
+                  id="home.addData.uploadFileButtonLabel"
+                  defaultMessage="Upload a file"
+                />
+              </EuiButtonEmpty>
+            </div>
+          </div>
 
-          <EuiFlexItem>
+          <div>
             {!isCloudEnabled ? (
               hasCloudConnectPermission ? (
                 isCloudConnectStatusLoading ? (
@@ -168,7 +148,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 alt={i18n.translate('home.addData.illustration.alt.text', {
                   defaultMessage: 'Illustration of Elastic data integrations',
                 })}
-                css={styles}
+                wrapperProps={{ css: { display: 'block' } }}
                 src={
                   addBasePath('/plugins/kibanaReact/assets/') +
                   (isDarkMode
@@ -177,8 +157,8 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 }
               />
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </div>
+        </div>
       </KibanaPageTemplate.Section>
     );
   } else {

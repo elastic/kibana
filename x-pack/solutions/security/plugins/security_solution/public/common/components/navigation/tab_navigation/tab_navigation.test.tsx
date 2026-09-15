@@ -6,12 +6,18 @@
  */
 
 import { screen, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
+import { navTabsUsersDetails } from '../../../../explore/users/pages/details/nav_tabs';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
-import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
+import {
+  mockGetUrlForApp,
+  mockNavigateToUrl,
+} from '@kbn/security-solution-navigation/mocks/context';
 
 jest.mock('@kbn/security-solution-navigation/src/context');
 
@@ -38,6 +44,7 @@ jest.mock('react-router-dom', () => {
 });
 
 const hostName = 'siem-window';
+const userName = 'siem-user';
 
 describe('Table Navigation', () => {
   const mockHasMlUserPermissions = true;
@@ -73,6 +80,51 @@ describe('Table Navigation', () => {
     expect(firstTab).toHaveAttribute(
       'href',
       `/app/securitySolutionUI/hosts/name/siem-window/authentications${SEARCH_QUERY}`
+    );
+  });
+
+  test('does not append location.search when href already encodes query (host details tabs)', () => {
+    const propsWithEmbeddedSearch: TabNavigationProps = {
+      navTabs: navTabsHostDetails({
+        hostName,
+        hasMlUserPermissions: mockHasMlUserPermissions,
+        urlStateQuery: SEARCH_QUERY,
+      }),
+    };
+
+    render(<TabNavigationComponent {...propsWithEmbeddedSearch} />);
+
+    const firstTab = screen.getByTestId(`navigation-${HostsTableType.authentications}`);
+    const { href } = firstTab as HTMLAnchorElement;
+    expect((href.match(/\?/g) ?? []).length).toBe(1);
+    expect(href).toContain('search=test');
+  });
+
+  test('does not append location.search when href already encodes query (user details tabs)', () => {
+    mockUseRouteSpy.mockReturnValue([{ tabName: UsersTableType.authentications }]);
+    const propsWithEmbeddedSearch: TabNavigationProps = {
+      navTabs: navTabsUsersDetails(userName, mockHasMlUserPermissions, {
+        urlStateQuery: SEARCH_QUERY,
+      }),
+    };
+
+    render(<TabNavigationComponent {...propsWithEmbeddedSearch} />);
+
+    const firstTab = screen.getByTestId(`navigation-${UsersTableType.authentications}`);
+    const { href } = firstTab as HTMLAnchorElement;
+    expect((href.match(/\?/g) ?? []).length).toBe(1);
+    expect(href).toContain('search=test');
+    mockUseRouteSpy.mockReturnValue([{ tabName: HostsTableType.authentications }]);
+  });
+
+  test('tab click navigates via navigateToUrl with the resolved app href', async () => {
+    const user = userEvent.setup();
+    render(<TabNavigationComponent {...mockProps} />);
+
+    await user.click(screen.getByTestId(`navigation-${HostsTableType.events}`));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      `/app/securitySolutionUI/hosts/name/siem-window/events${SEARCH_QUERY}`
     );
   });
 });

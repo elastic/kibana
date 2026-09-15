@@ -17,7 +17,6 @@ import type {
 
 export { AIAssistantType } from '../common/ai_assistant_type';
 export { AIChatExperience } from '@kbn/ai-assistant-common';
-export { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 export {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,

@@ -158,6 +158,29 @@ describe('CustomTimeRangePanel', () => {
     });
   });
 
+  describe('apply', () => {
+    it('applies the typed absolute range as ISO bounds', () => {
+      const onChange = jest.fn();
+      renderCustomTimeRangePanel({ defaultValue: '2024-01-01 to 2024-02-01', onChange });
+      openCustomPanel();
+
+      fireEvent.change(within(getStartFieldset()).getByLabelText('Start date absolute date'), {
+        target: { value: 'Jan 1, 2025, 00:00' },
+      });
+      fireEvent.change(within(getEndFieldset()).getByLabelText('End date absolute date'), {
+        target: { value: 'Mar 1, 2025, 00:00' },
+      });
+      fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Apply' }));
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: new Date(2025, 0, 1).toISOString(),
+          end: new Date(2025, 2, 1).toISOString(),
+        })
+      );
+    });
+  });
+
   describe('validation', () => {
     it('shows end-before-start error and disables Apply when end < start', () => {
       renderCustomTimeRangePanel({ defaultValue: '2025-06-01 to 2025-01-01' });
@@ -202,7 +225,7 @@ describe('CustomTimeRangePanel', () => {
         target: { value: '15' },
       });
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m to now');
     });
 
     it('emits the literal "now" in the input for the Now type', () => {
@@ -212,7 +235,7 @@ describe('CustomTimeRangePanel', () => {
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now to now');
     });
 
     it('updates the panel UI when the input text changes to a valid range', () => {
@@ -230,12 +253,12 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('does not reset the panel when the input becomes partial or unparseable', () => {
-      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1 2025, 00:00", end=NOW.
+      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1, 2025, 00:00:00", end=NOW.
       renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now' });
       openCustomPanel();
 
       const startAbsInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00');
 
       // Simulate the user clearing/partially typing in the main input.
       fireEvent.change(screen.getByLabelText('Set picker text'), {
@@ -243,7 +266,7 @@ describe('CustomTimeRangePanel', () => {
       });
 
       // Panel state must not have been clobbered by a fallback timestamp.
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00');
       expect(
         within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
@@ -270,7 +293,7 @@ describe('CustomTimeRangePanel', () => {
       expect(onPresetSave).toHaveBeenCalledWith({
         start: 'now-15m',
         end: 'now',
-        label: '-15m - now',
+        label: '-15m to now',
       });
     });
   });
@@ -284,7 +307,7 @@ describe('CustomTimeRangePanel', () => {
       fireEvent.change(countInput, { target: { value: '30' } });
 
       const dialog = screen.getByRole('dialog');
-      fireEvent.click(within(dialog).getByText('Custom time range'));
+      fireEvent.click(within(dialog).getByText('Custom range'));
 
       expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m');
     });

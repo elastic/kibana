@@ -22,6 +22,9 @@ interface UiSettingsApiResponse {
   };
 }
 
+// Wait long enough for the shared uiSettings cache to expire across Kibana nodes in tests. See https://github.com/elastic/kibana/issues/265720.
+export const MAX_UI_SETTINGS_EVENTUAL_CACHE_REFRESH_WAIT_MS = 11_000;
+
 export class KbnClientUiSettings {
   constructor(
     private readonly log: ToolingLog,
@@ -101,6 +104,17 @@ export class KbnClientUiSettings {
   }
 
   /**
+   * Wait for a uiSettings write to become visible on other Kibana nodes in tests.
+   *
+   * Deployment-agnostic stateful runs can serve the next request from a different Kibana node than
+   * the one that handled the write, so server-side consumers may observe stale advanced settings
+   * until the shared cache expires. See https://github.com/elastic/kibana/issues/265720.
+   */
+  async waitForEventualCacheRefresh() {
+    await delay(MAX_UI_SETTINGS_EVENTUAL_CACHE_REFRESH_WAIT_MS);
+  }
+
+  /**
    * Update UI settings globally (like setting 'hideAnnouncements', 'theme:darkMode', etc)
    */
   async updateGlobal(updates: UiSettingValues) {
@@ -125,3 +139,7 @@ export class KbnClientUiSettings {
     return data.settings;
   }
 }
+
+const delay = async (ms: number) => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};

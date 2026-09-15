@@ -124,6 +124,14 @@ export const getEffectedPolicySelectionByTags = (
   };
 };
 
+export const addGlobalPolicyTag = (tags: string[]): string[] => [
+  ...tags,
+  ...(tags.includes(GLOBAL_ARTIFACT_TAG) ? [] : [GLOBAL_ARTIFACT_TAG]),
+];
+
+export const removeGlobalPolicyTag = (tags: string[]): string[] =>
+  tags.filter((tag) => tag !== GLOBAL_ARTIFACT_TAG);
+
 export const isAdvancedModeEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
 ): boolean => (item.tags ?? []).includes(ADVANCED_MODE_TAG);

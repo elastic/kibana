@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, of, type Observable } from 'rxjs';
 
-import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
+  HasLastSavedChildState,
   PublishesSavedObjectId,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
 
-import { of } from 'rxjs';
-import type { DashboardState } from '../../common';
-import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import type { initializeApproximationManager } from './approximation_manager';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
+import type { PublishesOnSave } from './types';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
@@ -36,7 +37,9 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
+  approximationManager,
   setState,
+  onSave$,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -46,7 +49,9 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  setState: (state: DashboardState) => void;
+  approximationManager: ReturnType<typeof initializeApproximationManager>;
+  setState: (state: DashboardState) => Promise<void>;
+  onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -55,21 +60,24 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState) => void;
+    unsavedChanges$: Observable<Partial<DashboardState>>;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
+  });
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing(lastSavedState$),
     layoutManager.internalApi.startComparing(lastSavedState$),
     projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
+    approximationManager.internalApi.startComparing(lastSavedState$),
   ]).pipe(
-    map(([settings, unifiedSearch, layout, projectRouting]) => {
-      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
+    map(([settings, unifiedSearch, layout, projectRouting, approximation]) => {
+      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting, ...approximation };
     })
   );
 
@@ -99,7 +107,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        setState(lastSavedState$.value);
+        await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -108,12 +116,11 @@ export function initializeUnsavedChangesManager({
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
+      onSaveSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState) => {
-        lastSavedState$.next(savedState);
-      },
+      unsavedChanges$: dashboardStateChanges$,
     },
   };
 }

@@ -1,0 +1,53 @@
+{
+  "id": "c48fccf3-c6b1-412e-8a79-0ee36f836f98",
+  "type": "search",
+  "namespaces": ["default"],
+  "updated_at": "2026-04-14T07:46:33.984Z",
+  "created_at": "2026-04-14T07:46:33.984Z",
+  "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "version": "WzIxLDFd",
+  "attributes": {
+    "title": "ESQL control unlink test",
+    "description": "",
+    "tabs": [
+      {
+        "id": "bdf27597-150b-445e-90ca-ce1b52b0b5af",
+        "label": "Untitled",
+        "attributes": {
+          "sort": [],
+          "columns": [],
+          "grid": {},
+          "hideChart": false,
+          "hideTable": false,
+          "isTextBasedQuery": true,
+          "usesAdHocDataView": true,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"esql\":\"FROM logstash-* | WHERE geo.dest == ?geo_dest\"},\"index\":{\"id\":\"4d11d59d30aadbbe7353d7b382615b23f05b2023f3f35520d5f6617776bed65e\",\"title\":\"logstash-*\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"logstash-*\",\"allowHidden\":false,\"managed\":false},\"filter\":[]}"
+          },
+          "timeRestore": false,
+          "breakdownField": "",
+          "chartInterval": "auto",
+          "controlGroupJson": "{\"0f3d53c8-d694-4ccf-81e5-66d97aee259f\":{\"selected_options\":[\"AE\"],\"variable_name\":\"geo_dest\",\"single_select\":true,\"variable_type\":\"values\",\"control_type\":\"VALUES_FROM_QUERY\",\"esql_query\":\"FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest\",\"title\":\"geo_dest\",\"order\":0,\"width\":\"medium\",\"grow\":false,\"type\":\"esql_control\"}}"
+        }
+      }
+    ],
+    "sort": [],
+    "columns": [],
+    "grid": {},
+    "hideChart": false,
+    "hideTable": false,
+    "isTextBasedQuery": true,
+    "usesAdHocDataView": true,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"esql\":\"FROM logstash-* | WHERE geo.dest == ?geo_dest\"},\"index\":{\"id\":\"4d11d59d30aadbbe7353d7b382615b23f05b2023f3f35520d5f6617776bed65e\",\"title\":\"logstash-*\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"logstash-*\",\"allowHidden\":false,\"managed\":false},\"filter\":[]}"
+    },
+    "timeRestore": false,
+    "breakdownField": "",
+    "controlGroupJson": "{\"0f3d53c8-d694-4ccf-81e5-66d97aee259f\":{\"selected_options\":[\"AE\"],\"variable_name\":\"geo_dest\",\"single_select\":true,\"variable_type\":\"values\",\"control_type\":\"VALUES_FROM_QUERY\",\"esql_query\":\"FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest\",\"title\":\"geo_dest\",\"order\":0,\"width\":\"medium\",\"grow\":false,\"type\":\"esql_control\"}}"
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.12.0"
+}

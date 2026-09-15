@@ -14,9 +14,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_RESUME_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerResumeExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerResumeExecutionRoute(deps: RouteDependencies) {
+  const { router, api, spaces } = deps;
   router.versioned
     .post({
       path: '/api/workflows/executions/{executionId}/resume',
@@ -42,17 +43,30 @@ export function registerResumeExecutionRoute({ router, api, spaces }: RouteDepen
               input: schema.recordOf(schema.string(), schema.any(), {
                 meta: { description: 'Input data to resume the execution with.' },
               }),
+              stepExecutionId: schema.maybe(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 1024,
+                  meta: {
+                    description:
+                      'Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.',
+                  },
+                })
+              ),
             }),
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { input } = request.body;
+          const { input, stepExecutionId } = request.body;
           const spaceId = spaces.getSpaceId(request);
 
-          await api.resumeWorkflowExecution(executionId, spaceId, input, request);
+          await api.resumeWorkflowExecution(executionId, spaceId, input, request, {
+            channel: 'kibana_execution_view',
+            stepExecutionId,
+          });
 
           return response.ok({
             body: {

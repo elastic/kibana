@@ -6,7 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import produce from 'immer';
+import produce from 'immer-v9';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -78,7 +78,15 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
-  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
+  rulesPrivileges: {
+    rules: { edit: true, read: true },
+    exceptions: { read: true, edit: false },
+    enableDisable: { edit: false },
+    investigationGuide: { edit: false },
+    customHighlightedFields: { edit: false },
+    manualRun: { edit: false },
+    rulesManagementSettings: { edit: false },
+  },
   alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
 };
 

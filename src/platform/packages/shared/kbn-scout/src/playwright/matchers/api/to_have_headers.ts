@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect as baseExpect } from '@playwright/test';
-import { createMatcherError } from './utils';
+import type { ExpectMatcherState, MatcherReturnType } from '@playwright/test';
 
 /**
- * Asserts that the response contains the expected headers.
+ * Custom matcher for expect.extend(): asserts the response contains the expected headers.
  * This is a partial match - the response can contain additional headers.
  * Header keys are case-insensitive.
  *
@@ -20,25 +19,25 @@ import { createMatcherError } from './utils';
  * expect(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
  */
 export function toHaveHeaders(
-  obj: unknown,
-  expectedHeaders: Record<string, string>,
-  isNegated = false,
-  message?: string
-): void {
-  if (typeof obj !== 'object' || obj === null || !('headers' in obj)) {
-    throw createMatcherError({
-      expected: JSON.stringify({ headers: expectedHeaders }),
-      matcherName: 'toHaveHeaders',
-      received: obj,
-      isNegated,
-      message,
-    });
+  this: ExpectMatcherState,
+  received: unknown,
+  expectedHeaders: Record<string, string>
+): MatcherReturnType {
+  if (typeof received !== 'object' || received === null || !('headers' in received)) {
+    return {
+      pass: this.isNot,
+      message: () =>
+        this.utils.matcherHint('toHaveHeaders', undefined, undefined, { isNot: this.isNot }) +
+        '\n\n' +
+        `Expected object with ${this.utils.printExpected({ headers: expectedHeaders })}\n` +
+        `Received: ${this.utils.printReceived(received)}`,
+    };
   }
 
   const actualHeaders: Record<string, string> = {};
-  const headers = obj.headers ?? {};
-  for (const [key, value] of Object.entries(headers)) {
-    actualHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : value;
+  const headers = received.headers ?? {};
+  for (const [key, value] of Object.entries(headers as Record<string, unknown>)) {
+    actualHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : String(value);
   }
 
   const normalizedExpected: Record<string, string> = {};
@@ -46,19 +45,19 @@ export function toHaveHeaders(
     normalizedExpected[key.toLowerCase()] = value;
   }
 
-  try {
-    if (isNegated) {
-      baseExpect(actualHeaders).not.toMatchObject(normalizedExpected);
-    } else {
-      baseExpect(actualHeaders).toMatchObject(normalizedExpected);
-    }
-  } catch {
-    throw createMatcherError({
-      expected: JSON.stringify(normalizedExpected),
-      matcherName: 'toHaveHeaders',
-      received: JSON.stringify(actualHeaders),
-      isNegated,
-      message,
-    });
-  }
+  const pass = Object.entries(normalizedExpected).every(
+    ([key, value]) => actualHeaders[key] === value
+  );
+
+  return {
+    pass,
+    message: () =>
+      this.utils.matcherHint('toHaveHeaders', undefined, undefined, { isNot: this.isNot }) +
+      '\n\n' +
+      `Expected: ${this.utils.printExpected(normalizedExpected)}\n` +
+      `Received: ${this.utils.printReceived(actualHeaders)}`,
+    name: 'toHaveHeaders',
+    expected: normalizedExpected,
+    actual: actualHeaders,
+  };
 }

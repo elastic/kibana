@@ -103,10 +103,6 @@ components:
               type: integer
               nullable: true
               description: Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
-            index_duration_ms:
-              type: integer
-              nullable: true
-              description: Indexing duration in milliseconds. Not populated from the execute event currently.
           required:
             - total_search_duration_ms
             - total_indexing_duration_ms
@@ -115,7 +111,6 @@ components:
             - alert_counts
             - matched_indices_count
             - frozen_indices_queried_count
-            - index_duration_ms
       required:
         - execution_uuid
         - execution_start

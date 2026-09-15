@@ -22,6 +22,7 @@ import {
 import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../containers/api';
 import { basicCase, basicCaseClosed } from '../../containers/mock';
+import * as i18n from './translations';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
@@ -74,6 +75,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-tags",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     size="m"
                     type="tag"
                   />,
@@ -85,6 +87,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-assignees",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     size="m"
                     type="user"
                   />,
@@ -96,6 +99,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-delete",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     color="danger"
                     size="m"
                     type="trash"
@@ -134,7 +138,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-status-closed",
                   "disabled": false,
                   "icon": "empty",
-                  "key": "cases-bulk-status-action",
+                  "key": "cases-bulk-action-status-closed",
                   "name": "Closed",
                   "onClick": [Function],
                 },
@@ -182,6 +186,10 @@ describe('useBulkActions', () => {
           ],
         }
       `);
+      expect(result.current.panels).toHaveLength(3);
+      expect(result.current.panels[0].title).toBe('Actions');
+      expect(result.current.panels[1].title).toBe('Status');
+      expect(result.current.panels[2].title).toBe('Severity');
     });
 
     it('change the status of cases', async () => {
@@ -217,6 +225,115 @@ describe('useBulkActions', () => {
 
       await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
+      });
+    });
+
+    it('shows the reason selector when closing from bulk actions', async () => {
+      const { result } = renderHook(
+        () =>
+          useBulkActions({
+            onAction,
+            onActionSuccess,
+            selectedCases: [
+              {
+                ...basicCase,
+                totalAlerts: 2,
+                settings: {
+                  ...basicCase.settings,
+                  syncAlerts: true,
+                },
+              },
+            ],
+          }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      let modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const { rerender } = renderWithTestingProviders(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await userEvent.click(screen.getByTestId('case-bulk-action-status'));
+      await userEvent.click(await screen.findByTestId('cases-bulk-action-status-closed'), {
+        pointerEventsCheck: 0,
+      });
+
+      modals = result.current.modals;
+      rerender(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      expect(
+        await screen.findByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+      ).toBeInTheDocument();
+      expect(screen.getByText('Close without reason')).toBeInTheDocument();
+    });
+
+    it('closes without modal when sync alerts is off', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result } = renderHook(
+        () =>
+          useBulkActions({
+            onAction,
+            onActionSuccess,
+            selectedCases: [
+              {
+                ...basicCase,
+                totalAlerts: 2,
+                settings: {
+                  ...basicCase.settings,
+                  syncAlerts: false,
+                },
+              },
+            ],
+          }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      renderWithTestingProviders(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await userEvent.click(screen.getByTestId('case-bulk-action-status'));
+      await userEvent.click(await screen.findByTestId('cases-bulk-action-status-closed'), {
+        pointerEventsCheck: 0,
+      });
+
+      expect(
+        screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+      ).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(updateCasesSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            cases: [
+              expect.objectContaining({
+                id: basicCase.id,
+                status: 'closed',
+                version: basicCase.version,
+              }),
+            ],
+          })
+        );
       });
     });
 

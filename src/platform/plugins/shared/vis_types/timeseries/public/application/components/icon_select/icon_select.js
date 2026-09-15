@@ -85,7 +85,7 @@ export const ICONS = [
 export function IconView({ value: icon, label }) {
   return (
     <span>
-      <EuiIcon type={ICON_TYPES_MAP[icon]} />
+      <EuiIcon type={ICON_TYPES_MAP[icon]} aria-hidden={true} />
       {` ${label}`}
     </span>
   );

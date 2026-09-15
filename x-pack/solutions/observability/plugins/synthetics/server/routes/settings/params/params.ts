@@ -95,7 +95,7 @@ const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: s
     hits.push(...result.saved_objects.map(toClientResponse));
   }
 
-  void finder.close();
+  finder.close().catch(() => {});
 
   return hits;
 };
@@ -111,7 +111,7 @@ const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
     hits.push(...result.saved_objects.map(toClientResponse));
   }
 
-  void finder.close();
+  finder.close().catch(() => {});
 
   return hits;
 };

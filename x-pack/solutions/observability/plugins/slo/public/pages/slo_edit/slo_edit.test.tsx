@@ -32,7 +32,6 @@ import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
@@ -240,7 +239,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -254,7 +253,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -268,7 +267,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('renders an empty SLO Edit Form', async () => {
@@ -384,7 +383,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -398,7 +397,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -411,7 +410,7 @@ describe('SLO Edit Page', () => {
       });
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('prefills the form with the SLO values', async () => {
@@ -443,7 +442,7 @@ describe('SLO Edit Page', () => {
       });
 
       expect(mockUpdate).toHaveBeenCalled();
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 });

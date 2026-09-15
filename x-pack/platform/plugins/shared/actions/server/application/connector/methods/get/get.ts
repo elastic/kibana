@@ -13,6 +13,7 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
+import { getAuthMode } from '../../lib/get_auth_mode';
 
 export async function get({
   context,
@@ -70,6 +71,7 @@ export async function get({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
+    const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
 
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -88,9 +90,7 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
-      authMode: result.attributes.authMode
-        ? (result.attributes.authMode as Connector['authMode'])
-        : 'shared',
+      authMode,
     };
   }
 

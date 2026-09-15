@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { SampleDocument } from '@kbn/streams-schema';
-import { MemoPreviewTable } from '../data_management/shared';
+import { MemoPreviewTable } from '../stream_management/data_management/shared';
 import { AssetImage } from '../asset_image';
 import { useQueryStreamHint } from '../../hooks/use_query_stream_hint';
 import { QueryStreamHintCallout } from './query_stream_hint_callout';

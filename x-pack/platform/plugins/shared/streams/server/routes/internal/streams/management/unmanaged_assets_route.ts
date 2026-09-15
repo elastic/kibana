@@ -8,6 +8,7 @@
 import { Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {
   checkAccess,
@@ -31,11 +32,14 @@ export const unmanagedAssetsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {
@@ -51,6 +55,13 @@ export const unmanagedAssetsRoute = createServerRoute({
     }
 
     const dataStream = await streamsClient.getDataStream(params.path.name);
+
+    if (dataStream.replicated === true) {
+      throw new StatusError(
+        'Elasticsearch unmanaged assets are not available for replicated data streams',
+        422
+      );
+    }
 
     const assets = await getUnmanagedElasticsearchAssets({
       dataStream,

@@ -56,6 +56,12 @@ export const CreateCloudConnectorRequestSchema = {
 // The actual structure varies based on cloudProvider (AWS vs Azure), so we use a flexible schema
 const CloudConnectorResponseVarsSchema = schema.recordOf(schema.string(), schema.any());
 
+const VerificationFieldsSchema = {
+  verification_status: schema.maybe(schema.string()),
+  verification_started_at: schema.maybe(schema.string()),
+  verification_failed_at: schema.maybe(schema.string()),
+};
+
 export const CreateCloudConnectorResponseSchema = schema.object({
   item: schema.object({
     id: schema.string(),
@@ -67,6 +73,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
+    ...VerificationFieldsSchema,
   }),
 });
 
@@ -102,6 +109,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
       updated_at: schema.string(),
+      ...VerificationFieldsSchema,
     }),
     { maxSize: 10000 }
   ),
@@ -126,6 +134,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
+    ...VerificationFieldsSchema,
   }),
 });
 
@@ -205,6 +214,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
+    ...VerificationFieldsSchema,
   }),
 });
 

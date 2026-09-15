@@ -14,6 +14,7 @@ value:
   "title": "Observability case title 1",
   "category": null,
   "customFields": [],
+  "observables": [],
   "assignees": [
     {
       "uid": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
@@ -48,4 +49,6 @@ value:
   "version": "WzI0NywyXQ==",
   "totalComment": 1,
   "totalAlerts": 1,
+  "totalEvents": 0,
+  "total_observables": 0,
 }

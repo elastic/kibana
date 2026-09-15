@@ -8,13 +8,10 @@
  */
 
 import { execSync } from 'child_process';
-import { getKibanaDir } from '../utils';
-import {
-  findModuleForPath,
-  buildModuleDownstreamGraph,
-  UNCATEGORIZED_MODULE_ID,
-} from './module_lookup';
-import { filterIgnoredFiles } from './utils';
+import { getKibanaDir } from '../utils.ts';
+import { findModuleForPath, buildModuleDownstreamGraph } from './module_lookup.ts';
+import { UNCATEGORIZED_MODULE_ID } from './const.ts';
+import { filterIgnoredFiles } from './utils.ts';
 
 const isCI = !!process.env.CI?.match(/^(1|true)$/i);
 
@@ -24,14 +21,20 @@ export function getAffectedModulesGit({
   ignorePatterns = [],
   commit = 'HEAD',
   ignoreUncategorizedChanges = false,
+  changedFiles: providedFiles,
 }: {
-  mergeBase: string;
+  mergeBase?: string;
   includeDownstream: boolean;
   ignorePatterns?: string[];
   commit?: string;
   ignoreUncategorizedChanges?: boolean;
+  changedFiles?: string[];
 }): Set<string> {
-  const allChangedFiles = listChangedFiles({ mergeBase, commit });
+  if (!providedFiles && !mergeBase) {
+    throw new Error('No merge base found');
+  }
+
+  const allChangedFiles = providedFiles ?? listChangedFiles({ mergeBase: mergeBase!, commit });
 
   const changedFiles = filterIgnoredFiles(allChangedFiles, ignorePatterns);
 
@@ -50,7 +53,14 @@ export function getAffectedModulesGit({
   return includeDownstream ? getDownstreamDependents(directlyAffected) : directlyAffected;
 }
 
-function listChangedFiles({ mergeBase, commit }: { mergeBase: string; commit: string }): string[] {
+/** Paths changed from `git merge-base mergeBase HEAD` to `commit` (plus local untracked when not CI). */
+export function listChangedFiles({
+  mergeBase,
+  commit,
+}: {
+  mergeBase: string;
+  commit: string;
+}): string[] {
   const execOptions = {
     cwd: getKibanaDir(),
     encoding: 'utf8' as const,

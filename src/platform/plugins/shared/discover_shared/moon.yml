@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-shared-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/discover-shared-plugin'
   description: Moon project for @kbn/discover-shared-plugin
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/plugins/shared/discover_shared
 dependsOn:
   - '@kbn/discover-utils'
@@ -25,6 +25,8 @@ dependsOn:
   - '@kbn/apm-types-shared'
   - '@kbn/data-views-plugin'
   - '@kbn/slo-schema'
+  - '@kbn/unified-doc-viewer'
+  - '@kbn/core-execution-context-common'
 tags:
   - plugin
   - prod
@@ -37,26 +39,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

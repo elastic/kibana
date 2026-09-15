@@ -6,9 +6,8 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps } from 'react';
 import React from 'react';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { DependencyLink } from './dependency_link';
 
 type Args = ComponentProps<typeof DependencyLink>;
@@ -16,15 +15,6 @@ type Args = ComponentProps<typeof DependencyLink>;
 export default {
   title: 'shared/DependencyLink',
   component: DependencyLink,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      return (
-        <MockApmPluginStorybook>
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
-    },
-  ],
 };
 
 export const Example: StoryObj<Args> = {

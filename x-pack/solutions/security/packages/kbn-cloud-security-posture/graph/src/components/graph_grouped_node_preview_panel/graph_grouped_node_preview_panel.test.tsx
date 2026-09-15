@@ -20,6 +20,7 @@ import {
   TOTAL_HITS_TEST_ID,
   ICON_TEST_ID,
   GROUPED_ITEMS_TYPE_TEST_ID,
+  GROUPED_ITEM_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -61,6 +62,12 @@ let defaultProps: {
   dataViewId: string;
   documentIds: string[];
   entityItems: EntityItem[];
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 };
 
 describe('GraphGroupedNodePreviewPanel', () => {
@@ -70,11 +77,12 @@ describe('GraphGroupedNodePreviewPanel', () => {
     entityIdCounter += 1;
     return {
       id: `entity-${entityIdCounter}`,
-      type: 'host',
+      itemType: 'entity',
       icon: 'storage',
       label: 'Test Host',
+      entity: { type: 'host' },
       ...overrides,
-    } as EntityItem;
+    };
   };
 
   beforeEach(() => {
@@ -87,6 +95,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
       dataViewId: TEST_DATA_VIEW_ID,
       documentIds: ['doc-1', 'doc-2', 'doc-3'],
       entityItems: [] as EntityItem[],
+      onShowDocument: jest.fn(),
+      onShowEntity: jest.fn(),
     };
     getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();
@@ -177,7 +187,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should render icon, title, and grouped type in ContentBody', () => {
-        const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
+        const entityItems = [createEntityItem({ icon: 'test-icon', entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
@@ -199,7 +209,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct groupedItemsType label', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
@@ -413,6 +423,40 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/275261
+      // When switching between grouped nodes, the flyout reuses the same panel
+      // component instance (same panel key => no remount) and only updates props.
+      // A grouped node can contain several items resolving to the same entity `id`
+      // (one per underlying event permutation). If the list keys are not unique,
+      // React fails to reconcile the list and leaves stale <li> nodes mounted, so
+      // the previous group's entities accumulate on top of the current group's.
+      it('should render exactly the current entityItems when switching groups (no accumulation)', () => {
+        // Group A: 4 items but only 2 unique entity ids (duplicate ids on purpose).
+        const groupA: EntityItem[] = [
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-2' }),
+          createEntityItem({ id: 'user-2' }),
+        ];
+        const groupB: EntityItem[] = [
+          createEntityItem({ id: 'bucket-1' }),
+          createEntityItem({ id: 'bucket-2' }),
+        ];
+
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />
+        );
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+
+        // Switch to group B (same component instance, only props change).
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupB} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(2);
+
+        // Switch back to group A: must show A's items only, not A+B accumulated.
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+      });
+
       it('should use client-side pagination slicing', () => {
         const entityItems = Array.from({ length: 25 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
@@ -448,8 +492,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
       it('should derive groupedItemsType from first entity type - this should never happened', () => {
         const entityItems = [
-          createEntityItem({ type: 'host' }),
-          createEntityItem({ type: 'user' }),
+          createEntityItem({ entity: { type: 'host' } }),
+          createEntityItem({ entity: { type: 'user' } }),
         ];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
@@ -457,30 +501,28 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display "Hosts" label for host type', () => {
-        const entityItems = [createEntityItem({ type: 'host' })];
+        const entityItems = [createEntityItem({ entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
       });
 
       it('should display "Users" label for user type', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
       });
 
       it('should display "Entities" label for unknown type', () => {
-        const entityItems = [
-          createEntityItem({ type: 'unknown' as unknown as EntityItem['type'] }),
-        ];
+        const entityItems = [createEntityItem({ entity: { type: 'unknown' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
       });
 
       it('should display "Entities" label when type is undefined', () => {
-        const entityItems = [createEntityItem({ type: undefined })];
+        const entityItems = [createEntityItem({ entity: { type: undefined } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');

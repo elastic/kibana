@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { Sort } from '@kbn/securitysolution-io-ts-list-types';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiIcon } from '@elastic/eui';
 
 import {
@@ -66,7 +66,6 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
                 popoverPanelPaddingSize={'s'}
                 popoverContent={() => (
                   <EuiContextMenuPanel
-                    size="s"
                     items={sortFields?.map((item) => {
                       const isSelectedSortItem = selectedSortField?.field === item.field;
                       let nextSortOrder = item.defaultOrder;

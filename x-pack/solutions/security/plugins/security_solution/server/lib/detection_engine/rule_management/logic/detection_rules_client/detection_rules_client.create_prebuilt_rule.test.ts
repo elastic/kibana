@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_INSTALL_EVENT } from '../../../../telemetry/event_based/events';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -23,6 +27,7 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -30,29 +35,57 @@ jest.mock('../../../../machine_learning/validation');
 describe('DetectionRulesClient.createPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
+  let analytics: AnalyticsServiceSetup;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const rulesAuthz = getMockRulesAuthz();
   const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
+    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
+      analytics,
     });
+  });
+
+  it('sends detection_rule_install telemetry with the correct payload', async () => {
+    rulesClient.create.mockResolvedValueOnce(
+      getRuleMock(
+        getQueryRuleParams({
+          immutable: true,
+          ruleSource: { type: 'external', isCustomized: false },
+        })
+      )
+    );
+    const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
+
+    await detectionRulesClient.createPrebuiltRule({ params });
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_INSTALL_EVENT.eventType,
+      expect.objectContaining({ isPrebuilt: true, isCustomized: false })
+    );
   });
 
   it('creates a rule with the correct parameters and options', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
 
-    await detectionRulesClient.createPrebuiltRule({ params });
+    await detectionRulesClient.createPrebuiltRule({
+      params,
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -63,6 +96,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             ruleId: params.rule_id,
             immutable: true,
           }),
+        }),
+        changeTracking: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
         }),
       })
     );

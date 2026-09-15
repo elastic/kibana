@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import type { X509Expiry } from '../../../../../../common/runtime_types';
-import { useCertStatus } from '../../../../hooks';
+import { useCertStatus, useDateFormat } from '../../../../hooks';
 import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../../certificates/translations';
 import { CERT_STATUS } from '../../../../../../common/constants';
 
@@ -35,14 +36,15 @@ const H4Text = styled.h4`
 export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false }) => {
   const notAfter = expiry?.not_after;
   const certStatus = useCertStatus(notAfter);
+  const dateFormatter = useDateFormat();
 
   const relativeDate = moment(notAfter).fromNow();
 
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
-      <EuiToolTip content={moment(notAfter).format('L LT')}>
+      <EuiToolTip content={dateFormatter(notAfter)}>
         <EuiText size="s" tabIndex={0}>
-          <EuiIcon color={color} type="lock" size="s" />
+          <EuiIcon color={color} type="lock" size="s" aria-hidden={true} />
           {boldStyle ? (
             <H4Text>
               {text} {relativeDate}
@@ -64,5 +66,11 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
     return <CertStatus color="danger" text={EXPIRED} />;
   }
 
-  return certStatus ? <CertStatus color="success" text={EXPIRES} /> : <span>--</span>;
+  return certStatus ? (
+    <CertStatus color="success" text={EXPIRES} />
+  ) : (
+    <span>
+      {i18n.translate('xpack.uptime.certStatusColumn.span.Label', { defaultMessage: '--' })}
+    </span>
+  );
 };

@@ -8,6 +8,7 @@
 import type { HostMetadataInterface } from '../../../../common/endpoint/types';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import type {
   HostItem,
   HostRiskScore,
@@ -17,7 +18,8 @@ import type {
 } from '../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
+import type { HostEntity } from '../../../../common/api/entity_analytics';
 
 const userRiskScore: UserRiskScore = {
   '@timestamp': '1989-11-08T23:00:00.000Z',
@@ -200,6 +202,46 @@ export const mockServiceRiskScoreState: RiskScoreState<EntityType.service> = {
   error: undefined,
 };
 
+export const mockHostEntityRiskScores: EntityRiskScoresState<EntityType.host> = {
+  base: { ...mockHostRiskScoreState },
+  resolution: {
+    state: { ...mockHostRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
+};
+
+export const mockHostEntityRiskScoresWithResolution: EntityRiskScoresState<EntityType.host> = {
+  base: { ...mockHostRiskScoreState },
+  resolution: {
+    state: { ...mockHostRiskScoreState },
+    hasResolutionGroup: true,
+    resolutionTargetEntityId: 'host:target-entity',
+  },
+  refetch: () => {},
+};
+
+export const mockUserEntityRiskScores: EntityRiskScoresState<EntityType.user> = {
+  base: { ...mockUserRiskScoreState },
+  resolution: {
+    state: { ...mockUserRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
+};
+
+export const mockServiceEntityRiskScores: EntityRiskScoresState<EntityType.service> = {
+  base: { ...mockServiceRiskScoreState },
+  resolution: {
+    state: { ...mockServiceRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
+};
+
 const hostMetadata: HostMetadataInterface = {
   '@timestamp': 1036358673463478,
 
@@ -267,4 +309,33 @@ export const mockObservedHostData: ObservedEntityData<HostItem> = {
     date: '2023-02-23T20:03:17.489Z',
   },
   anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
+};
+
+export const mockEntityRecord: HostEntity = {
+  '@timestamp': '2024-01-15T10:00:00.000Z',
+  entity: {
+    id: 'test-entity-id-host-abc123',
+    name: 'test-host-name',
+    type: 'host',
+    lifecycle: {
+      first_seen: '2023-01-01T00:00:00.000Z',
+      last_activity: '2024-01-15T10:00:00.000Z',
+    },
+  },
+  host: {
+    name: 'test-host-name',
+    id: ['host-id'],
+    ip: ['10.0.0.1', '127.0.0.1'],
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    architecture: ['x86_64'],
+    type: ['server'],
+    os: {
+      name: 'Ubuntu',
+      family: 'debian',
+      version: '22.04',
+    },
+  },
+  asset: {
+    criticality: 'high_impact',
+  },
 };

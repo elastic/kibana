@@ -19,7 +19,7 @@ export const registerAlertsTableEmbeddableFactory = ({
   embeddable,
   core,
 }: RegisterAlertsTableEmbeddableFactoryParams) => {
-  embeddable.registerReactEmbeddableFactory(EMBEDDABLE_ALERTS_TABLE_ID, async () => {
+  embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_ALERTS_TABLE_ID, async () => {
     const [coreStart, deps] = await core.getStartServices();
     const { getAlertsTableEmbeddableFactory } = await import('./alerts_table_embeddable_factory');
     return getAlertsTableEmbeddableFactory(coreStart, deps);

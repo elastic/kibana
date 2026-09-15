@@ -12,6 +12,11 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 import { useDashboardLocator } from '../../../../../../hooks/use_locator';
 
+import {
+  FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE,
+  DASHBOARD_LOCATORS_IDS,
+} from '../../../../../../../common/constants';
+
 import { AgentDashboardLink } from './agent_dashboard_link';
 
 const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
@@ -144,6 +149,70 @@ describe('AgentDashboardLink', () => {
     expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 
+  it('should link to the agent policy settings tab if only traces are enabled for that policy', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['traces'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
+  });
+
+  it('should link to the agent policy settings tab if only logs are enabled (no metrics)', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            id: 'policy123',
+            monitoring_enabled: ['logs'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
+  });
+
   it('it should disable the button if the agent policy is managed', async () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
@@ -172,11 +241,11 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(
-      result.getByTestId('agentDetails.enableLogsAndMetricsButton').hasAttribute('disabled')
+      result.getByTestId('agentDetails.enableMetricsButton').hasAttribute('disabled')
     ).toBeTruthy();
   });
 
-  it('should use the otel_internal_telemetry package for OPAMP agents', () => {
+  it('should use the otel_collector_internal_telemetry package for OPAMP agents', () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
@@ -208,7 +277,9 @@ describe('AgentDashboardLink', () => {
       />
     );
 
-    expect(mockedUseGetPackageInfoByKeyQuery).toHaveBeenCalledWith('otel_internal_telemetry');
+    expect(mockedUseGetPackageInfoByKeyQuery).toHaveBeenCalledWith(
+      FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE
+    );
   });
 
   it('should use the OTEL telemetry dashboard locator for OPAMP agents', () => {
@@ -249,10 +320,57 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(getRedirectUrl).toHaveBeenCalledWith({
-      dashboardId: 'otel_internal_telemetry-9d120e25-539a-41b0-8b27-47a937342f3d',
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
       query: {
         language: 'kuery',
-        query: 'service.instance.id:opamp-agent',
+        query: 'service.instance.id:"opamp-agent"',
+      },
+    });
+  });
+
+  it('should use elastic.display.name as service.instance.id when present', () => {
+    const getRedirectUrl = jest.fn().mockReturnValue('app/dashboards#/view/otel');
+    mockedUseDashboardLocator.mockReturnValue({
+      id: 'DASHBOARD_APP_LOCATOR',
+      getRedirectUrl,
+    } as any);
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+          installationInfo: {
+            install_status: 'installed',
+            installed_kibana_space_id: 'default',
+          },
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+
+    const testRenderer = createFleetTestRendererMock();
+
+    testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'opamp-agent',
+            type: 'OPAMP',
+            non_identifying_attributes: { 'elastic.display.name': 'my-collector-host' },
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            monitoring_enabled: ['logs', 'metrics'],
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    expect(getRedirectUrl).toHaveBeenCalledWith({
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
+      query: {
+        language: 'kuery',
+        query: 'service.instance.id:"my-collector-host"',
       },
     });
   });

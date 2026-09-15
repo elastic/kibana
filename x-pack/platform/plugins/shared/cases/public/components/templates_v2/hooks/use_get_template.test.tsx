@@ -23,6 +23,7 @@ const mockTemplate: ParsedTemplate = {
   name: 'My template',
   owner: 'securitySolution',
   definition: { name: 'My template', fields: [] },
+  definitionString: 'name: My template\nfields: []',
   templateVersion: 3,
   deletedAt: null,
   isLatest: true,
@@ -51,6 +52,7 @@ describe('useGetTemplate', () => {
     expect(apiMock.getTemplate).toHaveBeenCalledWith({
       templateId: 'template-1',
       version: undefined,
+      includeDeleted: false,
       signal: expect.any(AbortSignal),
     });
     expect(result.current.data).toEqual(mockTemplate);
@@ -72,6 +74,7 @@ describe('useGetTemplate', () => {
     expect(apiMock.getTemplate).toHaveBeenCalledWith({
       templateId: 'template-1',
       version: 2,
+      includeDeleted: false,
       signal: expect.any(AbortSignal),
     });
   });
@@ -95,6 +98,7 @@ describe('useGetTemplate', () => {
         'detail',
         'template-1',
         'latest',
+        false,
       ]);
     });
 
@@ -104,6 +108,7 @@ describe('useGetTemplate', () => {
         'detail',
         'template-1',
         2,
+        false,
       ]);
     });
   });

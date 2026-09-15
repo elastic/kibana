@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/buildkite_migration/rewrite_buildkite_agent_rules');
+require('@kbn/dev/buildkite_migration/rewrite_buildkite_agent_rules');

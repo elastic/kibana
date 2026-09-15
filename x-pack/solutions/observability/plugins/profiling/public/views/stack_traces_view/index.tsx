@@ -6,6 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -19,6 +20,7 @@ import { RouteBreadcrumb } from '../../routing/route_breadcrumb';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
 import { getTracesViewRouteParams } from './utils';
 import { AsyncStatus } from '../../hooks/use_async';
+import { RedirectTo } from '../../components/redirect_to';
 
 export function StackTracesView() {
   const routePath = useProfilingRoutePath();
@@ -89,9 +91,15 @@ export function StackTracesView() {
       });
     }
   }, [state.status, state.data?.charts.length, onPageReady, rangeFrom, rangeTo]);
+
   return (
     <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
-      <ProfilingAppPageTemplate tabs={tabs}>
+      <ProfilingAppPageTemplate
+        tabs={tabs}
+        pageTitle={i18n.translate('xpack.profiling.stackTracesView.pageTitle', {
+          defaultMessage: 'Stacktraces',
+        })}
+      >
         <StackTraces
           type={topNType}
           state={state}
@@ -130,4 +138,14 @@ export function StackTracesView() {
       </ProfilingAppPageTemplate>
     </RouteBreadcrumb>
   );
+}
+
+export function StackTracesViewWrapper({ children }: { children: React.ReactElement }) {
+  const routePath = useProfilingRoutePath();
+
+  if (routePath === '/stacktraces') {
+    return <RedirectTo pathname="/stacktraces/executables" />;
+  }
+
+  return children;
 }

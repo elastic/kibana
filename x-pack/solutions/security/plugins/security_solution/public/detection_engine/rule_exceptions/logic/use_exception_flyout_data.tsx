@@ -113,6 +113,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
         // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
         try {
           const dv = await data.dataViews.get(memoDataViewId);
+          await data.dataViews.refreshFields(dv);
           setDataViewIndexPatterns(dv);
           setDataViewSpec(dv.toSpec());
         } catch (error) {

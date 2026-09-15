@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { rawGapAutoFillSchedulerSchemaV1 } from '../../../saved_objects/schemas/raw_gap_auto_fill_scheduler';
-export type SchedulerSoAttributes = TypeOf<typeof rawGapAutoFillSchedulerSchemaV1>;
+import type { rawGapAutoFillSchedulerSchemaV2 } from '../../../saved_objects/schemas/raw_gap_auto_fill_scheduler/v2';
+export type SchedulerSoAttributes = TypeOf<typeof rawGapAutoFillSchedulerSchemaV2>;
 
 export const GAP_AUTO_FILL_SCHEDULER_TASK_TYPE = 'gap-auto-fill-scheduler-task' as const;
 
@@ -20,5 +20,11 @@ export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT = '60s' as const;
 
 export type GapAutoFillSchedulerLogConfig = Pick<
   SchedulerSoAttributes,
-  'name' | 'numRetries' | 'gapFillRange' | 'schedule' | 'maxBackfills' | 'ruleTypes'
+  | 'name'
+  | 'numRetries'
+  | 'gapFillRange'
+  | 'schedule'
+  | 'maxBackfills'
+  | 'ruleTypes'
+  | 'excludedReasons'
 >;

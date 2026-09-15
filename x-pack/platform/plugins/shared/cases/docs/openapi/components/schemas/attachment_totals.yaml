@@ -1,0 +1,17 @@
+title: Attachment totals
+description: Counts of alerts, events, and user comments attached to a case.
+type: object
+required:
+  - alerts
+  - events
+  - userComments
+properties:
+  alerts:
+    type: integer
+    description: Number of alert attachments on the case.
+  events:
+    type: integer
+    description: Number of event attachments on the case.
+  userComments:
+    type: integer
+    description: Number of user comment attachments on the case.

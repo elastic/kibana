@@ -24,7 +24,7 @@ export interface CloudConnectorUsageItem {
   updated_at: string;
 }
 
-interface CloudConnectorUsageResponse {
+export interface CloudConnectorUsageResponse {
   items: CloudConnectorUsageItem[];
   total: number;
   page: number;
@@ -74,7 +74,7 @@ export const useCloudConnectorUsage = (
     {
       enabled: !!cloudConnectorId,
       keepPreviousData: true, // Keep previous data to avoid flashing when going through pages
-      staleTime: options?.staleTime ?? 60000, // Default: cache for 1 minute
+      staleTime: options?.staleTime ?? 0,
       refetchOnWindowFocus: false,
     }
   );

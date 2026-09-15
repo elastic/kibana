@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assertNever } from '@elastic/eui';
+import { assertNever } from '@kbn/std';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import type {

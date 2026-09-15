@@ -12,9 +12,12 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const gridContainer = css`
-    min-height: 400px;
     display: flex;
     flex-direction: column;
+  `;
+
+  const gridContainerLoading = css`
+    min-height: 400px;
   `;
 
   const gridProgressBar = css`
@@ -46,8 +49,7 @@ export const useStyles = () => {
       font-size: ${euiTheme.size.m};
 
       .euiDataGridRowCell__content {
-        display: flex;
-        align-items: center;
+        align-content: center;
       }
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
@@ -72,8 +74,6 @@ export const useStyles = () => {
 
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
-      display: flex;
-      width: 200px;
     }
     & .unifiedDataTable__inner .euiDataGrid__controls {
       border-top: none;
@@ -89,6 +89,7 @@ export const useStyles = () => {
   return {
     gridStyle,
     gridContainer,
+    gridContainerLoading,
     gridProgressBar,
   };
 };

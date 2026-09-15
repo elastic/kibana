@@ -58,7 +58,7 @@ describe('getAzureCloudConnectorsCredentialsFormOptions', () => {
 
       const { getByText } = render(<I18nProvider>{result?.description}</I18nProvider>);
 
-      expect(getByText(/Configure Azure Cloud Connector credentials/i)).toBeInTheDocument();
+      expect(getByText(/Configure Azure Federated Identity credentials/i)).toBeInTheDocument();
     });
   });
 
@@ -105,7 +105,7 @@ describe('getAzureCloudConnectorsCredentialsFormOptions', () => {
       );
 
       expect(connectorField).toBeDefined();
-      expect(connectorField?.label).toBe('Cloud Connector ID');
+      expect(connectorField?.label).toBe('Federated Identity ID');
       expect(connectorField?.type).toBe('text');
       expect(connectorField?.dataTestSubj).toBe(
         AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID

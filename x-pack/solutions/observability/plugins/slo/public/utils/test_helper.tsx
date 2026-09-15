@@ -19,7 +19,7 @@ import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProvider } from '@elastic/eui';
-import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
+import type { SLORouteRepository } from '../../server/routes/utils/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
@@ -45,6 +45,13 @@ const queryClient = new QueryClient({
 
 const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+export const pluginContextDefaultValue = {
+  appMountParameters,
+  observabilityRuleTypeRegistry,
+  ObservabilityPageTemplate: KibanaPageTemplate,
+  sloClient,
+};
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
@@ -68,14 +75,7 @@ export const render = (component: React.ReactNode) => {
             },
           }}
         >
-          <PluginContext.Provider
-            value={{
-              appMountParameters,
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate: KibanaPageTemplate,
-              sloClient,
-            }}
-          >
+          <PluginContext.Provider value={pluginContextDefaultValue}>
             <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
           </PluginContext.Provider>
         </KibanaContextProvider>

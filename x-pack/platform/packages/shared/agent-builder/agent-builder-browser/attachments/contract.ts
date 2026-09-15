@@ -6,12 +6,13 @@
  */
 
 import type { ReactNode } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
   UpdateOriginResponse,
   ScreenContextAttachmentData,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
@@ -35,6 +36,14 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   openSidebarConversation?: () => void;
 }
 
+/** Props passed to attachment renderers in the conversation details flyout. */
+export interface ConversationDetailsRenderProps<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment to render, with version data selected by the consumer. */
+  attachment: TAttachment;
+}
+
 /**
  * Callbacks available to canvas content renderers.
  */
@@ -53,6 +62,14 @@ export interface CanvasRenderCallbacks {
 }
 
 /**
+ * Callbacks available to inline content renderers.
+ */
+export interface InlineRenderCallbacks {
+  /** Register action buttons to display in the inline attachment header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+}
+
+/**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
 export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -62,10 +79,14 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
+  /** Id of the agent the current conversation is using, when known. */
+  agentId?: string;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /** Callback to dismiss the canvas. Undefined when not in canvas mode. */
+  closeCanvas?: () => void;
   /** Callback to open the agent builder sidebar with the current conversation loaded. */
   openSidebarConversation?: () => void;
   /**
@@ -85,7 +106,26 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
-  /** Handler function called when the button is clicked */
+  /** Optional EUI button color override (defaults to 'text') */
+  color?: EuiButtonColor;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
+  /**
+   * Optional URL. When provided, the button renders as an anchor (`<a href>`)
+   * so it honors native browser behaviors like middle-click and cmd-click /
+   * "Open in new tab" from the context menu.
+   */
+  href?: string;
+  /**
+   * When true, the link opens in a new browser tab. Only applies when `href`
+   * is set; `rel="noopener noreferrer"` is added automatically.
+   */
+  openInNewTab?: boolean;
+  /**
+   * Handler function called when the button is clicked.
+   */
   handler: () => void | Promise<void>;
 }
 
@@ -102,6 +142,39 @@ export interface AttachmentLifecycleParams<
 }
 
 /**
+ * Parameters passed to the `getHeader` resolver.
+ */
+export interface GetHeaderParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
+  /** The attachment being rendered in the header. */
+  attachment: TAttachment;
+}
+
+/**
+ * Return value of the `getHeader` resolver.
+ */
+export interface HeaderData {
+  /** Optional icon to display in the attachment header next to the title. */
+  icon?: IconType;
+  /** Optional secondary line rendered under the attachment title. */
+  subtitle?: string;
+  /** Optional badges rendered in the attachment header next to the title. */
+  badges?: HeaderBadge[];
+}
+
+/**
+ * Badge definition for rendering in the attachment header next to the title.
+ * Maps directly onto `EuiBadge`'s props.
+ */
+export interface HeaderBadge {
+  /** Badge content. */
+  label: string;
+  /** Optional EUI badge color (e.g. 'hollow', 'success', 'warning', 'accent'). */
+  color?: string;
+  /** Optional icon to display alongside the label. */
+  iconType?: IconType;
+}
+
+/**
  * UI definition for rendering attachments of a specific type.
  */
 export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -110,9 +183,20 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getLabel: (attachment: TAttachment) => string;
   /**
-   * Returns the icon type to display for the attachment.
+   * Returns the icon type to display for the attachment pill (pre-send chip).
    */
   getIcon?: () => IconType;
+  /**
+   * Returns a URL (or data URL) to use as a thumbnail image for the attachment.
+   * When provided, renders an <img> instead of an EuiIcon in the pill icon slot.
+   */
+  getThumbnail?: (attachment: TAttachment) => string | undefined;
+  /**
+   * Returns header metadata (icon, subtitle, badges) for the attachment header
+   * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
+   * subtitle, no badges).
+   */
+  getHeader?: (params: GetHeaderParams<TAttachment>) => HeaderData;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.
@@ -122,8 +206,25 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for inline attachment display.
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the inline header
    */
-  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /** Render attachment content in the conversation details flyout. */
+  renderConversationDetailsContent?: (
+    props: ConversationDetailsRenderProps<TAttachment>
+  ) => ReactNode;
+  /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
@@ -144,13 +245,78 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
   /**
-   * Optional lifecycle hook called when an attachment is first rendered in the conversation.
-   * Called once per attachment (not per version). Use for setting up subscriptions or
-   * other side effects that should persist across version renders.
-   *
-   * @returns Optional cleanup function called when the attachment is removed from the conversation.
+   * Optional max-width (in px) for the inline attachment panel.
+   * When provided, the outer panel will not exceed this width.
    */
-  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
+  getMaxWidth?: (attachment: TAttachment) => number | undefined;
+}
+
+/**
+ * Result of a `list` call on the browser client.
+ */
+export interface ListAttachmentsResult {
+  results: VersionedAttachment[];
+  total_token_estimate: number;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.create}.
+ */
+export interface CreateAttachmentArgs {
+  conversationId: string;
+  id?: string;
+  type: string;
+  data?: unknown;
+  origin?: string;
+  description?: string;
+  hidden?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.get}.
+ */
+export interface GetAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.update}.
+ */
+export interface UpdateAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  data?: unknown;
+  description?: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.delete}.
+ */
+export interface DeleteAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  permanent?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.list}.
+ */
+export interface ListAttachmentsArgs {
+  conversationId: string;
+  includeDeleted?: boolean;
+}
+
+/**
+ * A client for the AgentBuilder attachment HTTP APIs.
+ * Obtain via {@link AttachmentServiceStartContract.getClient}.
+ */
+export interface AttachmentBrowserClient {
+  create(args: CreateAttachmentArgs): Promise<VersionedAttachment>;
+  get(args: GetAttachmentArgs): Promise<VersionedAttachment>;
+  update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
+  delete(args: DeleteAttachmentArgs): Promise<void>;
+  list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
 }
 
 /**
@@ -177,4 +343,9 @@ export interface AttachmentServiceStartContract {
   getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
+
+  /**
+   * Returns a client for interacting with attachment HTTP APIs.
+   */
+  getClient(): AttachmentBrowserClient;
 }

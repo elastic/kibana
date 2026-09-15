@@ -23,8 +23,8 @@ import {
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
-  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_CONTAINER_CPU_USAGE,
+  SEMCONV_CONTAINER_MEMORY_WORKING_SET,
 } from '../shared/constants';
 
 export { metricByFieldEcs, metricByField } from './container_metrics_configs';
@@ -52,12 +52,11 @@ const semconvDockerUnpackMetrics = (row: MetricsExplorerRow) => {
 };
 
 const semconvK8sUnpackMetrics = (row: MetricsExplorerRow) => {
-  // semconv k8s unpack metrics
-  const cpuUtilization = unpackMetricSemconvK8s(row, SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION);
-  const memoryUsage = unpackMetricSemconvK8s(row, SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION);
+  const cpuUsage = unpackMetricSemconvK8s(row, SEMCONV_CONTAINER_CPU_USAGE);
+  const memoryBytes = unpackMetricSemconvK8s(row, SEMCONV_CONTAINER_MEMORY_WORKING_SET);
   return {
-    averageCpuUsage: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
-    averageMemoryUsage: memoryUsage !== null ? scaleUpPercentage(memoryUsage) : null,
+    averageCpuUsage: cpuUsage !== null ? scaleUpPercentage(cpuUsage) : null,
+    averageMemoryUsage: memoryBytes !== null ? Math.floor(memoryBytes / 1_000_000) : null,
   };
 };
 

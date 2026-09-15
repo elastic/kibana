@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
-import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -92,17 +92,17 @@ export default function ({ getService }: FtrProviderContext) {
             tag: 'ml_swim_lane_case',
           });
 
-          const attachmentData: Omit<AnomalySwimlaneEmbeddableStateViewBy, 'id'> = {
-            swimlaneType: SWIMLANE_TYPE.VIEW_BY,
-            viewBy: 'airline',
-            jobIds: [JOB_CONFIG.job_id],
+          const attachmentData: AnomalySwimLaneEmbeddableState = {
+            swimlane_type: SWIMLANE_TYPE.VIEW_BY,
+            view_by: 'airline',
+            job_ids: [JOB_CONFIG.job_id],
             time_range: {
               from: '2016-02-07T00:00:00.000Z',
               to: '2016-02-11T23:59:54.000Z',
             },
           };
 
-          const expectedAttachment: AnomalySwimLaneEmbeddableState = {
+          const expectedAttachment: AnomalySwimLaneEmbeddableState & { id: string } = {
             ...attachmentData,
             id: stringHash(JSON.stringify(attachmentData)).toString(),
           };

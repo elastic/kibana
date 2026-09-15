@@ -23,6 +23,7 @@ import type {
   ResponseError,
 } from '@kbn/core-http-server';
 import type { MonitorConfigRepository } from '../services/monitor_config_repository';
+import type { MonitorIntegrationHealthApi } from '../services/monitor_integration_health_api';
 import type { SyntheticsEsClient } from '../lib';
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -41,6 +42,12 @@ export interface UMServerRoute<T> {
   method: SupportedMethod;
   writeAccess?: boolean;
   requiredPrivileges?: string[];
+  /**
+   * Privileges where at least ONE must be satisfied (in addition to the always-required
+   * `uptime-read`). Emitted as an `{ anyRequired }` set in the route's authz config, e.g.
+   * `['uptime-write', 'monitor-run-manually']` allows either a full-write user or a run-only user.
+   */
+  anyRequiredPrivileges?: string[];
   handler: T;
   validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (
@@ -103,6 +110,7 @@ export interface RouteContext<
   subject?: Subject<unknown>;
   spaceId: string;
   monitorConfigRepository: MonitorConfigRepository;
+  monitorIntegrationHealthApi: MonitorIntegrationHealthApi;
 }
 
 export type SyntheticsRouteHandler<

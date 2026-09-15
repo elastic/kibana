@@ -47,7 +47,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
     <EuiText size={'xs'}>
       {fieldFormats
         .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-        .convert(valueCount)}{' '}
+        .convertToText(valueCount)}{' '}
       {docsPercent}
     </EuiText>
   );
@@ -63,7 +63,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}
@@ -79,7 +79,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
         size="m"
       />
     ) : (
-      <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} />
+      <EuiIcon aria-hidden={true} type="document" size={'m'} className={'columnHeader__icon'} />
     )
   ) : null;
 

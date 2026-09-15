@@ -188,6 +188,31 @@ describe('getIndexStatsRoute route', () => {
     );
   });
 
+  test('returns an empty object when fetchMeteringStats throws a 404', async () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: `auditbeat-*`,
+      },
+      query: {
+        isILMAvailable: false,
+        startDate: `now-7d`,
+        endDate: `now`,
+      },
+    });
+
+    (fetchMeteringStats as jest.Mock).mockRejectedValue({ statusCode: 404 });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({});
+    expect(fetchAvailableIndices).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      `No metering stats indices found under pattern: auditbeat-*`
+    );
+  });
+
   test('returns an empty object when "availableIndices" indices are empty', async () => {
     const request = requestMock.create({
       method: 'get',

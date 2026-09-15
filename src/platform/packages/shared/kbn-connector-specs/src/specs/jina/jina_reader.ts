@@ -13,7 +13,7 @@
  * MVP implementation focusing on core reader features.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 
@@ -51,6 +51,14 @@ function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT)
   }
 }
 
+const maybeReturnJinaErrorResponse = (err: unknown) => {
+  const response = (err as { response?: { data?: { code?: unknown } } })?.response;
+  if (response?.data?.code) {
+    return response;
+  }
+  return Promise.reject(err);
+};
+
 export const JinaReaderConnector: ConnectorSpec = {
   metadata: {
     id: JINA_READER_CONNECTOR_ID,
@@ -81,46 +89,52 @@ export const JinaReaderConnector: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    overrideBrowseUrl: UISchemas.url()
-      .optional()
-      .default(JINA_READER_BROWSE_URL)
-      .describe('Override Jina Reader Browse URL')
-      .meta({
-        widget: 'text',
-        label: 'Browse URL',
-        placeholder: JINA_READER_BROWSE_URL,
-      }),
-    overrideSearchUrl: UISchemas.url()
-      .optional()
-      .default(JINA_READER_SEARCH_URL)
-      .describe('Override Jina Reader Search URL')
-      .meta({
-        widget: 'text',
-        label: 'Search URL',
-        placeholder: JINA_READER_SEARCH_URL,
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      overrideBrowseUrl: UISchemas.url()
+        .optional()
+        .default(JINA_READER_BROWSE_URL)
+        .describe('Override Jina Reader Browse URL')
+        .meta({
+          widget: 'text',
+          label: 'Browse URL',
+          placeholder: JINA_READER_BROWSE_URL,
+        }),
+      overrideSearchUrl: UISchemas.url()
+        .optional()
+        .default(JINA_READER_SEARCH_URL)
+        .describe('Override Jina Reader Search URL')
+        .meta({
+          widget: 'text',
+          label: 'Search URL',
+          placeholder: JINA_READER_SEARCH_URL,
+        }),
+    })
+  ),
 
   actions: {
     browse: {
       isTool: true,
+      scope: 'read',
+      responseSizeHeader: 'x-decompressed-content-length',
       description: 'Turn any URL to markdown for LLM consumption',
-      input: z.object({
-        url: z.string().min(3).describe('URL to browse'),
-        returnFormat: z
-          .enum([
-            RETURN_FORMAT.MARKDOWN,
-            RETURN_FORMAT.FULL_MARKDOWN,
-            RETURN_FORMAT.PLAIN_TEXT,
-            RETURN_FORMAT.SCREENSHOT,
-            RETURN_FORMAT.FULL_SCREENSHOT,
-            RETURN_FORMAT.HTML,
-          ])
-          .optional()
-          .describe('Desired return format'),
-        options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          url: z.string().min(3).describe('URL to browse'),
+          returnFormat: z
+            .enum([
+              RETURN_FORMAT.MARKDOWN,
+              RETURN_FORMAT.FULL_MARKDOWN,
+              RETURN_FORMAT.PLAIN_TEXT,
+              RETURN_FORMAT.SCREENSHOT,
+              RETURN_FORMAT.FULL_SCREENSHOT,
+              RETURN_FORMAT.HTML,
+            ])
+            .optional()
+            .describe('Desired return format'),
+          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           url: string;
@@ -139,12 +153,7 @@ export const JinaReaderConnector: ConnectorSpec = {
               headers: { Accept: 'application/json' },
             }
           )
-          .catch((err) => {
-            if (err.response.data?.code) {
-              return err.response;
-            }
-            return Promise.reject(err);
-          });
+          .catch(maybeReturnJinaErrorResponse);
         return response.data?.data
           ? { ok: true, ...response.data.data, external: undefined }
           : { ok: false, ...response.data };
@@ -152,15 +161,19 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     search: {
       isTool: true,
+      scope: 'read',
+      responseSizeHeader: 'x-decompressed-content-length',
       description: 'Web search to find relevant context for LLMs',
-      input: z.object({
-        query: z.string().min(1).describe('Search query'),
-        returnFormat: z
-          .enum([RETURN_FORMAT.MARKDOWN, RETURN_FORMAT.FULL_MARKDOWN, RETURN_FORMAT.PLAIN_TEXT])
-          .optional()
-          .describe('Desired return format'),
-        options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().min(1).describe('Search query'),
+          returnFormat: z
+            .enum([RETURN_FORMAT.MARKDOWN, RETURN_FORMAT.FULL_MARKDOWN, RETURN_FORMAT.PLAIN_TEXT])
+            .optional()
+            .describe('Desired return format'),
+          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;
@@ -181,12 +194,7 @@ export const JinaReaderConnector: ConnectorSpec = {
               headers: { Accept: 'application/json' },
             }
           )
-          .catch((err) => {
-            if (err.response.data?.code) {
-              return err.response;
-            }
-            return Promise.reject(err);
-          });
+          .catch(maybeReturnJinaErrorResponse);
         return response.data?.data
           ? { ok: true, results: response.data.data }
           : { ok: false, ...response.data };
@@ -194,12 +202,15 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     fileToMarkdown: {
       isTool: true,
+      scope: 'read',
       description: 'Convert a file to markdown for LLM consumption',
-      input: z.object({
-        file: z.string().describe('Base64-encoded file content'),
-        filename: z.string().optional().describe('Original filename'),
-        options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          file: z.string().describe('Base64-encoded file content'),
+          filename: z.string().optional().describe('Original filename'),
+          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           file: string;
@@ -220,12 +231,7 @@ export const JinaReaderConnector: ConnectorSpec = {
               headers: { Accept: 'application/json' },
             }
           )
-          .catch((err) => {
-            if (err.response.data?.code) {
-              return err.response;
-            }
-            return Promise.reject(err);
-          });
+          .catch(maybeReturnJinaErrorResponse);
         return response.data?.data
           ? { ok: true, ...response.data.data }
           : { ok: false, ...response.data };
@@ -233,13 +239,16 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     fileToRenderedImage: {
       isTool: true,
+      scope: 'read',
       description: 'Render a document file to image. Office and PDF files supported.',
-      input: z.object({
-        file: z.string().describe('Base64-encoded file content'),
-        filename: z.string().optional().describe('Original filename'),
-        pageNumber: z.number().optional().describe('Page number to render (starting from 1)'),
-        options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          file: z.string().describe('Base64-encoded file content'),
+          filename: z.string().optional().describe('Original filename'),
+          pageNumber: z.number().optional().describe('Page number to render (starting from 1)'),
+          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           file: string;
@@ -265,12 +274,7 @@ export const JinaReaderConnector: ConnectorSpec = {
               headers: { Accept: 'application/json' },
             }
           )
-          .catch((err) => {
-            if (err.response.data?.code) {
-              return err.response;
-            }
-            return Promise.reject(err);
-          });
+          .catch(maybeReturnJinaErrorResponse);
         return response.data?.data
           ? { ok: true, ...response.data.data }
           : { ok: false, ...response.data };
@@ -280,21 +284,12 @@ export const JinaReaderConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const r = await ctx.client.get(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
-        );
-        return {
-          ok: true,
-          message: `Successfully connected to Jina Reader API: \n${r.data}`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get(
+        (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
+      );
+      return {};
     },
     description: 'Verifies Jina Reader API connectivity',
+    enabled: true,
   },
 };

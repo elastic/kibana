@@ -33,13 +33,20 @@ export const CREATE_NEW_BUTTON = i18n.translate('xpack.maintenanceWindows.create
 });
 
 export const EMPTY_PROMPT_BUTTON = i18n.translate('xpack.maintenanceWindows.emptyPrompt.button', {
-  defaultMessage: 'Create a maintenance window',
+  defaultMessage: 'Create maintenance window',
 });
 
-export const EMPTY_PROMPT_DOCUMENTATION = i18n.translate(
-  'xpack.maintenanceWindows.emptyPrompt.documentation',
+export const EMPTY_PROMPT_LEARN_MORE = i18n.translate(
+  'xpack.maintenanceWindows.emptyPrompt.learnMore',
   {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'Want to learn more?',
+  }
+);
+
+export const EMPTY_PROMPT_READ_THE_DOCS = i18n.translate(
+  'xpack.maintenanceWindows.emptyPrompt.readTheDocs',
+  {
+    defaultMessage: 'Read the docs',
   }
 );
 
@@ -69,10 +76,10 @@ export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
   }
 );
 
-export const MAINTENANCE_WINDOWS_RETURN_LINK = i18n.translate(
-  'xpack.maintenanceWindows.returnLink',
+export const LOADING_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.maintenanceWindows.edit.loadingMaintenanceWindow',
   {
-    defaultMessage: 'Return',
+    defaultMessage: 'Loading…',
   }
 );
 
@@ -454,5 +461,19 @@ export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.confirm',
   {
     defaultMessage: 'Save without filters',
+  }
+);
+
+export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const UPCOMING_EVENTS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.upcomingEventsPopover.ariaLabel',
+  {
+    defaultMessage: 'Upcoming events',
   }
 );

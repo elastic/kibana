@@ -6,6 +6,15 @@ paths:
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/prompts/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"delete":{"query":"name: test","ids":[]}}'
       x-labels: [ess, serverless]
       operationId: PerformPromptsBulkAction
       summary: Apply a bulk action to prompts
@@ -33,16 +42,18 @@ paths:
                   description: List of prompts to be updated.
                   items:
                     $ref: '#/components/schemas/PromptUpdateProps'
-            example:
-              create:
-                - name: "New Security Prompt"
-                  promptType: "system"
-                  content: "Please verify the security settings."
-              update:
-                - id: "prompt123"
-                  content: "Updated content for security prompt."
-              delete:
-                ids: ["prompt1", "prompt2"]
+            examples:
+              PerformPromptsBulkActionRequest:
+                value:
+                  create:
+                    - name: "New Security Prompt"
+                      promptType: "system"
+                      content: "Please verify the security settings."
+                  update:
+                    - id: "prompt123"
+                      content: "Updated content for security prompt."
+                  delete:
+                    ids: ["prompt1", "prompt2"]
       responses:
         200:
           description: Indicates a successful call with the results of the bulk action.
@@ -83,7 +94,7 @@ paths:
                         total: 5
                       errors: []
         400:
-          description: Indicates a generic error due to a bad request.
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -101,6 +112,12 @@ paths:
                     type: string
                     description: A detailed error message.
                     example: "Invalid prompt ID or missing required fields."
+              examples:
+                PerformPromptsBulkActionResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid prompt ID or missing required fields."
 
 components:
   schemas:

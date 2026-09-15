@@ -12,16 +12,37 @@ import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
+import type { DiscoverDataStateContainer } from '../state_management/discover_data_state_container';
+import type { CascadedDocumentsFetcher } from '../data_fetching/cascaded_documents_fetcher';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
   internalStateActions,
   useInternalStateSelector,
   useCurrentTabAction,
-  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
-  useCurrentTabRuntimeState,
+  useCurrentTabSelector,
+  useRuntimeStateManager,
+  selectTabRuntimeState,
 } from '../state_management/redux';
-import { useActiveContexts } from '../../../context_awareness/hooks';
+import { createContextsAdapter } from '../../../context_awareness/hooks';
+
+/**
+ * Builds an AggregateRequestAdapter from the data state container's inspector adapters
+ * and the cascaded documents fetcher.
+ */
+const getInspectorRequestAdapters = (
+  dataStateContainer: DiscoverDataStateContainer,
+  cascadedDocumentsFetcher: CascadedDocumentsFetcher
+): AggregateRequestAdapter => {
+  const { inspectorAdapters } = dataStateContainer;
+  const requestAdapters = [
+    inspectorAdapters.requests,
+    inspectorAdapters.lensRequests,
+    cascadedDocumentsFetcher.getRequestAdapter(),
+  ].filter((adapter) => !!adapter);
+
+  return new AggregateRequestAdapter(requestAdapters);
+};
 
 export function useInspector({ inspector }: { inspector: InspectorPublicPluginStart }) {
   const persistedDiscoverSession = useInternalStateSelector(
@@ -29,36 +50,34 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
   );
 
   const dispatch = useInternalStateDispatch();
+  const currentTabId = useCurrentTabSelector((state) => state.id);
+  const runtimeStateManager = useRuntimeStateManager();
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
-    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
-  );
-
-  const dataStateContainer = useCurrentTabDataStateContainer();
-
-  const getContextsAdapter = useActiveContexts({
-    dataDocuments$: dataStateContainer.data$.documents$,
-  });
-
   const onOpenInspector = useCallback(
     (onClose?: () => void) => {
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
+
+      if (!dataStateContainer || !tabRuntimeState) {
+        return;
+      }
+
+      const cascadedDocumentsFetcher = tabRuntimeState.cascadedDocumentsFetcher$.getValue();
+      const scopedProfilesManager = tabRuntimeState.scopedProfilesManager$.getValue();
+      const getContextsAdapter = createContextsAdapter({
+        scopedProfilesManager,
+        dataDocuments$: dataStateContainer.data$.documents$,
+      });
+
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-      const inspectorAdapters = dataStateContainer.inspectorAdapters;
-
-      const requestAdapters = [
-        inspectorAdapters.requests,
-        inspectorAdapters.lensRequests,
-        cascadedDocumentsFetcher.getRequestAdapter(),
-      ].filter((adapter) => !!adapter);
-
       const session = inspector.open(
         {
-          requests: new AggregateRequestAdapter(requestAdapters),
+          requests: getInspectorRequestAdapters(dataStateContainer, cascadedDocumentsFetcher),
           contexts: getContextsAdapter({
             onOpenDocDetails: (record) => {
               session?.close();
@@ -78,13 +97,12 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
       }
     },
     [
+      currentTabId,
       dispatch,
-      setExpandedDoc,
-      cascadedDocumentsFetcher,
-      dataStateContainer.inspectorAdapters,
       inspector,
-      getContextsAdapter,
       persistedDiscoverSession?.title,
+      runtimeStateManager,
+      setExpandedDoc,
     ]
   );
 

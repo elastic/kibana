@@ -46,7 +46,7 @@ export const InfoComponent = () => {
       data-test-subj="experimentalVisInfo"
       size="s"
       title={title}
-      iconType="beaker"
+      iconType="flask"
     >
       {text}
     </EuiCallOut>

@@ -55,7 +55,7 @@ export const EngineStatus = () => {
   useErrorToast(errorMessage, error);
 
   if (error) {
-    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="alert" />;
+    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="warning" />;
   }
 
   if (!data || isStatusAPILoading) return <EuiLoadingSpinner size="xl" />;
@@ -96,7 +96,7 @@ export const EngineStatus = () => {
             <Fragment key={type}>
               <EngineStatusHeader
                 entityType={type}
-                actionButton={<EngineStatusHeaderAction engine={engine} type={type} />}
+                actionButton={<EngineStatusHeaderAction engine={engine} />}
               />
               <EntityStoreErrorCallout engine={engine} size="s" />
               <EuiSpacer size="s" />

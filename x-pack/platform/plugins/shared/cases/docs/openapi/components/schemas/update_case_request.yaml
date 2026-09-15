@@ -46,6 +46,8 @@ properties:
               $ref: 'case_customfields.yaml'
         description:
           $ref: 'case_description.yaml'
+        extended_fields:
+          $ref: 'case_extended_fields.yaml'
         id:
           description: The identifier for the case.
           type: string
@@ -60,6 +62,8 @@ properties:
           $ref: 'case_tags.yaml'
         title:
           $ref: 'case_title.yaml'
+        closeReason:
+          $ref: 'case_close_sync_reason.yaml'
         version:
           description: >
             The current version of the case.

@@ -30,7 +30,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search only the current project',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
@@ -43,7 +42,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search all projects',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];
@@ -52,8 +50,8 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
 const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
-      label: UnmappedFieldsStrategy.FAIL,
-      text: UnmappedFieldsStrategy.FAIL,
+      label: UnmappedFieldsStrategy.DEFAULT,
+      text: UnmappedFieldsStrategy.DEFAULT,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
@@ -69,15 +67,26 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
-    // Hiding LOAD option as it's partially supported at the moment.
+    {
+      label: UnmappedFieldsStrategy.LOAD,
+      text: UnmappedFieldsStrategy.LOAD,
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+        defaultMessage:
+          'Attempts to load the fields from the source that are explicitly mentioned in the query',
+      }),
+      category: SuggestionCategory.CONSTANT_VALUE,
+    },
+    // Currently LOAD_ALL is only supported in snapshots.
     // {
-    //   label: UnmappedFieldsStrategy.LOAD,
-    //   text: UnmappedFieldsStrategy.LOAD,
+    //   label: UnmappedFieldsStrategy.LOAD_ALL,
+    //   text: UnmappedFieldsStrategy.LOAD_ALL,
     //   kind: 'Value',
-    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
-    //     defaultMessage: 'Attempts to load the fields from the source',
+    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadAllDoc', {
+    //     defaultMessage:
+    //       'Attempts to load all the fields from the source, even if they are not mentioned in the query',
     //   }),
-    //  category: SuggestionCategory.CONSTANT_VALUE,
+    //   category: SuggestionCategory.CONSTANT_VALUE,
     // },
   ];
 };

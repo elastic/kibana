@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { ScanUsageResults } from './scan_usage_results';
@@ -13,7 +13,8 @@ import { useKibana } from '../../../../../../hooks/use_kibana';
 
 jest.mock('../../../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
-const mockNavigateToApp = jest.fn();
+const mockGetUrl = jest.fn();
+const mockLocatorGet = jest.fn();
 const mockOnCheckboxChange = jest.fn();
 
 describe('ScanUsageResults', () => {
@@ -28,13 +29,23 @@ describe('ScanUsageResults', () => {
     },
   ];
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetUrl.mockResolvedValue('/index_management/indices');
+    mockLocatorGet.mockReturnValue({ getUrl: mockGetUrl });
+
     mockUseKibana.mockReturnValue({
       services: {
-        application: {
-          navigateToApp: mockNavigateToApp,
+        share: {
+          url: {
+            locators: {
+              get: mockLocatorGet,
+            },
+          },
         },
       },
     });
+
+    jest.spyOn(window, 'open').mockImplementation(() => null);
 
     render(
       <ScanUsageResults
@@ -43,6 +54,10 @@ describe('ScanUsageResults', () => {
         onIgnoreWarningCheckboxChange={mockOnCheckboxChange}
       />
     );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('renders', () => {
@@ -56,11 +71,14 @@ describe('ScanUsageResults', () => {
     expect(checkbox).toHaveProperty('checked', false);
   });
 
-  it('opens index management in a new tab', () => {
+  it('opens index management in a new tab', async () => {
     fireEvent.click(screen.getByTestId('inferenceManagementOpenIndexManagement'));
-    expect(mockNavigateToApp).toHaveBeenCalledWith('enterpriseSearchContent', {
-      openInNewTab: true,
-      path: 'search_indices',
+
+    expect(mockLocatorGet).toHaveBeenCalledWith('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+    expect(mockGetUrl).toHaveBeenCalledWith({ page: 'index_list' });
+
+    await waitFor(() => {
+      expect(window.open).toHaveBeenCalledWith('/index_management/indices', '_blank');
     });
   });
 

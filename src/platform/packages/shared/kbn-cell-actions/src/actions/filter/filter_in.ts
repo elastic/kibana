@@ -23,7 +23,7 @@ import {
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 import type { DefaultActionsSupportedValue } from '../types';
 
-const ICON = 'plusInCircle';
+const ICON = 'plusCircle';
 const FILTER_IN = i18n.translate('cellActions.actions.filterIn', {
   defaultMessage: 'Filter for',
 });

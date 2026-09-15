@@ -36,53 +36,53 @@ describe('TimeIntervalSelector', () => {
       options.map((option) => ({
         label: option.getAttribute('title'),
         value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
+        selected: option.getAttribute('aria-selected'),
       }))
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "true",
           "label": "Auto",
+          "selected": "true",
           "value": "auto",
         },
         Object {
-          "checked": "false",
           "label": "Millisecond",
+          "selected": "false",
           "value": "ms",
         },
         Object {
-          "checked": "false",
           "label": "Second",
+          "selected": "false",
           "value": "s",
         },
         Object {
-          "checked": "false",
           "label": "Minute",
+          "selected": "false",
           "value": "m",
         },
         Object {
-          "checked": "false",
           "label": "Hour",
+          "selected": "false",
           "value": "h",
         },
         Object {
-          "checked": "false",
           "label": "Day",
+          "selected": "false",
           "value": "d",
         },
         Object {
-          "checked": "false",
           "label": "Week",
+          "selected": "false",
           "value": "w",
         },
         Object {
-          "checked": "false",
           "label": "Month",
+          "selected": "false",
           "value": "M",
         },
         Object {
-          "checked": "false",
           "label": "Year",
+          "selected": "false",
           "value": "y",
         },
       ]
@@ -113,53 +113,53 @@ describe('TimeIntervalSelector', () => {
       options.map((option) => ({
         label: option.getAttribute('title'),
         value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
+        selected: option.getAttribute('aria-selected'),
       }))
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "false",
           "label": "Auto",
+          "selected": "false",
           "value": "auto",
         },
         Object {
-          "checked": "false",
           "label": "Millisecond",
+          "selected": "false",
           "value": "ms",
         },
         Object {
-          "checked": "false",
           "label": "Second",
+          "selected": "false",
           "value": "s",
         },
         Object {
-          "checked": "false",
           "label": "Minute",
+          "selected": "false",
           "value": "m",
         },
         Object {
-          "checked": "false",
           "label": "Hour",
+          "selected": "false",
           "value": "h",
         },
         Object {
-          "checked": "false",
           "label": "Day",
+          "selected": "false",
           "value": "d",
         },
         Object {
-          "checked": "false",
           "label": "Week",
+          "selected": "false",
           "value": "w",
         },
         Object {
-          "checked": "false",
           "label": "Month",
+          "selected": "false",
           "value": "M",
         },
         Object {
-          "checked": "true",
           "label": "Year",
+          "selected": "true",
           "value": "y",
         },
       ]

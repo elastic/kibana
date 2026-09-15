@@ -23,8 +23,7 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-overlays-browser'
-  - '@kbn/core-chrome-layout-components'
-  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-chrome-layout'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/core-chrome-browser-hooks'
 tags:
@@ -32,33 +31,13 @@ tags:
   - package
   - prod
   - group-platform
-  - private
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

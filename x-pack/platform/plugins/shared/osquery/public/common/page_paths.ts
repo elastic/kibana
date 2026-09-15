@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { getHistoryFilters } from '../actions/history_filter_storage';
+
 export type StaticPage =
   | 'base'
   | 'overview'
-  | 'live_queries'
-  | 'live_query_new'
   | 'history'
   | 'new_query'
   | 'packs'
@@ -18,10 +18,8 @@ export type StaticPage =
   | 'saved_query_new';
 
 export type DynamicPage =
-  | 'live_query_details'
   | 'history_details'
   | 'history_scheduled_details'
-  | 'pack_details'
   | 'pack_edit'
   | 'saved_query_edit';
 
@@ -35,16 +33,12 @@ export interface DynamicPagePathValues {
 // `pagePathGetters()`, below, needs any modifications
 export const PAGE_ROUTING_PATHS = {
   overview: '/',
-  live_queries: '/live_queries',
-  live_query_new: '/live_queries/new',
-  live_query_details: '/live_queries/:liveQueryId',
   history: '/history',
   history_details: '/history/:liveQueryId',
   history_scheduled_details: '/history/scheduled/:scheduleId/:executionCount',
   new_query: '/new',
   packs: '/packs',
   pack_add: '/packs/add',
-  pack_details: '/packs/:packId',
   pack_edit: '/packs/:packId/edit',
   saved_queries: '/saved_queries',
   saved_query_new: '/saved_queries/new',
@@ -58,10 +52,8 @@ export const pagePathGetters: {
 } = {
   base: () => '/',
   overview: () => '/',
-  live_queries: () => '/live_queries',
-  live_query_new: () => '/live_queries/new',
-  live_query_details: ({ liveQueryId }) => `/live_queries/${liveQueryId}`,
-  history: () => '/history',
+  // Note: unlike other getters, history() reads sessionStorage to restore persisted filters.
+  history: () => `/history${getHistoryFilters()}`,
   history_details: ({ liveQueryId }) => `/history/${liveQueryId}`,
   history_scheduled_details: ({ scheduleId, executionCount }) =>
     `/history/scheduled/${scheduleId}/${executionCount}`,
@@ -71,6 +63,5 @@ export const pagePathGetters: {
   saved_query_edit: ({ savedQueryId }) => `/saved_queries/${savedQueryId}`,
   packs: () => '/packs',
   pack_add: () => '/packs/add',
-  pack_details: ({ packId }) => `/packs/${packId}`,
   pack_edit: ({ packId }) => `/packs/${packId}/edit`,
 };

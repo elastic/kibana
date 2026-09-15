@@ -6,16 +6,18 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiHealth,
+  EuiIcon,
   EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
   type EuiBasicTableColumn,
   type IconColor,
-  EuiHealth,
-  EuiScreenReaderOnly,
-  EuiButtonIcon,
-  EuiIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -63,7 +65,7 @@ export const useColumns = (
             defaultMessage="Resource"
           />
         ),
-        width: '20%',
+        width: '12em',
         render: (resource: EngineComponentStatus['resource']) => RESOURCE_TO_TEXT[resource],
       },
       {
@@ -101,13 +103,25 @@ export const useColumns = (
             defaultMessage="Installed"
           />
         ),
-        width: '10%',
+        width: '6em',
         align: 'center',
         render: (value: boolean) =>
           value ? (
-            <EuiIcon data-test-subj="installation-status" type="check" color="success" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="check"
+              color="success"
+              size="l"
+              aria-hidden={true}
+            />
           ) : (
-            <EuiIcon data-test-subj="installation-status" type="cross" color="danger" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="cross"
+              color="danger"
+              size="l"
+              aria-hidden={true}
+            />
           ),
       },
       {
@@ -117,7 +131,7 @@ export const useColumns = (
             defaultMessage="Health"
           />
         ),
-        width: '10%',
+        width: '6em',
         align: 'center',
         render: ({ installed, resource, health }: EngineComponentStatus) => {
           if (!installed) {
@@ -145,12 +159,24 @@ export const useColumns = (
         render: (component: EngineComponentStatus) => {
           const isItemExpanded = expandedItems.includes(component);
 
+          const collapseLabel = i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.collapse',
+            { defaultMessage: 'Collapse' }
+          );
+          const expandLabel = i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.expand',
+            { defaultMessage: 'Expand' }
+          );
+          const label = isItemExpanded ? collapseLabel : expandLabel;
+
           return component.errors && component.errors.length > 0 ? (
-            <EuiButtonIcon
-              onClick={() => onToggleExpandedItem(component)}
-              aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
-              iconType={isItemExpanded ? 'arrowDown' : 'arrowRight'}
-            />
+            <EuiToolTip content={label} disableScreenReaderOutput>
+              <EuiButtonIcon
+                onClick={() => onToggleExpandedItem(component)}
+                aria-label={label}
+                iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              />
+            </EuiToolTip>
           ) : null;
         },
       },

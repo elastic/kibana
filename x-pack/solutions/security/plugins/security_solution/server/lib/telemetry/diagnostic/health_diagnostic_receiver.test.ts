@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
-import { QueryType, PermissionError } from './health_diagnostic_service.types';
+import { lastValueFrom, toArray } from 'rxjs';
+import { interpolatePath, CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
+import { QueryType, PermissionError, NotAllowedError } from './health_diagnostic_service.types';
+import type { ApiExecutableQuery, ApiQuery } from './health_diagnostic_service.types';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
+import { telemetryConfiguration } from '../configuration';
 import {
   createMockLogger,
   createMockEsClient,
   createMockCircuitBreaker,
-  createMockQuery,
+  createMockQueryV1,
+  createMockQueryV2,
   createMockSearchResponse,
   createMockEqlResponse,
+  createMockApiQueryV3,
   setupPointInTime,
   executeObservableTest,
+  type IndexQuery,
 } from './__mocks__';
 
 describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryExecutor', () => {
@@ -24,10 +30,29 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   let mockEsClient: ReturnType<typeof createMockEsClient>;
   let mockLogger: ReturnType<typeof createMockLogger>;
 
+  const mkExecV1 = (type: QueryType, overrides: Partial<IndexQuery> = {}) => ({
+    kind: 'executable' as const,
+    query: createMockQueryV1(type, overrides),
+  });
+
+  const mkExecV2 = (
+    type: QueryType,
+    overrides: Partial<IndexQuery> = {},
+    indices = ['logs-endpoint.events.process-default']
+  ) => ({
+    kind: 'executable' as const,
+    query: createMockQueryV2(type, overrides),
+    resolution: {
+      name: 'endpoint',
+      version: '8.14.2',
+      indices,
+    },
+  });
+
   beforeEach(() => {
     mockEsClient = createMockEsClient();
     mockLogger = createMockLogger();
-    queryExecutor = new CircuitBreakingQueryExecutorImpl(mockEsClient as any, mockLogger); // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryExecutor = new CircuitBreakingQueryExecutorImpl(mockEsClient as any, false, mockLogger); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
   describe('DSL queries', () => {
@@ -38,7 +63,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should run DSL query successfully', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreakers = [createMockCircuitBreaker(true)];
 
       mockEsClient.search
@@ -46,7 +71,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         .mockResolvedValueOnce(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers }),
+        queryExecutor.search({ query: execQuery, circuitBreakers }),
         (results, completed) => {
           expect(results).toHaveLength(1);
           expect(results[0]).toEqual(mockDocument);
@@ -66,14 +91,14 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle DSL query with aggregations', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
       const aggregations = { bucket_count: { value: 42 } };
 
       mockEsClient.search.mockResolvedValueOnce(createMockSearchResponse([], aggregations));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(1);
           expect(results[0]).toEqual(aggregations);
@@ -84,7 +109,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle multiple pages of DSL results', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
       const doc1 = { ...mockDocument, id: 1 };
       const doc2 = { ...mockDocument, id: 2 };
@@ -95,7 +120,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         .mockResolvedValueOnce(createMockSearchResponse([], undefined, 'test-pit-id-3'));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(2);
           expect(results[0]).toEqual(doc1);
@@ -123,7 +148,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle queries with tiers filtering', (done) => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({
@@ -137,7 +162,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
             index: 'test-index',
@@ -149,6 +174,23 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         done
       );
     });
+
+    it('streamDSL uses resolved indices from v2 ExecutableQuery', async () => {
+      const execQuery = mkExecV2(QueryType.DSL, {}, ['logs-endpoint.events.process-default']);
+      setupPointInTime(mockEsClient, 'pit-id');
+      mockEsClient.search.mockResolvedValueOnce(createMockSearchResponse([], undefined, 'pit-id'));
+
+      await new Promise<void>((resolve) => {
+        queryExecutor.streamDSL(execQuery, new AbortController().signal).subscribe({
+          complete: resolve,
+          error: resolve,
+        });
+      });
+
+      expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({ index: ['logs-endpoint.events.process-default'] })
+      );
+    });
   });
 
   describe('EQL queries', () => {
@@ -158,12 +200,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     ];
 
     beforeEach(() => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
     });
 
     test('should run EQL query with events successfully', (done) => {
-      const query = createMockQuery(QueryType.EQL, {
+      const execQuery = mkExecV1(QueryType.EQL, {
         query: 'process where process.name == "cmd.exe"',
       });
       const circuitBreaker = createMockCircuitBreaker(true);
@@ -172,7 +213,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(eventSources));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(2);
           expect(results[0]).toEqual(eventSources[0]);
@@ -192,7 +233,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should run EQL query with sequences successfully', (done) => {
-      const query = createMockQuery(QueryType.EQL, {
+      const execQuery = mkExecV1(QueryType.EQL, {
         query: 'sequence [process where true] [network where true]',
       });
       const circuitBreaker = createMockCircuitBreaker(true);
@@ -209,7 +250,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(undefined, mockSequences));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(1);
           expect(results[0]).toEqual(mockSequences[0].events.map((e) => e._source));
@@ -220,13 +261,13 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle EQL query with no results', (done) => {
-      const query = createMockQuery(QueryType.EQL);
+      const execQuery = mkExecV1(QueryType.EQL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
       mockEsClient.eql.search.mockResolvedValue({ hits: {} });
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(0);
           done();
@@ -238,12 +279,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
 
   describe('ES|QL queries', () => {
     beforeEach(() => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
     });
 
     test('should run ES|QL query successfully', (done) => {
-      const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
+      const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       const mockRecords = [
@@ -255,7 +295,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         (results) => {
           expect(results).toHaveLength(2);
           expect(results[0]).toEqual(mockRecords[0]);
@@ -270,33 +310,73 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       );
     });
 
-    test('should handle ES|QL query with FROM clause already present', (done) => {
-      const query = createMockQuery(QueryType.ESQL, {
+    test('v2 ESQL query with FROM clause errors without calling esql', (done) => {
+      const execQuery = mkExecV2(QueryType.ESQL, {
         query: 'FROM logs-* | stats count() by user.name',
       });
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      const mockRecords = [{ 'user.name': 'test', 'count()': 1 }];
-      const mockToRecords = jest.fn().mockResolvedValue({ records: mockRecords });
-      mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
-
-      executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
-        () => {
-          expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-            { query: 'FROM logs-* | stats count() by user.name' },
-            { signal: expect.any(AbortSignal) }
-          );
-          done();
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
         },
-        done
-      );
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('ESQL query with lowercase FROM clause is blocked', (done) => {
+      const execQuery = mkExecV1(QueryType.ESQL, {
+        query: 'from logs-* | stats count() by user.name',
+      });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('ESQL query with uppercase FROM clause is blocked', (done) => {
+      const execQuery = mkExecV1(QueryType.ESQL, {
+        query: 'FROM logs-* | stats count() by user.name',
+      });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
     });
   });
 
   describe('Circuit breaker functionality', () => {
     test('should trigger circuit breaker and abort query', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(false, 10);
 
       setupPointInTime(mockEsClient);
@@ -320,7 +400,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
           )
       );
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           try {
@@ -339,7 +419,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
 
   describe('Error handling', () => {
     test('should handle Elasticsearch search errors', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
       setupPointInTime(mockEsClient);
@@ -348,7 +428,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
       mockEsClient.search.mockRejectedValue(new Error('Elasticsearch error'));
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           expect(error.message).toBe('Elasticsearch error');
@@ -359,16 +439,16 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle unsupported query type', () => {
-      const query = createMockQuery('INVALID' as QueryType);
+      const execQuery = mkExecV1('INVALID' as QueryType);
       const circuitBreaker = createMockCircuitBreaker(true);
 
       expect(() => {
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] });
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] });
       }).toThrow('Unhandled QueryType: INVALID');
     });
 
     test('should handle ILM explain lifecycle errors gracefully', (done) => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({ indices: undefined });
@@ -376,7 +456,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
             index: ['test-index'],
@@ -389,7 +469,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle ILM API errors and assume serverless', (done) => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       const ilmError = new Error(
@@ -400,7 +480,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
             index: 'test-index',
@@ -418,7 +498,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle network errors during ILM checks', (done) => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       const networkError = new Error('ECONNREFUSED');
@@ -427,7 +507,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
             index: ['test-index'],
@@ -440,7 +520,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle malformed ILM responses', (done) => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
       const circuitBreaker = createMockCircuitBreaker(true);
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
@@ -448,7 +528,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
             index: ['test-index'],
@@ -462,22 +542,18 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   });
 
   describe('Permission checking', () => {
-    test('should proceed when index exists and has read privileges', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+    test('should proceed when has read privileges', (done) => {
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
       setupPointInTime(mockEsClient);
       mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
       executeObservableTest(
-        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
-          expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-            index: 'test-index',
-            allow_no_indices: false,
-          });
           expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
-            index: [{ names: 'test-index', privileges: ['read'] }],
+            index: [{ names: ['test-index'], privileges: ['read'] }],
           });
           expect(mockEsClient.openPointInTime).toHaveBeenCalled();
           done();
@@ -486,51 +562,13 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       );
     });
 
-    test('should throw PermissionError when indices.exists returns false', (done) => {
-      const query = createMockQuery(QueryType.DSL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
-    test('should throw PermissionError when indices.exists throws', (done) => {
-      const query = createMockQuery(QueryType.DSL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockRejectedValue(new Error('index_not_found_exception'));
-
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Error accessing index');
-          expect(error.message).toContain('index_not_found_exception');
-          expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError when missing read privileges', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           expect(error).toBeInstanceOf(PermissionError);
@@ -543,13 +581,12 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should throw PermissionError when security.hasPrivileges throws', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('security_exception'));
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           expect(error).toBeInstanceOf(PermissionError);
@@ -563,12 +600,12 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should not call closePointInTime when permission check fails', (done) => {
-      const query = createMockQuery(QueryType.DSL);
+      const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockRejectedValue(new Error('no access'));
+      mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('no access'));
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: () => {
           setTimeout(() => {
@@ -580,32 +617,13 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('should throw PermissionError for EQL when index does not exist', (done) => {
-      const query = createMockQuery(QueryType.EQL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.eql.search).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError for EQL when missing read privileges', (done) => {
-      const query = createMockQuery(QueryType.EQL);
+      const execQuery = mkExecV1(QueryType.EQL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           expect(error).toBeInstanceOf(PermissionError);
@@ -617,32 +635,13 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('should throw PermissionError for ESQL when index does not exist', (done) => {
-      const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError for ESQL when missing read privileges', (done) => {
-      const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
+      const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
         error: (error) => {
           expect(error).toBeInstanceOf(PermissionError);
@@ -657,14 +656,38 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
 
   describe('indicesFor method', () => {
     test('should return original index when no tiers are specified', async () => {
-      const query = createMockQuery(QueryType.DSL);
-      const result = await queryExecutor.indicesFor(query);
+      const execQuery = mkExecV1(QueryType.DSL);
+      const result = await queryExecutor.indicesFor(execQuery);
+      expect(result).toEqual(['test-index']);
+      expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
+    });
+
+    test('should return original index on serverless when no tiers are specified', async () => {
+      const serverlessExecutor = new CircuitBreakingQueryExecutorImpl(
+        mockEsClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        true,
+        mockLogger
+      );
+      const query = mkExecV1(QueryType.DSL);
+      const result = await serverlessExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+      expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
+    });
+
+    test('should return original index on serverless even when tiers are specified', async () => {
+      const serverlessExecutor = new CircuitBreakingQueryExecutorImpl(
+        mockEsClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        true,
+        mockLogger
+      );
+      const query = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const result = await serverlessExecutor.indicesFor(query);
       expect(result).toEqual(['test-index']);
       expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
     });
 
     test('should filter indices by tiers when ILM is available', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({
         indices: {
@@ -675,7 +698,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         },
       });
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index-000001', 'test-index-000002', 'test-index-000004']);
       expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
         index: 'test-index',
@@ -685,25 +708,25 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle serverless environment (undefined indices)', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({ indices: undefined });
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index']);
     });
 
     test('should handle empty ILM response', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index']);
     });
 
     test('should handle indices without phase information', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({
         indices: {
@@ -713,12 +736,12 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         },
       });
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index-000001']);
     });
 
     test('should filter out indices not in specified tiers', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({
         indices: {
@@ -728,34 +751,34 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         },
       });
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index-000001']);
     });
 
     test('should handle ILM API errors by falling back to original index', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       const serverlessError = new Error(
         'no handler found for uri [/.alerts-security.alerts*/_ilm/explain?only_managed=false&filter_path=indices.*.phase] and method [GET]'
       );
       mockEsClient.ilm.explainLifecycle.mockRejectedValue(serverlessError);
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index']);
     });
 
     test('should handle authorization errors gracefully', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
 
       const authError = new Error('security_exception');
       mockEsClient.ilm.explainLifecycle.mockRejectedValue(authError);
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual(['test-index']);
     });
 
     test('should return empty array when no indices match tiers', async () => {
-      const query = createMockQuery(QueryType.DSL, { tiers: ['frozen'] });
+      const execQuery = mkExecV1(QueryType.DSL, { tiers: ['frozen'] });
 
       mockEsClient.ilm.explainLifecycle.mockResolvedValue({
         indices: {
@@ -765,8 +788,240 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         },
       });
 
-      const result = await queryExecutor.indicesFor(query);
+      const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('CircuitBreakingQueryExecutorImpl.searchApi', () => {
+    const buildExecutableApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
+      kind: 'executable_api',
+      query: createMockApiQueryV3(overrides),
+    });
+
+    beforeEach(() => {
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_transform/*/_stats' }],
+      };
+    });
+
+    it('emits items extracted from responsePath', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        transforms: [{ id: 'foo' }, { id: 'bar' }],
+      });
+      const query = buildExecutableApiQuery({
+        api: '_transform/*/_stats',
+        pathParams: {},
+        responsePath: 'transforms',
+      });
+      const results: unknown[] = [];
+      await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      ).then((r) => results.push(...r));
+      expect(results).toEqual([{ id: 'foo' }, { id: 'bar' }]);
+    });
+
+    it('throws NotAllowedError when path is not in allowlist', async () => {
+      const query = buildExecutableApiQuery({ api: '_dangerous/path' });
+      await expect(
+        lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }))
+      ).rejects.toThrow(NotAllowedError);
+    });
+
+    it('interpolates pathParams into the api template when execute query', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
+      const query = buildExecutableApiQuery({
+        api: '_transform/{transform_id}/_stats',
+        pathParams: { transform_id: 'my-transform' },
+        responsePath: 'transforms',
+      });
+      await lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray()));
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '_transform/my-transform/_stats' }),
+        expect.anything()
+      );
+    });
+
+    it('interpolates pathParams into the api template', async () => {
+      const interpolated = interpolatePath('a/{key}/b', { key: 'value' });
+      expect(interpolated).toEqual('a/value/b');
+    });
+
+    it('fail interpolating pathParams into the api template if invalid key', () => {
+      expect(() => interpolatePath('a/{key}/b', { invalid_key: 'value' })).toThrow(
+        "Missing path parameter: 'key'"
+      );
+    });
+
+    it.each([
+      ['..', '_transform/{id}/_stats', { id: '..' }],
+      ['.', '_transform/{id}/_stats', { id: '.' }],
+      ['value with /', '_transform/{id}/_stats', { id: 'a/b' }],
+      ['value with backslash', '_transform/{id}/_stats', { id: 'a\\b' }],
+      ['traversal prefix', '_transform/{id}/_stats', { id: '../other' }],
+      ['value with ? (query-string injection)', '_transform/{id}/_stats', { id: 'foo?x=1' }],
+      ['value with # (fragment injection)', '_transform/{id}/_stats', { id: 'foo#bar' }],
+    ])('rejects path traversal attempt: %s', (_, template, pathParams) => {
+      expect(() => interpolatePath(template, pathParams)).toThrow('Invalid path parameter value');
+    });
+
+    it('passes an AbortSignal to transport.request', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
+      const query = buildExecutableApiQuery({
+        api: '_transform/*/_stats',
+        pathParams: {},
+        responsePath: 'transforms',
+      });
+      await lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray()));
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it('wraps a plain object in an array', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        status: { health: 'green' },
+      });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: 'status',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ health: 'green' }]);
+    });
+
+    it('completes with zero items when responsePath resolves to a scalar', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ count: 42 });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: 'count',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
+    });
+
+    it('completes with zero items when responsePath resolves to null', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ jobs: null });
+      const query = buildExecutableApiQuery({
+        api: '_ml/anomaly_detectors/_stats',
+        pathParams: {},
+        responsePath: 'jobs',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_ml/anomaly_detectors/_stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
+    });
+
+    it('completes with zero items when responsePath key is absent from the response', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ count: 0 });
+      const query = buildExecutableApiQuery({
+        api: '_ml/anomaly_detectors/_stats',
+        pathParams: {},
+        responsePath: 'jobs',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_ml/anomaly_detectors/_stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([]);
+    });
+
+    it('emits root-array items when responsePath is absent', async () => {
+      mockEsClient.transport.request.mockResolvedValue([{ id: 'task1' }, { id: 'task2' }]);
+      const query = buildExecutableApiQuery({
+        api: '_cat/tasks',
+        pathParams: {},
+        responsePath: undefined,
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cat/tasks' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ id: 'task1' }, { id: 'task2' }]);
+    });
+
+    it('emits root object as single document when responsePath is absent and root is object', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ status: 'green', indices: 5 });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: undefined,
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ status: 'green', indices: 5 }]);
+    });
+
+    it('emits keyed-object entries with the key injected as responsePathKey field', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        nodes: {
+          node1: { roles: ['master'] },
+          node2: { roles: ['data'] },
+        },
+      });
+      const query = buildExecutableApiQuery({
+        api: '_nodes/stats',
+        pathParams: {},
+        responsePath: 'nodes',
+        responsePathKey: 'node_id',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_nodes/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([
+        { roles: ['master'], node_id: 'node1' },
+        { roles: ['data'], node_id: 'node2' },
+      ]);
     });
   });
 });

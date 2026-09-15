@@ -280,13 +280,13 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           label={i18n.CONNECTOR_TITLE}
           helpText={
             <EuiLink
-              href={`${http.basePath.get()}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`}
+              href={`${http.basePath.get()}/app/management/modelManagement/model_settings`}
               target="_blank"
               external
             >
               <FormattedMessage
                 id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
-                defaultMessage="The default LLM connector for this conversation type."
+                defaultMessage="The default LLM for this conversation type."
               />
             </EuiLink>
           }

@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type {
   BoundOptions,
   InferenceClient,
@@ -15,6 +14,7 @@ import type {
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ActionsClientProvider } from '../types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -26,6 +26,7 @@ import type { RegexWorkerService } from '../chat_complete/anonymization/regex_wo
 import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 export function createInferenceClient({
   request,
@@ -39,11 +40,15 @@ export function createInferenceClient({
   endpointIdCache,
   callbacks,
   anonymization,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
 }: {
   request: KibanaRequest;
   namespace: string;
   logger: Logger;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
@@ -51,6 +56,10 @@ export function createInferenceClient({
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -71,6 +80,10 @@ export function createInferenceClient({
         ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
       },
     },
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
+    isDefaultConnectorOnly,
+    getDefaultConnectorId,
   });
 
   const chatComplete = createChatCompleteApi({

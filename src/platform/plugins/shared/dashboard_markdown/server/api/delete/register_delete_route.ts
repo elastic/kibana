@@ -7,64 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
 import { deleteMarkdown } from './delete';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { deleteMarkdownOASOperationObject } from '../oas_examples';
 
-export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDeleteRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
   const deleteRoute = router.delete({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Delete a markdown panel by ID.`,
+    summary: `Delete a markdown library item`,
     ...commonRouteConfig,
+    description: 'Permanently deletes a markdown library item by ID.',
   });
 
   deleteRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => deleteMarkdownOASOperationObject,
+      },
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'A unique identifier for the markdown panel.',
-              },
-            }),
-          }),
+          params: z
+            .object({
+              id: z.string().meta({
+                description:
+                  'The markdown library item ID, as returned by the create or search endpoints.',
+              }),
+            })
+            .strict(),
         },
         response: {
           204: {
-            description: 'Indicates that the markdown panel is deleted successfully.',
+            description: 'deleted',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
           404: {
-            description: 'Indicates that the markdown panel with the given ID is not found.',
+            description: 'not found',
           },
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        await deleteMarkdown(ctx, req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, { usageCounter }, async () => {
+        try {
+          await deleteMarkdown(ctx, req.params.id);
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A markdown library item with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
+            return res.notFound({
+              body: {
+                message,
+              },
+            });
+          }
+          if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
+            return res.forbidden({ body: { message: e.message } });
+          }
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          throw e;
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
-        }
-        return res.badRequest({ body: { message: e.message } });
-      }
 
-      return res.noContent();
-    }
+        return res.noContent();
+      })
   );
 }

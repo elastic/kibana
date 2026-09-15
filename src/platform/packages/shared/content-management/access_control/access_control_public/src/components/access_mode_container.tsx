@@ -56,6 +56,7 @@ const getSpaceIcon = (space: Space['solution']) => {
   switch (space) {
     case 'es':
     case 'workplaceai':
+    case 'vectordb':
       return 'logoElasticsearch';
     case 'security':
       return 'logoSecurity';
