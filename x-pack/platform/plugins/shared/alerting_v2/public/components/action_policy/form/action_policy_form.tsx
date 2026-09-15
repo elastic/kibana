@@ -178,7 +178,8 @@ export const ActionPolicyForm = () => {
                   placeholder={i18n.translate(
                     'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
                     {
-                      defaultMessage: 'e.g. data.host.name : "my-host.com" and severity : "critical"',
+                      defaultMessage:
+                        'e.g. data.host.name : "my-host.com" and severity : "critical"',
                     }
                   )}
                 />
