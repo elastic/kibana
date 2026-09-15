@@ -40,6 +40,12 @@ const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>([
   'bedrock-claude-sonnet-4-5',
 ]);
 
+// EIS models that declare chat_completion but require image input and don't handle plain text messages.
+// Remove from this list once exposed via a dedicated task type (e.g. document_extraction).
+const EXCLUDED_EIS_MODEL_IDS = new Set<string>([
+  'jina-ocr-v1',
+]);
+
 const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
   try {
     return getAvailableConnectors();
@@ -51,7 +57,9 @@ const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
 const allStaticConnectors: AvailableConnectorWithId[] = safeGetAvailableConnectors().filter(
   (c) => !EXCLUDED_STATIC_CONNECTOR_IDS.has(c.id)
 );
-const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
+const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout().filter(
+  (m) => !EXCLUDED_EIS_MODEL_IDS.has(m.modelId)
+);
 
 let eisCcmConfigured = false;
 
