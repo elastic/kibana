@@ -43,6 +43,11 @@ import { Server } from './server';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  markExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { CriticalError } from '@kbn/core-base-server-internal';
 
@@ -457,5 +462,87 @@ describe('When preboot is disabled', () => {
     expect(mockPluginsService.preboot).not.toHaveBeenCalled();
     expect(mockPrebootService.preboot).not.toHaveBeenCalled();
     expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  });
+});
+
+describe('self client UIAM auth header augmenter', () => {
+  const ATTESTATION = { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'attestation-for-outbound' };
+
+  beforeEach(() => {
+    // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
+    const nodeServiceContract: InternalNodeServicePreboot = {
+      roles: { migrator: false, ui: true, backgroundTasks: true },
+    };
+    mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+    mockNodeService.start.mockReturnValue(nodeServiceContract);
+    rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
+  });
+
+  const startServerAndGetAugmenter = async () => {
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await server.setup();
+    await server.start();
+
+    const { setSelfClientAuthHeaderAugmenter } = mockHttpService.getStartContract();
+    expect(setSelfClientAuthHeaderAugmenter).toHaveBeenCalledTimes(1);
+    return setSelfClientAuthHeaderAugmenter.mock.calls[0][0];
+  };
+
+  const getUiamMock = () => mockSecurityService.start().authc.apiKeys.uiam!;
+
+  it('derives the attestation from the outbound credential, not the inbound request', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_outbound' });
+
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
+    );
+  });
+
+  it('does not attest when the outbound credential is not a UIAM credential', async () => {
+    const uiam = getUiamMock();
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    const outboundHeaders = new Headers({ authorization: 'ApiKey not-a-uiam-key' });
+
+    expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest when there is no outbound authorization header', async () => {
+    const uiam = getUiamMock();
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+
+    expect(augmenter(request, new Headers())).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest a user-created (external) UIAM credential', async () => {
+    const uiam = getUiamMock();
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_external' },
+    });
+    markExternalUiamCredential(request);
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_external' });
+
+    expect(augmenter(request, outboundHeaders)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 });

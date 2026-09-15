@@ -25,6 +25,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
@@ -34,10 +35,14 @@ const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
 
-/** @internal */
+/**
+ * Supplies request-scoped authentication headers that only Core may stamp. Called last, with the
+ * fully built outbound headers, so it can bind its output to the credential actually being sent.
+ * @internal
+ */
 export type SelfClientAuthHeaderAugmenter = (
   request: KibanaRequest,
-  currentHeaders: Headers
+  outboundHeaders: Headers
 ) => Record<string, string> | undefined;
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
@@ -375,7 +380,7 @@ const isProtectedHeader = (name: string) => {
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
     lowerName.startsWith('x-elastic-internal-') ||
-    lowerName === 'x-kbn-uiam-internal-caller-attestation'
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
   );
 };
 

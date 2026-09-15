@@ -38,8 +38,21 @@ export class HTTPAuthorizationHeader {
       return null;
     }
 
-    const [scheme] = authorizationHeaderValue.split(/\s+/);
-    const credentials = authorizationHeaderValue.substring(scheme.length + 1);
+    return HTTPAuthorizationHeader.parseFromValue(authorizationHeaderValue);
+  }
+
+  /**
+   * Parses a raw `Authorization` header value. Use this when the credential is not (or not yet) on a
+   * request, such as an outbound header set that has not been sent.
+   * @param headerValue Raw header value, e.g. `Bearer some-token`.
+   */
+  static parseFromValue(headerValue: string) {
+    if (!headerValue) {
+      return null;
+    }
+
+    const [scheme] = headerValue.split(/\s+/);
+    const credentials = headerValue.substring(scheme.length + 1);
 
     return new HTTPAuthorizationHeader(scheme, credentials);
   }
