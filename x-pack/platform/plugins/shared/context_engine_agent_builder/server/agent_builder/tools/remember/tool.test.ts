@@ -8,6 +8,7 @@
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { kiFieldsSchema } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
@@ -94,6 +95,9 @@ describe('remember tool', () => {
     expect(tool.id).toBe(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, type: 'document' }).success).toBe(false);
+    expect(
+      kiFieldsSchema.shape.attributes.safeParse({ 'memory.session_id': 'conversation-1' }).success
+    ).toBe(true);
   });
 
   it('rejects calls without a conversation-derived session id', async () => {
@@ -148,9 +152,26 @@ describe('remember tool', () => {
         title: params.title,
         description: params.description,
         content: params.content,
+        references: [
+          {
+            uri: 'conversation://conversation-1',
+            relation: 'derived_from',
+            description: 'The Agent Builder conversation where this memory was recorded.',
+          },
+        ],
         attributes: {
-          memory: {
-            session_id: 'conversation-1',
+          'memory.session_id': 'conversation-1',
+        },
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'tool://platform.context_engine.remember',
+              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+            },
+            updated_by: {
+              uri: 'tool://platform.context_engine.remember',
+              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+            },
           },
         },
       }),
@@ -311,9 +332,31 @@ describe('remember tool', () => {
               tags: ['existing'],
               expires_at: '2027-01-01T00:00:00.000Z',
               updated_at: '2026-09-01T00:00:00.000Z',
+              references: [
+                {
+                  uri: 'conversation://conversation-0',
+                  relation: 'derived_from',
+                  description: 'An earlier conversation.',
+                },
+                {
+                  uri: 'conversation://conversation-1',
+                  relation: 'derived_from',
+                  description: 'The Agent Builder conversation where this memory was recorded.',
+                },
+              ],
               attributes: {
-                memory: {
-                  session_id: 'conversation-1',
+                'memory.session_id': 'conversation-1',
+              },
+              governance: {
+                provenance: {
+                  created_by: {
+                    uri: 'tool://platform.context_engine.remember',
+                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+                  },
+                  updated_by: {
+                    uri: 'tool://platform.context_engine.remember',
+                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+                  },
                 },
               },
             },
@@ -346,11 +389,33 @@ describe('remember tool', () => {
           id: 'memory-1',
           tags: ['existing'],
           expires_at: '2027-01-01T00:00:00.000Z',
-          attributes: expect.objectContaining({
-            memory: {
-              session_id: 'conversation-1',
+          references: [
+            {
+              uri: 'conversation://conversation-0',
+              relation: 'derived_from',
+              description: 'An earlier conversation.',
             },
+            {
+              uri: 'conversation://conversation-1',
+              relation: 'derived_from',
+              description: 'The Agent Builder conversation where this memory was recorded.',
+            },
+          ],
+          attributes: expect.objectContaining({
+            'memory.session_id': 'conversation-1',
           }),
+          governance: {
+            provenance: {
+              created_by: {
+                uri: 'tool://platform.context_engine.remember',
+                metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+              },
+              updated_by: {
+                uri: 'tool://platform.context_engine.remember',
+                metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              },
+            },
+          },
         }),
       })
     );
@@ -407,9 +472,7 @@ describe('remember tool', () => {
           '@timestamp': '2026-09-01T00:00:00.000Z',
           id: 'memory-1',
           attributes: expect.objectContaining({
-            memory: {
-              session_id: 'conversation-1',
-            },
+            'memory.session_id': 'conversation-1',
           }),
         }),
       })
