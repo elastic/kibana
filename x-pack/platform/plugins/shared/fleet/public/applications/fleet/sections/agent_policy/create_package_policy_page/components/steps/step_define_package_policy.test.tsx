@@ -302,6 +302,71 @@ describe('StepDefinePackagePolicy', () => {
       expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
     });
 
+    describe('inherit option label', () => {
+      const mockUseOutputs = jest.mocked(useOutputs);
+      const renderWithOutput = () =>
+        testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, output_id: null }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={false}
+            noAdvancedToggle={true}
+            agentPolicies={agentPolicies}
+          />
+        );
+
+      const getInheritOption = () => {
+        const select = renderResult.getByTestId('packagePolicyOutputInput') as HTMLSelectElement;
+        return {
+          select,
+          option: [...select.options].find((option) => option.value === ''),
+        };
+      };
+
+      beforeEach(() => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: undefined,
+        });
+      });
+
+      it('should label the inherit option instead of rendering it as an empty row', () => {
+        // An unset output_id means "inherit from the parent agent policy"; EuiSelect represents
+        // that with an empty value, which must still carry a label.
+        renderResult = renderWithOutput();
+
+        const { select, option } = getInheritOption();
+
+        expect(option?.text).toEqual('Inherited from agent policy');
+        expect([...select.options].every((o) => o.text !== '')).toBe(true);
+        expect(select.value).toEqual('');
+      });
+
+      it('should name the effective output on the inherit option when it is resolvable', () => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: 'Default output',
+        });
+
+        renderResult = renderWithOutput();
+
+        expect(getInheritOption().option?.text).toEqual(
+          'Inherited from agent policy (currently Default output)'
+        );
+      });
+    });
+
     it('should disable output selector when parent agent policy is managed', () => {
       const managedAgentPolicies: AgentPolicy[] = [{ ...agentPolicies[0], is_managed: true }];
       renderResult = testRenderer.render(
