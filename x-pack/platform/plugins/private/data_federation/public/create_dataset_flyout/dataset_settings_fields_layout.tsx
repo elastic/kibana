@@ -29,14 +29,10 @@ export const getIndentedDatasetSettingsFieldsWidthCss = (indent: readonly string
 `;
 
 /** Indents content under the section title but spans to the panel's right edge. */
-export const getIndentedDatasetSettingsFullWidthCss = (indent: readonly string[]) => {
-  const indentSum = indent.join(' + ');
-
-  return css`
-    margin-inline-start: calc(${indentSum});
-    width: calc(100% - (${indentSum}));
-  `;
-};
+export const getIndentedDatasetSettingsFullWidthCss = (indent: readonly string[]) => css`
+  margin-inline-start: calc(${indent.join(' + ')});
+  width: calc(100% - ${indent.join(' - ')});
+`;
 
 const chunkFields = <T,>(items: readonly T[], size: number): T[][] => {
   const chunks: T[][] = [];

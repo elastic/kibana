@@ -17,7 +17,7 @@ import {
 } from './dataset_wizard_layout';
 
 describe('dataset_wizard_layout', () => {
-  it('uses the narrower settings column only for classic flow 3', () => {
+  it('uses the narrower settings column for classic flow 3, not flow 3 9.6', () => {
     expect(shouldUseDatasetSettingsFieldsWidth(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
     expect(shouldUseDatasetSettingsFieldsWidth(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
     expect(shouldUseDatasetSettingsFieldsWidth(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);

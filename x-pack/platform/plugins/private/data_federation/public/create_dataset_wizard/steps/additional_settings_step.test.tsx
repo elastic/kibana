@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
+import { DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH } from '../dataset_wizard_constants';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { inferFormatFromResource } from '../infer_format_from_resource';
@@ -484,6 +485,23 @@ describe('AdditionalSettingsStep', () => {
   });
 
   describe('flow 3 9.6', () => {
+    it('caps additional settings fields at the same max width as logistics', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+      });
+
+      expect(getComputedStyle(getByTestId('datasetWizardFlow3CommonSettingsFields')).maxWidth).toBe(
+        `${DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH}px`
+      );
+    });
+
     it('hides the region and format fields', async () => {
       const { queryByTestId, getByTestId } = render(
         <TestHarness
@@ -772,7 +790,7 @@ describe('AdditionalSettingsStep', () => {
         const { width, marginInlineStart } = getComputedStyle(getByTestId(testSubj));
 
         expect(marginInlineStart).toBe('calc(24px + 4px)');
-        expect(width).toBe('calc(80% - 24px - 4px)');
+        expect(width).toBe('calc(100% - 24px - 4px)');
       });
     });
 

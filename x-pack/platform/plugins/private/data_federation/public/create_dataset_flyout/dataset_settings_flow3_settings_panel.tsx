@@ -21,6 +21,7 @@ import { getFlow3AdvancedFields, getFlow3CommonFields } from './dataset_settings
 import { DatasetSettingsSectionAccordion } from './dataset_settings_section_accordion';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
+import { datasetWizardStepFieldsMaxWidthCss } from '../create_dataset_wizard/dataset_wizard_layout';
 
 export interface DatasetSettingsFlow3SettingsPanelProps {
   control: Control<DatasetWizardFormValues>;
@@ -76,6 +77,8 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
     prefix: 'datasetWizardFlow3AdvancedSettingsAccordion',
   });
 
+  const stepFieldsMaxWidthCss = hasPanelBackground ? undefined : datasetWizardStepFieldsMaxWidthCss;
+
   /**
    * Rendered even with no fields of its own, because it also keeps the custom
    * JSON in step with the form, which the review reads back.
@@ -101,11 +104,12 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         id={commonSettingsAccordionId}
         title={commonSettingsTitle}
         borders={hasPanelBackground ? 'horizontal' : 'none'}
-        contentLayout={hasPanelBackground ? 'panel' : 'indented'}
+        contentLayout={hasPanelBackground ? 'panel' : 'indentedFullWidth'}
         initialIsOpen
         dataTestSubj={`${testSubjPrefix}Flow3CommonSettingsAccordion`}
         panelDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsPanel`}
         fieldsDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsFields`}
+        fieldsContainerCss={stepFieldsMaxWidthCss}
       >
         <DatasetSettingsFieldsLayout
           control={control}
@@ -121,15 +125,16 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         <DatasetSettingsSectionAccordion
           id={advancedSettingsAccordionId}
           title={advancedSettingsTitle}
-          contentLayout={hasPanelBackground ? 'panel' : 'indented'}
+          contentLayout={hasPanelBackground ? 'panel' : 'indentedFullWidth'}
           dataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
           panelDataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsPanel`}
           fieldsDataTestSubj={`${testSubjPrefix}Flow3AdvancedSettingsFields`}
+          fieldsContainerCss={stepFieldsMaxWidthCss}
         >
           {advancedSettings}
         </DatasetSettingsSectionAccordion>
       ) : (
-        advancedSettings
+        <div css={stepFieldsMaxWidthCss}>{advancedSettings}</div>
       )}
     </>
   );

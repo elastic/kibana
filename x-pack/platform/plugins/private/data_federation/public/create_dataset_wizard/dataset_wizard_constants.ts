@@ -24,3 +24,6 @@ export const DATASET_WIZARD_FORM_MAX_WIDTH = 850;
 export const DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6 = Math.round(
   DATASET_WIZARD_FORM_MAX_WIDTH * 1.2
 );
+
+/** Max width for stacked wizard step fields in flow 3 9.6 (logistics, additional settings). */
+export const DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH = 600;

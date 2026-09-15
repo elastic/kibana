@@ -28,6 +28,7 @@ import {
   isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
+import { datasetWizardStepFieldsMaxWidthCss } from '../dataset_wizard_layout';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   getResourceOwnedSettingsFieldIds,
@@ -224,7 +225,11 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
       </EuiText>
       <EuiSpacer size="l" />
 
-      <EuiForm component="div">
+      <div
+        css={isFlow396 ? datasetWizardStepFieldsMaxWidthCss : undefined}
+        data-test-subj={isFlow396 ? 'datasetWizardLogisticsFields' : undefined}
+      >
+        <EuiForm component="div">
           <EuiFormRow
             label={datasetWizardStrings.dataSourceLabel()}
             fullWidth
@@ -337,7 +342,8 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
               onRegionManualChange={onRegionManualChange}
             />
           ) : null}
-      </EuiForm>
+        </EuiForm>
+      </div>
     </>
   );
 };

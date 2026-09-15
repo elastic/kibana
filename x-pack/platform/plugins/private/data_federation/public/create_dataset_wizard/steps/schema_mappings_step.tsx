@@ -25,6 +25,7 @@ import {
   isDatasetWizardFlow396,
 } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
+import { datasetWizardStepFieldsMaxWidthCss } from '../dataset_wizard_layout';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { getSchemaMappingSettingsFieldIds } from '../schema_mapping_settings_fields';
@@ -171,10 +172,11 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
           <DatasetSettingsSectionAccordion
             id={schemaSettingsAccordionId}
             title={datasetWizardStrings.schemaSettingsTitle()}
-            contentLayout="indented"
+            contentLayout="indentedFullWidth"
             initialIsOpen
             dataTestSubj="datasetWizardSchemaSettingsAccordion"
             fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
+            fieldsContainerCss={datasetWizardStepFieldsMaxWidthCss}
           >
             {hasFormatSelected && schemaMappingSettingsFields.length > 0 ? (
               <DatasetSettingDefaultHintsProvider format={format} isEnabled>

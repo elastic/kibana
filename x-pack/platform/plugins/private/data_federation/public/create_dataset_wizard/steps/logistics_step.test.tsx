@@ -16,6 +16,7 @@ import type { DataSource } from '../../../common';
 import { DATASET_SETTING_DESCRIPTION_TEST_SUBJ } from '../../create_dataset_flyout/dataset_settings_default_hints';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH } from '../dataset_wizard_constants';
 import {
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
@@ -75,6 +76,14 @@ const TestHarness = ({
 };
 
 describe('LogisticsStep', () => {
+  it('caps logistics fields at a fixed max width in flow 3 9.6', () => {
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+
+    expect(getComputedStyle(getByTestId('datasetWizardLogisticsFields')).maxWidth).toBe(
+      `${DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH}px`
+    );
+  });
+
   it('asks for the partition settings beside the resource in flow 3 9.6', () => {
     render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 

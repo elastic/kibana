@@ -12,6 +12,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
+import { DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH } from '../dataset_wizard_constants';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
@@ -331,6 +332,27 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
         container: getByTestId('datasetWizardSchemaMappingSettings'),
       })
     ).toBeNull();
+  });
+
+  it('caps schema settings fields at the same max width as earlier wizard steps', () => {
+    const { getByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'parquet',
+          },
+        }}
+      />
+    );
+
+    expect(getComputedStyle(getByTestId('datasetWizardSchemaMappingSettings')).maxWidth).toBe(
+      `${DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH}px`
+    );
   });
 
   it('groups the schema mapping settings in a section that opens by default', () => {

@@ -7,7 +7,7 @@
 
 import type { FunctionComponent, ReactNode } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 
@@ -47,6 +47,8 @@ export interface DatasetSettingsSectionAccordionProps {
   dataTestSubj?: string;
   panelDataTestSubj?: string;
   fieldsDataTestSubj?: string;
+  /** Applied only to the fields wrapper inside the accordion body, not the section title. */
+  fieldsContainerCss?: SerializedStyles;
   children: ReactNode;
 }
 
@@ -69,6 +71,7 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
   dataTestSubj,
   panelDataTestSubj,
   fieldsDataTestSubj,
+  fieldsContainerCss,
   children,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -100,6 +103,14 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
         ? getIndentedDatasetSettingsFullWidthCss(accordionContentIndent)
         : undefined;
 
+  const fieldsWrapperCss =
+    contentCss || fieldsContainerCss
+      ? css`
+          ${contentCss}
+          ${fieldsContainerCss}
+        `
+      : undefined;
+
   return (
     <EuiAccordion
       id={id}
@@ -119,7 +130,7 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
       paddingSize="none"
     >
       <EuiPanel {...panelProps} hasShadow={false} data-test-subj={panelDataTestSubj}>
-        <div css={contentCss} data-test-subj={fieldsDataTestSubj}>
+        <div css={fieldsWrapperCss} data-test-subj={fieldsDataTestSubj}>
           {children}
         </div>
       </EuiPanel>

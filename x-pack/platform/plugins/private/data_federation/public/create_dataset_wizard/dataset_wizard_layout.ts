@@ -8,6 +8,7 @@
 import { css } from '@emotion/react';
 
 import { datasetSettingsFieldsWidthCss } from '../create_dataset_flyout/dataset_settings_fields_layout';
+import { DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH } from './dataset_wizard_constants';
 import type { DatasetWizardFlowVariant } from './dataset_wizard_flow_variant';
 import { isDatasetWizardFlow3, isDatasetWizardFlow396 } from './dataset_wizard_flow_variant';
 
@@ -17,7 +18,15 @@ const wizardFullWidthColumnCss = css`
   min-width: 0;
 `;
 
-/** Classic flow 3 keeps the narrower field column; flow 3 9.6 uses the full wizard width. */
+export const datasetWizardStepFieldsMaxWidthCss = css`
+  max-width: ${DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH}px;
+  min-width: 0;
+`;
+
+/**
+ * Classic flow 3 and flow 4 use the narrower settings column; flow 3 9.6 keeps full
+ * wizard width for later steps and caps step 1–2 fields separately.
+ */
 export const shouldUseDatasetSettingsFieldsWidth = (
   flowVariant: DatasetWizardFlowVariant
 ): boolean => isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow396(flowVariant);
