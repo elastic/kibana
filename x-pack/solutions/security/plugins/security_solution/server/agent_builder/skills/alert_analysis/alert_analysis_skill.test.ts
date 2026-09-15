@@ -50,6 +50,36 @@ const makeSuccess = (
 });
 
 describe('alertAnalysisSkill', () => {
+  describe('content guardrails', () => {
+    it('short-circuits re-fetching when the alert or entity values are already in context', () => {
+      expect(alertAnalysisSkill.content).toContain('do NOT re-fetch them');
+      expect(alertAnalysisSkill.content).toContain(
+        'call a tool only for information you do not already have'
+      );
+    });
+
+    it('forbids speculative platform.core and workflow tools for steps with a dedicated security tool', () => {
+      expect(alertAnalysisSkill.content).toContain('platform.core.search');
+      expect(alertAnalysisSkill.content).toContain('platform.core.generate_esql');
+      expect(alertAnalysisSkill.content).toContain('platform.core.execute_esql');
+      expect(alertAnalysisSkill.content).toContain('workflow tools');
+      expect(alertAnalysisSkill.content).toMatch(/Do NOT use[^\n]*platform\.core/);
+      expect(alertAnalysisSkill.content).toContain('no speculative index discovery');
+    });
+
+    it('bounds corroboration to one call per evidence source with a single window widening', () => {
+      expect(alertAnalysisSkill.content).toContain('Bound corroboration');
+      expect(alertAnalysisSkill.content).toContain('168h at most once');
+      expect(alertAnalysisSkill.content).toContain(
+        'Stop corroborating as soon as the evidence supports a disposition'
+      );
+    });
+
+    it('forbids tool calls after the final analysis is written', () => {
+      expect(alertAnalysisSkill.content).toContain('make no further tool calls');
+    });
+  });
+
   describe('get-related-alerts inline tool', () => {
     it('schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools?.();
