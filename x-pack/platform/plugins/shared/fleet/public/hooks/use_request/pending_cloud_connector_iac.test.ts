@@ -90,4 +90,41 @@ describe('pending cloud connector IaC', () => {
     });
     expect(mockedSendUpdateCloudConnector).not.toHaveBeenCalled();
   });
+
+  it('keeps pending IaC when the connector update returns an error', async () => {
+    const pending = {
+      templateSha: 'sha256:abc',
+      blueprintId: 'federated-identity',
+      blueprintVersion: 'v1',
+    };
+    mockedSendUpdateCloudConnector.mockResolvedValue({
+      data: null,
+      error: new Error('update failed'),
+    });
+    setPendingCloudConnectorIac('test-policy', pending);
+
+    await expect(
+      persistPendingCloudConnectorIac({
+        policyName: 'test-policy',
+        cloudConnectorId: 'connector-1',
+      })
+    ).resolves.toBeUndefined();
+
+    expect(takePendingCloudConnectorIac('test-policy')).toEqual(pending);
+  });
+
+  it('keeps pending IaC when the connector update throws', async () => {
+    const pending = { templateSha: 'sha256:abc' };
+    mockedSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
+    setPendingCloudConnectorIac('test-policy', pending);
+
+    await expect(
+      persistPendingCloudConnectorIac({
+        policyName: 'test-policy',
+        cloudConnectorId: 'connector-1',
+      })
+    ).resolves.toBeUndefined();
+
+    expect(takePendingCloudConnectorIac('test-policy')).toEqual(pending);
+  });
 });

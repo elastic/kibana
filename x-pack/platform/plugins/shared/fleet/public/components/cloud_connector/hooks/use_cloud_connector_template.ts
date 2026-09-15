@@ -132,6 +132,9 @@ export const useCloudConnectorTemplate = ({
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
     setTemplateAlreadyCurrent(undefined);
+    // Drop any previous confirm so a failed later launch cannot persist
+    // a checksum from an earlier successful render.
+    setIacConfirm(undefined);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -240,6 +243,7 @@ export const useCloudConnectorTemplate = ({
       );
     } catch (e) {
       cloudFormationTab?.close();
+      setIacConfirm(undefined);
       setTemplateGenerationError(
         i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError', {
           defaultMessage:

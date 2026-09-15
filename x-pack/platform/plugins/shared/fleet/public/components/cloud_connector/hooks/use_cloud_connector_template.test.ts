@@ -315,6 +315,25 @@ describe('useCloudConnectorTemplate', () => {
       expect(cloudFormationTab.close).toHaveBeenCalled();
       expect(cloudFormationTab.location.href).toBe('');
       expect(result.current.templateGenerationError).toBeDefined();
+      expect(result.current.iacConfirm).toBeUndefined();
+    });
+
+    it('does not persist a previous confirm when a later launch throws', async () => {
+      mockedSendRenderIacTemplate
+        .mockResolvedValueOnce(RENDERED as never)
+        .mockRejectedValueOnce(new Error('network down'));
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+      expect(result.current.iacConfirm).toEqual({
+        templateSha: 'sha256:661cb7def1c7101f',
+        blueprintId: 'federated-identity',
+        blueprintVersion: 'v1',
+      });
+
+      await launch(result);
+      expect(result.current.templateGenerationError).toBeDefined();
+      expect(result.current.iacConfirm).toBeUndefined();
     });
 
     it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {

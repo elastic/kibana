@@ -56,13 +56,24 @@ export const persistPendingCloudConnectorIac = async ({
   policyName?: string;
   cloudConnectorId?: string | null;
 }): Promise<void> => {
-  if (!cloudConnectorId) {
+  if (!cloudConnectorId || !policyName) {
     return;
   }
-  const iac = takePendingCloudConnectorIac(policyName);
+  const iac = pendingByPolicyName.get(policyName);
   if (!iac || !hasPendingIacConfirm(iac)) {
     return;
   }
   // Policy save already succeeded; a failed IAC write must not fail the save.
-  await sendUpdateCloudConnector(cloudConnectorId, iac);
+  // Keep the pending payload so a later save can retry.
+  try {
+    const { error } = await sendUpdateCloudConnector(cloudConnectorId, iac);
+    if (error) {
+      return;
+    }
+  } catch {
+    return;
+  }
+  if (pendingByPolicyName.get(policyName) === iac) {
+    pendingByPolicyName.delete(policyName);
+  }
 };
