@@ -1308,6 +1308,59 @@ describe('LayerPanel', () => {
     });
   });
 
+  describe('layer data view picker visibility', () => {
+    // On ES|QL charts, form-based reference line layers must not expose the
+    // data view switcher (rendered via the datasource LayerPanelComponent).
+    const referenceLineState: Partial<LensAppState> = {
+      datasourceStates: {
+        formBased: {
+          isLoading: false,
+          state: { layers: { referenceLine: {} } },
+        },
+      },
+    };
+
+    it('hides the data view picker for a reference line layer on an ES|QL chart', () => {
+      mockVisualization.getLayerType.mockReturnValue('referenceLine');
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'referenceLine',
+          isOnlyLayer: false,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              data: mockTextBasedDatasource.publicAPIMock,
+              referenceLine: mockDatasource.publicAPIMock,
+            },
+          } as FramePublicAPI,
+        },
+        preloadedState: referenceLineState,
+      });
+
+      expect(mockDatasource.LayerPanelComponent).not.toHaveBeenCalled();
+    });
+
+    it('renders the data view picker for a reference line layer on a form-based chart', () => {
+      mockVisualization.getLayerType.mockReturnValue('referenceLine');
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'referenceLine',
+          isOnlyLayer: false,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              data: mockDatasource.publicAPIMock,
+              referenceLine: mockDatasource.publicAPIMock,
+            },
+          } as FramePublicAPI,
+        },
+        preloadedState: referenceLineState,
+      });
+
+      expect(mockDatasource.LayerPanelComponent).toHaveBeenCalled();
+    });
+  });
+
   describe('activeData sync', () => {
     const makeTable = (rows: Datatable['rows'] = []): Datatable =>
       ({
