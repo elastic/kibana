@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 } from '@kbn/alertzero-common';
 
 export const PAGE_TITLE = i18n.translate('xpack.alertzero.watches.workers.pageTitle', {
@@ -69,6 +70,13 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
       defaultMessage: 'Continues Attack Discovery findings into reviewable investigation evidence.',
     }
   ),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.description',
+    {
+      defaultMessage:
+        'Reconstructs the host attack timeline and recommends containment from installed actions.',
+    }
+  ),
   [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.darkContinuousThreatHunt.description',
     {
@@ -100,6 +108,10 @@ export const WORKER_NAMES: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.floorAttackDiscovery.name',
     { defaultMessage: 'Attack Discovery' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.name',
+    { defaultMessage: 'Endpoint Forensic Analysis' }
   ),
   [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.darkContinuousThreatHunt.name',

@@ -12,22 +12,30 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/action_isolate_host.yaml';
+import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/action_kill_process.yaml';
+import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/action_suspend_process.yaml';
 import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/dark_continuous_threat_hunt.yaml';
 import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
+import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -63,6 +71,10 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '24h',
+  },
+  [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
   },
   [ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -153,6 +165,7 @@ function createContentFingerprint(content: string): string {
 it.each([
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '2:275b444e'],
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '3:17a26220'],
+  [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID, FORENSICS_ENDPOINT_ANALYSIS_YAML, '1:2f9569cb'],
   [
     ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
@@ -164,6 +177,9 @@ it.each([
     DETECTION_RULE_CREATION_YAML,
     '1:a6804a44',
   ],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '1:de70a952'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '1:56e87e51'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '1:d9128e0a'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {

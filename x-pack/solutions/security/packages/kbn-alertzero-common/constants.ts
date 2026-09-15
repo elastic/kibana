@@ -63,6 +63,7 @@ export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' 
 export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
+export const SYSTEM_SECURITY_WATCH_FORENSICS_ID = 'system-security-watch-forensics' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -70,6 +71,7 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
 ] as const;
 
 /**
@@ -84,7 +86,7 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
 /**
  * Presentation metadata for the managed watch catalog.
  *
- * The managed five are compile-time constants, so consumers that must not wait for an HTTP round
+ * The managed watches are compile-time constants, so consumers that must not wait for an HTTP round
  * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
@@ -128,6 +130,13 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: '#ec4899',
     isBeta: true,
   },
+  {
+    id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchForensics,
+    name: 'Forensics Watch',
+    color: '#0ea5e9',
+    isBeta: true,
+  },
 ] as const;
 
 export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
@@ -138,6 +147,7 @@ export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_DARK_TAG = 'watch-dark' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
+export const WATCH_FORENSICS_TAG = 'watch-forensics' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
@@ -145,6 +155,7 @@ export const WATCH_TIER_TAGS = [
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
+  WATCH_FORENSICS_TAG,
 ] as const;
 
 /** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
@@ -152,6 +163,8 @@ export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
+  'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-dark-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
@@ -165,6 +178,7 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
 
 /**
@@ -201,6 +215,12 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     name: 'Rule Creation',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    name: 'Endpoint Forensic Analysis',
+    watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    watchTag: WATCH_FORENSICS_TAG,
   },
 ] as const;
 

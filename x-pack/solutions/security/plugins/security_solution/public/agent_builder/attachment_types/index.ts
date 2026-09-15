@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   AttachmentServiceStartContract,
@@ -17,6 +18,8 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
+import { InvestigationTimelineInlineContent } from './investigation_timeline/investigation_timeline_inline_content';
+import { InvestigationIocsInlineContent } from './investigation_iocs/investigation_iocs_inline_content';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -52,6 +55,23 @@ const ALERTS_DEFAULT_LABEL = i18n.translate(
   { defaultMessage: 'Security alerts' }
 );
 
+const INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
+  type: SecurityAgentBuilderAttachments.investigationTimeline,
+  label: i18n.translate(
+    'xpack.securitySolution.agentBuilder.attachments.investigationTimeline.label',
+    { defaultMessage: 'Attack timeline' }
+  ),
+  icon: 'timeline',
+};
+
+const INVESTIGATION_IOCS_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
+  type: SecurityAgentBuilderAttachments.investigationIocs,
+  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.investigationIocs.label', {
+    defaultMessage: 'Indicators of compromise',
+  }),
+  icon: 'flag',
+};
+
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
@@ -61,9 +81,22 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 });
 
 /**
+ * Label config for attachment types whose payload is not an object, so there is nowhere in `data`
+ * for an `attachmentLabel`. The attachment's own `description` carries the override instead —
+ * `ai.attachment.add` and the attachments API both set it alongside the data.
+ */
+const createDescribedAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
+  getLabel: (attachment: Attachment<string, unknown>) => attachment?.description || defaultLabel,
+  getIcon: () => icon,
+  getHeader: () => ({ icon }),
+});
+
+/**
  * Registers the baseline attachment UI definitions that do not require Security Solution runtime
  * context:
  *   - `security.alert` — label + icon only (no rich renderer yet).
+ *   - `security.investigation.timeline` / `security.investigation.iocs` — table renderers for
+ *     forensic artifacts the worker writes onto an investigation conversation via `ai.attachment.add`.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
@@ -88,6 +121,30 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
+    }
+  );
+
+  attachments.addAttachmentType<Attachment<string, unknown>>(
+    INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.type,
+    {
+      ...createDescribedAttachmentTypeConfig(
+        INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.label,
+        INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.icon
+      ),
+      renderInlineContent: (props) =>
+        React.createElement(InvestigationTimelineInlineContent, props),
+    }
+  );
+
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    INVESTIGATION_IOCS_ATTACHMENT_CONFIG.type,
+    {
+      ...createAttachmentTypeConfig(
+        INVESTIGATION_IOCS_ATTACHMENT_CONFIG.label,
+        INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon
+      ),
+      getHeader: () => ({ icon: INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon }),
+      renderInlineContent: (props) => React.createElement(InvestigationIocsInlineContent, props),
     }
   );
 };

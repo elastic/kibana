@@ -12,12 +12,14 @@ import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   createCatalogWatchPlaceholder,
   type CatalogWatchId,
   type Worker,
@@ -75,6 +77,12 @@ const floorWorkers: Worker[] = [
   }),
 ];
 
+const forensicsWorker = createWorker({
+  id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  name: 'Endpoint Forensic Analysis',
+  watchIds: [SYSTEM_SECURITY_WATCH_FORENSICS_ID],
+});
+
 const darkWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
@@ -127,7 +135,7 @@ describe('WatchDetailPage', () => {
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, darkWorker]);
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, darkWorker, forensicsWorker]);
 
     expect(screen.queryByTestId('alertZeroWatchEnabledSwitch')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -141,6 +149,11 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
     ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId(
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
@@ -232,6 +245,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       darkWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -244,6 +258,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       darkWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     for (const worker of detectionWorkers) {
@@ -259,5 +274,31 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('shows Forensics Watch with one Worker that has enablement and autonomy', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
+      ...floorWorkers,
+      darkWorker,
+      ...detectionWorkers,
+      forensicsWorker,
+    ]);
+
+    const section = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+    );
+    expect(section).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomySlider')).toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
   });
 });
