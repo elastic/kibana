@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsBackfillTask(supertest);
+      await runAttachmentsBackfillTask(supertest, 'space1');
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -237,6 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
           '@timestamp': timestamp,
           created_at: createdAt,
           case_id: caseId,
+          created_by: { profile_uid: profileUid, ...createdByRest },
           ...analyticsFields
         } = commentAnalytics._source as any;
 
@@ -247,7 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAt).not.to.be(null);
         expect(createdAt).not.to.be(undefined);
 
-        expect(analyticsFields).to.eql({
+        expect({ ...analyticsFields, created_by: createdByRest }).to.eql({
           comment: 'This is a cool comment',
           created_by: {
             email: null,
