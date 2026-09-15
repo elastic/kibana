@@ -28,6 +28,24 @@ import type { ComposeDiscoverForm } from './compose_discover_form';
 import type { QueryTab } from './types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
+type CapturedFlyoutOnClose = (event: unknown, meta?: { reason?: string }) => void;
+
+let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
+
+jest.mock('@elastic/eui', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+  const EuiFlyoutActual = actual.EuiFlyout;
+  return {
+    ...actual,
+    EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
+      (props, ref) => {
+        latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
+        return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
+      }
+    ),
+  };
+});
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <div data-test-subj="codeEditorMock" />,
@@ -75,6 +93,26 @@ jest.mock('./compose_discover_form', () => {
   const { QueryFieldRules } = jest.requireActual(
     './compose_discover_form/query_field_rules'
   ) as typeof import('./compose_discover_form/query_field_rules');
+  const { useBuilderState } = jest.requireActual(
+    './rule_builder/builder_state_context'
+  ) as typeof import('./rule_builder/builder_state_context');
+
+  const MockMakeBuilderDirtyButton = () => {
+    const { state, setState } = useBuilderState<Record<string, unknown> | undefined>();
+    if (state == null || typeof state !== 'object') {
+      return null;
+    }
+    return (
+      <button
+        data-test-subj="mockMakeBuilderDirty"
+        onClick={() => setState({ ...state, indexPattern: 'logs-*' })}
+        type="button"
+      >
+        Make builder dirty
+      </button>
+    );
+  };
+
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -94,6 +132,7 @@ jest.mock('./compose_discover_form', () => {
           >
             Make dirty
           </button>
+          <MockMakeBuilderDirtyButton />
           <button
             data-test-subj="mockSetFormTimeField"
             onClick={() => setValue('timeField', 'event.ingested', { shouldDirty: true })}
@@ -274,6 +313,7 @@ const defaultProps: ComposeDiscoverFlyoutProps = {
   historyKey: Symbol('test'),
   mode: 'create',
   onClose: jest.fn(),
+  onHistoryBack: jest.fn(),
   services: createMockServices(),
   onCreateRule: jest.fn(),
 };
@@ -697,6 +737,195 @@ describe('ComposeDiscoverFlyout', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
+    it('returns to the picker without confirm when EUI navigates back and the form is pristine', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when EUI navigates back and the form is dirty', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('"Discard changes" on Back unmounts the form without dismissing the picker', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('"Continue editing" on Back keeps the flyout open', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('keeps the confirm modal and form when Back or X is pressed while the modal is open', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'close-button' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('closes without confirm when the parent session cascade-closes', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('closes the session when cascade arrives while the confirm modal is open', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onHistoryBack).not.toHaveBeenCalled();
+    });
+
+    it('returns to the picker without confirm when EUI navigates back and the threshold builder is pristine', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack, builderType: 'threshold' });
+
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when EUI navigates back and the threshold builder has edits', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack, builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('mockMakeBuilderDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('"Discard changes" on Back unmounts the threshold builder without dismissing the picker', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack, builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('mockMakeBuilderDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('"Continue editing" on Back keeps the threshold builder open', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack, builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('mockMakeBuilderDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when the threshold builder has edits and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose, builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('mockMakeBuilderDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
     it('shows confirmation in YAML mode when text differs from baseline', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
@@ -720,6 +949,20 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onClose).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('does not reopen the sandbox while the confirm modal is open', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
     });
 
     it('"Continue editing" does not open sandbox when it was closed before close attempt', () => {

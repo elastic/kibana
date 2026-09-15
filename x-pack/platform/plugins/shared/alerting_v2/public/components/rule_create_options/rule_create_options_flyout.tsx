@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,28 +16,43 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
+const CLOSE_LABEL = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+  defaultMessage: 'Close',
+});
+const CREATE_RULE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.title', {
+  defaultMessage: 'Create rule',
+});
+
+/** Matches ComposeDiscoverFlyout so stacking the form on top does not resize the panel. */
+const STACKED_FLYOUT_SIZE = 540;
+const STACKED_FLYOUT_MIN_WIDTH = 480;
 
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   /**
-   * When `true`, the "With AI Agent" option is rendered disabled. Independent of
+   * When `true`, the "Create with AI Agent" option is rendered disabled. Independent of
    * `createWithAgentTooltipText`.
    */
   createWithAgentDisabled?: boolean;
   /**
-   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
+   * Optional tooltip text for the "Create with AI Agent" option (e.g. explaining a missing
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
+  /**
+   * Shared EUI flyout history key. When set, this flyout is the first entry of a stacked
+   * create session (`overlay` + `session="start"`) so Back from the authoring flyout returns here.
+   */
+  historyKey?: symbol;
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -48,14 +63,43 @@ export const RuleCreateOptionsFlyout = ({
   createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
+  historyKey,
 }: RuleCreateOptionsFlyoutProps) => {
+  const isStacked = historyKey !== undefined;
+  const [flyoutKey, setFlyoutKey] = useState(0);
+
+  const handleFlyoutClose: EuiFlyoutProps['onClose'] = useCallback(
+    (_event, meta) => {
+      if (isStacked && meta?.reason === 'navigation-cascade') {
+        /*
+         * The stacked form shares this historyKey and session="start", so its X/ESC
+         * closeAllFlyouts() unregisters the picker too. Stay mounted and re-register
+         * so the form can stack on top again while it confirms unsaved changes.
+         */
+        setFlyoutKey((key) => key + 1);
+        return;
+      }
+      onClose();
+    },
+    [isStacked, onClose]
+  );
+
   return (
     <EuiFlyout
-      type="push"
-      size="s"
+      key={flyoutKey}
+      type={isStacked ? 'overlay' : 'push'}
+      size={isStacked ? STACKED_FLYOUT_SIZE : 's'}
+      minWidth={isStacked ? STACKED_FLYOUT_MIN_WIDTH : undefined}
+      session={isStacked ? 'start' : undefined}
+      historyKey={historyKey}
+      flyoutMenuProps={
+        isStacked
+          ? { title: CREATE_RULE_TITLE, titleId: FLYOUT_TITLE_ID, hideCloseButton: true }
+          : undefined
+      }
       ownFocus
       hideCloseButton
-      onClose={onClose}
+      onClose={handleFlyoutClose}
       aria-labelledby={FLYOUT_TITLE_ID}
       data-test-subj="ruleCreateOptionsFlyout"
     >
@@ -63,28 +107,16 @@ export const RuleCreateOptionsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
-                  defaultMessage="Create rule"
-                />
-              </h2>
+              <h2>{CREATE_RULE_TITLE}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
-                defaultMessage: 'Close',
-              })}
-              disableScreenReaderOutput
-            >
+            <EuiToolTip content={CLOSE_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="cross"
                 color="text"
                 onClick={onClose}
-                aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
-                  defaultMessage: 'Close',
-                })}
+                aria-label={CLOSE_LABEL}
                 data-test-subj="ruleCreateOptionsFlyoutCloseButton"
               />
             </EuiToolTip>

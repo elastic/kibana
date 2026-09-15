@@ -154,6 +154,28 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+      expect(capturedComposeProps.onHistoryBack).toEqual(expect.any(Function));
+    });
+
+    it('returns to the selector when the form navigates back', async () => {
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('esqlBtn'));
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+
+      act(() => {
+        (capturedComposeProps.onHistoryBack as () => void)();
+      });
+
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {

@@ -7,9 +7,29 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
+
+type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
+
+let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
+
+jest.mock('@elastic/eui', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+  const EuiFlyoutActual = actual.EuiFlyout;
+  return {
+    ...actual,
+    EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
+      (props, ref) => {
+        latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
+        return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
+      }
+    ),
+  };
+});
 
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
@@ -49,6 +69,45 @@ describe('RuleCreateOptionsFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
 
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dismiss when EUI cascade-closes a stacked session', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    act(() => {
+      latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+  });
+
+  it('uses overlay session stacking when a historyKey is provided', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

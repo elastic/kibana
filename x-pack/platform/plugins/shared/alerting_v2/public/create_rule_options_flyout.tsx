@@ -181,6 +181,9 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
+  const handleHistoryBack = useCallback(() => {
+    setStep({ type: 'selector' });
+  }, []);
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
 
   const rulesApi = useMemo(
@@ -264,6 +267,7 @@ const CreateRuleOptionsFlyoutInner = ({
           historyKey={historyKey}
           mode="create"
           onClose={onClose}
+          onHistoryBack={handleHistoryBack}
           services={services}
           onCreateRule={handleCreateRule}
           isSaving={isSaving}
@@ -281,6 +285,7 @@ const CreateRuleOptionsFlyoutInner = ({
           historyKey={historyKey}
           mode="create"
           onClose={onClose}
+          onHistoryBack={handleHistoryBack}
           services={services}
           builderType="threshold"
           onCreateRule={handleCreateRule}

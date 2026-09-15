@@ -114,8 +114,23 @@ const existingAction = { id: 'a1', source: 'existing' as const, workflowId: 'wf-
 
 let hookApi: ReturnType<typeof useComposeDiscoverFlyout> | undefined;
 
-const Harness = ({ redirectPath }: { redirectPath?: string }) => {
-  const api = useComposeDiscoverFlyout({ createSuccessRedirectPath: redirectPath });
+const Harness = ({
+  redirectPath,
+  historyKey,
+  onCreateSuccess,
+  onDismiss,
+}: {
+  redirectPath?: string;
+  historyKey?: symbol;
+  onCreateSuccess?: () => void;
+  onDismiss?: () => void;
+}) => {
+  const api = useComposeDiscoverFlyout({
+    createSuccessRedirectPath: redirectPath,
+    historyKey,
+    onCreateSuccess,
+    onDismiss,
+  });
   hookApi = api;
   return (
     <>
@@ -479,5 +494,156 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
 
     expect(capturedFlyoutProps.builderType).toBe('threshold');
     expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+  });
+});
+
+describe('useComposeDiscoverFlyout — stacked create session', () => {
+  const sharedHistoryKey = Symbol('rulesListCreateRule');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+  });
+
+  it('passes the shared historyKey for a fresh create', async () => {
+    render(<Harness historyKey={sharedHistoryKey} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.historyKey).toBe(sharedHistoryKey);
+  });
+
+  it('does not use the shared historyKey in edit mode', async () => {
+    render(<Harness historyKey={sharedHistoryKey} />);
+    act(() => {
+      hookApi!.openEditFlyout(editRule);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.historyKey).not.toBe(sharedHistoryKey);
+  });
+
+  it('calls onCreateSuccess after a successful create', async () => {
+    const onCreateSuccess = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onCreateSuccess={onCreateSuccess} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    callOnCreateRule(undefined);
+
+    await waitFor(() => {
+      expect(onCreateSuccess).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls onDismiss when the authoring flyout is dismissed', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      (capturedFlyoutProps.onClose as () => void)();
+    });
+
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('does not call onDismiss when closeFlyout runs without callOnDismiss', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      hookApi!.closeFlyout();
+    });
+
+    expect(onDismiss).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('does not call onDismiss after a successful rule update', async () => {
+    const onDismiss = jest.fn();
+    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(updatedRule));
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openEditFlyout(editRule);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    callOnUpdateRule(undefined);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
+  it('calls onDismiss when closeFlyout is given callOnDismiss', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      hookApi!.closeFlyout({ callOnDismiss: true });
+    });
+
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('unmounts the form on history back without dismissing the picker, and can reopen', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      (capturedFlyoutProps.onHistoryBack as () => void)();
+    });
+
+    expect(onDismiss).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
   });
 });
