@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { createInvestigationTimelineAttachmentDefinition } from './investigation_timeline_attachment';
-import { registerInvestigationTimelineAttachment } from '../';
+import type { InvestigationTimelineAttachment, InvestigationTimelineAttachmentData } from './types';
 
-const makeExperimentalFeatures = (
-  overrides: Partial<ExperimentalFeatures> = {}
-): ExperimentalFeatures =>
-  ({ endpointForensicAnalysisSkill: false, ...overrides } as unknown as ExperimentalFeatures);
-
-const mockAddAttachmentType = jest.fn();
-const mockAttachments: AttachmentServiceStartContract = {
-  addAttachmentType: mockAddAttachmentType,
-} as unknown as AttachmentServiceStartContract;
-
-const makeAttachment = (data: object) => ({
+const makeAttachment = (
+  data: InvestigationTimelineAttachmentData
+): InvestigationTimelineAttachment => ({
   id: 'test',
   type: SecurityAgentBuilderAttachments.investigationTimeline,
   data,
@@ -31,7 +21,7 @@ describe('createInvestigationTimelineAttachmentDefinition', () => {
   const definition = createInvestigationTimelineAttachmentDefinition();
 
   it('uses the timeline icon', () => {
-    expect(definition.getIcon()).toBe('timeline');
+    expect(definition.getIcon?.()).toBe('timeline');
   });
 
   it('returns default label when attachmentLabel is absent', () => {
@@ -46,20 +36,5 @@ describe('createInvestigationTimelineAttachmentDefinition', () => {
 
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
-  });
-});
-
-describe('registerInvestigationTimelineAttachment', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('does not register when endpointForensicAnalysisSkill is disabled', () => {
-    registerInvestigationTimelineAttachment({
-      attachments: mockAttachments,
-      experimentalFeatures: makeExperimentalFeatures(),
-    });
-
-    expect(mockAddAttachmentType).not.toHaveBeenCalled();
   });
 });

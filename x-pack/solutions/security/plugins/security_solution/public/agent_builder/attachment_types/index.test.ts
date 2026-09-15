@@ -7,13 +7,7 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerAttachmentUiDefinitions } from '.';
-
-const makeExperimentalFeatures = (
-  overrides: Partial<ExperimentalFeatures> = {}
-): ExperimentalFeatures =>
-  ({ endpointForensicAnalysisSkill: false, ...overrides } as unknown as ExperimentalFeatures);
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -26,7 +20,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -42,7 +36,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -57,24 +51,8 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Security Alert');
   });
 
-  it('does not register forensic attachment types (owned by registerInvestigationTimelineAttachment / registerInvestigationIocsAttachment)', () => {
-    registerAttachmentUiDefinitions(
-      mockAttachments,
-      makeExperimentalFeatures({ endpointForensicAnalysisSkill: true })
-    );
-
-    const registeredTypes = mockAddAttachmentType.mock.calls.map(
-      (call: unknown[]) => call[0]
-    ) as string[];
-    expect(registeredTypes).not.toContain(SecurityAgentBuilderAttachments.investigationTimeline);
-    expect(registeredTypes).not.toContain(SecurityAgentBuilderAttachments.investigationIocs);
-  });
-
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(
-      mockAttachments,
-      makeExperimentalFeatures({ endpointForensicAnalysisSkill: true })
-    );
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity

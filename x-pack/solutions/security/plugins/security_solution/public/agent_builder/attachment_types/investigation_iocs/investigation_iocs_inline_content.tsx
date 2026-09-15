@@ -20,11 +20,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type {
-  InvestigationIoc,
-  InvestigationIocCategory,
-  InvestigationIocsAttachment,
-} from './types';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { InvestigationIoc, InvestigationIocCategory } from './types';
 import { INVESTIGATION_IOC_CATEGORIES } from './types';
 
 export const INVESTIGATION_IOCS_ATTACHMENT_TEST_ID =

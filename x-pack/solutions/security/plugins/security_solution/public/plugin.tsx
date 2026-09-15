@@ -91,6 +91,8 @@ import {
   registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerInvestigationTimelineAttachment,
+  registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -358,7 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments, this.experimentalFeatures);
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -415,6 +417,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getServices: () => this.getDiscoverFlyoutServices(coreSetup),
           getStore: () => this.getDiscoverFlyoutStore(coreSetup),
           spaces: plugins.spaces,
+        });
+      }
+      if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+        registerInvestigationTimelineAttachment({
+          attachments: plugins.agentBuilder.attachments,
+        });
+        registerInvestigationIocsAttachment({
+          attachments: plugins.agentBuilder.attachments,
         });
       }
     }

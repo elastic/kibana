@@ -5,23 +5,11 @@
  * 2.0.
  */
 
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { createInvestigationIocsAttachmentDefinition } from './investigation_iocs_attachment';
-import { registerInvestigationIocsAttachment } from '../';
+import type { InvestigationIocsAttachment, InvestigationIocsAttachmentData } from './types';
 
-const makeExperimentalFeatures = (
-  overrides: Partial<ExperimentalFeatures> = {}
-): ExperimentalFeatures =>
-  ({ endpointForensicAnalysisSkill: false, ...overrides } as unknown as ExperimentalFeatures);
-
-const mockAddAttachmentType = jest.fn();
-const mockAttachments: AttachmentServiceStartContract = {
-  addAttachmentType: mockAddAttachmentType,
-} as unknown as AttachmentServiceStartContract;
-
-const makeAttachment = (data: object) => ({
+const makeAttachment = (data: InvestigationIocsAttachmentData): InvestigationIocsAttachment => ({
   id: 'test',
   type: SecurityAgentBuilderAttachments.investigationIocs,
   data,
@@ -31,7 +19,7 @@ describe('createInvestigationIocsAttachmentDefinition', () => {
   const definition = createInvestigationIocsAttachmentDefinition();
 
   it('uses the flag icon', () => {
-    expect(definition.getIcon()).toBe('flag');
+    expect(definition.getIcon?.()).toBe('flag');
   });
 
   it('returns default label when attachmentLabel is absent', () => {
@@ -46,20 +34,5 @@ describe('createInvestigationIocsAttachmentDefinition', () => {
 
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
-  });
-});
-
-describe('registerInvestigationIocsAttachment', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('does not register when endpointForensicAnalysisSkill is disabled', () => {
-    registerInvestigationIocsAttachment({
-      attachments: mockAttachments,
-      experimentalFeatures: makeExperimentalFeatures(),
-    });
-
-    expect(mockAddAttachmentType).not.toHaveBeenCalled();
   });
 });

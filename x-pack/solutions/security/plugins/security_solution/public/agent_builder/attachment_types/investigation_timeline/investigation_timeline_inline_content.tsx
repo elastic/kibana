@@ -11,7 +11,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { InvestigationTimelineAttachment, InvestigationTimelineEvent } from './types';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { InvestigationTimelineEvent } from './types';
 
 export const INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID =
   'securitySolutionAgentBuilderInvestigationTimelineAttachment';

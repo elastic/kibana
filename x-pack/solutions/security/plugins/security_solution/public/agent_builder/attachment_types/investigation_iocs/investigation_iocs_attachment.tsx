@@ -29,7 +29,6 @@ export const createInvestigationIocsAttachmentDefinition =
   (): AttachmentUIDefinition<InvestigationIocsAttachment> => ({
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
     getIcon: () => 'flag',
-    getHeader: () => ({ icon: 'flag' }),
     renderInlineContent: (props: AttachmentRenderProps<InvestigationIocsAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
         <LazyInvestigationIocsInlineContent {...props} />

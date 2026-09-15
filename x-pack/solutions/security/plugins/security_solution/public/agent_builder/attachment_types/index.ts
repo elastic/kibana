@@ -69,10 +69,7 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
  * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (
-  attachments: AttachmentServiceStartContract,
-  experimentalFeatures: ExperimentalFeatures
-) => {
+export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
@@ -96,22 +93,14 @@ export const registerAttachmentUiDefinitions = (
 };
 
 /**
- * Registers the `security.investigation.timeline` attachment renderer (chronological event table
- * for forensic artifacts the worker writes via `ai.attachment.add`). Dynamically imports
- * [./investigation_timeline](./investigation_timeline/index.ts) so the inline table stays off
- * the main `securitySolution` page-load bundle.
- *
- * Race-window: same semantics as {@link registerRuleAttachment} — resolves during plugin start
- * well before the user can receive a timeline attachment from the worker.
+ * Registers the `security.investigation.timeline` attachment renderer
+ * (chronological event table for forensic artifacts).
  */
 export const registerInvestigationTimelineAttachment = ({
   attachments,
-  experimentalFeatures,
 }: {
   attachments: AttachmentServiceStartContract;
-  experimentalFeatures: ExperimentalFeatures;
 }): void => {
-  if (!experimentalFeatures.endpointForensicAnalysisSkill) return;
   void import(
     /* webpackChunkName: "security_investigation_timeline_attachment" */
     './investigation_timeline'
@@ -124,22 +113,14 @@ export const registerInvestigationTimelineAttachment = ({
 };
 
 /**
- * Registers the `security.investigation.iocs` attachment renderer (category table of indicator
- * badges for forensic artifacts the worker writes via `ai.attachment.add`). Dynamically imports
- * [./investigation_iocs](./investigation_iocs/index.ts) so the inline table stays off the main
- * `securitySolution` page-load bundle.
- *
- * Race-window: same semantics as {@link registerRuleAttachment} — resolves during plugin start
- * well before the user can receive an IOC attachment from the worker.
+ * Registers the `security.investigation.iocs` attachment renderer
+ * (category table of indicator badges for forensic artifacts).
  */
 export const registerInvestigationIocsAttachment = ({
   attachments,
-  experimentalFeatures,
 }: {
   attachments: AttachmentServiceStartContract;
-  experimentalFeatures: ExperimentalFeatures;
 }): void => {
-  if (!experimentalFeatures.endpointForensicAnalysisSkill) return;
   void import(
     /* webpackChunkName: "security_investigation_iocs_attachment" */
     './investigation_iocs'

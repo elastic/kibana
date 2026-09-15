@@ -15,9 +15,8 @@ import {
   INVESTIGATION_IOCS_ATTACHMENT_TEST_ID,
   InvestigationIocsInlineContent,
   parseIocCategoryRows,
-  type InvestigationIocsAttachment,
-  type InvestigationIocsAttachmentData,
 } from './investigation_iocs_inline_content';
+import type { InvestigationIocsAttachment, InvestigationIocsAttachmentData } from './types';
 
 const renderContent = (data: InvestigationIocsAttachmentData) => {
   const props = {

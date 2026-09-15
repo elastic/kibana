@@ -29,7 +29,6 @@ export const createInvestigationTimelineAttachmentDefinition =
   (): AttachmentUIDefinition<InvestigationTimelineAttachment> => ({
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
     getIcon: () => 'timeline',
-    getHeader: () => ({ icon: 'timeline' }),
     renderInlineContent: (props: AttachmentRenderProps<InvestigationTimelineAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
         <LazyInvestigationTimelineInlineContent {...props} />
