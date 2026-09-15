@@ -67,6 +67,12 @@ export const aws_bedrockEvaluations = {
     data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.id IS NOT NULL, gen_ai.request.model.id,
     null
   ),
+  entity.target.id = CASE(
+    entity.target.id IS NOT NULL, entity.target.id,
+    data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.id IS NOT NULL, gen_ai.request.model.id,
+    data_stream.dataset == "aws_bedrock.invocation" AND aws_bedrock.invocation.model_id IS NOT NULL, aws_bedrock.invocation.model_id,
+    null
+  ),
   service.target.type = CASE(
     service.target.type IS NOT NULL, service.target.type,
     data_stream.dataset == "aws_bedrock.invocation" AND gen_ai.request.model.type IS NOT NULL, gen_ai.request.model.type,
