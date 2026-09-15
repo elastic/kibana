@@ -1,11 +1,13 @@
 version: "1"
 name: Endpoint Forensic Analysis
 description: >
-  Invokable investigation worker: given an attack
-  discovery alert id it extracts the affected host, runs
-  endpoint-forensic-analysis and suggest recommended response
-  action remedation
-enabled: true
+  Forensics Watch investigation worker: given an attack discovery alert id it
+  extracts the affected host, runs endpoint-forensic-analysis, and suggests
+  recommended response-action remediation.
+enabled: false
+tags:
+  - watch
+  - watch-forensics
 triggers:
   - type: manual
     inputs:
@@ -16,6 +18,11 @@ triggers:
         investigation_id:
           type: string
           description: The ID of an existing investigation
+
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
 
 outputs:
   properties:

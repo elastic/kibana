@@ -152,4 +152,5 @@ export enum SecurityPageName {
   alertZeroWatchDark = 'watch_dark',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }
