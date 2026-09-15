@@ -13,9 +13,11 @@ import {
   type DataTableRecord,
 } from '@kbn/discover-utils';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
+import { BehaviorSubject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
@@ -79,12 +81,21 @@ const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta) => {
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
   const stateManager = createStateManager(initialColumnsMeta);
+  const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(
+    createMockEsqlSource([], [], '@timestamp')
+  );
 
   return {
     stateManager,
-    fetcher: new CascadedDocumentsFetcher(discoverServices, scopedProfilesManager, stateManager),
+    fetcher: new CascadedDocumentsFetcher(
+      discoverServices,
+      scopedProfilesManager,
+      stateManager,
+      currentDataSource$
+    ),
     scopedProfilesManager,
     discoverServices,
+    currentDataSource$,
   };
 };
 
@@ -153,7 +164,7 @@ describe('CascadedDocumentsFetcher', () => {
       expect.objectContaining({
         query: cascadeQuery,
         esqlVariables: params.esqlVariables,
-        dataView: params.dataView,
+        esqlSource: expect.objectContaining({ kind: 'esql' }),
         data: discoverServices.data,
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,

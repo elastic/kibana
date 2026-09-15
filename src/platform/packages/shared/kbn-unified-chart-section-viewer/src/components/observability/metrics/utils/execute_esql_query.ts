@@ -8,7 +8,6 @@
  */
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -30,7 +29,7 @@ export interface ExecuteEsqlParams {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
-  dataView: DataView;
+  timeFieldName?: string;
   timeRange?: TimeRange;
   filters?: Filter[];
   variables?: ESQLControlVariable[];
@@ -69,7 +68,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   esqlQuery,
   search,
   signal,
-  dataView,
+  timeFieldName,
   timeRange,
   filters = [],
   variables,
@@ -78,8 +77,8 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
-    timeRange && dataView?.timeFieldName
-      ? getTime(dataView, timeRange, { fieldName: dataView.timeFieldName })
+    timeRange && timeFieldName
+      ? getTime(undefined, timeRange, { fieldName: timeFieldName })
       : undefined;
   const filtersWithTime = [...(timeFilter ? [timeFilter] : []), ...filters];
   const filter =

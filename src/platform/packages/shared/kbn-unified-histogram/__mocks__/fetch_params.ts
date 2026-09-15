@@ -7,38 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
   UnifiedHistogramFetch$Arguments,
 } from '../types';
-import { processFetchParams } from '../utils/process_fetch_params';
-import { unifiedHistogramServicesMock } from './services';
 import { ReplaySubject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+
+const defaultDataSource = new DataViewSource(dataViewWithTimefieldMock);
 
 export const getFetchParamsMock = (
   partialParams?: Partial<UnifiedHistogramFetchParamsExternal>
 ): UnifiedHistogramFetchParams => {
+  const dataSource =
+    (partialParams?.dataSource as DataViewSource | undefined) ?? defaultDataSource;
+
   return {
-    ...processFetchParams({
-      params: {
-        searchSessionId: 'id',
-        query: {
-          language: 'kuery',
-          query: '',
-        },
-        filters: [],
-        timeRange: { from: '2025-10-07T22:00:00.000Z', to: '2025-11-07T15:56:36.264Z' },
-        relativeTimeRange: { from: 'now-30d/d', to: 'now' },
-        dataView: dataViewWithTimefieldMock,
-        requestAdapter: new RequestAdapter(),
-        ...partialParams,
-      },
-      services: unifiedHistogramServicesMock,
-      initialBreakdownField: undefined,
-    }),
+    dataSource,
+    searchSessionId: 'id',
+    query: { language: 'kuery', query: '' },
+    filters: [],
+    timeRange: { from: '2025-10-07T22:00:00.000Z', to: '2025-11-07T15:56:36.264Z' },
+    relativeTimeRange: { from: 'now-30d/d', to: 'now' },
+    requestAdapter: new RequestAdapter(),
+    esqlVariables: [],
+    lastReloadRequestTime: Date.now(),
+    isESQLQuery: false,
+    isTimeBased: dataSource.isTimeBased() && !dataSource.isRollup(),
+    columnsMap: undefined,
+    breakdown: dataSource.isTimeBased() && !dataSource.isRollup() ? { field: undefined } : undefined,
+    timeInterval: 'auto',
+    ...partialParams,
   };
 };
 

@@ -123,7 +123,7 @@ export function UnifiedHistogramChart({
   }, [visContext?.attributes]);
 
   const {
-    dataView,
+    dataSource,
     query,
     timeRange,
     relativeTimeRange,
@@ -182,7 +182,7 @@ export function UnifiedHistogramChart({
       if (response) {
         const newBucketInterval = buildBucketInterval({
           data: services.data,
-          dataView,
+          dataSource,
           timeInterval: chart?.timeInterval,
           timeRange,
           response,
@@ -221,7 +221,7 @@ export function UnifiedHistogramChart({
 
   const onEditVisualization = useEditVisualization({
     services,
-    dataView,
+    dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
     isPlainRecord,
@@ -237,7 +237,7 @@ export function UnifiedHistogramChart({
       <div>
         {chartVisible && breakdown && (
           <BreakdownFieldSelector
-            dataView={dataView}
+            dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
             esqlColumns={isPlainRecord ? columns : undefined}
@@ -251,7 +251,7 @@ export function UnifiedHistogramChart({
       onTimeIntervalChange,
       chart,
       breakdown,
-      dataView,
+      dataSource,
       onBreakdownFieldChange,
       columns,
     ]
@@ -354,7 +354,7 @@ export function UnifiedHistogramChart({
               {lensPropsContext && (
                 <HistogramMemoized
                   services={services}
-                  dataView={dataView}
+                  dataSource={dataSource}
                   chart={chart}
                   bucketInterval={bucketInterval}
                   visContext={visContext}

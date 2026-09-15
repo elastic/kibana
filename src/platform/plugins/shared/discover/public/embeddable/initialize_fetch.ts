@@ -36,7 +36,9 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { createEsqlSource } from '../application/main/data_fetching/create_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -149,6 +151,7 @@ export function initializeFetch({
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  let cachedEsqlSource: { esql: string; source: EsqlSource } | undefined;
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
@@ -210,15 +213,28 @@ export function initializeFetch({
           if (
             esqlMode &&
             searchSourceQuery &&
+            isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
+            if (!cachedEsqlSource || cachedEsqlSource.esql !== searchSourceQuery.esql) {
+              cachedEsqlSource = {
+                esql: searchSourceQuery.esql,
+                source: await createEsqlSource({
+                  esql: searchSourceQuery.esql,
+                  http: discoverServices.http,
+                  projectRoutingFallback: fetchContext.projectRouting,
+                  timeRange: getTimeRangeFromFetchContext(fetchContext),
+                }),
+              };
+            }
+            const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
               timeRange: getTimeRangeFromFetchContext(fetchContext),
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              dataView,
+              esqlSource: embeddableEsqlSource,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
@@ -228,12 +244,9 @@ export function initializeFetch({
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
-              http: discoverServices.http,
             });
             return {
-              columnsMeta: result.dataSource
-                ? columnsToColumnsMeta(result.dataSource.getColumns())
-                : undefined,
+              columnsMeta: columnsToColumnsMeta(embeddableEsqlSource.getColumns()),
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,

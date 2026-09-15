@@ -10,14 +10,21 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { HttpStart } from '@kbn/core/public';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLSourceInfo,
+  isComputedColumn,
+  getQuerySummary,
+} from '@kbn/esql-utils';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
 
 export interface EsqlSourceArgs {
   query: string;
-  resultColumns: readonly DatatableColumn[];
+  resultColumns?: readonly DatatableColumn[];
   timeFieldName?: string;
   /**
    * CPS project routing string. When present it is included in the id hash so
@@ -25,10 +32,22 @@ export interface EsqlSourceArgs {
    * filter state does not bleed across project boundaries.
    */
   projectRouting?: string;
+  /**
+   * When provided, the factory calls `/internal/esql/source_info` to resolve
+   * both the time field and the result schema in a single round trip, populating
+   * `resultColumns` with correct `isComputedColumn` metadata.
+   */
+  http?: HttpStart;
+  /**
+   * Passed to the source_info route so that queries using `?_tstart` / `?_tend`
+   * named parameters can be executed for schema discovery.
+   */
+  timeRange?: { from: string; to: string };
 }
 
 interface EsqlSourceConstructorArgs {
   id: string;
+  query: string;
   title: string;
   timeFieldName: string | undefined;
   resultColumns: readonly DatatableColumn[];
@@ -47,6 +66,7 @@ interface EsqlSourceConstructorArgs {
 export class EsqlSource implements DataSourceBase {
   public readonly kind = 'esql' as const;
   public readonly id: string;
+  public readonly query: string;
   public readonly title: string;
   public readonly timeFieldName: string | undefined;
   public readonly references: SavedObjectReference[];
@@ -63,8 +83,15 @@ export class EsqlSource implements DataSourceBase {
   private readonly columns: readonly Column[];
   private readonly columnsByName: ReadonlyMap<string, Column>;
 
-  private constructor({ id, title, timeFieldName, resultColumns }: EsqlSourceConstructorArgs) {
+  private constructor({
+    id,
+    query,
+    title,
+    timeFieldName,
+    resultColumns,
+  }: EsqlSourceConstructorArgs) {
     this.id = id;
+    this.query = query;
     this.title = title;
     this.timeFieldName = timeFieldName;
     this.references = [{ type: 'index-pattern', id, name: 'data-source' }];
@@ -78,18 +105,46 @@ export class EsqlSource implements DataSourceBase {
   /** Async factory — id derivation via `crypto.subtle` requires async. */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
     const title = getIndexPatternFromESQLQuery(args.query);
+
+    let timeFieldName: string | undefined = args.timeFieldName;
+    let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
+
+    if (args.http) {
+      const querySummary = getQuerySummary(args.query);
+      const info = await getESQLSourceInfo({
+        query: args.query,
+        http: args.http,
+        projectRouting: args.projectRouting,
+        timeRange: args.timeRange,
+      }).catch(() => null);
+
+      if (info) {
+        timeFieldName = info.timeField;
+        resultColumns = info.columns.map(
+          ({ name, esType }) =>
+            ({
+              id: name,
+              name,
+              meta: { type: esFieldTypeToKibanaFieldType(esType), esType },
+              isComputedColumn: isComputedColumn(name, querySummary),
+            } as DatatableColumn)
+        );
+      }
+    }
+
     const hashInput = JSON.stringify([
       'esql',
-      title,
+      args.query,
       args.projectRouting ?? null,
-      args.timeFieldName ?? null,
+      timeFieldName ?? null,
     ]);
     const hash = await sha256(hashInput);
     return new EsqlSource({
       id: `esql-${hash}`,
+      query: args.query,
       title,
-      timeFieldName: args.timeFieldName,
-      resultColumns: args.resultColumns,
+      timeFieldName,
+      resultColumns,
     });
   }
 
@@ -112,6 +167,7 @@ export class EsqlSource implements DataSourceBase {
   public withColumns(resultColumns: readonly DatatableColumn[]): EsqlSource {
     return new EsqlSource({
       id: this.id,
+      query: this.query,
       title: this.title,
       timeFieldName: this.timeFieldName,
       resultColumns,

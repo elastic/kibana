@@ -18,7 +18,7 @@ import {
   convertTimeseriesCommandToFrom,
   hasTimeseriesInfoCommand,
 } from '@kbn/esql-utils';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -499,6 +499,7 @@ export class LensVisService {
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
+    const timeFieldName = queryParams.timeFieldName ?? dataView.timeFieldName;
     const breakdownColumn = breakdownField?.name
       ? columns?.find((column) => column.name === breakdownField.name)
       : undefined;
@@ -515,7 +516,6 @@ export class LensVisService {
             'splitAccessors' in layer && layer.splitAccessors?.includes(breakdownColumn.name)
         )
       ) {
-        // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
         preferredVisAttributes = undefined;
       }
     }
@@ -524,26 +524,25 @@ export class LensVisService {
       const dataSource = preferredVisAttributes.state.datasourceStates?.textBased;
       const layers = Object.values(dataSource?.layers ?? {});
       if (!layers.some((layer) => layer.index === dataView.id)) {
-        // the preferred vis attributes don't contain the current data view, so we discard it to avoid issues
         preferredVisAttributes = undefined;
       }
     }
 
     if (
-      dataView.timeFieldName &&
+      timeFieldName &&
       timeRange &&
       isOfAggregateQueryType(query) &&
       !hasTransformationalCommand(query.esql)
     ) {
       const interval = computeInterval(timeRange, this.services.data);
       const esqlQuery = this.getESQLHistogramQuery({
-        dataView,
+        timeFieldName,
         query,
         timeRange,
         interval,
         breakdownColumn,
       });
-      const dateFieldLabel = `${dataView.timeFieldName} every ${interval}`;
+      const dateFieldLabel = `${timeFieldName} every ${interval}`;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -625,13 +624,13 @@ export class LensVisService {
   };
 
   private getESQLHistogramQuery = ({
-    dataView,
+    timeFieldName,
     timeRange,
     query,
     interval,
     breakdownColumn,
   }: {
-    dataView: DataView;
+    timeFieldName: string;
     timeRange: TimeRange;
     query: AggregateQuery;
     interval?: string;
@@ -643,13 +642,12 @@ export class LensVisService {
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
     const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
 
-    // sort by breakdown column if it's sortable
     const sortBy =
       breakdownColumn && isESQLColumnSortable(breakdownColumn)
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
-    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
       `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
@@ -720,6 +718,7 @@ export class LensVisService {
     visContext: UnifiedHistogramVisContext | undefined;
   } => {
     const { dataView, query, filters, timeRange, columns } = queryParams;
+    const timeFieldName = queryParams.timeFieldName ?? dataView.timeFieldName;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
@@ -732,16 +731,19 @@ export class LensVisService {
     const isTextBased = isOfAggregateQueryType(query);
     const requestData = {
       dataViewId: dataView.id,
-      timeField: dataView.timeFieldName,
+      timeField: timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
       breakdownField: breakdownField?.name,
     };
 
     const currentQuery =
-      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
+      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
+      isTextBased &&
+      timeRange &&
+      timeFieldName
         ? {
             esql: this.getESQLHistogramQuery({
-              dataView,
+              timeFieldName,
               query,
               timeRange,
               breakdownColumn: breakdownField?.name

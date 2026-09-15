@@ -80,6 +80,11 @@ export function discoverSidebarReducer(
       if (state.dataView === action.payload.dataView) {
         return state; // already updated in `DOCUMENTS_LOADED`
       }
+      if (state.dataSource?.kind === 'esql') {
+        // In ES|QL mode the DataView switch is synthetic (registered after fetch).
+        // The field list was just populated from the query result, so keep it as-is.
+        return { ...state, dataView: action.payload.dataView };
+      }
       return {
         ...state,
         dataView: action.payload.dataView,

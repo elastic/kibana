@@ -120,7 +120,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
 
   const isChartAvailable = checkChartAvailability({
     chart,
-    dataView: fetchParams?.dataView,
+    dataSource: fetchParams?.dataSource,
     isPlainRecord: fetchParams?.isESQLQuery,
   });
 
@@ -131,7 +131,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   }, [api, isChartAvailable]);
 
   const chartProps = useMemo<UnifiedHistogramPartialChartProps | undefined>(() => {
-    return lensVisService && lensVisServiceState && fetchParams?.dataView
+    return lensVisService && lensVisServiceState && fetchParams?.dataSource
       ? {
           ...props,
           ...stateProps,

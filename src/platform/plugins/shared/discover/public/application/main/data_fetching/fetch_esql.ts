@@ -23,19 +23,13 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
-import {
-  getColumnsWithHighlights,
-  getESQLTimeField,
-  getProjectRoutingFromEsqlQuery,
-} from '@kbn/esql-utils';
-import { EsqlSource } from '@kbn/data-source';
-import type { HttpStart } from '@kbn/core/public';
+import { getColumnsWithHighlights } from '@kbn/esql-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -51,7 +45,7 @@ export interface FetchEsqlParams {
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  esqlSource: EsqlSource;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
@@ -65,7 +59,6 @@ export interface FetchEsqlParams {
     title: string;
     description: string;
   };
-  http?: HttpStart;
 }
 
 export function fetchEsql({
@@ -73,7 +66,7 @@ export function fetchEsql({
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  esqlSource,
   abortSignal,
   inspectorAdapters,
   data,
@@ -84,17 +77,18 @@ export function fetchEsql({
   projectRouting,
   esqlApproximation,
   inspectorConfig,
-  http,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
-  const props = getTextBasedQueryStateToAstProps({
-    query,
-    inputQuery,
-    filters,
-    timeRange,
-    dataView,
-    data,
-    inspectorConfig,
-  });
+  const props = {
+    ...getTextBasedQueryStateToAstProps({
+      query,
+      inputQuery,
+      filters,
+      timeRange,
+      timeFieldName: esqlSource.timeFieldName,
+      data,
+      inspectorConfig,
+    }),
+  };
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
@@ -113,7 +107,6 @@ export function fetchEsql({
         });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
-        let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
         let approximationApplied: boolean | undefined;
@@ -126,7 +119,6 @@ export function fetchEsql({
             const rows = table?.rows ?? [];
             approximationApplied = table.meta?.approximationApplied;
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
-            esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             let inlineHighlights: ESQLColumnsWithHighlights | undefined;
             if (isOfAggregateQueryType(query)) {
@@ -150,7 +142,7 @@ export function fetchEsql({
             });
           }
         });
-        return lastValueFrom(execution).then(async () => {
+        return lastValueFrom(execution).then(() => {
           if (error) {
             throw new Error(error);
           } else {
@@ -162,26 +154,9 @@ export function fetchEsql({
                 return true; // suppress the default behaviour
               });
             }
-            let esqlSource: EsqlSource | undefined;
-            if (esqlQueryColumns) {
-              const esql = isOfAggregateQueryType(query) ? query.esql : '';
-              const resolvedProjectRouting =
-                projectRouting ?? getProjectRoutingFromEsqlQuery(esql) ?? undefined;
-              esqlSource = await EsqlSource.create({
-                query: esql,
-                resultColumns: esqlQueryColumns,
-                timeFieldName: await getESQLTimeField({
-                  query: esql,
-                  http,
-                  projectRouting: resolvedProjectRouting,
-                }),
-                projectRouting: resolvedProjectRouting,
-              });
-            }
             return {
               records: finalData || [],
               interceptedWarnings,
-              dataSource: esqlSource,
               esqlHeaderWarning,
               approximationApplied,
             };
@@ -191,7 +166,6 @@ export function fetchEsql({
       return {
         records: [],
         interceptedWarnings: [],
-        dataSource: undefined,
         esqlHeaderWarning: undefined,
         approximationApplied: undefined,
       };
@@ -205,7 +179,7 @@ export function getTextBasedQueryStateToAstProps({
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  timeFieldName,
   data,
   inspectorConfig,
 }: {
@@ -213,7 +187,7 @@ export function getTextBasedQueryStateToAstProps({
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  timeFieldName?: string;
   data: DataPublicPluginStart;
   inspectorConfig?: {
     title: string;
@@ -224,7 +198,7 @@ export function getTextBasedQueryStateToAstProps({
     filters,
     query,
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
-    timeFieldName: dataView.timeFieldName,
+    timeFieldName,
     inputQuery,
     titleForInspector:
       inspectorConfig?.title ??

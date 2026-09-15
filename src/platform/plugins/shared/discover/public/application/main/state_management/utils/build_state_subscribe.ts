@@ -8,6 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   type InternalStateDispatch,
@@ -29,6 +30,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { createEsqlSource } from '../../data_fetching/create_esql_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -168,10 +170,25 @@ export const buildStateSubscribe =
         JSON.stringify(logData, null, 2)
       );
 
-      // Set documents loading to true immediately on state changes since there's a delay
-      // on the fetch and we don't want to see state changes reflected in the data grid
-      // until the fetch is complete (it also helps to minimize data grid re-renders)
+      // Send LOADING immediately — before the async EsqlSource creation — so UI masks
+      // stale state and waitForDataFetching (250ms window on main$) doesn't time out.
+      sendLoadingMsg(dataState.data$.main$);
       sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
+
+      if (queryChanged && isOfAggregateQueryType(nextState.query)) {
+        const tabId = getCurrentTab().id;
+        const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+        const currentSource = currentDataSource$.getValue();
+        if (currentSource?.kind !== 'esql' || currentSource.query !== nextState.query.esql) {
+          const newEsqlSource = await createEsqlSource({
+            esql: nextState.query.esql,
+            http: services.http,
+            projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
+            timeRange: services.data.query.timefilter.timefilter.getTime(),
+          });
+          currentDataSource$.next(newEsqlSource);
+        }
+      }
 
       dataState.fetch();
     }

@@ -43,7 +43,21 @@ describe('EsqlSource', () => {
       expect(source.id).toMatch(/^esql-[0-9a-f]{64}$/);
     });
 
-    it('is deterministic — same title and timeFieldName produce the same id', async () => {
+    it('is deterministic — same query and timeFieldName produce the same id', async () => {
+      const a = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+      const b = await EsqlSource.create({
+        query: 'FROM logs-* | LIMIT 10',
+        resultColumns: [makeColumn('message', 'string')],
+        timeFieldName: '@timestamp',
+      });
+      expect(a.id).toBe(b.id);
+    });
+
+    it('produces a different id when the query differs but title is the same', async () => {
       const a = await EsqlSource.create({
         query: 'FROM logs-* | LIMIT 10',
         resultColumns: [],
@@ -51,10 +65,10 @@ describe('EsqlSource', () => {
       });
       const b = await EsqlSource.create({
         query: 'FROM logs-* | KEEP message',
-        resultColumns: [makeColumn('message', 'string')],
+        resultColumns: [],
         timeFieldName: '@timestamp',
       });
-      expect(a.id).toBe(b.id);
+      expect(a.id).not.toBe(b.id);
     });
 
     it('produces a different id when the timeFieldName differs', async () => {

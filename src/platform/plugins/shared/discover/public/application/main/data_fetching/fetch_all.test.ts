@@ -265,7 +265,7 @@ describe('test fetchAll', () => {
         appState: { query },
       })
     );
-    fetchAll(deps);
+    fetchAll({ ...deps, currentEsqlSource: createMockEsqlSource() });
     await waitForNextTick();
 
     expect(await collect()).toEqual([

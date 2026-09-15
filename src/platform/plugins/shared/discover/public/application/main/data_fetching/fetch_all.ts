@@ -13,7 +13,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, type EsqlSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -51,6 +51,7 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  currentEsqlSource?: EsqlSource;
 }
 
 /**
@@ -78,6 +79,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    currentEsqlSource,
   } = params;
   const { data, expressions } = services;
 
@@ -110,10 +112,14 @@ export function fetchAll(
     });
 
     // Start fetching all required requests
+    if (isEsqlQuery && !currentEsqlSource) {
+      throw new Error('ES|QL fetch attempted without a current EsqlSource');
+    }
+
     const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          dataView,
+          esqlSource: currentEsqlSource!,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
@@ -123,7 +129,6 @@ export function fetchAll(
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
           esqlApproximation: currentTab.appState.esqlApproximation ?? false,
-          http: services.http,
         })
       : fetchDocuments(searchSource, params);
 
@@ -135,7 +140,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, dataSource: esqlSource, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(({ records, interceptedWarnings = [], esqlHeaderWarning }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -177,7 +182,11 @@ export function fetchAll(
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
-          dataSource: esqlSource ?? (dataView.id ? new DataViewSource(dataView) : undefined),
+          dataSource: isEsqlQuery
+            ? currentEsqlSource
+            : dataView.id
+            ? new DataViewSource(dataView)
+            : undefined,
           esqlHeaderWarning,
           interceptedWarnings,
           query,

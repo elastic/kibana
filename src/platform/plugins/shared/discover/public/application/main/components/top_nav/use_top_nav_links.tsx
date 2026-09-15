@@ -19,7 +19,6 @@ import {
   dismissFlyouts,
   DiscoverFlyouts,
 } from '@kbn/discover-utils';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
@@ -207,7 +206,7 @@ export const useTopNavLinks = ({
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-        isEsqlMode && currentDataView.type === ESQL_TYPE
+        isEsqlMode
           ? { query: { esql: getInitialESQLQuery(currentDataView) } }
           : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState

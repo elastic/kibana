@@ -70,6 +70,11 @@ async function getTestProps({
   const msgLoading = {
     fetchStatus: defaultFetchStatus,
     query,
+    // Provide an empty EsqlSource so the hook advances past the initial-fetch state
+    // even before the test's real PARTIAL arrives (mirrors production behaviour).
+    ...(defaultFetchStatus === FetchStatus.PARTIAL && query && 'esql' in query
+      ? { dataSource: createMockEsqlSource([], [], undefined, (query as { esql: string }).esql) }
+      : {}),
   };
   dataState.data$.documents$.next(msgLoading);
 
@@ -86,6 +91,14 @@ async function getTestProps({
   };
 }
 
+const makeEsqlSource = (names: string[], esql = 'FROM mock') =>
+  createMockEsqlSource(
+    names.map((name) => ({ name, type: 'keyword', source: 'esql-result' as const })),
+    [],
+    undefined,
+    esql
+  );
+
 const query = { esql: 'from the-data-view-title' };
 const msgComplete = {
   fetchStatus: FetchStatus.PARTIAL,
@@ -97,6 +110,7 @@ const msgComplete = {
     } as unknown as DataTableRecord,
   ],
   query,
+  dataSource: makeEsqlSource(['field1', 'field2'], query.esql),
 };
 
 const setupTest = async ({
@@ -191,6 +205,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       // transformational command
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -215,6 +230,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-2' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-2'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -241,6 +257,10 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       // non transformational command, same columns as msgComplete
       query: { esql: 'from the-data-view-title | where field1 > 0' },
+      dataSource: makeEsqlSource(
+        ['field1', 'field2'],
+        'from the-data-view-title | where field1 > 0'
+      ),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     replaceUrlState.mockClear();
@@ -256,6 +276,10 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       // non transformational command, different index
       query: { esql: 'from the-data-view-title2 | where field1 > 0' },
+      dataSource: makeEsqlSource(
+        ['field1', 'field2'],
+        'from the-data-view-title2 | where field1 > 0'
+      ),
     });
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
@@ -281,6 +305,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -299,6 +324,10 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
+      dataSource: makeEsqlSource(
+        ['field1'],
+        'from the-data-view-title | keep field 1 | WHERE field1=1'
+      ),
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
@@ -333,6 +362,10 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
+      dataSource: makeEsqlSource(
+        ['field1'],
+        'from the-data-view-title | keep field 1 | WHERE field1=1'
+      ),
     });
 
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -360,6 +393,10 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
+      dataSource: makeEsqlSource(
+        ['field1', 'field2'],
+        'from the-data-view-title | keep field 1 | WHERE field1=1'
+      ),
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
@@ -379,6 +416,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -407,6 +445,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field 1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field 1'),
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
@@ -458,6 +497,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
+      dataSource: makeEsqlSource(['field1', 'field2'], 'from the-data-view-title | WHERE field2=1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -480,6 +520,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
+      dataSource: makeEsqlSource(['field1', 'field2'], 'from the-data-view-title | WHERE field2=1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -497,6 +538,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -528,6 +570,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
+      dataSource: makeEsqlSource(['field1', 'field2'], 'from the-data-view-title | WHERE field1=2'),
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
     toolkit.internalState.dispatch(
@@ -561,6 +604,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
@@ -588,6 +632,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-* | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-* | keep field1'),
     });
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.assignNextDataView)({
@@ -611,6 +656,7 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
+      dataSource: makeEsqlSource([], 'from pattern'),
     });
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateAppState)({
@@ -625,6 +671,7 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
+      dataSource: makeEsqlSource([], 'from pattern1'),
     });
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
@@ -644,6 +691,7 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
+      dataSource: makeEsqlSource([], 'from pattern1'),
     });
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateAppState)({
@@ -658,6 +706,7 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern2' },
+      dataSource: makeEsqlSource([], 'from pattern2'),
     });
   });
 
@@ -705,6 +754,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title' },
+      dataSource: makeEsqlSource(expectedColumns, 'from the-data-view-title'),
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(1);
@@ -733,11 +783,6 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
   });
-
-  const makeEsqlSource = (names: string[]) =>
-    createMockEsqlSource(
-      names.map((name) => ({ name, type: 'keyword', source: 'esql-result' as const }))
-    );
 
   test('should clear stale columns from a STATS query to a zero-result query', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
@@ -773,7 +818,10 @@ describe('buildEsqlFetchSubscribe', () => {
     const { replaceUrlState, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
-    const manyEsqlCols = makeEsqlSource(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    const manyEsqlCols = makeEsqlSource(
+      ['f1', 'f2', 'f3', 'f4', 'f5', 'f6'],
+      'from the-data-view-title'
+    );
     const manyRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6 };
 
     documents$.next({
@@ -803,7 +851,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field2', 'field3', 'field4', 'field5', 'field6'],
+        'from the-data-view-title'
+      ),
       query: { esql: 'from the-data-view-title' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
@@ -812,7 +863,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field3', 'field4', 'field5', 'field6', 'field7'],
+        'from the-data-view-title | where field1 > 0'
+      ),
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
 
@@ -863,7 +917,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field2', 'field3', 'field4', 'field5', 'field6'],
+        'from the-data-view-title'
+      ),
       query: { esql: 'from the-data-view-title' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
@@ -872,7 +929,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field3', 'field4', 'field5', 'field6', 'field7'],
+        'from the-data-view-title | where field1 > 0'
+      ),
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
 
@@ -892,7 +952,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field2', 'field3', 'field4', 'field5', 'field6']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field2', 'field3', 'field4', 'field5', 'field6'],
+        'from the-data-view-title'
+      ),
       query: { esql: 'from the-data-view-title' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
@@ -907,7 +970,10 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [],
-      dataSource: makeEsqlSource(['field1', 'field3', 'field4', 'field5', 'field6', 'field7']),
+      dataSource: makeEsqlSource(
+        ['field1', 'field3', 'field4', 'field5', 'field6', 'field7'],
+        'from the-data-view-title | where field1 > 0'
+      ),
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
 
@@ -943,6 +1009,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
 
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -981,6 +1048,7 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       query: { esql: 'from the-data-view-title | keep field1' },
+      dataSource: makeEsqlSource(['field1'], 'from the-data-view-title | keep field1'),
     });
 
     expect(replaceUrlState).toHaveBeenCalledWith({

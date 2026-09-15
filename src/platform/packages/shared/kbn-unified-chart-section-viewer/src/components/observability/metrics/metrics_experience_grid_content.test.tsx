@@ -88,7 +88,6 @@ describe('MetricsExperienceGridContent', () => {
     jest.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
-      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
       query: { esql: 'FROM metrics-*' },
       esqlVariables: [],

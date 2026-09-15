@@ -98,9 +98,7 @@ export const DiscoverTopNav = ({
     if (dataView.type === DataViewType.ROLLUP) {
       return false;
     }
-    const isTimeBased = isEsqlMode
-      ? currentDataSource.isTimeBased()
-      : dataView.isTimeBased();
+    const isTimeBased = isEsqlMode ? currentDataSource.isTimeBased() : dataView.isTimeBased();
     return { disabled: !isTimeBased };
   }, [dataView, isEsqlMode, currentDataSource]);
 

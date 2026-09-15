@@ -55,10 +55,10 @@ function makeFieldsSpec(columns: readonly Column[], timeFieldName?: string) {
       { ...columnToFieldBase(col), searchable: true, aggregatable: true },
     ])
   );
-  // TODO: Remove once Discover's Redux state holds EsqlSource directly instead of a DataView shim.
   // DataView.isTimeBased() requires the time field to exist in the fields list
-  // (not just timeFieldName being set on the spec). On first load resultColumns is empty,
-  // so we inject a minimal entry to satisfy that check and enable the timepicker.
+  // (not just timeFieldName being set on the spec). Transformational commands like
+  // STATS remove the time field from result columns, so we inject a minimal entry
+  // to keep the timepicker enabled.
   if (timeFieldName && !spec[timeFieldName]) {
     spec[timeFieldName] = {
       name: timeFieldName,

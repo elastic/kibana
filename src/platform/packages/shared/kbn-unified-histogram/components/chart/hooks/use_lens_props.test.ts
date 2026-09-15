@@ -27,7 +27,7 @@ describe('useLensProps', () => {
       query: fetchParams.query,
       columns: [],
       isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: fetchParams.timeInterval,
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
@@ -64,7 +64,7 @@ describe('useLensProps', () => {
       query: fetchParams.query,
       columns: [],
       isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
@@ -92,7 +92,7 @@ describe('useLensProps', () => {
       query: fetchParams.query,
       columns: [],
       isPlainRecord: fetchParams.isESQLQuery,
-      dataView: fetchParams.dataView,
+      dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });

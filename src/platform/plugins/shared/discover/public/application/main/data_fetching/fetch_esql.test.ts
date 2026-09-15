@@ -12,27 +12,25 @@ import type { ExecutionContract } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
 import { of } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
 import type { TimeRange } from '@kbn/es-query';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
-import { EsqlSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(EsqlSource, 'create').mockResolvedValue(createMockEsqlSource());
   });
 
   const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
+  const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },
-    dataView: dataViewWithTimefieldMock,
+    esqlSource: mockEsqlSource,
     inspectorAdapters: { requests: new RequestAdapter() },
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
@@ -65,7 +63,6 @@ describe('fetchEsql', () => {
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
-      dataSource: expect.any(Object),
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
     });
@@ -110,7 +107,6 @@ describe('fetchEsql', () => {
             flattened: hits[1],
           },
         ],
-        dataSource: expect.any(Object),
         esqlHeaderWarning: undefined,
         interceptedWarnings: [],
       });
@@ -197,7 +193,11 @@ describe('fetchEsql', () => {
 
   it('should use inputTimeRange if provided', () => {
     const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
-    const result = getTextBasedQueryStateToAstProps({ ...fetchEsqlMockProps, timeRange });
+    const result = getTextBasedQueryStateToAstProps({
+      query: fetchEsqlMockProps.query,
+      timeRange,
+      data: fetchEsqlMockProps.data,
+    });
     expect(result.time).toEqual(timeRange);
   });
 
@@ -210,7 +210,10 @@ describe('fetchEsql', () => {
       .spyOn(discoverServiceMock.data.query.timefilter.timefilter, 'getAbsoluteTime')
       .mockReturnValue(absoluteTimeRange);
 
-    const result = getTextBasedQueryStateToAstProps(fetchEsqlMockProps);
+    const result = getTextBasedQueryStateToAstProps({
+      query: fetchEsqlMockProps.query,
+      data: fetchEsqlMockProps.data,
+    });
 
     expect(result.time).toEqual(absoluteTimeRange);
   });

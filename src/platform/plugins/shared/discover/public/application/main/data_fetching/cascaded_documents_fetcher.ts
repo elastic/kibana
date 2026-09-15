@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
@@ -15,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DataSource, EsqlSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -41,7 +43,8 @@ export class CascadedDocumentsFetcher {
   constructor(
     private readonly services: DiscoverServices,
     private readonly scopedProfilesManager: ScopedProfilesManager,
-    private readonly stateManager: CascadedDocumentsStateManager
+    private readonly stateManager: CascadedDocumentsStateManager,
+    private readonly currentDataSource$: BehaviorSubject<DataSource | undefined>
   ) {}
 
   getRequestAdapter(): RequestAdapter {
@@ -89,10 +92,16 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
+      const currentEsqlSource = this.currentDataSource$.getValue();
+
+      if (currentEsqlSource?.kind !== 'esql') {
+        return [];
+      }
+
       const { dataSource: esqlSource, records: fetchedRecords } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        dataView,
+        esqlSource: currentEsqlSource as EsqlSource,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,
@@ -100,7 +109,6 @@ export class CascadedDocumentsFetcher {
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
         esqlApproximation,
-        http: this.services.http,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',

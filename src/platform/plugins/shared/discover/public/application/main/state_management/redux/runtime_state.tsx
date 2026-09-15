@@ -102,10 +102,12 @@ export const createTabRuntimeState = ({
     scopedEbtManager,
     toolkit,
   });
+  const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,
-    cascadedDocumentsStateManager
+    cascadedDocumentsStateManager,
+    currentDataSource$
   );
 
   return {
@@ -121,7 +123,7 @@ export const createTabRuntimeState = ({
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
+    currentDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
