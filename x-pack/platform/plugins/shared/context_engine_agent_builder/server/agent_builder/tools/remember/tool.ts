@@ -210,8 +210,6 @@ export const createRememberTool = ({
         existingDocument = existingHit._source;
       }
 
-      const previousRevision = existingDocument?.attributes?.revision;
-      const revision = typeof previousRevision === 'number' ? previousRevision + 1 : 1;
       const document: StoredMemoryDocument = {
         '@timestamp':
           aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
@@ -237,7 +235,6 @@ export const createRememberTool = ({
           session_id: conversationId,
           session_kind: 'conversation',
           namespace: 'agent_memory',
-          revision,
         },
       };
 
@@ -269,7 +266,7 @@ export const createRememberTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data: { id: logicalId, revision },
+            data: { id: logicalId },
           },
         ],
       };

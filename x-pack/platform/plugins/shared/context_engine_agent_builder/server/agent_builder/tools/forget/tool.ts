@@ -141,16 +141,11 @@ export const createForgetTool = ({
         };
       }
 
-      const previousRevision = existingHit._source.attributes?.revision;
       const now = new Date().toISOString();
       const tombstoneDocument: StoredMemoryDocument = {
         ...existingHit._source,
         '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existingHit._source['@timestamp'],
         updated_at: now,
-        attributes: {
-          ...existingHit._source.attributes,
-          revision: typeof previousRevision === 'number' ? previousRevision + 1 : 1,
-        },
         governance: {
           ...existingHit._source.governance,
           lifecycle: {
