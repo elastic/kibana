@@ -215,6 +215,27 @@ describe('useGroupTakeActionsItems', () => {
       );
     });
 
+    it('forwards runtimeMappings to updateAlertStatus when the close action is clicked', async () => {
+      const { result } = renderHook(
+        () => useGroupTakeActionsItems({ showAlertStatusActions: true }),
+        { wrapper: wrapperContainer }
+      );
+
+      const { getByTestId } = render(
+        <>{result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })}</>
+      );
+
+      await act(async () => {
+        getByTestId('close-alert-status').click();
+      });
+
+      expect(updateAlertStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runtimeMappings: scriptedMappings,
+        })
+      );
+    });
+
     it('passes runtimeMappings as undefined when not provided', async () => {
       const { result } = renderHook(
         () => useGroupTakeActionsItems({ showAlertStatusActions: true }),

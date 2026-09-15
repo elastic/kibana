@@ -222,8 +222,8 @@ describe('set signal status', () => {
     });
 
     test('returns 200 when runtime_fields + runtime_mappings share a key (union counts it once, staying at the limit)', async () => {
-      // 99 unique fields in runtime_fields, 1 field in runtime_mappings that overlaps with a
-      // runtime_fields entry → union size is 99, not 100. Well within the limit.
+      // 100 unique fields in runtime_fields (99 rf_field_N + 1 shared key), 1 field in
+      // runtime_mappings that overlaps with a runtime_fields entry → union size is 100, exactly at the limit.
       const sharedKey = 'custom.shared_field';
       const runtimeFields = Object.fromEntries([
         ...Array.from({ length: 99 }, (_, i) => [`rf_field_${i}`, RuntimeFieldTypeEnum.keyword]),
