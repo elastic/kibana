@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { syncEditedMonitor } from './edit_monitor';
+import { editSyntheticsMonitorRoute, syncEditedMonitor } from './edit_monitor';
 import type { SavedObject } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { ConfigKey } from '../../../common/runtime_types';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
+import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { getRouteContextMock } from '../../mocks/route_context_mock';
 
 jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
@@ -23,6 +25,23 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
   formatTelemetryUpdateEvent: jest.fn(),
 }));
+
+jest.mock('./monitor_locations_utils', () => {
+  const actual = jest.requireActual('./monitor_locations_utils');
+  return {
+    ...actual,
+    assertCanPerformMonitorBulkActionInAllSpaces: jest.fn(),
+  };
+});
+
+jest.mock('./monitor_validation', () => {
+  const actual = jest.requireActual('./monitor_validation');
+  return {
+    ...actual,
+    validateMonitor: jest.fn().mockImplementation(actual.validateMonitor),
+    normalizeAPIConfig: jest.fn().mockImplementation(actual.normalizeAPIConfig),
+  };
+});
 
 describe('syncEditedMonitor', () => {
   const editedMonitor = {
@@ -152,5 +171,98 @@ describe('syncEditedMonitor', () => {
       expect.any(Object),
       expect.objectContaining({ references: undefined })
     );
+  });
+});
+
+describe('editSyntheticsMonitorRoute space authorization', () => {
+  const monitorId = '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d';
+  let normalizeSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    const { validateMonitor, normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+    normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
+    validateMonitor.mockImplementation((m: Record<string, unknown>) => ({
+      valid: true,
+      reason: '',
+      details: '',
+      payload: m,
+      decodedMonitor: m,
+    }));
+
+    normalizeSpy = jest
+      .spyOn(AddEditMonitorAPI.prototype, 'normalizeMonitor')
+      .mockImplementation(async (cfg) => cfg as SyntheticsMonitor);
+  });
+
+  afterEach(() => {
+    normalizeSpy.mockRestore();
+  });
+
+  const runEdit = async ({
+    namespaces,
+    payloadSpaces,
+  }: {
+    namespaces: string[];
+    payloadSpaces: string[];
+  }) => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { routeContext } = getRouteContextMock();
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.KIBANA_SPACES]: payloadSpaces },
+    } as any;
+    routeContext.spaceId = 'space-a';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor',
+        namespaces,
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          locations: [],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+    return { result, forbidden, assertCanPerformMonitorBulkActionInAllSpaces };
+  };
+
+  it('authorizes the union of previous namespaces and submitted spaces', async () => {
+    const { result, forbidden, assertCanPerformMonitorBulkActionInAllSpaces } = await runEdit({
+      namespaces: ['space-a', 'space-b'],
+      payloadSpaces: ['space-a'],
+    });
+
+    expect(result).toBe(forbidden);
+    expect(assertCanPerformMonitorBulkActionInAllSpaces).toHaveBeenCalledTimes(1);
+    const [, spacesArg] = assertCanPerformMonitorBulkActionInAllSpaces.mock.calls[0];
+    expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
+    expect(spacesArg).toHaveLength(2);
+  });
+
+  it('authorizes a newly submitted space that the monitor was not previously shared to', async () => {
+    const { result, forbidden, assertCanPerformMonitorBulkActionInAllSpaces } = await runEdit({
+      namespaces: ['space-a'],
+      payloadSpaces: ['space-a', 'space-b'],
+    });
+
+    expect(result).toBe(forbidden);
+    const [, spacesArg] = assertCanPerformMonitorBulkActionInAllSpaces.mock.calls[0];
+    expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
+    expect(spacesArg).toHaveLength(2);
   });
 });
