@@ -15,7 +15,6 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  RULE_CREATION_SKILL_ID,
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
@@ -25,46 +24,38 @@ import {
 const AGENT_BUILDER_API_VERSION = '2023-10-31';
 
 /**
- * The tool ids the detection-rule-edit skill registers on the stack under test. Read live rather
- * than pinned: the skill's list is conditional (rule preview is feature-flagged), so a constant
- * could never match every stack, and the Known Tools evaluator would penalize legitimate calls.
+ * Every tool id registered in Agent Builder on the stack under test. Read live: the registry
+ * varies by enabled plugins and feature flags, so a pinned list would penalize legitimate calls.
  */
-export const fetchSkillToolIds = async ({
+export const fetchRegisteredToolIds = async ({
   fetch,
   log,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
 }): Promise<ReadonlySet<string>> => {
-  let skill: { tool_ids?: string[] };
+  let response: { results?: Array<{ id: string }> };
   try {
-    skill = await fetch<{ tool_ids?: string[] }>(
-      `/api/agent_builder/skills/${RULE_CREATION_SKILL_ID}`,
-      {
-        method: 'GET',
-        version: AGENT_BUILDER_API_VERSION,
-        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      }
-    );
+    response = await fetch<{ results?: Array<{ id: string }> }>('/api/agent_builder/tools', {
+      method: 'GET',
+      version: AGENT_BUILDER_API_VERSION,
+      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+    });
   } catch (err) {
     throw new Error(
-      `Could not read skill "${RULE_CREATION_SKILL_ID}" from Agent Builder. The Trajectory: Known ` +
-        `Tools evaluator scores against this skill's registered tools, so without it every run ` +
-        `would be judged against an empty list. Original error: ${
+      `Could not list Agent Builder tools. Trajectory: Known Tools scores against the registry, ` +
+        `so without it every call would be judged unknown. Original error: ${
           err instanceof Error ? err.message : String(err)
         }`
     );
   }
-  const toolIds = skill.tool_ids ?? [];
+  const toolIds = (response.results ?? []).map((t) => t.id);
   if (toolIds.length === 0) {
     throw new Error(
-      `Skill "${RULE_CREATION_SKILL_ID}" registers no tools on this stack — the draft agent has ` +
-        `nothing to call and Trajectory: Known Tools would penalize every span.`
+      'Agent Builder reports no registered tools on this stack — the draft agent has nothing to call.'
     );
   }
-  log.info(
-    `Skill ${RULE_CREATION_SKILL_ID} registers ${toolIds.length} tool(s): ${toolIds.join(', ')}`
-  );
+  log.info(`Agent Builder registers ${toolIds.length} tool(s)`);
   return new Set(toolIds);
 };
 

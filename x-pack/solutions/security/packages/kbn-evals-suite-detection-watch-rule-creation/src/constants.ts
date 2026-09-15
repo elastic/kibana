@@ -35,8 +35,5 @@ export const REVIEW_STEP_ID = 'review_creation';
  */
 export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 
-/**
- * Skill the workflow's `ai.agent` step is instructed to route through. Its registered tool ids
- * are read from the running stack at setup (see workflow_fixture.ts) for the Trajectory evaluators.
- */
+/** Skill the workflow's `ai.agent` step is instructed to route through. */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';

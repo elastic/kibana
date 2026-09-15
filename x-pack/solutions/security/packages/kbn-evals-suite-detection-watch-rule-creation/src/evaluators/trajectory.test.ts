@@ -28,7 +28,7 @@ const CREATE = RULE_CREATION_TOOL_ID;
 const PREVIEW = 'security.run_rule_preview';
 const LABS = 'security.security_labs_search';
 const INTERNAL = internalTools.loadSkill;
-// What GET /api/agent_builder/skills/detection-rule-edit would return as tool_ids.
+// Stand-in for the ids GET /api/agent_builder/tools returns on the stack under test.
 const KNOWN = new Set([CREATE, PREVIEW, LABS]);
 
 const NAME_COL = [{ name: 'attributes.gen_ai.tool.name', type: 'keyword' }];
@@ -88,6 +88,7 @@ describe('createTrajectoryFetcher', () => {
     await fetcher(client)(result());
     const q = query.mock.calls[0][0].query as string;
     expect(q).toContain('attributes.elastic.inference.span.kind == "TOOL"');
+    expect(q).toContain('attributes.gen_ai.tool.call.id IS NOT NULL');
     expect(q).toContain('SORT @timestamp ASC');
     expect(q).toContain('KEEP attributes.gen_ai.tool.name');
   });
@@ -178,7 +179,7 @@ describe('scoreCallCount', () => {
 describe('scoreKnownTools', () => {
   const score = scoreKnownTools(KNOWN);
 
-  it('accepts the skill registry tools it was given and Agent Builder internal tools', () => {
+  it('accepts the registered tools it was given and Agent Builder internal tools', () => {
     const r = score(settled([LABS, INTERNAL, CREATE, PREVIEW]));
     expect(r.score).toBe(1);
     expect(r.metadata).toMatchObject({ internal: [INTERNAL], unknown: [] });

@@ -37,7 +37,9 @@ const fetchToolNames = async (
   where: string
 ): Promise<string[] | undefined> => {
   const response = (await traceEsClient.esql.query({
-    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL"\n| SORT @timestamp ASC\n| KEEP ${TOOL_NAME_COLUMN}`,
+    // tool.call.id is set only on calls the LLM issued; helper spans tools open internally
+    // (e.g. search's natural_language_search) have none and are not part of the trajectory.
+    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP ${TOOL_NAME_COLUMN}`,
   })) as unknown as EsqlResponse;
   const nameIdx = response.columns.findIndex((c) => c.name === TOOL_NAME_COLUMN);
   if (nameIdx === -1) return undefined;
@@ -173,12 +175,12 @@ export const scoreCallCount: ScoreFn = ({ toolNames }) => {
 export const scoreKnownTools =
   (knownToolIds: ReadonlySet<string>): ScoreFn =>
   ({ toolNames }) => {
-    const registry: string[] = [];
+    const registered: string[] = [];
     const internal: string[] = [];
     const anonymized: string[] = [];
     const unknown: string[] = [];
     for (const name of toolNames) {
-      if (knownToolIds.has(name)) registry.push(name);
+      if (knownToolIds.has(name)) registered.push(name);
       else if (isInternalTool(name)) internal.push(name);
       // AgentBuilderSpanProcessor writes "custom" for non-builtin tools when includeRealNames is off.
       else if (name === 'custom') anonymized.push(name);
@@ -189,21 +191,21 @@ export const scoreKnownTools =
       score,
       explanation:
         unknown.length === 0
-          ? `all ${toolNames.length} call(s) name reachable tools${
+          ? `all ${toolNames.length} call(s) name registered tools${
               anonymized.length > 0
                 ? `; ${anonymized.length} anonymized by tracing privacy settings`
                 : ''
             }`
-          : `${unknown.length} call(s) name tools the agent cannot reach: ${[
+          : `${unknown.length} call(s) name tools not registered on this stack: ${[
               ...new Set(unknown),
             ].join(', ')}`,
-      metadata: { registry, internal, anonymized, unknown },
+      metadata: { registered, internal, anonymized, unknown },
     };
   };
 
 /**
  * Separate series rather than one average, so a failing dimension cannot hide behind a passing one.
- * `knownToolIds` is the skill's registered tool list read from the stack under test.
+ * `knownToolIds` is Agent Builder's tool registry as read from the stack under test.
  */
 export const createTrajectoryEvaluators = ({
   knownToolIds,
