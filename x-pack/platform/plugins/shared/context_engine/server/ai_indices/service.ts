@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isResponseError } from '@kbn/es-errors';
 import pRetry from 'p-retry';
 import {
@@ -21,6 +22,7 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -29,8 +31,15 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient } from './storage';
-import { buildAiIndexDocId, createAiIndexStorageClient } from './storage';
+import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
+import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+
+/** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
+const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
+  ...source,
+  id: source.id ?? docId,
+  space: source.space ?? DEFAULT_SPACE_ID,
+});
 
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
@@ -113,29 +122,18 @@ export class AiIndexService {
     }
     await this.assertValidDest(properties.dest);
 
-    const now = new Date().toISOString();
-    const document: AiIndexDocument = {
-      ...properties,
-      id: aiIndexId,
-      space: spaceId,
-      managed: false,
-      date_created: now,
-      date_modified: now,
-    };
-
-    try {
-      await this.storageClient.index({
-        id: buildAiIndexDocId(spaceId, aiIndexId),
-        document,
-        op_type: 'create',
-        refresh: 'wait_for',
-      });
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 409) {
-        throw new AiIndexAlreadyExistsError(aiIndexId);
-      }
-      throw error;
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (existing) {
+      throw new AiIndexAlreadyExistsError(aiIndexId);
     }
+
+    // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
+    await this.writeDocument(
+      aiIndexId,
+      spaceId,
+      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      undefined
+    );
   }
 
   /**
@@ -189,7 +187,8 @@ export class AiIndexService {
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: true },
-      existing
+      existing,
+      { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
   }
 
@@ -197,7 +196,8 @@ export class AiIndexService {
     aiIndexId: string,
     spaceId: string,
     document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
-    existing: Awaited<ReturnType<typeof this.findDocument>>
+    existing: Awaited<ReturnType<typeof this.findDocument>>,
+    options?: { docId?: string }
   ): Promise<'created' | 'updated'> {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
@@ -205,12 +205,12 @@ export class AiIndexService {
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
-    const docId = buildAiIndexDocId(spaceId, aiIndexId);
 
     try {
       if (existing) {
+        // Writing back to the existing `_id` upgrades a pre-upgrade document in place (it gains `id` and `space`) instead of duplicating it.
         await this.storageClient.index({
-          id: docId,
+          id: existing.docId,
           document: fullDocument,
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
@@ -219,12 +219,19 @@ export class AiIndexService {
         return 'updated';
       }
 
-      await this.storageClient.index({
-        id: docId,
-        document: fullDocument,
-        op_type: 'create',
-        refresh: 'wait_for',
-      });
+      if (options?.docId) {
+        await this.storageClient.index({
+          id: options.docId,
+          document: fullDocument,
+          op_type: 'create',
+          refresh: 'wait_for',
+        });
+      } else {
+        await this.storageClient.index({
+          document: fullDocument,
+          refresh: 'wait_for',
+        });
+      }
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -389,7 +396,7 @@ export class AiIndexService {
     // Re-check the delete result: the entry may have been removed concurrently
     // between the existence lookup above and this call.
     const { result } = await this.storageClient.delete({
-      id: buildAiIndexDocId(spaceId, aiIndexId),
+      id: existing.docId,
     });
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
@@ -400,10 +407,17 @@ export class AiIndexService {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
-      query: { term: { space: spaceId } },
-      sort: [{ id: 'asc' }],
+      query: createSpaceDslFilter(spaceId),
+      // Pre-upgrade documents have no `id` to sort on and land at the end, where `_doc` keeps
+      // their order stable rather than leaving it undefined under the `size` cap.
+      sort: [{ id: { order: 'asc', missing: '_last' } }, { _doc: { order: 'asc' } }],
     });
-    return response.hits.hits.flatMap((hit) => (hit._source ? [toAiIndexItem(hit._source)] : []));
+    return response.hits.hits.flatMap((hit) => {
+      if (!hit._source || hit._id === undefined) {
+        return [];
+      }
+      return [toAiIndexItem(toAiIndexDocument(hit._source, hit._id))];
+    });
   }
 
   private async findDocument(
@@ -411,34 +425,43 @@ export class AiIndexService {
     spaceId: string
   ): Promise<
     | {
+        docId: string;
         document: AiIndexDocument;
         seqNo?: number;
         primaryTerm?: number;
       }
     | undefined
   > {
-    try {
-      // seq_no_primary_term is required for the OCC assertions in `put`: the
-      // storage client's get is search-based, and search hits only carry
-      // _seq_no/_primary_term when explicitly requested.
-      const response = await this.storageClient.get({
-        id: buildAiIndexDocId(spaceId, aiIndexId),
-        seq_no_primary_term: true,
-      });
-      if (!response.found || !response._source || response._source.space !== spaceId) {
-        return undefined;
-      }
-      return {
-        document: response._source,
-        seqNo: response._seq_no,
-        primaryTerm: response._primary_term,
-      };
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 404) {
-        return undefined;
-      }
-      throw error;
+    const response = await this.storageClient.search({
+      size: 1,
+      track_total_hits: false,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [
+            createSpaceDslFilter(spaceId),
+            {
+              bool: {
+                // The `ids` clause still finds a pre-upgrade document, whose logical id was its `_id`.
+                should: [{ term: { id: aiIndexId } }, { ids: { values: [aiIndexId] } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const [hit] = response.hits.hits;
+    if (!hit?._source || hit._id === undefined) {
+      return undefined;
     }
+    return {
+      docId: hit._id,
+      document: toAiIndexDocument(hit._source, hit._id),
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
+    };
   }
 
   /**

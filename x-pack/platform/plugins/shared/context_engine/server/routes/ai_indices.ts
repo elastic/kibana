@@ -351,18 +351,21 @@ export const registerAiIndexRoutes = ({
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+  const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
-      const spaceId = resolveSpaceId(await getSpaces(), request);
       const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       await getScheduleService().reconcile({
         aiIndexId,
+        spaceId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
         request,
       });
@@ -406,13 +409,10 @@ export const registerAiIndexRoutes = ({
             actions: await getActions(),
             request,
           });
-          await getAiIndexService().create(
-            id,
-            resolveSpaceId(await getSpaces(), request),
-            properties
-          );
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, request);
+          await reconcileSchedule(id, spaceId, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -460,7 +460,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -664,7 +664,7 @@ export const registerAiIndexRoutes = ({
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -723,7 +723,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
           await getScheduleService()
-            .remove({ aiIndexId })
+            .remove({ aiIndexId, spaceId })
             .catch((error) => {
               logger.warn(
                 `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
@@ -760,7 +760,7 @@ export const registerAiIndexRoutes = ({
               const automationErrors = await deleteAutomationResources({
                 automations: aiIndex.automations,
                 workflowsManagementApi: await getWorkflowsManagementApi(),
-                spaceId: resolveSpaceId(await getSpaces(), request),
+                spaceId,
                 request,
                 logger,
                 aiIndexId,
@@ -785,7 +785,7 @@ export const registerAiIndexRoutes = ({
           // is a user-owned index and the caller may well have no privileges on it, and reporting a
           // failure for an index that is already gone would only send them to retry a delete that
           // now 404s. What is left behind is inert until an id is reused.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser, spaceId)
             .deleteByAiIndex(aiIndexId)
             .catch((error) => {
               logger.warn(

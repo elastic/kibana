@@ -37,12 +37,15 @@ export interface KiStepDependencies {
 /** Dependencies injected into the feedback analysis step definition factories. */
 export interface FeedbackAnalysisStepDependencies {
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger | undefined>;
-  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
+  isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
   /** Whether the feedback loop advanced setting is on. */
   isFeedbackLoopEnabled: () => Promise<boolean>;
-  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
   logger: Logger;
 }
 

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { buildAiIndexDocId } from './storage';
+import { buildManagedAiIndexDocId } from './storage';
 
-describe('buildAiIndexDocId', () => {
+describe('buildManagedAiIndexDocId', () => {
   it('uses a colon so space and id cannot collide', () => {
-    expect(buildAiIndexDocId('team', 'ops_logs')).toBe('team:ops_logs');
-    expect(buildAiIndexDocId('team_ops', 'logs')).toBe('team_ops:logs');
-    expect(buildAiIndexDocId('team', 'ops_logs')).not.toBe(buildAiIndexDocId('team_ops', 'logs'));
+    expect(buildManagedAiIndexDocId('team', 'ops_logs')).toBe('team:ops_logs');
+    expect(buildManagedAiIndexDocId('team_ops', 'logs')).toBe('team_ops:logs');
+    expect(buildManagedAiIndexDocId('team', 'ops_logs')).not.toBe(
+      buildManagedAiIndexDocId('team_ops', 'logs')
+    );
   });
 });
