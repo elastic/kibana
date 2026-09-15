@@ -391,6 +391,10 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, license error', async () => {
+      jest.mocked(Registry.getPackage).mockResolvedValueOnce({
+        packageInfo: { license: 'platinum', conditions: { elastic: { subscription: 'platinum' } } },
+        paths: [],
+      } as any);
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -403,7 +407,7 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: 'not_installed',
         dryRun: false,
-        errorMessage: 'Installation requires basic license',
+        errorMessage: 'Installation requires platinum license',
         eventType: 'package-install',
         installType: 'install',
         newVersion: '1.3.0',
@@ -411,6 +415,24 @@ describe('install', () => {
         status: 'failure',
         automaticInstall: false,
       });
+    });
+
+    it('should not require a license for a basic package even when the license is unavailable', async () => {
+      // Reproduces the startup race where the Fleet license singleton has not been hydrated yet:
+      // `hasAtLeast` reports falsy, but a `basic` package must still install because `basic` is the
+      // lowest tier available to every deployment.
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.3.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(response.status).toEqual('installed');
     });
 
     it('should send telemetry on install failure, datastream type exclusion', async () => {

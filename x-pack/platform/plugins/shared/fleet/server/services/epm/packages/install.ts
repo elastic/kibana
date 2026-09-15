@@ -772,7 +772,12 @@ export async function installPackageWithStateMachine(options: {
       }
     }
     const elasticSubscription = getElasticSubscription(packageInfo);
-    if (!licenseService.hasAtLeast(elasticSubscription)) {
+    // `basic` is the lowest license tier and is available to every deployment. Only enforce the
+    // license gate when the package genuinely requires a higher tier. This avoids spuriously
+    // rejecting a `basic` package during startup, when the Fleet license singleton may not have
+    // been hydrated yet by the `license$` observable and `hasAtLeast` would return falsy for a
+    // license that is simply not-yet-available rather than actually below the required tier.
+    if (elasticSubscription !== 'basic' && !licenseService.hasAtLeast(elasticSubscription)) {
       logger.error(`Installation requires ${elasticSubscription} license`);
       const err = new FleetError(`Installation requires ${elasticSubscription} license`);
       sendEvent({
