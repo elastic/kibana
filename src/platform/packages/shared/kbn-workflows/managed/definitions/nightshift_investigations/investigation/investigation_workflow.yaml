@@ -24,6 +24,13 @@ triggers:
         message:
           type: string
           description: Description of the issue or event to investigate.
+        title:
+          type: string
+          maxLength: 512
+          description: >
+            Short human-readable headline for the investigation (e.g. the significant event title
+            or the alert rule name). Shown in the investigations list and details flyout from the
+            moment the run starts, so never an id or UUID.
         stream_names:
           type: array
           items:
@@ -38,6 +45,7 @@ triggers:
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
       required:
         - message
+        - title
       additionalProperties: false
 
 steps:

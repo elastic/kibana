@@ -443,7 +443,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('persists the title into the workflow context and the pending record', async () => {
+  it('passes the title as a workflow input and persists it on the pending record', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
@@ -454,7 +454,8 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
-    expect(inputs.context.title).toBe('Checkout latency breach');
+    expect(inputs.title).toBe('Checkout latency breach');
+    expect(inputs.context).not.toHaveProperty('title');
     expect(repository.create).toHaveBeenCalledWith({
       id: 'exec-123',
       attributes: expect.objectContaining({ title: 'Checkout latency breach', status: 'pending' }),
@@ -885,6 +886,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     context: {
       inputs: {
         message: 'Investigate this',
+        title: 'Investigate this',
         concurrency_key: 'key-1',
         context: {
           source: 'alert',
@@ -989,44 +991,22 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
   });
 
-  it('prefers context.title over the first line of the message', async () => {
+  it('throws InvestigationSubjectMissingError when the execution inputs carry no title', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({
         context: {
           inputs: {
-            message: 'Checkout latency breach\n\nP99 climbed above 2s.',
-            context: { source: 'alert', alert_id: 'alert-42', title: 'Explicit title' },
-          },
-        },
-      })
-    );
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ attributes: expect.objectContaining({ title: 'Explicit title' }) })
-    );
-  });
-
-  it('falls back to the first line of the message as title', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({
-        context: {
-          inputs: {
-            message: 'Checkout latency breach\n\nP99 climbed above 2s.',
+            message: 'Investigate this',
             context: { source: 'alert', alert_id: 'alert-42' },
           },
         },
       })
     );
 
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attributes: expect.objectContaining({ title: 'Checkout latency breach' }),
-      })
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationSubjectMissingError
     );
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('cancels a superseded running investigation sharing the concurrency key', async () => {
@@ -1164,7 +1144,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: { source: 'significant_event', event_id: 'event-42' },
             },
           },
@@ -1181,7 +1161,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: { source: 'significant_event', significant_event_id: 'se-99' },
             },
           },
@@ -1198,7 +1178,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: {
                 source: 'significant_event',
                 event_id: 'checkout-latency-breach',
@@ -1218,7 +1198,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: {
                 source: 'significant_event',
                 event_id: '',
@@ -1238,7 +1218,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: { source: 'significant_event', significant_event_id: '' },
             },
           },
@@ -1254,7 +1234,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
-            inputs: { message: 'Investigate this', context: { source: 'chat', some_id: 'x' } },
+            inputs: { title: 'Investigate this', context: { source: 'chat', some_id: 'x' } },
           },
         })
       );
@@ -1270,7 +1250,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: { source: 'significant_event', event_id: 'event-42', summary: long },
             },
           },
@@ -1288,7 +1268,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         makeEnsureExecution({
           context: {
             inputs: {
-              message: 'Investigate this',
+              title: 'Investigate this',
               context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
             },
           },
@@ -1305,7 +1285,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
-            inputs: { message: 'Investigate this', context: { source: 'alert', alert_id: 'a-1' } },
+            inputs: { title: 'Investigate this', context: { source: 'alert', alert_id: 'a-1' } },
           },
         })
       );

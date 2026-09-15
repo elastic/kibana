@@ -11,7 +11,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { investigationStateSchema, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   AlertInvestigationContext,
@@ -194,7 +194,8 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
-    title: recoverTitleFromInput(inputs),
+    // A required workflow input, so the engine has already rejected a run without one.
+    title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -230,19 +231,6 @@ function recoverSubjectFromInput(
   }
 
   return undefined;
-}
-
-/**
- * The headline for a run that reached `ensureOrCreate()` without `start()`. `context.title` when
- * the caller set one; otherwise the first line of the brief, which `message` (a required workflow
- * input) always has and which discovery and the chat skill fill with the trigger's title.
- */
-function recoverTitleFromInput(input: Record<string, unknown> | undefined): string | undefined {
-  const ctx = input?.context;
-  const explicit = isPlainObject(ctx) ? asString(ctx.title) : undefined;
-  // ponytail: first line of the brief as title when a direct workflow run omits context.title
-  const fromMessage = asString(input?.message)?.split('\n')[0]?.trim();
-  return (explicit ?? fromMessage)?.slice(0, MAX_TITLE_LENGTH) || undefined;
 }
 
 function recoverTriggerTypeFromInput(
@@ -376,13 +364,13 @@ export class NightshiftInvestigationsClient {
 
     const inputs = {
       message: prepared.message,
+      title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
-        title,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
         ...(subject.summary ? { summary: subject.summary } : {}),
       },
