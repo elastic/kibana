@@ -9,7 +9,7 @@ applies_to:
 
 # ServiceNow connector [servicenow-search-action-type]
 
-The ServiceNow connector enables both federated search and write operations against ServiceNow tables using the ServiceNow Table API. It supports full-text search, record retrieval, incident management, Security Operations incidents, ITOM Event Management, attachment handling, and generic record create/update/delete operations.
+The {{sn}} connector enables federated search and data retrieval from {{sn}} tables using the ServiceNow Table API.
 
 ::::{note}
 For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
@@ -21,44 +21,44 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [servicenow-search-connector-configuration]
 
-ServiceNow connectors support **OAuth 2.0 Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
+{{sn}} connectors support **OAuth 2.0 Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
 
 Instance URL
-:   The URL of your ServiceNow instance (for example, `https://your-instance.service-now.com`).
+:   The URL of your {{sn}} instance (for example, `https://your-instance.service-now.com`).
 
 #### OAuth 2.0 Client Credentials
 
 Token URL
-:   The OAuth 2.0 token endpoint URL for your ServiceNow instance (for example, `https://your-instance.service-now.com/oauth_token.do`).
+:   The OAuth 2.0 token endpoint URL for your {{sn}} instance (for example, `https://your-instance.service-now.com/oauth_token.do`).
 
 Client ID
-:   The OAuth client ID from your ServiceNow application registry.
+:   The OAuth client ID from your {{sn}} application registry.
 
 Client Secret
-:   The OAuth client secret for your ServiceNow application.
+:   The OAuth client secret for your {{sn}} application.
 
 #### OAuth 2.0 Authorization Code
 
 Client ID
-:   The OAuth client ID from your ServiceNow application registry. Refer to [OAuth Authorization Code setup](#servicenow-search-oauth-auth-code).
+:   The OAuth client ID from your {{sn}} application registry. Refer to [OAuth Authorization Code setup](#servicenow-search-oauth-auth-code).
 
 Client Secret
-:   The OAuth client secret for your ServiceNow application.
+:   The OAuth client secret for your {{sn}} application.
 
-The connector automatically uses the correct ServiceNow OAuth endpoints for your instance (`https://<your-instance>.service-now.com/oauth_auth.do` for authorization and `https://<your-instance>.service-now.com/oauth_token.do` for token exchange). The connector handles scopes automatically.
+The connector automatically uses the correct {{sn}} OAuth endpoints for your instance (`https://<your-instance>.service-now.com/oauth_auth.do` for authorization and `https://<your-instance>.service-now.com/oauth_token.do` for token exchange). The connector handles scopes automatically.
 
 ## Test connectors [servicenow-search-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}.
 The test verifies connectivity by querying the `sys_user` table, which any authenticated user can access.
 
-The ServiceNow connector has the following actions:
+The {{sn}} connector has the following actions:
 
 Search
-:   Search for records in a ServiceNow table using full-text search.
+:   Search for records in a {{sn}} table using full-text search.
     - `table` (required): The table to search. Common values: `incident`, `kb_knowledge`, `sc_req_item`, `change_request`, `problem`, `sc_task`, `cmdb_ci`. Custom tables are also supported.
     - `query` (required): The full-text search query string.
-    - `encodedQuery` (optional): ServiceNow encoded query to combine with the full-text search for additional filtering (for example, `active=true^priority=1`). Uses `^` to AND conditions and `^OR` for OR.
+    - `encodedQuery` (optional): {{sn}} encoded query to combine with the full-text search for additional filtering (for example, `active=true^priority=1`). Uses `^` to AND conditions and `^OR` for OR.
     - `fields` (optional): Comma-separated list of fields to return.
     - `limit` (optional): Maximum number of results (default: 20).
     - `offset` (optional): Offset for pagination.
@@ -72,7 +72,7 @@ Get record
 List records
 :   List records from a table with optional filtering.
     - `table` (required): The table to query. Common values: `incident`, `kb_knowledge`, `sc_req_item`, `change_request`, `problem`, `sc_task`, `cmdb_ci`. Custom tables are also supported.
-    - `encodedQuery` (optional): ServiceNow encoded query for filtering (for example, `active=true^priority=1`).
+    - `encodedQuery` (optional): {{sn}} encoded query for filtering (for example, `active=true^priority=1`).
     - `fields` (optional): Comma-separated list of fields to return.
     - `limit` (optional): Maximum number of results (default: 20).
     - `offset` (optional): Offset for pagination.
@@ -91,28 +91,28 @@ Get comments
     - `offset` (optional): Offset for pagination.
 
 List tables
-:   List available ServiceNow tables with their names and labels. Use this to discover what tables exist in the instance, especially for custom or unfamiliar ServiceNow configurations.
+:   List available {{sn}} tables with their names and labels. Use this to discover what tables exist in the instance, especially for custom or unfamiliar {{sn}} configurations.
     - `query` (optional): Filter to search table names or labels (for example, `incident`, `CMDB`).
     - `limit` (optional): Maximum number of results (default: 50).
     - `offset` (optional): Offset for pagination.
 
 Get attachment
-:   Download a ServiceNow attachment as base64-encoded binary content by its attachment `sys_id`. Returns `fileName`, `contentType`, and `base64` fields. To process document content (PDFs, Word files, and so on), pass the base64 value through the Elasticsearch attachment processor. To find attachment `sys_id` values, query the `sys_attachment` table using List records with `encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>`.
+:   Download a {{sn}} attachment as base64-encoded binary content by its attachment `sys_id`. Returns `fileName`, `contentType`, and `base64` fields. To process document content (PDFs, Word files, and so on), pass the base64 value through the Elasticsearch attachment processor. To find attachment `sys_id` values, query the `sys_attachment` table using List records with `encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>`.
     - `sysId` (required): The `sys_id` of the attachment (from the `sys_attachment` table).
 
 Create record {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Insert a new record into any ServiceNow table. Returns the created record including its `sys_id` and record number. For ITSM incidents, use Create incident; for security incidents, use Create security incident; for ITOM events, use Create event. Use this action for all other tables.
+:   Insert a new record into any {{sn}} table. Returns the created record including its `sys_id` and record number. For ITSM incidents, use Create incident; for security incidents, use Create security incident; for ITOM events, use Create event. Use this action for all other tables.
     - `table` (required): The table to insert the record into.
-    - `fields` (required): Key-value map of ServiceNow field names to values for the new record (for example, `{"short_description": "VPN issue", "impact": "2"}`). At least one field required; maximum 100 fields.
+    - `fields` (required): Key-value map of {{sn}} field names to values for the new record (for example, `{"short_description": "VPN issue", "impact": "2"}`). At least one field required; maximum 100 fields.
 
 Update record {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Update an existing record in any ServiceNow table by its `sys_id`. Provide only the fields that need to change — the connector leaves all other fields untouched. Returns the full updated record. For ITSM incidents, use Update incident.
+:   Update an existing record in any {{sn}} table by its `sys_id`. Provide only the fields that need to change — the connector leaves all other fields untouched. Returns the full updated record. For ITSM incidents, use Update incident.
     - `table` (required): The table containing the record.
     - `sysId` (required): The `sys_id` of the record to update.
     - `fields` (required): Key-value map of field names to their new values. At least one field required; maximum 100 fields.
 
 Create incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create a new ITSM incident in ServiceNow. Returns the created incident including its `sys_id` and incident number (for example, `INC0012345`). Use Query users to resolve names to `sys_id` values for `caller_id` and `assigned_to`. Use Get choices to discover valid values for `category`, `impact`, and `urgency`.
+:   Create a new ITSM incident in {{sn}}. Returns the created incident including its `sys_id` and incident number (for example, `INC0012345`). Use Query users to resolve names to `sys_id` values for `caller_id` and `assigned_to`. Use Get choices to discover valid values for `category`, `impact`, and `urgency`.
     - `short_description` (required): Brief one-line summary of the incident.
     - `description` (optional): Detailed description.
     - `caller_id` (optional): `sys_id` or username of the reporting user.
@@ -144,19 +144,19 @@ Update incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
     - `close_notes` (optional): Detailed resolution notes (required when setting state to `6` or `7`).
 
 Add comment {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Add a customer-visible comment to a ServiceNow record. The comment appears in the record journal and is visible to the caller. Use Add work note for internal-only notes.
+:   Add a customer-visible comment to a {{sn}} record. The comment appears in the record journal and is visible to the caller. Use Add work note for internal-only notes.
     - `table` (required): The table containing the record (for example, `incident`, `change_request`).
     - `sysId` (required): The `sys_id` of the record.
     - `comment` (required): The comment text to add.
 
 Add work note {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Add an internal work note to a ServiceNow record. Work notes are only visible to agents and never shown to the caller. Use Add comment for customer-facing journal entries.
+:   Add an internal work note to a {{sn}} record. Work notes are only visible to agents and never shown to the caller. Use Add comment for customer-facing journal entries.
     - `table` (required): The table containing the record (for example, `incident`, `change_request`).
     - `sysId` (required): The `sys_id` of the record.
     - `workNote` (required): The internal work note text to add.
 
 Close incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Resolve or close a ServiceNow incident by setting its state to Resolved (`6`) or Closed (`7`). A close code and close notes are required. Use Get choices with `tableName=incident`, `fieldName=close_code` to see valid close codes for the instance.
+:   Resolve or close a {{sn}} incident by setting its state to Resolved (`6`) or Closed (`7`). A close code and close notes are required. Use Get choices with `tableName=incident`, `fieldName=close_code` to see valid close codes for the instance.
     - `sysId` (required): The `sys_id` of the incident to close.
     - `closeCode` (required): Resolution close code.
     - `closeNotes` (required): Detailed description of how the incident was resolved.
@@ -166,7 +166,7 @@ Create security incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new Security Operations (SecOps/SIR) incident in the `sn_si_incident` table. Use this for cyber security incidents and threat investigations rather than ITSM incidents. Returns the created incident with its `sys_id`.
 
     ::::{note}
-    Requires the **ServiceNow Security Incident Response (SIR)** plugin to be installed on the ServiceNow instance. The connector user must have the `sn_si_incident_write` role. If the plugin is absent, the connector returns a 400 error stating that the table does not exist.
+    Requires the **ServiceNow Security Incident Response (SIR)** plugin to be installed on the {{sn}} instance. The connector user must have the `sn_si_incident_write` role. If the plugin is absent, the connector returns a 400 error stating that the table does not exist.
     ::::
 
     - `short_description` (required): Brief summary of the security incident.
@@ -182,10 +182,10 @@ Create security incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
     - `business_criticality` (optional): Business criticality — `1`=Critical, `2`=High, `3`=Medium, `4`=Low, `5`=Negligible.
 
 Create event {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Send an ITOM event to ServiceNow Event Management via `/api/global/em/jsonv2`. Creates or updates an alert in the Event Management console. Use `message_key` to deduplicate: events with the same `source`, `node`, `type`, and `message_key` update the existing alert instead of creating a new one.
+:   Send an ITOM event to {{sn}} Event Management via `/api/global/em/jsonv2`. Creates or updates an alert in the Event Management console. Use `message_key` to deduplicate: events with the same `source`, `node`, `type`, and `message_key` update the existing alert instead of creating a new one.
 
     ::::{note}
-    Requires the **ServiceNow Event Management (ITOM)** plugin to be installed on the ServiceNow instance. The connector user must have the `evt_mgmt_integration` role (or `evt_mgmt_operator`/`evt_mgmt_admin`). If the plugin is absent or the role is missing, the connector returns a 400 error.
+    Requires the **ServiceNow Event Management (ITOM)** plugin to be installed on the {{sn}} instance. The connector user must have the `evt_mgmt_integration` role (or `evt_mgmt_operator`/`evt_mgmt_admin`). If the plugin is absent or the role is missing, the connector returns a 400 error.
     ::::
 
     - `source` (required): Event source system (for example, `"Elastic"`, `"monitoring-agent"`).
@@ -200,32 +200,32 @@ Create event {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
     - `additional_info` (optional): Extra key-value metadata to attach to the event (maximum 50 entries).
 
 Upload attachment {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Upload a file attachment to a ServiceNow record. The file must be provided as base64-encoded content. Returns the attachment metadata including the new attachment `sys_id`. Avoid files larger than 5 MB. To retrieve existing attachments use Get attachment.
-    - `tableName` (required): The ServiceNow table to attach the file to (for example, `incident`, `change_request`).
+:   Upload a file attachment to a {{sn}} record. The file must be provided as base64-encoded content. Returns the attachment metadata including the new attachment `sys_id`. Avoid files larger than 5 MB. To retrieve existing attachments use Get attachment.
+    - `tableName` (required): The {{sn}} table to attach the file to (for example, `incident`, `change_request`).
     - `tableSysId` (required): The `sys_id` of the record to attach the file to.
     - `fileName` (required): Name of the file including extension (for example, `screenshot.png`, `report.pdf`).
     - `contentType` (required): MIME type of the file (for example, `application/pdf`, `image/png`, `text/plain`).
     - `base64Content` (required): Base64-encoded file content.
 
 Delete record {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Permanently delete a record from a ServiceNow table by its `sys_id`. This operation cannot be undone. Use only for automation-created records that need cleanup — prefer updating state to "Cancelled" or "Closed" over deleting business records.
+:   Permanently delete a record from a {{sn}} table by its `sys_id`. This operation cannot be undone. Use only for automation-created records that need cleanup — prefer updating state to "Cancelled" or "Closed" over deleting business records.
     - `table` (required): The table containing the record to delete.
     - `sysId` (required): The `sys_id` of the record to permanently delete.
 
 Get choices {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Look up valid choice values for a ServiceNow field. Call this before writing to discover valid values for `state`, `close_code`, `category`, `impact`, `urgency`, and other choice-list fields. Returns values with their display labels.
-    - `tableName` (required): The ServiceNow table to get choices for (for example, `incident`, `change_request`, `sn_si_incident`).
+:   Look up valid choice values for a {{sn}} field. Call this before writing to discover valid values for `state`, `close_code`, `category`, `impact`, `urgency`, and other choice-list fields. Returns values with their display labels.
+    - `tableName` (required): The {{sn}} table to get choices for (for example, `incident`, `change_request`, `sn_si_incident`).
     - `fieldName` (required): The field name to get choices for (for example, `state`, `close_code`, `category`, `impact`, `urgency`, `priority`).
     - `language` (optional): Language code for choice labels (default: `en`).
 
 Query users {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Search ServiceNow users by name, email, or username. Use this to look up the `sys_id` for `caller_id` or `assigned_to` fields before creating or updating an incident.
+:   Search {{sn}} users by name, email, or username. Use this to look up the `sys_id` for `caller_id` or `assigned_to` fields before creating or updating an incident.
     - `query` (optional): Search text to filter users by name, email, or username. Omit to list recent users.
     - `limit` (optional): Maximum number of users to return (default: 20).
     - `offset` (optional): Offset for pagination.
 
 Who am I {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Return the identity of the currently authenticated ServiceNow user. Returns `sys_id`, `user_name`, `name`, `email`, `title`, `department`, and `active` status. Use this to verify connector credentials, find the `sys_id` of the connector account for use as `caller_id`, or confirm which account is performing write operations. Takes no parameters.
+:   Return the identity of the currently authenticated {{sn}} user. Returns `sys_id`, `user_name`, `name`, `email`, `title`, `department`, and `active` status. Use this to verify connector credentials, find the `sys_id` of the connector account for use as `caller_id`, or confirm which account is performing write operations. Takes no parameters.
 
 ## Connector networking configuration [servicenow-search-connector-networking-configuration]
 
@@ -238,7 +238,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 1. Select **System OAuth > Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
 3. Enter a name for your application.
-4. Enter a **Client Secret** value, or let ServiceNow generate one.
+4. Enter a **Client Secret** value, or let {{sn}} generate one.
 5. Select **Submit**.
 6. Copy the following values from the OAuth application:
    - **Client ID**: The auto-generated client ID.
@@ -250,13 +250,13 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
    - **Delete record**: admin or equivalent role on the target table.
    - **ITOM events** (Create event): `evt_mgmt_operator` or `evt_mgmt_admin`.
 8. Enter the following values when you configure the connector in {{kib}}:
-   - **Instance URL**: Your ServiceNow instance URL (for example, `https://your-instance.service-now.com`).
+   - **Instance URL**: Your {{sn}} instance URL (for example, `https://your-instance.service-now.com`).
    - **Token URL**: `https://your-instance.service-now.com/oauth_token.do`.
    - **Client ID** and **Client Secret**: From step 6.
 
 ### OAuth 2.0 Authorization Code (recommended for per-user access) [servicenow-search-oauth-auth-code]
 
-Use this method to let individual users sign in to ServiceNow through {{kib}}. {{kib}} stores refreshable tokens on the user's behalf.
+Use this method to let individual users sign in to {{sn}} through {{kib}}. {{kib}} stores refreshable tokens on the user's behalf.
 
 1. Select **System OAuth** > **Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
@@ -268,11 +268,11 @@ Use this method to let individual users sign in to ServiceNow through {{kib}}. {
      https://<your-kibana-host>/api/actions/connector/_oauth_callback
      ```
 
-   - **Client Secret**: Enter a value, or let ServiceNow generate one.
+   - **Client Secret**: Enter a value, or let {{sn}} generate one.
 4. Select **Submit**.
 5. Copy the **Client ID** and **Client Secret** from the application.
-6. In {{kib}}, create a ServiceNow connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your ServiceNow account.
+6. In {{kib}}, create a {{sn}} connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your {{sn}} account.
 
 ::::{tip}
-The connector automatically configures the correct ServiceNow OAuth endpoints for your instance. You do not need to enter the authorization or token URLs manually.
+The connector automatically configures the correct {{sn}} OAuth endpoints for your instance. You do not need to enter the authorization or token URLs manually.
 ::::
