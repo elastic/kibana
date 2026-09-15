@@ -32,6 +32,7 @@ import {
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 import { deleteKiView, putKiView } from './ki_view';
+import { AI_INDEX_DEST_VALUE_PATTERN } from '../../common/validation';
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
@@ -373,6 +374,11 @@ export class AiIndexService {
    * prefix.
    */
   private assertDestValueHasPrefix(value: string, prefix: string): void {
+    if (!AI_INDEX_DEST_VALUE_PATTERN.test(value)) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: only lowercase letters, numbers, and '_.*,+-' are permitted`
+      );
+    }
     const invalid = value.split(',').find((expression) => !expression.startsWith(prefix));
     if (invalid !== undefined) {
       throw new InvalidAiIndexDestError(

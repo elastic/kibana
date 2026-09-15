@@ -191,6 +191,17 @@ describe('AiIndexService', () => {
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(storageClient.index).not.toHaveBeenCalled();
     });
+
+    it('rejects a dest with characters outside the index name allowlist', async () => {
+      await expect(
+        service.create('customer_support', {
+          ...properties,
+          dest: { type: 'index', value: 'ai-index-idx-mine\n| EVAL leaked = 1' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('put', () => {
@@ -234,6 +245,28 @@ describe('AiIndexService', () => {
       expect(indexArgs.if_primary_term).toBe(2);
       expect(indexArgs.document?.date_created).toBe(aiIndexDocument.date_created);
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
+    });
+
+    it('replaces the retrieval view with the new dest', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
+
+      await service.put('customer_support', {
+        ...properties,
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support_v2' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'ai-view-customer_support',
+        query: expect.stringContaining('FROM ai-index-ds-customer_support_v2 METADATA _id'),
+      });
     });
 
     it('persists feedback_analysis when updating an existing AI index', async () => {
@@ -532,6 +565,10 @@ describe('AiIndexService', () => {
           document: expect.objectContaining({ managed: true }),
         })
       );
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'ai-view-elastic',
+        query: expect.stringContaining('FROM ai-index-idx-sml-data'),
+      });
     });
 
     it('overwrites an existing managed entry (idempotent upsert)', async () => {
