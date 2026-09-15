@@ -198,7 +198,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           design:
             'Place the legend outside the plot, at the bottom. Hide it when it only repeats what is visible (a single series); show it when it carries legend statistics.',
           config:
-            'Legend: `legend.position: "bottom"` with the default outside placement; omit `legend.layout.type`. Leave `legend.visibility` unset (Lens auto-hides single-series legends) unless legend statistics are set — then set it to "visible".',
+            'Legend: `legend.position: "bottom"` with the default outside placement. Layout follows legend statistics: `legend.layout: { type: "list" }` without statistics, `legend.layout: { type: "grid" }` when statistics are set so the values line up in columns. Always set `legend.visibility`: an unset value hides the legend entirely. Use `"auto"` so Lens shows the legend for multiple series and hides it for a single series; use `"visible"` instead when legend statistics are set.',
         },
         {
           design:

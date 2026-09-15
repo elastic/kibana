@@ -36,6 +36,18 @@ describe('chart type guidance', () => {
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
+  it('always sets XY legend visibility so breakdown legends are not hidden', () => {
+    const xyConfig = getChartTypeConfigPromptContent(SupportedChartType.XY);
+
+    expect(xyConfig).toContain('Always set `legend.visibility`');
+    expect(xyConfig).toContain('an unset value hides the legend entirely');
+    expect(xyConfig).toContain('Use `"auto"`');
+    expect(xyConfig).toContain('`legend.layout: { type: "list" }` without statistics');
+    expect(xyConfig).toContain('`legend.layout: { type: "grid" }` when statistics are set');
+    expect(xyConfig).not.toContain('omit `legend.layout.type`');
+    expect(xyConfig).not.toContain('Leave `legend.visibility` unset');
+  });
+
   it('leaves pie legends to the Lens default', () => {
     const design = getChartDesignPromptContent();
     const pieConfig = getChartTypeConfigPromptContent(SupportedChartType.Pie);
