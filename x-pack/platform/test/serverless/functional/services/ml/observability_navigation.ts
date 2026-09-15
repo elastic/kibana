@@ -16,9 +16,9 @@ export function MachineLearningNavigationProviderObservability({
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
-    await retry.tryForTime(5 * 1000, async () => {
-      await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
-      await svlCommonNavigation.sidenav.clickPanelLink(id);
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
+    await svlCommonNavigation.sidenav.clickPanelLink(id);
+    await retry.tryForTime(20 * 1000, async () => {
       await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
     });
   }
