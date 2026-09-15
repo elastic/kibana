@@ -13,7 +13,6 @@ import {
   trimEntityValues,
   type SourceEntities,
 } from './utils/entity_utils';
-import { getErrorMessage } from './utils/es_errors';
 
 export type { SourceEntities } from './utils/entity_utils';
 
@@ -268,3 +267,6 @@ const getAlertSourceEntities = async (
 
   return extractSourceEntitiesFromAlert(alertSource);
 };
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
