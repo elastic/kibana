@@ -165,10 +165,11 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/discover-session-constants'
+  - '@kbn/as-code-discover-schema'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
-  - '@kbn/as-code-discover-schema'
 tags:
   - plugin
   - prod
