@@ -13,7 +13,7 @@ import type {
 } from '@kbn/agent-builder-common';
 
 /**
- * The billed unit, defined as **conversational turn**: one input and its response, 
+ * The billed unit, defined as **conversational turn**: one input and its response,
  * charged one unit per 50k input tokens.
  * Billing calls this an "Agent Execution", but it is a whole round, not one of the executions a
  * round is made of: a turn paused for human input still bills exactly once, when it answers.
