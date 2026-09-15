@@ -34,7 +34,7 @@ import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
+import { buildFeatureDiscoverParams } from '../../../util/discover_helpers';
 import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
@@ -320,7 +320,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               button={
                 <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="boxesVertical"
+                    iconType="ellipsis"
                     aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
                     isLoading={isMutating}
                     isDisabled={isMutating}
