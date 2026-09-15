@@ -18,18 +18,32 @@ import {
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
 
+/** The definition every consumer outside log extraction resolves to. */
+interface EntityDefinitionBase {
+  single: EntityDefinitionWithoutId;
+}
+
 /**
- * Extraction variants of one entity type. `single` is the definition every consumer outside log
- * extraction resolves to. `priority` and `nonPriority` are registered as a pair: a priority gate
+ * A type without dual-process support. `never` keeps the process variants out entirely rather than
+ * making them optional, so a half-registered pair cannot typecheck, while still leaving the keys
+ * readable across the union.
+ */
+interface SingleProcessDefinition extends EntityDefinitionBase {
+  priority?: never;
+  nonPriority?: never;
+}
+
+/**
+ * A type with dual-process support. The two process variants exist only as a pair: a priority gate
  * without its complement would leave the documents that gate rejects unscanned.
  */
-type EntityDefinitionVariants =
-  | { single: EntityDefinitionWithoutId; priority?: undefined; nonPriority?: undefined }
-  | {
-      single: EntityDefinitionWithoutId;
-      priority: EntityDefinitionWithoutId;
-      nonPriority: EntityDefinitionWithoutId;
-    };
+interface DualProcessDefinitions extends EntityDefinitionBase {
+  priority: EntityDefinitionWithoutId;
+  nonPriority: EntityDefinitionWithoutId;
+}
+
+/** Either single only, or single plus both process variants. */
+type EntityDefinitionVariants = SingleProcessDefinition | DualProcessDefinitions;
 
 const entitiesDefinitionRegistry = {
   host: { single: hostEntityDefinition },
