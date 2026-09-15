@@ -18,6 +18,7 @@ import type {
   ActionContext,
   ClientTypeSpec,
   ConnectorNetworkSettings,
+  PlatformServices,
   RelayActionClient,
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -91,6 +92,7 @@ export const generateExecutorFunction = ({
   getClientLeasePool,
   getRelayClient,
   networkSettings,
+  platform,
   clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
@@ -99,6 +101,7 @@ export const generateExecutorFunction = ({
   getClientLeasePool: () => LeasePool<unknown>;
   getRelayClient?: () => RelayActionClient | undefined;
   networkSettings: ConnectorNetworkSettings;
+  platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
@@ -193,6 +196,7 @@ export const generateExecutorFunction = ({
               logger,
               config,
               networkSettings,
+              platform,
               credential: getCredential({
                 connectorId,
                 secrets,

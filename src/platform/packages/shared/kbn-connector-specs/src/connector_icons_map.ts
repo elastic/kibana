@@ -240,6 +240,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.mongodb',
+    lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
+  ],
+  [
     '.ansible_controller',
     lazy(
       () =>
