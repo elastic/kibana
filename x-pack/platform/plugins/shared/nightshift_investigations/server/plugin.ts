@@ -47,6 +47,7 @@ import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { writeElasticManifest } from './tools/sandbox_bash/elastic_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
+import { scopeConversationId } from './tools/sandbox_bash/tool_utils';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -214,7 +215,10 @@ export class NightshiftInvestigationsPlugin
               handler: (context) => {
                 const { conversationId, request } = context;
                 if (!conversationId) return;
-                const scopedConversationId = `${getSpaceId(request)}:${conversationId}`;
+                const scopedConversationId = scopeConversationId(
+                  getSpaceId(request),
+                  conversationId
+                );
                 workspaceManager.backupWorkspace(scopedConversationId).catch((err) => {
                   sandboxLogger
                     .get('workspace')
