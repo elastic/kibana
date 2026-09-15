@@ -153,6 +153,38 @@ Confirm `system: true` and `hidden: true` for privileged streams. There is no El
 
 When writing integration tests that touch system streams, use a client that sends `x-elastic-product-origin: kibana` (see [kibana#279803](https://github.com/elastic/kibana/pull/279803)).
 
+### Known Elasticsearch limitations
+
+The three issues below are partially or fully owned by Elasticsearch. They are documented here so Kibana developers understand the current security boundary and do not accidentally rely on protections that do not yet exist. Alignment with the ES team is tracked in [kibana-team#3902](https://github.com/elastic/kibana-team/issues/3902).
+
+#### 1. Backing index protection depends on descriptor landing order
+
+When a stream is created with a `SystemDataStreamDescriptor` already registered in ES, its backing indices do receive the system flag and are protected against direct access the same way the stream itself is. The gap is an **ordering risk**: if Kibana creates the stream before the ES descriptor exists — because it has not shipped in that ES version yet — the initial backing indices are stamped without the system flag. A cluster-level upgrade service corrects this retroactively once the master sees the descriptor, but there is a window.
+
+This race is a downstream effect of Gap 3 below (the descriptor cannot be registered without a template body). Resolving Gap 3 removes the ordering dependency and closes this gap with it.
+
+Until then, do not ship Kibana code that writes to a system stream before the matching `SystemDataStreamDescriptor` is present in the ES version you are targeting. See [Landing order](#landing-order) for examples.
+
+#### 2. The `.kibana_*` wildcard must be narrowed for each new data stream
+
+Elasticsearch has a `SystemIndexDescriptor` that historically matched `.kibana_*`. When a stream name matches that pattern but has no matching `SystemDataStreamDescriptor`, ES logs a warning at creation time and proceeds — the stream is created without system protection, even though its name suggests otherwise.
+
+The ES Kibana plugin has already worked around this for all currently registered streams by using complement-syntax patterns (e.g. `.kibana_~(change_history*)` instead of `.kibana_*`). This excludes known data streams from the index-descriptor wildcard. Any future Kibana data stream under `.kibana_*` or `.workflows-*` must:
+
+1. Register a `SystemDataStreamDescriptor` in the ES Kibana plugin, **and**
+2. Update the complement pattern in the `SystemIndexDescriptor` to exclude the new stream name, **and**
+3. Do both before or alongside the Kibana code that first writes to the stream.
+
+Failing any of these steps produces a warning-only, not an error, so the problem is easy to miss. Until ES tightens this to a hard rejection (a behavior change the ES team would need to own), every new `.kibana_*` or `.workflows-*` data stream requires explicit coordination across both repos.
+
+#### 3. `SystemDataStreamDescriptor` requires index templates to be defined in Elasticsearch at startup
+
+`SystemDataStreamDescriptor` requires the matching index template to exist in Elasticsearch at the time the descriptor is instantiated. Kibana currently owns those templates (they are defined in `@kbn/data-streams` and applied at boot), but ES needs them present before it can register the descriptor — creating a cross-repo ordering dependency.
+
+This is especially painful on serverless, where deployment ordering between the Kibana and ES plugins is not always controllable. The upstream ES issue tracking this is [elastic/elasticsearch#149309](https://github.com/elastic/elasticsearch/issues/149309).
+
+Until resolved, the practical requirement is: ship the `SystemDataStreamDescriptor` in ES (with any required template stubs) **before or alongside** the Kibana code that first writes to the stream. See [Landing order](#landing-order) above for worked examples.
+
 ## Mapping Validation
 
 When registering a data stream, the following reserved keys are automatically validated and will cause an error if found in your mappings:
