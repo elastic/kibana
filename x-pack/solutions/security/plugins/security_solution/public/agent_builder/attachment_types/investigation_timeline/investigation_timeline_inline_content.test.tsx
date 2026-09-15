@@ -14,8 +14,8 @@ import {
   INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID,
   InvestigationTimelineInlineContent,
   parseTimelineEvents,
-  type InvestigationTimelineAttachment,
 } from './investigation_timeline_inline_content';
+import type { InvestigationTimelineAttachment } from './types';
 
 const renderContent = (data: InvestigationTimelineAttachment['data']) => {
   const props = {
@@ -35,18 +35,20 @@ const renderContent = (data: InvestigationTimelineAttachment['data']) => {
 
 describe('InvestigationTimelineInlineContent', () => {
   it('renders timestamp, host, and description for each event', () => {
-    renderContent([
-      {
-        timestamp: '2026-09-11T14:23:32.488Z',
-        host: 'WKSTN-RECV01',
-        description: 'OUTLOOK.EXE spawned powershell.exe',
-      },
-      {
-        timestamp: '2026-09-11T14:45:32.488Z',
-        host: 'SRV-DC01',
-        description: 'wmiprvse.exe spawned cmd.exe /c whoami',
-      },
-    ]);
+    renderContent({
+      events: [
+        {
+          timestamp: '2026-09-11T14:23:32.488Z',
+          host: 'WKSTN-RECV01',
+          description: 'OUTLOOK.EXE spawned powershell.exe',
+        },
+        {
+          timestamp: '2026-09-11T14:45:32.488Z',
+          host: 'SRV-DC01',
+          description: 'wmiprvse.exe spawned cmd.exe /c whoami',
+        },
+      ],
+    });
 
     expect(screen.getByTestId(INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('Timestamp')).toBeInTheDocument();
@@ -59,7 +61,7 @@ describe('InvestigationTimelineInlineContent', () => {
   });
 
   it('renders an empty state when there are no events', () => {
-    renderContent([]);
+    renderContent({ events: [] });
     expect(
       screen.getByText('No events were reconstructed from the available telemetry.')
     ).toBeInTheDocument();
@@ -67,11 +69,13 @@ describe('InvestigationTimelineInlineContent', () => {
 
   it('drops rows that are missing required fields', () => {
     expect(
-      parseTimelineEvents([
-        { timestamp: '2026-09-11T14:23:32.488Z', host: 'h', description: 'ok' },
-        { timestamp: '2026-09-11T14:23:32.488Z', host: 'h' },
-        'not-an-event',
-      ])
+      parseTimelineEvents({
+        events: [
+          { timestamp: '2026-09-11T14:23:32.488Z', host: 'h', description: 'ok' },
+          { timestamp: '2026-09-11T14:23:32.488Z', host: 'h' },
+          'not-an-event',
+        ],
+      })
     ).toEqual([{ timestamp: '2026-09-11T14:23:32.488Z', host: 'h', description: 'ok' }]);
   });
 });
