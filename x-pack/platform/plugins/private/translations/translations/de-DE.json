@@ -11610,7 +11610,6 @@
     "xpack.agentBuilder.conversationInput.messageEditor.newConversationLabel": "Neue Konversation, Nachrichteneingang",
     "xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder": "Agent „{agentId}“ wurde gelöscht. Bitte beginnen Sie eine neue Konversation.",
     "xpack.agentBuilder.conversationInput.textArea.enabledPlaceholder": "Fragen stellen",
-    "xpack.agentBuilder.conversationList.optimisticNewConversationTitle": "Neue Konversation",
     "xpack.agentBuilder.conversationRounds": "Konversationsnachrichten",
     "xpack.agentBuilder.conversationRounds.agentResponse": "Agent sagte: {message}",
     "xpack.agentBuilder.conversationRounds.generatingAnnouncement": "Der Agent generiert eine Reaktion.",

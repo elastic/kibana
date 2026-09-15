@@ -7,8 +7,9 @@
 
 import { useLayoutEffect, useRef } from 'react';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useConversationRounds, useConversationStatus } from './use_conversation';
+import { useConversationStatus } from './use_conversation';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
 
 interface Baseline {
   conversationId: string | undefined;
@@ -24,7 +25,7 @@ export const useOnRoundFromOtherParticipant = (onRoundFromOtherParticipant: () =
   const conversationId = useConversationId();
   const { isFetched } = useConversationStatus();
   const isStreaming = useIsCurrentConversationStreaming();
-  const roundCount = useConversationRounds().length;
+  const roundCount = useTimelineItems().filter((item) => item.kind === 'userMessage').length;
 
   const baseline = useRef<Baseline | undefined>(undefined);
 

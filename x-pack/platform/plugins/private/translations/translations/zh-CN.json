@@ -11638,7 +11638,6 @@
     "xpack.agentBuilder.conversationInput.messageEditor.newConversationLabel": "新对话，消息输入",
     "xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder": "代理“{agentId}”已删除。请开始新的对话。",
     "xpack.agentBuilder.conversationInput.textArea.enabledPlaceholder": "尽管提问",
-    "xpack.agentBuilder.conversationList.optimisticNewConversationTitle": "新对话",
     "xpack.agentBuilder.conversationRounds": "对话消息",
     "xpack.agentBuilder.conversationRounds.agentResponse": "代理说：{message}",
     "xpack.agentBuilder.conversationRounds.generatingAnnouncement": "代理正在生成响应。",

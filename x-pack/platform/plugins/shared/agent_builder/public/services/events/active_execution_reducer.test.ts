@@ -123,7 +123,8 @@ const unknownEvent = (): ChatEvent =>
 
 const executionStartedEvent = (
   execution_id = 'exec-1',
-  created_at = '2026-01-01T00:00:00.000Z'
+  created_at = '2026-01-01T00:00:00.000Z',
+  trigger_event_id?: string
 ): ChatEvent =>
   ({
     type: TimelineEventType.executionStarted,
@@ -131,6 +132,7 @@ const executionStartedEvent = (
     created_at,
     actor: { type: EventActorType.agent, id: 'agent' },
     execution_id,
+    ...(trigger_event_id ? { trigger_event_id } : {}),
     data: { trigger_type: TimelineTriggerType.userMessage },
   } as ChatEvent);
 
@@ -311,6 +313,29 @@ describe('activeExecutionReducer', () => {
     expect(state?.executionId).toBe('exec-42');
     expect(state?.startedAt).toBe('2026-06-01T10:00:00.000Z');
     expect(state?.status).toBe('running');
+  });
+
+  it('execution_started records the trigger event id', () => {
+    const state = activeExecutionReducer(
+      null,
+      executionStartedEvent('exec-42', '2026-06-01T10:00:00.000Z', 'round-42::user_message')
+    );
+    expect(state?.triggerEventId).toBe('round-42::user_message');
+  });
+
+  it('execution_terminated falls back to its trigger_event_id when execution_started did not set one', () => {
+    const terminal = {
+      ...executionTerminatedEvent('exec-42'),
+      trigger_event_id: 'round-42::user_message',
+    };
+    const state = activeExecutionReducer(null, terminal);
+    expect(state?.triggerEventId).toBe('round-42::user_message');
+
+    const started = activeExecutionReducer(
+      null,
+      executionStartedEvent('exec-42', '2026-06-01T10:00:00.000Z', 'from-start')
+    );
+    expect(activeExecutionReducer(started, terminal)?.triggerEventId).toBe('from-start');
   });
 
   it('execution_terminated seals the draft: status completed, terminalEvent stored', () => {

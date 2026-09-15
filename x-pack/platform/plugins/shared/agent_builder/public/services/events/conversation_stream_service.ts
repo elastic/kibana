@@ -80,6 +80,24 @@ export class ConversationStreamService {
     return !!this.streams.get(conversationId)?.state$.getValue();
   }
 
+  getSnapshot(conversationId: string): ActiveExecutionDraft | null {
+    return this.streams.get(conversationId)?.state$.getValue() ?? null;
+  }
+
+  /** Drops a completed draft once its saved replacement is in the cache. */
+  clearPersistedExecution(conversationId: string, executionId: string) {
+    const stream = this.streams.get(conversationId);
+    const current = stream?.state$.getValue();
+    if (!stream || !current) {
+      return;
+    }
+    if (current.status !== 'completed' || current.executionId !== executionId) {
+      return;
+    }
+    stream.state$.next(null);
+    this.maybeTeardown(conversationId);
+  }
+
   releaseStream(conversationId: string) {
     this.maybeTeardown(conversationId);
   }

@@ -11636,7 +11636,6 @@
     "xpack.agentBuilder.conversationInput.messageEditor.newConversationLabel": "新しい会話、メッセージ入力",
     "xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder": "エージェント「{agentId}」は削除されました。新しい会話を開始してください。",
     "xpack.agentBuilder.conversationInput.textArea.enabledPlaceholder": "何でも聞いてください",
-    "xpack.agentBuilder.conversationList.optimisticNewConversationTitle": "新しい会話",
     "xpack.agentBuilder.conversationRounds": "会話メッセージ",
     "xpack.agentBuilder.conversationRounds.agentResponse": "エージェントはこう言いました: {message}",
     "xpack.agentBuilder.conversationRounds.generatingAnnouncement": "エージェントが応答を生成しています。",
