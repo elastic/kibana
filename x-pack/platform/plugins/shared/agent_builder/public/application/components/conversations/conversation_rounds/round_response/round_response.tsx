@@ -30,7 +30,7 @@ export interface RoundResponseProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  rawRound: ConversationRound;
+  rawRound?: ConversationRound;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({

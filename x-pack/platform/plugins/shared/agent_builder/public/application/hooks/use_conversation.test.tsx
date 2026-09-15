@@ -15,8 +15,10 @@ import {
   ConversationAccessControlRole,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
+import { NEVER } from 'rxjs';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
+import { ConversationStreamService } from '../../services/events/conversation_stream_service';
 import { pendingRoundId } from '../utils/new_conversation';
 import { queryKeys } from '../query_keys';
 import { useConversation, useIsUnpersistedConversation } from './use_conversation';
@@ -44,6 +46,11 @@ jest.mock('./use_last_agent_id', () => ({
   useLastAgentId: () => ({ agentId: undefined }),
 }));
 
+const stubConversationStreamService = new ConversationStreamService({
+  getChatEvents$: () => NEVER,
+  getStreamEnded$: () => NEVER,
+});
+
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseStreamRecord = jest.mocked(useStreamRecord);
@@ -69,6 +76,7 @@ const renderUseIsUnpersistedConversation = ({
   mockUseStreamingContext.mockReturnValue({
     activeStreams: isStreaming ? new Map([['conversation-1', { type: 'send' }]]) : new Map(),
     byConversationId: {},
+    conversationStreamService: stubConversationStreamService,
     mutateSendMessage: jest.fn(),
     mutateResumeRound: jest.fn(),
     cancelStream: jest.fn(),
@@ -181,6 +189,7 @@ describe('useConversation polling', () => {
     mockUseStreamingContext.mockReturnValue({
       activeStreams: new Map(),
       byConversationId: {},
+      conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
@@ -281,6 +290,7 @@ describe('useConversation polling', () => {
     mockUseStreamingContext.mockReturnValue({
       activeStreams: new Map([[conversationId, { type: 'send' }]]),
       byConversationId: {},
+      conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
