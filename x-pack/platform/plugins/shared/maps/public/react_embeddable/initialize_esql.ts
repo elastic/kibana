@@ -27,7 +27,7 @@ export function initializeEsql(store: MapStore) {
     prevLayerList = layerList;
 
     const esqlQueries: AggregateQuery[] = [];
-    let nextApproximationApplied: boolean | undefined = undefined;
+    let nextApproximationApplied: boolean | undefined;
 
     for (const layer of layerList) {
       if (layer.sourceDescriptor?.type !== SOURCE_TYPES.ESQL) continue;
