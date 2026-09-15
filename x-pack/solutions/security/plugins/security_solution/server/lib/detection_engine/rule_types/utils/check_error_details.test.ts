@@ -169,11 +169,16 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
-    it('should mark IP string literal error string as user error', () => {
+    it('should mark IP string literal error as user error when passed as a raw string', () => {
       const errorMessage = `search_phase_execution_exception
 	Root causes:
 		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
       expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark Fielddata error as user error without illegal_argument_exception', () => {
+      const errorMessage = `index: "packetbeat-9.4.1" reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." type: "query_shard_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
     it('should not mark query_shard_exception with an unrecognized reason as user error', () => {

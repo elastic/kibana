@@ -23,6 +23,9 @@ const USER_ERRORS_EXCEPTIONS = [
 // they arrive wrapped in different exception types depending on the search path (an
 // illegal_argument_exception caused_by on a shard failure, or a query_shard_exception root
 // cause of a search_phase_execution_exception), so they are matched regardless of the wrapper.
+// Each substring must be one ES only produces when evaluating user-supplied query text against
+// the target field mapping — framework-generated queries do not emit them. When adding a new
+// substring, verify that property before landing.
 const USER_ERROR_REASON_SUBSTRINGS = [
   'is not an IP string literal',
   'Fielddata is disabled on',
