@@ -180,6 +180,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         },
         {
           field: 'updated_by',
+          truncateText: true,
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedBy: string) => (
             <EuiFlexGroup
@@ -231,7 +232,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       if (showEnabledColumn) {
         tableColumns.push({
           name: labels.tableColumnEnabledLabel,
-          width: '90px',
+          width: '80px',
           render: (item: ExceptionListItemSchema) => (
             <ArtifactEnabledSwitch
               item={item}
