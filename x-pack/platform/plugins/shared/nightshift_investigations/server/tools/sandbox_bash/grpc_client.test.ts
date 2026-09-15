@@ -14,15 +14,19 @@ interface MockServiceClient {
 }
 
 jest.mock('@grpc/grpc-js', () => {
-  const actual = jest.requireActual<typeof import('@grpc/grpc-js')>('@grpc/grpc-js');
-
   function MockSandboxServiceClient(this: MockServiceClient): void {
     this.close = mockClose;
   }
 
   return {
-    ...actual,
     makeClientConstructor: () => MockSandboxServiceClient,
+    credentials: {
+      createInsecure: () => ({}),
+      createSsl: () => ({}),
+    },
+    Metadata: class MockMetadata {
+      set(_key: string, _value: string) {}
+    },
   };
 });
 
@@ -31,7 +35,14 @@ describe('grpc_client', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    client = new SandboxApiClient({ host: 'sandbox-api', port: 50051, apiKey: 'secret-key' });
+    client = new SandboxApiClient({
+      host: 'sandbox-api',
+      port: 50051,
+      apiKey: 'secret-key',
+      rootCertPem: Buffer.from('mock-ca'),
+      clientCertPem: Buffer.from('mock-cert'),
+      clientKeyPem: Buffer.from('mock-key'),
+    });
   });
 
   describe('close', () => {

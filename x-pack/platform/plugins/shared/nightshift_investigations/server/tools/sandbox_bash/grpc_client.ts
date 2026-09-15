@@ -332,50 +332,6 @@ function deserializeWriteFilesResponse(buf: Buffer): WriteFileResult[] {
 }
 
 // ---------------------------------------------------------------------------
-// BackupState / RestoreState
-// ---------------------------------------------------------------------------
-
-export interface StateOperationResult {
-  success: boolean;
-  error: string;
-}
-
-function serializeBackupStateRequest(destinationUrl: string, targetPath: string): Buffer {
-  return Buffer.concat([encodeStringField(1, destinationUrl), encodeStringField(2, targetPath)]);
-}
-
-function serializeRestoreStateRequest(sourceUrl: string, targetPath: string): Buffer {
-  return Buffer.concat([encodeStringField(1, sourceUrl), encodeStringField(2, targetPath)]);
-}
-
-function deserializeStateOperationResponse(buf: Buffer): StateOperationResult {
-  const r: StateOperationResult = { success: false, error: '' };
-  let offset = 0;
-  while (offset < buf.length) {
-    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
-    offset += tb;
-    const field = tag >>> 3;
-    const wireType = tag & 0x7;
-    if (wireType === 0) {
-      const { value, bytesRead: vb } = decodeVarint(buf, offset);
-      offset += vb;
-      if (field === 1) r.success = value !== 0;
-    } else if (wireType === 2) {
-      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
-      offset += lb;
-      const payload = buf.slice(offset, offset + len);
-      offset += len;
-      if (field === 2) r.error = payload.toString('utf8');
-    } else if (wireType === 1) {
-      offset += 8;
-    } else if (wireType === 5) {
-      offset += 4;
-    }
-  }
-  return r;
-}
-
-// ---------------------------------------------------------------------------
 // Mkdirs
 // ---------------------------------------------------------------------------
 
@@ -476,26 +432,6 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
     responseSerialize: (res: Buffer) => res,
     responseDeserialize: (buf: Buffer) => deserializeMkdirsResponse(buf),
   },
-  backupState: {
-    path: '/sandbox.SandboxService/BackupState',
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (req: { destinationUrl: string; targetPath: string }) =>
-      serializeBackupStateRequest(req.destinationUrl, req.targetPath),
-    requestDeserialize: (buf: Buffer) => buf,
-    responseSerialize: (res: Buffer) => res,
-    responseDeserialize: (buf: Buffer) => deserializeStateOperationResponse(buf),
-  },
-  restoreState: {
-    path: '/sandbox.SandboxService/RestoreState',
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (req: { sourceUrl: string; targetPath: string }) =>
-      serializeRestoreStateRequest(req.sourceUrl, req.targetPath),
-    requestDeserialize: (buf: Buffer) => buf,
-    responseSerialize: (res: Buffer) => res,
-    responseDeserialize: (buf: Buffer) => deserializeStateOperationResponse(buf),
-  },
 };
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
@@ -508,16 +444,22 @@ export class SandboxApiClient {
     host,
     port,
     apiKey,
-    serverCertPem,
+    rootCertPem,
+    clientCertPem,
+    clientKeyPem,
   }: {
     host: string;
     port: number;
     apiKey: string;
-    serverCertPem?: Buffer;
+    rootCertPem?: Buffer;
+    clientCertPem: Buffer;
+    clientKeyPem: Buffer;
   }) {
-    const credentials = serverCertPem
-      ? grpc.credentials.createSsl(serverCertPem)
-      : grpc.credentials.createInsecure();
+    const credentials = grpc.credentials.createSsl(
+      rootCertPem ?? null,
+      clientKeyPem,
+      clientCertPem
+    );
     this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
     this.apiKey = apiKey;
   }
@@ -599,36 +541,6 @@ export class SandboxApiClient {
     return call(paths, this.metadata(conversationId));
   }
 
-  async backupState(
-    conversationId: string,
-    destinationUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    const call = promisify(
-      (this.client as any).backupState.bind(this.client) as (
-        request: { destinationUrl: string; targetPath: string },
-        metadata: grpc.Metadata,
-        callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
-      ) => void
-    );
-    return call({ destinationUrl, targetPath }, this.metadata(conversationId));
-  }
-
-  async restoreState(
-    conversationId: string,
-    sourceUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    const call = promisify(
-      (this.client as any).restoreState.bind(this.client) as (
-        request: { sourceUrl: string; targetPath: string },
-        metadata: grpc.Metadata,
-        callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
-      ) => void
-    );
-    return call({ sourceUrl, targetPath }, this.metadata(conversationId));
-  }
-
   close(): void {
     this.client.close();
   }
@@ -652,12 +564,10 @@ export class SandboxConnectionManager {
     conversationId: string,
     callContext: SandboxCallContext
   ) => Promise<void>;
-  /** Tracks conversations that have been initialized (restore + manifest write). */
+  /** Tracks conversations that have been initialized (manifest write). */
   private readonly initialized = new Map<string, Promise<void>>();
   /** conversationId → JSON.stringify(allowedConnectorIds) for manifest refresh detection. */
   private readonly lastAllowedIds = new Map<string, string>();
-  /** Called once per conversation so workspace can be restored before manifest write. */
-  private restoreCallback?: (conversationId: string) => Promise<void>;
 
   constructor({
     config,
@@ -671,12 +581,14 @@ export class SandboxConnectionManager {
     this.logger = logger;
     this.writeManifest = writeManifest;
     this.apiClient = new SandboxApiClient({
-      host: config.sandbox_api_host,
-      port: config.sandbox_api_port,
-      apiKey: config.sandbox_api_key,
-      serverCertPem: config.sandbox_api_server_cert
-        ? Buffer.from(config.sandbox_api_server_cert)
+      host: config.host,
+      port: config.port,
+      apiKey: config.api_key,
+      rootCertPem: config.ssl.certificate_authorities
+        ? Buffer.from(config.ssl.certificate_authorities)
         : undefined,
+      clientCertPem: Buffer.from(config.ssl.certificate),
+      clientKeyPem: Buffer.from(config.ssl.key),
     });
   }
 
@@ -736,26 +648,6 @@ export class SandboxConnectionManager {
     );
   }
 
-  async backupState(
-    conversationId: string,
-    destinationUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    return this.apiClient.backupState(conversationId, destinationUrl, targetPath);
-  }
-
-  async restoreState(
-    conversationId: string,
-    sourceUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    return this.apiClient.restoreState(conversationId, sourceUrl, targetPath);
-  }
-
-  setRestoreCallback(cb: (conversationId: string) => Promise<void>): void {
-    this.restoreCallback = cb;
-  }
-
   /** If the sandbox returns UNAVAILABLE (pod self-exited), clear initialized so the
    *  next call triggers a fresh restore + manifest write before re-allocating via sandbox-api. */
   private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
@@ -810,12 +702,6 @@ export class SandboxConnectionManager {
     callContext: SandboxCallContext
   ): Promise<void> {
     this.logger.debug(`Initializing sandbox for conversation ${conversationId}`);
-
-    if (this.restoreCallback) {
-      await this.restoreCallback(conversationId).catch((err) => {
-        this.logger.warn(`Workspace restore failed for conversation ${conversationId}: ${err}`);
-      });
-    }
 
     if (this.writeManifest) {
       const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
