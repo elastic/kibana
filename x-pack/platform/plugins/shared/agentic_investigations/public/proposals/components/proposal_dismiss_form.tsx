@@ -22,7 +22,7 @@ export interface ProposalDismissFormProps {
 
 /**
  * Inline form shown when the analyst clicks Dismiss inside a proposal card.
- * Contains a reason select and an optional rationale textarea.
+ * Contains a reason select and a rationale textarea.
  */
 export const ProposalDismissForm = memo<ProposalDismissFormProps>(
   ({
@@ -56,7 +56,7 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
             defaultMessage: 'Rationale',
           })}
           helpText={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleHelpText', {
-            defaultMessage: 'Explain why this proposal is being dismissed.',
+            defaultMessage: 'Required - explain why this proposal is being dismissed.',
           })}
         >
           <EuiTextArea
