@@ -62,6 +62,10 @@ export async function cleanupTroubleshootingData(clients: CleanupClients): Promi
   return cleanupSeededData({ ...clients, agentIdPrefix: TROUBLESHOOTING_AGENT_ID_PREFIX });
 }
 
+export async function cleanupResponseActionsData(clients: CleanupClients): Promise<void> {
+  return cleanupSeededData({ ...clients, agentIdPrefix: 'eval-agent-' });
+}
+
 export async function cleanupForensicData(clients: CleanupClients): Promise<void> {
   return cleanupSeededData({ ...clients, agentIdPrefix: FORENSIC_AGENT_ID_PREFIX });
 }
