@@ -242,6 +242,8 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const extractObservables = configuration.attributes.extractObservables ?? true;
+
   return {
     ...configuration,
     attributes: {
@@ -250,6 +252,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      extractObservables,
     },
   };
 }
