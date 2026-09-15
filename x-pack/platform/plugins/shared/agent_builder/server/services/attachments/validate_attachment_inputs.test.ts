@@ -7,7 +7,7 @@
 
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createResolveContextMock } from '../../test_utils';
-import { validateAttachments } from './validate_attachment';
+import { validateAttachmentInputs } from './validate_attachment_inputs';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
 const createRegistry = (definition?: {
@@ -21,7 +21,7 @@ const createRegistry = (definition?: {
     get: () => definition,
   } as unknown as AttachmentTypeRegistry);
 
-describe('validateAttachments', () => {
+describe('validateAttachmentInputs', () => {
   const resolveContext = createResolveContextMock();
   const validateContext = { request: resolveContext.request };
 
@@ -32,7 +32,7 @@ describe('validateAttachments', () => {
       });
 
       await expect(
-        validateAttachments({
+        validateAttachmentInputs({
           attachments: [{ type: 'text', data: { body: 'only-data' } }],
           registry,
           resolveContext,
@@ -49,7 +49,7 @@ describe('validateAttachments', () => {
       });
 
       await expect(
-        validateAttachments({
+        validateAttachmentInputs({
           attachments: [{ type: 'text', origin: 'dashboard-id' }],
           registry,
           resolveContext,
@@ -68,7 +68,7 @@ describe('validateAttachments', () => {
       });
 
       await expect(
-        validateAttachments({
+        validateAttachmentInputs({
           attachments: [{ type: 'text', data: { body: 'inline' }, origin: 'so-1' }],
           registry,
           resolveContext,
@@ -87,7 +87,7 @@ describe('validateAttachments', () => {
       });
 
       await expect(
-        validateAttachments({
+        validateAttachmentInputs({
           attachments: [{ type: 'text' }],
           registry,
           resolveContext,
@@ -105,7 +105,7 @@ describe('validateAttachments', () => {
     });
 
     await expect(
-      validateAttachments({
+      validateAttachmentInputs({
         attachments: [
           {
             type: 'test-attachment',
@@ -135,7 +135,7 @@ describe('validateAttachments', () => {
 
   it('returns undefined when there are no inputs', async () => {
     await expect(
-      validateAttachments({
+      validateAttachmentInputs({
         attachments: undefined,
         registry: createRegistry(),
         resolveContext,
@@ -146,7 +146,7 @@ describe('validateAttachments', () => {
 
   it('rejects unknown attachment types', async () => {
     await expect(
-      validateAttachments({
+      validateAttachmentInputs({
         attachments: [{ type: 'bad', data: {} }],
         registry: createRegistry(),
         resolveContext,
@@ -161,7 +161,7 @@ describe('validateAttachments', () => {
     });
 
     await expect(
-      validateAttachments({
+      validateAttachmentInputs({
         attachments: [{ type: 'test-attachment', data: {} }],
         registry,
         resolveContext,

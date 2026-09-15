@@ -20,7 +20,7 @@ import type { AttachmentTypeRegistry } from './attachment_type_registry';
  * invalid one. Validation resolves by-reference attachments, so the returned inputs carry
  * resolved data.
  */
-export const validateAttachments = async ({
+export const validateAttachmentInputs = async ({
   attachments,
   registry,
   resolveContext,

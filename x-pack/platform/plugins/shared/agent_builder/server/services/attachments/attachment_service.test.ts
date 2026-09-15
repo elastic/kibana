@@ -72,7 +72,7 @@ describe('AttachmentService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(
-        serviceStart.validate(
+        serviceStart.validateAttachmentInputs(
           [
             {
               type: 'test-attachment',
@@ -104,7 +104,10 @@ describe('AttachmentService', () => {
       });
 
       await expect(
-        serviceStart.validate([{ type: 'bad', data: {} }], httpServerMock.createKibanaRequest())
+        serviceStart.validateAttachmentInputs(
+          [{ type: 'bad', data: {} }],
+          httpServerMock.createKibanaRequest()
+        )
       ).rejects.toThrow('Attachment validation failed: Unknown attachment type: bad');
     });
   });

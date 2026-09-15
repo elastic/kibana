@@ -102,7 +102,10 @@ export function registerChatApiRoutes({
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
 
-            const attachments = await attachmentsService.validate(attachmentInputs, request);
+            const attachments = await attachmentsService.validateAttachmentInputs(
+              attachmentInputs,
+              request
+            );
 
             const body = await conversationsService.appendUserMessage({
               request,

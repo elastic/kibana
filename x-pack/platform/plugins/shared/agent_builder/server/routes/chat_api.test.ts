@@ -324,7 +324,7 @@ describe('user message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validate: jest.fn().mockImplementation(async (attachments) =>
+        validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
           attachments?.map((attachment: { type: string; data: unknown }) => ({
             id: 'attachment-1',
             type: attachment.type,
@@ -421,7 +421,7 @@ describe('user message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validate: jest
+        validateAttachmentInputs: jest
           .fn()
           .mockRejectedValue(
             createBadRequestError('Attachment validation failed: Unknown attachment type: bad')

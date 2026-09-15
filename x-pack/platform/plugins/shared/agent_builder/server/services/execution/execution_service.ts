@@ -84,7 +84,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const validatedAttachments = await this.deps.attachmentsService.validate(
+    const validatedAttachments = await this.deps.attachmentsService.validateAttachmentInputs(
       params.nextInput.attachments,
       request
     );

@@ -120,7 +120,7 @@ export class ConversationServiceImpl implements ConversationService {
     const snapshot = conversation.attachments ?? [];
     const stateManager = this.attachments.createStateManager(snapshot);
 
-    await this.attachments.mergeInputs({
+    await this.attachments.mergeAttachmentInputs({
       stateManager,
       inputs: attachments,
       request,

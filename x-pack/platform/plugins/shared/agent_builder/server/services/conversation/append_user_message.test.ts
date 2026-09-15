@@ -70,7 +70,7 @@ const attachmentsService = {
   getTypeDefinition: () => textType,
   createStateManager: (attachments: VersionedAttachment[]) =>
     createAttachmentStateManager(attachments, { getTypeDefinition: () => textType }),
-  mergeInputs: ({
+  mergeAttachmentInputs: ({
     stateManager,
     inputs,
     actor,

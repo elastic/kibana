@@ -21,14 +21,14 @@ export interface AttachmentServiceSetup {
 }
 
 export interface AttachmentServiceStart {
-  validate(
+  validateAttachmentInputs(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
   ): Promise<AttachmentInput[] | undefined>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];
   createStateManager(attachments: VersionedAttachment[]): AttachmentStateManager;
-  mergeInputs(options: {
+  mergeAttachmentInputs(options: {
     stateManager: AttachmentStateManager;
     inputs: AttachmentInput[];
     request: KibanaRequest;
