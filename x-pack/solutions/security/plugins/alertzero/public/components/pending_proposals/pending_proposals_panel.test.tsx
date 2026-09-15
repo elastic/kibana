@@ -13,10 +13,10 @@ import {
   useApproveProposal,
   useDismissProposal,
   usePendingProposals,
-} from '../../hooks/use_proposals_api';
+} from '@kbn/agentic-investigations-plugin/public';
 import { PendingProposalsPanel } from './pending_proposals_panel';
 
-jest.mock('../../hooks/use_proposals_api');
+jest.mock('@kbn/agentic-investigations-plugin/public');
 
 const mockUsePendingProposals = usePendingProposals as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;

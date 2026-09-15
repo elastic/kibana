@@ -16,3 +16,10 @@ export type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
 } from './types';
+
+export {
+  useApproveProposal,
+  useDismissProposal,
+  usePendingProposals,
+  useProposal,
+} from './proposals/hooks/use_proposals_api';
