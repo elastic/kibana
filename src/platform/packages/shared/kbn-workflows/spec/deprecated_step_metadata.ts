@@ -18,6 +18,10 @@ export interface StepPrefixDeprecationInfo {
   deprecation: StepDeprecationInfo;
 }
 
+const SLACK_V1_DEPRECATION: StepDeprecationInfo = {
+  message: 'This step uses a legacy Slack connector. Use the current Slack connector instead.',
+};
+
 export const DEPRECATED_STEP_METADATA: Record<string, StepDeprecationInfo> = {
   'kibana.createCase': {
     replacementStepType: 'cases.createCase',
@@ -43,6 +47,7 @@ export const DEPRECATED_STEP_METADATA: Record<string, StepDeprecationInfo> = {
   'kibana.addCaseCommentDefaultSpace': {
     replacementStepType: 'cases.addComment',
   },
+  slack: SLACK_V1_DEPRECATION,
 };
 
 /**
@@ -55,6 +60,10 @@ export const DEPRECATED_STEP_PREFIX_METADATA: StepPrefixDeprecationInfo[] = [
   { prefix: 'bedrock.', deprecation: { replacementStepType: 'ai.prompt' } },
   { prefix: 'gen-ai.', deprecation: { replacementStepType: 'ai.prompt' } },
   { prefix: 'gemini.', deprecation: { replacementStepType: 'ai.prompt' } },
+  {
+    prefix: 'slack_api.',
+    deprecation: SLACK_V1_DEPRECATION,
+  },
 ];
 
 export function getStepPrefixDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
