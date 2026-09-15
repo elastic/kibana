@@ -102,7 +102,10 @@ const createDescribedAttachmentTypeConfig = (defaultLabel: string, icon: string)
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
  * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
+export const registerAttachmentUiDefinitions = (
+  attachments: AttachmentServiceStartContract,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
@@ -124,29 +127,31 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
     }
   );
 
-  attachments.addAttachmentType<Attachment<string, unknown>>(
-    INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.type,
-    {
-      ...createDescribedAttachmentTypeConfig(
-        INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.label,
-        INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.icon
-      ),
-      renderInlineContent: (props) =>
-        React.createElement(InvestigationTimelineInlineContent, props),
-    }
-  );
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    attachments.addAttachmentType<Attachment<string, unknown>>(
+      INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.type,
+      {
+        ...createDescribedAttachmentTypeConfig(
+          INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.label,
+          INVESTIGATION_TIMELINE_ATTACHMENT_CONFIG.icon
+        ),
+        renderInlineContent: (props) =>
+          React.createElement(InvestigationTimelineInlineContent, props),
+      }
+    );
 
-  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-    INVESTIGATION_IOCS_ATTACHMENT_CONFIG.type,
-    {
-      ...createAttachmentTypeConfig(
-        INVESTIGATION_IOCS_ATTACHMENT_CONFIG.label,
-        INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon
-      ),
-      getHeader: () => ({ icon: INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon }),
-      renderInlineContent: (props) => React.createElement(InvestigationIocsInlineContent, props),
-    }
-  );
+    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+      INVESTIGATION_IOCS_ATTACHMENT_CONFIG.type,
+      {
+        ...createAttachmentTypeConfig(
+          INVESTIGATION_IOCS_ATTACHMENT_CONFIG.label,
+          INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon
+        ),
+        getHeader: () => ({ icon: INVESTIGATION_IOCS_ATTACHMENT_CONFIG.icon }),
+        renderInlineContent: (props) => React.createElement(InvestigationIocsInlineContent, props),
+      }
+    );
+  }
 };
 
 /**
