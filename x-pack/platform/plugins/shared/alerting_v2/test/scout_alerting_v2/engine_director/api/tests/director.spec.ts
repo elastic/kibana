@@ -1514,7 +1514,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           },
           recovery_strategy: 'none',
           no_data_strategy: 'recover',
-          state_transition: { pending_count: 0, recovering_count: 1 },
+          state_transition: { pending_count: 0 },
         })
       );
 
@@ -1536,7 +1536,8 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
-      // The director resolves the episode directly to inactive, ignoring recovering_count.
+      // The director resolves the episode directly to inactive on a no_data
+      // event when no_data_strategy is 'recover'.
       for (const event of noDataEvents) {
         expect(event.episode?.status).toBe('inactive');
       }
