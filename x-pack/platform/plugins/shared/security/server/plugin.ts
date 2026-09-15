@@ -533,6 +533,7 @@ export class SecurityPlugin
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
         apiKeys: publicApiKeys,
+        systemIdentity: this.authenticationStart.systemIdentity,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

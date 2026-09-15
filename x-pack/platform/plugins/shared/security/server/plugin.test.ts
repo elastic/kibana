@@ -211,6 +211,7 @@ describe('Security Plugin', () => {
               "validate": [Function],
             },
             "getCurrentUser": [Function],
+            "systemIdentity": undefined,
           },
           "authz": Object {
             "actions": Actions {

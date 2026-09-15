@@ -35,6 +35,13 @@ export const uiamServiceMock = {
     exchangeServiceAccountToken: jest
       .fn()
       .mockResolvedValue({ token: 'essu_mock-service-account-token' }),
+    authenticateAsKibana: jest.fn().mockResolvedValue({
+      type: 'project',
+      project_id: 'mock-project-id',
+      project_type: 'elasticsearch',
+      organization_id: 'mock-organization-id',
+      token: 'essu_mock-kibana-token',
+    }),
     createServiceAccount: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
       type: 'project' as const,
