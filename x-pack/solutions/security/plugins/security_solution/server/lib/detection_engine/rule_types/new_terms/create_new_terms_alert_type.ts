@@ -202,6 +202,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: firstPhaseLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest,
@@ -222,11 +223,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
 
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
+        result.warningMessages.push(...searchWarnings);
 
         if (!searchResult.aggregations) {
           reportMissingAggregations({
             searchResult,
             searchErrors,
+            searchWarnings,
             result,
             inputIndex,
             cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
@@ -359,6 +362,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
             searchErrors: pageSearchErrors,
+            searchWarnings: pageSearchWarnings,
             loggedRequests: pageSearchLoggedRequests = [],
           } = await singleSearchAfter({
             searchRequest: pageSearchRequest,
@@ -374,6 +378,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
           result.searchAfterTimes.push(pageSearchDuration);
           result.errors.push(...pageSearchErrors);
+          result.warningMessages.push(...pageSearchWarnings);
           loggedRequests.push(...pageSearchLoggedRequests);
 
           logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
@@ -382,6 +387,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             reportMissingAggregations({
               searchResult: pageSearchResult,
               searchErrors: pageSearchErrors,
+              searchWarnings: pageSearchWarnings,
               result,
               inputIndex,
               cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
@@ -420,6 +426,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               searchResult: docFetchSearchResult,
               searchDuration: docFetchSearchDuration,
               searchErrors: docFetchSearchErrors,
+              searchWarnings: docFetchSearchWarnings,
               loggedRequests: docFetchLoggedRequests = [],
             } = await singleSearchAfter({
               searchRequest: docFetchSearchRequest,
@@ -437,12 +444,14 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             });
             result.searchAfterTimes.push(docFetchSearchDuration);
             result.errors.push(...docFetchSearchErrors);
+            result.warningMessages.push(...docFetchSearchWarnings);
             loggedRequests.push(...docFetchLoggedRequests);
 
             if (!docFetchSearchResult.aggregations) {
               reportMissingAggregations({
                 searchResult: docFetchSearchResult,
                 searchErrors: docFetchSearchErrors,
+                searchWarnings: docFetchSearchWarnings,
                 result,
                 inputIndex,
                 cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,

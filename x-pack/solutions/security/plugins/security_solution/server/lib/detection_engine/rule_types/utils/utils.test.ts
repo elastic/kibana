@@ -32,7 +32,7 @@ import {
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
-  createErrorsFromClusters,
+  createWarningsFromClusters,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
@@ -741,7 +741,7 @@ describe('utils', () => {
     });
   });
 
-  describe('createErrorsFromClusters', () => {
+  describe('createWarningsFromClusters', () => {
     const skippedFailure: estypes.ShardFailure = {
       shard: -1,
       index: 'kayak:logs-a-000001',
@@ -753,11 +753,11 @@ describe('utils', () => {
     };
 
     test('returns an empty array without a _clusters section', () => {
-      expect(createErrorsFromClusters({ clusters: undefined, shardErrors: [] })).toEqual([]);
+      expect(createWarningsFromClusters({ clusters: undefined, shardErrors: [] })).toEqual([]);
     });
 
-    test('prefixes per-cluster failures with the cluster alias', () => {
-      const errors = createErrorsFromClusters({
+    test('reports per-cluster failures as warnings naming the cluster and its status', () => {
+      const warnings = createWarningsFromClusters({
         clusters: {
           total: 2,
           successful: 1,
@@ -777,14 +777,14 @@ describe('utils', () => {
         shardErrors: [],
       });
 
-      expect(errors).toEqual([
-        'cluster: "kayak" index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data may be missing from this rule run: index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
       ]);
     });
 
     test('omits failures already reported in _shards.failures', () => {
       const shardErrors = createErrorsFromShard({ errors: [skippedFailure] });
-      const errors = createErrorsFromClusters({
+      const warnings = createWarningsFromClusters({
         clusters: {
           total: 1,
           successful: 1,
@@ -804,11 +804,11 @@ describe('utils', () => {
         shardErrors,
       });
 
-      expect(errors).toEqual([]);
+      expect(warnings).toEqual([]);
     });
 
     test('reports skipped and failed clusters that carry no failures', () => {
-      const errors = createErrorsFromClusters({
+      const warnings = createWarningsFromClusters({
         clusters: {
           total: 2,
           successful: 0,
@@ -825,9 +825,9 @@ describe('utils', () => {
         shardErrors: [],
       });
 
-      expect(errors).toEqual([
-        'cluster: "kayak" status: "skipped" indices: "logs-a-*"',
-        'cluster: "booking" status: "failed" indices: "logs-a-*"',
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data is missing from this rule run (indices: "logs-a-*").',
+        'Cluster "booking" is "failed" and its data is missing from this rule run (indices: "logs-a-*").',
       ]);
     });
   });

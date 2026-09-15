@@ -564,10 +564,12 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 
 /**
  * Given the `_clusters` section of a cross-cluster or cross-project search response this will return
- * an array of strings for failures that are only reported per cluster, e.g. when a linked project is
- * skipped. Failures already present in `_shards.failures` are omitted.
+ * an array of warning strings for conditions that are only reported per cluster, e.g. a remote cluster
+ * with `skip_unavailable: true` being unreachable or a linked project rejecting the search. These are
+ * warnings rather than errors because Elasticsearch still returns the data of the reachable clusters.
+ * Failures already present in `_shards.failures` are omitted.
  */
-export const createErrorsFromClusters = ({
+export const createWarningsFromClusters = ({
   clusters,
   shardErrors,
 }: {
@@ -580,10 +582,15 @@ export const createErrorsFromClusters = ({
   return Object.entries(details).flatMap(([alias, detail]) => {
     const failures = createErrorsFromShard({ errors: detail.failures ?? [] })
       .filter((failure) => !knownShardErrors.has(failure))
-      .map((failure) => `cluster: "${alias}" ${failure}`);
+      .map(
+        (failure) =>
+          `Cluster "${alias}" is "${detail.status}" and its data may be missing from this rule run: ${failure}`
+      );
 
     if (failures.length === 0 && (detail.status === 'skipped' || detail.status === 'failed')) {
-      return [`cluster: "${alias}" status: "${detail.status}" indices: "${detail.indices}"`];
+      return [
+        `Cluster "${alias}" is "${detail.status}" and its data is missing from this rule run (indices: "${detail.indices}").`,
+      ];
     }
 
     return failures;

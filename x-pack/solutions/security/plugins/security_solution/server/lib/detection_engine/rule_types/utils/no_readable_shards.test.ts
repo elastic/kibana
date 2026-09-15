@@ -65,6 +65,7 @@ describe('reportMissingAggregations', () => {
     reportMissingAggregations({
       searchResult: someShardsResult,
       searchErrors: ['index: "logs-a-000001" type: "index_not_found_exception"'],
+      searchWarnings: [],
       result,
       inputIndex,
       unexpectedErrorMessage: 'unexpected',
@@ -79,6 +80,7 @@ describe('reportMissingAggregations', () => {
     reportMissingAggregations({
       searchResult: someShardsResult,
       searchErrors: ['index: "logs-a-000001" type: "circuit_breaking_exception"'],
+      searchWarnings: [],
       result,
       inputIndex,
       unexpectedErrorMessage: 'unexpected',
@@ -93,6 +95,7 @@ describe('reportMissingAggregations', () => {
     reportMissingAggregations({
       searchResult: zeroShardsResult,
       searchErrors: [],
+      searchWarnings: [],
       result,
       inputIndex,
       cpsLinkedProjects: linkedProjects,
@@ -110,6 +113,7 @@ describe('reportMissingAggregations', () => {
     const params = {
       searchResult: zeroShardsResult,
       searchErrors: [],
+      searchWarnings: [],
       result,
       inputIndex,
       unexpectedErrorMessage: 'unexpected',
@@ -121,6 +125,21 @@ describe('reportMissingAggregations', () => {
     expect(result.warningMessages).toHaveLength(1);
   });
 
+  it('keeps the result successful without extra warnings when a cluster was skipped', () => {
+    const result = { success: true, warningMessages: [] as string[] };
+
+    reportMissingAggregations({
+      searchResult: someShardsResult,
+      searchErrors: [],
+      searchWarnings: ['Cluster "kayak" is "skipped" and its data is missing from this rule run.'],
+      result,
+      inputIndex,
+      unexpectedErrorMessage: 'unexpected',
+    });
+
+    expect(result).toEqual({ success: true, warningMessages: [] });
+  });
+
   it('throws the unexpected error when shards were searched but aggregations are missing', () => {
     const result = { success: true, warningMessages: [] as string[] };
 
@@ -128,6 +147,7 @@ describe('reportMissingAggregations', () => {
       reportMissingAggregations({
         searchResult: someShardsResult,
         searchErrors: [],
+        searchWarnings: [],
         result,
         inputIndex,
         unexpectedErrorMessage: 'expected to find aggregations on search result',

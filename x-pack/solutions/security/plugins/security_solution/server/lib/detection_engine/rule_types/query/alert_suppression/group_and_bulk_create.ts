@@ -201,7 +201,7 @@ export const groupAndBulkCreate = async ({
         runtimeMappings: sharedParams.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
       });
-      const { searchResult, searchDuration, searchErrors, loggedRequests } =
+      const { searchResult, searchDuration, searchErrors, searchWarnings, loggedRequests } =
         await singleSearchAfter({
           searchRequest,
           services,
@@ -219,6 +219,7 @@ export const groupAndBulkCreate = async ({
       }
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
+      toReturn.warningMessages.push(...searchWarnings);
       toReturn.totalEventsFound = getTotalHitsValue(searchResult.hits.total);
 
       const eventsByGroupResponseWithAggs =
@@ -227,6 +228,7 @@ export const groupAndBulkCreate = async ({
         reportMissingAggregations({
           searchResult,
           searchErrors,
+          searchWarnings,
           result: toReturn,
           inputIndex: sharedParams.inputIndex,
           cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,

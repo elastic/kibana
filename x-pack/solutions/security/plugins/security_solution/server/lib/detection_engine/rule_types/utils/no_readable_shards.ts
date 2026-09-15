@@ -24,6 +24,7 @@ interface NoReadableShardsWarningParams {
 interface ReportMissingAggregationsParams extends NoReadableShardsWarningParams {
   searchResult: ShardsSearchResult;
   searchErrors: string[];
+  searchWarnings: string[];
   result: Pick<SearchAfterAndBulkCreateReturnType, 'success' | 'userError' | 'warningMessages'>;
   unexpectedErrorMessage: string;
 }
@@ -57,13 +58,15 @@ export const getNoReadableShardsWarning = ({
 };
 
 /**
- * Handles a search response without an `aggregations` object. Shard or cluster failures are
- * reported as rule errors, a zero-shard response is reported as a warning, and anything else is
- * treated as an unexpected condition and thrown.
+ * Handles a search response without an `aggregations` object. Shard failures fail the run, a
+ * zero-shard response is reported as a warning, per-cluster warnings (already pushed by the caller)
+ * explain the missing aggregations on their own, and anything else is treated as an unexpected
+ * condition and thrown.
  */
 export const reportMissingAggregations = ({
   searchResult,
   searchErrors,
+  searchWarnings,
   result,
   inputIndex,
   cpsLinkedProjects,
@@ -83,6 +86,10 @@ export const reportMissingAggregations = ({
       result.warningMessages.push(warning);
     }
 
+    return;
+  }
+
+  if (searchWarnings.length > 0) {
     return;
   }
 

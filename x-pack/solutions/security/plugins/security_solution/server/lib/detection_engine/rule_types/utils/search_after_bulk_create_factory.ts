@@ -133,6 +133,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: singleSearchLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest: searchAfterQuery,
@@ -153,6 +154,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           createSearchAfterReturnType({
             searchAfterTimes: [searchDuration],
             errors: searchErrors,
+            warningMessages: searchWarnings,
           }),
         ]);
         loggedRequests.push(...singleSearchLoggedRequests);

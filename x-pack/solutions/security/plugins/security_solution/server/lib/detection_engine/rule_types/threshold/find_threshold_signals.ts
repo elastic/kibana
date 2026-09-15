@@ -116,6 +116,7 @@ export const findThresholdSignals = async ({
         searchResult,
         searchDuration,
         searchErrors,
+        searchWarnings,
         loggedRequests: thresholdLoggedRequests,
       } = await singleSearchAfter({
         searchRequest,
@@ -131,6 +132,7 @@ export const findThresholdSignals = async ({
       });
 
       searchAfterResults.searchDurations.push(searchDuration);
+      warnings.push(...searchWarnings);
       loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
       if (!isEmpty(searchErrors)) {
@@ -147,6 +149,8 @@ export const findThresholdSignals = async ({
           getNoReadableShardsWarning({ inputIndex: inputIndexPattern, cpsLinkedProjects })
         );
         sortKeys = undefined; // this will eject us out of the loop
+      } else if (searchWarnings.length > 0) {
+        sortKeys = undefined; // a skipped cluster explains the missing aggregations
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
@@ -172,6 +176,7 @@ export const findThresholdSignals = async ({
       searchResult,
       searchDuration,
       searchErrors,
+      searchWarnings,
       loggedRequests: thresholdLoggedRequests,
     } = await singleSearchAfter({
       searchRequest,
@@ -187,6 +192,7 @@ export const findThresholdSignals = async ({
 
     searchAfterResults.searchDurations.push(searchDuration);
     searchAfterResults.searchErrors.push(...searchErrors);
+    warnings.push(...searchWarnings);
     loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
     if (searchResult.aggregations != null) {
@@ -205,11 +211,13 @@ export const findThresholdSignals = async ({
           cardinality_count: searchResult.aggregations.cardinality_count,
         });
       }
+    } else if (!isEmpty(searchErrors)) {
+      // shard failures fail the run, nothing else to report
     } else if (hasZeroShards(searchResult)) {
       warnings.push(
         getNoReadableShardsWarning({ inputIndex: inputIndexPattern, cpsLinkedProjects })
       );
-    } else {
+    } else if (searchWarnings.length === 0) {
       throw new Error('Aggregations were missing on threshold rule search result');
     }
   }
