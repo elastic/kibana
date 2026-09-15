@@ -63,7 +63,7 @@ spaceTest.describe(
         });
         expect(workers.status).toBe(200);
         const body = workers.data as { workers?: unknown[] } | unknown[];
-        const workersList = Array.isArray(body) ? body : body.workers;
+        const workersList = Array.isArray(body) ? body : (body.workers ?? []);
         expect(workersList.length).toBeGreaterThan(0);
         // UI transitions out of S0.
         await page.gotoApp('alertzero');
