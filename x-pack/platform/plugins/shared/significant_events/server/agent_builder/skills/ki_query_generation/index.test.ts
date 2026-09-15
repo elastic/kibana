@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { MemoryToolsOptions } from '../../../memory_and_investigation/tools/memory';
 import { platformStreamsMemoryTools } from '../../../memory_and_investigation/tools/memory/tool_ids';
 import { SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID } from './get_features/tool';
@@ -13,12 +14,15 @@ import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from './validate_queries/
 import { createKIQueryGenerationSkill } from '.';
 
 describe('createKIQueryGenerationSkill', () => {
-  it('returns query-generation and memory tools as inline tools', () => {
-    const skill = createKIQueryGenerationSkill({
+  const createOptions = () =>
+    ({
       getScopedClients: jest.fn(),
       server: {},
       logger: loggerMock.create(),
     } as unknown as MemoryToolsOptions);
+
+  it('returns query-generation and memory tools as inline tools', () => {
+    const skill = createKIQueryGenerationSkill(createOptions());
 
     expect(skill.getInlineTools?.()).toEqual([
       expect.objectContaining({ id: platformStreamsMemoryTools.memorySearch }),
@@ -27,6 +31,6 @@ describe('createKIQueryGenerationSkill', () => {
       expect.objectContaining({ id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID }),
       expect.objectContaining({ id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID }),
     ]);
-    expect(skill.getRegistryTools).toBeUndefined();
+    expect(skill.getRegistryTools?.()).toEqual([platformSignificantEventsTools.searchEvent]);
   });
 });

@@ -14,6 +14,7 @@ import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
+  type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
@@ -22,6 +23,10 @@ import { streamToAnalysisTarget } from '../../../../lib/significant_events/strea
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
+
+export type AcceptedQuery = Omit<ValidatedKIQuery, 'esql' | 'expects_matches'> & {
+  esql: { query: string };
+};
 
 const MAX_QUERIES_PER_CALL = 100;
 const MAX_FEATURE_IDS_PER_QUERY = 100;
@@ -82,9 +87,10 @@ const validateQueriesSchema = z.object({
     .describe('Target identifier against which the candidate ES|QL queries must be validated.'),
   queries: z
     .array(candidateQuerySchema)
-    .min(1)
     .max(MAX_QUERIES_PER_CALL)
-    .describe('Complete candidate query batch. Resubmit repaired queries after validation errors.'),
+    .describe(
+      'Complete candidate query batch. Resubmit the full repaired batch after validation errors, or pass an empty array to finalize with no queries.'
+    ),
 });
 
 export const createValidateQueriesTool = ({
@@ -98,9 +104,20 @@ export const createValidateQueriesTool = ({
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Validate candidate KI queries against a target. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
+      'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
     handler: async ({ target_id: targetId, queries }, context) => {
+      if (queries.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { queries: [], finalized: true, finalized_queries: [] },
+            },
+          ],
+        };
+      }
+
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         const stream = await scopedClients.streamsClient.getStream(targetId);
@@ -109,7 +126,7 @@ export const createValidateQueriesTool = ({
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
         const [{ hits: features }, { [target.id]: existingLinks }] = await Promise.all([
           kiClient.getFeatures(target.id, {
-            id: featureIds,
+            featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
           kiClient.getStreamToQueryLinksMap([target.id]),
@@ -143,18 +160,22 @@ export const createValidateQueriesTool = ({
           queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
         });
 
+        const validatedQueries: AcceptedQuery[] = acceptedQueries.map(
+          ({ expects_matches: _expectsMatches, esql, ...query }) => ({
+            ...query,
+            esql: { query: esql },
+          })
+        );
+        const finalized = results.every(({ valid }) => valid === true);
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 queries: results,
-                accepted_queries: acceptedQueries.map(
-                  ({ category: _category, expects_matches: _expectsMatches, esql, ...query }) => ({
-                    ...query,
-                    esql: { query: esql },
-                  })
-                ),
+                finalized,
+                ...(finalized ? { finalized_queries: validatedQueries } : {}),
               },
             },
           ],

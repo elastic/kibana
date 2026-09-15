@@ -76,9 +76,14 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
       _meta: {
         description:
           'Reasoning turns that contained external content and pending task tools and were correctly continued',
+        optional: true,
       },
     },
     tool_usage: {
+      _meta: {
+        description: 'Tool usage statistics for the inference steps',
+        optional: true,
+      },
       properties: {
         get_stream_features: {
           properties: {

@@ -29,7 +29,10 @@ export {
   type SignificantEventsToolUsage,
 } from './src/significant_events/queries/tools/tool_usage';
 export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/queries/tools/features_tool';
-export { significantEventsPrompt } from './src/significant_events/queries/prompt';
+export {
+  significantEventsPrompt,
+  significantEventsAgentPrompt,
+} from './src/significant_events/queries/prompt';
 export {
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,

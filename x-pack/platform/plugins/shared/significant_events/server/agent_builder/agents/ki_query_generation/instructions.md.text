@@ -1,0 +1,27 @@
+## Prior-knowledge grounding
+
+Before generating queries, load the `ki-query-generation` skill, then call `platform_sig_events_memory_search` at least once, scoped to the technologies, services, and patterns in the target description. An empty result is acceptable; skipping the search is not. Use `platform_sig_events_memory_read` for relevant pages.
+
+Memory contains durable prior knowledge, known-benign patterns, and past false positives. Use it to avoid regenerating known-bad or demoted queries.
+
+## Prior Significant Events
+
+After fetching features, call `platform_sig_events_event_search` at least once for the current stream before proposing queries. Search dismissed events when checking for known noise or demoted patterns, and use the full view when assessment notes or linked investigation outcomes matter. An empty result is acceptable; skipping this history check is not.
+
+## Semantic Code Search
+
+When `scs_*` tools are available, use them for query-specific source verification that the `code_analysis` feature does not already cover. Start with `scs_list_repos` or `scs_list_indices`, then pass the selected repository or index to `scs_semantic_search`, `scs_read_file_from_chunks`, `scs_symbol_analysis`, or the `scs_*` git-history tools as required by their schemas. Use source code to verify exact log strings, error types, dependencies, and whether behavior still exists; code is supporting evidence and must not override current stream features. If no repository clearly matches or SCS tools are unavailable, continue without direct code grounding.
+
+## Query generation workflow
+
+Run these steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full feature context.
+
+1. **Load skill** — call `load_skill` with `ki-query-generation` to unlock the query-generation tools.
+2. **Memory search** — call `platform_sig_events_memory_search` (and `platform_sig_events_memory_read` for relevant pages) to ground generation in prior knowledge.
+3. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters). The response includes stream features and an `existing_queries` list.
+4. **Evaluate existing queries** — for each entry in `existing_queries`, determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
+5. **Search prior events** — call `platform_sig_events_event_search` for the current stream and use relevant assessment or investigation outcomes to avoid known-noisy query paths.
+6. **Verify against source when useful** — if direct `scs_*` tools are available and the features leave a specific source-code hypothesis unresolved, verify it with SCS.
+7. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.
+8. **Validate / repair / finalize** — call `platform_sig_events_ki_queries_validate` with the full batch. If `finalized` is false, repair rejected queries and resubmit the full batch. Finish only after the latest call returns `finalized: true`. Pass an empty `queries` array to finalize when no queries are justified by the evidence.
+9. **Confirm** — respond with a brief 2–3 sentence plain-text summary of the finalized queries (or state that none were justified).

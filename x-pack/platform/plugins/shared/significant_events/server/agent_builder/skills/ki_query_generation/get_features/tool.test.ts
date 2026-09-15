@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
@@ -28,12 +29,24 @@ describe('ki_features_get tool', () => {
   };
   const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
+  const getStreamToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       streamsClient: { getStream },
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+      getKnowledgeIndicatorClient: jest
+        .fn()
+        .mockResolvedValue({ getFeatures, getStreamToQueryLinksMap }),
     } as unknown as RouteHandlerScopedClients;
   }) as unknown as jest.MockedFunction<GetScopedClients>;
+
+  const existingQuery = {
+    id: 'query-1',
+    title: 'Error rate',
+    type: 'stats',
+    severity_score: 65,
+    description: 'Tracks error rate',
+    esql: { query: 'FROM logs | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)' },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,6 +63,9 @@ describe('ki_features_get tool', () => {
           properties: { service: 'checkout' },
         },
       ],
+    });
+    getStreamToQueryLinksMap.mockResolvedValue({
+      'logs.test': [{ query: existingQuery }],
     });
   });
 
@@ -103,9 +119,49 @@ describe('ki_features_get tool', () => {
               title: 'Checkout',
             }),
           ],
+          existing_queries: [
+            {
+              id: 'query-1',
+              title: 'Error rate',
+              type: 'stats',
+              severity_score: 65,
+              description: 'Tracks error rate',
+              esql: 'FROM logs | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+            },
+          ],
         },
       },
     ]);
+  });
+
+  it('bounds existing queries surfaced to the LLM by severity, count and description length', async () => {
+    const longDescription = 'x'.repeat(250);
+    const links = Array.from({ length: DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 }, (_, i) => ({
+      query: {
+        ...existingQuery,
+        id: `query-${i}`,
+        severity_score: i,
+        description: longDescription,
+      },
+    }));
+    getStreamToQueryLinksMap.mockResolvedValue({ 'logs.test': links });
+
+    const result = await invokeHandler(
+      createTool(),
+      { target_id: 'logs.test' },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    const { existing_queries: existingQueries } = result.results[0].data as {
+      existing_queries: Array<{ id: string; severity_score: number; description: string }>;
+    };
+    expect(existingQueries).toHaveLength(DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT);
+    expect(existingQueries[0].severity_score).toBe(DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
+    expect(existingQueries.at(-1)?.severity_score).toBe(5);
+    expect(existingQueries[0].description).toHaveLength(200);
   });
 
   it('does not read internally stored features when target authorization fails', async () => {

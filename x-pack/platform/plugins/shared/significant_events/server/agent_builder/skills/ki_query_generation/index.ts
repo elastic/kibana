@@ -7,6 +7,7 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
   createMemoryListTool,
   createMemoryReadTool,
@@ -20,6 +21,11 @@ import content from './skill.md.text';
 
 export const KI_QUERY_GENERATION_SKILL_ID = 'ki-query-generation' as const;
 
+export {
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+  type AcceptedQuery,
+} from './validate_queries/tool';
+
 export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
   const { getScopedClients, logger } = options;
 
@@ -31,6 +37,7 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
     excludeFromElasticCapabilities: true,
     description,
     content,
+    getRegistryTools: () => [platformSignificantEventsTools.searchEvent],
     getInlineTools: (): BuiltinSkillBoundedTool[] => [
       createMemorySearchTool(options),
       createMemoryReadTool(options),
