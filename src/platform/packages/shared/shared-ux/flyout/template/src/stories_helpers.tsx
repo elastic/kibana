@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  EuiHealth,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiHealth, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FlyoutTemplateProps } from './types';
 import { FlyoutTemplate } from './flyout_template';
+import type { FlyoutTemplateProps } from './types';
 
 /** Args shared across all `@kbn/flyout-template` story files. Extend per story as needed. */
 export interface SharedStoryArgs {
@@ -32,13 +40,13 @@ export interface SharedStoryArgs {
 }
 
 export const LEADING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['leadingActions'] = [
-  { iconType: 'documents', onClick: () => {}, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
-  { iconType: 'document', onClick: () => {}, 'aria-label': 'View document', toolTipContent: 'View document' },
+  { iconType: 'documents', onClick: () => { }, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
+  { iconType: 'document', onClick: () => { }, 'aria-label': 'View document', toolTipContent: 'View document' },
 ]; // prettier-ignore
 
 export const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['trailingActions'] = [
-  { iconType: 'share', onClick: () => {}, 'aria-label': 'Share', toolTipContent: 'Share' },
-  { iconType: 'gear', onClick: () => {}, 'aria-label': 'Settings', toolTipContent: 'Settings' },
+  { iconType: 'share', onClick: () => { }, 'aria-label': 'Share', toolTipContent: 'Share' },
+  { iconType: 'gear', onClick: () => { }, 'aria-label': 'Settings', toolTipContent: 'Settings' },
 ]; // prettier-ignore
 
 /** Maps shared story args to `FlyoutTemplate` props. Pagination is handled per-story via useState. */
@@ -140,8 +148,12 @@ const METABLOCK_POOL = [
   <FlyoutTemplate.Header.MetaBlock key="updated" title="Last updated">
     Dec 3, 2025
   </FlyoutTemplate.Header.MetaBlock>,
-  <FlyoutTemplate.Header.MetaBlock key="updatedBy" title="Last updated by">
-    <EuiLink href="#">long-user-name-with-ellipsis@elastic.co</EuiLink>
+  <FlyoutTemplate.Header.MetaBlock key="oncall" title="On call">
+    <EuiToolTip content="Platform team, paged until Friday 18:00 UTC">
+      <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+        platform-oncall@elastic.co
+      </EuiLink>
+    </EuiToolTip>
   </FlyoutTemplate.Header.MetaBlock>,
   <FlyoutTemplate.Header.MetaBlock key="owner" title="Owner">
     Platform
@@ -183,6 +195,18 @@ const BADGE_POOL = [
 
 export const badgeItems = (count: number) => BADGE_POOL.slice(0, count);
 
+const NotifyOnChangeSwitch = (): React.JSX.Element => {
+  const [checked, setChecked] = useState(false);
+  return (
+    <EuiSwitch
+      compressed
+      label="Notify on change"
+      checked={checked}
+      onChange={(event) => setChecked(event.target.checked)}
+    />
+  );
+};
+
 const INFO_BLOCK_POOL = [
   <FlyoutTemplate.Header.InfoBlock key="owner" title="Owner">
     Platform
@@ -195,6 +219,9 @@ const INFO_BLOCK_POOL = [
   </FlyoutTemplate.Header.InfoBlock>,
   <FlyoutTemplate.Header.InfoBlock key="risk" title="Risk score" size="xl" color="danger">
     90
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="notifications" title="Notifications">
+    <NotifyOnChangeSwitch />
   </FlyoutTemplate.Header.InfoBlock>,
   <FlyoutTemplate.Header.InfoBlock key="env" title="Environment">
     global.prod.long-environment-name-with-ellipsis.elastic.co
