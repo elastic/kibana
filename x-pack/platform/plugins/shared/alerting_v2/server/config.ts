@@ -105,9 +105,6 @@ const rulesSchema = schema.object({
 });
 
 const esqlSchema = schema.object({
-  // `schema.oneOf` only declares fixed-arity tuple overloads, so the mapped
-  // array is asserted into the single-branch one; the resulting type is the
-  // full `EsqlResponseFormatName` union.
   responseFormat: schema.oneOf(
     ESQL_RESPONSE_FORMAT_NAMES.map((name) => schema.literal(name)) as [
       Type<EsqlResponseFormatName>

@@ -681,22 +681,31 @@ describe('QueryService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('logs debug instead of error when the transport aborts mid-flight', async () => {
+    it('reports a mid-flight transport abort as a cancellation, keeping the transport error as cause', async () => {
       const abortController = new AbortController();
+      const transportError = new errors.RequestAbortedError('Request aborted');
       mockEsClient.esql.query.mockImplementation(async () => {
         abortController.abort();
-        throw new errors.RequestAbortedError('Request aborted');
+        throw transportError;
       });
 
-      await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({
-          query: mockQuery,
-          abortSignal: abortController.signal,
-        })) {
-          // consume
-        }
-      }).rejects.toThrow(errors.RequestAbortedError);
+      let thrown: unknown;
 
+      await expect(async () => {
+        try {
+          for await (const _batch of queryService.executeQueryStream({
+            query: mockQuery,
+            abortSignal: abortController.signal,
+          })) {
+            // consume
+          }
+        } catch (error) {
+          thrown = error;
+          throw error;
+        }
+      }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect((thrown as RuleExecutionCancellationError).cause).toBe(transportError);
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });

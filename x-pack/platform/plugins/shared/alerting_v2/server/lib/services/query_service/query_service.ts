@@ -13,7 +13,11 @@ import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
-import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+import {
+  createExecutionContext,
+  isRuleExecutionCancellationError,
+  toRuleExecutionCancellationError,
+} from '../../execution_context';
 import type { PluginConfig } from '../../../config';
 import { toRows } from './row_coercion';
 import type { EsqlFormatRequest, EsqlFormatRequestOptions, EsqlRowBatchSource } from './formats';
@@ -126,12 +130,14 @@ export class QueryService implements QueryServiceContract {
         this.logger.debug({
           message: `QueryService: Streaming query aborted (${format.name})`,
         });
-      } else {
-        this.logger.error({
-          error,
-          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
-        });
+
+        throw toRuleExecutionCancellationError(error);
       }
+
+      this.logger.error({
+        error,
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+      });
 
       throw error;
     } finally {

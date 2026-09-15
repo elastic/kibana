@@ -61,9 +61,6 @@ export const arrowFormat = {
     request: EsqlFormatRequest,
     options: EsqlFormatRequestOptions
   ): Promise<EsqlRowBatchSource> {
-    // Arrow streaming uses chunked transfer encoding so the transport's
-    // maxResponseSize guard (which checks Content-Length) will not fire.
-    // The per-run alerts.max row limit acts as the primary guardrail here.
     const reader = await esClient.helpers.esql(request, options).toArrowReader();
 
     if (!reader) {

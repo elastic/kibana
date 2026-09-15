@@ -28,3 +28,13 @@ export const isRuleExecutionCancellationError = (
     error !== null &&
     'code' in error &&
     error.code === CANCELLATION_ERROR_CODE);
+
+/**
+ * Normalizes anything a cancellation can surface as into a
+ * `RuleExecutionCancellationError`, keeping an already-recognized one as-is and
+ * preserving any other reason as `cause`.
+ */
+export const toRuleExecutionCancellationError = (reason: unknown): RuleExecutionCancellationError =>
+  isRuleExecutionCancellationError(reason)
+    ? reason
+    : new RuleExecutionCancellationError(undefined, { cause: reason });
