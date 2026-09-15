@@ -65,6 +65,8 @@ export interface WorkflowExecutionPanelProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   childExecutionsMap?: ChildWorkflowExecutionsMap;
   isLoadingChildExecutions?: boolean;
+  /** Close step detail panel before opening Agent Builder diagnose chat. */
+  onBeforeDiagnose?: () => void;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -79,6 +81,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onReRunExecution,
     childExecutionsMap,
     isLoadingChildExecutions,
+    onBeforeDiagnose,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = Boolean(
@@ -154,6 +157,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutionsMap}
               isLoadingChildExecutions={isLoadingChildExecutions}
+              onBeforeDiagnose={onBeforeDiagnose}
             />
           </EuiPanel>
         </EuiFlexItem>

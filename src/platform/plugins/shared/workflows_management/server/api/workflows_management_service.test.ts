@@ -269,7 +269,7 @@ describe('WorkflowsService (facade)', () => {
     it('returns managed template values to their owning plugin', async () => {
       const source = {
         managed: true,
-        managedBy: 'pnd',
+        managedBy: 'alertzero',
         managedTemplateValues: { autonomyLevel: 'assisted' },
         originManagedWorkflowId: 'system-security-watch-floor',
         spaceId: 'space-a',
@@ -282,7 +282,7 @@ describe('WorkflowsService (facade)', () => {
         service.getInstalledManagedWorkflowState(
           'system-security-watch-floor-space-a',
           'space-a',
-          'pnd'
+          'alertzero'
         )
       ).resolves.toEqual({
         workflowId: 'system-security-watch-floor-space-a',

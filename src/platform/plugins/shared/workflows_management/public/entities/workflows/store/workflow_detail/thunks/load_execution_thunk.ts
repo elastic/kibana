@@ -35,10 +35,12 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
+      // includeOutput so AI token metadata (LangChain tokenUsage) is available for
+      // tree badges / AI section before step.usage is populated by the engine.
       const [execution, stepsPage] = await Promise.all([
         api.getExecution(id, {
           includeInput: false,
-          includeOutput: false,
+          includeOutput: true,
           omitStepExecutions: true,
         }),
         api.getExecutionSteps(id, { page: 1, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }),

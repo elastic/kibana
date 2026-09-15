@@ -84,7 +84,7 @@ describe('loadExecutionThunk', () => {
 
     expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
       includeInput: false,
-      includeOutput: false,
+      includeOutput: true,
       omitStepExecutions: true,
     });
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {

@@ -19,7 +19,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const reportingApi = getService('reportingAPI');
   const retry = getService('retry');
 
-  describe('Access to Management > Reporting', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/284991
+  describe.skip('Access to Management > Reporting', () => {
     before(async () => {
       await reportingFunctional.initEcommerce();
     });
