@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ScoutPage } from '@kbn/scout-oblt';
+import { AppMenu, type ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
-const CREATE_ANNOTATION_BUTTON = 'o11yRenderToolsRightCreateAnnotationButton';
-
 export class AnnotationsApp {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly appMenu: AppMenu;
+
+  constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
+  }
 
   async goto() {
     await this.page.gotoApp('slo', {});
@@ -20,10 +22,6 @@ export class AnnotationsApp {
   }
 
   async clickCreateAnnotation() {
-    const item = this.page.testSubj.locator(CREATE_ANNOTATION_BUTTON);
-    if (!(await item.isVisible())) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-    }
-    await item.click();
+    await this.appMenu.clickItem('o11yRenderToolsRightCreateAnnotationButton');
   }
 }
