@@ -7,6 +7,7 @@
 
 import type {
   FormBasedPrivateState,
+  TextBasedPersistedState,
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
@@ -227,8 +228,14 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
     expect(result).toBeDefined();
     expect(result?.state.datasourceStates.textBased).toBeDefined();
-    // Conversion formats the query with the composer before adding to state
-    expect(result?.state.query).toEqual({
+    // The ES|QL query lives exclusively on the converted text-based layer;
+    // the top-level slot keeps only the chart-scoped KQL/Lucene filter
+    expect(result?.state.query).toEqual({ query: '', language: 'kuery' });
+    const convertedLayers = Object.values(
+      (result?.state.datasourceStates.textBased as TextBasedPersistedState).layers
+    );
+    // Layer queries are stored pretty-printed with line-wrapping
+    expect(convertedLayers[0]?.query).toEqual({
       esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
     });
   });

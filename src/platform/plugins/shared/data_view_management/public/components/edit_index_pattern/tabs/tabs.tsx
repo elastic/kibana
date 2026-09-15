@@ -403,7 +403,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     isLoading={isRefreshing}
                     isDisabled={isRefreshing}
                     size="m"
-                    color="success"
                     className="eui-fullWidth"
                   >
                     {refreshAriaLabel}
@@ -572,11 +571,9 @@ export const Tabs: React.FC<TabsProps> = ({
               <EuiSpacer size="m" />
               <RelationshipsTable
                 basePath={http.basePath}
-                id={indexPattern.id!}
                 capabilities={application.capabilities}
                 relationships={relationships}
                 allowedTypes={allowedTypes}
-                navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
                 savedObjectsTagging={savedObjectsTagging}

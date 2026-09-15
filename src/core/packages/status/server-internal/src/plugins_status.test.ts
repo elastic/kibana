@@ -429,7 +429,7 @@ describe('PluginStatusService', () => {
       const service = new PluginsStatusService({ core$: coreAllAvailable$, pluginDependencies });
       expect(() => {
         service.getDependenciesStatus$('dont-exist');
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('debounces plugins custom status registration', async () => {

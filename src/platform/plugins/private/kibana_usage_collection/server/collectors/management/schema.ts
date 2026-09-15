@@ -576,16 +576,21 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:deductiveEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
+  },
+  'agentBuilder:deductiveEndpoint': {
+    type: 'keyword',
+    _meta: { description: 'Base URL of the external Deductive backend.' },
+  },
+  'agentBuilder:deductiveApiKey': {
+    type: 'keyword',
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
+  },
   'contextEngine:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
-  },
-  'agentBuilder:uiamOAuthClientManagement': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
-    },
   },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
@@ -648,6 +653,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'workflows:ui:showManagedWorkflows': {
     type: 'boolean',
     _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
+  },
+  'workflows:executionFlyout:aiDiagnose:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the Diagnose with AI action is enabled on failed-step error panels.',
+    },
   },
   'banners:placement': {
     type: 'keyword',

@@ -33,6 +33,11 @@ spaceTest.describe(
         title: 'Network Investigation',
         query: 'event.category: network',
       });
+      await apiServices.timeline.createTimeline({
+        title: 'EQL Correlation',
+        // EQL query — its Query tab is intentionally empty (no KQL query set)
+        eqlQuery: 'process where process.name == "cmd.exe"',
+      });
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -50,7 +55,7 @@ spaceTest.describe(
         // Record SO count before opening Super Timeline (transience proof).
         const timelineCountBefore = await apiServices.timeline.getCount();
 
-        await spaceTest.step('Select both timelines', async () => {
+        await spaceTest.step('Select both KQL timelines', async () => {
           await timelinePage.selectTimelineByTitle('Endpoint Investigation');
           await timelinePage.selectTimelineByTitle('Network Investigation');
         });
@@ -70,6 +75,33 @@ spaceTest.describe(
           const timelineCountAfter = await apiServices.timeline.getCount();
           expect(timelineCountAfter).toBe(timelineCountBefore);
         });
+
+        await timelinePage.close();
+      }
+    );
+
+    spaceTest(
+      'allows selecting a mixed KQL + EQL selection and opens the Super Timeline',
+      async ({ browserAuth, pageObjects }) => {
+        const { timelinePage } = pageObjects;
+
+        await browserAuth.loginAsPlatformEngineer();
+        await timelinePage.navigateToTimelines();
+
+        await spaceTest.step('Select one KQL timeline and one EQL timeline', async () => {
+          await timelinePage.selectTimelineByTitle('Endpoint Investigation');
+          await timelinePage.selectTimelineByTitle('EQL Correlation');
+        });
+
+        await spaceTest.step(
+          'Verify "View Super Timeline" action is enabled and opens the modal',
+          async () => {
+            await timelinePage.batchActionsButton.click();
+            // The action must be clickable — if it were disabled it would have no onClick handler
+            await timelinePage.viewSuperTimelineAction.click();
+            await expect(timelinePage.superTimelineBadge).toBeVisible();
+          }
+        );
 
         await timelinePage.close();
       }

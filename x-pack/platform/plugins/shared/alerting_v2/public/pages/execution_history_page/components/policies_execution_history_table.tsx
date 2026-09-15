@@ -121,7 +121,7 @@ const buildColumns = ({
             <RulesCell
               rules={item.rules}
               maxVisibleRules={MAX_VISIBLE_RULES}
-              totalRuleCount={item.totalRuleCount}
+              totalRuleCount={item.total_rule_count}
               activeRuleId={activeRuleId}
               onRuleClick={onRuleClick}
               canReadRules={canReadRules}

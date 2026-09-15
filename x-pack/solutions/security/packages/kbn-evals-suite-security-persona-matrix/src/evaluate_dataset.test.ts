@@ -235,6 +235,32 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     expect(result.score).toBeNull();
     expect(result.label).toBe('unavailable');
   });
+
+  it('matches the load_skill tool, not just the retired filestore.read', async () => {
+    // Regression guard. The agent loads skills via the `load_skill` tool:
+    //   {"skill":"/skills/<category>/<name>/SKILL.md"}
+    // A predicate pinned to `filestore.read` can never match, so `skill_invoked`
+    // stays 0 while `total_tool_spans` is non-zero -- meaning the "unavailable"
+    // guard does NOT trip and the evaluator reports a confident false 0 for
+    // every model. Verified against the golden cluster: over 7 days,
+    // filestore.read = 0 spans, load_skill = 7,991 spans.
+    const query = jest.fn().mockResolvedValue({
+      columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
+      values: [[2, 1]],
+    });
+    const evaluator = createPersonaMatrixSkillInvokedEvaluator({
+      traceEsClient: { esql: { query } } as unknown as EsClient,
+      log: buildLog(),
+    });
+
+    const result = await evaluator.evaluate(
+      buildEvaluatorArgs(baseExample.metadata, '0af7651916cd43dd8448eb211c80319c')
+    );
+
+    const sent = query.mock.calls[0][0].query as string;
+    expect(sent).toContain('load_skill');
+    expect(result.score).toBe(1);
+  });
 });
 
 describe('task output shape', () => {

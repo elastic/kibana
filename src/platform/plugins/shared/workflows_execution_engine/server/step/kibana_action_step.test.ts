@@ -30,7 +30,7 @@ describe('KibanaActionStepImpl', () => {
       node,
       runtime,
       {} as WorkflowExecutionRuntimeManager,
-      { logInfo: jest.fn(), logError: jest.fn() } as unknown as IWorkflowEventLogger
+      { logInfo: jest.fn(), logError: jest.fn(), logWarn: jest.fn() } as unknown as IWorkflowEventLogger
     );
   };
 
@@ -116,5 +116,15 @@ describe('KibanaActionStepImpl', () => {
     expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
       expect.objectContaining({ path: '/api/test' })
     );
+  });
+
+  it('encodes binary form_data content as a Blob', async () => {
+    step = createStep({
+      form_data: { file: { content: new Uint8Array([1, 2, 3]), filename: 'a.bin' } },
+    });
+    await (step as any)._run();
+    const call = contextManager.callKibanaApi.mock.calls[0][0];
+    expect(call.rawBody).toBeInstanceOf(FormData);
+    expect(call.body).toBeUndefined();
   });
 });

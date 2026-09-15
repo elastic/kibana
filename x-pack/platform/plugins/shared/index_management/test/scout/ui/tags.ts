@@ -14,3 +14,11 @@ export const SERVERLESS_ONLY: string[] = [
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,
 ];
+
+// `tags.deploymentAgnostic` minus the Search serverless project, which has its own
+// `search_indices` app for managing individual indices.
+export const NOT_SVL_SEARCH: string[] = [
+  ...tags.stateful.classic,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];

@@ -12,6 +12,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateExperimentRun } from '@kbn/evals-plugin/server';
 import {
+  assertDatasetsVisible,
   buildResultsLink,
   errorResult,
   evalExperimentConfigSchema,
@@ -88,12 +89,25 @@ export const runEvalExperimentTool = (
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     const workflowExecutionIds: string[] = [];
     try {
-      const { security } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
       if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
         return errorResult(
           'You do not have the manage_evals privilege required to run evaluation experiments in this space.'
         );
       }
+
+      if (!evals.datasetService) {
+        return toErrorResult(
+          new Error('the evals dataset service is unavailable'),
+          'Failed to run experiment'
+        );
+      }
+
+      await assertDatasetsVisible({
+        datasetService: evals.datasetService,
+        spaceId,
+        datasetIds: config.dataset_ids,
+      });
 
       const params = toGenerateParams(config);
       const run = generateExperimentRun(params);

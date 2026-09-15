@@ -57,14 +57,16 @@ const fetchTimelines = async (savedObjectIds: string[]): Promise<FetchTimelinesR
 /**
  * Hook that opens a Super Timeline from a list of saved object IDs.
  *
- * Fetches all source timelines in parallel, aggregates their pinned events, notes, and KQL
- * queries (via buildSuperTimelineModel), then loads the result into the active timeline slot.
- * The result is transient — it is never persisted.
+ * Fetches all source timelines in parallel, aggregates their pinned events, notes, date range
+ * and Query-tab queries (via buildSuperTimelineModel), then loads the result into the active
+ * timeline slot. The result is transient — it is never persisted.
+ *
+ * EQL and ES|QL queries are intentionally disregarded; only each timeline's Query-tab state
+ * (kqlQuery + dataProviders + filters) contributes to the merged filter.
  *
  * Enforces:
  * - A cap of MAX_SUPER_TIMELINE_COUNT (10) source timelines.
  * - An overwrite-guard confirm dialog when the active timeline has unsaved changes.
- * - A warning toast naming any EQL/ESQL timelines whose queries could not be merged.
  */
 export const useOpenSuperTimeline = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -133,20 +135,11 @@ export const useOpenSuperTimeline = () => {
         }
 
         const esQueryConfig = getEsQueryConfig(uiSettings);
-        const { model, skippedQueryTimelines } = buildSuperTimelineModel(timelineModels, {
+        const model = buildSuperTimelineModel(timelineModels, {
           dataView,
           browserFields,
           esQueryConfig,
         });
-
-        if (skippedQueryTimelines.length > 0) {
-          notifications.toasts.addWarning({
-            title: i18nStrings.SKIPPED_QUERY_TITLE,
-            text: i18nStrings.skippedQueryText(
-              skippedQueryTimelines.map((t) => t.title).join(', ')
-            ),
-          });
-        }
 
         updateTimeline({
           duplicate: false,

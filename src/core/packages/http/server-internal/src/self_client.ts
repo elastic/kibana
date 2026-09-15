@@ -25,6 +25,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 import { SELF_CALL_HEADER } from './self_client_observer';
@@ -192,11 +193,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
     const baseUrl = this.getBaseUrl(options.target);
-    const requestBasePath =
-      options.prependBasePath === false
-        ? this.params.basePath.serverBasePath
-        : this.request.basePath;
-    const pathname = `${requestBasePath}${path}`;
+    const pathname =
+      options.prependBasePath === false ? path : `${this.getRequestBasePath()}${path}`;
     const url = new URL(pathname, baseUrl);
 
     if (url.origin !== baseUrl.origin) {
@@ -221,6 +219,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   private getEffectiveTarget(target?: 'local'): 'local' | 'public' {
     if (target === 'local') return 'local';
     return this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  }
+
+  private getRequestBasePath(): string {
+    if (!this.request.isFakeRequest) {
+      return this.request.basePath;
+    }
+    return `${this.params.basePath.serverBasePath}${getSpaceUrlPrefix(this.request.spaceId)}`;
   }
 
   private getBaseUrl(target?: 'local'): URL {

@@ -125,7 +125,7 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
       order: 'desc',
       script: {
         lang: 'painless',
-        // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
+        // Use priority if explicitly specified in task definition, otherwise default to 50 (Standard)
         // TODO: we could do this locally as well, but they may starve
         source: `
           String taskType = doc['task.taskType'].value;
@@ -134,7 +134,7 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
           } else if (params.priority_map.containsKey(taskType)) {
             return params.priority_map[taskType];
           } else {
-            return ${TaskPriority.Normal};
+            return ${TaskPriority.Standard};
           }
         `,
         params: {
@@ -178,9 +178,9 @@ export function claimSort(
   return tasks.slice().sort(compare);
 
   function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
-    // sort by priority, descending — task instance priority overrides task definition priority, and defaults to Normal
-    const priorityA = a.priority ?? priorityMap[a.taskType] ?? TaskPriority.Normal;
-    const priorityB = b.priority ?? priorityMap[b.taskType] ?? TaskPriority.Normal;
+    // sort by priority, descending — task instance priority overrides task definition priority, and defaults to Standard
+    const priorityA = a.priority ?? priorityMap[a.taskType] ?? TaskPriority.Standard;
+    const priorityB = b.priority ?? priorityMap[b.taskType] ?? TaskPriority.Standard;
 
     if (priorityA > priorityB) return -1;
     if (priorityA < priorityB) return 1;
@@ -197,7 +197,7 @@ export function claimSort(
 }
 
 function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
-  return definitions.get(taskType)?.priority ?? TaskPriority.Normal;
+  return definitions.get(taskType)?.priority ?? TaskPriority.Standard;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {

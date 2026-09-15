@@ -131,7 +131,7 @@ export const AlertsTab = React.memo<AlertsTabProps>(
             <EuiCallOut
               announceOnMount
               color="primary"
-              iconType="iInCircle"
+              iconType="info"
               data-test-subj={ALERTS_TAB_CALLOUT_TEST_ID}
             >
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>

@@ -57,6 +57,13 @@ export function createFeatureKnowledgeIndicatorTool({
       Use this tool when the conversation discovers a new stream behavior pattern and it should be
       saved as a feature KI for future investigations.
     `,
+    annotations: {
+      title: 'Create Feature Knowledge Indicator',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createFeatureKISchema,
     tags: ['streams', 'significant-events'],
     confirmation: {

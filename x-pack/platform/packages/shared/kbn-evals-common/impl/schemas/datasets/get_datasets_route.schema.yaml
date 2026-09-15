@@ -123,6 +123,8 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
         maturity:
           $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
+        space_ids:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/RedactedSpaceIds'
         examples_count:
           type: integer
         created_at:

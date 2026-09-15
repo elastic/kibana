@@ -8,6 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+export const YES_LABEL = i18n.translate('xpack.securitySolution.translations.yesLabel', {
+  defaultMessage: 'Yes',
+});
+
+export const NO_LABEL = i18n.translate('xpack.securitySolution.translations.noLabel', {
+  defaultMessage: 'No',
+});
+
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
 });
@@ -41,6 +49,11 @@ export const HOST_ISOLATION_EXCEPTIONS_TAB = i18n.translate(
 export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.tabs.blocklist', {
   defaultMessage: 'Blocklist',
 });
+
+export const CUSTOM_YARA_SIGNATURES_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.customYaraSignatures',
+  { defaultMessage: 'Custom YARA signatures' }
+);
 
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
@@ -366,6 +379,9 @@ export const CONSOLE_COMMANDS = {
           'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
       }
     ),
+    rawArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.rawArgAbout', {
+      defaultMessage: 'Generates a raw memory dump',
+    }),
     agentResultMissing: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.agentResultMissing',
       { defaultMessage: 'Agent result missing' }
@@ -382,6 +398,21 @@ export const CONSOLE_COMMANDS = {
       'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
       { defaultMessage: 'Disk free space' }
     ),
+    resultUserSpaceIncludedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultUserSpaceIncludedLabel',
+      { defaultMessage: 'User space included' }
+    ),
+    resultTotalMemorySizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalMemorySizeLabel',
+      { defaultMessage: 'Total memory size' }
+    ),
+    resultTotalBytesCapturedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalBytesCapturedLabel',
+      { defaultMessage: 'Total bytes captured' }
+    ),
+    bytesValue: i18n.translate('xpack.securitySolution.translations.memoryDump.bytesValue', {
+      defaultMessage: 'bytes',
+    }),
   },
 };
 
@@ -532,4 +563,16 @@ export const RESPONSE_ACTION_STATUS = Object.freeze({
   successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
     defaultMessage: 'Action successful',
   }),
+});
+
+export const ENDPOINT_VERSION_NOT_SUPPORTED = (unsupportedFeature: string): string => {
+  return i18n.translate('xpack.securitySolution.translations.endpointVersionNotSupported', {
+    defaultMessage:
+      'The version of Endpoint running on this host does not support {unsupportedFeature}.',
+    values: { unsupportedFeature },
+  });
+};
+
+export const HOST_ISOLATION = i18n.translate('xpack.securitySolution.translations.hostIsolation', {
+  defaultMessage: 'host isolation',
 });

@@ -524,6 +524,7 @@ export function PreviewTable({
 
   return (
     <EuiDataGrid
+      data-test-subj="streamsAppPreviewDataGrid"
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}

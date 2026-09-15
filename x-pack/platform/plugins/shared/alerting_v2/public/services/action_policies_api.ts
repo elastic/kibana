@@ -14,17 +14,17 @@ import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
   FindActionPoliciesRequest,
+  FindActionPoliciesResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
-export interface FindActionPoliciesResponse {
-  items: ActionPolicyResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+/** Re-exported from the shared schemas package. */
+export type { FindActionPoliciesResponse };
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -93,7 +93,7 @@ export class ActionPoliciesApi {
 
   public async snoozeActionPolicy(id: string, snoozedUntil: string) {
     return this.http.post<ActionPolicyResponse>(buildActionPolicyPath(id, '_snooze'), {
-      body: JSON.stringify({ snoozedUntil }),
+      body: JSON.stringify({ snoozed_until: snoozedUntil }),
     });
   }
 
@@ -125,7 +125,7 @@ export class ActionPoliciesApi {
 
   public async bulkSnoozeActionPolicies(ids: string[], snoozedUntil: string) {
     return this.http.post<BulkResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_snooze`, {
-      body: JSON.stringify({ ids, snoozedUntil }),
+      body: JSON.stringify({ ids, snoozed_until: snoozedUntil }),
     });
   }
 
@@ -145,16 +145,19 @@ export class ActionPoliciesApi {
   public async fetchRuleEventFields(matcher?: string) {
     const trimmed = matcher?.trim();
     return this.http.get<string[]>(
-      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+      ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
       trimmed ? { query: { matcher: trimmed } } : {}
     );
   }
 
   public async fetchTags(params?: { search?: string }) {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/tags`, {
-      query: {
-        search: params?.search || undefined,
-      },
-    });
+    return this.http.get<{ tags: string[] }>(
+      `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/tags`,
+      {
+        query: {
+          search: params?.search || undefined,
+        },
+      }
+    );
   }
 }

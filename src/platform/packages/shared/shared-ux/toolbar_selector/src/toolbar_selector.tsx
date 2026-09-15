@@ -78,7 +78,6 @@ export const ToolbarSelector = ({
   const { euiTheme } = useEuiTheme();
   const popoverTitleId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
 
   const [searchTerm, _setSearchTerm] = useState<string>(); // current value to show in the search input
   const [searchTermDebounced, _setSearchTermDebounced] = useState<string>(); // debounced value to filter options less often when typing
@@ -127,13 +126,6 @@ export const ToolbarSelector = ({
     }
   }, [isOpen, closePopover, setIsOpen]);
 
-  const disableLabelPopover = useCallback(() => setLabelPopoverDisabled(true), []);
-
-  const enableLabelPopover = useCallback(
-    () => setTimeout(() => setLabelPopoverDisabled(false)),
-    []
-  );
-
   const onSelectionChange = useCallback<
     NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
   >(
@@ -156,10 +148,9 @@ export const ToolbarSelector = ({
           chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
         );
         closePopover();
-        disableLabelPopover();
       }
     },
-    [closePopover, disableLabelPopover, onChange, singleSelection, options]
+    [closePopover, onChange, singleSelection, options]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
@@ -217,16 +208,7 @@ export const ToolbarSelector = ({
         }}
         panelPaddingSize="none"
         button={
-          <EuiToolTip
-            content={
-              labelPopoverDisabled
-                ? undefined
-                : buttonTooltipContent !== undefined
-                ? buttonTooltipContent
-                : buttonLabel
-            }
-            display="block"
-          >
+          <EuiToolTip content={buttonTooltipContent ?? popoverTitle} display="block">
             <ToolbarButton
               size="s"
               data-test-subj={`${dataTestSubj}Button`}
@@ -234,7 +216,6 @@ export const ToolbarSelector = ({
               aria-label={popoverTitle}
               label={buttonLabel}
               onClick={togglePopover}
-              onBlur={enableLabelPopover}
               hasArrow={hasArrow}
               fullWidth={fullWidth}
               isDisabled={disabled}

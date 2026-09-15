@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
@@ -76,8 +77,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onSave,
 }) => {
   const {
-    services: { cloudInfo, featureFlags },
+    services: { cloudInfo, featureFlags, docLinks },
   } = useKibana<DataFederationKibanaServices>();
+
+  const dataFederationLinks = docLinks.links.dataFederation;
 
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
@@ -247,7 +250,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              <p>{createDataSourceFlyoutStrings.createDescription()}</p>
+              <p>
+                {createDataSourceFlyoutStrings.createDescription()}{' '}
+                <EuiLink href={dataFederationLinks.dataSources} target="_blank">
+                  {createDataSourceFlyoutStrings.learnMore()}
+                </EuiLink>
+              </p>
             </EuiText>
           </>
         )}
@@ -320,6 +328,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             dataSourceType={dataSourceType}
             enableFederatedIdentity={enableFederatedIdentityAuth}
             onAuthenticationModeChange={setAuthenticationMode}
+            authenticationDocsUrl={dataFederationLinks.authentication}
           />
           <CreateDataSourceFlyoutAuthenticationFields
             authenticationMode={authenticationMode}

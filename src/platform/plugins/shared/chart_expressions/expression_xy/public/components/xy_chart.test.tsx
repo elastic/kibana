@@ -940,6 +940,63 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('area fill in area chart', () => {
+    const getAreaStyle = ({
+      areaFill,
+      fillOpacity,
+      isStacked = false,
+    }: {
+      areaFill?: 'solid' | 'gradient';
+      fillOpacity?: number;
+      isStacked?: boolean;
+    }) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            areaFill,
+            fillOpacity,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked }],
+          }}
+        />
+      );
+      const areaSeries = component.find(DataLayers).dive().find(AreaSeries).at(0);
+      return (areaSeries.prop('areaSeriesStyle') as AreaSeriesStyle).area;
+    };
+
+    test('applies gradient fill when areaFill is gradient', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'gradient', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toEqual(
+        expect.objectContaining({
+          type: 'linear',
+          stops: expect.any(Array),
+        })
+      );
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply gradient when areaFill is solid', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'solid', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('applies fill opacity', () => {
+      const areaStyle = getAreaStyle({ fillOpacity: 0.5 });
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply area styling when both areaFill and fillOpacity are omitted', () => {
+      const areaStyle = getAreaStyle({});
+      expect(areaStyle).toBeUndefined();
+    });
+  });
+
   test('applies point radius to the chart', () => {
     const pointsRadius = 10;
     const { args } = sampleArgs();

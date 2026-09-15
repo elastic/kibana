@@ -93,7 +93,11 @@ describe('AlertEpisodeOverviewListSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeOverviewListSectionLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeOverviewListSectionLoading')
+        .querySelector('.euiSkeletonText')
+    ).not.toBeNull();
   });
 
   it('does not wait on group actions when groupHash is undefined', async () => {

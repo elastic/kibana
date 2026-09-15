@@ -105,6 +105,7 @@ function createMockContext({
   return {
     core: {
       application: {
+        navigateToUrl: jest.fn(),
         capabilities: {
           apm: { save: canSaveApm },
           ml: { canGetJobs: canReadMlJobs, canCreateJob: canCreateMlJobs },
@@ -189,12 +190,14 @@ describe('ApmAppMenu', () => {
         label: 'Settings',
         testId: 'apmSettingsHeaderLink',
         href: '/app/apm/settings',
+        ebt: { action: 'viewSettings' },
       });
       expect(latestMenuConfig?.primaryActionItem).toMatchObject({
         id: 'addData',
         label: 'Add data',
         testId: 'apmAddDataHeaderLink',
         href: '/add-data',
+        ebt: { action: 'addData' },
       });
     });
 

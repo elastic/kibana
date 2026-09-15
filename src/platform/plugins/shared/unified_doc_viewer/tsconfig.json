@@ -53,7 +53,6 @@
     "@kbn/es-query",
     "@kbn/css-utils",
     "@kbn/storybook",
-    "@kbn/esql-composer",
     "@kbn/esql-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/restorable-state",

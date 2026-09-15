@@ -8,6 +8,7 @@
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slosHeaderLink', {
   defaultMessage: 'SLOs',
@@ -50,13 +51,19 @@ export function getSloMenuItem({
         id: 'createLatencySlo',
         label: createLatencySloLabel,
         testId: 'apmSlosMenuItemCreateLatencySlo',
-        run: () => onCreateSlo('sli.apm.transactionDuration'),
+        ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_LATENCY_SLO),
+        run: () => {
+          onCreateSlo('sli.apm.transactionDuration');
+        },
       },
       {
         id: 'createAvailabilitySlo',
         label: createAvailabilitySloLabel,
         testId: 'apmSlosMenuItemCreateAvailabilitySlo',
-        run: () => onCreateSlo('sli.apm.transactionErrorRate'),
+        ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_AVAILABILITY_SLO),
+        run: () => {
+          onCreateSlo('sli.apm.transactionErrorRate');
+        },
       }
     );
   }
@@ -67,6 +74,7 @@ export function getSloMenuItem({
       label: manageSlosLabel,
       iconType: 'tableOfContents',
       href: manageSlosUrl,
+      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.MANAGE_SLOS),
       testId: 'apmSlosMenuItemManageSlos',
     });
   }
@@ -80,6 +88,7 @@ export function getSloMenuItem({
     label: sloLabel,
     iconType: 'visGauge',
     testId: 'apmSlosHeaderLink',
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_SLO_MENU),
     items: sloItems,
     order,
   };

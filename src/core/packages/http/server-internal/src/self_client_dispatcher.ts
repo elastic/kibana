@@ -12,11 +12,38 @@ import { Agent, type Dispatcher } from 'undici';
 import type { IBasePath } from '@kbn/core-http-server';
 import type { HttpConfig } from './http_config';
 
+type VerificationMode = HttpConfig['selfHttp']['ssl']['verificationMode'];
+
+type ConnectOptions = NonNullable<Agent.Options['connect']>;
+
 interface SelfHttpDispatcherProviderParams {
   readonly basePath: IBasePath;
   readonly getHttpConfig: () => HttpConfig;
   readonly target: 'auto' | 'local';
 }
+
+const buildConnectOptions = (
+  verificationMode: VerificationMode,
+  certificateAuthorities: string[]
+): ConnectOptions => {
+  // Omitting `ca` keeps Node's default trust store, which includes NODE_EXTRA_CA_CERTS.
+  // Passing `rootCertificates` instead would replace it and trust less than `full` does.
+  const connect: ConnectOptions =
+    certificateAuthorities.length === 0
+      ? {}
+      : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };
+
+  switch (verificationMode) {
+    case 'none':
+      return { ...connect, rejectUnauthorized: false };
+    case 'certificate':
+      return { ...connect, rejectUnauthorized: true, checkServerIdentity: () => undefined };
+    case 'full':
+      return { ...connect, rejectUnauthorized: true };
+    default:
+      throw new Error(`Unknown selfHttp.ssl.verificationMode: ${verificationMode}`);
+  }
+};
 
 export class SelfHttpDispatcherProvider {
   private readonly dispatchers = new Map<
@@ -41,12 +68,15 @@ export class SelfHttpDispatcherProvider {
       (certificate): certificate is string => certificate !== undefined
     );
 
-    if (certificateAuthorities.length === 0) {
+    const { verificationMode } = config.selfHttp.ssl;
+
+    // Node's global dispatcher already verifies fully, so it only stays usable in `full` mode.
+    if (certificateAuthorities.length === 0 && verificationMode === 'full') {
       this.replaceDispatcher(target, undefined, undefined);
       return undefined;
     }
 
-    const trustKey = `${usesLocalTarget ? 'local' : 'public'}:${certificateAuthorities.join('\n')}`;
+    const trustKey = `${target}:${verificationMode}:${certificateAuthorities.join('\n')}`;
     const profile = this.dispatchers.get(target) ?? {};
     if (profile.agent && profile.trustKey === trustKey) {
       return profile.agent;
@@ -54,13 +84,7 @@ export class SelfHttpDispatcherProvider {
 
     this.replaceDispatcher(
       target,
-      new Agent({
-        connect: {
-          ca: [...rootCertificates, ...certificateAuthorities],
-          allowPartialTrustChain: true,
-          rejectUnauthorized: true,
-        },
-      }),
+      new Agent({ connect: buildConnectOptions(verificationMode, certificateAuthorities) }),
       trustKey
     );
     return this.dispatchers.get(target)?.agent;

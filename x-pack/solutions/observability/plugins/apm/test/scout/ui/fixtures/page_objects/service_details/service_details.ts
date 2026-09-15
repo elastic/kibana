@@ -105,7 +105,7 @@ export class ServiceDetailsPage {
 
   // #region Service Header
   getServiceHeaderName() {
-    return this.page.getByTestId('apmMainTemplateHeaderServiceName');
+    return this.page.getByTestId('appHeaderTitle');
   }
   // #endregion
 

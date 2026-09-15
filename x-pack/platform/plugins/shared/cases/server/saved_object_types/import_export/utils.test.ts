@@ -156,6 +156,31 @@ describe('import_export utils', () => {
       );
     });
 
+    it('strips legacyKey from bundled field definitions', async () => {
+      // legacyKey only holds in the space it was written in — an exported copy must not carry
+      // it (see stripLegacyKeyForExport), or a re-import could collide with a definition
+      // already using that legacyKey at the destination.
+      const globalFieldDef = makeFieldDefSO('fd-global', {
+        name: 'environment',
+        owner: 'securitySolution',
+        isGlobal: true,
+        legacyKey: 'cf_environment',
+      });
+
+      const find = jest.fn().mockResolvedValueOnce({ saved_objects: [globalFieldDef] });
+      const savedObjectsClient = { find } as unknown as SavedObjectsClientContract;
+      const cases = [makeCaseSO('case-1', 'securitySolution')];
+
+      const result = await getTemplatesAndFieldDefinitionsForCases(
+        savedObjectsClient,
+        cases,
+        logger
+      );
+
+      const bundled = result.find((so) => so.id === 'fd-global');
+      expect(bundled?.attributes).not.toHaveProperty('legacyKey');
+    });
+
     it('fetches the template SO matching the case template reference', async () => {
       const templateSO = makeTemplateSO('tmpl-so-1', {
         templateId: 'tmpl-abc',

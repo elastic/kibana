@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
 import {
   SERVICE_NAME,
@@ -15,8 +17,26 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
 
+export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
+
+/** Window for the cheap existence pass, day-rounded so the request body stays cacheable. */
+export const HAS_RUM_DATA_LOOKBACK = 'now-30d/d';
+
+interface HasRumDataQueryOptions {
+  dataTiers?: DataTier[];
+  since?: estypes.DateMath;
+}
+
+/**
+ * Formats a response to `hasRumDataWithServiceNameQuery`; `serviceName` is optional because the
+ * `mostTraffic` buckets are empty when the requested range holds no matching documents.
+ */
 export function formatHasRumResult<T>(
-  esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>, { restTotalHitsAsInt: false }>,
+  esResult: ESSearchResponse<
+    T,
+    ReturnType<typeof hasRumDataWithServiceNameQuery>,
+    { restTotalHitsAsInt: false }
+  >,
   indices?: string
 ) {
   if (!esResult) return esResult;
@@ -27,13 +47,7 @@ export function formatHasRumResult<T>(
   };
 }
 
-export function hasRumDataQuery({
-  start = moment().subtract(24, 'h').valueOf(),
-  end = moment().valueOf(),
-}: {
-  start?: number;
-  end?: number;
-}) {
+function hasRumDataBaseQuery({ dataTiers, since }: HasRumDataQueryOptions = {}) {
   return {
     size: 0,
     query: {
@@ -41,9 +55,34 @@ export function hasRumDataQuery({
         filter: [
           { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          ...(dataTiers?.length ? [{ terms: { _tier: dataTiers } }] : []),
+          // Open ended, so documents timestamped ahead of the cluster clock still match.
+          ...(since ? [{ range: { '@timestamp': { gte: since } } }] : []),
         ],
       },
     },
+  };
+}
+
+export function hasRumDataQuery({ dataTiers, since }: HasRumDataQueryOptions = {}) {
+  return {
+    ...hasRumDataBaseQuery({ dataTiers, since }),
+    terminate_after: 1,
+    track_total_hits: 1,
+  };
+}
+
+export function hasRumDataWithServiceNameQuery({
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
+  dataTiers,
+}: {
+  start?: number;
+  end?: number;
+  dataTiers?: DataTier[];
+} = {}) {
+  return {
+    ...hasRumDataBaseQuery({ dataTiers }),
     aggs: {
       services: {
         filter: rangeQuery(start, end)[0],

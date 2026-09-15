@@ -12,16 +12,18 @@ import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
   SmlContext,
-  SmlDocument,
   SmlEntry,
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
-  SmlPermissions,
+  SmlPermissionsInput,
+  SmlDocument,
+  SmlDocumentAttributes,
   SmlTypeDefinition,
 } from './types';
-import { createSmlStorage, smlIndexName } from './sml_storage';
+
+import { smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -45,9 +47,9 @@ export interface SmlIndexer {
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
    * mutation (the existing entry remains intact) and the throw is propagated
-   * to the caller. Stamping empty permissions instead would be fail-open:
-   * the read-path filter treats `kbnPrivs.length === 0` as publicly
-   * readable. See `resolvePermissionsForOrigin` for the full rationale.
+   * to the caller. Stamping an empty action list instead would be fail-open:
+   * the read path treats a `count: 0` element as requiring nothing, i.e. public
+   * within its spaces. See `resolvePermissionsForOrigin` for the full rationale.
    *
    * For `action: 'delete'`, only an entry with `ingestion_method: 'crawled'` is
    * removed — a manual entry for the same `origin_id` is preserved. This keeps
@@ -96,6 +98,27 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
+const withNamespace = (
+  client: SavedObjectsClientContract,
+  namespace: string
+): SavedObjectsClientContract => {
+  const wrapped = Object.create(client) as SavedObjectsClientContract;
+  wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
+  wrapped.bulkGet = (objects, opts) =>
+    client.bulkGet(
+      objects.map(({ namespaces: _namespaces, ...object }) => object),
+      { ...opts, namespace }
+    );
+  wrapped.resolve = (type, id, opts) => client.resolve(type, id, { ...opts, namespace });
+  wrapped.bulkResolve = (objects, opts) => client.bulkResolve(objects, { ...opts, namespace });
+  return wrapped;
+};
+
+const namespaceForSpaces = (spaces: string[]): string | undefined => {
+  const [firstSpace] = spaces;
+  return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
+};
+
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
   return new SmlIndexerImpl({ registry, logger });
 };
@@ -118,6 +141,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient,
       logger: contextLogger,
+      clientHasSpacesExtension = false,
     } = params;
     const originUri = `${attachmentType}://${originId}`;
 
@@ -158,9 +182,15 @@ class SmlIndexerImpl implements SmlIndexer {
       }
     }
 
+    // Internal repos need an explicit namespace to access non-default spaces
+    const internalNamespace = clientHasSpacesExtension ? undefined : namespaceForSpaces(spaces);
+    const wrappedClient = internalNamespace
+      ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)
+      : (savedObjectsClient as SavedObjectsClientContract);
+
     const context: SmlContext = {
       esClient,
-      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      savedObjectsClient: wrappedClient,
       logger: contextLogger,
     };
 
@@ -186,7 +216,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // leave the origin in a wiped state. `getPermissions(originId, ctx)`
     // is a per-origin computation (it doesn't take an entry), so one call
     // is correct.
-    let resolvedPermissions: SmlPermissions;
+    let resolvedPermissions: SmlPermissionsInput;
     try {
       resolvedPermissions = await this.resolvePermissionsForOrigin({
         definition,
@@ -207,6 +237,16 @@ class SmlIndexerImpl implements SmlIndexer {
       throw error;
     }
 
+    // An entry with no spaces produces zero nested privilege elements, which the read path
+    // treats as public — so it must not be indexed. Bail out *before* the delete below, so a
+    // producer that reports zero spaces skips the origin instead of wiping its existing entry.
+    if (spaces.length === 0) {
+      this.logger.warn(
+        `SML indexer: origin '${originId}' (type='${attachmentType}') has no spaces — skipping (fail closed), existing entry left intact`
+      );
+      return;
+    }
+
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
@@ -218,6 +258,10 @@ class SmlIndexerImpl implements SmlIndexer {
       resolvedPermissions,
     });
 
+    if (!indexOp) {
+      return;
+    }
+
     await this.executeIndexOp({ indexOp, esClient, originId });
   }
 
@@ -226,18 +270,13 @@ class SmlIndexerImpl implements SmlIndexer {
     const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
 
     this.logger.info(
-      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}', spaces=[${spaces.join(
-        ', '
-      )}]`
+      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}'`
     );
 
-    // `'all'` translates to "no ingestion_method filter" on the underlying
-    // helper — that's the way `SmlIndexer.deleteEntry` distinguishes "wipe
-    // everything for this origin" from "wipe a single method".
     await this.deleteEntry({
       originUri: `${attachmentType}://${originId}`,
       esClient,
-      spaces,
+      ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
@@ -247,7 +286,9 @@ class SmlIndexerImpl implements SmlIndexer {
    * origin. Called **once per origin** before any ES mutation.
    *
    * - If the type's `getPermissions` hook is present, its result is used.
-   * - Otherwise, permissions are left empty.
+   * - Otherwise the action list is empty, which `buildIndexOp` stamps as a
+   *   `count: 0` element per space — the type opts out of privilege gating and
+   *   its entries are public within those spaces.
    */
   private async resolvePermissionsForOrigin({
     definition,
@@ -257,17 +298,17 @@ class SmlIndexerImpl implements SmlIndexer {
     definition: SmlTypeDefinition;
     originId: string;
     context: SmlContext;
-  }): Promise<SmlPermissions> {
+  }): Promise<SmlPermissionsInput> {
     if (definition.getPermissions) {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
       return {
-        kibana: { privileges: result.kibana?.privileges ?? [] },
+        kibana: { privileges: { name: result.kibana?.privileges?.name ?? [] } },
       };
     }
 
-    return { kibana: { privileges: [] } };
+    return { kibana: { privileges: { name: [] } } };
   }
 
   private buildIndexOp({
@@ -284,40 +325,55 @@ class SmlIndexerImpl implements SmlIndexer {
     originId: string;
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
-    resolvedPermissions: SmlPermissions;
+    resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
   }) {
+    const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
+
+    const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
+    if (normalizedSpaces.length === 0) {
+      this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
+      return undefined;
+    }
+
+    // One nested element per space. `count` is per-space: "how many actions THIS space requires".
+    // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
+    // element to see the document — matches cannot accumulate across spaces. `count: 0` (a type
+    // with no `getPermissions` hook) means "requires nothing here" and the read filter admits it
+    // on space scoping alone.
+    const privileges = normalizedSpaces
+      .slice()
+      .sort()
+      .map((space) => ({ space, name: actions, count: actions.length }));
+
     const now = new Date().toISOString();
-    const document: SmlDocument = {
+
+    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
+    // which gate deletion and manual-entry protection.
+    const attributes: SmlDocumentAttributes = {
+      ...entry.attributes,
       id: entryId,
-      type: entry.type,
-      title: entry.title,
       origin: { uri: `${entry.type}://${originId}` },
-      content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      spaces,
-      permissions: {
-        kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
-      },
       ingestion_method: ingestionMethod,
+    };
+    if (entry.user_id !== undefined) {
+      attributes.user_id = entry.user_id;
+    }
+
+    const document: SmlDocument = {
+      type: entry.type,
+      title: entry.title,
+      content: entry.content,
+      permissions: { kibana: { privileges } },
+      attributes,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
     }
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
-    }
-    document.discovery_labels = [
-      { value: entry.title, kind: 'title' },
-      { value: entry.type, kind: 'type' },
-      ...(entry.discovery_labels ?? []),
-    ];
-    if (entry.extended_attrs !== undefined) {
-      document.extended_attrs = entry.extended_attrs;
-    }
-    if (entry.user_id !== undefined) {
-      document.user_id = entry.user_id;
     }
     if (entry.references !== undefined) {
       document.references = entry.references;
@@ -335,20 +391,18 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     originId,
   }: {
-    indexOp: ReturnType<SmlIndexerImpl['buildIndexOp']>;
+    indexOp: NonNullable<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
     this.logger.debug(
       `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
     );
     try {
-      const response = await smlClient.bulk({
+      const response = await esClient.bulk({
+        index: smlIndexName,
         refresh: 'wait_for',
-        operations: [indexOp],
+        operations: [{ index: { _id: indexOp.index._id } }, indexOp.index.document],
       });
 
       if (response.errors) {
@@ -390,8 +444,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'origin.uri': originUri } },
-              { term: { ingestion_method: 'manual' } },
+              { term: { 'attributes.origin.uri': originUri } },
+              { term: { 'attributes.ingestion_method': 'manual' } },
             ],
           },
         },
@@ -433,16 +487,22 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
   }): Promise<void> {
-    const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
+    const filter: Array<Record<string, unknown>> = [
+      { term: { 'attributes.origin.uri': originUri } },
+    ];
     if (ingestionMethod) {
-      filter.push({ term: { ingestion_method: ingestionMethod } });
+      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
-      // Scope the delete to entries visible in at least one of the provided
-      // spaces. Mirrors `isVisibleInSpace`: an entry is visible when its
-      // `spaces` array contains the space id OR the wildcard `'*'` (global
-      // entries).
-      filter.push({ terms: { spaces: [...spaces, '*'] } });
+      // Space scoping is a direct term match on the nested `.space` field
+      filter.push({
+        nested: {
+          path: 'permissions.kibana.privileges',
+          query: {
+            terms: { 'permissions.kibana.privileges.space': [...spaces, '*'] },
+          },
+        },
+      });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';
 

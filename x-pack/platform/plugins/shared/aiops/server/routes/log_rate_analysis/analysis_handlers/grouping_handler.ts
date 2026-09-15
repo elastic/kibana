@@ -97,6 +97,7 @@ export const groupingHandlerFactory =
           deviationMin: requestBody.deviationMin,
           deviationMax: requestBody.deviationMax,
           sampleProbability: stateHandler.sampleProbability(),
+          projectRouting: requestBody.projectRouting,
         },
       });
 

@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { publicApiPath } from '../../../../common/constants';
@@ -20,6 +21,9 @@ function mockAgent(id: string, toolIds: string[] = ['*']) {
     id,
     name: 'RBAC Fixture Agent',
     description: 'Fixture for RBAC tests',
+    // Public so the read-only, non-owner principal used throughout this suite can see it; these
+    // tests exercise Kibana feature-privilege RBAC, not agent-level access control.
+    access_control: { access_mode: AgentAccessControlMode.Public },
     configuration: {
       instructions: 'Test agent',
       tools: [{ tool_ids: toolIds }],

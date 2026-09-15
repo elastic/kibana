@@ -288,7 +288,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
+      await lens.waitForVisualization('xyVisChart');
+      await lens.closeDimensionEditor();
 
       expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Last value of bytes'

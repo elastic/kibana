@@ -92,6 +92,7 @@ export default function (ctx: FtrProviderContext) {
         statusCode: 400,
         error: 'Bad Request',
         message: `Elasticsearch output host must have default URL in serverless: ${defaultEsOutputUrl}`,
+        attributes: { type: 'OutputInvalidError' },
       });
       expect(status).toBe(400);
     });

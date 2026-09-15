@@ -26,6 +26,7 @@ describe('DescriptionField', () => {
 
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
   });
 
   it('displays textarea directly when initial description value exists', () => {

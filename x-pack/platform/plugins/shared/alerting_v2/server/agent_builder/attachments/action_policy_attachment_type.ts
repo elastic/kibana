@@ -14,6 +14,7 @@ import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   actionPolicyAttachmentDataSchema,
   type ActionPolicyAttachmentData,
+  type PolicyMatcher,
 } from '@kbn/alerting-v2-schemas';
 import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
@@ -24,6 +25,13 @@ interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
 }
+
+const formatMatcher = (matcher: PolicyMatcher): string => {
+  const parts: string[] = [];
+  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
+  if (matcher.expression?.trim()) parts.push(`expression: "${matcher.expression.trim()}"`);
+  return parts.join(' AND ') || '{}';
+};
 
 const formatActionPolicyDescription = (
   attachmentId: string,
@@ -36,8 +44,8 @@ const formatActionPolicyDescription = (
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
-  const matcherSnippet = data.matcher ? `"${data.matcher}"` : 'match all (catch-all)';
-  const grouping = data.groupingMode ?? 'per_episode';
+  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
+  const grouping = data.grouping_mode ?? 'per_episode';
   const throttle = data.throttle?.strategy ?? 'none';
 
   return `Action Policy "${data.name}" (actionPolicyAttachment.id: "${attachmentId}")
@@ -102,10 +110,10 @@ export const createActionPolicyAttachmentType = ({
     try {
       const client = getActionPolicyClient(context);
       const policy = await client.getActionPolicy({ id: attachment.origin });
-      if (Date.parse(policy.updatedAt) > Date.parse(attachment.origin_snapshot_at)) {
+      if (Date.parse(policy.updated_at) > Date.parse(attachment.origin_snapshot_at)) {
         const latestVersion = getLatestVersion(attachment);
         if (!latestVersion) return false;
-        return policy.updatedAt !== latestVersion.data.updatedAt;
+        return policy.updated_at !== latestVersion.data.updated_at;
       }
       return false;
     } catch (error) {

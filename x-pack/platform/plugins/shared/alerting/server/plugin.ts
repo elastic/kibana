@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -36,6 +36,7 @@ import type {
   CoreStatus,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type {
@@ -119,7 +120,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
 import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
-import { ruleCreateTelemetryEvents } from './application/rule/methods/create/event_based_telemetry';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -190,7 +191,7 @@ export interface AlertingServerStart {
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
@@ -242,6 +243,7 @@ export class AlertingPlugin {
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private readonly serverUuid: string;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
@@ -272,6 +274,7 @@ export class AlertingPlugin {
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.serverUuid = initializerContext.env.instanceUuid;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -361,6 +364,7 @@ export class AlertingPlugin {
           logger: this.logger,
           pluginStop$: this.pluginStop$,
           kibanaVersion: this.kibanaVersion,
+          serverUuid: this.serverUuid,
           dataStreamAdapter: this.dataStreamAdapter!,
           elasticsearchClientPromise: core
             .getStartServices()
@@ -368,6 +372,11 @@ export class AlertingPlugin {
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
           totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
+          // Coordinate resource installation across nodes with a cluster-wide lock
+          // unless disabled via config.
+          lockManager: this.config.alertsService.coordinateInstallation
+            ? new LockManagerService(core, this.logger)
+            : undefined,
         });
       }
     }
@@ -716,6 +725,7 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
       analytics: core.analytics,
@@ -742,7 +752,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
-      spaceId: string,
+      spaceId: SpaceId,
       options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
@@ -808,6 +818,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      uiamConvert: core.security.authc.apiKeys.uiam?.convert,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
