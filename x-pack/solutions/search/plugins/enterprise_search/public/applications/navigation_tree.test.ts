@@ -6,9 +6,11 @@
  */
 
 import { firstValueFrom, of } from 'rxjs';
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+
 import { coreMock } from '@kbn/core/public/mocks';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+
 import { getNavigationTreeDefinition } from '../navigation_tree';
 
 describe('Elasticsearch solution navigation tree', () => {
