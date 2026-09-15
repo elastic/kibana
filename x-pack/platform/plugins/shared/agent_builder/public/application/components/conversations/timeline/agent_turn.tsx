@@ -38,7 +38,7 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
   if (isAbortedTurn(item)) {
     return <ExecutionAbortedEvent event={item.terminal} />;
   }
-  if (item.steps.length === 0 && !item.response && !item.transientReasoning) {
+  if (item.steps.length === 0 && !item.response) {
     return null;
   }
   return (
@@ -46,7 +46,6 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
       steps={item.steps}
       response={{ message: item.response?.message ?? '' }}
       isLoading
-      transientReasoning={item.transientReasoning}
     />
   );
 };

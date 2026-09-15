@@ -66,7 +66,6 @@ export const createStreamingTurnItem = (overrides?: Partial<AgentTurnItem>): Age
     { type: ConversationRoundStepType.reasoning, reasoning: 'Querying host metrics.' },
   ],
   response: { message: 'Here are the active hosts I found so far...' },
-  transientReasoning: 'Summarizing the results...',
   timeToFirstToken: 320,
   ...overrides,
 });

@@ -30,7 +30,6 @@ export interface AgentTurnItem {
   steps: ConversationRoundStep[];
   response?: { message: string };
   terminal?: ExecutionTerminatedEvent | ExecutionFailedEvent | ExecutionAbortedEvent;
-  transientReasoning?: string;
   pendingPrompts?: PromptRequest[];
   timeToFirstToken?: number;
 }
@@ -107,7 +106,6 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
     steps: draft.steps,
   };
   if (draft.message) item.response = { message: draft.message };
-  if (draft.transientReasoning) item.transientReasoning = draft.transientReasoning;
   if (draft.pendingPrompts) item.pendingPrompts = draft.pendingPrompts;
   if (draft.timeToFirstToken !== undefined) item.timeToFirstToken = draft.timeToFirstToken;
   return item;

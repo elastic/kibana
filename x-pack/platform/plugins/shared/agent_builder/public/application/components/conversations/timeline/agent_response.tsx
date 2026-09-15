@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   AssistantResponse,
   ConversationRound,
@@ -21,8 +21,6 @@ interface AgentResponseProps {
   isLoading: boolean;
   /** The round shape the response actions still expect. Omitted while streaming - actions are hidden then. */
   rawRound?: ConversationRound;
-  /** Reasoning shown live while streaming, never a persisted step. */
-  transientReasoning?: string;
 }
 
 /** The assistant's turn: shared presenter for both the finished run and the in-flight one. */
@@ -31,19 +29,11 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   response,
   isLoading,
   rawRound,
-  transientReasoning,
 }) => (
   <EuiFlexGroup direction="column" gutterSize="s">
     {steps.length > 0 && (
       <EuiFlexItem grow={false}>
         <RoundEvents steps={steps} />
-      </EuiFlexItem>
-    )}
-    {transientReasoning && (
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="s">
-          <p>{transientReasoning}</p>
-        </EuiText>
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>

@@ -167,30 +167,32 @@ describe('activeExecutionReducer', () => {
     expect(state?.message).toBe('hello');
   });
 
-  it('reasoning transient=true sets transientReasoning, adds NO step', () => {
-    const state = activeExecutionReducer(null, reasoningEvent('thinking...', true));
-    expect(state?.transientReasoning).toBe('thinking...');
-    expect(state?.steps).toHaveLength(0);
+  it('ignores transient reasoning without creating a draft', () => {
+    expect(activeExecutionReducer(null, reasoningEvent('thinking...', true))).toBeNull();
   });
 
-  it('reasoning non-transient appends a reasoning step, resets message and clears transientReasoning', () => {
+  it.each(['running', 'awaiting_prompt', 'completed'] as const)(
+    'ignores transient reasoning without changing a %s execution',
+    (status) => {
+      const state = { status, steps: [], message: 'Existing response' };
+      expect(activeExecutionReducer(state, reasoningEvent('thinking...', true))).toBe(state);
+    }
+  );
+
+  it('non-transient reasoning appends a reasoning step and resets message', () => {
     const s1 = activeExecutionReducer(null, messageChunkEvent('prior'));
-    const s2 = activeExecutionReducer(s1, reasoningEvent('thinking...', true));
-    const s3 = activeExecutionReducer(s2, reasoningEvent('real reasoning'));
+    const s2 = activeExecutionReducer(s1, reasoningEvent('real reasoning'));
 
-    expect(s3?.steps).toHaveLength(1);
-    expect(s3?.steps[0].type).toBe(ConversationRoundStepType.reasoning);
-    expect(s3?.message).toBe('');
-    expect(s3?.transientReasoning).toBeUndefined();
+    expect(s2?.steps).toHaveLength(1);
+    expect(s2?.steps[0].type).toBe(ConversationRoundStepType.reasoning);
+    expect(s2?.message).toBe('');
   });
 
-  it('message_chunk appends text_chunk to message and clears transientReasoning; two chunks concatenate', () => {
-    const s1 = activeExecutionReducer(null, reasoningEvent('tr', true));
-    const s2 = activeExecutionReducer(s1, messageChunkEvent('Hello '));
-    const s3 = activeExecutionReducer(s2, messageChunkEvent('world'));
+  it('message_chunk appends text_chunk to message; two chunks concatenate', () => {
+    const s1 = activeExecutionReducer(null, messageChunkEvent('Hello '));
+    const s2 = activeExecutionReducer(s1, messageChunkEvent('world'));
 
-    expect(s2?.transientReasoning).toBeUndefined();
-    expect(s3?.message).toBe('Hello world');
+    expect(s2?.message).toBe('Hello world');
   });
 
   it('message_complete replaces message with message_content', () => {
@@ -311,16 +313,14 @@ describe('activeExecutionReducer', () => {
     expect(state?.status).toBe('running');
   });
 
-  it('execution_terminated seals the draft: status completed, terminalEvent stored, transientReasoning dropped', () => {
+  it('execution_terminated seals the draft: status completed, terminalEvent stored', () => {
     const s1 = activeExecutionReducer(null, executionStartedEvent('exec-seal'));
-    const s2 = activeExecutionReducer(s1, reasoningEvent('thinking...', true));
     const terminal = executionTerminatedEvent('exec-seal');
-    const s3 = activeExecutionReducer(s2, terminal);
+    const s3 = activeExecutionReducer(s1, terminal);
 
     expect(s3?.status).toBe('completed');
     expect(s3?.terminalEvent).toBe(terminal);
     expect(s3?.executionId).toBe('exec-seal');
-    expect(s3?.transientReasoning).toBeUndefined();
   });
 
   it('execution_terminated falls back to event execution_id/created_at when not set by execution_started', () => {
