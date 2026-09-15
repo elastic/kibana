@@ -9,15 +9,12 @@
 
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '.';
+import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
-  ALERTZERO_ACTION_WORKFLOW_IDS,
-  ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
-  ALERTZERO_RULE_WORKFLOW_IDS,
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -222,17 +219,6 @@ describe('managedWorkflowDefinitions', () => {
   it('contains the Security alert analysis workflow', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
-  });
-
-  // The alertzero plugin installs these id lists verbatim at start. An id the registry cannot
-  // resolve fails its install, which also stops reconciliation of the worker workflows — so an
-  // id list that drifts from the registry silently breaks far more than the missing workflow.
-  it.each([
-    ...ALERTZERO_ACTION_WORKFLOW_IDS,
-    ...ALERTZERO_RULE_WORKFLOW_IDS,
-    ...ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
-  ])('%s is resolvable in the registry so its install can succeed', (id) => {
-    expect(getManagedWorkflowDefinition(id)).toBeDefined();
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

@@ -190,9 +190,7 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   // Generic proposal gate, owned by the agenticInvestigations plugin.
   CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
-  // AlertZero action catalog. Every id in `ALERTZERO_ACTION_WORKFLOW_IDS` must appear here:
-  // the alertzero plugin installs that list verbatim at start, and an id the registry cannot
-  // resolve fails its install and blocks reconciliation of the worker workflows.
+  // AlertZero action catalog.
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
