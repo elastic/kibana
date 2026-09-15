@@ -35,6 +35,12 @@ const defaultProps = {
 };
 
 describe('Connector', () => {
+  beforeAll(async () => {
+    // Warm Jest's module cache for the React.lazy connector fields so they resolve within the per-test timeout instead of racing the dynamic import under CI load.
+    await import('../connectors/jira/case_fields');
+    await import('../connectors/resilient/case_fields');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
