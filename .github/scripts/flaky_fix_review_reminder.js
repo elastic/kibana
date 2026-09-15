@@ -13,8 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
-// Same gitignore-semantics matcher as @kbn/code-owners.
-const ignore = require('ignore');
+const { buildCodeownersEntries, resolveOwners } = require('./codeowners');
 
 const LABEL = 'flaky-test-fixer';
 const REMINDER_MARKER = '<!-- flaky-fix-review-reminder -->';
@@ -42,45 +41,6 @@ function laterOf(a, b) {
   if (!a) return b;
   if (!b) return a;
   return new Date(a).getTime() >= new Date(b).getTime() ? a : b;
-}
-
-/**
- * Parse CODEOWNERS into per-line `ignore` matchers, reversed so the last
- * matching line wins (GitHub's precedence rule), mirroring @kbn/code-owners.
- */
-function buildCodeownersEntries(contents) {
-  const entries = [];
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith('#')) {
-      continue;
-    }
-    // Backport branches override ownership with `* @kibanamachine`; ignore it.
-    if (/^\*\s+@kibanamachine$/.test(line)) {
-      continue;
-    }
-    const [pattern, ...owners] = line.replace(/#.*$/, '').trim().split(/\s+/);
-    if (!pattern) {
-      continue;
-    }
-    entries.push({
-      owners: owners.filter((o) => o.startsWith('@')),
-      matcher: ignore().add(pattern.replace(/\/$/, '')),
-    });
-  }
-  return entries.reverse();
-}
-
-function resolveOwners(entries, files) {
-  const owners = new Set();
-  for (const file of files) {
-    const normalized = file.replace(/^\/+/, '');
-    const match = entries.find((entry) => entry.matcher.test(normalized).ignored);
-    if (match) {
-      match.owners.forEach((o) => owners.add(o));
-    }
-  }
-  return [...owners];
 }
 
 function buildCommentBody(ownerHandles) {
