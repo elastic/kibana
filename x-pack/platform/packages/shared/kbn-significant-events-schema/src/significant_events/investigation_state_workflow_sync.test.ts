@@ -175,6 +175,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   it('accepts all three trigger feedback field types (severity, status, summary) under both schemas', () => {
     const allFields = {
       ...validPayload,
+      title: 'Checkout connection leak after the 14:02 deploy',
       trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate],
     };
 

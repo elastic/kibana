@@ -20,6 +20,7 @@ Use `platform.core.execute_workflow` with the following parameters:
 workflowId: "system-significant-events-investigation"
 inputs:
   message: "<required – describe the issue or event to investigate>"
+  title: "<required – short human-readable headline for the investigation>"
   stream_names: ["<optional – data stream names to scope the investigation>"]
   context: { <optional – any structured context, e.g. significant event or alert metadata> }
   concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
@@ -34,6 +35,7 @@ waitForCompletion: true
 
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
+- `title` (string, required) — a short human-readable headline (under ~80 characters) naming the affected entity and the problem, e.g. the significant event title or the alert rule name. It is the investigation's title, so never use an id or UUID.
 - `stream_names` (string array, optional) — data stream names to scope observability queries. Leave empty to let the investigation agent discover relevant streams.
 - `context` (object, optional) — structured context such as significant event metadata, alert payload, or environment info. Passed verbatim to the investigation agent.
 - `concurrency_key` (string, optional) — a stable key (e.g. a significant event's event id or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.
@@ -44,6 +46,7 @@ execute_workflow({
   workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
+    title: "Checkout error rate spike (HTTP 503)",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"]
   },
   waitForCompletion: true
@@ -60,6 +63,7 @@ When the user wants to investigate a Significant Event, gather the event's metad
 
 **2. Build the workflow inputs from the event:**
 - `message`: `"{title}\n\n{summary}"`
+- `title`: the event's title
 - `stream_names`: the event's `Streams`
 - `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events discovery automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
 - `context`: a structured object with the event metadata you can read from the attachment.
@@ -70,6 +74,7 @@ execute_workflow({
   workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.",
+    title: "Checkout latency p99 breached SLO",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
     concurrency_key: "checkout-latency-slo-breach",
     context: {
@@ -97,6 +102,7 @@ When the user wants to investigate an alert, load the alert's data first, then t
 
 **3. Build the workflow inputs from the alert:**
 - `message`: composed from the rule name, the alert reason, and the start time.
+- `title`: the rule name (`kibana.alert.rule.name`).
 - `stream_names`: derive from `service.name` / `host.name` when they map to known data streams; otherwise omit and let the investigation agent discover relevant streams.
 - `concurrency_key`: the alert id (`kibana.alert.uuid`), to de-duplicate repeated requests for the same alert.
 - `context`: a structured `alert` object with the key fields above.
@@ -107,6 +113,7 @@ execute_workflow({
   workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Alert \"High error rate - checkout\" fired at 2024-05-21T14:30:00Z. Reason: error rate is 38% (above the 5% threshold) for service checkout in environment production.",
+    title: "High error rate - checkout",
     stream_names: ["logs-checkout-service.default"],
     concurrency_key: "a1b2c3d4-0000-1111-2222-333344445555",
     context: {

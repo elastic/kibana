@@ -111,6 +111,7 @@ describe('triggerInvestigationWorkflow', () => {
       id: 'my-stable-id',
       summary: 'P99 latency climbed above 2s.',
     });
+    expect(request.title).toBe('Checkout latency breach');
     expect(request.trigger_type).toBe('manual');
     expect(request.context.event_uuid).toBe('event-42');
   });

@@ -12,7 +12,6 @@ import { buildNightshiftInvestigationFlyoutShareUrl } from '../common/url_params
 import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { useFetchInvestigationById } from '../hooks/use_fetch_investigation_by_id';
-import { getInvestigationPrimaryText } from './investigation_list_presentation';
 
 export interface InvestigationDetailFlyoutProps {
   investigationId: string;
@@ -30,7 +29,7 @@ export function InvestigationDetailFlyout({
     [investigationId]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
-  const primaryText = investigation ? getInvestigationPrimaryText(investigation) : investigationId;
+  const primaryText = investigation?.title ?? investigationId;
 
   return (
     <SharedInvestigationDetailFlyout
