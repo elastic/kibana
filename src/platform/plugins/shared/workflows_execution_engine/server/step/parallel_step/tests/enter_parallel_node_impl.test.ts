@@ -147,7 +147,9 @@ describe('EnterParallelNodeImpl', () => {
       getNode: jest.fn((nodeId: string) =>
         nodeId === node.id ? node : { id: nodeId, stepId: nodeId, type: 'atomic' }
       ),
-      getNodeStack: jest.fn(() => [node.id]),
+      getNodeStack: jest.fn(() => ({ stackFrames: [] })),
+      withBranchScope: jest.fn((_frames, run) => run()),
+      getNavigationOrder: jest.fn((order) => order),
       get topologicalOrder() {
         const order = new Set<string>();
         const pending = node.branches?.map((branch) => branch.startNodeId) ?? ['branchStep'];

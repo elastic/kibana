@@ -46,7 +46,7 @@ export interface WorkflowExecutionCursorApi {
  */
 export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private readonly runtimeGraph: WorkflowRuntimeGraph;
-  private readonly navigationOrder: readonly string[];
+  private readonly navigationOrder?: readonly string[];
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
@@ -56,8 +56,9 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.runtimeGraph = init.workflowExecutionGraph;
-    this.navigationOrder = init.navigationOrder ?? this.runtimeGraph.topologicalOrder;
-    this.currentNodeId = init.nodeId || this.navigationOrder[0];
+    this.navigationOrder = init.navigationOrder;
+    this.currentNodeId =
+      init.nodeId || (this.navigationOrder ?? this.runtimeGraph.topologicalOrder)[0];
     this.stackFrames = init.stackFrames ?? [];
   }
 
@@ -209,7 +210,8 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   private nodeAfter(nodeId: string | undefined): string | undefined {
-    const topologicalOrder = this.navigationOrder;
+    if (!this.navigationOrder) return this.runtimeGraph.nodeAfter(nodeId)?.id;
+    const topologicalOrder = this.runtimeGraph.getNavigationOrder(this.navigationOrder);
     const index = topologicalOrder.findIndex((id) => id === nodeId);
     if (index >= 0 && index < topologicalOrder.length - 1) {
       return topologicalOrder[index + 1];

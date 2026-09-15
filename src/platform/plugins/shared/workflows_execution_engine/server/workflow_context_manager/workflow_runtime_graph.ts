@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, SyntheticGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -50,15 +51,43 @@ function getPairByNodeId(nodeId: string): { enterNodeId: string; exitNodeId: str
  */
 export class WorkflowRuntimeGraph {
   private readonly originalNodesTopologicalOrder!: GraphNodeUnion[];
-  private nodesInTopologicalOrder!: GraphNodeUnion[];
-  private readonly syntheticNodesById = new Map<
+  private readonly branchGraph = new AsyncLocalStorage<WorkflowRuntimeGraph>();
+  private ownNodes: GraphNodeUnion[] = [];
+  private readonly ownSyntheticNodes = new Map<
     string,
-    {
-      node: SyntheticGraphNode;
-      ownerId: string;
-    }
+    { node: SyntheticGraphNode; ownerId: string }
   >();
-  private readonly syntheticNodeIdByOwnerId = new Map<string, string>();
+  private readonly ownSyntheticOwners = new Map<string, string>();
+
+  private get nodesInTopologicalOrder(): GraphNodeUnion[] {
+    return (this.branchGraph.getStore() ?? this).ownNodes;
+  }
+
+  private set nodesInTopologicalOrder(nodes: GraphNodeUnion[]) {
+    (this.branchGraph.getStore() ?? this).ownNodes = nodes;
+  }
+
+  private get syntheticNodesById(): Map<string, { node: SyntheticGraphNode; ownerId: string }> {
+    return (this.branchGraph.getStore() ?? this).ownSyntheticNodes;
+  }
+
+  private get syntheticNodeIdByOwnerId(): Map<string, string> {
+    return (this.branchGraph.getStore() ?? this).ownSyntheticOwners;
+  }
+
+  /** Runs a branch with its own synthetic loop scopes while sharing the compiled graph. */
+  public withBranchScope<T>(stackFrames: StackFrame[], run: () => T): T {
+    return this.branchGraph.run(new WorkflowRuntimeGraph(this.compiledGraph, stackFrames), run);
+  }
+
+  /** Includes runtime loop nodes belonging to the branch's compiled navigation order. */
+  public getNavigationOrder(branchOrder?: readonly string[]): readonly string[] {
+    if (!branchOrder) return this.topologicalOrder;
+    const allowed = new Set(branchOrder);
+    return this.nodesInTopologicalOrder
+      .filter((node) => allowed.has(this.syntheticNodesById.get(node.id)?.ownerId ?? node.id))
+      .map((node) => node.id);
+  }
 
   constructor(private compiledGraph: WorkflowGraph, stackFrames: StackFrame[]) {
     this.originalNodesTopologicalOrder = compiledGraph.topologicalOrder

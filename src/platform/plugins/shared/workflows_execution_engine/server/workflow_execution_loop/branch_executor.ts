@@ -181,6 +181,13 @@ export class BranchExecutor {
   }
 
   public async advance(request: BranchExecutionRequest): Promise<void> {
+    return this.params.workflowExecutionGraph.withBranchScope(
+      request.branch.stackFrames ?? request.stackFrames,
+      () => this.advanceInBranchScope(request)
+    );
+  }
+
+  private async advanceInBranchScope(request: BranchExecutionRequest): Promise<void> {
     const { branch, parentSignal } = request;
     const cursor = new WorkflowExecutionCursor({
       workflowExecutionGraph: this.params.workflowExecutionGraph,
