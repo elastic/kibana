@@ -490,10 +490,9 @@ export function getSharedModuleRules(
  */
 export function getSharedIgnoreWarnings(): RegExp[] {
   return [
-    // Same as legacy webpack optimizer (STATS_WARNINGS_FILTER)
     /export .* was not found in/,
     /chunk .* \[mini-css-extract-plugin\].*Conflicting order between/,
-    // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
+    // Node.js globals mocking (webpack silently mocks these)
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
   ];

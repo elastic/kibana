@@ -49,10 +49,6 @@ export interface BuildOptions {
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
-  if (process.env.KBN_USE_RSPACK === undefined) {
-    process.env.KBN_USE_RSPACK = 'true';
-  }
-
   if (options.tarZstd) {
     try {
       await execa('zstd', ['--version']);
@@ -91,13 +87,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    // [rspack-transition] Use Rspack by default, with an explicit legacy webpack opt-out.
-    // When legacy is removed, keep only Tasks.BuildRspackBundles.
-    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
-      await globalRun(Tasks.BuildRspackBundles);
-    } else {
-      await globalRun(Tasks.BuildKibanaPlatformPlugins);
-    }
+    await globalRun(Tasks.BuildBundles);
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);

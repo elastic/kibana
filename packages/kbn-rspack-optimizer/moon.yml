@@ -33,7 +33,8 @@ tags:
   - shared-server
   - package
   - dev
-  - group-undefined
+  - group-platform
+  - private
   - jest-unit-tests
 fileGroups:
   src:
