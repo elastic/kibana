@@ -484,7 +484,7 @@ export function injectChildWorkflowSteps(
     node: StepExecutionTreeItem;
     lifted: StepExecutionTreeItem[];
   } {
-    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && node.stepExecutionId;
+    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && !node.isRetryAttempt;
 
     if (!isWorkflowExecuteStep) {
       return {
@@ -496,8 +496,16 @@ export function injectChildWorkflowSteps(
       };
     }
 
-    if (childExecutionsMap.has(node.stepExecutionId!)) {
-      const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
+    const executeStepExecutionIds = [
+      node.stepExecutionId,
+      ...node.children
+        .filter((child) => child.isRetryAttempt)
+        .map((child) => child.stepExecutionId),
+    ].filter((id): id is string => Boolean(id));
+    const childMapKey = executeStepExecutionIds.find((id) => childExecutionsMap.has(id));
+
+    if (childMapKey) {
+      const childExecution = childExecutionsMap.get(childMapKey)!;
       const visibleSteps = childExecution.stepExecutions.filter((step) =>
         isVisibleStepType(step.stepType ?? '')
       );
@@ -522,7 +530,7 @@ export function injectChildWorkflowSteps(
               stepId: 'Loading...',
               stepType: '__loading',
               executionIndex: 0,
-              stepExecutionId: `__loading_${node.stepExecutionId}`,
+              stepExecutionId: `__loading_${childMapKey ?? node.stepExecutionId ?? node.stepId}`,
               status: ExecutionStatus.RUNNING,
               isChildWorkflowStep: true,
               children: [],
