@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   ToolHandlerContext,
@@ -210,10 +211,14 @@ describe('connector-discovery inline tools', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
 
-    it('returns only isTool:true sub-actions', async () => {
+    it('returns only isTool:true sub-actions with formatted parameter schemas', async () => {
       const { actionsStart } = makeActionsStart([makeConnector()]);
+      const createIssueInput = z.object({
+        title: z.string().describe('Issue title'),
+        body: z.string().optional(),
+      });
       const spec = makeSpec('GitHub connector', {
-        createIssue: { isTool: true, description: 'Create an issue', input: {} },
+        createIssue: { isTool: true, description: 'Create an issue', input: createIssueInput },
         internalOp: { isTool: false, description: 'Internal', input: {} },
       });
       mockGetConnectorSpec.mockReturnValue(spec);
@@ -227,11 +232,13 @@ describe('connector-discovery inline tools', () => {
 
       expect(result.results[0].type).toBe(ToolResultType.other);
       const data = result.results[0].data as {
-        subActions: Array<{ name: string; description: string }>;
+        subActions: Array<{ name: string; description: string; params: string }>;
       };
       expect(data.subActions).toHaveLength(1);
       expect(data.subActions[0].name).toBe('createIssue');
       expect(data.subActions[0].description).toBe('Create an issue');
+      expect(data.subActions[0].params).toContain('- title (string, required): Issue title');
+      expect(data.subActions[0].params).toContain('- body (string, optional)');
     });
 
     it('returns the full connector detail shape', async () => {
@@ -295,7 +302,8 @@ describe('connector-discovery inline tools', () => {
     });
 
     it('returns an error when connector_id is not in agentConfiguration.connector_ids', async () => {
-      const { actionsStart } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      const { actionsStart, mockGet } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec()); // connector is spec-eligible; denial must come from allowedIds guard
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
 
       const result = (await tool.handler(
@@ -304,10 +312,12 @@ describe('connector-discovery inline tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(mockGet).not.toHaveBeenCalled(); // guard must fire before any network call
     });
 
     it('blocks access when connector_ids is an empty array', async () => {
-      const { actionsStart } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      const { actionsStart, mockGet } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec()); // connector is spec-eligible; denial must come from allowedIds guard
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
 
       const result = (await tool.handler(
@@ -316,6 +326,7 @@ describe('connector-discovery inline tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(mockGet).not.toHaveBeenCalled(); // guard must fire before any network call
     });
 
     it('allows access when connector_id is in agentConfiguration.connector_ids', async () => {
