@@ -26,7 +26,6 @@ import {
   formatFailedCreates,
 } from './deploy_private_location_monitors';
 import type { HeartbeatConfig } from '../../common/runtime_types';
-import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
@@ -34,7 +33,12 @@ import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
+/**
+ * TM deletes a task with no schedule after it runs, which would break
+ * `runSoon` (MW mutations and Sync now). This interval is only a safety net
+ * for a missed notifyChange / leftover cleanup — not the MW trigger.
+ */
+export const DEFAULT_TASK_SCHEDULE = '24h';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -108,9 +112,7 @@ export class SyncPrivateLocationMonitorsTask {
       lastStartedAt = moment().subtract(10, 'minute').toISOString();
     }
     const taskState = this.getNewTaskState({ taskInstance });
-
-    const interval =
-      (taskInstance.schedule as IntervalSchedule | undefined)?.interval ?? DEFAULT_TASK_SCHEDULE;
+    const schedule = { interval: DEFAULT_TASK_SCHEDULE };
 
     try {
       const soClient = savedObjects.createInternalRepository([
@@ -168,12 +170,12 @@ export class SyncPrivateLocationMonitorsTask {
 
       const defaultState = {
         state: taskState,
-        schedule: { interval },
+        schedule,
       };
 
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        return { state: taskState, schedule: { interval } };
+        return { state: taskState, schedule };
       }
 
       if (taskState.disableAutoSync) {
@@ -235,10 +237,10 @@ export class SyncPrivateLocationMonitorsTask {
         // One-shot: no schedule (it would make the task recurring), and keep the location for the retry.
         return { error, state: taskInstance.state as SyncTaskState };
       }
-      return { error, state: taskState, schedule: { interval } };
+      return { error, state: taskState, schedule };
     }
 
-    return { state: taskState, schedule: { interval } };
+    return { state: taskState, schedule };
   }
 
   getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
@@ -256,16 +258,13 @@ export class SyncPrivateLocationMonitorsTask {
     } = this.serverSetup;
     this.debugLog(`Scheduling private location task`);
 
-    // Read the existing task schedule so ensureScheduled doesn't reset a user-configured interval
-    // on every Kibana restart. Falls back to DEFAULT_TASK_SCHEDULE only on first creation.
-    let schedule: IntervalSchedule = { interval: DEFAULT_TASK_SCHEDULE };
+    const schedule: IntervalSchedule = { interval: DEFAULT_TASK_SCHEDULE };
+    let previousInterval: string | undefined;
     try {
       const existingTask = await taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
-      if (existingTask.schedule) {
-        schedule = existingTask.schedule as IntervalSchedule;
-      }
-    } catch (_err) {
-      // task doesn't exist yet — default schedule will be used on creation
+      previousInterval = (existingTask.schedule as IntervalSchedule | undefined)?.interval;
+    } catch {
+      // task doesn't exist yet
     }
 
     await taskManager.ensureScheduled({
@@ -275,6 +274,16 @@ export class SyncPrivateLocationMonitorsTask {
       taskType: TASK_TYPE,
       params: {},
     });
+
+    // Overwriting 5m / a user interval with 24h would otherwise delay the next
+    // run by a day, including in-progress cleanup retries.
+    if (previousInterval && previousInterval !== DEFAULT_TASK_SCHEDULE) {
+      try {
+        await runSynPrivateLocationMonitorsTaskSoon({ server: this.serverSetup });
+      } catch {
+        // already logged; the safety-net schedule still runs
+      }
+    }
     this.debugLog(`Sync private location monitors task scheduled successfully`);
   };
 
