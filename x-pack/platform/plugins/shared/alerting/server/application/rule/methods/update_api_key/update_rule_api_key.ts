@@ -103,6 +103,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   }
 
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: attributes.alertTypeId,
@@ -118,6 +119,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
+    updatedByProfileUid: profileUid,
   });
 
   context.auditLogger?.log(

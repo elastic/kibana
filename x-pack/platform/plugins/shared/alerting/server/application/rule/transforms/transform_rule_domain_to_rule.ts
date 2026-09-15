@@ -25,6 +25,8 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     scheduledTaskId: ruleDomain.scheduledTaskId,
     createdBy: ruleDomain.createdBy,
     updatedBy: ruleDomain.updatedBy,
+    createdByProfileUid: ruleDomain.createdByProfileUid,
+    updatedByProfileUid: ruleDomain.updatedByProfileUid,
     createdAt: ruleDomain.createdAt,
     updatedAt: ruleDomain.updatedAt,
     apiKeyOwner: ruleDomain.apiKeyOwner,

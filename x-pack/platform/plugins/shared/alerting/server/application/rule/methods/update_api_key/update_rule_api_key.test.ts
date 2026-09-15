@@ -110,6 +110,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -168,6 +169,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -259,6 +261,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -315,6 +318,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: true,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
@@ -386,6 +390,7 @@ describe('updateRuleApiKey()', () => {
         revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -539,6 +544,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [],

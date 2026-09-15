@@ -76,6 +76,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   item,
   original,
   allowMissingConnectorSecrets,
@@ -85,6 +86,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   item: BulkUpdateRulesItem<Params>;
   original: SavedObject<RawRule>;
   allowMissingConnectorSecrets?: boolean;
@@ -207,6 +209,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       notifyWhen,
       revision,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
       artifacts: artifactsWithRefs,
       enabled: originalRule.enabled,

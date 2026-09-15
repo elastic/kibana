@@ -121,6 +121,12 @@ export const transformRuleToRuleResponseInternal = <Params extends RuleParams = 
   updated_by: rule.updatedBy,
   created_at: rule.createdAt.toISOString(),
   updated_at: rule.updatedAt.toISOString(),
+  ...(rule.createdByProfileUid !== undefined
+    ? { created_by_profile_uid: rule.createdByProfileUid }
+    : {}),
+  ...(rule.updatedByProfileUid !== undefined
+    ? { updated_by_profile_uid: rule.updatedByProfileUid }
+    : {}),
   api_key_owner: rule.apiKeyOwner,
   ...(rule.apiKeyCreatedByUser !== undefined
     ? { api_key_created_by_user: rule.apiKeyCreatedByUser }

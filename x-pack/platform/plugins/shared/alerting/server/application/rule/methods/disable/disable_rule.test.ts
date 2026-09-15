@@ -199,6 +199,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -278,6 +279,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -369,6 +371,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -423,6 +426,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -469,6 +473,7 @@ describe('disableRule()', () => {
         scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -587,6 +592,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -641,6 +647,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',

@@ -194,6 +194,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        getProfileUid: expect.any(Function),
         changeTrackingService: scopedChangeTrackingService,
         getActionsClient: expect.any(Function),
         getEventLogClient: expect.any(Function),
@@ -276,6 +277,7 @@ describe('RulesClientFactory', () => {
         spaceId: 'default',
         namespace: 'default',
         getUserName: expect.any(Function),
+        getProfileUid: expect.any(Function),
         changeTrackingService: scopedChangeTrackingService,
         createAPIKey: expect.any(Function),
         internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
@@ -322,6 +324,33 @@ describe('RulesClientFactory', () => {
     } as unknown as AuthenticatedUser);
     const userNameResult = await constructorCall.getUserName();
     expect(userNameResult).toEqual('bob');
+  });
+
+  test('getProfileUid() returns null when security is disabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const profileUidResult = await constructorCall.getProfileUid();
+    expect(profileUidResult).toEqual(null);
+  });
+
+  test('getProfileUid() returns the profile uid when security is enabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.getCurrentUser.mockReturnValueOnce({
+      username: 'bob',
+      profile_uid: 'u_profile_1',
+    } as unknown as AuthenticatedUser);
+    const profileUidResult = await constructorCall.getProfileUid();
+    expect(profileUidResult).toEqual('u_profile_1');
   });
 
   test('getActionsClient() returns ActionsClient', async () => {

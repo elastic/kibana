@@ -43,6 +43,12 @@ export const transformPartialRule = (
     ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
     ...(rule.createdBy !== undefined ? { created_by: rule.createdBy } : {}),
     ...(rule.updatedBy !== undefined ? { updated_by: rule.updatedBy } : {}),
+    ...(rule.createdByProfileUid !== undefined
+      ? { created_by_profile_uid: rule.createdByProfileUid }
+      : {}),
+    ...(rule.updatedByProfileUid !== undefined
+      ? { updated_by_profile_uid: rule.updatedByProfileUid }
+      : {}),
     ...(rule.createdAt ? { created_at: rule.createdAt.toISOString() } : {}),
     ...(rule.updatedAt ? { updated_at: rule.updatedAt.toISOString() } : {}),
     ...(rule.apiKeyOwner !== undefined ? { api_key_owner: rule.apiKeyOwner } : {}),

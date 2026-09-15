@@ -188,6 +188,12 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     createdBy: esRule.createdBy,
     updatedBy: esRule.updatedBy,
+    ...(esRule.createdByProfileUid !== undefined
+      ? { createdByProfileUid: esRule.createdByProfileUid }
+      : {}),
+    ...(esRule.updatedByProfileUid !== undefined
+      ? { updatedByProfileUid: esRule.updatedByProfileUid }
+      : {}),
     createdAt: new Date(esRule.createdAt),
     updatedAt: new Date(esRule.updatedAt),
     apiKey: esRule.apiKey,

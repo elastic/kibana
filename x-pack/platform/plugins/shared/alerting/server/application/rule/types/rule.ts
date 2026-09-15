@@ -66,6 +66,8 @@ export interface Rule<Params extends RuleParams = never> {
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
   createdBy: RuleSchemaType['createdBy'];
   updatedBy: RuleSchemaType['updatedBy'];
+  createdByProfileUid?: RuleSchemaType['createdByProfileUid'];
+  updatedByProfileUid?: RuleSchemaType['updatedByProfileUid'];
   createdAt: Date;
   updatedAt: Date;
   apiKeyOwner: RuleSchemaType['apiKeyOwner'];
@@ -107,6 +109,8 @@ export interface RuleDomain<Params extends RuleParams = never> {
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
   createdBy: RuleDomainSchemaType['createdBy'];
   updatedBy: RuleDomainSchemaType['updatedBy'];
+  createdByProfileUid?: RuleDomainSchemaType['createdByProfileUid'];
+  updatedByProfileUid?: RuleDomainSchemaType['updatedByProfileUid'];
   createdAt: Date;
   updatedAt: Date;
   apiKey: RuleDomainSchemaType['apiKey'];

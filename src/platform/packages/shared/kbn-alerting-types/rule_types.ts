@@ -305,6 +305,10 @@ export interface Rule<Params extends RuleTypeParams = never> {
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
+  /** Elasticsearch user profile uid of the creator, when available (e.g. not populated for API key-authenticated actions). */
+  createdByProfileUid?: string | null;
+  /** Elasticsearch user profile uid of the last updater, when available (e.g. not populated for API key-authenticated actions). */
+  updatedByProfileUid?: string | null;
   createdAt: Date;
   updatedAt: Date;
   apiKey: string | null;

@@ -134,6 +134,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   skipped,
   errors,
   username,
+  profileUid,
   shouldInvalidateApiKeys,
   shouldIncrementRevision = () => true,
 }: UpdateOperationOpts & {
@@ -153,6 +154,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       skipped,
       errors,
       username,
+      profileUid,
       paramsModifier,
       shouldInvalidateApiKeys,
       shouldIncrementRevision,

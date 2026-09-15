@@ -114,6 +114,60 @@ describe('transformRuleDomainToRuleAttributes', () => {
     expect(result).not.toHaveProperty('lastEnabledAt');
   });
 
+  test('should include createdByProfileUid and updatedByProfileUid when present', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        createdByProfileUid: 'u_profile_created',
+        updatedByProfileUid: 'u_profile_updated',
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.createdByProfileUid).toBe('u_profile_created');
+    expect(result.updatedByProfileUid).toBe('u_profile_updated');
+  });
+
+  test('should omit createdByProfileUid and updatedByProfileUid when absent', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule,
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result).not.toHaveProperty('createdByProfileUid');
+    expect(result).not.toHaveProperty('updatedByProfileUid');
+  });
+
   test('should transform rule domain to rule attribute', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule,

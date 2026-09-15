@@ -283,6 +283,61 @@ describe('bulkEdit()', () => {
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               revision: 1,
+              updatedByProfileUid: null,
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 1,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              updatedByProfileUid: 'u_profile_1',
             }),
           }),
         ],
@@ -635,6 +690,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -861,6 +917,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1010,6 +1067,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1183,6 +1241,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },

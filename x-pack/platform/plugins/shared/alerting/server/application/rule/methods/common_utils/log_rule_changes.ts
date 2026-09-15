@@ -235,6 +235,8 @@ function transformRuleDomainToRuleChangeHistorySnapshot(
     mapped_params: ruleDomain.mapped_params,
     createdBy: ruleDomain.createdBy,
     updatedBy: ruleDomain.updatedBy,
+    createdByProfileUid: ruleDomain.createdByProfileUid,
+    updatedByProfileUid: ruleDomain.updatedByProfileUid,
     createdAt: normalizeDate(ruleDomain.createdAt, new Date()),
     updatedAt: normalizeDate(ruleDomain.updatedAt, new Date()),
     apiKey: ruleDomain.apiKey,

@@ -5332,4 +5332,52 @@ This is the type of text _investigation guides_ will contain.`;
       await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
     });
   });
+
+  test('persists createdByProfileUid and updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    const data = getMockData({ enabled: false });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            uuid: 'test-uuid',
+            params: { foo: true },
+          },
+        ],
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+    });
+
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+      }),
+      expect.any(Object)
+    );
+  });
 });

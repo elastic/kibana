@@ -55,6 +55,7 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  profileUid: string | null;
   updateAttributesFn: (
     opts: UpdateAttributesFnOpts<Params>
   ) => Promise<UpdateAttributesFnResult<Params>>;
@@ -74,6 +75,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     skipped,
     errors,
     username,
+    profileUid,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
   }: UpdateRuleInMemoryOpts<Params>
@@ -203,6 +205,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     updatedParams,
     rawAlertActions: ruleAttributes.actions,
     username,
+    profileUid,
   });
 
   rules.push({ ...rule, references, attributes: updatedAttributes });
@@ -250,6 +253,7 @@ async function updateAttributes({
   updatedParams,
   rawAlertActions,
   username,
+  profileUid,
 }: {
   context: RulesClientContext;
   attributes: RawRule;
@@ -257,6 +261,7 @@ async function updateAttributes({
   updatedParams: RuleParams;
   rawAlertActions: RawRuleAction[];
   username: string | null;
+  profileUid: string | null;
 }): Promise<{
   updatedAttributes: RawRule;
 }> {
@@ -287,6 +292,7 @@ async function updateAttributes({
     actions: rawAlertActions,
     notifyWhen,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
   });
 

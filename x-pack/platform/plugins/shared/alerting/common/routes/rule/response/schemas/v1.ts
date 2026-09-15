@@ -752,6 +752,20 @@ export const ruleResponseInternalSchema = schema.object(
         },
       })
     ),
+    created_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that created the rule.' },
+        })
+      )
+    ),
+    updated_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that last updated the rule.' },
+        })
+      )
+    ),
     created_at: schema.string({
       meta: {
         description: 'The date and time that the rule was created.',

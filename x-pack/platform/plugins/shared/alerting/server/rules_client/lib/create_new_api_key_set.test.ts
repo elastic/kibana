@@ -45,6 +45,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   getUserName: jest.fn(),
+  getProfileUid: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,

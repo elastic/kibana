@@ -179,4 +179,18 @@ describe('transformToSanitizedRule', () => {
       expect(result).toBe(expectedSanitizedRule);
     });
   });
+
+  it('includes createdByProfileUid and updatedByProfileUid when present on the saved object', async () => {
+    const { so } = getTestRule();
+    so.attributes = {
+      ...so.attributes,
+      createdByProfileUid: 'u_profile_created',
+      updatedByProfileUid: 'u_profile_updated',
+    };
+
+    const sanitized = await transformToSanitizedRule(rulesClientContext, so);
+
+    expect(sanitized.createdByProfileUid).toBe('u_profile_created');
+    expect(sanitized.updatedByProfileUid).toBe('u_profile_updated');
+  });
 });

@@ -242,6 +242,151 @@ describe('transformRuleAttributesToRuleDomain', () => {
     `);
   });
 
+  it('includes createdByProfileUid and updatedByProfileUid when present', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+
+    const res = transformRuleAttributesToRuleDomain(
+      {
+        enabled: false,
+        tags: ['foo'],
+        createdBy: 'user',
+        createdByProfileUid: 'u_profile_created',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        legacyId: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozeSchedule: [],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending' as const,
+          error: null,
+          warning: null,
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [],
+        name: 'my rule name',
+        revision: 0,
+        updatedBy: 'user',
+        updatedByProfileUid: 'u_profile_updated',
+        apiKey: MOCK_API_KEY,
+        apiKeyOwner: 'user',
+      },
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res.createdByProfileUid).toBe('u_profile_created');
+    expect(res.updatedByProfileUid).toBe('u_profile_updated');
+  });
+
+  it('omits createdByProfileUid and updatedByProfileUid when absent', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+
+    const res = transformRuleAttributesToRuleDomain(
+      {
+        enabled: false,
+        tags: ['foo'],
+        createdBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        legacyId: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozeSchedule: [],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending' as const,
+          error: null,
+          warning: null,
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [],
+        name: 'my rule name',
+        revision: 0,
+        updatedBy: 'user',
+        apiKey: MOCK_API_KEY,
+        apiKeyOwner: 'user',
+      },
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res).not.toHaveProperty('createdByProfileUid');
+    expect(res).not.toHaveProperty('updatedByProfileUid');
+  });
+
+  it('preserves an explicit null for createdByProfileUid and updatedByProfileUid', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+
+    const res = transformRuleAttributesToRuleDomain(
+      {
+        enabled: false,
+        tags: ['foo'],
+        createdBy: 'user',
+        createdByProfileUid: null,
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        legacyId: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozeSchedule: [],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending' as const,
+          error: null,
+          warning: null,
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [],
+        name: 'my rule name',
+        revision: 0,
+        updatedBy: 'user',
+        updatedByProfileUid: null,
+        apiKey: MOCK_API_KEY,
+        apiKeyOwner: 'user',
+      },
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res).toHaveProperty('createdByProfileUid', null);
+    expect(res).toHaveProperty('updatedByProfileUid', null);
+  });
+
   describe('lastRun outcomeMsg migration', () => {
     const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
 

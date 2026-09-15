@@ -225,4 +225,22 @@ describe('transformRuleDomainToRule', () => {
 
     expect(result.snoozedInstances).toEqual(snoozedInstances);
   });
+
+  it('should include createdByProfileUid and updatedByProfileUid when present', () => {
+    const result = transformRuleDomainToRule({
+      ...rule,
+      createdByProfileUid: 'u_profile_created',
+      updatedByProfileUid: 'u_profile_updated',
+    });
+
+    expect(result.createdByProfileUid).toBe('u_profile_created');
+    expect(result.updatedByProfileUid).toBe('u_profile_updated');
+  });
+
+  it('should omit createdByProfileUid and updatedByProfileUid when absent', () => {
+    const result = transformRuleDomainToRule(rule);
+
+    expect(result).not.toHaveProperty('createdByProfileUid');
+    expect(result).not.toHaveProperty('updatedByProfileUid');
+  });
 });
