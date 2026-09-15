@@ -227,7 +227,7 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
   }
 };
 
-/** Runs a workflow as a KI verifier; if the step is cancelled, the running workflow is cancelled too. */
+/** Runs a workflow as a KI verifier; if the step is cancelled, the verifier workflow run it started is cancelled too. */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
   dependencies: WorkflowVerifierDependencies
