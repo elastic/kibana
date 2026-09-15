@@ -46,7 +46,10 @@ const spawnParticle = (
 ): ConfettiParticle => {
   // Spread angles slightly so each cannon reads as a burst, not a line.
   const spread = (Math.random() - 0.5) * 0.5;
-  const speed = 9 + Math.random() * 5;
+  // Tuned so the apex lands in the upper third of the viewport (~800px at
+  // vy≈16, g=0.16): corner cannons that top out low read as confetti "stuck"
+  // at the bottom of the screen instead of a celebration.
+  const speed = 13 + Math.random() * 6;
   return {
     x: originX,
     y: originY,
@@ -110,7 +113,7 @@ export const fireConfetti = (): boolean => {
 
     for (const particle of particles) {
       // Physics normalized to ~60fps steps.
-      particle.vy += 0.18; // gravity
+      particle.vy += 0.16; // gravity
       particle.vx *= 0.99; // horizontal drag
       particle.x += particle.vx;
       particle.y += particle.vy;
