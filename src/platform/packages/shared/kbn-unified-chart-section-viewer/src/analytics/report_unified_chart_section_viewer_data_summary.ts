@@ -12,14 +12,17 @@ import type { MetricsTelemetry } from '../types';
 import {
   MAX_DIMENSIONS_REACHED_EVENT_TYPE,
   METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+  METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
   METRICS_INFO_EVENT_TYPE,
   type MetricAggregationConfigChangedEvent,
+  type MetricsEsqlQueryFailureEvent,
 } from '../components/observability/metrics/telemetry';
 
 export interface UnifiedChartSectionViewerTelemetry {
   trackMetricsInfo: (telemetryPayload: MetricsTelemetry) => void;
   trackMaxDimensionsReached: (maxDimensions: number) => void;
   trackAggregationConfigChanged: (event: MetricAggregationConfigChangedEvent) => void;
+  trackEsqlQueryFailure: (event: MetricsEsqlQueryFailureEvent) => void;
 }
 
 export const createUnifiedChartSectionViewerTelemetry = (
@@ -44,5 +47,11 @@ export const createUnifiedChartSectionViewerTelemetry = (
       return;
     }
     analytics.reportEvent(METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE, event);
+  },
+  trackEsqlQueryFailure: (event: MetricsEsqlQueryFailureEvent) => {
+    if (!analytics) {
+      return;
+    }
+    analytics.reportEvent(METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE, event);
   },
 });

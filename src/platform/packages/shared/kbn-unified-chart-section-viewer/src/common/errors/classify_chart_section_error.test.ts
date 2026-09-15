@@ -144,9 +144,9 @@ describe('classifyChartSectionError', () => {
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
 
-    it('classifies a 429 circuit-breaker status as an application error', () => {
+    it('classifies a 429 rate-limit status with no resource-limit cause as an application error', () => {
       const error = new EsqlResponseError(
-        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { type: 'es_rejected_execution_exception', reason: 'queue capacity reached' },
         { status: 429 }
       );
 
@@ -161,14 +161,49 @@ describe('classifyChartSectionError', () => {
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
+  });
 
-    it('classifies a search-interceptor error carrying a 429 circuit-breaker status as an application error', () => {
+  describe('resource_limit', () => {
+    it('classifies a 429 circuit-breaker status as a resource limit', () => {
+      const error = new EsqlResponseError(
+        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less circuit-breaker type as a resource limit', () => {
+      const error = new EsqlResponseError({ type: 'circuit_breaking_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a search-interceptor error carrying a 429 circuit-breaker status as a resource limit', () => {
       const error = createEsErrorLike(
         { type: 'circuit_breaking_exception', reason: 'data too large' },
         { status: 429 }
       );
 
-      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a status-less search-interceptor circuit-breaker error as a resource limit', () => {
+      const error = createEsErrorLike({ type: 'circuit_breaking_exception' });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
+    });
+
+    it('classifies a circuit breaker nested under a generic wrapper as a resource limit', () => {
+      const error = createEsErrorLike({
+        type: 'search_phase_execution_exception',
+        reason: 'all shards failed',
+        root_cause: [
+          { type: 'circuit_breaking_exception', reason: 'data too large' },
+        ] as estypes.ErrorCause[],
+      });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.RESOURCE_LIMIT);
     });
   });
 
@@ -180,7 +215,7 @@ describe('classifyChartSectionError', () => {
     });
 
     it('classifies an unrecognized error type carrying no status as unknown', () => {
-      const error = new EsqlResponseError({ type: 'circuit_breaking_exception' });
+      const error = new EsqlResponseError({ type: 'illegal_state_exception' });
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.UNKNOWN);
     });
@@ -195,7 +230,7 @@ describe('classifyChartSectionError', () => {
     });
 
     it('classifies a status-less search-interceptor error with no known cause type as unknown', () => {
-      const error = createEsErrorLike({ type: 'circuit_breaking_exception' });
+      const error = createEsErrorLike({ type: 'illegal_state_exception' });
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.UNKNOWN);
     });
