@@ -32,6 +32,15 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
 } from './utils';
+import type {
+  WriteAuditRecord,
+  SavedObjectAuditDiffRecorder,
+} from './utils/saved_object_audit_diff_recorder';
+import {
+  applyBeforeAttrsFromMgetDocs,
+  fetchBeforeAttrs,
+  type BeforeAttrsRequest,
+} from './utils/saved_object_diff_before_state';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
@@ -47,10 +56,11 @@ import type {
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];
   options: SavedObjectsBulkDeleteOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performBulkDelete = async <T>(
-  { objects, options }: PerformBulkDeleteParams<T>,
+  { objects, options, auditDiffRecorder }: PerformBulkDeleteParams<T>,
   {
     registry,
     helpers,
@@ -72,7 +82,8 @@ export const performBulkDelete = async <T>(
     objects,
     allowedTypes,
     registry,
-    securityExtension
+    securityExtension,
+    auditDiffRecorder
   );
   if (expectedBulkGetResults.length === 0) {
     return { statuses: [] };
@@ -95,10 +106,12 @@ export const performBulkDelete = async <T>(
   );
 
   let expectedResults: ExpectedBulkDeleteResult[];
+  // Reused below for audit names (resolved from the preflight for multi-namespace types).
+  let authObjects: AuthorizeUpdateObject[] = [];
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const authObjects: AuthorizeUpdateObject[] = expectedMultiNamespaceResults.map((element) => {
+    authObjects = expectedMultiNamespaceResults.map((element) => {
       const index = (element.value as { esRequestIndex: number }).esRequestIndex;
       const { type, id } = element.value;
       const preflightResult =
@@ -141,6 +154,23 @@ export const performBulkDelete = async <T>(
     );
   } else expectedResults = expectedMultiNamespaceResults;
 
+  // Track each authorized object for auditing (flushed by the repository once the
+  // operation settles); bulk delete authorizes both valid and already-errored objects.
+  // `before` is populated by the feature-gated pre-delete fetch; empty attributes
+  // still audit — the delete itself is the audit signal.
+  // Indexed by request position so duplicate `{type, id}` entries each get their own event.
+  const auditRecords: Array<WriteAuditRecord | undefined> = [];
+  if (auditDiffRecorder) {
+    expectedResults.forEach(({ value }, index) => {
+      if (value.id) {
+        auditRecords[index] = auditDiffRecorder.track(
+          { type: value.type, id: value.id, name: authObjects[index]?.name },
+          { key: String(index) }
+        );
+      }
+    });
+  }
+
   // Filter valid objects
   const validObjects = expectedResults.filter(isRight);
   if (validObjects.length === 0) {
@@ -149,6 +179,49 @@ export const performBulkDelete = async <T>(
       return { ...expectedResult.value, success: false };
     });
     return { statuses: [...savedObjects] };
+  }
+
+  // Capture pre-delete attributes for the diff audit event (feature-gated).
+  // Multi-namespace objects already went through a preflight mget; when the
+  // type is allow-listed that request also pulls attributes, so we reuse it
+  // instead of a second round-trip. Single-namespace objects have no preflight,
+  // so they still need a dedicated mget. Results are matched by `_id` (not
+  // array position). Failure-isolated: an mget error must not fail the delete.
+  if (auditDiffRecorder) {
+    try {
+      const toBeforeRequests = (multiNamespace: boolean): BeforeAttrsRequest[] =>
+        expectedResults.flatMap((expectedResult, index) => {
+          if (isLeft(expectedResult)) {
+            return [];
+          }
+          const { type, id } = expectedResult.value;
+          if (
+            registry.isMultiNamespace(type) !== multiNamespace ||
+            !auditDiffRecorder.shouldComputeDiff(type)
+          ) {
+            return [];
+          }
+          return [
+            {
+              rawId: serializer.generateRawId(namespace, type, id),
+              type,
+              auditRecord: auditRecords[index],
+            },
+          ];
+        });
+
+      applyBeforeAttrsFromMgetDocs(multiNamespaceDocsResponse?.body.docs, toBeforeRequests(true));
+
+      await fetchBeforeAttrs({
+        client,
+        getIndexForType: (objectType) => commonHelper.getIndexForType(objectType),
+        requests: toBeforeRequests(false),
+      });
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
+      );
+    }
   }
 
   // Create the bulkDeleteParams
@@ -179,7 +252,7 @@ export const performBulkDelete = async <T>(
   let errorResult: BulkDeleteItemErrorResult;
   const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
 
-  const savedObjects = expectedResults.map((expectedResult) => {
+  const savedObjects = expectedResults.map((expectedResult, index) => {
     if (isLeft(expectedResult)) {
       return { ...expectedResult.value, success: false };
     }
@@ -211,6 +284,8 @@ export const performBulkDelete = async <T>(
     }
 
     if (rawResponse.result === 'deleted') {
+      auditRecords[index]?.succeed();
+
       // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
       if (namespaces) {
         objectsToDeleteAliasesFor.push({
@@ -258,7 +333,8 @@ function presortObjectsByNamespaceType(
   objects: SavedObjectsBulkDeleteObject[],
   allowedTypes: string[],
   registry: ISavedObjectTypeRegistry,
-  securityExtension?: ISavedObjectsSecurityExtension
+  securityExtension?: ISavedObjectsSecurityExtension,
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder
 ) {
   let bulkGetRequestIndexCounter = 0;
   return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
@@ -271,13 +347,18 @@ function presortObjectsByNamespaceType(
       });
     }
     const requiresNamespacesCheck = registry.isMultiNamespace(type);
+    const nameFields = securityExtension?.includeSavedObjectNames()
+      ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
+      : [];
+    // Widen the preflight `_source` so allow-listed multi-namespace objects
+    // already have attributes for the diff — no second mget for those types.
+    const diffFields =
+      requiresNamespacesCheck && auditDiffRecorder?.shouldComputeDiff(type) ? [type] : [];
 
     return right({
       type,
       id,
-      fields: securityExtension?.includeSavedObjectNames()
-        ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
-        : [],
+      fields: [...nameFields, ...diffFields],
       ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
     });
   });

@@ -24,7 +24,13 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
     getEncryptedAttributes: jest.fn(),
   });
 
-const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> =>
+/** `savedObjectDiffEnabled` is writable so tests can toggle the feature without casts. */
+type SecurityExtensionMock = Omit<
+  jest.Mocked<ISavedObjectsSecurityExtension>,
+  'savedObjectDiffEnabled'
+> & { savedObjectDiffEnabled: boolean };
+
+const createSecurityExtension = (): SecurityExtensionMock =>
   lazyObject({
     authorizeCreate: jest.fn(),
     authorizeBulkCreate: jest.fn(),
@@ -46,6 +52,16 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
     authorizeUpdateSpaces: jest.fn(),
     authorizeDisableLegacyUrlAliases: jest.fn(),
     auditObjectsForSpaceDeletion: jest.fn(),
+    emitSavedObjectDiffAuditEvent: jest.fn(),
+    savedObjectDiffEnabled: false,
+    // Mirrors production: extra before-state reads only happen when the feature is on.
+    // Tests that assert allow-list skipping override this with mockReturnValue(false).
+    shouldComputeSavedObjectDiff: jest.fn(function (
+      this: { savedObjectDiffEnabled: boolean },
+      _type: string
+    ) {
+      return this.savedObjectDiffEnabled;
+    }),
     getCurrentUser: jest.fn(),
     includeSavedObjectNames: jest.fn(),
     authorizeChangeAccessControl: jest.fn(),

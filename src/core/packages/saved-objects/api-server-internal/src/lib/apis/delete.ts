@@ -16,6 +16,7 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
@@ -23,10 +24,11 @@ export interface PerformDeleteParams<T = unknown> {
   type: string;
   id: string;
   options: SavedObjectsDeleteOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performDelete = async <T>(
-  { type, id, options }: PerformDeleteParams<T>,
+  { type, id, options, auditDiffRecorder }: PerformDeleteParams<T>,
   {
     registry,
     helpers,
@@ -48,6 +50,9 @@ export const performDelete = async <T>(
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
+  let deleteBeforeAttributes: Record<string, unknown> = {};
+  let savedObjectName: string | undefined;
+
   if (securityExtension) {
     const nameAttribute = registry.getNameAttribute(type);
 
@@ -58,15 +63,21 @@ export const performDelete = async <T>(
         _source_includes: [
           ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
           'accessControl',
+          // Only fetch the full attributes (needed for the saved object diff) when
+          // this type is on the allow list, to avoid paying that cost otherwise.
+          ...(auditDiffRecorder?.shouldComputeDiff(type) ? [type] : []),
         ],
       },
       { ignore: [404], meta: true }
     );
 
     const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
-    const name = securityExtension.includeSavedObjectNames()
-      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
-      : undefined;
+    deleteBeforeAttributes = (savedObjectResponse.body._source?.[type] ?? {}) as Record<
+      string,
+      unknown
+    >;
+    savedObjectName = SavedObjectsUtils.getName(nameAttribute, saveObject);
+    const name = securityExtension.includeSavedObjectNames() ? savedObjectName : undefined;
     const accessControl = savedObjectResponse.body._source?.accessControl;
     // we don't need to pass existing namespaces in because we're only concerned with authorizing
     // the current space. This saves us from performing the preflight check if we're unauthorized
@@ -77,6 +88,16 @@ export const performDelete = async <T>(
   }
 
   const rawId = serializer.generateRawId(namespace, type, id);
+
+  // Track the delete for auditing (flushed by the repository once the operation
+  // settles). For multi-namespace types the raw ID is not space-scoped, so the
+  // fetched before-attributes may belong to an object outside the current space;
+  // recording them is deferred until the namespace preflight below confirms the
+  // object is in scope, so out-of-space rejections audit without a snapshot.
+  const auditRecord = auditDiffRecorder?.track(
+    { type, id, name: savedObjectName },
+    registry.isMultiNamespace(type) ? {} : { before: deleteBeforeAttributes }
+  );
   let preflightResult: PreflightCheckNamespacesResult | undefined;
 
   if (registry.isMultiNamespace(type)) {
@@ -101,6 +122,7 @@ export const performDelete = async <T>(
         'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
       );
     }
+    auditRecord?.setBefore(deleteBeforeAttributes);
   }
 
   const { body, statusCode, headers } = await client.delete(
@@ -119,6 +141,8 @@ export const performDelete = async <T>(
 
   const deleted = body.result === 'deleted';
   if (deleted) {
+    auditRecord?.succeed();
+
     const namespaces = preflightResult?.savedObjectNamespaces;
     if (namespaces) {
       // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.

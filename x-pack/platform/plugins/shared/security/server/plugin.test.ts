@@ -19,8 +19,23 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import { setupSavedObjects } from './saved_objects';
 import { ServiceAccountsService } from './service_accounts';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
+
+jest.mock('./saved_objects', () => ({
+  __esModule: true,
+  setupSavedObjects: jest.fn(),
+  // Lazy re-exports: eagerly requiring the real module here would force-evaluate its
+  // re-export getters during a circular-init window (index -> security_extension ->
+  // access_control_service -> index) and crash. Defer to access time instead.
+  get SecurityAction() {
+    return jest.requireActual('./saved_objects').SecurityAction;
+  },
+  get SavedObjectsSecurityExtension() {
+    return jest.requireActual('./saved_objects').SavedObjectsSecurityExtension;
+  },
+}));
 
 describe('Security Plugin', () => {
   let plugin: SecurityPlugin;
@@ -84,6 +99,66 @@ describe('Security Plugin', () => {
       licensing: licensingMock.createStart(),
       taskManager: taskManagerMock.createStart(),
     };
+  });
+
+  describe('saved object diff config wiring', () => {
+    // Derives the params passed to setupSavedObjects() for a given `audit` config block.
+    const setupWithAudit = (audit: Record<string, unknown>) => {
+      const initializerContext = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          {
+            session: { idleTimeout: 1500 },
+            authc: {
+              providers: ['saml', 'token'],
+              saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+            },
+            encryptionKey: 'z'.repeat(32),
+            audit,
+          },
+          { dist: true }
+        )
+      );
+      new SecurityPlugin(initializerContext).setup(mockCoreSetup, mockSetupDependencies);
+      return (setupSavedObjects as jest.Mock).mock.calls[0][0];
+    };
+
+    it('derives enabled + typesToInclude + fieldSizeLimit (in bytes) when the block is on', () => {
+      const params = setupWithAudit({
+        enabled: true,
+        savedObjectDiff: {
+          enabled: true,
+          typesToInclude: ['dashboard'],
+          fieldSizeLimit: '20kb',
+        },
+      });
+      expect(params).toMatchObject({
+        savedObjectDiffEnabled: true,
+        savedObjectDiffTypesToInclude: ['dashboard'],
+        savedObjectDiffFieldSizeLimit: 20480,
+      });
+    });
+
+    it('forwards enabled=false and the schema defaults when the block is absent', () => {
+      const params = setupWithAudit({ enabled: true });
+      expect(params).toMatchObject({
+        savedObjectDiffEnabled: false,
+        savedObjectDiffTypesToInclude: [],
+        savedObjectDiffFieldSizeLimit: 49152,
+      });
+    });
+
+    it('sets enabled=false when audit itself is disabled', () => {
+      expect(setupWithAudit({ enabled: false }).savedObjectDiffEnabled).toBe(false);
+    });
+
+    it('sets enabled=false but still forwards defaults when the block is present but disabled', () => {
+      const params = setupWithAudit({ enabled: true, savedObjectDiff: { enabled: false } });
+      expect(params).toMatchObject({
+        savedObjectDiffEnabled: false,
+        savedObjectDiffTypesToInclude: [],
+        savedObjectDiffFieldSizeLimit: 49152,
+      });
+    });
   });
 
   describe('setup()', () => {

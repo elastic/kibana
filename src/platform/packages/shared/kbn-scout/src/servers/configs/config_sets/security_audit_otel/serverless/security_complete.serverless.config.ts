@@ -9,13 +9,19 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { savedObjectDiffKbnServerArgs } from '../../security_audit_so_diff/shared';
 import { securityAuditOtelServerArgs, securityAuditOtelServerEnv } from '../shared';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAuditOtelServerArgs],
+    // Diffs on, so the spec can assert kibana.diff is serialized for the OTel SDK.
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      ...securityAuditOtelServerArgs,
+      ...savedObjectDiffKbnServerArgs,
+    ],
     env: { ...defaultConfig.kbnTestServer.env, ...securityAuditOtelServerEnv },
   },
 };

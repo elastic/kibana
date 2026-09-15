@@ -17,6 +17,28 @@ import {
 
 const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
+// Allow-listed on the Serverless OTel config (see security_audit_so_diff/shared.ts).
+const DIFF_TYPE = 'index-pattern';
+
+/**
+ * The OTel SDK drops array-of-object attributes. applyAuditOtelFieldMap must
+ * reassemble kibana.diff.* into one JSON string before the record is exported.
+ */
+const parseOtelDiff = (e: FlatAttributes) => {
+  expect(e['kibana.diff.ops']).toBeUndefined();
+  expect(e['kibana.diff.format']).toBeUndefined();
+  expect(e['kibana.diff.noOps']).toBeUndefined();
+  expect(typeof e['kibana.diff']).toBe('string');
+  return JSON.parse(e['kibana.diff'] as string) as {
+    format: string;
+    ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }>;
+  };
+};
+
+const opAt = (
+  diff: { ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }> },
+  path: string
+) => diff.ops.find((op) => op.path === path);
 
 const receiver = new OtlpLogReceiver();
 
@@ -55,6 +77,8 @@ apiTest.describe(
   // audit_log_traditional.spec.ts.
   { tag: [...tags.serverless.security.complete] },
   () => {
+    const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
+
     apiTest.beforeAll(async ({ kbnClient }) => {
       await receiver.start(OTEL_RECEIVER_PORT);
       await kbnClient.savedObjects.create({
@@ -65,6 +89,13 @@ apiTest.describe(
           title: 'Audit log OTel test dashboard',
         },
       });
+    });
+
+    apiTest.afterEach(async ({ kbnClient }) => {
+      const leftover = savedObjectsToCleanUp.splice(0);
+      for (const { type, id } of leftover) {
+        await kbnClient.savedObjects.delete({ type, id });
+      }
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
@@ -316,6 +347,85 @@ apiTest.describe(
         expect(e['source.address']).toBe('127.0.0.1');
         expect(e['source.ip']).toBe('127.0.0.1');
         expect(e['http.request.id']).toBeDefined();
+      }
+    );
+
+    // These run before `user_logout`: SamlSessionManager caches the admin sid, and
+    // logout invalidates it so later tests would 401 with a stale cookie.
+    apiTest(
+      'saved_object_create: kibana.diff is a JSON string (ops not dropped by the OTel SDK)',
+      async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const id = `otel-diff-create-${Date.now()}`;
+
+        const res = await apiClient.post(`api/saved_objects/${DIFF_TYPE}/${id}`, {
+          headers: { ...cookieHeader, ...KBN_XSRF },
+          body: { attributes: { title: 'created' } },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: DIFF_TYPE, id });
+
+        const e = await snap.waitForLogRecord(
+          (attrs) =>
+            attrs['event.action'] === 'saved_object_create' &&
+            attrs['kibana.saved_object.type'] === DIFF_TYPE &&
+            attrs['kibana.saved_object.id'] === id
+        );
+
+        expectOtelEnvelope(e);
+        expect(e['event.outcome']).toBe('success');
+
+        const diff = parseOtelDiff(e);
+        expect(diff.format).toBe('json_patch_extended');
+        expect(opAt(diff, '/title')).toStrictEqual({
+          op: 'add',
+          path: '/title',
+          value: 'created',
+        });
+      }
+    );
+
+    apiTest(
+      'saved_object_update: kibana.diff stringify preserves replace ops with oldValue',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_XSRF };
+        const id = `otel-diff-update-${Date.now()}`;
+
+        const createRes = await apiClient.post(`api/saved_objects/${DIFF_TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'old' } },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: DIFF_TYPE, id });
+
+        const snap = receiver.snapshot();
+        const res = await apiClient.put(`api/saved_objects/${DIFF_TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'new' } },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+
+        const e = await snap.waitForLogRecord(
+          (attrs) =>
+            attrs['event.action'] === 'saved_object_update' &&
+            attrs['kibana.saved_object.id'] === id
+        );
+
+        expectOtelEnvelope(e);
+        expect(e['event.outcome']).toBe('success');
+
+        const diff = parseOtelDiff(e);
+        expect(opAt(diff, '/title')).toStrictEqual({
+          op: 'replace',
+          path: '/title',
+          value: 'new',
+          oldValue: 'old',
+        });
       }
     );
 

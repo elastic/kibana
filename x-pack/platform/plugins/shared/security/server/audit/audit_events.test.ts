@@ -48,6 +48,7 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
+          "diff": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "name": "test_dashboard",
@@ -83,6 +84,7 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
+          "diff": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "name": "test_dashboard",
@@ -122,6 +124,7 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
+          "diff": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "name": "test_dashboard",
@@ -232,6 +235,7 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
+          "diff": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
@@ -276,6 +280,7 @@ describe('#savedObjectEvent', () => {
             "space4",
             "space6",
           ],
+          "diff": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
@@ -312,6 +317,7 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
+          "diff": undefined,
           "saved_object": undefined,
           "unauthorized_spaces": Array [
             "space1",
@@ -327,6 +333,60 @@ describe('#savedObjectEvent', () => {
         "message": "User has accessed saved objects",
       }
     `);
+  });
+
+  test('propagates savedObjectDiff into kibana.diff for CREATE', () => {
+    const savedObjectDiff = {
+      format: 'json_patch_extended' as const,
+      ops: [{ op: 'add' as const, path: '/name', value: 'test' }],
+      noOps: [],
+    };
+    const event = savedObjectEvent({
+      action: AuditAction.CREATE,
+      outcome: 'success',
+      savedObject: { type: 'dashboard', id: '123' },
+      savedObjectDiff,
+    });
+    expect(event?.kibana?.diff).toEqual(savedObjectDiff);
+  });
+
+  test('propagates savedObjectDiff into kibana.diff for UPDATE', () => {
+    const savedObjectDiff = {
+      format: 'json_patch_extended' as const,
+      ops: [{ op: 'replace' as const, path: '/name', value: 'new', oldValue: 'old' }],
+      noOps: [],
+    };
+    const event = savedObjectEvent({
+      action: AuditAction.UPDATE,
+      outcome: 'success',
+      savedObject: { type: 'dashboard', id: '123' },
+      savedObjectDiff,
+    });
+    expect(event?.kibana?.diff).toEqual(savedObjectDiff);
+  });
+
+  test('propagates savedObjectDiff into kibana.diff for DELETE', () => {
+    const savedObjectDiff = {
+      format: 'json_patch_extended' as const,
+      ops: [{ op: 'remove' as const, path: '/name', oldValue: 'test' }],
+      noOps: [],
+    };
+    const event = savedObjectEvent({
+      action: AuditAction.DELETE,
+      outcome: 'success',
+      savedObject: { type: 'dashboard', id: '123' },
+      savedObjectDiff,
+    });
+    expect(event?.kibana?.diff).toEqual(savedObjectDiff);
+  });
+
+  test('diff is undefined when savedObjectDiff is not provided', () => {
+    const event = savedObjectEvent({
+      action: AuditAction.UPDATE,
+      outcome: 'success',
+      savedObject: { type: 'dashboard', id: '123' },
+    });
+    expect(event?.kibana?.diff).toBeUndefined();
   });
 });
 

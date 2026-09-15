@@ -36,5 +36,4 @@ const config: InitialBenchConfig = {
   ],
 };
 
-// eslint-disable-next-line import/no-default-export
 export default config;

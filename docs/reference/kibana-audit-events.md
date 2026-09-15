@@ -35,7 +35,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `saved_object_create` | `unknown` | User is creating a saved object. |
+| `saved_object_create` | `unknown` | User is creating a saved object. When `xpack.security.audit.savedObjectDiff.enabled` is `true`, this outcome instead means the create was attempted but not confirmed. |
+| | `success` | Saved object created. Only emitted when `xpack.security.audit.savedObjectDiff.enabled` is `true`; carries `kibana.diff` for types listed in `typesToInclude`. |
 | | `failure` | User is not authorized to create a saved object. |
 | `saved_object_open_point_in_time` | `unknown` | User is creating a Point In Time to use when querying saved objects. |
 | | `failure` | User is not authorized to create a Point In Time for the provided saved object types. |
@@ -85,7 +86,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `saved_object_update` | `unknown` | User is updating a saved object. |
+| `saved_object_update` | `unknown` | User is updating a saved object. When `xpack.security.audit.savedObjectDiff.enabled` is `true`, this outcome instead means the update was attempted but not confirmed. |
+| | `success` | Saved object updated. Only emitted when `xpack.security.audit.savedObjectDiff.enabled` is `true`; carries `kibana.diff` for types listed in `typesToInclude`. |
 | | `failure` | User is not authorized to update a saved object. |
 | `saved_object_update_objects_spaces` | `unknown` | User is adding and/or removing a saved object to/from other spaces. |
 | | `failure` | User is not authorized to add or remove a saved object to or from other spaces. |
@@ -180,7 +182,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `saved_object_delete` | `unknown` | User is deleting a saved object. |
+| `saved_object_delete` | `unknown` | User is deleting a saved object. When `xpack.security.audit.savedObjectDiff.enabled` is `true`, this outcome instead means the delete was attempted but not confirmed. |
+| | `success` | Saved object deleted. Only emitted when `xpack.security.audit.savedObjectDiff.enabled` is `true`; carries `kibana.diff` for types listed in `typesToInclude`. |
 | | `failure` | User is not authorized to delete a saved object. |
 | `saved_object_close_point_in_time` | `unknown` | User is deleting a Point In Time that was used to query saved objects. |
 | | `failure` | User is not authorized to delete a Point In Time. |
@@ -330,7 +333,7 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
 | `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication` |
 | `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion` |
-| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`<br><br>Possible values: `success`, `failure`, `unknown`<br> |
+| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`<br>* When `xpack.security.audit.savedObjectDiff.enabled` is `true`, saved object create, update, and delete operations are instead logged after the operation: outcome `success` once {{es}} confirms the write, or outcome `unknown` when the write was attempted but did not complete<br><br>Possible values: `success`, `failure`, `unknown`<br> |
 
 ### User fields
 
@@ -351,6 +354,7 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | `kibana.session_id` | ID of the user session associated with the event.<br>Each login attempt results in a unique session id. |
 | `kibana.saved_object.type` | Type of saved object associated with the event.<br>Example: `dashboard` |
 | `kibana.saved_object.id` | ID of the saved object associated with the event. |
+| `kibana.diff` | Field-level diff of a saved object create, update, or delete. Only present when `xpack.security.audit.savedObjectDiff.enabled` is `true` and the saved object type is listed in `xpack.security.audit.savedObjectDiff.typesToInclude`. An object with `format` (`json_patch_extended`), `ops[]` (RFC 6902 `add`/`remove`/`replace` operations with `path`, `value`, and `oldValue`), and `noOps[]` (paths of unchanged attributes). Encrypted attribute values are replaced with `[redacted]`.<br>Example: `{"format":"json_patch_extended","ops":[{"op":"replace","path":"/title","value":"New","oldValue":"Old"}],"noOps":[{"path":"/description"}]}` |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |
