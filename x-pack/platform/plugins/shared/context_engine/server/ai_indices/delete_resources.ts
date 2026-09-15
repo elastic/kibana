@@ -16,22 +16,23 @@ import { MAX_AI_INDICES } from '../../common/constants';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
 import type { DeleteWorkflowsApi } from '../types';
-import { aiIndicesIndexName } from './storage';
+import { aiIndicesIndexName, type StoredAiIndexDocument } from './storage';
 
 const findIdsByDestValue = async (
   esClient: ElasticsearchClient,
   destValue: string,
   excludeId?: string
 ): Promise<string[]> => {
-  const response = await esClient.search({
+  const response = await esClient.search<StoredAiIndexDocument>({
     index: aiIndicesIndexName,
     size: MAX_AI_INDICES,
     track_total_hits: false,
     query: { term: { 'dest.value': destValue } },
   });
-  return response.hits.hits.flatMap((hit) =>
-    hit._id !== undefined && hit._id !== excludeId ? [hit._id] : []
-  );
+  return response.hits.hits.flatMap((hit) => {
+    const id = hit._source?.id ?? hit._id;
+    return id !== undefined && id !== excludeId ? [id] : [];
+  });
 };
 
 /** Best-effort backing-store delete. Returns an error string on failure, null on success or 404. */

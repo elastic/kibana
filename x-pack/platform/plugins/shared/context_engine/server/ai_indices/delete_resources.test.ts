@@ -136,13 +136,20 @@ describe('deleteBackingStoreResource', () => {
   it('skips dest delete when another AI index still uses the dest', async () => {
     registrySearch.mockResolvedValue({
       hits: {
-        hits: [{ _id: 'my-ai-index' }, { _id: 'other_space_index' }],
+        hits: [
+          { _id: 'auto-gen-self', _source: { id: 'my-ai-index' } },
+          { _id: 'auto-gen-other', _source: { id: 'other_space_index' } },
+        ],
       },
     });
 
     await expect(
       deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
-    ).resolves.toMatch(/other_space_index/);
+    ).resolves.toEqual(
+      expect.stringMatching(
+        /Did not delete the backing store 'ai-index-ds-customer_support': it is still used by other AI indices \(other_space_index\)/
+      )
+    );
 
     expect(registrySearch).toHaveBeenCalledWith({
       index: aiIndicesIndexName,
@@ -153,5 +160,18 @@ describe('deleteBackingStoreResource', () => {
     expect(deleteDataStream).not.toHaveBeenCalled();
     expect(deleteIndex).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
+  });
+
+  it('falls back to _id for pre-upgrade documents that have no id field', async () => {
+    registrySearch.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'legacy-other-index' }],
+      },
+    });
+
+    await expect(
+      deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
+    ).resolves.toMatch(/legacy-other-index/);
+    expect(deleteDataStream).not.toHaveBeenCalled();
   });
 });
