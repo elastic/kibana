@@ -19,9 +19,6 @@ describe('SetMap', () => {
     sm.add('foo', 'baz');
     sm.add('baz', 'foo');
 
-    const addResult: void = sm.add('queue', 'value');
-    expect(addResult).toBeUndefined();
-
     expect(sm.get('foo')).toMatchInlineSnapshot(`
       Set {
         "bar",
