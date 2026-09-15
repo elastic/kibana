@@ -287,6 +287,33 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
+ * Per-Worker numeric tuning for detection-oriented Workers, e.g. Alert Triage's auto-close threshold. Optional and per-Worker opt-in — only meaningful for Workers whose autonomy cards reference these fields.
+ */
+export const DetectionConfig = lazySchema(() =>
+  z.object({
+    /**
+     * Minimum confidence score, 0–1, for the auto-close/proposal decision.
+     */
+    confidenceThreshold: z
+      .number()
+      .min(0)
+      .max(1)
+      .optional()
+      .describe('Minimum confidence score, 0–1, for the auto-close/proposal decision.'),
+    /**
+     * Minimum qualifying false-positive count, a positive integer.
+     */
+    fpCountThreshold: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('Minimum qualifying false-positive count, a positive integer.'),
+  })
+);
+export type DetectionConfig = z.infer<typeof DetectionConfig>;
+
+/**
  * Durable per-Worker settings stored as managed template values.
  */
 export const WorkerSettings = lazySchema(() =>
@@ -298,6 +325,12 @@ export const WorkerSettings = lazySchema(() =>
      */
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
+    ),
+    /**
+     * Omitted for Workers that own no detection tuning fields. Its presence is what tells the UI to render the confidence/false-positive controls.
+     */
+    detectionConfig: DetectionConfig.optional().describe(
+      'Omitted for Workers that own no detection tuning fields. Its presence is what tells the UI to render the confidence/false-positive controls.'
     ),
   })
 );

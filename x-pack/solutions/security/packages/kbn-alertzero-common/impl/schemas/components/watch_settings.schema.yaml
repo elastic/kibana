@@ -253,6 +253,23 @@ components:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
 
+    DetectionConfig:
+      type: object
+      description: >-
+        Per-Worker numeric tuning for detection-oriented Workers, e.g. Alert Triage's auto-close
+        threshold. Optional and per-Worker opt-in — only meaningful for Workers whose autonomy
+        cards reference these fields.
+      properties:
+        confidenceThreshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Minimum confidence score, 0–1, for the auto-close/proposal decision.
+        fpCountThreshold:
+          type: integer
+          minimum: 1
+          description: Minimum qualifying false-positive count, a positive integer.
+
     WorkerSettings:
       type: object
       description: Durable per-Worker settings stored as managed template values.
@@ -269,6 +286,11 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        detectionConfig:
+          $ref: '#/components/schemas/DetectionConfig'
+          description: >-
+            Omitted for Workers that own no detection tuning fields. Its presence is what tells
+            the UI to render the confidence/false-positive controls.
 
     Worker:
       type: object

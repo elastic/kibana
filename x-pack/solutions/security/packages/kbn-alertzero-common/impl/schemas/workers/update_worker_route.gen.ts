@@ -19,6 +19,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   WatchAutonomyLevel,
   WorkerScheduleInterval,
+  DetectionConfig,
   Worker,
 } from '../components/watch_settings.gen';
 
@@ -62,6 +63,12 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
      */
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       "New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule."
+    ),
+    /**
+     * New detection tuning values for a Worker whose autonomy cards reference them. Rejected with a 400 for a Worker that owns no detection config. Merged field-by-field into the existing detectionConfig rather than replacing it wholesale.
+     */
+    detectionConfig: DetectionConfig.optional().describe(
+      'New detection tuning values for a Worker whose autonomy cards reference them. Rejected with a 400 for a Worker that owns no detection config. Merged field-by-field into the existing detectionConfig rather than replacing it wholesale.'
     ),
   })
 );

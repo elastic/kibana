@@ -317,6 +317,40 @@ describe('WorkersService', () => {
     ).resolves.toEqual({ outcome: 'conflict' });
   });
 
+  it('treats a detectionConfig-only patch as a settings write that persists', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    // Without treating detectionConfig as a settings-touching field, this patch would be silently
+    // dropped: touchesSettings would stay false and update() would fall straight through to the
+    // enabled-only branch, never calling applyPatch/install for the detectionConfig value.
+    const result = await service.update(
+      TRIAGE,
+      {
+        detectionConfig: { confidenceThreshold: 0.9, fpCountThreshold: 3 },
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    if (result.outcome !== 'updated') throw new Error('Expected detectionConfig save to succeed');
+    expect(result.response.worker.settings.detectionConfig).toEqual({
+      confidenceThreshold: 0.9,
+      fpCountThreshold: 3,
+    });
+
+    await expect(
+      service.update(TRIAGE, { detectionConfig: { confidenceThreshold: 0.5 } }, SPACE, request)
+    ).resolves.toEqual({
+      outcome: 'rejected',
+      what: 'a settings update without its revision',
+    });
+  });
+
   it('installs defaults when disabling a Worker that has no document yet', async () => {
     const harness = createPersistentHarness();
     const result = await harness.createService().update(TRIAGE, { enabled: false }, SPACE, request);

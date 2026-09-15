@@ -14,6 +14,7 @@ import {
 } from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
 import {
+  DetectionConfig,
   GetInvestigationResponse,
   GetWatchResponse,
   ListInvestigationProposalsResponse,
@@ -130,5 +131,53 @@ describe('AlertZero schema smoke tests', () => {
     const investigation = MOCK_INVESTIGATIONS[0];
     const result = GetInvestigationResponse.parse({ investigation });
     expect(result.investigation.id).toBe(investigation.id);
+  });
+
+  it('parses a live Worker settings object carrying a detectionConfig', () => {
+    const worker = Worker.parse({
+      id: 'system-security-floor-alert-triage',
+      name: 'Alert Triage',
+      watchIds: ['system-security-watch-floor'],
+      enabled: true,
+      lastRun: null,
+      state: 'ok',
+      settings: {
+        workerId: 'system-security-floor-alert-triage',
+        autonomy: 'manual',
+        detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+      },
+      settingsRevision: 0,
+    });
+
+    expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);
+    expect(worker.settings).toEqual({
+      workerId: 'system-security-floor-alert-triage',
+      autonomy: 'manual',
+      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+    });
+  });
+
+  describe('DetectionConfig', () => {
+    it.each([
+      [{}, 'empty object — both fields optional'],
+      [{ confidenceThreshold: 0 }, 'confidenceThreshold at the lower boundary'],
+      [{ confidenceThreshold: 1 }, 'confidenceThreshold at the upper boundary'],
+      [{ confidenceThreshold: 0.5 }, 'confidenceThreshold mid-range'],
+      [{ fpCountThreshold: 1 }, 'fpCountThreshold at the lower boundary'],
+      [{ confidenceThreshold: 0.85, fpCountThreshold: 10 }, 'both fields'],
+    ])('accepts %j (%s)', (value, _description) => {
+      expect(DetectionConfig.safeParse(value).success).toBe(true);
+    });
+
+    it.each([
+      [{ confidenceThreshold: -0.01 }, 'confidenceThreshold below 0'],
+      [{ confidenceThreshold: 1.01 }, 'confidenceThreshold above 1'],
+      [{ fpCountThreshold: 0 }, 'fpCountThreshold below 1'],
+      [{ fpCountThreshold: 1.5 }, 'fpCountThreshold not an integer'],
+      [{ fpCountThreshold: -5 }, 'fpCountThreshold negative'],
+      [{ confidenceThreshold: 'high' }, 'confidenceThreshold wrong type'],
+    ])('rejects %j (%s)', (value, _description) => {
+      expect(DetectionConfig.safeParse(value).success).toBe(false);
+    });
   });
 });

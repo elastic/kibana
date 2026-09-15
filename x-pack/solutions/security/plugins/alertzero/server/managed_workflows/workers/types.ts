@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { UpdateWorkerRequestBody, WorkerSettings } from '@kbn/alertzero-common';
+import type {
+  DetectionConfig,
+  UpdateWorkerRequestBody,
+  WorkerSettings,
+} from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
 export type WorkerSettingsPatch = Pick<
   UpdateWorkerRequestBody,
-  'autonomyLevel' | 'scheduleInterval'
+  'autonomyLevel' | 'scheduleInterval' | 'detectionConfig'
 >;
 
 export interface WorkerSettingsRegistration {
@@ -26,3 +30,5 @@ export interface WorkerSettingsRegistration {
   /** Return the raw projection; the registry test guards against API schema stripping. */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }
+
+export type { DetectionConfig };
