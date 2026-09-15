@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AiIndexDest } from '../../common/http_api/ai_indices';
+
+export const KI_VIEW_PREFIX = 'ai-view-';
+
+export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_PREFIX}${aiIndexId}`;
+
+const LIFECYCLE_FILTERS = [
+  'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+  'WHERE expires_at IS NULL OR expires_at > NOW()',
+  'DROP governance.*',
+];
+
+/** The retrieval view of an AI index: the current, active, unexpired KIs without governance fields. */
+export const kiViewQuery = ({ type, value }: AiIndexDest): string =>
+  (type === 'data_stream'
+    ? [
+        `FROM ${value} METADATA _id`,
+        'EVAL id = COALESCE(id, _id)',
+        'INLINE STATS latest = MAX(@timestamp) BY id',
+        'WHERE @timestamp == latest',
+        'DROP latest',
+        ...LIFECYCLE_FILTERS,
+      ]
+    : [`FROM ${value}`, ...LIFECYCLE_FILTERS]
+  ).join('\n| ');
+
+interface KiViewOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  aiIndexId: string;
+}
+
+/** Creates or replaces the view for an AI index. */
+export const putKiView = async ({
+  esClient,
+  aiIndexId,
+  dest,
+}: Omit<KiViewOptions, 'logger'> & { dest: AiIndexDest }): Promise<void> => {
+  await esClient.esql.putView({ name: kiViewName(aiIndexId), query: kiViewQuery(dest) });
+};
+
+/** Deletes the view for an AI index. A missing view is not an error. */
+export const deleteKiView = async ({
+  esClient,
+  logger,
+  aiIndexId,
+}: KiViewOptions): Promise<void> => {
+  const name = kiViewName(aiIndexId);
+  try {
+    await esClient.esql.deleteView({ name }, { ignore: [404] });
+  } catch (error) {
+    logger.warn(`Failed to delete ES|QL view '${name}' for AI index '${aiIndexId}': ${error}`);
+  }
+};
