@@ -28,7 +28,7 @@ import dedent from 'dedent';
 import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
-const memoryTypeSchema = z.enum(['memory_session', 'memory_session_fact']);
+const memoryTypeSchema = z.enum(['memory.session', 'memory.session_fact']);
 
 const rememberSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -41,7 +41,7 @@ const rememberSchema = z.object({
     .optional()
     .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
   type: memoryTypeSchema.describe(
-    'Use memory_session_fact for a granular fact discovered during a session, or memory_session for a session synthesis'
+    'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis'
   ),
   title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
   description: z
@@ -75,7 +75,11 @@ interface StoredMemoryDocument {
   tags?: string[];
   expires_at?: string;
   updated_at: string;
-  attributes?: Record<string, string | number | boolean | string[]>;
+  attributes?: {
+    memory?: {
+      session_id?: string;
+    };
+  };
   governance?: {
     lifecycle?: {
       status?: string;
@@ -106,8 +110,8 @@ export const createRememberTool = ({
   },
   description: dedent`
     Write a memory to a memory-enabled Context Engine AI index.
-    Use memory_session_fact for a granular fact discovered during a session.
-    Use memory_session for a synthesis of what was tried, what worked, and what should be done
+    Use memory.session_fact for a granular fact discovered during a session.
+    Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
     deliberately revising that memory. This tool handles session metadata server-side.
   `,
@@ -182,8 +186,8 @@ export const createRememberTool = ({
           throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
         }
         if (
-          existingHit._source.type !== 'memory_session' &&
-          existingHit._source.type !== 'memory_session_fact'
+          existingHit._source.type !== 'memory.session' &&
+          existingHit._source.type !== 'memory.session_fact'
         ) {
           throw new Error(
             `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
@@ -225,9 +229,10 @@ export const createRememberTool = ({
         updated_at: now,
         attributes: {
           ...existingDocument?.attributes,
-          session_id: conversationId,
-          session_kind: 'conversation',
-          namespace: 'agent_memory',
+          memory: {
+            ...existingDocument?.attributes?.memory,
+            session_id: conversationId,
+          },
         },
       };
 

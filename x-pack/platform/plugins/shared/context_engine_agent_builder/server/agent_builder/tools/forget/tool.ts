@@ -34,7 +34,11 @@ interface StoredMemoryDocument {
   tags?: string[];
   expires_at?: string;
   updated_at: string;
-  attributes?: Record<string, string | number | boolean | string[]>;
+  attributes?: {
+    memory?: {
+      session_id?: string;
+    };
+  };
   governance?: {
     lifecycle?: {
       status?: string;
@@ -118,8 +122,8 @@ export const createForgetTool = ({
         throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
       }
       if (
-        existingHit._source.type !== 'memory_session' &&
-        existingHit._source.type !== 'memory_session_fact'
+        existingHit._source.type !== 'memory.session' &&
+        existingHit._source.type !== 'memory.session_fact'
       ) {
         throw new Error(
           `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`

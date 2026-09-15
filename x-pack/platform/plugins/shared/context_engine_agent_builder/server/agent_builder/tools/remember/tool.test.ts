@@ -59,7 +59,7 @@ describe('remember tool', () => {
 
   const params = {
     aiIndexId: 'support',
-    type: 'memory_session_fact' as const,
+    type: 'memory.session_fact' as const,
     title: 'Duration mapping',
     description: 'duration_ms is a keyword and must be cast.',
     content: 'Use TO_DOUBLE(duration_ms) before numeric comparisons.',
@@ -144,14 +144,14 @@ describe('remember tool', () => {
         '@timestamp': expect.any(String),
         id: 'logical-memory-id',
         updated_at: expect.any(String),
-        type: 'memory_session_fact',
+        type: 'memory.session_fact',
         title: params.title,
         description: params.description,
         content: params.content,
         attributes: {
-          session_id: 'conversation-1',
-          session_kind: 'conversation',
-          namespace: 'agent_memory',
+          memory: {
+            session_id: 'conversation-1',
+          },
         },
       }),
       op_type: 'create',
@@ -228,7 +228,7 @@ describe('remember tool', () => {
             _index: 'ai-index-idx-support',
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
-              type: 'memory_session',
+              type: 'memory.session',
               title: 'Session summary',
               description: 'Summary',
               content: 'Summary',
@@ -249,7 +249,7 @@ describe('remember tool', () => {
           type: ToolResultType.error,
           data: {
             message:
-              "Failed to store memory: Memory 'session-1' has type 'memory_session' and cannot be revised as 'memory_session_fact'.",
+              "Failed to store memory: Memory 'session-1' has type 'memory.session' and cannot be revised as 'memory.session_fact'.",
           },
         },
       ],
@@ -267,7 +267,7 @@ describe('remember tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session_fact',
+              type: 'memory.session_fact',
               title: 'Old title',
               description: 'Old description',
               content: 'Old content',
@@ -304,7 +304,7 @@ describe('remember tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session_fact',
+              type: 'memory.session_fact',
               title: 'Old title',
               description: 'Old description',
               content: 'Old content',
@@ -312,9 +312,9 @@ describe('remember tool', () => {
               expires_at: '2027-01-01T00:00:00.000Z',
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {
-                session_id: 'conversation-1',
-                session_kind: 'conversation',
-                namespace: 'agent_memory',
+                memory: {
+                  session_id: 'conversation-1',
+                },
               },
             },
           },
@@ -347,9 +347,9 @@ describe('remember tool', () => {
           tags: ['existing'],
           expires_at: '2027-01-01T00:00:00.000Z',
           attributes: expect.objectContaining({
-            session_id: 'conversation-1',
-            session_kind: 'conversation',
-            namespace: 'agent_memory',
+            memory: {
+              session_id: 'conversation-1',
+            },
           }),
         }),
       })
@@ -377,7 +377,7 @@ describe('remember tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session_fact',
+              type: 'memory.session_fact',
               title: 'Old title',
               description: 'Old description',
               content: 'Old content',
@@ -407,9 +407,9 @@ describe('remember tool', () => {
           '@timestamp': '2026-09-01T00:00:00.000Z',
           id: 'memory-1',
           attributes: expect.objectContaining({
-            session_id: 'conversation-1',
-            session_kind: 'conversation',
-            namespace: 'agent_memory',
+            memory: {
+              session_id: 'conversation-1',
+            },
           }),
         }),
       })
