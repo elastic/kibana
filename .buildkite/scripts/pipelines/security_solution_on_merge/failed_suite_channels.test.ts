@@ -219,6 +219,30 @@ describe('CODEOWNERS agreement', () => {
   });
 });
 
+describe('notifier step', () => {
+  const notifierStep = () => {
+    const pipeline = parseYaml(readFileSync(PIPELINE_YML, 'utf8')) as {
+      steps: Array<
+        PipelineStep & {
+          soft_fail?: boolean;
+          retry?: { automatic: Array<{ exit_status: string | number; limit: number }> };
+        }
+      >;
+    };
+    return pipeline.steps.find((step) => step.key === NOTIFY_STEP_KEY);
+  };
+
+  it('retries only on agent loss', () => {
+    // Re-running the script on an ordinary failure could fan out duplicate Slack
+    // messages; -1 means the agent died, usually before the pipeline upload.
+    expect(notifierStep()?.retry).toEqual({ automatic: [{ exit_status: '-1', limit: 2 }] });
+  });
+
+  it('stays soft_fail so a notifier problem cannot mask the suite results', () => {
+    expect(notifierStep()?.soft_fail).toBe(true);
+  });
+});
+
 describe('pipeline resource definition', () => {
   it('keeps the build-bot Slack notifier disabled', () => {
     const yaml = readFileSync(RESOURCE_YML, 'utf8');

@@ -497,9 +497,16 @@ steps:
   - wait: ~
     continue_on_failure: true
 
-  # No automatic retry: a retry after a successful pipeline upload would fan out
-  # duplicate Slack messages. Idempotency is also enforced via buildkite meta-data.
+  # Retry on -1 (agent loss) only. A lost agent usually dies before the pipeline
+  # upload, and the buildkite meta-data guard makes the retry a no-op when it did
+  # not. Retrying other exit statuses is not safe: the script already handles its
+  # own errors and re-running it could fan out duplicate Slack messages.
   # Non-preemptible so the upload step is less likely to die mid-flight.
+  #
+  # Known gap: a failure before this script starts (pre-command setup, node
+  # startup) or a timeout produces no Slack message at all, because the build-bot
+  # notifier is disabled and this step is soft_fail. Closing that needs an
+  # independent watchdog step; tracked as follow-up.
   - command: node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
     label: ':slack: Notify owning teams of Security on-merge failures'
     key: notify_owning_teams
@@ -511,3 +518,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: false
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
