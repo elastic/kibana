@@ -51,14 +51,15 @@ function createEsqlLayerDescriptor(
       type: SOURCE_TYPES.ESQL,
       esql,
     },
-    __dataRequests: approximationApplied !== undefined
-      ? [
-          {
-            dataId: SOURCE_DATA_REQUEST_ID,
-            dataRequestMeta: { approximationApplied },
-          },
-        ]
-      : [],
+    __dataRequests:
+      approximationApplied !== undefined
+        ? [
+            {
+              dataId: SOURCE_DATA_REQUEST_ID,
+              dataRequestMeta: { approximationApplied },
+            },
+          ]
+        : [],
   } as unknown as LayerDescriptor;
 }
 
@@ -140,9 +141,7 @@ describe('initializeEsql', () => {
       const onEmitMock = jest.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
-      store.dispatch(
-        updateLayerDescriptor(createEsqlLayerDescriptor('layer1', 'FROM logs*'))
-      );
+      store.dispatch(updateLayerDescriptor(createEsqlLayerDescriptor('layer1', 'FROM logs*')));
 
       expect(onEmitMock).not.toHaveBeenCalled();
 
@@ -230,9 +229,7 @@ describe('initializeEsql', () => {
       const onEmitMock = jest.fn();
       const subscription = api.approximationApplied$.pipe(skip(1)).subscribe(onEmitMock);
 
-      store.dispatch(
-        updateLayerDescriptor(createEsqlLayerDescriptor('layer1', 'FROM logs*'))
-      );
+      store.dispatch(updateLayerDescriptor(createEsqlLayerDescriptor('layer1', 'FROM logs*')));
 
       expect(onEmitMock).toHaveBeenCalledTimes(1);
       expect(onEmitMock).toHaveBeenCalledWith(undefined);
