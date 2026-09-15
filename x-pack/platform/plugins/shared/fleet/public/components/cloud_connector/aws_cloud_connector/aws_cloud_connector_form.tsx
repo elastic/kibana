@@ -123,7 +123,9 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         iconType="rocket"
         isLoading={isGeneratingTemplate}
         isDisabled={isDisabled}
-        {...launchButtonProps}
+        onClick={'onClick' in launchButtonProps ? launchButtonProps.onClick : undefined}
+        href={'href' in launchButtonProps ? launchButtonProps.href : undefined}
+        target={'target' in launchButtonProps ? launchButtonProps.target : undefined}
       >
         <FormattedMessage
           id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
