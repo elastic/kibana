@@ -24,8 +24,11 @@ import {
   apiHasPinnedPanels,
   apiPublishesChildren,
   apiPublishesESQLQuery,
+  getViewModeSubject,
   initializeRelatedPanels,
   initializeStateApi,
+  useStateFromPublishingSubject,
+  ViewMode,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -57,6 +60,8 @@ export const getESQLControlFactory = <
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
@@ -235,6 +240,8 @@ export const getESQLControlFactory = <
       return {
         api,
         Component: () => {
+          const viewMode = useStateFromPublishingSubject(viewMode$);
+
           useEffect(() => {
             return () => {
               selections.cleanup();
@@ -253,6 +260,7 @@ export const getESQLControlFactory = <
                   hide_exists: true,
                   hide_sort: true,
                   placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+                  previewMode: viewMode === 'preview',
                 },
                 customStrings: {
                   invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
