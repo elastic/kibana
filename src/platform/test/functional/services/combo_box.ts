@@ -370,10 +370,6 @@ export class ComboBoxService extends FtrService {
       // The input may be temporarily disabled or re-rendered (e.g. an auto-save triggered by a
       // just-committed value), so re-resolve it on each attempt and verify the list is gone.
       await this.retry.try(async () => {
-        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
-        if (!isOpen) {
-          return;
-        }
         const input = await comboBoxElement.findByTagName('input');
         await input.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.missingOrFail('~comboBoxOptionsList', { timeout: 1000 });
