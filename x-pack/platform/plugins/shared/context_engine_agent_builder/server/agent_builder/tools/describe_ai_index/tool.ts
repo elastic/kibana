@@ -47,7 +47,6 @@ export const createDescribeAiIndexTool = (
   description: dedent`
     Describe one Context Engine AI Index before writing a query for it.
     Returns: what the index holds, the ES|QL target for FROM, its fields (name, type, searchable, aggregatable), document counts by type and tag, and example ES|QL queries.
-    The example queries run as-is on Elastic-managed AI Indices. For other AI Indices, change the field names to match.
     Reads only what you are allowed to read in the current space. The space comes from the request (over MCP, from the URL).
   `,
   schema: describeAiIndexSchema,

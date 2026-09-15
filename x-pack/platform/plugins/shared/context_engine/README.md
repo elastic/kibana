@@ -188,9 +188,9 @@ above, as the same user, so a tool and its route always return the same thing:
 
 | Tool                | Route                    | Result                                                                            |
 | ------------------- | ------------------------ | --------------------------------------------------------------------------------- |
-| `list_ai_indices`   | `GET …/ai_index`         | `{ id, esql_target, description, managed, assigned_to_agent? }` per listed entry  |
-| `describe_ai_index` | `GET …/{id}/_describe`   | `{ response }`, the text block describing the index                               |
-| `query_ai_indices`  | `POST …/ai_index/_query` | `{ columns, values }`                                                             |
+| `list_ai_indices`   | `GET /api/context_engine/ai_index`                | `{ id, esql_target, description, managed, assigned_to_agent? }` per listed entry  |
+| `describe_ai_index` | `GET /api/context_engine/ai_index/{id}/_describe` | `{ response }`, the text block describing the index                               |
+| `query_ai_indices`  | `POST /api/context_engine/ai_index/_query`        | `{ columns, values }`                                                             |
 
 `assigned_to_agent` only appears when an agent calls the tool during a chat. It
 says whether that agent is set up with the index. Over MCP there is no agent, so
