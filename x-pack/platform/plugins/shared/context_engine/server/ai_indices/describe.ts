@@ -60,6 +60,36 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
+const memorySection = (
+  { memory_enabled: memoryEnabled }: AiIndexHttpItem,
+  counts: KiTypeCount[],
+  target: string
+): string[] => {
+  if (!memoryEnabled) {
+    return [];
+  }
+
+  const countByType = new Map(counts.map(({ type, count }) => [type, count]));
+  return [
+    'Memory',
+    'Memory writes are enabled for this AI-index registry entry.',
+    'Available memory types',
+    `memory.session: ${countByType.get('memory.session') ?? 0}`,
+    `memory.session_fact: ${countByType.get('memory.session_fact') ?? 0}`,
+    'Use platform.context_engine.remember to write memory.',
+    'Use platform.context_engine.forget with a memory id to tombstone memory.',
+    'Recall active, unexpired memory with ES|QL:',
+    `FROM ${target}`,
+    '| WHERE type IN ("memory.session", "memory.session_fact")',
+    '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+    '| WHERE @timestamp == latest_at',
+    '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+    '  AND (expires_at IS NULL OR expires_at > NOW())',
+    '| SORT updated_at DESC',
+    '| LIMIT 10',
+  ];
+};
+
 const exampleQueriesSection = (target: string): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
   ...buildExampleQueries(target).flatMap(({ title, esql }) => ['', title, esql]),
@@ -99,6 +129,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
+    memorySection(aiIndex, kiTypeCounts, target),
     exampleQueriesSection(target),
   ]);
 };
