@@ -77,6 +77,11 @@ interface StoredMemoryDocument {
   expires_at?: string;
   updated_at: string;
   attributes?: Record<string, string | number | boolean | string[]>;
+  governance?: {
+    lifecycle?: {
+      status?: string;
+    };
+  };
 }
 
 export const createRememberTool = ({
@@ -194,6 +199,9 @@ export const createRememberTool = ({
           throw new Error(
             `Memory '${params.id}' does not belong to the current space '${spaceId}'.`
           );
+        }
+        if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+          throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
 
         existingBackingIndex = existingHit._index;

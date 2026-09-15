@@ -15,6 +15,7 @@ import { createRunAutomationTool } from './run_automation/tool';
 import { createListAiIndicesTool } from './list_ai_indices/tool';
 import { createDescribeAiIndexTool } from './describe_ai_index/tool';
 import { createQueryAiIndicesTool } from './query_ai_indices/tool';
+import { createForgetTool } from './forget/tool';
 import { createRememberTool } from './remember/tool';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -55,6 +56,13 @@ export const registerAgentBuilderTools = ({
   agentBuilder.tools.register(createQueryAiIndicesTool(aiIndexToolDeps));
   agentBuilder.tools.register(
     createRememberTool({
+      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getCoreStart,
+      getSecurityStart,
+    })
+  );
+  agentBuilder.tools.register(
+    createForgetTool({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
       getCoreStart,
       getSecurityStart,
