@@ -57,9 +57,9 @@ export const MappingEditorHeader = ({
               aria-hidden={!isAddFieldVisible}
             >
               <EuiButton
-                iconType="plusCircle"
                 size="s"
                 color="primary"
+                fill
                 onClick={onAddField}
                 data-test-subj="dataFederationMappingEditorAddField"
               >

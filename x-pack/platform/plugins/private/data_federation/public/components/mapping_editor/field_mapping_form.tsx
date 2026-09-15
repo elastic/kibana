@@ -64,8 +64,9 @@ const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: s
 const CreateButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <EuiButton
-      iconType="plusCircle"
       size="s"
+      color="primary"
+      fill
       onClick={onClick}
       data-test-subj="dataFederationMappingEditorDraftAddField"
     >
@@ -123,110 +124,118 @@ export function FieldMappingForm({
   const isDateType = value.type === DEFAULT_DATE_TYPE_VALUE;
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
-            defaultMessage: 'Field type',
-          })}
-          helpText={typeHelpText}
-          isInvalid={Boolean(errors?.type)}
-          error={errors?.type}
-          fullWidth
-        >
-          <EuiSelect
-            isInvalid={Boolean(errors?.type)}
-            fullWidth
-            options={DEFAULT_TYPE_OPTIONS}
-            value={value.type}
-            onChange={(e) => {
-              const nextType = e.target.value as '' | DatasetMappingFieldType;
-              onChange({
-                type: nextType,
-                ...(nextType === DEFAULT_DATE_TYPE_VALUE ? {} : { format: '' }),
-              });
-            }}
-            data-test-subj="dataFederationMappingEditorFieldType"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
-            defaultMessage: 'Field name',
-          })}
-          isInvalid={Boolean(errors?.name)}
-          error={errors?.name}
-          fullWidth
-        >
-          <EuiFieldText
-            isInvalid={Boolean(errors?.name)}
-            fullWidth
-            value={value.name}
-            onChange={(e) => onChange({ name: e.target.value })}
-            data-test-subj="dataFederationMappingEditorFieldName"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
-            defaultMessage: 'Source file path (optional)',
-          })}
-          helpText={i18n.translate('xpack.dataFederation.mappingEditor.physicalPathHelp', {
-            defaultMessage: 'Physical column name, if differs from name.',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            fullWidth
-            value={value.path}
-            onChange={(e) => onChange({ path: e.target.value })}
-            data-test-subj="dataFederationMappingEditorFieldPath"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        {isDateType ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-              defaultMessage: 'format (optional)',
-            })}
-            isInvalid={Boolean(errors?.format)}
-            error={errors?.format}
-            fullWidth
-          >
-            <EuiFieldText
-              isInvalid={Boolean(errors?.format)}
-              fullWidth
-              value={value.format}
-              onChange={(e) => onChange({ format: e.target.value })}
-              data-test-subj="dataFederationMappingEditorFieldFormat"
-            />
-          </EuiFormRow>
-        ) : (
-          <div aria-hidden="true" style={{ visibility: 'hidden' }}>
+        <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+          <EuiFlexItem>
             <EuiFormRow
-              label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                defaultMessage: 'format (optional)',
+              label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
+                defaultMessage: 'Field type',
+              })}
+              helpText={typeHelpText}
+              isInvalid={Boolean(errors?.type)}
+              error={errors?.type}
+              fullWidth
+            >
+              <EuiSelect
+                isInvalid={Boolean(errors?.type)}
+                fullWidth
+                options={DEFAULT_TYPE_OPTIONS}
+                value={value.type}
+                onChange={(e) => {
+                  const nextType = e.target.value as '' | DatasetMappingFieldType;
+                  onChange({
+                    type: nextType,
+                    ...(nextType === DEFAULT_DATE_TYPE_VALUE ? {} : { format: '' }),
+                  });
+                }}
+                data-test-subj="dataFederationMappingEditorFieldType"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormRow
+              label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
+                defaultMessage: 'Field name',
+              })}
+              isInvalid={Boolean(errors?.name)}
+              error={errors?.name}
+              fullWidth
+            >
+              <EuiFieldText
+                isInvalid={Boolean(errors?.name)}
+                fullWidth
+                value={value.name}
+                onChange={(e) => onChange({ name: e.target.value })}
+                data-test-subj="dataFederationMappingEditorFieldName"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormRow
+              label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
+                defaultMessage: 'Source file path (optional)',
+              })}
+              helpText={i18n.translate('xpack.dataFederation.mappingEditor.physicalPathHelp', {
+                defaultMessage: 'Physical column name, if differs from name.',
               })}
               fullWidth
             >
-              <EuiFieldText fullWidth value="" onChange={() => {}} />
+              <EuiFieldText
+                fullWidth
+                value={value.path}
+                onChange={(e) => onChange({ path: e.target.value })}
+                data-test-subj="dataFederationMappingEditorFieldPath"
+              />
             </EuiFormRow>
-          </div>
-        )}
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            {isDateType ? (
+              <EuiFormRow
+                label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
+                  defaultMessage: 'format (optional)',
+                })}
+                isInvalid={Boolean(errors?.format)}
+                error={errors?.format}
+                fullWidth
+              >
+                <EuiFieldText
+                  isInvalid={Boolean(errors?.format)}
+                  fullWidth
+                  value={value.format}
+                  onChange={(e) => onChange({ format: e.target.value })}
+                  data-test-subj="dataFederationMappingEditorFieldFormat"
+                />
+              </EuiFormRow>
+            ) : (
+              <div aria-hidden="true" style={{ visibility: 'hidden' }}>
+                <EuiFormRow
+                  label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
+                    defaultMessage: 'format (optional)',
+                  })}
+                  fullWidth
+                >
+                  <EuiFieldText fullWidth value="" onChange={() => {}} />
+                </EuiFormRow>
+              </div>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {mode === 'create' ? (
-          <CreateButton onClick={onSubmit} />
-        ) : (
-          <EditButton onClick={onSubmit} />
-        )}
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {mode === 'create' ? (
+              <CreateButton onClick={onSubmit} />
+            ) : (
+              <EditButton onClick={onSubmit} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
