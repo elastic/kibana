@@ -15,7 +15,8 @@ import type {
   SmlAutocompleteHttpResponse,
   SmlSearchHttpResponse,
 } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
-import { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
+import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
@@ -31,6 +32,35 @@ import {
   INTERNAL_AGENT_BUILDER_SML,
 } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
+
+const SML_FIXTURE_NOW = '2024-06-01T12:00:00.000Z';
+
+/** An SML document as written to the index: bookkeeping lives under the flattened `attributes`. */
+const indexedDocument = ({
+  id,
+  type,
+  title,
+  originUri,
+  content,
+}: {
+  id: string;
+  type: string;
+  title: string;
+  originUri: string;
+  content: string;
+}): SmlDocument => ({
+  type,
+  title,
+  content,
+  permissions: { kibana: { privileges: [] } },
+  attributes: {
+    id,
+    origin: { uri: originUri },
+    created_at: SML_FIXTURE_NOW,
+    updated_at: SML_FIXTURE_NOW,
+    ingestion_method: 'crawled',
+  },
+});
 
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
   let adminInteractiveCookieHeader: Record<string, string>;
@@ -56,86 +86,70 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    // Created bare — the Elasticsearch-managed `ai-index-idx-managed` template owns the mappings.
     const exists = await sysEsClient.indices.exists({ index: smlIndexName });
     if (!exists) {
-      await sysEsClient.indices.create({
-        index: smlIndexName,
-        mappings: smlElasticsearchIndexMappings,
-      });
+      await sysEsClient.indices.create({ index: smlIndexName });
     }
-
-    const now = '2024-06-01T12:00:00.000Z';
-    const baseDocument = {
-      created_at: now,
-      updated_at: now,
-      spaces: ['default'],
-      permissions: { kibana: { privileges: [] } },
-      ingestion_method: 'crawled',
-    };
 
     await sysEsClient.index({
       index: smlIndexName,
       id: searchEntryId,
-      document: {
-        ...baseDocument,
+      document: indexedDocument({
         id: searchEntryId,
         type: 'visualization',
         title: searchIndexedTitle,
-        origin: { uri: `visualization://${searchOriginId}` },
+        originUri: `visualization://${searchOriginId}`,
         content: 'pacific bluefin tuna content for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: slashTitleEntryId,
-      document: {
-        ...baseDocument,
+      document: indexedDocument({
         id: slashTitleEntryId,
         type: 'dashboard',
         title: slashTitle,
-        origin: { uri: `dashboard://${slashTitleEntryId}` },
+        originUri: `dashboard://${slashTitleEntryId}`,
         content: 'sales and marketing overview for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: longTitleEntryId,
-      document: {
-        ...baseDocument,
+      document: indexedDocument({
         id: longTitleEntryId,
         type: 'visualization',
         title: `yellowfin tuna migration patterns across the pacific ${searchRunId}`,
-        origin: { uri: `visualization://${longTitleEntryId}` },
+        originUri: `visualization://${longTitleEntryId}`,
         content: 'yellowfin long title for sml scout ranking',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: shortTitleEntryId,
-      document: {
-        ...baseDocument,
+      document: indexedDocument({
         id: shortTitleEntryId,
         type: 'visualization',
         title: `yellowfin ${searchRunId}`,
-        origin: { uri: `visualization://${shortTitleEntryId}` },
+        originUri: `visualization://${shortTitleEntryId}`,
         content: 'yellowfin short title for sml scout ranking',
-      },
+      }),
     });
 
     await sysEsClient.index({
       index: smlIndexName,
       id: capitalizedTypeEntryId,
-      document: {
-        ...baseDocument,
+      document: indexedDocument({
         id: capitalizedTypeEntryId,
         type: 'Workflow',
         title: `capitalized type entry ${searchRunId}`,
-        origin: { uri: `workflow://${capitalizedTypeEntryId}` },
+        originUri: `workflow://${capitalizedTypeEntryId}`,
         content: 'capitalized type for sml scout',
-      },
+      }),
     });
 
     await sysEsClient.indices.refresh({ index: smlIndexName });
@@ -316,23 +330,17 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       const llmProxy = await createLlmProxy(log);
       const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
 
-      const now = '2024-06-01T12:00:00.000Z';
       await sysEsClient.index({
         index: smlIndexName,
         id: entryId,
         refresh: 'wait_for',
-        document: {
+        document: indexedDocument({
           id: entryId,
           type: 'connector',
           title: indexedTitle,
-          origin: { uri: `connector://${connectorId}` },
+          originUri: `connector://${connectorId}`,
           content: `attach content for ${runId}`,
-          created_at: now,
-          updated_at: now,
-          spaces: ['default'],
-          permissions: { kibana: { privileges: [] } },
-          ingestion_method: 'crawled',
-        },
+        }),
       });
 
       await setupAgentDirectAnswer({

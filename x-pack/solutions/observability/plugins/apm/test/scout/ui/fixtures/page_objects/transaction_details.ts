@@ -38,7 +38,8 @@ export class TransactionDetailsPage {
           rangeFrom: start,
           rangeTo: end,
         }
-      )}`
+      )}`,
+      { waitUntil: 'commit' }
     );
     await waitForApmAppMenuReady(this.page);
   }
@@ -65,7 +66,8 @@ export class TransactionDetailsPage {
           kuery: '',
           serviceGroup: '',
         }
-      )}`
+      )}`,
+      { waitUntil: 'commit' }
     );
     await waitForApmAppMenuReady(this.page);
   }
@@ -79,7 +81,7 @@ export class TransactionDetailsPage {
   async removeTransactionNameFromUrlAndNavigate() {
     const url = new URL(this.page.url());
     url.searchParams.delete('transactionName');
-    await this.page.goto(url.toString());
+    await this.page.goto(url.toString(), { waitUntil: 'commit' });
     await waitForApmAppMenuReady(this.page);
   }
 
@@ -114,7 +116,8 @@ export class TransactionDetailsPage {
         transactionType: 'request',
         comparisonEnabled: 'true',
         offset: '1d',
-      })}`
+      })}`,
+      { waitUntil: 'commit' }
     );
     await this.waitForPageToLoad(this.page);
   }

@@ -208,9 +208,19 @@ export function sourceExists(index: string, sources: Set<string>) {
   const individualIndices = index.split(',').map((item) => cleanIndex(item));
   // Check if all individual indices exist in sources
   const allExist = individualIndices.every((singleIndex) => {
+    const unquoted = removeSourceNameQuotes(singleIndex);
     // First, check for exact match after removing source name quotes
-    if (sources.has(removeSourceNameQuotes(singleIndex))) {
+    if (sources.has(unquoted)) {
       return true;
+    }
+    // CPS (cross-project search): resolveIndex returns names as "project:index".
+    // A query like `FROM index` is valid when project_routing routes to a project
+    // that owns `my-index`, so also match against the local part of prefixed sources.
+    for (const src of sources) {
+      const sep = src.indexOf(':');
+      if (sep !== -1 && src.slice(sep + 1) === unquoted) {
+        return true;
+      }
     }
     // If not an exact match, perform a fuzzy search
     return Boolean(fuzzySearch(singleIndex, sources.keys()));

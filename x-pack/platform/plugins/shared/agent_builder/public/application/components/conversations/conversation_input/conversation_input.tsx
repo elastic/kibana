@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
@@ -18,6 +18,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
   useAgentId,
+  useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
@@ -27,6 +28,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useImageUpload } from './use_image_upload';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -94,6 +96,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
+  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+
   const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
@@ -105,9 +109,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
-    useConversationContext();
+  const { isReadOnly: isConversationReadOnly, isLoading: isConversationReadOnlyLoading } =
+    useConversationReadOnly();
+  const {
+    attachments,
+    upsertAttachments,
+    initialMessage,
+    autoSendInitialMessage,
+    resetInitialMessage,
+  } = useConversationContext();
   const submitMessage = useSubmitMessage();
+
+  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
+    useImageUpload({
+      addErrorToast,
+      messageEditorController,
+    });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -115,7 +132,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty ||
+    isResponseLoading ||
+    !isAgentIdValid ||
+    isAwaitingPrompt ||
+    uploadingNames.size > 0;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -147,6 +168,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
+    if (isConversationReadOnly) return;
+
     if (initialMessage && !autoSendInitialMessage && isNewConversation && !isAwaitingPrompt) {
       messageEditorController.setContent(initialMessage);
       messageEditorController.focus();
@@ -157,13 +180,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     isNewConversation,
     isAwaitingPrompt,
+    isConversationReadOnly,
     messageEditorController,
     resetInitialMessage,
   ]);
 
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
   useEffect(() => {
-    if (isAwaitingPrompt) return;
+    if (isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
       messageEditorController.focus();
     }, 200);
@@ -171,7 +195,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditorController, isAwaitingPrompt]);
+  }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -200,11 +224,21 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     onSubmit?.();
   };
 
+  if (isConversationReadOnly || isConversationReadOnlyLoading) {
+    return null;
+  }
+
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-      {visibleAttachments.length > 0 && (
+      {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} removable />
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            uploadingNames={uploadingNames}
+            removable
+            onRemoveAttachment={handleRemoveAttachment}
+            hoveredImageName={hoveredImageName}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={editorContainerStyles}>
@@ -215,6 +249,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           placeholder={placeholder}
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
+          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onAfterInput={handleAfterInput}
+          onHoveredPlaceholderChange={setHoveredImageName}
+          uploadingNames={uploadingNames}
         />
       </EuiFlexItem>
       {!isAgentDeleted && (

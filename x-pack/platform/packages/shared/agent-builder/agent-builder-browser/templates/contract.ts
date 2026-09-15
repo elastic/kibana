@@ -6,14 +6,21 @@
  */
 
 import type { ComponentType } from 'react';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { IconType } from '@elastic/eui';
+import type {
+  Conversation,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
- * Props passed to a conversation template tab's `content` component.
+ * Props shared by conversation details tabs, headers, and footers.
  */
-export interface ConversationTemplateTabRenderProps {
+export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
+  /** Whether the flyout was opened by the chat's details button rather than the public API. */
+  isOpenedFromChat: boolean;
 }
 
 /**
@@ -30,7 +37,24 @@ export interface ConversationTemplateTabDefinition {
    * mount any providers you need inside this component. The flyout can render outside any
    * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
    */
-  content: ComponentType<ConversationTemplateTabRenderProps>;
+  content: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+}
+
+export interface ConversationTemplateBriefCardRenderProps {
+  conversation: ConversationWithoutRoundsWithPermissions;
+}
+
+/** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
+export interface ConversationTemplateUIContext {
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
+  /** Opens the sidebar using the existing conversation navigation behavior. */
+  openSidebarConversation: (conversationId: string) => void;
+  /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
+  openFullscreenConversation: (options: {
+    conversationId: string;
+    agentId: string;
+  }) => Promise<void>;
 }
 
 /**
@@ -38,8 +62,21 @@ export interface ConversationTemplateTabDefinition {
  * at render time, so registration order across plugins does not matter.
  */
 export interface ConversationTemplateUIDefinition {
+  /** Localized display name for the template, shown in the conversation UI (e.g. title badge). */
+  name: string;
+  /** Optional icon shown alongside the name. */
+  icon?: IconType;
   /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
   tabs: readonly string[];
+  /** Self-contained card component; capture solution services and providers at registration. */
+  briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /** Optional flyout content; capture capabilities from the template registration context. */
+  detailsFlyout?: {
+    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
+    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
+    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+  };
 }
 
 /**
@@ -50,19 +87,22 @@ export interface ConversationTemplateUIDefinition {
  */
 export interface ConversationTemplateServiceStartContract {
   /**
-   * Register a reusable flyout tab under a tab id.
+   * Register a reusable flyout tab with a callback invoked once with Agent Builder capabilities.
    */
-  registerTab(tabId: string, definition: ConversationTemplateTabDefinition): void;
+  registerTab(
+    tabId: string,
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateTabDefinition
+  ): void;
   /**
    * Resolve a registered tab, if any.
    */
   getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
   /**
-   * Register the UI definition for a template: which tabs it shows, in which order.
+   * Register template UI with a callback invoked once with Agent Builder capabilities.
    */
   registerTemplateUIDefinition(
     templateId: string,
-    definition: ConversationTemplateUIDefinition
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateUIDefinition
   ): void;
   /**
    * Resolve the UI definition for a template, if one has been registered.

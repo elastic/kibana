@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CriteriaWithPagination, Direction, EuiTableSelectionType, Query } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  Query,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -30,8 +36,8 @@ import {
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useMemo, useState } from 'react';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../components/badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
@@ -69,6 +75,7 @@ export function StreamsTreeTable({
   selection,
   blocksActivity = false,
   activityBlockTooltip,
+  canManage,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -76,17 +83,19 @@ export function StreamsTreeTable({
   streamOnboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
   searchQuery: Query;
-  selection: EuiTableSelectionType<TableRow>;
+  selection?: EuiTableSelectionType<TableRow>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
+  canManage: boolean;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
   const {
     dependencies: {
       start: {
+        cps,
         share: {
           url: { locators },
         },
@@ -95,7 +104,7 @@ export function StreamsTreeTable({
   } = useKibana();
   const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
-  const isCpsMultiProject = useIsCpsMultiProject();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
 
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -222,6 +231,7 @@ export function StreamsTreeTable({
           selection={selection}
           loading={loading}
           data-test-subj="streamsTable"
+          // prettier-ignore
           columns={[
             {
               field: 'nameSortKey',
@@ -428,7 +438,9 @@ export function StreamsTreeTable({
                 );
               },
             },
-          ]}
+          ].filter((column) => canManage || column.field !== 'definition') as Array<
+            EuiBasicTableColumn<TableRow>
+          >}
           itemId="nameSortKey"
           items={items}
           sorting={sorting}

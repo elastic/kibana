@@ -61,5 +61,8 @@ export type { Limits, UpdateBundleLimitsOptions } from './limits';
 // Types
 export type { ThemeTag } from './types';
 
-// Re-export useful RSPack types
+// Re-export useful RSPack types and the natively-loaded runtime value.
+// Consumers needing the `rspack` runtime must use this re-export (pure-ESM
+// packages cannot be loaded by Jest's CJS registry — see rspack_runtime.ts).
+export { rspack } from './rspack_runtime';
 export type { Configuration, Stats, Compiler, RspackPluginInstance } from '@rspack/core';
