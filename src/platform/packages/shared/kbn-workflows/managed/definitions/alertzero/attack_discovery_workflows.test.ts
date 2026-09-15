@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import {
+  ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
@@ -708,5 +709,39 @@ describe('Attack Discovery worker chain', () => {
     ['worker', worker],
   ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
     expect(workflow.settings?.timeout).toBeUndefined();
+  });
+
+  // Systemic guard, not a point fix. Three separate references to the batched
+  // child's output went stale during this re-site (`title` / `alert_ids` /
+  // `summary_markdown`, then `alerts_context_count` and `status`), each failing
+  // silently: an unknown field renders empty rather than erroring, so nothing
+  // downstream notices. Enumerating what the child actually emits and checking
+  // every reference against it catches the whole class in one assertion.
+  describe('runner references to the batched generation child', () => {
+    const childYaml = ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml;
+    const child = parse(childYaml) as YamlWorkflow;
+    const runnerYaml = ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml;
+
+    const emitted = Object.keys(
+      (child.steps ?? []).find(({ name }) => name === 'emit_result')?.with ?? {}
+    );
+
+    it('the child emits a non-empty output contract', () => {
+      expect(emitted.length).toBeGreaterThan(0);
+    });
+
+    it('every steps.run_generation.output.<field> reference is a field the child emits', () => {
+      const referenced = [
+        ...new Set(
+          Array.from(
+            runnerYaml.matchAll(/steps\.run_generation\.output\.([a-zA-Z_][a-zA-Z0-9_]*)/g),
+            (match) => match[1]
+          )
+        ),
+      ];
+
+      expect(referenced.length).toBeGreaterThan(0);
+      expect(referenced.filter((field) => !emitted.includes(field))).toEqual([]);
+    });
   });
 });

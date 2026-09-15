@@ -165,11 +165,18 @@ steps:
     type: console
     if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
     with:
+      # Batch counts rather than a single `status`: the child has none, and with
+      # batching "no attacks" is genuinely ambiguous in a way it was not before.
+      # Every batch succeeding and finding nothing is a normal quiet run; batches
+      # having failed means the emptiness is unexplained. One status field could
+      # not express that difference.
       message: >-
         Attack Discovery generation produced no attacks
-        (alerts analyzed: {{ steps.run_generation.output.alerts_context_count }},
-        status: {{ steps.run_generation.output.status }}). Skipping the per-attack
-        fan-out.
+        (alerts analyzed: {{ steps.run_generation.output.alerts_analyzed }},
+        batches: {{ steps.run_generation.output.batches_succeeded }}/{{
+        steps.run_generation.output.batches_total }} succeeded, {{
+        steps.run_generation.output.batches_failed }} failed). Skipping the
+        per-attack fan-out.
 
   # Failed-review count starts at 0 so an empty generation and the first batch
   # both have a number to add to. Each batch writes the running total back here.
