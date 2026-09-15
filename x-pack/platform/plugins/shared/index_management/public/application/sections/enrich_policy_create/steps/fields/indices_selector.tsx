@@ -122,6 +122,9 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
     async (search: string) => {
       const indexPattern = isEmpty(search) ? '*' : search;
       setIsIndiciesLoading(true);
+      // Drop the previous search's options while the new query is in flight so the
+      // async ComboBox shows no stale suggestions until the filtered results arrive.
+      setIndexOptions([]);
       setIndexOptions(await getIndexOptions(indexPattern));
       setIsIndiciesLoading(false);
     },
