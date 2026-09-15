@@ -9,10 +9,51 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
+const IAC_FIELD_AVAILABILITY = {
+  stability: 'experimental' as const,
+  since: '9.6.0',
+};
+
 const IacFieldsSchema = {
-  templateSha: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
-  blueprintId: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
-  blueprintVersion: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))),
+  templateSha: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description:
+            'Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
+      })
+    )
+  ),
+  blueprintId: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description:
+            'Identifier of the template source last used for this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
+      })
+    )
+  ),
+  blueprintVersion: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 64,
+        meta: {
+          description:
+            'Version of the template source last used for this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
+      })
+    )
+  ),
 };
 
 const IacStateSchema = schema.maybe(
@@ -20,7 +61,7 @@ const IacStateSchema = schema.maybe(
     meta: {
       description:
         'Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.',
-      availability: { stability: 'experimental', since: '9.6.0' }, 
+      availability: IAC_FIELD_AVAILABILITY,
     },
   })
 );
