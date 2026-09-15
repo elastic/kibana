@@ -8,6 +8,9 @@
  */
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
+import { ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/action_isolate_host';
+import { ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID } from './actions/action_kill_process';
+import { ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID } from './actions/action_suspend_process';
 import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
@@ -41,6 +44,18 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+} from './actions/action_isolate_host';
+export {
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+} from './actions/action_kill_process';
+export {
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from './actions/action_suspend_process';
 export {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
@@ -98,4 +113,9 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
-export const ALERTZERO_ACTION_WORKFLOW_IDS = [ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID] as const;
+export const ALERTZERO_ACTION_WORKFLOW_IDS = [
+  ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+] as const;
