@@ -173,9 +173,9 @@ describe('installMlModel', () => {
       throw originalError;
     });
 
-    await expect(
-      installMlModel(ctx, esClient, soClient, logger, existingRefs)
-    ).rejects.toBe(originalError);
+    await expect(installMlModel(ctx, esClient, soClient, logger, existingRefs)).rejects.toBe(
+      originalError
+    );
   });
 
   it('should throw when a selected ML model archive entry has no buffer', async () => {

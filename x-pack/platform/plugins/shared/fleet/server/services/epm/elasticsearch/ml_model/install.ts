@@ -60,7 +60,9 @@ export const installMlModel = async (
       if (installError) return;
       if (!wantedPaths.has(entry.path)) return;
       if (!entry.buffer) {
-        installError = new FleetError(`No buffer for ML model archive entry at path: ${entry.path}`);
+        installError = new FleetError(
+          `No buffer for ML model archive entry at path: ${entry.path}`
+        );
         return;
       }
       const pathParts = entry.path.split('/');
