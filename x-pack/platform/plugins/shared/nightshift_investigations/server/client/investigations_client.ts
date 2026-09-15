@@ -11,7 +11,10 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
+import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   GetInvestigationResponse,
@@ -48,10 +51,12 @@ import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
+import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
@@ -157,19 +162,26 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
   impact: record.impact,
 });
 
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
-  ...toListInvestigationItem(record),
-  trigger_type: record.trigger_type,
-  error: record.error,
-  summary: record.summary,
-  conclusion: record.conclusion,
-  hypotheses: record.hypotheses,
-  recommendations: record.recommendations,
-  blind_spots: record.blind_spots,
-  trigger_feedback: record.trigger_feedback,
-  conversation_id: record.conversation_id,
-  impact: record.impact,
-});
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
+  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
+    record.recommendations
+  );
+  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
+
+  return {
+    ...toListInvestigationItem(record),
+    trigger_type: record.trigger_type,
+    error: record.error,
+    summary: record.summary,
+    conclusion: record.conclusion,
+    hypotheses: record.hypotheses,
+    recommendations: recommendations.success ? recommendations.data : undefined,
+    blind_spots: blindSpots.success ? blindSpots.data : undefined,
+    trigger_feedback: record.trigger_feedback,
+    conversation_id: record.conversation_id,
+    impact: record.impact,
+  };
+};
 
 const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined
@@ -239,6 +251,7 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
   isAvailable: () => Promise<boolean>;
 }
@@ -250,6 +263,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
   private readonly checkAvailability: () => Promise<boolean>;
 
@@ -260,6 +274,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
     this.checkAvailability = deps.isAvailable;
   }
@@ -329,13 +344,6 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install stays because the run
-    // below executes the *stored* workflow definition, which predates that step until the managed
-    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
-    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
-
     const workflow = await this.workflowsManagement.management.getWorkflow(
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       spaceId
@@ -348,6 +356,30 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('Investigations are not configured in this space');
     }
 
+    switch (trigger_type) {
+      case 'manual':
+        break;
+      case 'automatic': {
+        const { allowed } = await evaluateInvestigationQuota({
+          callback: this.investigationQuotaCallback,
+          logger: this.logger,
+        });
+        if (!allowed) {
+          throw new InvestigationQuotaDeniedError();
+        }
+        break;
+      }
+      default:
+        assertNever(trigger_type);
+    }
+
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install stays because the run
+    // below executes the *stored* workflow definition, which predates that step until the managed
+    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
+    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
     const inputs = {
       message: prepared.message,
       stream_names: stream_names ?? [],
@@ -356,7 +388,7 @@ export class NightshiftInvestigationsClient {
         ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
-        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        trigger_type,
         ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
@@ -376,7 +408,7 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject,
-      triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
       this.logger.warn(

@@ -16,6 +16,36 @@ export type PolicyArtifactKind =
   | 'trustedDevices'
   | 'endpointExceptions';
 
+const ARTIFACT_FORM_IDENTITY_FIELDS: Record<
+  PolicyArtifactKind,
+  { name: string; description: string }
+> = {
+  trustedApps: {
+    name: 'trustedApps-form-nameTextField',
+    description: 'trustedApps-form-descriptionField',
+  },
+  eventFilters: {
+    name: 'eventFilters-form-name-input',
+    description: 'eventFilters-form-description-input',
+  },
+  blocklists: {
+    name: 'blocklist-form-name-input',
+    description: 'blocklist-form-description-input',
+  },
+  hostIsolationExceptions: {
+    name: 'hostIsolationExceptions-form-name-input',
+    description: 'hostIsolationExceptions-form-description-input',
+  },
+  trustedDevices: {
+    name: 'trustedDevices-form-nameTextField',
+    description: 'trustedDevices-form-descriptionField',
+  },
+  endpointExceptions: {
+    name: 'endpointExceptions-form-name-input',
+    description: 'endpointExceptions-form-description-input',
+  },
+};
+
 export class PolicyArtifactsPage {
   readonly emptyUnexisting: Locator;
   readonly emptyUnassigned: Locator;
@@ -127,6 +157,12 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator(`${pagePrefix}-flyout-submitButton`).click();
   }
 
+  async fillNameAndDescription(kind: PolicyArtifactKind, name: string, description: string) {
+    const fields = ARTIFACT_FORM_IDENTITY_FIELDS[kind];
+    await this.page.testSubj.locator(fields.name).fill(name);
+    await this.page.testSubj.locator(fields.description).fill(description);
+  }
+
   async fillCreateForm(kind: PolicyArtifactKind) {
     switch (kind) {
       case 'trustedApps':
@@ -161,12 +197,11 @@ export class PolicyArtifactsPage {
   }
 
   private async fillTrustedAppsForm() {
-    await this.page.testSubj
-      .locator('trustedApps-form-nameTextField')
-      .fill('Trusted application name');
-    await this.page.testSubj
-      .locator('trustedApps-form-descriptionField')
-      .fill('This is the trusted application description');
+    await this.fillNameAndDescription(
+      'trustedApps',
+      'Trusted application name',
+      'This is the trusted application description'
+    );
     await this.page.testSubj
       .locator('trustedApps-form-conditionsBuilder-group1-entry0-field')
       .click();
@@ -179,20 +214,22 @@ export class PolicyArtifactsPage {
   }
 
   private async fillEventFiltersForm() {
-    await this.page.testSubj.locator('eventFilters-form-name-input').fill('Event filter name');
-    await this.page.testSubj
-      .locator('eventFilters-form-description-input')
-      .fill('This is the event filter description');
+    await this.fillNameAndDescription(
+      'eventFilters',
+      'Event filter name',
+      'This is the event filter description'
+    );
     await this.fillComboBox('fieldAutocompleteComboBox', '@timestamp');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
     await this.page.testSubj.locator('eventFilters-form-description-input').click();
   }
 
   private async fillBlocklistForm() {
-    await this.page.testSubj.locator('blocklist-form-name-input').fill('Blocklist name');
-    await this.page.testSubj
-      .locator('blocklist-form-description-input')
-      .fill('This is the blocklist description');
+    await this.fillNameAndDescription(
+      'blocklists',
+      'Blocklist name',
+      'This is the blocklist description'
+    );
     await this.page.testSubj.locator('blocklist-form-field-select').click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
     await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
@@ -200,22 +237,20 @@ export class PolicyArtifactsPage {
   }
 
   private async fillHostIsolationExceptionsForm() {
-    await this.page.testSubj
-      .locator('hostIsolationExceptions-form-name-input')
-      .fill('Host Isolation exception name');
-    await this.page.testSubj
-      .locator('hostIsolationExceptions-form-description-input')
-      .fill('This is the host isolation exception description');
+    await this.fillNameAndDescription(
+      'hostIsolationExceptions',
+      'Host Isolation exception name',
+      'This is the host isolation exception description'
+    );
     await this.page.testSubj.locator('hostIsolationExceptions-form-ip-input').fill('1.1.1.1');
   }
 
   private async fillTrustedDevicesForm() {
-    await this.page.testSubj
-      .locator('trustedDevices-form-nameTextField')
-      .fill('Trusted device name');
-    await this.page.testSubj
-      .locator('trustedDevices-form-descriptionField')
-      .fill('This is the trusted device description');
+    await this.fillNameAndDescription(
+      'trustedDevices',
+      'Trusted device name',
+      'This is the trusted device description'
+    );
     // OS is an EuiComboBox; field is an EuiSuperSelect. Both render options in
     // a body portal, so page-wide `getByRole('option')` can hit the wrong list.
     await this.fillComboBox('trustedDevices-form-osSelectField', 'Windows and Mac');
@@ -226,12 +261,11 @@ export class PolicyArtifactsPage {
   }
 
   private async fillEndpointExceptionsForm() {
-    await this.page.testSubj
-      .locator('endpointExceptions-form-name-input')
-      .fill('Endpoint exception name');
-    await this.page.testSubj
-      .locator('endpointExceptions-form-description-input')
-      .fill('This is the endpoint exception description');
+    await this.fillNameAndDescription(
+      'endpointExceptions',
+      'Endpoint exception name',
+      'This is the endpoint exception description'
+    );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
     await this.page.testSubj.locator('endpointExceptions-form-description-input').click();
