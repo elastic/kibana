@@ -71,6 +71,7 @@ import {
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
+  executionStartedEvents$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -188,6 +189,7 @@ const handleConversationExecution = async ({
     action,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     accessControl,
     subagentCreation,
     readOnly,
@@ -260,6 +262,7 @@ const handleConversationExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -296,6 +299,10 @@ const handleConversationExecution = async ({
         nextInput,
         author,
       })
+    : EMPTY;
+
+  const startedEvents$ = storeConversation
+    ? executionStartedEvents$({ conversation, agentEvents$ })
     : EMPTY;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
@@ -340,7 +347,13 @@ const handleConversationExecution = async ({
           )
         : EMPTY;
 
-      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+      return merge(
+        conversationIdEvent$,
+        agentEvents$,
+        startedEvents$,
+        persistenceEvents$,
+        titleAttr$
+      ).pipe(
         filter((event) => !isRoundStartedEvent(event)),
         // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
         // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
@@ -625,7 +638,8 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
+    execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -645,6 +659,7 @@ const handleStandaloneExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,

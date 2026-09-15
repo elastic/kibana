@@ -7,6 +7,7 @@
 
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
@@ -17,9 +18,14 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const TRIAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 
-/** Every Worker except Attack Discovery is alert- or event-triggered and owns no schedule. */
-const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== AD_WORKER_ID);
+const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+
+/** Every other Worker is alert- or event-triggered and owns no schedule. */
+const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => !SCHEDULED_WORKER_IDS.includes(id)
+);
 
 /** Only Alert Triage's autonomy cards reference detectionConfig at present. */
 const NO_DETECTION_CONFIG_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
@@ -134,6 +140,33 @@ describe('createWorkerSettingsRegistration', () => {
 
       expect(applied).toEqual({
         values: { settingsVersion: 1, autonomyLevel: 'assisted', scheduleInterval: '15m' },
+      });
+    });
+  });
+
+  describe('schedule interval — detection rule tuning (opted in)', () => {
+    const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+
+    it('defaults to 2h and projects it', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '2h',
+      });
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+      });
+    });
+
+    it('applies an interval patch', () => {
+      const applied = registration.applyPatch(registration.createDefaultValues(), {
+        scheduleInterval: '6h',
+      });
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '6h' },
       });
     });
   });

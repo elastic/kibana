@@ -36,6 +36,9 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
+import { PendingProposalsPanel } from '../../components/pending_proposals';
+import { usePendingProposals } from '../../hooks/use_proposals_api';
+import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -61,6 +64,17 @@ export const ConversationsPage: React.FC = () => {
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+
+  // The header's count comes from the proposals list API, which already returns a
+  // `track_total_hits` total for the same set the queue acts on — not summed in
+  // the browser, and deliberately independent of the trend chart's own query, so
+  // a chart failure can neither zero the count nor hold the header in loading.
+  const {
+    data: pendingProposalsData,
+    isLoading: isPendingProposalsLoading,
+    error: pendingProposalsError,
+  } = usePendingProposals();
+  const proposalCount = pendingProposalsData?.total ?? 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -199,9 +213,17 @@ export const ConversationsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
-            isQueueEmpty={sortedConversations.length === 0}
-            eventCount={filteredQueueItems.length}
+            // Both queries the header speaks for — the conversation queue and
+            // the proposal count — so settling one while the other is in flight
+            // would flash a title the next render contradicts.
+            isLoading={isLoading || isPendingProposalsLoading}
+            hasError={Boolean(pendingProposalsError)}
+            isQueueEmpty={sortedConversations.length === 0 && proposalCount === 0}
+            eventCount={proposalCount}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ProposalsTrendChartRow />
         </EuiFlexItem>
         <EuiFlexItem>
           <BlastRadius
@@ -209,6 +231,12 @@ export const ConversationsPage: React.FC = () => {
             surfaceFilter={surfaceFilter}
             onSurfaceFilterChange={setSurfaceFilter}
           />
+        </EuiFlexItem>
+
+        {/* Durable proposals from the investigation proposals API. Hidden when
+            empty so the queue below is unaffected when nothing is pending. */}
+        <EuiFlexItem grow={false}>
+          <PendingProposalsPanel hideWhenEmpty />
         </EuiFlexItem>
 
         {isLoading ? (
