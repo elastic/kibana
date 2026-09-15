@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getEsqlDataView } from '@kbn/discover-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  getESQLTimeField,
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -34,6 +39,7 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import type { DiscoverServices } from '../../../../../build_services';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
@@ -66,8 +72,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
-    const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+    const { dataStateContainer$, customizationService$, scopedEbtManager$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
 
     /**
      * New tab initialization with the restored data if available
@@ -180,14 +188,20 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      */
 
     let dataView: DataView;
+    let esqlSource: EsqlSource | undefined;
+    let updateDataSource = true;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      // Regardless of what was requested, we always use ad hoc data views for ES|QL
-      dataView = await getEsqlDataView(
-        initialQuery,
-        persistedTabDataView ?? currentDataView$.getValue(),
-        services
-      );
+      ({ esqlSource, dataView } = await initializeEsqlDataSource(
+        initialQuery.esql,
+        services,
+        getState().savedDataViews,
+        runtimeStateManager.adHocDataViews$.getValue()
+      ));
+      // Set currentDataSource$ to the real EsqlSource before setDataView runs,
+      // and tell setDataView not to overwrite it with DataViewSource(dataView).
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
+      updateDataSource = false;
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -204,14 +218,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView = result.dataView;
     }
 
-    dispatch(setDataView({ tabId, dataView }));
+    dispatch(setDataView({ tabId, dataView, updateDataSource }));
 
     if (!dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
@@ -348,3 +362,56 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     return { showNoDataPage: false };
   }
 );
+
+async function initializeEsqlDataSource(
+  esql: string,
+  services: DiscoverServices,
+  savedDataViews: DataViewListItem[],
+  adHocDataViews: DataView[]
+): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
+  const projectRouting =
+    getProjectRoutingFromEsqlQuery(esql) ?? services.cps?.cpsManager?.getProjectRouting();
+  const esqlSource = await EsqlSource.create({
+    query: esql,
+    resultColumns: [],
+    timeFieldName: await getESQLTimeField({ query: esql, http: services.http, projectRouting }),
+    projectRouting,
+  });
+  services.dataSourceService.registerEsqlSource(esqlSource);
+  // Register in the DataViews cache for filter pill backward compat only — this synthetic DataView
+  // must never flow into currentDataView$ or Redux state.
+  await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+
+  // Resolve the real DataView for currentDataView$ — look up by index pattern title,
+  // then fall back to the default DataView. currentDataView$ must never hold a synthetic DataView.
+  const indexPattern = getIndexPatternFromESQLQuery(esql);
+  let dataView: DataView | null = null;
+
+  const savedMatch = indexPattern
+    ? savedDataViews.find((dv) => dv.title === indexPattern)
+    : undefined;
+  if (savedMatch?.id) {
+    try {
+      dataView = await services.dataViews.get(savedMatch.id);
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  if (!dataView && indexPattern) {
+    dataView = adHocDataViews.find((dv) => dv.title === indexPattern) ?? null;
+  }
+
+  if (!dataView) {
+    try {
+      dataView = await services.dataViews.getDefaultDataView({
+        displayErrors: false,
+        refreshFields: false,
+      });
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  return { esqlSource, dataView: dataView! };
+}

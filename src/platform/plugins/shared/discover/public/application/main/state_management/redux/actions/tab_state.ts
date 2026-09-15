@@ -441,7 +441,11 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
+  function transitionFromESQLToDataViewThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
     // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
       internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({

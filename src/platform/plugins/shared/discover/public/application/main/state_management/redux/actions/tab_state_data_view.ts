@@ -15,6 +15,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DataViewSource } from '@kbn/data-source';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -40,17 +41,23 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView; updateDataSource?: boolean }>]
 > =
-  ({ tabId, dataView }) =>
+  ({ tabId, dataView, updateDataSource = true }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
 
     if (dataView.id !== currentDataView$.getValue()?.id) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);
+    if (updateDataSource) {
+      currentDataSource$.next(new DataViewSource(dataView));
+    }
   };
 
 /**
