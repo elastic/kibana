@@ -46,6 +46,14 @@ describe('hasActiveUserActivityFilter', () => {
   it('returns false when authors is an empty array', () => {
     expect(hasActiveUserActivityFilter({ ...baseParams, authors: [] })).toBe(false);
   });
+
+  it('returns true when a source filter is applied', () => {
+    expect(hasActiveUserActivityFilter({ ...baseParams, sources: ['agent'] })).toBe(true);
+  });
+
+  it('returns false when sources is an empty array', () => {
+    expect(hasActiveUserActivityFilter({ ...baseParams, sources: [] })).toBe(false);
+  });
 });
 
 describe('hasSearchOrAuthorFilter', () => {
@@ -71,5 +79,13 @@ describe('hasSearchOrAuthorFilter', () => {
 
   it('returns true when both search and authors are set', () => {
     expect(hasSearchOrAuthorFilter({ search: 'hello', authors: ['elastic'] })).toBe(true);
+  });
+
+  it('returns true when sources has at least one entry', () => {
+    expect(hasSearchOrAuthorFilter({ sources: ['agent'] })).toBe(true);
+  });
+
+  it('returns false when sources is an empty array', () => {
+    expect(hasSearchOrAuthorFilter({ sources: [] })).toBe(false);
   });
 });

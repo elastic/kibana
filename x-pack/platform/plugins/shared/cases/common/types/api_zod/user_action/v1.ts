@@ -11,10 +11,13 @@ import {
   MAX_USER_ACTION_SEARCH_LENGTH,
   MAX_USER_ACTION_AUTHOR_LENGTH,
   MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema_zod';
 import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypes } from '../../domain/user_action/source/v1';
 
 const UserActionAdditionalFindRequestFilterTypes = {
   action: 'action',
@@ -62,6 +65,20 @@ export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.e
     fieldName: 'search',
     min: 1,
     max: MAX_USER_ACTION_SEARCH_LENGTH,
+  }).optional(),
+  sources: limitedArraySchema({
+    codec: z.enum([
+      ActionSourceTypes.agent,
+      ActionSourceTypes.workflow,
+      ActionSourceTypes.rule,
+      ActionSourceTypes.attack,
+      ActionSourceTypes.api,
+      ActionSourceTypes.user,
+      NO_ACTION_SOURCE_FILTERING_KEYWORD,
+    ]),
+    fieldName: 'sources',
+    min: 0,
+    max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
   }).optional(),
 });
 

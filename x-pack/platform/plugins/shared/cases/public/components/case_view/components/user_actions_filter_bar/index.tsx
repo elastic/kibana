@@ -24,6 +24,7 @@ import type {
 import { hasActiveUserActivityFilter } from '../../../user_actions_activity_bar/utils';
 import { TypeFilter } from './type_filter';
 import { AuthorFilter } from './author_filter';
+import { SourceFilter } from './source_filter';
 import { SortFilter } from './sort_filter';
 import * as i18n from './translations';
 
@@ -38,20 +39,13 @@ interface UserActionsFilterBarProps {
 }
 
 /**
- * Search + filter toolbar for the redesigned case activity tab. Mirrors the
- * layout of the attachments filter bar (`CaseViewAttachments`): a search
- * input followed by an `EuiFilterGroup` with type / author / sort filters,
- * and an optional "Clear filters" affordance below the toolbar. Unlike the
- * attachments filter, search and filtering here are performed server-side by
- * the user_actions `_find` endpoint.
+ * Activity search and filters. Filtering runs on the user_actions `_find` API.
  */
 export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
   ({ caseId, params, userActionsStats, isLoading = false, onParamsChange, rightAction }) => {
     const [searchInputValue, setSearchInputValue] = useState(params.search ?? '');
 
-    // Derived from the applied `params`, not `searchInputValue`, so "Clear
-    // filters" can't fall out of sync with what's actually being filtered on
-    // (e.g. while backspacing an applied search term without blurring yet).
+    // Applied params, not the in-progress search input.
     const hasActiveFilter = hasActiveUserActivityFilter(params);
 
     const handleTypeChange = useCallback(
@@ -64,6 +58,13 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
     const handleAuthorsChange = useCallback(
       (authors: string[]) => {
         onParamsChange({ ...params, authors: authors.length ? authors : undefined });
+      },
+      [params, onParamsChange]
+    );
+
+    const handleSourcesChange = useCallback(
+      (sources: string[]) => {
+        onParamsChange({ ...params, sources: sources.length ? sources : undefined });
       },
       [params, onParamsChange]
     );
@@ -82,10 +83,7 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
       [params, onParamsChange]
     );
 
-    // Clearing the input via backspace and then leaving the field (without
-    // pressing Enter or clicking the field's own clear button) should still
-    // apply the now-empty search, otherwise the last applied search term
-    // stays active even though the input looks empty.
+    // Empty blur still clears an applied search. Enter and the field clear already do.
     const handleSearchBlur = useCallback(() => {
       if (!searchInputValue.trim() && params.search) {
         onParamsChange({ ...params, search: undefined });
@@ -94,7 +92,13 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
 
     const handleClearFilters = useCallback(() => {
       setSearchInputValue('');
-      onParamsChange({ ...params, type: 'all', authors: undefined, search: undefined });
+      onParamsChange({
+        ...params,
+        type: 'all',
+        authors: undefined,
+        sources: undefined,
+        search: undefined,
+      });
     }, [params, onParamsChange]);
 
     return (
@@ -123,6 +127,11 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
                 caseId={caseId}
                 authors={params.authors}
                 onAuthorsChange={handleAuthorsChange}
+                isLoading={isLoading}
+              />
+              <SourceFilter
+                sources={params.sources}
+                onSourcesChange={handleSourcesChange}
                 isLoading={isLoading}
               />
               <SortFilter
