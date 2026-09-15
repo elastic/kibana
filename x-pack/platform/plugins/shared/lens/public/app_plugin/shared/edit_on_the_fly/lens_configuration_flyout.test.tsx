@@ -459,6 +459,61 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
+  // Suggestions are single-layer: applying one drops the other layers
+  // (annotations, reference lines), so the panel is hidden for multi-layer
+  // ES|QL charts edited via layer tabs.
+  it('should not display the suggestions for a multi-layer ES|QL chart', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    getLayerIdsMock.mockReturnValue(['layer1', 'layer2']);
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
+      expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+    }
+  });
+
+  // Hidden layers (e.g. the metric trendline) do not render as tabs and must
+  // not hide the suggestions panel.
+  it('should display the suggestions for an ES|QL chart with an extra hidden layer', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    const getConfigurationMock = jest.mocked(visualizationMap.testVis.getConfiguration);
+    const originalGetConfiguration = getConfigurationMock.getMockImplementation();
+    getLayerIdsMock.mockReturnValue(['layer1', 'trendline']);
+    getConfigurationMock.mockImplementation((props) => ({
+      ...originalGetConfiguration!(props),
+      hidden: props.layerId === 'trendline',
+    }));
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+      getConfigurationMock.mockImplementation(originalGetConfiguration!);
+    }
+  });
+
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
