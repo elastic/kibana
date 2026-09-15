@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { buildCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 
@@ -23,13 +23,25 @@ jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
 
 describe('ObservableActionsPopoverButton', () => {
+  let user: UserEvent;
+
   const addObservable = jest.fn().mockResolvedValue({});
   const deleteObservable = jest.fn().mockResolvedValue({});
 
   const caseData: CaseUI = { ...mockCase };
   const observable = { id: '05041f40-ac9f-4192-b367-7e6a5dafcee5' } as Observable;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+
     jest
       .mocked(usePostObservable)
       .mockReturnValue({ mutateAsync: addObservable, isLoading: false } as unknown as ReturnType<
@@ -58,7 +70,7 @@ describe('ObservableActionsPopoverButton', () => {
       <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
     );
 
-    await userEvent.click(
+    await user.click(
       await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
     );
 
@@ -75,13 +87,11 @@ describe('ObservableActionsPopoverButton', () => {
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
-      await userEvent.click(
+      await user.click(
         await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-observables-edit-button'), {
-        pointerEventsCheck: 0,
-      });
+      await user.click(await screen.findByTestId('cases-observables-edit-button'));
 
       expect(await screen.findByTestId('case-observables-edit-modal')).toBeInTheDocument();
     });
@@ -93,13 +103,11 @@ describe('ObservableActionsPopoverButton', () => {
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
-      await userEvent.click(
+      await user.click(
         await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-observables-delete-button'), {
-        pointerEventsCheck: 0,
-      });
+      await user.click(await screen.findByTestId('cases-observables-delete-button'));
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
@@ -109,17 +117,15 @@ describe('ObservableActionsPopoverButton', () => {
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
-      await userEvent.click(
+      await user.click(
         await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-observables-delete-button'), {
-        pointerEventsCheck: 0,
-      });
+      await user.click(await screen.findByTestId('cases-observables-delete-button'));
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+      await user.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(deleteObservable).toHaveBeenCalledTimes(1);
@@ -132,7 +138,7 @@ describe('ObservableActionsPopoverButton', () => {
         { wrapperProps: { permissions: buildCasesPermissions({ update: false }) } }
       );
 
-      await userEvent.click(
+      await user.click(
         await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
       );
 
