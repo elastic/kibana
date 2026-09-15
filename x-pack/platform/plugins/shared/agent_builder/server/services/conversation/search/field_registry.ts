@@ -8,12 +8,11 @@
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { ConversationSearchFilterField } from '@kbn/agent-builder-common';
 import {
+  CONVERSATION_METADATA_KEY_MAX_LENGTH,
   CONVERSATION_SEARCH_FILTER_FIELDS,
   CONVERSATION_SEARCH_METADATA_FIELD_PREFIX,
 } from '@kbn/agent-builder-common';
 import { conversationIndexName } from '../client/storage';
-
-export const METADATA_KEY_MAX_LENGTH = 256;
 
 interface ConversationFilterFieldDefinition {
   path: string;
@@ -79,7 +78,7 @@ export const resolveFilterField = (apiFieldName: string): ResolvedFilterField | 
   }
 
   const key = apiFieldName.slice(CONVERSATION_SEARCH_METADATA_FIELD_PREFIX.length + 1);
-  if (key.length === 0 || key.length > METADATA_KEY_MAX_LENGTH || hasWildcard(key)) {
+  if (key.length === 0 || key.length > CONVERSATION_METADATA_KEY_MAX_LENGTH || hasWildcard(key)) {
     return undefined;
   }
 

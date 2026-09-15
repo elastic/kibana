@@ -199,6 +199,7 @@ export {
   DEFAULT_CONVERSATION_TITLE,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_METADATA_KEY_MAX_LENGTH,
   type ConversationRound,
   type ConversationRoundFeedback,
   type FeedbackChipId,
