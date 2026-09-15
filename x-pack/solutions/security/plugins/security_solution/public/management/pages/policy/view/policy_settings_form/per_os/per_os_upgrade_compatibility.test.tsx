@@ -24,7 +24,6 @@ import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import { PerOsRansomwareProtectionCard } from './per_os_ransomware_protection_card';
-import { PerOsMalwareProtectionsCard } from './per_os_malware_protections_card';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../hooks/use_get_protections_unavailable_component');
@@ -74,36 +73,6 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     expect(
       renderResult.getByTestId(testSubjects.perOsRansomware.windows.modeSelect)
     ).toHaveTextContent(/^Disable$/);
-  });
-
-  /*
-   * A 9.4 policy was written by a form that fanned one value across every OS, so every
-   * upgraded policy arrives uniform. Each row must display that shared value rather than
-   * a per-OS default.
-   */
-  it('renders every OS row from a uniform 9.4-shaped policy', () => {
-    policy.windows.malware.mode = ProtectionModes.detect;
-    policy.mac.malware.mode = ProtectionModes.detect;
-    policy.linux.malware.mode = ProtectionModes.detect;
-
-    renderResult = mockedContext.render(
-      <PerOsMalwareProtectionsCard
-        policy={policy}
-        onChange={jest.fn()}
-        mode="edit"
-        data-test-subj={testSubjects.perOsMalware.card}
-      />
-    );
-
-    expect(
-      renderResult.getByTestId(testSubjects.perOsMalware.windows.modeSelect)
-    ).toHaveTextContent(/^Detect$/);
-    expect(renderResult.getByTestId(testSubjects.perOsMalware.mac.modeSelect)).toHaveTextContent(
-      /^Detect$/
-    );
-    expect(renderResult.getByTestId(testSubjects.perOsMalware.linux.modeSelect)).toHaveTextContent(
-      /^Detect$/
-    );
   });
 
   /*

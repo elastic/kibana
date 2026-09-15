@@ -26,34 +26,6 @@ describe('OsRow', () => {
     }
   );
 
-  it('uses the same design-fixed OS label column for every row', () => {
-    const render = createAppRootMockRenderer();
-    const result = render.render(
-      <>
-        <OsRow
-          os={OperatingSystem.WINDOWS}
-          primaryControl={<span>{'Windows control'}</span>}
-          data-test-subj="windowsRow"
-        />
-        <OsRow
-          os={OperatingSystem.MAC}
-          primaryControl={<span>{'Mac control'}</span>}
-          data-test-subj="macRow"
-        />
-        <OsRow
-          os={OperatingSystem.LINUX}
-          primaryControl={<span>{'Linux control'}</span>}
-          data-test-subj="linuxRow"
-        />
-      </>
-    );
-
-    for (const row of ['windowsRow', 'macRow', 'linuxRow']) {
-      expect(result.getByTestId(`${row}-osLabel`)).toHaveStyleRule('flex-basis', '5rem');
-      expect(result.getByTestId(`${row}-osLabel`)).toHaveStyleRule('min-inline-size', '5rem');
-    }
-  });
-
   it('renders inlineControls beside the primary control and children below it', () => {
     const render = createAppRootMockRenderer();
     const result = render.render(

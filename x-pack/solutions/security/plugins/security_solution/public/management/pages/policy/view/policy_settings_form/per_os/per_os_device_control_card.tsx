@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
@@ -155,23 +156,25 @@ const PerOsDeviceControlMasterToggle = ({
   const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
     (event) => {
       const enabled = event.target.checked;
-      let updatedPolicy = policy;
+      const updatedPolicy = cloneDeep(policy);
 
       for (const os of DEVICE_CONTROL_OS_VALUES) {
-        const accessor = createDeviceControlPolicyAccessor(updatedPolicy, os);
-        updatedPolicy = accessor.update((currentOsPolicy) => {
-          currentOsPolicy.device_control = {
-            enabled,
-            usb_storage: enabled
-              ? DeviceControlAccessLevelEnum.deny_all
-              : DeviceControlAccessLevelEnum.audit,
-          };
-          currentOsPolicy.popup.device_control ??= {
-            enabled,
-            message: DefaultPolicyDeviceNotificationMessage,
-          };
-          currentOsPolicy.popup.device_control.enabled = enabled;
-        });
+        const osPolicy = updatedPolicy[os];
+
+        osPolicy.device_control = {
+          enabled,
+          usb_storage: enabled
+            ? DeviceControlAccessLevelEnum.deny_all
+            : DeviceControlAccessLevelEnum.audit,
+        };
+        // Seed the shared default message when the branch is missing entirely, matching the
+        // notify-user checkbox handler. The legacy master switch seeded '' here instead, which
+        // disagreed with its own notify handler.
+        osPolicy.popup.device_control ??= {
+          enabled,
+          message: DefaultPolicyDeviceNotificationMessage,
+        };
+        osPolicy.popup.device_control.enabled = enabled;
       }
 
       onChange({ isValid: true, updatedPolicy });

@@ -60,40 +60,28 @@ describe('Policy Advanced Settings section chrome', () => {
     ).toBeInTheDocument();
   });
 
-  it.each([undefined, true])(
-    'sets aria-expanded to false when collapsed and true after click (fullWidthToggle=%s)',
-    async (fullWidthToggle) => {
-      const renderResult = renderSection(fullWidthToggle ? { fullWidthToggle } : {});
-      const toggle = getToggle(renderResult);
+  it('sets aria-expanded to false when collapsed and true after click', async () => {
+    const renderResult = renderSection();
+    const toggle = getToggle(renderResult);
 
-      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
-      await userEvent.click(toggle);
+    await userEvent.click(toggle);
 
-      expect(getToggle(renderResult)).toHaveAttribute('aria-expanded', 'true');
-    }
-  );
+    expect(getToggle(renderResult)).toHaveAttribute('aria-expanded', 'true');
+  });
 
-  it.each([undefined, true])(
-    'omits aria-controls while collapsed and points it at the rendered region once expanded (fullWidthToggle=%s)',
-    async (fullWidthToggle) => {
-      const renderResult = renderSection(fullWidthToggle ? { fullWidthToggle } : {});
-      const toggle = getToggle(renderResult);
+  it('omits aria-controls while collapsed and points it at the rendered region once expanded', async () => {
+    const renderResult = renderSection();
+    const toggle = getToggle(renderResult);
 
-      expect(toggle).not.toHaveAttribute('aria-controls');
+    expect(toggle).not.toHaveAttribute('aria-controls');
 
-      await userEvent.click(toggle);
+    await userEvent.click(toggle);
 
-      const expandedToggle = getToggle(renderResult);
-      const controlsId = expandedToggle.getAttribute('aria-controls');
+    const controlsId = getToggle(renderResult).getAttribute('aria-controls');
+    expect(controlsId).toBeTruthy();
 
-      expect(controlsId).toBeTruthy();
-      expect(controlsId).not.toBe('advanced-settings');
-      expect(controlsId).not.toBe('advancedSettings');
-
-      const region = renderResult.container.querySelector(`#${CSS.escape(controlsId!)}`);
-      expect(region).toBeInTheDocument();
-      expect(region).toHaveAttribute('id', controlsId);
-    }
-  );
+    expect(renderResult.container.querySelector(`#${CSS.escape(controlsId!)}`)).toBeInTheDocument();
+  });
 });

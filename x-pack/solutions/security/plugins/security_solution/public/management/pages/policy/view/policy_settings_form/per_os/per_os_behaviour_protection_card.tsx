@@ -144,8 +144,11 @@ const PerOsBehaviourProtectionRow = <OS extends BehaviorProtectionOSes>({
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.behavior_protection.mode = nextMode;
-        // Legacy parity (detect_prevent_protection_level.tsx): selecting an active mode syncs the
-        // host notification. `off` is left untouched so a Disabled row preserves its stored values.
+        // Selecting an active mode syncs the host notification, as the legacy Detect/Prevent
+        // radios did (detect_prevent_protection_level.tsx). `off` has no legacy counterpart —
+        // it was only reachable through the master toggle, which still clears popup.enabled for
+        // every OS. A row disabled on its own keeps its stored notification values so
+        // re-enabling it restores them.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
           currentOsPolicy.popup.behavior_protection.enabled = nextMode === ProtectionModes.prevent;
         }

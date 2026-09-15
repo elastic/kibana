@@ -84,6 +84,38 @@ describe('PerOsPolicySettingsForm', () => {
     expect(renderResult.getByTestId(testSubjSelector)).toBeInTheDocument();
   });
 
+  describe('and when policy protections are not available', () => {
+    beforeEach(() => {
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
+    });
+
+    it.each([
+      ['malware', testSubj.perOsMalware.card],
+      ['malicious behaviour', testSubj.perOsBehaviour.card],
+      ['antivirus registration', testSubj.perOsAntivirusRegistration.card],
+      ['ransomware', testSubj.perOsRansomware.card],
+      ['memory', testSubj.perOsMemory.card],
+      ['attack surface', testSubj.perOsAttackSurface.card],
+    ])('hides the %s card', (_, testSubjSelector) => {
+      render();
+
+      expect(renderResult.queryByTestId(testSubjSelector)).not.toBeInTheDocument();
+    });
+
+    it('shows the upsell and keeps the non-protection cards', () => {
+      // The protection cards sit in two conditional blocks with Antivirus solution between
+      // them, so a mistake in that split would take Event collection or the advanced
+      // settings down with the protections.
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.perOsEventCollection.card)).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.advancedSection.container)).toBeInTheDocument();
+    });
+  });
+
   describe('antivirus-registration sync proxy', () => {
     const changeWindowsMalwareMode = async (optionName: RegExp) => {
       await userEvent.click(renderResult.getByTestId(testSubj.perOsMalware.windows.modeSelect));

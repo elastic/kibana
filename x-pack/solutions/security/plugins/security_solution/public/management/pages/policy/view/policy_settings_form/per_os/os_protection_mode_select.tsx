@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
@@ -54,31 +54,22 @@ export interface OsProtectionModeSelectProps {
 }
 
 export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
-  ({ mode, onModeChange, disabled, 'data-test-subj': dataTestSubj }) => {
-    const handleChange = useCallback(
-      (selectedMode: ProtectionModes) => {
-        onModeChange(selectedMode);
-      },
-      [onModeChange]
-    );
-
-    return (
-      <EuiFlexItem
-        grow={false}
-        data-test-subj={dataTestSubj ? `${dataTestSubj}-fixedWidth` : undefined}
-        css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
-      >
-        <EuiSuperSelect<ProtectionModes>
-          options={PROTECTION_MODE_OPTIONS}
-          valueOfSelected={mode}
-          onChange={handleChange}
-          disabled={disabled}
-          fullWidth={true}
-          data-test-subj={dataTestSubj}
-          aria-label={PROTECTION_MODE_SELECT_ARIA_LABEL}
-        />
-      </EuiFlexItem>
-    );
-  }
+  ({ mode, onModeChange, disabled, 'data-test-subj': dataTestSubj }) => (
+    <EuiFlexItem
+      grow={false}
+      data-test-subj={dataTestSubj ? `${dataTestSubj}-fixedWidth` : undefined}
+      css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
+    >
+      <EuiSuperSelect<ProtectionModes>
+        options={PROTECTION_MODE_OPTIONS}
+        valueOfSelected={mode}
+        onChange={onModeChange}
+        disabled={disabled}
+        fullWidth={true}
+        data-test-subj={dataTestSubj}
+        aria-label={PROTECTION_MODE_SELECT_ARIA_LABEL}
+      />
+    </EuiFlexItem>
+  )
 );
 OsProtectionModeSelect.displayName = 'OsProtectionModeSelect';

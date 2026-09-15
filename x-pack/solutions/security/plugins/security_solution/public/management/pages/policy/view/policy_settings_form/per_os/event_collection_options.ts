@@ -176,7 +176,6 @@ export const LINUX_SUPPLEMENTAL_EVENT_OPTIONS: ReadonlyArray<
   PerOsSupplementalEventFormOption<OperatingSystem.LINUX>
 > = [
   {
-    id: 'sessionDataSection',
     // The mock shows no visible heading or paragraph here — the explanation lives in the
     // tooltip beside the switch. Same i18n ID and same default text, rendered somewhere else.
     tooltipText: i18n.translate(
