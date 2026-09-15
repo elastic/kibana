@@ -78,12 +78,14 @@ const compareCustomPackageVersion = (
 const hasAutoImportIntegration = (
   packageName: string,
   autoImportIntegrations: AutoImportIntegrationName[]
-): boolean =>
-  autoImportIntegrations.some(
+): boolean => {
+  const normalizedName = normalizeTitleName(packageName);
+  return autoImportIntegrations.some(
     (integration) =>
-      integration.integrationId === packageName ||
-      normalizeTitleName(integration.title) === packageName
+      integration.integrationId === normalizedName ||
+      normalizeTitleName(integration.title) === normalizedName
   );
+};
 
 export const evaluateUploadPackage = (
   packageName: string,

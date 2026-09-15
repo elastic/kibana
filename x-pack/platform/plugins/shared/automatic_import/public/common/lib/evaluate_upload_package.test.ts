@@ -201,6 +201,31 @@ describe('evaluateUploadPackage', () => {
       }
     );
   });
+
+  it('matches an Automatic Import integration even when the zip name has different casing', () => {
+    expect(
+      evaluateUploadPackage(
+        'Nginx_Logs',
+        '1.0.0',
+        [],
+        [{ integrationId: 'nginx_logs', title: 'Nginx Logs' }]
+      )
+    ).toEqual({
+      kind: 'error',
+      reason: 'automatic_import',
+      packageName: 'Nginx_Logs',
+    });
+  });
+
+  it('treats a custom install_source as a duplicate', () => {
+    expect(
+      evaluateUploadPackage('mako', '2.0.0', [uploadedPackage('mako', '1.0.0', 'custom')], [])
+    ).toEqual({
+      kind: 'error',
+      reason: 'duplicate',
+      packageName: 'mako',
+    });
+  });
 });
 
 describe('evaluateUploadedZipPackage', () => {
@@ -247,5 +272,30 @@ describe('evaluateUploadedZipPackage', () => {
     await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).resolves.toEqual({
       kind: 'ok',
     });
+  });
+
+  it('rejects when getInstalledPackages returns a 403', async () => {
+    mockGetInstalledPackages.mockRejectedValue({ statusCode: 403, message: 'Forbidden' });
+
+    await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).rejects.toEqual({
+      statusCode: 403,
+      message: 'Forbidden',
+    });
+  });
+
+  it('rejects with an AbortError when the request is cancelled', async () => {
+    const abortError = new DOMException('The operation was aborted.', 'AbortError');
+    mockGetInstalledPackages.mockRejectedValue(abortError);
+
+    await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).rejects.toBe(abortError);
+  });
+
+  it('rejects when one API call succeeds but the other fails', async () => {
+    mockGetInstalledPackages.mockResolvedValue({ items: [] });
+    mockGetAllIntegrations.mockRejectedValue(new Error('network error'));
+
+    await expect(evaluateUploadedZipPackage('mako', '1.0.0', deps)).rejects.toThrow(
+      'network error'
+    );
   });
 });

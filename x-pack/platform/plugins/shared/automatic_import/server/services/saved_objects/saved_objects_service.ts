@@ -186,6 +186,7 @@ export class AutomaticImportSavedObjectService {
       const integrationsResponse: SavedObjectsFindResponse<IntegrationAttributes> =
         await this.savedObjectsClient.find<IntegrationAttributes>({
           type: INTEGRATION_SAVED_OBJECT_TYPE,
+          perPage: 10000,
         });
       return integrationsResponse.saved_objects.map((integration) => integration.attributes);
     } catch (error) {
