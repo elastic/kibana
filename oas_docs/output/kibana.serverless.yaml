@@ -41507,15 +41507,19 @@ paths:
                         accountType:
                           type: string
                         blueprintId:
+                          description: Identifier of the template source last used for this connector. Set to null to remove it.
                           maxLength: 255
                           minLength: 1
                           nullable: true
                           type: string
+                          x-state: Experimental
                         blueprintVersion:
+                          description: Version of the template source last used for this connector. Set to null to remove it.
                           maxLength: 64
                           minLength: 1
                           nullable: true
                           type: string
+                          x-state: Experimental
                         cloudProvider:
                           type: string
                         created_at:
@@ -41529,10 +41533,12 @@ paths:
                         packagePolicyCount:
                           type: number
                         templateSha:
+                          description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                           maxLength: 255
                           minLength: 1
                           nullable: true
                           type: string
+                          x-state: Experimental
                         updated_at:
                           type: string
                         vars:
@@ -41642,24 +41648,31 @@ paths:
                   type: string
                 iac:
                   additionalProperties: false
-                  description: IaC provenance to persist on the cloud connector after the user confirms the template.
+                  description: Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.
                   type: object
                   properties:
                     blueprintId:
+                      description: Identifier of the template source last used for this connector. Set to null to remove it.
                       maxLength: 255
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
                     blueprintVersion:
+                      description: Version of the template source last used for this connector. Set to null to remove it.
                       maxLength: 64
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
                     templateSha:
+                      description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                       maxLength: 255
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
+                  x-state: Experimental
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -41731,15 +41744,19 @@ paths:
                       accountType:
                         type: string
                       blueprintId:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       blueprintVersion:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       cloudProvider:
                         type: string
                       created_at:
@@ -41753,10 +41770,12 @@ paths:
                       packagePolicyCount:
                         type: number
                       templateSha:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
@@ -41946,15 +41965,19 @@ paths:
                       accountType:
                         type: string
                       blueprintId:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       blueprintVersion:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       cloudProvider:
                         type: string
                       created_at:
@@ -41968,10 +41991,12 @@ paths:
                       packagePolicyCount:
                         type: number
                       templateSha:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
@@ -42076,24 +42101,31 @@ paths:
                   type: string
                 iac:
                   additionalProperties: false
-                  description: IaC provenance to persist on the cloud connector after the user confirms the template.
+                  description: Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.
                   type: object
                   properties:
                     blueprintId:
+                      description: Identifier of the template source last used for this connector. Set to null to remove it.
                       maxLength: 255
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
                     blueprintVersion:
+                      description: Version of the template source last used for this connector. Set to null to remove it.
                       maxLength: 64
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
                     templateSha:
+                      description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                       maxLength: 255
                       minLength: 1
                       nullable: true
                       type: string
+                      x-state: Experimental
+                  x-state: Experimental
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -42161,15 +42193,19 @@ paths:
                       accountType:
                         type: string
                       blueprintId:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       blueprintVersion:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       cloudProvider:
                         type: string
                       created_at:
@@ -42183,10 +42219,12 @@ paths:
                       packagePolicyCount:
                         type: number
                       templateSha:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
+                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
