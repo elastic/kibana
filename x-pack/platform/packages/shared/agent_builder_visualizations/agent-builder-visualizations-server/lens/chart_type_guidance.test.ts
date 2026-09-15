@@ -36,6 +36,17 @@ describe('chart type guidance', () => {
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
+  it('warns both authors that percent formatting multiplies already-scaled columns', () => {
+    const design = getChartDesignPromptContent();
+    const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
+
+    expect(design).toContain('Percent formatting multiplies by 100');
+    expect(design).toContain('plain numbers with a "%" suffix');
+    expect(metricConfig).toContain('`{ type: "percent" }` multiplies the value by 100');
+    expect(metricConfig).toContain('{ type: "number", decimals: 1, suffix: "%" }');
+    expect(metricConfig).not.toContain('Percent formatting multiplies by 100');
+  });
+
   it('lists every chart type in the selection guidance', () => {
     const selection = getChartTypeSelectionPromptContent();
 
