@@ -16,7 +16,7 @@ import { getNavigationTreeDefinition } from '../navigation_tree';
 describe('Elasticsearch solution navigation tree', () => {
   it('includes Stack Alerts in Stack Management > Alerts and Insights', async () => {
     const core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
+    core.settings.globalClient.get.mockReturnValue(false);
 
     const definition = getNavigationTreeDefinition({
       core,

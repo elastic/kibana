@@ -17,7 +17,7 @@ const getAlertsAndInsightsLinks = async (): Promise<Array<string | undefined>> =
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue = jest.fn().mockReturnValue(false);
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
-  coreStart.settings.globalClient.get = <T>(_key: string) => false as T;
+  coreStart.settings.globalClient.get.mockReturnValue(false);
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },
