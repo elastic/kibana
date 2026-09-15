@@ -42,8 +42,8 @@ object should be encrypted.
 ```ts
   export interface EncryptedSavedObjectTypeRegistration {
     readonly type: string; // The name of the Saved Object type. This must match the name used to register the type with Core's Saved Object Service.
-    readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>; // The attributes to protect (anything considered sensitive data)
-    readonly attributesToIncludeInAAD?: ReadonlySet<string>; // The attributes to include in AAD (more on this below)
+    readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>; // The attributes to protect (anything considered sensitive data). Top-level names only.
+    readonly attributesToIncludeInAAD?: ReadonlySet<string>; // The attributes to include in AAD (more on this below). Top-level names only.
   }
 ```
 
@@ -86,9 +86,33 @@ This is one reason why it is important to carefully consider whether an attribut
 
 #### Nested attributes
 
-When an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD. When AAD is constructed as key-value pairs, the nested properties
-of an attribute are all included in its value. In this way, AAD inclusion is hierarchical. If restructuring the attributes of an object to account for AAD hierarchical
-inclusion is not possible or desireable, you can make use of more granular keys, e.g. `firstLevelAttribute.nestedFieldToInclude`.
+`attributesToEncrypt` and `attributesToIncludeInAAD` accept top-level attribute names only. Names are compared to the keys of the object's `attributes` with an exact
+string match; a dot in a registered name is not interpreted as a path, and nothing traverses into subfields. Nested data is still covered, but at the granularity of the
+top-level attribute that contains it: when an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD, because AAD is constructed
+as key-value pairs and the nested properties of an attribute are all part of its value. In this way, AAD inclusion is hierarchical. If some subfields of an attribute need
+different treatment than others, restructure the object so that the subfields you care about become top-level attributes.
+
+Registering a dotted path that is not a literal attribute key fails silently. If it is listed in `attributesToEncrypt`, it matches nothing, the sensitive value is stored
+in plaintext, and - because stripping uses the same names - it is also returned by the "standard" Saved Object Client APIs (e.g. get, find). The only signal is a
+debug-level log listing the attributes that should have been encrypted. If it is listed in `attributesToIncludeInAAD`, it is dropped from AAD, silently weakening the
+integrity binding of the encrypted attributes, while encryption and decryption both continue to succeed.
+
+Because these failures are invisible, dotted names are a lint error. The `@kbn/eslint/no_eso_registration_dotted_attribute_keys` rule rejects them in both sets, and it
+resolves enums, constants, spreads and cross-file imports, so indirection will not hide a violation. A dotted name is only correct when the object genuinely stores a flat
+key containing a dot, and in that case you must acknowledge it with a per-line disable:
+
+```ts
+  // eslint-disable-next-line @kbn/eslint/no_eso_registration_dotted_attribute_keys
+  attributesToIncludeInAAD: new Set(['service.name', 'url.port']),
+```
+
+This is a deliberate exception to the usual expectation that lint errors are fixed rather than suppressed. The disable comment is the point: it records that the author
+knows only top-level attributes resolve, and that this attribute really is a top-level key that happens to contain a dot. The `synthetics_monitor` type is the existing
+example, with literal attribute keys such as `'service.name'` and `'url.port'` that follow the Beats configuration convention. Those registrations are valid as written,
+so do not "correct" them.
+
+Note that this behavior differs from Core's Model Version `data_removal` change, whose `removedAttributePaths` does resolve nested paths. Within the same type definition,
+`removedAttributePaths: ['auth.apiKey']` reaches a nested `apiKey` subfield, but `attributesToEncrypt: ['auth.apiKey']` does not.
 
 #### What attributes should be included in AAD
 
@@ -164,8 +188,8 @@ version will not be able to decrypt it. It is critical that when changes are mad
 subsequent Model Versions.
 
 It is worth noting here that if a ESO's Model Version `forwardCompatibility` schema is set to drop unknown fields (when the `unknowns` option is set to `ignore`),
-ESOs of this type will first be decrypted before the unknown fields are dropped. This more easily supports the hierarchical aspect of AAD-included attributes - when
-subfields of an attribute are added or removed, the previous version of Kibana will still be able to successfully construct AAD and decrypt the object.
+ESOs of this type will first be decrypted before the unknown fields are dropped. This more easily supports the fact that an AAD-included attribute covers all of its
+subfields - when subfields of an attribute are added or removed, the previous version of Kibana will still be able to successfully construct AAD and decrypt the object.
 
 The table below offers some general guidance on how various changes could be supported (or not). Keep in mind that any time you are adding or removing attributes from
 a Saved Object type, all related business logic for that type must be capable of gracefully and appropriately handling an object with or without the attribute in both
@@ -334,10 +358,10 @@ encrypted attribute `apiKeyToUse`:
   revision: schema.number(),
 ```
 
-This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. It is worth considering the nature
-of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when specifying which attributes to include in AAD,
-e.g. `rule.apiKeyOwner`. For more information, see the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of
-this document.
+This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. Note that `rule` can only be
+included in AAD as a whole. `attributesToIncludeInAAD` accepts top-level attribute names only, so a more granular key such as `rule.apiKeyOwner` is not supported - it
+would be silently ignored, and is a lint error. If only part of an attribute belongs in AAD, the attribute must be restructured so that part of it is top-level. For more
+information, see the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of this document.
 
 Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.
 
