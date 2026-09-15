@@ -21,19 +21,20 @@ import {
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
 import { getRuleChangeHistoryEventOasExamples } from './get_rule_change_history_event_oas_example';
 
 @injectable()
 export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`;
+  static path = `${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get a rule change-history event',
     description:
       'Get the full detail for a single rule change-history event, including the rule configuration snapshot.',
