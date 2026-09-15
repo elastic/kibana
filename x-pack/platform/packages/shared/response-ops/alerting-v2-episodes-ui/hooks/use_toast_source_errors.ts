@@ -12,8 +12,6 @@ import type { EpisodeSourceError } from '../utils/fetch_from_sources';
 import { shouldSwallowFetchError } from '../utils/should_swallow_fetch_error';
 import { EPISODES_FETCH_ERROR_TOAST_TITLE } from './translations';
 
-export type { EpisodeFetchErrorSurface };
-
 /**
  * Toasts dual-source fetch errors, naming the failing source and swallowing
  * 401/403/503/AbortError.

@@ -38,8 +38,6 @@ import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 
-export type { PrivilegeCheck } from './privilege_check_context';
-
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

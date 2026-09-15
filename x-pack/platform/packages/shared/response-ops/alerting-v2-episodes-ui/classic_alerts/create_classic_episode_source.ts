@@ -14,8 +14,6 @@ import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
-export { CLASSIC_EPISODE_SOURCE_ID };
-
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
 }
