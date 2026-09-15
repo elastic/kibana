@@ -9,20 +9,20 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useRunWorkflow, useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils';
 
 const mockRunWorkflow = jest.fn();
-const mockWorkflowApi = createMockWorkflowApi();
+const mockTestWorkflow = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useRunWorkflow: jest.fn(),
-  useWorkflowsApi: jest.fn(),
+  useTestWorkflow: jest.fn(),
   useWorkflowsCapabilities: jest.fn(),
 }));
 
@@ -36,12 +36,15 @@ describe('ExecutionTakeActionSplitButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
-    mockWorkflowApi.testWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
+    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     jest.mocked(useRunWorkflow).mockReturnValue({
       mutateAsync: mockRunWorkflow,
       isLoading: false,
     } as unknown as ReturnType<typeof useRunWorkflow>);
-    jest.mocked(useWorkflowsApi).mockReturnValue(mockWorkflowApi);
+    jest.mocked(useTestWorkflow).mockReturnValue({
+      mutateAsync: mockTestWorkflow,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useTestWorkflow>);
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
     services.notifications.toasts.addSuccess = jest.fn();
     services.notifications.toasts.addError = jest.fn();
@@ -67,7 +70,7 @@ describe('ExecutionTakeActionSplitButton', () => {
         inputs: { alertId: 'a-1' },
       });
     });
-    expect(mockWorkflowApi.testWorkflow).not.toHaveBeenCalled();
+    expect(mockTestWorkflow).not.toHaveBeenCalled();
   });
 
   it('re-runs a test execution through testWorkflow', async () => {
@@ -79,11 +82,22 @@ describe('ExecutionTakeActionSplitButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
 
     await waitFor(() => {
-      expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      expect(mockTestWorkflow).toHaveBeenCalledWith({
         workflowId: 'wf-1',
         inputs: { alertId: 'a-1' },
       });
     });
     expect(mockRunWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('disables Re-run while a test re-run is pending', () => {
+    jest.mocked(useTestWorkflow).mockReturnValue({
+      mutateAsync: mockTestWorkflow,
+      isLoading: true,
+    } as unknown as ReturnType<typeof useTestWorkflow>);
+
+    renderButton({ isTestRun: true });
+
+    expect(screen.getByRole('button', { name: 'Re-run' })).toBeDisabled();
   });
 });
