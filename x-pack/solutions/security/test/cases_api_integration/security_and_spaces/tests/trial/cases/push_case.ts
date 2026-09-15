@@ -515,8 +515,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157588
-      describe.skip('user profile uid', () => {
+      describe('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
         let superUserInfo: User;

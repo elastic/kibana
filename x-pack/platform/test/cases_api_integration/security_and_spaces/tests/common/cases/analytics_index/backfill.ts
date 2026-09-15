@@ -47,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/243870
-  describe.skip('analytics indexes backfill task', () => {
+  describe('analytics indexes backfill task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -115,6 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
           '@timestamp': timestamp,
           created_at: createdAt,
           created_at_ms: createdAtMs,
+          created_by: { profile_uid: profileUid, ...createdByRest },
           ...analyticsFields
         } = caseAnalytics._source as any;
 
@@ -125,13 +125,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAtMs).not.to.be(null);
         expect(createdAtMs).not.to.be(undefined);
 
-        expect(analyticsFields).to.eql({
+        expect({ ...analyticsFields, created_by: createdByRest }).to.eql({
           assignees: [],
           category: 'foobar',
           created_by: {
             email: null,
             full_name: null,
-            profile_uid: null,
             username: 'elastic',
           },
           custom_fields: [
