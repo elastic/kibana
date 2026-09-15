@@ -82,7 +82,8 @@ function extractPatternTextField(
   fieldName: string,
   property: MappingProperty
 ): PatternTextField | undefined {
-  if (property.type === 'pattern_text') {
+  // pattern_text is a new ES field type not yet in @elastic/elasticsearch types
+  if ((property.type as string) === 'pattern_text') {
     return {
       field: fieldName,
       templateIdField: `${fieldName}.template_id`,

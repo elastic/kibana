@@ -245,7 +245,7 @@ describe('getLogsHandler', () => {
       expect(hasSemanticFilter).toBe(false);
     });
 
-    it('should handle unavailable semantic search gracefully', async () => {
+    it('should handle unavailable semantic search gracefully and return warnings', async () => {
       const { kqlFilter } = jest.requireMock('../../utils/dsl_filters');
 
       const mockSemanticLogSearch: SemanticLogSearchService = {
@@ -256,7 +256,7 @@ describe('getLogsHandler', () => {
         expand: jest.fn(),
       };
 
-      await getLogsHandler({
+      const result = await getLogsHandler({
         esClient: mockEsClient,
         params: {
           ...baseParams,
@@ -276,6 +276,41 @@ describe('getLogsHandler', () => {
           f.bool && (f.bool as Record<string, unknown>).should !== undefined
       );
       expect(hasSemanticFilter).toBe(false);
+
+      // Should return warnings when semantic search is unavailable
+      expect(result.warnings).toEqual([
+        'Semantic filtering is not available for this index. Results are not filtered by semantic relevance.',
+      ]);
+    });
+
+    it('should not return warnings when semantic search succeeds', async () => {
+      const mockSemanticLogSearch: SemanticLogSearchService = {
+        search: jest.fn().mockResolvedValue({
+          patterns: [
+            {
+              field: 'message',
+              pattern: 'Connection error',
+              count: 50,
+              firstSeen: '2024-01-01T00:00:00Z',
+              lastSeen: '2024-01-01T01:00:00Z',
+              sample: { message: 'Connection error to server' },
+            },
+          ],
+        }),
+        expand: jest.fn(),
+      };
+
+      const result = await getLogsHandler({
+        esClient: mockEsClient,
+        params: {
+          ...baseParams,
+          semanticFilter: 'connection errors',
+        },
+        semanticLogSearch: mockSemanticLogSearch,
+      });
+
+      // Should NOT have warnings when semantic search succeeds
+      expect(result.warnings).toBeUndefined();
     });
 
     it('should handle multiple patterns with match_phrase for each', async () => {

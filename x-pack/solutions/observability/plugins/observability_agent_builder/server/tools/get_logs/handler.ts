@@ -50,6 +50,7 @@ export interface GetLogsResult {
     sample: { _id?: string; _index?: string; [key: string]: unknown };
   }>;
   topValues: Record<string, Array<{ value: string; count: number }>>;
+  warnings?: string[];
 }
 
 export async function getLogsHandler({
@@ -81,6 +82,8 @@ export async function getLogsHandler({
 
   // If semantic filter is provided, build DSL filter for patterns
   let semanticPatternFilter: QueryDslQueryContainer[] = [];
+  const warnings: string[] = [];
+
   if (semanticFilter && semanticLogSearch) {
     const semanticResult = await semanticLogSearch.search({
       esClient,
@@ -88,9 +91,16 @@ export async function getLogsHandler({
       nlQuery: semanticFilter,
       timeRange: { start: startMs, end: endMs },
       maxPatterns: 10,
+      kqlFilter, // Pass KQL filter to scope the semantic search corpus
     });
 
-    semanticPatternFilter = buildSemanticPatternFilter(semanticResult.patterns);
+    if (semanticResult.unavailable) {
+      warnings.push(
+        'Semantic filtering is not available for this index. Results are not filtered by semantic relevance.'
+      );
+    } else {
+      semanticPatternFilter = buildSemanticPatternFilter(semanticResult.patterns);
+    }
   }
 
   const searchClient = getTypedSearch(esClient);
@@ -110,7 +120,14 @@ export async function getLogsHandler({
   const totalCount = getTotalHits(countResponse);
 
   if (totalCount === 0) {
-    return { histogram: [], totalCount: 0, samples: [], categories: [], topValues: {} };
+    return {
+      histogram: [],
+      totalCount: 0,
+      samples: [],
+      categories: [],
+      topValues: {},
+      ...(warnings.length > 0 && { warnings }),
+    };
   }
 
   const samplingProbability = computeSamplingProbability({
@@ -135,7 +152,14 @@ export async function getLogsHandler({
   const categories = parseCategories(response);
   const topValues = parseTopValues(response);
 
-  return { histogram, totalCount, samples, categories, topValues };
+  return {
+    histogram,
+    totalCount,
+    samples,
+    categories,
+    topValues,
+    ...(warnings.length > 0 && { warnings }),
+  };
 }
 
 async function searchLogs(
