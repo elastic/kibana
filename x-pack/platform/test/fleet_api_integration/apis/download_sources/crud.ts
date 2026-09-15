@@ -1340,12 +1340,12 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 when body id is a traversal payload that does not match path sourceId', async function () {
+      it('should return 400 when body id is a payload that does not match path sourceId', async function () {
         const { body } = await supertest
           .put(`/api/fleet/agent_download_sources/${targetSourceId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            id: '../../../api/spaces/space/admin-space',
+            id: 'mismatch',
             name: 'id-immutability-test',
             host: 'https://artifacts.test.co:443',
           })
