@@ -14,7 +14,7 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus, type WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
-import { getWorkflowGlobalTimeoutResumeTaskId } from './workflow_task_manager/workflow_task_manager';
+import { getWorkflowWakeTaskId } from './workflow_task_manager/workflow_task_manager';
 
 jest.mock('./repositories/data_access_layer', () => {
   const actual = jest.requireActual('./repositories/data_access_layer');
@@ -118,7 +118,8 @@ describe('user-interactive task priority', () => {
     const coreStart = coreMock.createStart();
     taskManager = taskManagerMock.createStart();
     taskManager.schedule.mockResolvedValue({ id: 'scheduled-task' } as any);
-    taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task' } as any);
+    taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
+    taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,
@@ -228,7 +229,7 @@ describe('user-interactive task priority', () => {
         request
       );
 
-      expect(taskManager.schedule).toHaveBeenCalledWith(
+      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'workflow:resume',
           priority: TaskPriority.UserInteractive,
@@ -243,10 +244,8 @@ describe('user-interactive task priority', () => {
 
       await pluginStart.resumeWorkflowExecution('exec-hitl', 'default', { approved: true });
 
-      expect(taskManager.schedule).not.toHaveBeenCalled();
-      expect(taskManager.runSoon).toHaveBeenCalledWith(
-        getWorkflowGlobalTimeoutResumeTaskId('exec-hitl')
-      );
+      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(taskManager.runSoon).toHaveBeenCalledWith(getWorkflowWakeTaskId('exec-hitl'));
     });
   });
 });
