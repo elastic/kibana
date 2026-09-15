@@ -9,6 +9,7 @@ import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-c
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -17,6 +18,8 @@ import {
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
 } from './rule_data_schema';
@@ -55,6 +58,7 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
+        recovery_strategy: 'no_breach',
         grouping: { fields: ['host.name'] },
         state_transition: {
           pending_operator: 'AND',
@@ -72,6 +76,7 @@ describe('createRuleDataSchema', () => {
           metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
+          recovery_strategy: 'no_breach',
           grouping: { fields: ['host.name'] },
           state_transition: {
             pending_operator: 'AND',
@@ -702,6 +707,7 @@ describe('createRuleDataSchema', () => {
     it('accepts state_transition with only recovering fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: {
           recovering_operator: 'OR',
           recovering_count: 5,
@@ -728,6 +734,7 @@ describe('createRuleDataSchema', () => {
     it('accepts recovering_count of 0', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: { recovering_count: 0 },
       });
 
@@ -860,6 +867,83 @@ describe('createRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('recovery delay allowed', () => {
+    it('rejects a recovering_count when recovery_strategy is unset', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { pending_count: 0, recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_count when recovery_strategy is "none"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_timeframe when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an inert recovery delay even when no_data_strategy is "recover"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        no_data_strategy: 'recover',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+        },
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count of 0 when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts pending-only state_transition when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 3 },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a recovering delay when recovery_strategy is "no_breach"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 2, recovering_timeframe: '5m' },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -1631,6 +1715,117 @@ describe('bulkGetRulesResponseSchema', () => {
   });
 });
 
+describe('bulkCreateRulesRequestSchema', () => {
+  const validItem = {
+    kind: 'alert',
+    metadata: { name: 'test rule' },
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  };
+
+  it('accepts a single item and defaults enabled to true', () => {
+    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0].enabled).toBe(true);
+    expect(result.rules[0].id).toBeUndefined();
+  });
+
+  it('accepts client-supplied id and enabled: false', () => {
+    const result = bulkCreateRulesRequestSchema.parse({
+      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+    });
+    expect(result.rules[0].id).toBe('rule-1');
+    expect(result.rules[0].enabled).toBe(false);
+  });
+
+  it('accepts up to MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+  });
+
+  it('rejects an empty rules array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+  });
+
+  it('rejects duplicate client-supplied ids', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [
+          { ...validItem, id: 'same-id' },
+          { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+  });
+
+  it('rejects an item that fails create-rule refinements', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [{ ...validItem, kind: 'signal', recovery_strategy: 'no_breach' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('bulkCreateRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r', version: 1 },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts created rules and an empty errors array', () => {
+    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts per-item errors without created rules', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      rules: [],
+      errors: [
+        {
+          id: 'rule-1',
+          error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
+        },
+      ],
+    });
+    expect(result.rules).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
+  });
+});
+
 describe('ruleTagsParamsSchema', () => {
   it('accepts an empty object', () => {
     expect(ruleTagsParamsSchema.parse({})).toEqual({});
@@ -1675,5 +1870,61 @@ describe('tagsResponseSchema', () => {
 
   it('rejects a missing tags field', () => {
     expect(() => tagsResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('isRecoveryTransitionConsistentWithStrategy', () => {
+  it('returns true when recovery is enabled, regardless of recovering delay', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      })
+    ).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'query',
+        state_transition: { recovering_count: 3 },
+      })
+    ).toBe(true);
+  });
+
+  it('returns true when recovery is disabled but no recovering delay is set', () => {
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: 'none' })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: null })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({})).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: {},
+      })
+    ).toBe(true);
+  });
+
+  it('rejects recovering_count 0 when recovery is disabled (immediate recovery is not a delay)', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 0 },
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for a positive recovering delay when recovery is disabled', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 1 },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: null,
+        state_transition: { recovering_timeframe: '5m' },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({ state_transition: { recovering_count: 2 } })
+    ).toBe(false);
   });
 });
