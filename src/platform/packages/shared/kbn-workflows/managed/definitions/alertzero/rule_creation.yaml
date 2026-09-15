@@ -41,14 +41,34 @@ steps:
     create-conversation: true
     with:
       message: |-
-        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
-        security.create_detection_rule to create a new ES|QL rule draft now. The
-        supplied context is sufficient; do not ask a follow-up question.
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill to draft
+        a new ES|QL rule from the supplied context. The supplied context is
+        sufficient; do not ask a follow-up question.
 
         ATT&CK technique: {{ inputs.technique }}
         Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
         Confidence: {{ inputs.confidence }}
+
+        Quality gate — decline an unwinnable gap instead of drafting when ANY
+        holds:
+        - confidence is below 0.3;
+        - the gap is a catch-all with no concrete behavior, indicator, or data
+          source (e.g. "any command execution activity");
+        - the evidence cannot support a specific ES|QL query.
+        To decline: call no tools, set skipped to true, set reason to one
+        sentence naming what is missing, and leave rule empty. Never draft a
+        generic catch-all query to avoid declining — a decline is the correct
+        outcome for an unwinnable gap.
+
+        When the gap is winnable, call security.create_detection_rule exactly
+        once and set skipped to false. Tool discipline:
+        - No speculative tools: no rule search, no ES|QL validation, no rule
+          preview — later workflow steps preview and validate the draft.
+        - Corroboration is bounded: at most one threat-intel or documentation
+          lookup, and only when the evidence names no concrete behavior or
+          data source.
+        - After security.create_detection_rule returns, call no further tools.
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id.
@@ -56,6 +76,12 @@ steps:
         type: object
         additionalProperties: false
         properties:
+          skipped:
+            type: boolean
+            description: True when the quality gate declined the gap as unwinnable.
+          reason:
+            type: string
+            description: One sentence naming what is missing, set when skipped is true.
           rule:
             type: object
             additionalProperties: false
@@ -110,8 +136,7 @@ steps:
           attachment_version:
             type: number
         required:
-          - rule
-          - attachment_id
+          - skipped
 
   - name: preview_creation
     type: workflow.execute
