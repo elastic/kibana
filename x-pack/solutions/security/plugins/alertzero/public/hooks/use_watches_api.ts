@@ -29,7 +29,7 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
   return true;
 };
 
-export const useWatches = () => {
+export const useWatches = (options?: { enabled?: boolean }) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -38,6 +38,7 @@ export const useWatches = () => {
       services.http!.get<ListWatchesResponse>(ALERTZERO_WATCHES_URL, {
         version: API_VERSIONS.internal.v1,
       }),
+    enabled: options?.enabled,
     keepPreviousData: true,
     retry: retryOnTransientError,
   });

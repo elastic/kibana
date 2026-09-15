@@ -15,6 +15,7 @@ import {
 import { queryKeys } from '../query_keys';
 import { usePendingProposals } from './use_proposals_api';
 import { useWatches } from './use_watches_api';
+import { ENABLE_SUCCESS_TOAST_BODY, ENABLE_SUCCESS_TOAST_TITLE } from '../pages/onboarding/translations';
 
 /**
  * Derived onboarding state. There is no stored step — the state is recomputed from the
@@ -109,6 +110,12 @@ export const useEnableOnboarding = () => {
       }),
     onSuccess: () => {
       services.uiSettings?.set(ALERTZERO_ENABLED_SETTING, true);
+      // Transient confirmation on top of whatever surface the gate lands the user on
+      // (S2 → watch detail, S1 → the no-watches empty state). The toast portal is global.
+      services.notifications?.toasts.addSuccess({
+        title: ENABLE_SUCCESS_TOAST_TITLE,
+        text: ENABLE_SUCCESS_TOAST_BODY,
+      });
       void queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
     },

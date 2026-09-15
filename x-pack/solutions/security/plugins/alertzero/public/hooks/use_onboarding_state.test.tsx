@@ -216,5 +216,10 @@ describe('useEnableOnboarding', () => {
       body: JSON.stringify({}),
     });
     expect(services.uiSettings.set).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING, true);
+    // enable confirmation is transient feedback (a toast), not a full-page prompt
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'AlertZero is enabled',
+      text: 'AlertZero will start running your watches and surface proposals after the next run.',
+    });
   });
 });

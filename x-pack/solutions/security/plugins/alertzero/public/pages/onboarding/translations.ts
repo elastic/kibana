@@ -62,6 +62,20 @@ export const AWAITING_CTA = i18n.translate('xpack.alertzero.onboarding.awaitingR
   defaultMessage: 'Go to watches',
 });
 
+// Enable success toast (transient feedback on top of whatever surface the user lands on)
+export const ENABLE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.enable.successToastTitle',
+  {
+    defaultMessage: 'AlertZero is enabled',
+  }
+);
+export const ENABLE_SUCCESS_TOAST_BODY = i18n.translate(
+  'xpack.alertzero.onboarding.enable.successToastBody',
+  {
+    defaultMessage: 'AlertZero will start running your watches and surface proposals after the next run.',
+  }
+);
+
 // Onboarding complete (beyond the three derived onboarding states)
 export const ACTIVE_TITLE = i18n.translate('xpack.alertzero.onboarding.active.title', {
   defaultMessage: "You're all set",

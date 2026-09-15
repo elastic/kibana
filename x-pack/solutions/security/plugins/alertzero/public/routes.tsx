@@ -24,19 +24,23 @@ import { OnboardingPage } from './pages/onboarding';
 import { useOnboardingState } from './hooks/use_onboarding_state';
 
 /**
- * Root gate: until a run has happened, every route renders the onboarding page. The
- * derived state (S0 disabled / S1 no-watches / S2 awaiting-first-run) is never stored —
- * it falls out of the enabled setting plus best-effort watches/proposals data, and the
- * onboarding page itself shows a brief loading prompt while those secondary queries are
+ * Root gate. The derived onboarding state (S0 disabled / S1 no-watches / S2 awaiting-first-run)
+ * is never stored — it falls out of the enabled setting plus best-effort watches/proposals data,
+ * and the onboarding page itself shows a brief loading prompt while those secondary queries are
  * still resolving.
+ *
+ * Only the states that have no useful real surface to show are redirected to the onboarding page:
+ * S0 (`disabled`) must gate the whole app behind the enable CTA, and S1 (`no-watches`) has no
+ * watch catalog page to land on. S2 has a real destination — the watch detail page (via the
+ * `/watches` redirect) — so it and `active` render the app proper, with enable confirmation
+ * carried by a transient toast rather than a full-page prompt.
  */
 const OnboardingGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const onboarding = useOnboardingState();
-  // Only the active state (a run exists) reaches the app proper.
-  if (onboarding.state === 'active') {
-    return <>{children}</>;
+  if (onboarding.state === 'disabled' || onboarding.state === 'no-watches') {
+    return <OnboardingPage />;
   }
-  return <OnboardingPage />;
+  return <>{children}</>;
 };
 
 /**

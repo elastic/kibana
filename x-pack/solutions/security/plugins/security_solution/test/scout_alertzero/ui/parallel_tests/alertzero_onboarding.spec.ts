@@ -39,15 +39,23 @@ spaceTest.describe(
       await expect(page.testSubj.locator('alertZeroOnboardingEnableToggle')).toBeVisible();
     });
     spaceTest(
-      'enable flips the setting and installs watch workflows',
+      'enable flips the setting, installs watch workflows, and confirms with a toast',
       async ({ page, kbnClient, scoutSpace }) => {
-        const response = await kbnClient.request({
-          method: 'POST',
-          path: `/s/${scoutSpace.id}/internal/alertzero/onboarding/enable`,
-          headers: INTERNAL_HEADERS,
-          body: {},
-        });
-        expect(response.status).toBe(200);
+        // Click the REAL UI enable toggle — the path the enable-body bug lived in (the
+        // API-only version of this test passed in CI while the button 400'd for a real user).
+        await page.gotoApp('alertzero');
+        await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).toBeVisible();
+        await page.testSubj.click('alertZeroOnboardingEnableToggle');
+
+        // S2 is no longer a full-page prompt: enable lands on the real watch detail surface
+        // (the gate passes awaiting-first-run + active straight through).
+        await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
+
+        // The enable confirmation is a transient success toast on top of that surface.
+        await expect(
+          page.getByText('AlertZero is enabled', { exact: true })
+        ).toBeVisible();
+
         // Real install path evidence: managed watch workflows now exist in this space.
         const workers = await kbnClient.request({
           method: 'GET',
@@ -58,17 +66,10 @@ spaceTest.describe(
         const body = workers.data as { workers?: unknown[] } | unknown[];
         const workersList = Array.isArray(body) ? body : body.workers ?? [];
         expect(workersList.length).toBeGreaterThan(0);
-        // UI transitions out of S0.
-        await page.gotoApp('alertzero');
-        await expect(
-          page.testSubj
-            .locator('alertZeroOnboardingNoWatchesPage')
-            .or(page.testSubj.locator('alertZeroOnboardingAwaitingRunPage'))
-        ).toBeVisible();
       }
     );
     spaceTest(
-      'S2: empty state renders while awaiting first run',
+      'S2: after enable the app lands on the watch detail surface',
       async ({ page, kbnClient, scoutSpace }) => {
         // Self-contained: enable in this space first (idempotent) so the assertion
         // does not depend on a previous test's side effect surviving a retry or a
@@ -80,11 +81,11 @@ spaceTest.describe(
           body: {},
         });
         await page.gotoApp('alertzero');
+        // S2 renders the real watch detail page (workers section), not the onboarding prompt.
+        await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
         await expect(
-          page.testSubj
-            .locator('alertZeroOnboardingAwaitingRunPage')
-            .or(page.testSubj.locator('alertZeroOnboardingNoWatchesPage'))
-        ).toBeVisible();
+          page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')
+        ).not.toBeVisible();
       }
     );
   }
