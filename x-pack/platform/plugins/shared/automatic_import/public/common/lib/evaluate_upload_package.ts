@@ -78,7 +78,7 @@ const hasAutoImportIntegration = (
   return autoImportIntegrations.some(
     (integration) =>
       integration.integrationId === normalizedName ||
-      normalizeTitleName(integration.title) === normalizedName
+      normalizeTitleName(integration.integrationId) === normalizedName ||
   );
 };
 
