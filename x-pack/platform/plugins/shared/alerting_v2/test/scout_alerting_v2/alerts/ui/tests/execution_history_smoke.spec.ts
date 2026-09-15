@@ -109,13 +109,13 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
+    if (ruleId) {
+      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId });
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+      await apiServices.alertingV2.rules.delete(ruleId);
+    }
     if (policyId) {
       await apiServices.alertingV2.actionPolicies.delete(policyId);
-    }
-    if (ruleId) {
-      await apiServices.alertingV2.rules.delete(ruleId);
     }
     if (workflowId) {
       await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
