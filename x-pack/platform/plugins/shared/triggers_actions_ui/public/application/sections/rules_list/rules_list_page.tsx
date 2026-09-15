@@ -36,6 +36,7 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    tabs: hostTabs,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -62,6 +63,10 @@ export const RulesListContainer = () => {
   }, [docTitle, setBreadcrumbs]);
 
   const rulesListTabs = useMemo(() => {
+    if (hostTabs) {
+      return hostTabs;
+    }
+
     if (mode === RULES_PAGE_MODE.v1AndV2Tabs) {
       return getV1RulesPageTabs({
         v1Href: http.basePath.prepend(triggersActionsRoute),
@@ -74,7 +79,7 @@ export const RulesListContainer = () => {
     }
 
     return getClassicTabs('rules', authorizedToReadAnyRules, history);
-  }, [mode, authorizedToReadAnyRules, history, http.basePath]);
+  }, [hostTabs, mode, authorizedToReadAnyRules, history, http.basePath]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =
