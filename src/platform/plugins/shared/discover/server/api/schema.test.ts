@@ -12,18 +12,19 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
+  DiscoverTabType,
   MAX_METRICS_TAB_DIMENSIONS,
   MAX_METRICS_TAB_STATE_STRING_LENGTH,
-} from '@kbn/saved-search-plugin/common';
+  UnifiedHistogramSuggestionType,
+} from '@kbn/discover-session-constants';
 import {
-  discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
   type DiscoverSessionApiMetricsTab,
-} from './schema';
+} from '@kbn/as-code-discover-schema';
+import { discoverSessionApiResponseSchema } from './schema';
 
 // Keep these values independent from the schema constants so contract changes require an explicit
 // test update.
@@ -41,6 +42,7 @@ const CURRENT_API_LIMITS = {
   sampleSize: { min: 10, max: 10_000 },
   headerRowHeight: { min: 1, max: 5 },
   rowHeight: { min: 1, max: 20 },
+  defaultRenderedNodes: { min: 10, max: 200 },
 } as const;
 
 const classicTab = {
@@ -189,6 +191,13 @@ describe('discoverSessionApiDataSchema', () => {
 
     expect(validated.tabs).toHaveLength(2);
     expect(validated.description).toBe('');
+
+    for (const tab of validated.tabs) {
+      expect(tab.documents_display_mode).toBeUndefined();
+      expect(tab.hide_nulls).toBeUndefined();
+      expect(tab.wrap_lines).toBeUndefined();
+      expect(tab.default_rendered_nodes).toBeUndefined();
+    }
   });
 
   it('validates tag IDs', () => {
@@ -708,6 +717,7 @@ describe('discoverSessionApiDataSchema', () => {
       ['sample_size', CURRENT_API_LIMITS.sampleSize],
       ['header_row_height', CURRENT_API_LIMITS.headerRowHeight],
       ['row_height', CURRENT_API_LIMITS.rowHeight],
+      ['default_rendered_nodes', CURRENT_API_LIMITS.defaultRenderedNodes],
     ] as const)('pins the current %s range', (field, { min, max }) => {
       for (const value of [min, max]) {
         expect(() =>
