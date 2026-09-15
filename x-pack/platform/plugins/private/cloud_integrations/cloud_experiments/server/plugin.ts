@@ -18,6 +18,7 @@ import { LaunchDarklyProvider } from '@launchdarkly/openfeature-node-server';
 import type { LogLevelId } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 import { getAllFlags, registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
@@ -116,8 +117,7 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
 
   private async addHasDataMetadata(core: CoreStart): Promise<{ has_data: boolean }> {
     const repo = core.savedObjects.createInternalRepository();
-    // same semantics as the previous data-views service check: any data view saved object exists
-    const { total } = await repo.find({ type: 'index-pattern', perPage: 0 });
+    const { total } = await repo.find({ type: DATA_VIEW_SAVED_OBJECT_TYPE, perPage: 0 });
     return { has_data: total > 0 };
   }
 }
