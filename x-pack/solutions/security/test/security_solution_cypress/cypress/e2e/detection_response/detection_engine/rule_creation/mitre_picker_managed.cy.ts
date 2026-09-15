@@ -30,6 +30,7 @@ import {
   createAndEnableRule,
   expandAdvancedSettings,
   fillCustomQueryInput,
+  fillDescription,
   fillRuleName,
   fillThreat,
   fillThreatTechnique,
@@ -104,6 +105,7 @@ describe(
 
       // --- About step ---
       fillRuleName(ruleName);
+      fillDescription();
       expandAdvancedSettings();
 
       // When managedSourceEnabled is true the picker shows a loading spinner while the
