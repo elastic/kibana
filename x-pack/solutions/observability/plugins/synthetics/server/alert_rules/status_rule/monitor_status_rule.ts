@@ -97,7 +97,7 @@ export const registerSyntheticsStatusCheckRule = (
         downConfigs,
       });
 
-      await statusRule.handlePendingMonitorAlert({
+      const firingPendingConfigs = await statusRule.handlePendingMonitorAlert({
         pendingConfigs,
       });
 
@@ -115,7 +115,7 @@ export const registerSyntheticsStatusCheckRule = (
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(firingPendingConfigs), {
           downConfigs,
           pendingConfigs,
         }),

@@ -278,6 +278,7 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
+        source: 'discovery',
         items: [
           {
             ...input,
@@ -314,6 +315,7 @@ describe('events_write tool', () => {
     });
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
       eventClient: {},
+      source: 'discovery',
       inputs: [
         expect.objectContaining({
           causal_features: [
@@ -363,14 +365,18 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [
-        expect.objectContaining({
-          causal_features: [expect.objectContaining({ type: 'technology', subtype: 'web_server' })],
-        }),
-      ],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+            ],
+          }),
+        ],
+      })
+    );
   });
 
   it('writes unenriched causal features when the lookup fails', async () => {
@@ -386,10 +392,12 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [expect.objectContaining({ causal_features: causalFeatures })],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+      })
+    );
   });
 
   it('returns aligned results and tracks each item', async () => {
