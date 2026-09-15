@@ -157,4 +157,21 @@ describe('ServiceFlyoutApmCharts', () => {
       rangeTo: '2024-01-02T00:00:00.000Z',
     });
   });
+
+  it('renders inside an existing shared-ux Router without throwing (9.5 CompatRouter)', () => {
+    const { Router } = jest.requireActual('@kbn/shared-ux-router');
+    const { createMemoryHistory } = jest.requireActual('history');
+
+    expect(() =>
+      render(
+        <IntlProvider locale="en">
+          <Router history={createMemoryHistory()}>
+            <ServiceFlyoutApmCharts {...defaultProps} />
+          </Router>
+        </IntlProvider>
+      )
+    ).not.toThrow();
+
+    expect(screen.getByTestId('latencyChartMock')).toBeInTheDocument();
+  });
 });

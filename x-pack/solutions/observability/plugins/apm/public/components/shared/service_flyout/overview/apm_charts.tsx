@@ -11,8 +11,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo } from 'react';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { ScopedRouterProvider } from '../../../../context/scoped_router_provider';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FailedTransactionChart } from '../../../alerting/ui_components/alert_details_app_section/failed_transaction_chart';
 import { LatencyChart } from '../../../alerting/ui_components/alert_details_app_section/latency_chart';
@@ -93,30 +94,36 @@ export function ServiceFlyoutApmCharts({
   };
 
   return (
-    <Router history={history}>
-      <ChartPointerEventContextProvider>
-        <div
-          data-test-subj="serviceFlyoutApmCharts"
-          css={css`
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: ${euiTheme.size.m};
-          `}
-        >
-          {/* Distinct chart ids: the flyout globally pushes the page charts' tooltip
-              portals (latencyChart/throughput/errorRate) below the flyout, and the
-              tooltip portal is named after the chart id — reusing those ids here
-              would hide the flyout's own tooltips. */}
-          <LatencyChart
-            {...commonProps}
-            chartId="serviceFlyoutLatencyChart"
-            latencyAggregationType={latencyAggregationType}
-            setLatencyAggregationType={setLatencyAggregationType}
-          />
-          <FailedTransactionChart {...commonProps} chartId="serviceFlyoutErrorRate" />
-          <ThroughputChart {...commonProps} chartId="serviceFlyoutThroughput" />
-        </div>
-      </ChartPointerEventContextProvider>
-    </Router>
+    // 9.5 `@kbn/shared-ux-router` still wraps Router in CompatRouter. Without
+    // resetting the v6 context, this nested memory router throws
+    // "You cannot render a <Router> inside another <Router>" and takes down
+    // the Service map page when the flyout opens.
+    <ScopedRouterProvider>
+      <Router history={history}>
+        <ChartPointerEventContextProvider>
+          <div
+            data-test-subj="serviceFlyoutApmCharts"
+            css={css`
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: ${euiTheme.size.m};
+            `}
+          >
+            {/* Distinct chart ids: the flyout globally pushes the page charts' tooltip
+                portals (latencyChart/throughput/errorRate) below the flyout, and the
+                tooltip portal is named after the chart id — reusing those ids here
+                would hide the flyout's own tooltips. */}
+            <LatencyChart
+              {...commonProps}
+              chartId="serviceFlyoutLatencyChart"
+              latencyAggregationType={latencyAggregationType}
+              setLatencyAggregationType={setLatencyAggregationType}
+            />
+            <FailedTransactionChart {...commonProps} chartId="serviceFlyoutErrorRate" />
+            <ThroughputChart {...commonProps} chartId="serviceFlyoutThroughput" />
+          </div>
+        </ChartPointerEventContextProvider>
+      </Router>
+    </ScopedRouterProvider>
   );
 }
