@@ -9,7 +9,6 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { ElasticsearchOtlpExporter, EvalSpanProcessor } from '@kbn/tracing';
 import { initInferenceTracerProvider } from '@kbn/inference-tracing';
 import { coreMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderConfig } from '../config';
 import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
@@ -77,8 +76,6 @@ const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClas
 const MockedEvalSpanProcessor = EvalSpanProcessor as jest.MockedClass<typeof EvalSpanProcessor>;
 
 describe('registerTracingExporter', () => {
-  const logger = loggerMock.create();
-
   function createCore() {
     return coreMock.createStart();
   }
@@ -98,7 +95,6 @@ describe('registerTracingExporter', () => {
     const result = await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(result).toBeDefined();
@@ -124,7 +120,6 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(MockedOtlpExporter).toHaveBeenCalledWith({
@@ -147,7 +142,6 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
@@ -166,7 +160,6 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(initInferenceTracerProvider).toHaveBeenCalledTimes(1);
@@ -196,7 +189,7 @@ describe('registerTracingExporter', () => {
       opik_distributed_tracing: false,
     };
 
-    const teardown = await registerTracingExporter({ core: coreStart, tracingConfig, logger });
+    const teardown = await registerTracingExporter({ core: coreStart, tracingConfig });
     expect(teardown).toBeDefined();
 
     await teardown!();

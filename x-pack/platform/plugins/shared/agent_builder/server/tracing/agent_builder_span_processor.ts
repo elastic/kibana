@@ -26,7 +26,6 @@ import { toHashedId } from '@kbn/agent-builder-server/telemetry';
 import {
   DATA_STREAM_NAMESPACE_ATTR,
   getPrivacySettingsFromContext,
-  getSpaceIdFromContext,
   isAgentBuilderSpan,
 } from './agent_builder_context';
 import type { TracingPrivacySettings } from './privacy_settings';
@@ -289,7 +288,6 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     }
     this.spanSettings.set(span, settings);
     span.setAttribute(SHOULD_TRACK_ATTR, true);
-    span.setAttribute(DATA_STREAM_NAMESPACE_ATTR, getSpaceIdFromContext(parentContext));
     this.batchProcessor.onStart(span, parentContext);
   }
 
@@ -348,11 +346,11 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     this.batchProcessor.onEnd(exportSpan);
   }
 
-  async forceFlush(): Promise<void> {
+  forceFlush(): Promise<void> {
     return this.batchProcessor.forceFlush();
   }
 
-  async shutdown(): Promise<void> {
+  shutdown(): Promise<void> {
     return this.batchProcessor.shutdown();
   }
 }

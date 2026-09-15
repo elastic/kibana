@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { buildOtelResources } from '@kbn/telemetry';
 import {
@@ -34,7 +33,6 @@ export const registerTracingExporter = async ({
 }: {
   core: CoreStart;
   tracingConfig: AgentBuilderConfig['tracing'];
-  logger: Logger;
 }): Promise<(() => Promise<void>) | undefined> => {
   const allExporters: tracing.SpanExporter[] = [
     new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),

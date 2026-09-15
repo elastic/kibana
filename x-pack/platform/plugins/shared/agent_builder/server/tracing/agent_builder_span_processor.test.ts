@@ -164,6 +164,9 @@ describe('AgentBuilderSpanProcessor', () => {
     });
     const span = createMockSpan('inference', options?.name);
     processor.onStart(span, agentBuilderParentContext(options?.spaceId, createSettings(settings)));
+    if (options?.spaceId) {
+      span.setAttribute(DATA_STREAM_NAMESPACE_ATTR, options.spaceId);
+    }
     Object.assign(span.attributes, attrs);
     if (options?.events) {
       Object.assign(span, { events: options.events });
@@ -173,7 +176,7 @@ describe('AgentBuilderSpanProcessor', () => {
     return calls[calls.length - 1][0] as tracing.ReadableSpan;
   }
 
-  it('onStart marks agent builder inference spans and copies the space onto the span', () => {
+  it('onStart marks agent builder inference spans with attribute when enabled', () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -184,7 +187,10 @@ describe('AgentBuilderSpanProcessor', () => {
     processor.onStart(span, parentContext);
 
     expect(span.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
-    expect(span.setAttribute).toHaveBeenCalledWith(DATA_STREAM_NAMESPACE_ATTR, 'default');
+    expect(span.setAttribute).not.toHaveBeenCalledWith(
+      DATA_STREAM_NAMESPACE_ATTR,
+      expect.anything()
+    );
     expect(mockBatch.onStart).toHaveBeenCalledWith(span, parentContext);
   });
 
@@ -231,18 +237,6 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(mockBatch.onStart).not.toHaveBeenCalled();
   });
 
-  it('onStart copies the baggage space onto the span', () => {
-    const processor = new AgentBuilderSpanProcessor({
-      exporter: createExporter(),
-      scheduledDelayMillis: 1,
-    });
-
-    const span = createMockSpan('inference');
-    processor.onStart(span, agentBuilderParentContext('marketing'));
-
-    expect(span.setAttribute).toHaveBeenCalledWith(DATA_STREAM_NAMESPACE_ATTR, 'marketing');
-  });
-
   it('onStart still marks the span when enabled is false', () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
@@ -278,11 +272,9 @@ describe('AgentBuilderSpanProcessor', () => {
       existing: 'keep-me',
     });
     expect(exported.resource.attributes).toEqual(
-      expect.objectContaining({
-        'data_stream.dataset': 'agent_builder',
-        [DATA_STREAM_NAMESPACE_ATTR]: 'default',
-      })
+      expect.objectContaining({ 'data_stream.dataset': 'agent_builder' })
     );
+    expect(exported.resource.attributes).not.toHaveProperty(DATA_STREAM_NAMESPACE_ATTR);
     expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
   });
