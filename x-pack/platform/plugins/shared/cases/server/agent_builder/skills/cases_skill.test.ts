@@ -33,8 +33,7 @@ describe('buildCasesSkill', () => {
       expect(tools).toEqual([
         platformCoreTools.cases,
         platformCoreCasesTools.manage,
-        platformCoreCasesTools.getAttachments,
-        platformCoreCasesTools.manageAttachments,
+        platformCoreCasesTools.attachments,
         platformCoreCasesTools.observables,
       ]);
     });
