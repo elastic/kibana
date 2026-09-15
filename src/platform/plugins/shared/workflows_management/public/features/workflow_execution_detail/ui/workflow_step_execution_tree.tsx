@@ -1123,6 +1123,8 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
+  /** Paginated steps-list `total`; empty truncated state when this is > 0 and no rows loaded. */
+  stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -1144,6 +1146,7 @@ export interface WorkflowStepExecutionTreeProps {
 export const WorkflowStepExecutionTree = ({
   error,
   execution,
+  stepExecutionsTotal = 0,
   definition,
   onStepExecutionClick,
   selectedId,
@@ -1213,6 +1216,9 @@ export const WorkflowStepExecutionTree = ({
 
   const openNodes = useMemo(() => {
     if (!execution || !definition || error) return [] as OpenTreeNode[];
+    if (stepExecutionsTotal > 0 && execution.stepExecutions.length === 0) {
+      return [] as OpenTreeNode[];
+    }
     if (
       execution.stepExecutions?.length === 0 &&
       !isInProgressStatus(execution.status) &&
@@ -1323,6 +1329,7 @@ export const WorkflowStepExecutionTree = ({
     onStepExecutionClick,
     onToggleGap,
     selectedId,
+    stepExecutionsTotal,
   ]);
 
   const defaultExpandedIds = useMemo(() => {
@@ -1380,6 +1387,34 @@ export const WorkflowStepExecutionTree = ({
           </h2>
         }
         body={<EuiText>{error.message}</EuiText>}
+      />
+    );
+  }
+
+  if (stepExecutionsTotal > 0 && execution.stepExecutions.length === 0) {
+    const omittedCount = stepExecutionsTotal;
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        data-test-subj="workflowStepExecutionTreeTruncatedEmpty"
+        icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeTitle"
+              defaultMessage="Unable to show step executions"
+            />
+          </h2>
+        }
+        body={
+          <EuiText>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.stepExecutionsTooLargeDescription"
+              defaultMessage="This execution has too much step data to load at once. {count, plural, one {# step execution was not loaded} other {# step executions were not loaded}}."
+              values={{ count: omittedCount }}
+            />
+          </EuiText>
+        }
       />
     );
   }

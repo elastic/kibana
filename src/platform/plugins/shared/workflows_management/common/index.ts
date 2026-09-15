@@ -16,6 +16,15 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 
 export const WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
 
+/** Max `size` for GET .../executions/{id}/steps. */
+export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE = 5000;
+
+/** Max step executions embedded on GET .../executions/{id}. */
+export const WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT = 5000;
+
+/** Page size the execution-detail UI requests (tree budget). */
+export const WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE = 1000;
+
 export const WORKFLOWS_DOCUMENTATION_URL = 'https://ela.st/workflows-docs';
 
 // Export shared utilities that are needed by both server and client
