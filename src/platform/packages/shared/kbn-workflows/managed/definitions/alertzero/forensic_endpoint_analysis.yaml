@@ -95,6 +95,9 @@ steps:
           configuration_overrides:
             skill_ids:
               - endpoint-forensic-analysis
+            tools:
+              - tool_ids:
+                  - security.alertzero.actions.list
           message: >
             I have an alert on {{ steps.resolve_host.output.host_name }}.
             Perform forensic analysis and extract all IoCs.
@@ -122,31 +125,30 @@ steps:
               Do not restate them in `rationale`. Put the assessment in `rationale`: whether this is a real
               incident, which other hosts are affected, what the data gaps are, and why the evidence supports
               the actions you recommend.
-            - If this reconstruction justifies containment, recommend specific containment actions in `recommendedActions.
-              Only recommend actions specified below in "Allowed actions". Do not invent actions. Each action requires
-              endpoint_ids taken from Elastic Defend agent.id on involved hosts. Recommend only what you can
-              tie to the timeline and indicators you returned.
+            - Call `security.alertzero.actions.list` with categories `["contain"]` before proposing anything.
+              Use the returned catalog as the only allowed actions. Set each `actionId` to a catalog
+              `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
+              catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
+            - If this reconstruction justifies containment, recommend specific containment actions in
+              `recommendedActions` from that catalog. Each action requires endpoint_ids taken from Elastic
+              Defend agent.id on involved hosts. Recommend only what you can tie to the timeline and
+              indicators you returned.
             - State plainly
               (a) what you will propose for human approval
               (b) the exact change or action that approval authorizes
               (c) what happens if it is declined.
               Return this statement in `proposal`.
 
-            Allowed actions (use exact actionID, do not invent IDs):
-            - system-alertzero-action-isolate-host - isolate the host. Use when the host is compromised and no more specific process/path action fits.
-            - system-alertzero-action-kill-process - kill a malicious process. Requires pid or entity_id from evidence.
-            - system-alertzero-action-suspend-process - suspend a suspected malicious process. Use when the evidence is strong but you want a reversible action. Requires pid or entity_id from evidence.
-
             Rules
-            - Pick the most specific action the evidence supports. Prefer kill/suspend when a process entity_id or pid is present; isolate when only the host is known.
-            - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set propose=false. Do not guess ids, pids, paths, or commands.
+            - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
+              entity_id or pid is present; isolate when only the host is known.
+            - If no Elastic Defend endpoint_id is present, or required extra fields are missing, set
+              propose=false. Do not guess ids, pids, paths, or commands.
             - Cite hosts, process/path, tactics, and why this action now in rationale.
 
-            For each recommended action set actionInput to the exact shape the action workflow expects:
-            - system-alertzero-action-isolate-host → { "endpoint_ids": [agentId] }
-            - system-alertzero-action-kill-process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
-              or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
-            - system-alertzero-action-suspend-process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
+            For each recommended action set actionInput to the shape that action's catalog description implies:
+            - Host isolation → { "endpoint_ids": [agentId] }
+            - Kill or suspend process → { "endpoint_ids": [agentId], "parameters": { "pid": <pid> } }
               or { "endpoint_ids": [agentId], "parameters": { "entity_id": "<entity_id>" } }
             agentId must come from Elastic Defend agent.id in the telemetry.
             For process actions include pid when present in telemetry, otherwise entity_id.
@@ -320,7 +322,9 @@ steps:
                 type: array
                 maxItems: 8
                 description: >
-                  Containment this reconstruction justifies. Empty when the evidence justifies none.
+                  Containment this reconstruction justifies, taken from
+                  `security.alertzero.actions.list`. Empty when the evidence
+                  justifies none or the catalog returned nothing.
                 items:
                   type: object
                   required:
@@ -331,10 +335,10 @@ steps:
                       type: string
                     actionId:
                       type: string
-                      enum:
-                        - system-alertzero-action-isolate-host
-                        - system-alertzero-action-kill-process
-                        - system-alertzero-action-suspend-process
+                      maxLength: 256
+                      description: >
+                        workflowId from `security.alertzero.actions.list`. Must match a catalog
+                        entry exactly. Never invent an id.
                     comment:
                       type: string
                       maxLength: 500
@@ -342,9 +346,8 @@ steps:
                     actionInput:
                       type: object
                       description: >
-                        Input for the action workflow. Shape depends on actionId:
-                        system-alertzero-action-isolate-host → { endpoint_ids }.
-                        system-alertzero-action-kill-process / system-alertzero-action-suspend-process → { endpoint_ids, parameters: { pid } or { entity_id } }.
+                        Input for the catalog action. Host isolation → { endpoint_ids }.
+                        Kill or suspend process → { endpoint_ids, parameters: { pid } or { entity_id } }.
                       required:
                         - endpoint_ids
                       properties:
