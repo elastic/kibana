@@ -11,15 +11,20 @@ import { fireEvent } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
+import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
+import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { expectIsViewOnly } from '../mocks';
 import { createMalwarePolicyAccessor } from './policy_accessor';
 import type { PerOsNotifyUserOptionProps } from './per_os_notify_user_option';
 import { PerOsNotifyUserOption } from './per_os_notify_user_option';
 
 jest.mock('../../../../../../common/hooks/use_license');
+
+const useLicenseMock = _useLicense as jest.Mock;
 
 describe('PerOsNotifyUserOption', () => {
   let policy: PolicyConfig;
@@ -49,6 +54,7 @@ describe('PerOsNotifyUserOption', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     hasRendered = false;
+    useLicenseMock.mockReturnValue(licenseServiceMocked);
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
     onChange = jest.fn();
@@ -165,5 +171,14 @@ describe('PerOsNotifyUserOption', () => {
     expectIsViewOnly(renderResult.getByTestId('test'));
     expect(renderResult.getByTestId('test-customMessage')).toHaveValue('mac message');
     expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
+  });
+
+  it('renders nothing below Platinum', () => {
+    const licenseServiceMock = createLicenseServiceMock();
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+    useLicenseMock.mockReturnValue(licenseServiceMock);
+    render();
+
+    expect(renderResult.container).toBeEmptyDOMElement();
   });
 });

@@ -253,5 +253,12 @@ describe('PerOsBehaviourProtectionCard', () => {
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.card));
     });
+
+    it('should show the stored protection mode', () => {
+      policy.windows.behavior_protection.mode = ProtectionModes.detect;
+      render();
+
+      expect(renderResult.getByTestId(testSubj.windows.modeSelect)).toHaveTextContent(/^Detect$/);
+    });
   });
 });

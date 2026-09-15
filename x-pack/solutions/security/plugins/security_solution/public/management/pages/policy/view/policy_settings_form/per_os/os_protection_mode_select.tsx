@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
@@ -55,8 +55,7 @@ export interface OsProtectionModeSelectProps {
 
 export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
   ({ mode, onModeChange, disabled, 'data-test-subj': dataTestSubj }) => (
-    <EuiFlexItem
-      grow={false}
+    <div
       data-test-subj={dataTestSubj ? `${dataTestSubj}-fixedWidth` : undefined}
       css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
     >
@@ -69,7 +68,7 @@ export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
         data-test-subj={dataTestSubj}
         aria-label={PROTECTION_MODE_SELECT_ARIA_LABEL}
       />
-    </EuiFlexItem>
+    </div>
   )
 );
 OsProtectionModeSelect.displayName = 'OsProtectionModeSelect';

@@ -10,7 +10,6 @@ import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
   DeviceControlAccessLevel,
   Immutable,
@@ -28,7 +27,7 @@ import { PerOsSettingCard } from './per_os_setting_card';
 import { SettingLockedCard } from '../components/setting_locked_card';
 import { useGetDeviceControlUpsellComponent } from '../hooks/use_get_device_control_component';
 import type { PolicyFormComponentCommonProps } from '../types';
-import { OsRow } from './os_row';
+import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
 import { PerOsDeviceControlNotifyUserOption } from './per_os_device_control_notify_user_option';
@@ -39,11 +38,6 @@ const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
 ];
-
-const POLICY_OS_TO_OPERATING_SYSTEM: Readonly<Record<DeviceControlOSes, OperatingSystem>> = {
-  [PolicyOperatingSystem.windows]: OperatingSystem.WINDOWS,
-  [PolicyOperatingSystem.mac]: OperatingSystem.MAC,
-};
 
 export const PER_OS_DEVICE_CONTROL_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl',

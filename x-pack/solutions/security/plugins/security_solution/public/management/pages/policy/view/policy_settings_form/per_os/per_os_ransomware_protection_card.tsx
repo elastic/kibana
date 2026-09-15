@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -18,22 +17,18 @@ import { SettingLockedCard } from '../components/setting_locked_card';
 import { useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
-import { OsRow } from './os_row';
+import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 import { PerOsNotifyUserOption } from './per_os_notify_user_option';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 import { createRansomwarePolicyAccessor } from './policy_accessor';
 import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
+import { useProtectionModeChangeHandler } from './use_protection_mode_change_handler';
 
 const RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
 ];
-
-const POLICY_OS_TO_OPERATING_SYSTEM: Readonly<Record<RansomwareProtectionOSes, OperatingSystem>> = {
-  [PolicyOperatingSystem.windows]: OperatingSystem.WINDOWS,
-  [PolicyOperatingSystem.mac]: OperatingSystem.MAC,
-};
 
 export const LOCKED_CARD_RANSOMWARE_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.ransomware',
@@ -136,25 +131,10 @@ const PerOsRansomwareProtectionRow = <OS extends RansomwareProtectionOSes>({
   'data-test-subj': dataTestSubj,
 }: PerOsRansomwareProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const osPolicy = accessor.read();
   const ransomwareMode = osPolicy.ransomware.mode ?? ProtectionModes.off;
   const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
-  const handleModeChange = useCallback(
-    (nextMode: ProtectionModes) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.ransomware.mode = nextMode;
-        // An active mode syncs the host notification. `off` leaves it alone, so a row disabled
-        // on its own keeps its stored notification values and re-enabling restores them; the
-        // master toggle is what clears them across every OS.
-        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
-          currentOsPolicy.popup.ransomware.enabled = nextMode === ProtectionModes.prevent;
-        }
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, isPlatinumPlus, onChange]
-  );
+  const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
 
   return (
     <OsRow

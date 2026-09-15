@@ -65,7 +65,7 @@ export async function notifyProtectionFeatureUsage(
   });
 
   PROTECTION_KEYS.forEach((protectionKey) => {
-    // only notify once per protection since protection can't be configured per os
+    // notify once per protection per update even when several OSes change together
     let notified = false;
 
     OS_KEYS.forEach((osKey) => {

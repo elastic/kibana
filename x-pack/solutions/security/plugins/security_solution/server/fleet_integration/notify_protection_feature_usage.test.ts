@@ -105,6 +105,21 @@ describe('notifyProtectionFeatureUsage', () => {
       expect(featureUsageService.notifyUsage).toHaveBeenCalledTimes(1);
       expect(featureUsageService.notifyUsage).toHaveBeenCalledWith('RANSOMWARE_PROTECTION');
     });
+
+    it('does not notify when a missing ransomware branch stays off', async () => {
+      const currentMac = currentPackagePolicy.inputs[0].config.policy.value.mac as Partial<
+        PolicyConfig['mac']
+      >;
+      delete currentMac.ransomware;
+      currentPackagePolicy.inputs[0].config.policy.value.windows.ransomware.mode =
+        ProtectionModes.off;
+      newPackagePolicy.inputs[0].config.policy.value.windows.ransomware.mode = ProtectionModes.off;
+      newPackagePolicy.inputs[0].config.policy.value.mac.ransomware.mode = ProtectionModes.off;
+
+      await notify();
+
+      expect(featureUsageService.notifyUsage).not.toHaveBeenCalled();
+    });
   });
 
   describe('memory_protection and behavior_protection', () => {

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
@@ -88,8 +88,7 @@ export const PerOsDeviceControlAccessLevelSelect = memo<PerOsDeviceControlAccess
     );
 
     return (
-      <EuiFlexItem
-        grow={false}
+      <div
         data-test-subj={dataTestSubj ? `${dataTestSubj}-fixedWidth` : undefined}
         css={{ inlineSize: OS_CONTROL_WIDTH, maxInlineSize: '100%' }}
       >
@@ -102,7 +101,7 @@ export const PerOsDeviceControlAccessLevelSelect = memo<PerOsDeviceControlAccess
           data-test-subj={dataTestSubj}
           aria-label={ACCESS_LEVEL_SELECT_ARIA_LABEL}
         />
-      </EuiFlexItem>
+      </div>
     );
   }
 );

@@ -90,9 +90,9 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
     [accessor, onChange]
   );
 
-  const customNotificationComponent = CustomNotificationUpsellingComponent ? (
-    <CustomNotificationUpsellingComponent />
-  ) : (
+  // Custom notification is a paid control: show its upsell only after opt-in.
+  // When unchecked, keep the disabled textarea unless an upsell is active (then nothing).
+  const customNotificationComponent = !CustomNotificationUpsellingComponent ? (
     <EuiTextArea
       placeholder={i18n.translate(
         'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
@@ -111,7 +111,9 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
       rows={1}
       data-test-subj={getTestId('customMessage')}
     />
-  );
+  ) : userNotificationSelected ? (
+    <CustomNotificationUpsellingComponent />
+  ) : null;
 
   if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
     return null;

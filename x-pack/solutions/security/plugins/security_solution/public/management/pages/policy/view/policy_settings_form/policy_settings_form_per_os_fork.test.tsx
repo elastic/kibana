@@ -49,11 +49,11 @@ describe('PolicySettingsForm per-OS feature-flag fork', () => {
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
-  it('renders the per-OS form and not the legacy form when perOsPolicySettings is enabled', () => {
+  it('renders the per-OS form and not the legacy form when perOsPolicySettings is enabled', async () => {
     mockedContext.setExperimentalFlag({ linuxDnsEvents: true, perOsPolicySettings: true });
     render();
 
-    expect(renderResult.getByTestId(formTestSubj.perOsMalware.card)).toBeInTheDocument();
+    expect(await renderResult.findByTestId(formTestSubj.perOsMalware.card)).toBeInTheDocument();
     expect(
       renderResult.queryByTestId(formTestSubj.malware.enableDisableSwitch)
     ).not.toBeInTheDocument();

@@ -221,6 +221,13 @@ describe('PerOsMemoryProtectionCard', () => {
       expectIsViewOnly(renderResult.getByTestId(testSubj.card));
     });
 
+    it('should show the stored protection mode', () => {
+      policy.windows.memory_protection.mode = ProtectionModes.detect;
+      render();
+
+      expect(renderResult.getByTestId(testSubj.windows.modeSelect)).toHaveTextContent(/^Detect$/);
+    });
+
     it('collapses the card body when memory protection is off on every OS', () => {
       policy.windows.memory_protection.mode = ProtectionModes.off;
       policy.mac.memory_protection.mode = ProtectionModes.off;

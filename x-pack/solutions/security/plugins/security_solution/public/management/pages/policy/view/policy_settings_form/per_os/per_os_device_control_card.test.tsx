@@ -139,6 +139,37 @@ describe('PerOsDeviceControlCard', () => {
     expect(updatedPolicy.linux).toEqual(linuxBefore);
   });
 
+  it('syncs popup.device_control.enabled when USB access level enters and leaves deny_all', async () => {
+    policy[PolicyOperatingSystem.mac].device_control!.usb_storage =
+      DeviceControlAccessLevel.read_only;
+    policy[PolicyOperatingSystem.mac].popup.device_control!.enabled = false;
+    const windowsBefore = cloneDeep(policy[PolicyOperatingSystem.windows]);
+    const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);
+    render();
+
+    await userEvent.click(renderResult.getByTestId(testSubj.mac.accessLevelSelect));
+    await userEvent.click(renderResult.getByRole('option', { name: 'Block all' }));
+
+    const afterDenyAll = getUpdatedPolicy();
+    expect(afterDenyAll.mac.device_control?.usb_storage).toBe(DeviceControlAccessLevel.deny_all);
+    expect(afterDenyAll.mac.popup.device_control!.enabled).toBe(true);
+    expect(afterDenyAll.windows).toEqual(windowsBefore);
+    expect(afterDenyAll.linux).toEqual(linuxBefore);
+
+    renderResult.rerender(<PerOsDeviceControlCard {...props} policy={afterDenyAll} />);
+
+    await userEvent.click(renderResult.getByTestId(testSubj.mac.accessLevelSelect));
+    await userEvent.click(renderResult.getByRole('option', { name: 'Read only' }));
+
+    const afterLeaveDenyAll = getUpdatedPolicy();
+    expect(afterLeaveDenyAll.mac.device_control?.usb_storage).toBe(
+      DeviceControlAccessLevel.read_only
+    );
+    expect(afterLeaveDenyAll.mac.popup.device_control!.enabled).toBe(false);
+    expect(afterLeaveDenyAll.windows).toEqual(windowsBefore);
+    expect(afterLeaveDenyAll.linux).toEqual(linuxBefore);
+  });
+
   it('renders without throwing when one OS has no device_control field', () => {
     delete policy[PolicyOperatingSystem.mac].device_control;
 

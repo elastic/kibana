@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -18,25 +17,20 @@ import { SettingLockedCard } from '../components/setting_locked_card';
 import { useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
-import { OsRow } from './os_row';
+import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 import { PerOsNotifyUserOption } from './per_os_notify_user_option';
 import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
 import { PerOsReputationService } from './per_os_reputation_service';
 import type { PerOsPolicyAccessor } from './policy_accessor';
 import { createBehaviorProtectionPolicyAccessor } from './policy_accessor';
+import { useProtectionModeChangeHandler } from './use_protection_mode_change_handler';
 
 const BEHAVIOUR_OS_VALUES: Immutable<BehaviorProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
   PolicyOperatingSystem.linux,
 ];
-
-const POLICY_OS_TO_OPERATING_SYSTEM: Readonly<Record<BehaviorProtectionOSes, OperatingSystem>> = {
-  [PolicyOperatingSystem.windows]: OperatingSystem.WINDOWS,
-  [PolicyOperatingSystem.mac]: OperatingSystem.MAC,
-  [PolicyOperatingSystem.linux]: OperatingSystem.LINUX,
-};
 
 const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
@@ -136,24 +130,13 @@ const PerOsBehaviourProtectionRow = <OS extends BehaviorProtectionOSes>({
   'data-test-subj': dataTestSubj,
 }: PerOsBehaviourProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const osPolicy = accessor.read();
   const behaviorMode = osPolicy.behavior_protection.mode;
   const subfeaturesVisible = behaviorMode !== ProtectionModes.off;
-  const handleModeChange = useCallback(
-    (nextMode: ProtectionModes) => {
-      const updatedPolicy = accessor.update((currentOsPolicy) => {
-        currentOsPolicy.behavior_protection.mode = nextMode;
-        // An active mode syncs the host notification. `off` leaves it alone, so a row disabled
-        // on its own keeps its stored notification values and re-enabling restores them; the
-        // master toggle is what clears them across every OS.
-        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
-          currentOsPolicy.popup.behavior_protection.enabled = nextMode === ProtectionModes.prevent;
-        }
-      });
-      onChange({ isValid: true, updatedPolicy });
-    },
-    [accessor, isPlatinumPlus, onChange]
+  const handleModeChange = useProtectionModeChangeHandler(
+    accessor,
+    'behavior_protection',
+    onChange
   );
 
   return (

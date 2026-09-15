@@ -59,14 +59,21 @@ export const PerOsProtectionMasterToggle = memo(
   }: PerOsProtectionMasterToggleProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    // A missing mode is treated as off so the switch agrees with the rows.
     const selected = osList.some((os) => {
       if (os === 'windows') {
-        return policy.windows[protection].mode !== ProtectionModes.off;
+        return (policy.windows[protection].mode ?? ProtectionModes.off) !== ProtectionModes.off;
       }
       if (os === 'mac') {
-        return policy.mac[protection as MacPolicyProtection].mode !== ProtectionModes.off;
+        return (
+          (policy.mac[protection as MacPolicyProtection].mode ?? ProtectionModes.off) !==
+          ProtectionModes.off
+        );
       }
-      return policy.linux[protection as LinuxPolicyProtection].mode !== ProtectionModes.off;
+      return (
+        (policy.linux[protection as LinuxPolicyProtection].mode ?? ProtectionModes.off) !==
+        ProtectionModes.off
+      );
     });
 
     const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(

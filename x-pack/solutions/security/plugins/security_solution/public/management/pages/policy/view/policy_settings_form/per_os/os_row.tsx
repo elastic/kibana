@@ -8,9 +8,18 @@
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, useEuiTheme } from '@elastic/eui';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import { OS_TITLES } from '../../../../../common/translations';
 import { OS_LABEL_COLUMN_WIDTH } from './os_control_layout';
+
+export const POLICY_OS_TO_OPERATING_SYSTEM: Readonly<
+  Record<PolicyOperatingSystem, OperatingSystem>
+> = {
+  [PolicyOperatingSystem.windows]: OperatingSystem.WINDOWS,
+  [PolicyOperatingSystem.mac]: OperatingSystem.MAC,
+  [PolicyOperatingSystem.linux]: OperatingSystem.LINUX,
+};
 
 export interface OsRowProps {
   os: OperatingSystem;

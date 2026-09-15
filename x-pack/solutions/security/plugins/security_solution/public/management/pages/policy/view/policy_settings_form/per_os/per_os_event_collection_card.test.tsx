@@ -229,6 +229,14 @@ describe('PerOsEventCollectionCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows the stored event collection values in view mode', () => {
+    props.mode = 'view';
+    policy.windows.events.file = false;
+    render();
+
+    expect(renderResult.getByTestId(testSubj.windows.fileCheckbox)).not.toBeChecked();
+  });
+
   it('shows the selected / total event collection count on each OS row', () => {
     render();
 

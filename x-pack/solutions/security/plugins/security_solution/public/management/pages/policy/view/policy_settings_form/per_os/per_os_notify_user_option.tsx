@@ -149,9 +149,9 @@ const PerOsNotifyUserOptionComponent = <
     });
   }, []);
 
-  const customNotificationComponent = CustomNotificationUpsellingComponent ? (
-    <CustomNotificationUpsellingComponent />
-  ) : (
+  // Custom notification is a paid control: show its upsell only after opt-in.
+  // When unchecked, keep the disabled textarea unless an upsell is active (then nothing).
+  const customNotificationComponent = !CustomNotificationUpsellingComponent ? (
     <EuiTextArea
       placeholder={i18n.translate(
         'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
@@ -170,7 +170,9 @@ const PerOsNotifyUserOptionComponent = <
       rows={1}
       data-test-subj={getTestId('customMessage')}
     />
-  );
+  ) : userNotificationSelected ? (
+    <CustomNotificationUpsellingComponent />
+  ) : null;
 
   if (!isPlatinumPlus) {
     return null;

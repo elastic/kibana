@@ -67,6 +67,32 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     ).toHaveTextContent(/^Disable$/);
   });
 
+  // A missing macOS ransomware mode must not check the master switch while both rows read Disable.
+  it('leaves the master switch unchecked when Windows ransomware is off and macOS mode is missing', () => {
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    // @ts-expect-error reproducing a policy stored without the field
+    delete policy.mac.ransomware.mode;
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={jest.fn()}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    expect(
+      renderResult.getByTestId(testSubjects.perOsRansomware.enableDisableSwitch)
+    ).toHaveAttribute('aria-checked', 'false');
+    expect(
+      renderResult.getByTestId(testSubjects.perOsRansomware.windows.modeSelect)
+    ).toHaveTextContent(/^Disable$/);
+    expect(renderResult.getByTestId(testSubjects.perOsRansomware.mac.modeSelect)).toHaveTextContent(
+      /^Disable$/
+    );
+  });
+
   // The advanced text field could delete the key while leaving `supported` behind. Falling
   // back to Windows' default here would show macOS ransomware as on.
   it('shows Disable for a 9.4 policy whose macOS ransomware mode was cleared', () => {

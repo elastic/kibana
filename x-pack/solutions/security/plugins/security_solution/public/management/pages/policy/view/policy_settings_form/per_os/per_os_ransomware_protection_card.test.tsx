@@ -227,5 +227,12 @@ describe('PerOsRansomwareProtectionCard', () => {
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.card));
     });
+
+    it('should show the stored protection mode', () => {
+      policy.windows.ransomware.mode = ProtectionModes.detect;
+      render();
+
+      expect(renderResult.getByTestId(testSubj.windows.modeSelect)).toHaveTextContent(/^Detect$/);
+    });
   });
 });
