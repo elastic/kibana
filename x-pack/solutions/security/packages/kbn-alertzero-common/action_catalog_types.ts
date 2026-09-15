@@ -12,7 +12,7 @@ import type {
   JsonSchema,
 } from '@kbn/workflows';
 
-export type { ActionApprovalPolicy, ActionCategory, ActionImpact };
+export type { ActionApprovalPolicy, ActionCategory, ActionImpact, JsonSchema };
 
 /**
  * One entry of the action catalog: the lightweight, agent-facing projection of

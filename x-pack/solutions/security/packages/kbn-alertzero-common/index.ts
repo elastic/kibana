@@ -71,6 +71,7 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
