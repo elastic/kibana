@@ -7,7 +7,6 @@
 
 import { agentHasConnector, getEffectiveConnectorIds } from './connector_ids_utils';
 
-const ALL_IDS = ['c1', 'c2', 'c3'];
 
 describe('agentHasConnector', () => {
   it('returns false when connector_ids is undefined (no connectors assigned)', () => {
@@ -37,28 +36,25 @@ describe('agentHasConnector', () => {
 
 describe('getEffectiveConnectorIds', () => {
   it('returns empty array when connector_ids is undefined (no connectors assigned)', () => {
-    expect(
-      getEffectiveConnectorIds({ configuration: { connector_ids: undefined } }, ALL_IDS)
-    ).toEqual([]);
+    expect(getEffectiveConnectorIds({ configuration: { connector_ids: undefined } })).toEqual([]);
   });
 
   it('returns empty array when connector_ids is null (no connectors assigned)', () => {
-    expect(getEffectiveConnectorIds({ configuration: { connector_ids: null } }, ALL_IDS)).toEqual(
-      []
-    );
+    expect(getEffectiveConnectorIds({ configuration: { connector_ids: null } })).toEqual([]);
   });
 
   it('returns empty array when configuration is absent', () => {
-    expect(getEffectiveConnectorIds({ configuration: undefined }, ALL_IDS)).toEqual([]);
+    expect(getEffectiveConnectorIds({ configuration: undefined })).toEqual([]);
   });
 
   it('returns the explicit list when connector_ids is set', () => {
-    expect(
-      getEffectiveConnectorIds({ configuration: { connector_ids: ['c1', 'c3'] } }, ALL_IDS)
-    ).toEqual(['c1', 'c3']);
+    expect(getEffectiveConnectorIds({ configuration: { connector_ids: ['c1', 'c3'] } })).toEqual([
+      'c1',
+      'c3',
+    ]);
   });
 
   it('returns an empty array when connector_ids is []', () => {
-    expect(getEffectiveConnectorIds({ configuration: { connector_ids: [] } }, ALL_IDS)).toEqual([]);
+    expect(getEffectiveConnectorIds({ configuration: { connector_ids: [] } })).toEqual([]);
   });
 });

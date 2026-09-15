@@ -22,10 +22,7 @@ export const agentHasConnector = (agent: AgentWithConnectorIds, connectorId: str
 /**
  * Returns the effective connector IDs for an agent. undefined/null means no connectors assigned.
  */
-export const getEffectiveConnectorIds = (
-  agent: AgentWithConnectorIds,
-  _allConnectorIds: string[]
-): string[] => {
+export const getEffectiveConnectorIds = (agent: AgentWithConnectorIds): string[] => {
   const { connector_ids: connectorIds } = agent.configuration ?? {};
   return connectorIds ?? [];
 };
