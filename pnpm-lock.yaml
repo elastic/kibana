@@ -2600,6 +2600,9 @@ importers:
       '@kbn/nightshift-ai':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
+      '@kbn/nightshift-decision-trees':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/nightshift_investigations
@@ -8834,6 +8837,8 @@ importers:
   x-pack/platform/packages/shared/kbn-mcp-client: {}
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
+
+  x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
 
   x-pack/platform/packages/shared/kbn-nightshift-shared: {}
 

@@ -24,6 +24,7 @@ import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
+import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
@@ -31,11 +32,15 @@ import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensur
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
+import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
+import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
+import { createDecisionTreeTools } from './tools/decision_tree';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
@@ -85,6 +90,7 @@ export class NightshiftInvestigationsPlugin
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
+  private decisionTreesEnabled = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -102,6 +108,13 @@ export class NightshiftInvestigationsPlugin
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
     }
+
+    // Decision trees are stored as Cortex pages and edited in the sandbox, so the feature only
+    // works when both are configured.
+    this.decisionTreesEnabled =
+      this.ctx.config.get().decision_trees.enabled &&
+      this.cortexEnabled &&
+      Boolean(this.ctx.config.get().sandbox);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
 
@@ -132,8 +145,12 @@ export class NightshiftInvestigationsPlugin
       registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: !!config.sandbox,
         cortexEnabled: this.cortexEnabled,
+        decisionTreesEnabled: this.decisionTreesEnabled,
         telemetryConnectorId,
       });
+      if (this.decisionTreesEnabled) {
+        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+      }
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
@@ -195,6 +212,18 @@ export class NightshiftInvestigationsPlugin
         plugins.agentBuilder.tools.register(
           createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
+
+        if (this.decisionTreesEnabled) {
+          const decisionTreeLogger = this.logger.get('decision_trees');
+          for (const tool of createDecisionTreeTools({
+            connectionManager,
+            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            getSpaceId,
+            logger: decisionTreeLogger,
+          })) {
+            plugins.agentBuilder.tools.register(tool);
+          }
+        }
       }
     }
 
@@ -219,6 +248,21 @@ export class NightshiftInvestigationsPlugin
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
               logger: this.logger.get('cortex'),
+            })
+          );
+        }
+        if (this.decisionTreesEnabled) {
+          const decisionTreeLogger = this.logger.get('decision_trees');
+          plugins.workflowsExtensions.registerStepDefinition(
+            decisionTreeHydrateStepDefinition({
+              getConnectionManager: () => this.sandboxConnectionManager,
+              logger: decisionTreeLogger,
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
+            decisionTreePrepareStepDefinition({
+              getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+              logger: decisionTreeLogger,
             })
           );
         }
@@ -376,6 +420,9 @@ export class NightshiftInvestigationsPlugin
     await installInvestigationWorkflow({ client });
     if (this.cortexEnabled) {
       await installCortexWorkflows({ client });
+    }
+    if (this.decisionTreesEnabled) {
+      await installDecisionTreeWorkflows({ client });
     }
     await client.ready();
   }

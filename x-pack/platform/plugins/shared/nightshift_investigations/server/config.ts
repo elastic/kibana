@@ -36,11 +36,19 @@ const cortexConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
 });
 
+const decisionTreesConfigSchema = schema.object({
+  // Governs the decision-tree reinforcement agent end to end: the post-execution hook on the
+  // deductive agent, the hydrate step that materializes trees into the sandbox, and the agent's
+  // own tools. Trees are stored as Cortex pages, so this depends on cortex.enabled as well.
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: false }),
   sandbox: schema.maybe(sandboxConfigSchema),
   cortex: cortexConfigSchema,
+  decision_trees: decisionTreesConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;

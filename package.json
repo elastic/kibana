@@ -961,6 +961,7 @@
     "@kbn/newsfeed-plugin": "workspace:*",
     "@kbn/newsfeed-test-plugin": "workspace:*",
     "@kbn/nightshift-ai": "workspace:*",
+    "@kbn/nightshift-decision-trees": "workspace:*",
     "@kbn/nightshift-investigations-plugin": "workspace:*",
     "@kbn/nightshift-plugin": "workspace:*",
     "@kbn/nightshift-shared": "workspace:*",

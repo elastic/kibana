@@ -1917,6 +1917,8 @@
       "@kbn/newsfeed-test-plugin/*": ["./src/platform/test/common/plugins/newsfeed/*"],
       "@kbn/nightshift-ai": ["./x-pack/platform/packages/shared/kbn-nightshift-ai"],
       "@kbn/nightshift-ai/*": ["./x-pack/platform/packages/shared/kbn-nightshift-ai/*"],
+      "@kbn/nightshift-decision-trees": ["./x-pack/platform/packages/shared/kbn-nightshift-decision-trees"],
+      "@kbn/nightshift-decision-trees/*": ["./x-pack/platform/packages/shared/kbn-nightshift-decision-trees/*"],
       "@kbn/nightshift-investigations-plugin": ["./x-pack/platform/plugins/shared/nightshift_investigations"],
       "@kbn/nightshift-investigations-plugin/*": ["./x-pack/platform/plugins/shared/nightshift_investigations/*"],
       "@kbn/nightshift-plugin": ["./x-pack/solutions/observability/plugins/nightshift"],

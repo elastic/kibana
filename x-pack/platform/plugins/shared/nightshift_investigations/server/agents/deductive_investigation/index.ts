@@ -11,6 +11,7 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools'
 import {
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -45,10 +46,12 @@ export const DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION =
 export const getDeductiveInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
+  decisionTreesEnabled = false,
   telemetryConnectorId,
 }: {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
+  decisionTreesEnabled?: boolean;
   telemetryConnectorId?: string;
 }): AgentTypeDefinition => ({
   id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_TYPE_ID,
@@ -73,8 +76,13 @@ export const getDeductiveInvestigationAgentType = ({
     ...(sandboxEnabled && cortexEnabled
       ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
       : {}),
-    ...(cortexEnabled
-      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] }
+    ...(cortexEnabled || decisionTreesEnabled
+      ? {
+          post_execution_workflow_ids: [
+            ...(cortexEnabled ? [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] : []),
+            ...(decisionTreesEnabled ? [NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID] : []),
+          ],
+        }
       : {}),
   },
 });
@@ -84,14 +92,21 @@ export const registerDeductiveInvestigationAgentType = (
   {
     sandboxEnabled,
     cortexEnabled,
+    decisionTreesEnabled = false,
     telemetryConnectorId,
   }: {
     sandboxEnabled: boolean;
     cortexEnabled: boolean;
+    decisionTreesEnabled?: boolean;
     telemetryConnectorId?: string;
   } = { sandboxEnabled: false, cortexEnabled: false }
 ): void => {
   agentBuilder.agents.registerType(
-    getDeductiveInvestigationAgentType({ sandboxEnabled, cortexEnabled, telemetryConnectorId })
+    getDeductiveInvestigationAgentType({
+      sandboxEnabled,
+      cortexEnabled,
+      decisionTreesEnabled,
+      telemetryConnectorId,
+    })
   );
 };
