@@ -31,15 +31,11 @@ export function resolveConnectorIdStepType(
     return null;
   }
 
-  const channelConnectorType =
-    getHitlChannelConnectorTypeFromPath(focusedYamlPair?.path) ??
-    getHitlChannelConnectorTypeFromPath(path);
-  if (channelConnectorType) {
-    return channelConnectorType;
-  }
-
   if (isHitlWaitStepType(focusedStepInfo.stepType)) {
-    return null;
+    return (
+      getHitlChannelConnectorTypeFromPath(focusedYamlPair?.path) ??
+      getHitlChannelConnectorTypeFromPath(path)
+    );
   }
 
   return focusedStepInfo.stepType;

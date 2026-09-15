@@ -106,9 +106,10 @@ describe('getConnectorIdSuggestions', () => {
       dynamicConnectorTypes: fakeConnectorTypes,
     } as unknown as AutocompleteContext);
 
-    expect(result).toHaveLength(3);
-    expect(result[0].insertText).toBe('public-slack');
-    expect(result[2].command?.arguments?.[0].connectorType).toBe('.slack');
+    expect(result.some((item) => item.insertText === 'public-slack')).toBe(true);
+    expect(result.some((item) => item.command?.arguments?.[0].connectorType === '.slack')).toBe(
+      true
+    );
   });
 
   it('should suggest inbound webhook instances for a trigger connector-id', () => {

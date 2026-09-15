@@ -104,6 +104,20 @@ describe('resolveConnectorIdStepType', () => {
       resolveConnectorIdStepType(waitForApprovalStep, ['steps', 0, 'with', 'message'], null)
     ).toBeNull();
   });
+
+  it('does not apply HITL channel mapping to non-HITL step types', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'slack', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        { ...waitForApprovalStep, stepType: 'slack' },
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('slack');
+  });
 });
 
 describe('resolveConnectorIdTriggerType', () => {
