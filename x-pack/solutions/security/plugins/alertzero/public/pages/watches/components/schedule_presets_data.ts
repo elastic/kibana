@@ -89,7 +89,6 @@ export const formatScheduleRunsHelper = ({
   cautionBelowMinutes?: number;
   intervalMinutes: number;
 }): string => {
-  const rounded = runsPerDay < 1 ? runsPerDay.toFixed(2) : String(Math.round(runsPerDay * 10) / 10);
   const caution =
     cautionBelowMinutes !== undefined && intervalMinutes < cautionBelowMinutes
       ? ` ${i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.frequentCaution', {
@@ -98,8 +97,8 @@ export const formatScheduleRunsHelper = ({
       : '';
   return (
     i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.runsPerDay', {
-      defaultMessage: '{runs} runs per day.',
-      values: { runs: rounded },
+      defaultMessage: '{runsCount, plural, one {# run per day.} other {# runs per day.}}',
+      values: { runsCount: runsPerDay < 1 ? 1 : Math.round(runsPerDay * 10) / 10 },
     }) + caution
   );
 };

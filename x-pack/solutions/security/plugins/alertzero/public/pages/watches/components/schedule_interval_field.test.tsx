@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
 const renderField = (
@@ -14,14 +14,16 @@ const renderField = (
   onChange: jest.Mock = jest.fn(),
   workerId = 'system-security-floor-attack-discovery'
 ) => {
-  const { rerender } = render(
+  const { rerender, unmount } = render(
     <ScheduleIntervalField workerId={workerId} current={current} onChange={onChange} />
   );
   return {
     onChange,
     rerender,
+    unmount,
     value: () => screen.getByTestId('alertZeroScheduleIntervalValue') as HTMLInputElement,
     unit: () => screen.getByTestId('alertZeroScheduleIntervalUnit') as HTMLSelectElement,
+    helper: () => screen.getByTestId('alertZeroScheduleRunsHelper'),
   };
 };
 
@@ -96,5 +98,35 @@ describe('ScheduleIntervalField', () => {
 
     expect(value().value).toBe('15');
     expect(screen.getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
+  });
+
+  it('pluralizes the runs-per-day helper', () => {
+    const { helper, unmount } = renderField('24h');
+    expect(helper()).toHaveTextContent('1 run per day.');
+    unmount();
+
+    const { helper: helper4 } = renderField('6h');
+    expect(helper4()).toHaveTextContent('4 runs per day.');
+  });
+
+  it('selects the matching preset button', () => {
+    const { rerender } = renderField('4h');
+    const group = screen.getByTestId('alertZeroSchedulePresets');
+    const fourHour = within(group).getByText('4h');
+    expect(fourHour.closest('button')).toHaveAttribute('aria-pressed', 'true');
+
+    rerender(
+      <ScheduleIntervalField
+        workerId="system-security-floor-attack-discovery"
+        current="45m"
+        onChange={jest.fn()}
+      />
+    );
+    expect(fourHour.closest('button')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('shows the frequent-run caution below 15 minutes for Attack Discovery', () => {
+    const { helper } = renderField('10m');
+    expect(helper()).toHaveTextContent(/Very frequent runs/i);
   });
 });

@@ -184,7 +184,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   return (
     <EuiFormRow
       label={i18n.SCHEDULE_INTERVAL_LABEL}
-      helpText={runsHelper}
+      helpText={<span data-test-subj="alertZeroScheduleRunsHelper">{runsHelper}</span>}
       fullWidth
       data-test-subj="alertZeroScheduleIntervalField"
     >
