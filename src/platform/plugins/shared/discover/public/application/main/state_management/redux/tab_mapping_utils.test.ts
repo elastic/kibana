@@ -156,6 +156,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocCascadePath": undefined,
           "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
@@ -246,6 +247,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocCascadePath": undefined,
           "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
