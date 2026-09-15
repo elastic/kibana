@@ -212,13 +212,13 @@ entries:
   - https://github.com/elastic/kibana/issues/264746
 - file:
     name: 289881.yaml
-    checksum: 4db6609be3b81b060dc9fa5f4f09f2078436d9bc
+    checksum: 4daa12805f02184f7b9a6c43635e65dfd3b7b9ff
   type: enhancement
-  title: 'chore: remove deprecated cases.attachments tool'
+  title: Removes the deprecated `platform.core.cases.attachments` tool
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Removes the deprecated `platform.core.cases.attachments` tool. Agents/Skills should instead be using `platform.core.cases.get_attachments` and `platform.core.cases.manage_attachments`
+  description: Agents/Skills should instead be using `platform.core.cases.get_attachments` and `platform.core.cases.manage_attachments`
   areas:
   - AI and machine Learning
   prs:
@@ -290,9 +290,9 @@ entries:
   - https://github.com/elastic/kibana/pull/289635
 - file:
     name: 289506.yaml
-    checksum: 940843085b5c5450bc20d5ef8f7a21efa6c82334
+    checksum: 9936e2308681bb05af41cd0f12db64d705f70b6a
   type: feature
-  title: Renders inside the conversation
+  title: Render custom panels insidex the AI Assistant conversation
   products:
   - product: cloud-serverless
   - product: kibana
@@ -340,9 +340,9 @@ entries:
   - https://github.com/elastic/kibana/pull/289707
 - file:
     name: 290219.yaml
-    checksum: 0e59da5f0404e99d0001248d24655aa49b702494
+    checksum: 03fac149691b0f0edc04dc6721dcc63e51fc3e6f
   type: enhancement
-  title: Adds in a dashboard by the attachment id
+  title: Add custom panels from chat directly to dashboards
   products:
   - product: cloud-serverless
   - product: kibana
