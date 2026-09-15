@@ -9,16 +9,20 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
+const sandboxSslConfigSchema = schema.object({
+  certificate_authorities: schema.maybe(schema.string()),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+});
+
 const sandboxConfigSchema = schema.object({
   // sandbox-api address — gRPC proxy that allocates sandboxes and proxies RPCs.
-  sandbox_api_host: schema.string({ defaultValue: 'localhost' }),
-  sandbox_api_port: schema.number({ defaultValue: 9090 }),
+  host: schema.string({ defaultValue: 'localhost' }),
+  port: schema.number({ defaultValue: 9090 }),
   // API key required by sandbox-api for authentication (ApiKey scheme).
-  sandbox_api_key: schema.string(),
-  // mTLS PEM strings — all required.
-  sandbox_api_tls_ca: schema.string(),
-  sandbox_api_tls_cert: schema.string(),
-  sandbox_api_tls_key: schema.string(),
+  api_key: schema.string(),
+  // mTLS inline PEM strings — required when sandbox is configured.
+  ssl: sandboxSslConfigSchema,
 });
 
 const configSchema = schema.object({

@@ -451,11 +451,15 @@ export class SandboxApiClient {
     host: string;
     port: number;
     apiKey: string;
-    rootCertPem: Buffer;
-    clientCertPem: Buffer;
-    clientKeyPem: Buffer;
+    rootCertPem?: Buffer;
+    clientCertPem?: Buffer;
+    clientKeyPem?: Buffer;
   }) {
-    const credentials = grpc.credentials.createSsl(rootCertPem, clientKeyPem, clientCertPem);
+    const credentials = grpc.credentials.createSsl(
+      rootCertPem ?? null,
+      clientKeyPem ?? null,
+      clientCertPem ?? null
+    );
     this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
     this.apiKey = apiKey;
   }
@@ -577,12 +581,14 @@ export class SandboxConnectionManager {
     this.logger = logger;
     this.writeManifest = writeManifest;
     this.apiClient = new SandboxApiClient({
-      host: config.sandbox_api_host,
-      port: config.sandbox_api_port,
-      apiKey: config.sandbox_api_key,
-      rootCertPem: Buffer.from(config.sandbox_api_tls_ca),
-      clientCertPem: Buffer.from(config.sandbox_api_tls_cert),
-      clientKeyPem: Buffer.from(config.sandbox_api_tls_key),
+      host: config.host,
+      port: config.port,
+      apiKey: config.api_key,
+      rootCertPem: config.ssl?.certificate_authorities
+        ? Buffer.from(config.ssl.certificate_authorities)
+        : undefined,
+      clientCertPem: config.ssl?.certificate ? Buffer.from(config.ssl.certificate) : undefined,
+      clientKeyPem: config.ssl?.key ? Buffer.from(config.ssl.key) : undefined,
     });
   }
 
