@@ -19,7 +19,7 @@ import {
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
-import { retrieveLatestVersion } from './attachment_state';
+import { retrieveLatestVersion } from '../attachment_state';
 import {
   createAttachmentPanelResolver,
   createVisPanelResolver,
@@ -108,6 +108,8 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
+
+For Prettify, use the existing dashboardAttachmentId and preserve every panel id. Use edit_panels for content and update_panel_layouts for placement. Do not delete and recreate panels to apply fixes, even when every panel needs changes. Leave unsupported panels unchanged.
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 

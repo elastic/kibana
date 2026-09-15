@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
-export { reviewDashboardTool, type GetFilesStart } from './review';
+export { reviewDashboardTool } from './review_dashboard_tool';
+export type { GetFilesStart } from './screenshot';

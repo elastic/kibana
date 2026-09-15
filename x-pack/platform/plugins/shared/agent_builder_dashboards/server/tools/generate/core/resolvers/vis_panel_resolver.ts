@@ -89,6 +89,7 @@ export const createVisPanelResolver = ({
     chartType,
     esql,
     renderer: requestedRenderer,
+    appearanceOnly,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
@@ -140,6 +141,7 @@ export const createVisPanelResolver = ({
         esql,
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
+        appearanceOnly,
         modelProvider,
         logger,
         events,
