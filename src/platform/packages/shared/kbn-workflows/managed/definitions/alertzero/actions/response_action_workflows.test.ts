@@ -36,6 +36,7 @@ interface YamlStep {
   condition?: string;
   timeout?: string;
   'max-iterations'?: { limit?: number; 'on-limit'?: string } | number;
+  'on-failure'?: { retry?: { 'max-attempts'?: number; delay?: string } };
   with?: Record<string, unknown>;
   steps?: YamlStep[];
   else?: YamlStep[];
@@ -117,7 +118,7 @@ describe('AlertZero response-action workflows', () => {
       expect(unscoped.map((step) => `${step.name}: ${String(step.with?.path)}`)).toEqual([]);
     });
 
-    it('dispatches the response action to the public API with the versioned header', () => {
+    it('dispatches the response action to the public API with the versioned header and no retry', () => {
       const dispatch = stepByName('dispatch');
 
       expect(dispatch?.type).toBe('kibana.request');
@@ -126,6 +127,8 @@ describe('AlertZero response-action workflows', () => {
       expect(
         (dispatch?.with?.headers as Record<string, string> | undefined)?.['elastic-api-version']
       ).toBe('2023-10-31');
+      // POST is non-idempotent: retrying would issue duplicate isolate/kill/suspend commands.
+      expect(dispatch?.['on-failure']).toBeUndefined();
     });
 
     it('polls action details until isCompleted, with the same 10s / 60 / 10m ceiling as the custom steps', () => {
