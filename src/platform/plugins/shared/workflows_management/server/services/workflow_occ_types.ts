@@ -33,7 +33,7 @@ export interface WriteWorkflowDocumentWithOccParams {
 }
 
 export interface ReadModifyWriteWorkflowDocumentParams {
-  mutate: (existing: WorkflowProperties) => WorkflowProperties | Promise<WorkflowProperties>;
+  mutate: (existing: WorkflowProperties) => WorkflowProperties;
   maxRetries?: number;
   getOptions?: WorkflowDocumentGetOptions;
 }

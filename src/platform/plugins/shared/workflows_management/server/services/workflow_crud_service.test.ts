@@ -15,6 +15,7 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
@@ -240,6 +241,27 @@ describe('WorkflowCrudService', () => {
       const query = client.search.mock.calls[0][0].query.bool;
       expect(query.must_not ?? []).not.toContainEqual({ exists: { field: 'deleted_at' } });
     });
+  });
+
+  it('rejects a conditional write conflict without retrying', async () => {
+    const { deps, client } = makeDeps();
+    client.index.mockRejectedValue(Object.assign(new Error('conflict'), { statusCode: 409 }));
+    const service = new WorkflowCrudService(deps);
+    const document = makeSource();
+
+    await expect(
+      service.writeWorkflowDocumentWithOcc('wf-1', 'default', {
+        document,
+        ifSeqNo: 5,
+        ifPrimaryTerm: 1,
+      })
+    ).rejects.toBeInstanceOf(WorkflowConflictError);
+
+    expect(client.index).toHaveBeenCalledTimes(1);
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({ document, if_seq_no: 5, if_primary_term: 1 })
+    );
+    expect(client.search).not.toHaveBeenCalled();
   });
 
   describe('getWorkflowsByIds', () => {

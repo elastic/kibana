@@ -325,7 +325,7 @@ export class WorkflowCrudService {
       );
       const { document } = await writer.readModifyWrite({
         id,
-        mutate: async (existing) => applyWorkflowVersion(await params.mutate(existing), existing),
+        mutate: (existing) => applyWorkflowVersion(params.mutate(existing), existing),
       });
       return document;
     });

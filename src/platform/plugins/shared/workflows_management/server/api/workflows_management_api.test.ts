@@ -260,7 +260,10 @@ describe('WorkflowsManagementApi', () => {
       const core = coreMock.createStart();
       core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
       mockWorkflowsService.getAccessControl.mockResolvedValue(
-        new WorkflowAccessControlService(core, { readModifyWriteWorkflowDocument: jest.fn() })
+        new WorkflowAccessControlService(core, {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        })
       );
       const children = [
         {

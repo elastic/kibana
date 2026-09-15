@@ -29,9 +29,11 @@ import type {
   WorkflowAccessSubject,
   WorkflowPermissions,
 } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import { workflowIndexName } from '../storage/workflow_storage';
 
 const rolePrivileges = {
@@ -62,7 +64,10 @@ export class WorkflowAccessControlService {
 
   constructor(
     private readonly core: CoreStart,
-    private readonly crud: Pick<WorkflowCrudService, 'readModifyWriteWorkflowDocument'>,
+    private readonly crud: Pick<
+      WorkflowCrudService,
+      'getWorkflowDocumentWithVersion' | 'writeWorkflowDocumentWithOcc'
+    >,
     private readonly authz?: SecurityPluginStart['authz']
   ) {}
 
@@ -203,66 +208,70 @@ export class WorkflowAccessControlService {
     if (!profileId) throw new WorkflowAccessDeniedError();
     const { access_mode, entries = [] } = input;
     const { authz } = this;
-    const document = await this.crud.readModifyWriteWorkflowDocument(id, spaceId, {
-      mutate: async (existing) => {
-        const legacyOwner =
-          !existing.owner_id &&
-          !existing.access_control &&
-          this.core.security.authc.getCurrentUser(request)?.username === existing.createdBy;
-        if (existing.managed || (!legacyOwner && existing.owner_id !== profileId)) {
-          throw new WorkflowAccessDeniedError();
-        }
-        if (access_mode === 'private') {
-          await Promise.all(
-            WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {
-              const uids = new Set(
-                entries
-                  .filter((entry) => {
-                    if (entry.role !== role || entry.id === profileId) return false;
-                    const previous =
-                      existing.access_control?.access_mode === 'private'
-                        ? existing.access_control.entries.find(({ id: uid }) => uid === entry.id)
-                        : undefined;
-                    return (
-                      !previous ||
-                      WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(role) >
-                        WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(previous.role)
-                    );
-                  })
-                  .map(({ id: uid }) => uid)
-              );
-              if (uids.size > 0) {
-                const result = authz
-                  ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
-                      kibana: rolePrivileges[role].map((privilege) =>
-                        authz.actions.api.get(privilege)
-                      ),
-                    })
-                  : undefined;
-                if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
-                  throw new InvalidAccessControlError(
-                    `Selected users must have the Workflows privileges required for ${role} access in this space.`
-                  );
-                }
-              }
-            })
+    const stored = await this.crud.getWorkflowDocumentWithVersion(id, spaceId);
+    if (!stored) throw new WorkflowNotFoundError(id);
+    const { source: existing, seqNo, primaryTerm } = stored;
+    const legacyOwner =
+      !existing.owner_id &&
+      !existing.access_control &&
+      this.core.security.authc.getCurrentUser(request)?.username === existing.createdBy;
+    if (existing.managed || (!legacyOwner && existing.owner_id !== profileId)) {
+      throw new WorkflowAccessDeniedError();
+    }
+    if (access_mode === 'private') {
+      await Promise.all(
+        WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {
+          const uids = new Set(
+            entries
+              .filter((entry) => {
+                if (entry.role !== role || entry.id === profileId) return false;
+                const previous =
+                  existing.access_control?.access_mode === 'private'
+                    ? existing.access_control.entries.find(({ id: uid }) => uid === entry.id)
+                    : undefined;
+                return (
+                  !previous ||
+                  WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(role) >
+                    WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(previous.role)
+                );
+              })
+              .map(({ id: uid }) => uid)
           );
-        }
-        const accessControl = prepareAccessControl({
-          input,
-          roles: WORKFLOW_ACCESS_CONTROL_ROLES,
-          ownerId: profileId,
-          previous: existing.access_control,
-        });
-        return {
+          if (uids.size > 0) {
+            const result = authz
+              ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
+                  kibana: rolePrivileges[role].map((privilege) => authz.actions.api.get(privilege)),
+                })
+              : undefined;
+            if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
+              throw new InvalidAccessControlError(
+                `Selected users must have the Workflows privileges required for ${role} access in this space.`
+              );
+            }
+          }
+        })
+      );
+    }
+    const accessControl = prepareAccessControl({
+      input,
+      roles: WORKFLOW_ACCESS_CONTROL_ROLES,
+      ownerId: profileId,
+      previous: existing.access_control,
+    });
+    const document = await this.crud.writeWorkflowDocumentWithOcc(id, spaceId, {
+      ifSeqNo: seqNo,
+      ifPrimaryTerm: primaryTerm,
+      document: applyWorkflowVersion(
+        {
           ...existing,
           owner_id: profileId,
           access_control: accessControl,
           updated_at: new Date().toISOString(),
           lastUpdatedBy:
             this.core.security.authc.getCurrentUser(request)?.username ?? existing.lastUpdatedBy,
-        };
-      },
+        },
+        existing
+      ),
     });
     this.executionFilters.delete(request);
     if (!document.access_control) throw new Error('Access control was not saved.');

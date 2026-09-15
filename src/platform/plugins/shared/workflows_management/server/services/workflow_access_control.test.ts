@@ -9,8 +9,8 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { InvalidAccessControlError } from '@kbn/entity-access-control';
-import { OccWriter } from '@kbn/occ';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { assertWorkflowOperation, WorkflowAccessControlService } from './workflow_access_control';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -50,16 +50,16 @@ describe('WorkflowAccessControlService', () => {
     jest.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
     atSpace.mockReset().mockResolvedValue({ hasPrivilegeUids: ['reader'] });
     authz.checkUserProfilesPrivileges.mockReturnValue({ atSpace });
-    const writer = new OccWriter<WorkflowProperties>({
-      get: async (id) => ({ id, source: document, occ: { seqNo: 1, primaryTerm: 1 } }),
-      index: async ({ document: updated }) => {
-        document = updated;
-        return { seqNo: 2, primaryTerm: 1 };
-      },
-    });
     crud = {
-      readModifyWriteWorkflowDocument: async (id, _spaceId, { mutate }) =>
-        (await writer.readModifyWrite({ id, mutate })).document,
+      getWorkflowDocumentWithVersion: jest.fn(async () => ({
+        source: document,
+        seqNo: 1,
+        primaryTerm: 1,
+      })),
+      writeWorkflowDocumentWithOcc: jest.fn(async (_id, _spaceId, { document: updated }) => {
+        document = updated;
+        return document;
+      }),
     };
     service = new WorkflowAccessControlService(core, crud, authz);
   });
@@ -250,29 +250,15 @@ describe('WorkflowAccessControlService', () => {
     }
   );
 
-  it('checks a previously unchanged grant again after a concurrent removal', async () => {
+  it('rejects a concurrent removal conflict without restoring the removed grant', async () => {
     document.access_control = {
       access_mode: 'private',
       entries: [{ type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-10' }],
     };
-    const index = jest.fn().mockImplementation(async () => {
+    jest.mocked(crud.writeWorkflowDocumentWithOcc).mockImplementation(async () => {
       document = makeDocument();
-      throw Object.assign(new Error('conflict'), { statusCode: 409 });
+      throw new WorkflowConflictError('Workflow was updated concurrently.', 'id');
     });
-    const writer = new OccWriter<WorkflowProperties>({
-      get: async (id) => ({ id, source: document, occ: { seqNo: 1, primaryTerm: 1 } }),
-      index,
-      maxRetries: 1,
-      retryDelayMs: 0,
-    });
-    service = new WorkflowAccessControlService(
-      core,
-      {
-        readModifyWriteWorkflowDocument: async (id, _spaceId, { mutate }) =>
-          (await writer.readModifyWrite({ id, mutate })).document,
-      },
-      authz
-    );
     atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
     await expect(
       service.update(
@@ -284,9 +270,15 @@ describe('WorkflowAccessControlService', () => {
         },
         request
       )
-    ).rejects.toBeInstanceOf(InvalidAccessControlError);
-    expect(index).toHaveBeenCalledTimes(1);
-    expect(atSpace).toHaveBeenCalledTimes(1);
+    ).rejects.toBeInstanceOf(WorkflowConflictError);
+    expect(crud.getWorkflowDocumentWithVersion).toHaveBeenCalledTimes(1);
+    expect(crud.writeWorkflowDocumentWithOcc).toHaveBeenCalledTimes(1);
+    expect(crud.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+      'id',
+      'default',
+      expect.objectContaining({ ifSeqNo: 1, ifPrimaryTerm: 1 })
+    );
+    expect(atSpace).not.toHaveBeenCalled();
     expect(document.access_control?.entries).toEqual([]);
   });
 
