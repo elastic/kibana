@@ -49,7 +49,9 @@ describe('fetchTakenPackageNames', () => {
   });
 
   it('includes normalized AIV2 integration titles', async () => {
-    mockGetAllIntegrationNames.mockResolvedValue([{ integrationId: 'some_id', title: 'Nginx Logs' }]);
+    mockGetAllIntegrationNames.mockResolvedValue([
+      { integrationId: 'some_id', title: 'Nginx Logs' },
+    ]);
 
     const result = await fetchTakenPackageNames(deps);
 

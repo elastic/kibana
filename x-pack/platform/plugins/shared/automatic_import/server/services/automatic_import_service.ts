@@ -266,9 +266,7 @@ export class AutomaticImportService {
     return integrationResponse;
   }
 
-  public async getAllIntegrationNames(): Promise<
-    Array<{ integrationId: string; title: string }>
-  > {
+  public async getAllIntegrationNames(): Promise<Array<{ integrationId: string; title: string }>> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
