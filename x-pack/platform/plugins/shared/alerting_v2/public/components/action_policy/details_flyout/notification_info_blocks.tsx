@@ -23,7 +23,7 @@ export const getNotificationInfoBlocks = (
 ): InfoBlockItem[] => {
   const { grouping_mode: groupingMode, group_by: groupBy, throttle } = policy;
 
-  return [
+  const items: Array<InfoBlockItem | null> = [
     {
       id: 'dispatchMode',
       title: DISPATCH_PER_LABEL,
@@ -44,5 +44,6 @@ export const getNotificationInfoBlocks = (
       value: getFrequencyLabel(throttle, groupingMode),
       'data-test-subj': 'actionPolicyDetailsFlyoutFrequencyBlock',
     },
-  ].filter((b): b is InfoBlockItem => b !== null);
+  ];
+  return items.filter((b): b is InfoBlockItem => b !== null);
 };
