@@ -225,7 +225,11 @@ describe('schema validation', () => {
       await putDownloadSourcesHandler(
         context,
         {
-          body: { id: '../../../api/spaces/space/admin-space', name: 'Test', host: 'http://test.co' },
+          body: {
+            id: '../../../api/spaces/space/admin-space',
+            name: 'Test',
+            host: 'http://test.co',
+          },
           params: { sourceId: 'source1' },
         } as any,
         response
