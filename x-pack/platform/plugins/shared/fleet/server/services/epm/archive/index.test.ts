@@ -27,7 +27,7 @@ function createZipBuffer(files: Array<{ name: string; content: string }>): Promi
     for (const { name, content } of files) {
       archive.append(content, { name });
     }
-    archive.finalize();
+    void archive.finalize();
   });
 }
 
