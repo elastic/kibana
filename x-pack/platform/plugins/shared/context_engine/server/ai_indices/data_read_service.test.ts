@@ -142,7 +142,7 @@ describe('AiIndexDataReadService', () => {
     });
   });
 
-  describe('listVisible', () => {
+  describe('list', () => {
     const withId = (id: string): AiIndexHttpItem => ({ ...aiIndex, id });
     const registry = ['visible', 'empty', 'hidden', 'unknown'].map(withId);
 
@@ -152,7 +152,7 @@ describe('AiIndexDataReadService', () => {
         registry.map((entry) => ({ aiIndex: entry, visibility: entry.id as AiIndexVisibility }))
       );
 
-      const result = await service.listVisible();
+      const result = await service.list();
 
       expect(resolveAiIndexVisibilityMock).toHaveBeenCalledWith({
         esClient,
@@ -179,7 +179,7 @@ describe('AiIndexDataReadService', () => {
         { aiIndex: registry[0], visibility: 'visible' },
       ]);
 
-      const result = await service.listVisible(['visible', 'not-registered']);
+      const result = await service.list(['visible', 'not-registered']);
 
       expect(resolveAiIndexVisibilityMock).toHaveBeenCalledWith(
         expect.objectContaining({ aiIndices: [registry[0]] })
@@ -190,7 +190,7 @@ describe('AiIndexDataReadService', () => {
     it('audit-logs failure and rethrows', async () => {
       aiIndexService.list.mockRejectedValue(new Error('boom'));
 
-      await expect(service.listVisible()).rejects.toThrow('boom');
+      await expect(service.list()).rejects.toThrow('boom');
 
       expect(resolveAiIndexVisibilityMock).not.toHaveBeenCalled();
       expect(auditLogger.log).toHaveBeenCalledWith(

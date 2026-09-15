@@ -52,7 +52,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
         esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
         request,
       })
-      .listVisible(ids);
+      .list(ids);
     return aiIndices.map((aiIndex) => ({
       id: aiIndex.id,
       esqlTarget: aiIndex.dest.value,

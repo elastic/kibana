@@ -33,7 +33,7 @@ export interface AiIndexDataReadServiceApi {
    * when every document belongs to another space, or when the check itself failed. `ids` limits
    * which registry entries are checked.
    */
-  listVisible(ids?: string[]): Promise<AiIndexHttpItem[]>;
+  list(ids?: string[]): Promise<AiIndexHttpItem[]>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -72,7 +72,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     }
   }
 
-  async listVisible(ids?: string[]): Promise<AiIndexHttpItem[]> {
+  async list(ids?: string[]): Promise<AiIndexHttpItem[]> {
     const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
     try {
       const registry = await aiIndexService.list();
