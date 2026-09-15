@@ -314,7 +314,44 @@ export const BrowserFieldsCodec = t.intersection([
   TLSCodec,
 ]);
 
-// MonitorFields, represents any possible monitor type
+// API monitor — `monitor.type: api`. Shares Browser's script source, params,
+// journey filters, metadata, and Playwright options, since Heartbeat's `api`
+// plugin (see elastic/beats#50802) reuses the synthexec runtime — just
+// without launching Chromium. SCREENSHOTS and THROTTLING_CONFIG are
+// browser/CDP-specific (that plugin silently filters `--screenshots` /
+// `--throttling` from the CLI invocation) and are omitted here rather than
+// carried as inert values.
+export const EncryptedAPISimpleFieldsCodec = EncryptedBrowserSimpleFieldsCodec;
+export const APISensitiveSimpleFieldsCodec = BrowserSensitiveSimpleFieldsCodec;
+export const APISimpleFieldsCodec = BrowserSimpleFieldsCodec;
+
+export const EncryptedAPIAdvancedFieldsCodec = t.interface({
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: t.array(t.string),
+});
+export const APISensitiveAdvancedFieldsCodec = BrowserSensitiveAdvancedFieldsCodec;
+export const APIAdvancedFieldsCodec = t.intersection([
+  EncryptedAPIAdvancedFieldsCodec,
+  APISensitiveAdvancedFieldsCodec,
+]);
+
+export const EncryptedAPIFieldsCodec = t.intersection([
+  EncryptedAPISimpleFieldsCodec,
+  EncryptedAPIAdvancedFieldsCodec,
+  TLSFieldsCodec,
+]);
+export const APIFieldsCodec = t.intersection([
+  APISimpleFieldsCodec,
+  APIAdvancedFieldsCodec,
+  TLSCodec,
+]);
+
+// MonitorFields, represents any possible monitor type. APIFieldsCodec is
+// intentionally not listed here — every field it requires is a subset of
+// BrowserFieldsCodec's, so adding it would be a no-op intersection that
+// confuses readers.
 export const MonitorFieldsCodec = t.intersection([
   HTTPFieldsCodec,
   TCPFieldsCodec,
@@ -327,20 +364,22 @@ export const MonitorFieldsResultCodec = t.intersection([
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
-// Monitor, represents one of (Icmp | Tcp | Http | Browser) decrypted
+// Monitor, represents one of (Icmp | Tcp | Http | Browser | API) decrypted.
 export const SyntheticsMonitorCodec = t.union([
   HTTPFieldsCodec,
   TCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   BrowserFieldsCodec,
+  APIFieldsCodec,
 ]);
 
-// Monitor, represents one of (Icmp | Tcp | Http | Browser) encrypted
+// Monitor, represents one of (Icmp | Tcp | Http | Browser | API) encrypted.
 export const EncryptedSyntheticsMonitorCodec = t.union([
   EncryptedHTTPFieldsCodec,
   EncryptedTCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   EncryptedBrowserFieldsCodec,
+  EncryptedAPIFieldsCodec,
 ]);
 
 export const SyntheticsMonitorWithIdCodec = t.intersection([
@@ -387,6 +426,7 @@ export const MonitorDefaultsCodec = t.interface({
   [MonitorTypeEnum.TCP]: TCPFieldsCodec,
   [MonitorTypeEnum.ICMP]: ICMPSimpleFieldsCodec,
   [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.API]: APIFieldsCodec,
 });
 
 export const MonitorManagementListResultCodec = t.type({
@@ -414,6 +454,9 @@ export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
 export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
 export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
+export type APIFields = t.TypeOf<typeof APIFieldsCodec>;
+export type APISimpleFields = t.TypeOf<typeof APISimpleFieldsCodec>;
+export type APIAdvancedFields = t.TypeOf<typeof APIAdvancedFieldsCodec>;
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
 export type MonitorFieldsResult = t.TypeOf<typeof MonitorFieldsResultCodec>;
 export type HeartbeatFields = t.TypeOf<typeof HeartbeatFieldsCodec>;
