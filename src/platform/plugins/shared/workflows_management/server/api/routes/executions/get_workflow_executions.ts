@@ -22,12 +22,14 @@ import {
   WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
+  hasWorkflowReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
@@ -248,8 +250,12 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             sortOrder: request.query.sortOrder,
             searchAfter,
           };
+          const result = await api.getWorkflowExecutions(params, spaceId);
+          if (hasWorkflowReadPrivilege(request)) {
+            return response.ok({ body: result });
+          }
           return response.ok({
-            body: await api.getWorkflowExecutions(params, spaceId),
+            body: { ...result, results: result.results.map(toExecutionSummaryDto) },
           });
         } catch (error) {
           return handleRouteError(response, error);
