@@ -91,10 +91,6 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 const sameEntry = (a: AgentAccessControlEntry, b: AgentAccessControlEntry): boolean =>
   getAccessControlEntryKey(a) === getAccessControlEntryKey(b);
 
-/**
- * Renders the per-agent access-control entries editor. Resolves user profiles for id-backed
- * entries internally so callers only need to pass the entries themselves.
- */
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
@@ -111,8 +107,6 @@ export const AccessForm: React.FC<AccessFormProps> = ({
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  // The picker excludes people already in the list by username. Id-backed entries resolve their
-  // username through the fetched profile, so they are only excluded once that profile has loaded.
   const excludedUsernames = useMemo(
     () =>
       entries.flatMap((entry) => {
