@@ -221,6 +221,17 @@ describe('AiIndexService', () => {
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(storageClient.index).not.toHaveBeenCalled();
     });
+
+    it('rejects a dot-prefixed index dest on create', async () => {
+      await expect(
+        service.create('elastic', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('put', () => {
@@ -530,6 +541,17 @@ describe('AiIndexService', () => {
       );
       expect(storageClient.index).not.toHaveBeenCalled();
     });
+
+    it('rejects a dot-prefixed index dest on put', async () => {
+      await expect(
+        service.put('elastic', DEFAULT_SPACE, {
+          ...indexProperties,
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('putManaged', () => {
@@ -604,6 +626,44 @@ describe('AiIndexService', () => {
         service.putManaged('elastic', DEFAULT_SPACE, managedProperties)
       ).rejects.toBeInstanceOf(AiIndexIdConflictError);
       expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('accepts a dot-prefixed managed index dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: '.ai-index-idx-elastic-index', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(
+        service.putManaged('elastic', DEFAULT_SPACE, {
+          ...managedProperties,
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        })
+      ).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('accepts a dot-prefixed managed data_stream dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: '.ai-index-ds-elastic-stream',
+            backing_indices: [],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+
+      await expect(
+        service.putManaged('elastic', DEFAULT_SPACE, {
+          ...managedProperties,
+          dest: { type: 'data_stream', value: '.ai-index-ds-elastic-stream' },
+        })
+      ).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
     });
   });
 

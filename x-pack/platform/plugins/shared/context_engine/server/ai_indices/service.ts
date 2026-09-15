@@ -178,7 +178,7 @@ export class AiIndexService {
     spaceId: string,
     properties: AiIndexProperties
   ): Promise<'created' | 'updated'> {
-    await this.assertValidDest(properties.dest);
+    await this.assertValidDest(properties.dest, { managed: true });
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
@@ -466,31 +466,42 @@ export class AiIndexService {
 
   /**
    * The dest value must follow the type-specific naming convention and match
-   * the declared `type`.
+   * the declared `type`. A managed entry may also use the dot-prefixed form,
+   * which is reserved for Kibana-internal backing stores.
    */
-  private async assertValidDest({ type, value }: AiIndexDest): Promise<void> {
+  private async assertValidDest(
+    { type, value }: AiIndexDest,
+    { managed = false }: { managed?: boolean } = {}
+  ): Promise<void> {
     if (type === 'data_stream') {
-      await this.assertValidDataStreamDest(value);
+      await this.assertValidDataStreamDest(value, managed);
     } else {
-      await this.assertValidIndexDest(value);
+      await this.assertValidIndexDest(value, managed);
     }
   }
 
+  private allowedDestPrefixes(basePrefix: string, managed: boolean): string[] {
+    return managed ? [basePrefix, `.${basePrefix}`] : [basePrefix];
+  }
+
   /**
-   * Every expression in the dest value must start with the type-specific
-   * prefix.
+   * Every expression in the dest value must start with one of the type-specific
+   * prefixes.
    */
-  private assertDestValueHasPrefix(value: string, prefix: string): void {
-    const invalid = value.split(',').find((expression) => !expression.startsWith(prefix));
+  private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
+    const invalid = value
+      .split(',')
+      .find((expression) => !prefixes.some((prefix) => expression.startsWith(prefix)));
     if (invalid !== undefined) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: every expression must start with '${prefix}'`
+        `dest.value '${value}' is not allowed: every expression must start with '${prefixes[0]}'`
       );
     }
   }
 
-  private async assertValidDataStreamDest(value: string): Promise<void> {
-    this.assertDestValueHasPrefix(value, DATA_STREAM_PREFIX);
+  private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
+    const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
+    this.assertDestValueHasPrefix(value, prefixes);
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
@@ -513,7 +524,9 @@ export class AiIndexService {
       );
     }
 
-    const invalidPrefix = dataStreams.find((ds) => !ds.name.startsWith(DATA_STREAM_PREFIX));
+    const invalidPrefix = dataStreams.find(
+      (ds) => !prefixes.some((prefix) => ds.name.startsWith(prefix))
+    );
     if (invalidPrefix) {
       throw new InvalidAiIndexDestError(
         `dest.value '${value}' is not allowed: '${invalidPrefix.name}' must start with '${DATA_STREAM_PREFIX}'`
@@ -521,8 +534,9 @@ export class AiIndexService {
     }
   }
 
-  private async assertValidIndexDest(value: string): Promise<void> {
-    this.assertDestValueHasPrefix(value, INDEX_PREFIX);
+  private async assertValidIndexDest(value: string, managed: boolean): Promise<void> {
+    const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
+    this.assertDestValueHasPrefix(value, prefixes);
 
     let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
     let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
@@ -545,7 +559,9 @@ export class AiIndexService {
       );
     }
 
-    const invalidPrefix = indices.find((index) => !index.name.startsWith(INDEX_PREFIX));
+    const invalidPrefix = indices.find(
+      (index) => !prefixes.some((prefix) => index.name.startsWith(prefix))
+    );
     if (invalidPrefix) {
       throw new InvalidAiIndexDestError(
         `dest.value '${value}' is not allowed: '${invalidPrefix.name}' must start with '${INDEX_PREFIX}'`
