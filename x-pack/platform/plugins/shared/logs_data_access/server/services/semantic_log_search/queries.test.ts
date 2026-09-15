@@ -172,10 +172,7 @@ describe('semantic log search queries', () => {
         pageSize: 50,
       });
 
-      expect(query.sort).toEqual([
-        { '@timestamp': { order: 'desc' } },
-        { _doc: { order: 'asc' } },
-      ]);
+      expect(query.sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _doc: { order: 'asc' } }]);
     });
   });
 

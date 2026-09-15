@@ -5,31 +5,99 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { SemanticLogSearchParams } from '../../../../common/services/semantic_log_search/types';
+import { esqlRowsToObjects, parseEsqlPatternResponse, searchWithEsqlRerank } from './esql_rerank';
 
-// Note: These tests cover the internal helper functions that are not exported.
-// We test them indirectly through the public API or extract them for testing.
+describe('searchWithEsqlRerank', () => {
+  const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
 
-describe('semantic log search service helpers', () => {
+  const runQuery = async (overrides: Partial<SemanticLogSearchParams> = {}) => {
+    const query = jest.fn().mockResolvedValue(emptyResponse);
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+        ...overrides,
+      },
+      loggerMock.create()
+    );
+
+    return query.mock.calls[0][0];
+  };
+
+  it('sends the time range as reserved named params instead of inlining it', async () => {
+    const request = await runQuery();
+
+    expect(request.query).toContain('WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend');
+    expect(request.params).toEqual([
+      { _tstart: '2024-01-01T00:00:00.000Z' },
+      { _tend: '2024-01-02T00:00:00.000Z' },
+    ]);
+  });
+
+  it('categorizes, keeps the rank window, then reranks by the natural language query', async () => {
+    const { query } = await runQuery();
+
+    expect(query).toContain('BY pattern = CATEGORIZE(message)');
+    expect(query).toContain('SORT count DESC | LIMIT 200');
+    expect(query).toContain('RERANK "connection failures" ON pattern, `sample`');
+    expect(query).toMatch(/SORT _score DESC \| LIMIT 10$/);
+  });
+
+  it('applies maxPatterns as the final limit', async () => {
+    const { query } = await runQuery({ maxPatterns: 3 });
+
+    expect(query).toMatch(/SORT _score DESC \| LIMIT 3$/);
+  });
+
+  it('omits the KQL clause when no filter is given', async () => {
+    const { query } = await runQuery();
+
+    expect(query).not.toContain('KQL(');
+  });
+
+  it('escapes quotes in the KQL filter so it cannot terminate the string literal', async () => {
+    const { query } = await runQuery({ kqlFilter: 'service.name:"checkout" | DROP message' });
+
+    expect(query).toContain('WHERE KQL("service.name:\\"checkout\\" | DROP message")');
+  });
+
+  it('reports unavailable and warns when the query fails', async () => {
+    const logger = loggerMock.create();
+    const esClient = {
+      esql: { query: jest.fn().mockRejectedValue(new Error('verification_exception')) },
+    } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+      },
+      logger
+    );
+
+    expect(result).toEqual({ patterns: [], unavailable: true });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
+  });
+});
+
+describe('esql rerank helpers', () => {
   describe('esqlRowsToObjects', () => {
-    // Helper function copied for testing (since it's not exported)
-    function esqlRowsToObjects<T>(response: ESQLSearchResponse): T[] {
-      const columns = response.columns ?? [];
-      return (response.values ?? []).map((row) => {
-        const record: Record<string, unknown> = {};
-        row.forEach((value, index) => {
-          const name = columns[index]?.name;
-          if (name) {
-            record[name] = value;
-          }
-        });
-        return record as T;
-      });
-    }
-
     it('converts columnar response to array of objects', () => {
       const response: ESQLSearchResponse = {
-        columns: [{ name: 'name', type: 'keyword' }, { name: 'count', type: 'long' }],
+        columns: [
+          { name: 'name', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
         values: [
           ['foo', 10],
           ['bar', 20],
@@ -56,7 +124,10 @@ describe('semantic log search service helpers', () => {
 
     it('handles null values in rows', () => {
       const response: ESQLSearchResponse = {
-        columns: [{ name: 'name', type: 'keyword' }, { name: 'value', type: 'long' }],
+        columns: [
+          { name: 'name', type: 'keyword' },
+          { name: 'value', type: 'long' },
+        ],
         values: [['foo', null]],
       };
 
@@ -66,62 +137,6 @@ describe('semantic log search service helpers', () => {
   });
 
   describe('parseEsqlPatternResponse', () => {
-    // Helper function copied for testing (since it's not exported)
-    interface EsqlPatternRow {
-      pattern: string;
-      count: number;
-      first_seen: string;
-      last_seen: string;
-      sample: string;
-    }
-
-    interface LogPattern {
-      field: string;
-      pattern: string;
-      count: number;
-      firstSeen: string;
-      lastSeen: string;
-      sample: Record<string, unknown>;
-    }
-
-    function esqlRowsToObjects<T>(response: ESQLSearchResponse): T[] {
-      const columns = response.columns ?? [];
-      return (response.values ?? []).map((row) => {
-        const record: Record<string, unknown> = {};
-        row.forEach((value, index) => {
-          const name = columns[index]?.name;
-          if (name) {
-            record[name] = value;
-          }
-        });
-        return record as T;
-      });
-    }
-
-    function parseEsqlPatternResponse(
-      response: ESQLSearchResponse,
-      field: string = 'message'
-    ): LogPattern[] {
-      const rows = esqlRowsToObjects<EsqlPatternRow>(response);
-
-      return rows
-        .filter((row) => row.pattern != null && row.count != null)
-        .map((row) => ({
-          field,
-          pattern: String(row.pattern),
-          count: Number(row.count),
-          firstSeen: row.first_seen
-            ? new Date(row.first_seen).toISOString()
-            : new Date().toISOString(),
-          lastSeen: row.last_seen
-            ? new Date(row.last_seen).toISOString()
-            : new Date().toISOString(),
-          sample: {
-            message: row.sample ? String(row.sample) : '',
-          },
-        }));
-    }
-
     it('parses ES|QL response with all columns', () => {
       const response: ESQLSearchResponse = {
         columns: [

@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectionConfig } from '../lib/connection_config';
 import { EVAL_QUERIES, matchesPattern, type EvalQuery } from '../ground_truth';
 import { createSemanticLogSearchService } from '../../../server/services/semantic_log_search';
@@ -99,14 +100,7 @@ async function evaluateQuery(
 ): Promise<EvalResult> {
   // Create the service (note: we pass a mock RegisterServicesParams since we're using esClient directly)
   const service = createSemanticLogSearchService({
-    logger: {
-      get: () => ({
-        debug: () => {},
-        info: () => {},
-        warn: () => {},
-        error: () => {},
-      }),
-    },
+    logger: loggerMock.create(),
     deps: {
       savedObjects: {} as any,
       uiSettings: {} as any,

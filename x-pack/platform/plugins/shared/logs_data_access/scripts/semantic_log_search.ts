@@ -30,9 +30,9 @@ import { runEval } from './semantic_log_search/tasks/run_eval';
  *   node scripts/semantic_log_search.ts --task eval
  */
 run(
-  async ({ log, flags }) => {
-    const task = String(flags.task || 'eval');
-    const config = getConnectionConfig(flags);
+  async ({ log, flagsReader }) => {
+    const task = flagsReader.requiredString('task');
+    const config = getConnectionConfig(flagsReader);
 
     log.info(`Running task: ${task}`);
     log.info(`Elasticsearch: ${config.esUrl}`);

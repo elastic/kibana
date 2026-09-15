@@ -20,6 +20,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-ui-settings-browser",
     "@kbn/logging",
+    "@kbn/logging-mocks",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/use-tracked-promise",
@@ -27,7 +28,7 @@
     "@kbn/i18n-react",
     "@kbn/agent-builder-genai-utils",
     "@kbn/product-doc-common",
-    "@kbn/ai-tools",
+    "@kbn/storage-adapter",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log"
   ]
