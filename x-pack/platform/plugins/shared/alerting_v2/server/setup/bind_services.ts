@@ -58,11 +58,6 @@ import {
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { SettingsService } from '../lib/services/settings_service/settings_service';
-import {
-  SettingsServiceToken,
-  UiSettingsClientToken,
-} from '../lib/services/settings_service/tokens';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -162,17 +157,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
   bind(RuleChangesHistoryClient).toSelf().inRequestScope();
   bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
-
-  bind(UiSettingsClientToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const uiSettings = get(CoreStart('uiSettings'));
-      const internalSoClient = savedObjects.createInternalRepository();
-      return uiSettings.globalAsScopedToClient(internalSoClient);
-    })
-    .inSingletonScope();
-  bind(SettingsService).toSelf().inSingletonScope();
-  bind(SettingsServiceToken).toService(SettingsService);
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);

@@ -265,7 +265,7 @@ export function createNavigationTree({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
+          ...getAlertingV2ManagementNavPanel(),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,

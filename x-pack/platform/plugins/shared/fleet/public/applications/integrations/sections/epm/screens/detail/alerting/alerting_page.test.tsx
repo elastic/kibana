@@ -16,7 +16,7 @@ import { InstallStatus } from '../../../../../types';
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
 const mockUseAlertingAssets = jest.fn();
-const mockIsAlertingV2Enabled = jest.fn();
+const mockIsAlertingV2Available = jest.fn();
 const mockGetRuleLibraryRedirectUrl = jest.fn(
   ({ templateId }: { templateId?: string }) =>
     `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
@@ -29,7 +29,7 @@ jest.mock('../../../../../services', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-utils', () => ({
-  isAlertingV2Enabled: (...args: any[]) => mockIsAlertingV2Enabled(...args),
+  isAlertingV2Available: (...args: any[]) => mockIsAlertingV2Available(...args),
 }));
 
 jest.mock('../../../components/side_bar_column', () => ({
@@ -108,7 +108,7 @@ describe('AlertingPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockIsAlertingV2Enabled.mockReturnValue(false);
+    mockIsAlertingV2Available.mockReturnValue(false);
 
     mockUseGetPackageInstallStatus.mockReturnValue(() => ({
       status: InstallStatus.installed,
@@ -174,7 +174,7 @@ describe('AlertingPage', () => {
   };
 
   it('should render engine tabs under the templates accordion when v2 templates exist and the feature flag is on', async () => {
-    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockIsAlertingV2Available.mockReturnValue(true);
     renderComponent();
 
     await waitFor(() => {
@@ -198,7 +198,7 @@ describe('AlertingPage', () => {
   });
 
   it('should show v1 templates on the Classic Alerting tab', async () => {
-    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockIsAlertingV2Available.mockReturnValue(true);
     renderComponent();
 
     await waitFor(() => {
@@ -266,7 +266,7 @@ describe('AlertingPage', () => {
   });
 
   it('should not render engine tabs when the feature flag is on but no v2 templates exist', async () => {
-    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockIsAlertingV2Available.mockReturnValue(true);
 
     mockUseAlertingAssets.mockReturnValue({
       alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],

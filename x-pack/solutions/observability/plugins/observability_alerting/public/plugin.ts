@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
-import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
-import { from, map, switchMap } from 'rxjs';
 import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
@@ -60,20 +52,7 @@ export class ObservabilityAlertingPlugin
       }),
       appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
       category: DEFAULT_APP_CATEGORIES.observability,
-      status: AppStatus.inaccessible,
       visibleIn: [],
-      updater$: from(startServices).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false).pipe(
-            map(
-              (settingEnabled): AppUpdater =>
-                () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-                })
-            )
-          )
-        )
-      ),
       deepLinks: [
         {
           id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,

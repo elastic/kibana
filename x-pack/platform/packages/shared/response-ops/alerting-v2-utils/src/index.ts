@@ -7,11 +7,10 @@
 
 export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
-  isAlertingV2Enabled,
+  isAlertingV2Available,
   shouldShowAlertingV2CreateRuleFlyout,
   hasAlertingV2RulesReadCapability,
-  canAccessAlertingV2Rules,
-} from './is_alerting_v2_enabled';
+} from './alerting_v2_access';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';

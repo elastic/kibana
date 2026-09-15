@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import { isAlertingV2Available } from '@kbn/alerting-v2-utils';
 
 import { useAlertingV2RuleLibraryLocator, useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
@@ -123,14 +123,14 @@ const useAlertingEngineAssets = (savedObjects: AlertingAsset[], type: DisplayedA
   const startServices = useStartServices();
   const isAlertingRuleTemplate = type === KibanaAssetType.alertingRuleTemplate;
   const hasV2Templates = savedObjects.some(isV2AlertingAsset);
-  const alertingV2Enabled = isAlertingV2Enabled(startServices);
-  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Enabled;
+  const alertingV2Available = isAlertingV2Available(startServices);
+  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Available;
   const [selectedEngineTab, setSelectedEngineTab] = useState<AlertingEngine>(
     hasV2Templates ? 'v2' : 'v1'
   );
 
   const listedSavedObjects = listAlertingAssets(savedObjects, {
-    hideV2: isAlertingRuleTemplate && !alertingV2Enabled,
+    hideV2: isAlertingRuleTemplate && !alertingV2Available,
   });
   const visibleSavedObjects = showEngineUi
     ? filterAlertingAssetsByEngine(listedSavedObjects, selectedEngineTab)

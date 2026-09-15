@@ -43,7 +43,6 @@ const buildToAttachmentContext = () => ({
 
 describe('createActionPolicySmlType', () => {
   let getActionPolicy: jest.Mock;
-  let getIsAlertingV2Enabled: jest.Mock;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let actionPolicyClient: ActionPolicyClient;
 
@@ -63,7 +62,6 @@ describe('createActionPolicySmlType', () => {
 
   beforeEach(() => {
     getActionPolicy = jest.fn();
-    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
     soClient = savedObjectsClientMock.create();
     actionPolicyClient = { getActionPolicy } as unknown as ActionPolicyClient;
   });
@@ -71,7 +69,6 @@ describe('createActionPolicySmlType', () => {
   const buildDefinition = () =>
     createActionPolicySmlType({
       getScopedActionPolicyClient: () => actionPolicyClient,
-      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -165,15 +162,6 @@ describe('createActionPolicySmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
-
-    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const items = await drainList();
-
-      expect(items).toEqual([]);
-      expect(soClient.createPointInTimeFinder).not.toHaveBeenCalled();
-    });
   });
 
   describe('getSmlEntry', () => {
@@ -233,15 +221,6 @@ describe('createActionPolicySmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML action policy: failed to get data for 'policy-missing'")
       );
-    });
-
-    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
-
-      expect(result).toBeUndefined();
-      expect(soClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -337,18 +316,6 @@ describe('createActionPolicySmlType', () => {
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
       expect(getActionPolicy).toHaveBeenCalledWith({ id: '' });
-    });
-
-    it('returns undefined without calling the action policy client when alerting v2 is disabled', async () => {
-      getIsAlertingV2Enabled.mockResolvedValue(false);
-
-      const result = await buildDefinition().toAttachment(
-        buildSmlDocument(),
-        buildToAttachmentContext()
-      );
-
-      expect(result).toBeUndefined();
-      expect(getActionPolicy).not.toHaveBeenCalled();
     });
   });
 });

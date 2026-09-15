@@ -16,8 +16,6 @@ import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { injectable } from 'inversify';
 import merge from 'lodash/merge';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import type { AlertingLabels } from '../lib/services/logger_service/types';
 import type { AlertingRouteContext } from './alerting_route_context';
@@ -99,7 +97,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     503: {
       body: () => errorResponseSchema,
       description:
-        'Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.',
+        'Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).',
     },
   };
 
@@ -175,7 +173,6 @@ export abstract class BaseAlertingRoute implements RouteHandler {
 
   async handle(): Promise<IKibanaResponse> {
     try {
-      await this.assertAlertingEnabled();
       return await this.execute();
     } catch (e) {
       return this.onError(e);
@@ -183,23 +180,6 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   }
 
   protected abstract execute(): Promise<IKibanaResponse>;
-
-  /**
-   * Global kill switch for the alerting v2 HTTP surface.
-   *
-   * Reads the `alerting:v2:enabled` advanced setting and short-circuits with
-   * a 503 `ALERTING_DISABLED` error before any route-specific work runs
-   * when the operator has turned the engine off.
-   */
-  private async assertAlertingEnabled(): Promise<void> {
-    const enabled = await this.ctx.settings.get(ALERTING_V2_ENABLED_SETTING_ID);
-
-    if (!enabled) {
-      throw Boom.serverUnavailable('Alerting is disabled.', {
-        code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
-      });
-    }
-  }
 
   protected errorLabels(_e: Boom.Boom | Error): AlertingLabels | undefined {
     return undefined;

@@ -23,7 +23,10 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_CHANGE_HISTORY_UNAVAILABLE_DESCRIPTION,
+} from '../route_descriptions';
 import { ruleIdParamsSchema } from '../rules/route_schemas';
 import { listRuleChangeHistoryOasExamples } from './list_rule_change_history_oas_example';
 
@@ -57,6 +60,10 @@ export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      503: {
+        body: () => errorResponseSchema,
+        description: RULE_CHANGE_HISTORY_UNAVAILABLE_DESCRIPTION,
       },
     },
   };

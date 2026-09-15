@@ -28,12 +28,11 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
-import { alertingAdvancedSettings } from '../settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
- * capabilities, UI settings, the action policy event log, workflow extensions,
- * and usage collection).
+ * capabilities, the action policy event log, workflow extensions, and usage
+ * collection).
  *
  * Larger / optional concerns live in their own setup modules: task definitions
  * in `bind_tasks` and Agent Builder in `bind_agent_builder`. `OnSetup` is a
@@ -52,10 +51,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       ),
       logger: container.get(LoggerServiceToken).forSubsystem('savedObjects'),
     });
-
-    const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
-
-    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')

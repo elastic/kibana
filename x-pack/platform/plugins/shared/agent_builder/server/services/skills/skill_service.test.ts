@@ -210,10 +210,10 @@ describe('createSkillService', () => {
       const { getRegistry } = startServiceWithUiSettings({
         // Global settings are not visible to the namespace client.
         namespaceGet: async () => undefined,
-        globalGet: async (key) => (key === 'alerting:v2:enabled' ? true : undefined),
+        globalGet: async (key) => (key === 'my:global:setting' ? true : undefined),
         skill: createMockSkillDefinition({
           id: 'global-gated',
-          uiSettingRequired: 'alerting:v2:enabled',
+          uiSettingRequired: 'my:global:setting',
         }),
       });
 
@@ -227,7 +227,7 @@ describe('createSkillService', () => {
         globalGet: async () => false,
         skill: createMockSkillDefinition({
           id: 'global-gated-off',
-          uiSettingRequired: 'alerting:v2:enabled',
+          uiSettingRequired: 'my:global:setting',
         }),
       });
 

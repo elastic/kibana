@@ -106,12 +106,6 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | ------------------- | ------ | ----------------------------------------------------------------- | ---------------- |
 | `INSIGHT_NOT_FOUND` | 404    | `getInsight` / `updateInsightStatus` cannot find an insight by id | `{ insight_id }` |
 
-### Engine state (`server/routes/base_alerting_route.ts`)
-
-| Code                | Status | When                                                                                                                                                     | `details` |
-| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `ALERTING_DISABLED` | 503    | `BaseAlertingRoute.handle` short-circuits when `alerting:v2:enabled` is off so every route refuses requests until the operator turns the engine back on. | _(none)_  |
-
 ### Generic fallback codes
 
 | Code                    | Status | When                                                                                 |
@@ -128,7 +122,7 @@ validate()` merges into each subclass's `schemas.response`. Every route therefor
 | `401`       | The request was not authenticated.                                                                  |
 | `403`       | The caller lacks the route's `requiredPrivileges`.                                                  |
 | `500`       | Any uncaught throw boomifies to 500.                                                                |
-| `503`       | Alerting is administratively disabled via the `alerting:v2:enabled` advanced setting (kill switch). |
+| `503`       | An infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).           |
 
 Important distinction:
 

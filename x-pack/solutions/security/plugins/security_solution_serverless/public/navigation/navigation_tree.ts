@@ -151,7 +151,7 @@ export const createNavigationTree = async (
         title: i18nStrings.devTools,
         icon: 'code',
       },
-      createManagementFooterItemsTree(services, chatExperience),
+      createManagementFooterItemsTree(chatExperience),
     ],
   };
 };

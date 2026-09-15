@@ -7,3 +7,6 @@
 
 export const INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION =
   'Indicates an invalid schema or parameters.';
+
+export const RULE_CHANGE_HISTORY_UNAVAILABLE_DESCRIPTION =
+  'Indicates the rule change-history data stream is not initialized.';

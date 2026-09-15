@@ -222,9 +222,12 @@ describe('rulesPage', () => {
     });
   });
 
-  describe('when alerting v2 is enabled', () => {
+  describe('when alerting v2 is deployed', () => {
     beforeEach(() => {
-      (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
+      useKibanaMock().services.application.capabilities = {
+        ...useKibanaMock().services.application.capabilities,
+        alerting_v2_rules: {},
+      };
     });
 
     describe('and the user can read v2 rules', () => {
@@ -349,11 +352,8 @@ describe('rulesPage', () => {
     });
 
     describe('and the user cannot read v2 rules', () => {
-      beforeEach(() => {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutV2 } =
-          useKibanaMock().services.application.capabilities;
-        useKibanaMock().services.application.capabilities = capabilitiesWithoutV2;
-      });
+      // Inherits `alerting_v2_rules: {}` from the outer beforeEach: the plugin is
+      // deployed but the user has no read/write privileges on it.
 
       it('hides heading tabs rather than keeping Rules/Logs', async () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
