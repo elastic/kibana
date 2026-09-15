@@ -2788,6 +2788,15 @@ x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/flee
 # Leaving this unowned avoids routing every edit through Kibana Operations.
 /.buildkite/ftr-manifests/
 
+
+/.mise.toml @elastic/kibana-operations
+
+# PNPM
+pnpm-workspace.yaml @elastic/kibana-operations
+.pnpmfile.cjs @elastic/kibana-operations
+
+/knip.jsonc @elastic/kibana-security
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
