@@ -25,6 +25,16 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
       enabled: false,
       properties: {},
     }),
+    // Graph a parallel branch child runs, sliced out of its parent at fan-out.
+    // Stored so the child keeps running the graph it was handed; only ever read
+    // back by id, never queried.
+    executionGraph: mappings.object({
+      enabled: false,
+      properties: {},
+    }),
+    // Indexed so the top-level executions list can exclude branch children with
+    // a single `must_not: exists` clause.
+    parentExecutionId: mappings.keyword(),
     createdAt: mappings.date(),
     isTestRun: mappings.boolean(),
     // Only exists in single step test executions

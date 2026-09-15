@@ -21,6 +21,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import { mergeDescendantStepExecutions } from './merge_descendant_step_executions';
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -56,10 +57,20 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const stepExecutions = await getStepExecutionsByWorkflowExecution({
+    const ownStepExecutions = await getStepExecutionsByWorkflowExecution({
       stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds: doc.stepExecutionIds,
+      sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
+    });
+
+    // Parallel branches run as their own executions, so the steps of one run can
+    // be spread across several documents. The detail view shows them as one.
+    const stepExecutions = await mergeDescendantStepExecutions({
+      workflowExecutionsDataClient,
+      stepExecutionsDataClient,
+      spaceId,
+      stepExecutions: ownStepExecutions,
       sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
     });
 

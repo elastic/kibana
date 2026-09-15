@@ -18,6 +18,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { SerializedWorkflowGraph } from '@kbn/workflows/graph';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -101,10 +102,28 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   spaces?: SpacesPluginStart;
 }
 
+/**
+ * Engine-level overrides for a caller that is creating a fragment of its own run
+ * rather than an independent sub-workflow execution (today: parallel branches).
+ */
+export interface ExecuteWorkflowOptions {
+  /**
+   * Execution id to create under, instead of a fresh uuid. Creation becomes
+   * idempotent: an execution that already exists under this id is reused rather
+   * than duplicated, so a caller that crashed mid fan-out can safely re-run.
+   */
+  executionId?: string;
+  /** Graph to run instead of compiling `workflow.definition`. */
+  executionGraph?: SerializedWorkflowGraph;
+  /** Execution this one is a fragment of. */
+  parentExecutionId?: string;
+}
+
 export type ExecuteWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: ExecuteWorkflowOptions
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type ExecuteWorkflowStep = (

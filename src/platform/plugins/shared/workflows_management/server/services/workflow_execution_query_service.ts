@@ -35,6 +35,7 @@ import {
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
+import { collectExecutionFamilyIds, isInExecutionFamily } from '../api/lib/execution_family';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
@@ -52,6 +53,8 @@ import type {
 } from '../api/workflows_management_service';
 
 const DEFAULT_PAGE_SIZE = 100;
+
+const DEFAULT_SPACE = 'default';
 
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
@@ -390,14 +393,42 @@ export class WorkflowExecutionQueryService {
     if (!this.deps.workflowEventLoggerService) {
       throw new Error('WorkflowEventLoggerService not initialized');
     }
-    return this.deps.workflowEventLoggerService.getExecutionLogs(params);
+
+    // Parallel branches log under their own execution ids, so a run's log view
+    // reads the whole family rather than the root execution alone.
+    const executionIds = await collectExecutionFamilyIds(
+      {
+        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+        spaceId: params.spaceId ?? DEFAULT_SPACE,
+      },
+      params.executionId
+    );
+
+    return this.deps.workflowEventLoggerService.getExecutionLogs({ ...params, executionIds });
   }
 
   async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
     if (!this.deps.workflowEventLoggerService) {
       throw new Error('WorkflowEventLoggerService not initialized');
     }
-    return this.deps.workflowEventLoggerService.getStepLogs(params);
+
+    // Resolving the step first does two jobs: it authorizes the caller against
+    // the run they asked for, and it yields the execution the logs were actually
+    // written under, which for a branch step is the branch child, not the run.
+    const stepExecution = await this.getStepExecution(
+      { executionId: params.executionId, id: params.stepExecutionId },
+      params.spaceId ?? DEFAULT_SPACE
+    );
+
+    if (!stepExecution) {
+      return { total: 0, logs: [] };
+    }
+
+    return this.deps.workflowEventLoggerService.getStepLogs({
+      ...params,
+      executionId: stepExecution.workflowRunId,
+    });
   }
 
   /**
@@ -805,11 +836,22 @@ export class WorkflowExecutionQueryService {
    */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
+      // The blocking step may live in a parallel branch, which runs as its own
+      // execution, so the search covers the run's whole execution family.
+      const familyIds = await collectExecutionFamilyIds(
+        {
+          workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+          stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+          spaceId,
+        },
+        executionId
+      );
+
       const response = (await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [
-              { term: { workflowRunId: executionId } },
+              { terms: { workflowRunId: familyIds } },
               { term: { spaceId } },
               { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
@@ -840,21 +882,23 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
+    const { items } = await this.deps.stepExecutionsDataClient.getByIds([id]);
+    const stepExecution = items[0]?.document;
 
-    if (response.hits.hits.length === 0) {
+    if (!stepExecution || stepExecution.spaceId !== spaceId) {
       return null;
     }
 
-    return response.hits.hits[0]._source ?? null;
+    // A step of a parallel branch carries the branch child's `workflowRunId`,
+    // but callers address it under the run they are looking at, so authorize
+    // against the execution family instead of an exact match.
+    const authorized = await isInExecutionFamily(
+      { workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient, spaceId },
+      stepExecution.workflowRunId,
+      executionId
+    );
+
+    return authorized ? stepExecution : null;
   }
 
   /**

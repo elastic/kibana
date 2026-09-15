@@ -11,8 +11,11 @@ import { graphlib } from '@dagrejs/dagre';
 import type { EdgeLabel } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
-import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
-import type { GraphNodeUnion, WorkflowGraphType } from '../types';
+import {
+  convertToWorkflowGraph,
+  wrapInWorkflowTimeoutZone,
+} from '../build_execution_graph/build_execution_graph';
+import type { GraphNodeUnion, SerializedWorkflowGraph, WorkflowGraphType } from '../types';
 import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
@@ -44,6 +47,34 @@ export class WorkflowGraph {
     defaultSettings?: WorkflowSettings
   ): WorkflowGraph {
     return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition, defaultSettings));
+  }
+
+  /** Rebuilds a graph from {@link toJSON} output, for executions that carry their own graph. */
+  public static fromJSON(serialized: SerializedWorkflowGraph): WorkflowGraph {
+    const graph = createTypedGraph({ directed: true });
+
+    for (const node of serialized.nodes) {
+      graph.setNode(node.id, node);
+    }
+
+    for (const { v, w } of serialized.edges) {
+      graph.setEdge(v, w);
+    }
+
+    return new WorkflowGraph(graph);
+  }
+
+  /**
+   * Serializes the graph to a persistable shape.
+   *
+   * Hand-rolled rather than `graphlib.json.write` because that is typed `any` on
+   * both ends, and this payload is stored in Elasticsearch and read back.
+   */
+  public toJSON(): SerializedWorkflowGraph {
+    return {
+      nodes: this.getAllNodes(),
+      edges: this.getEdges(),
+    };
   }
 
   public get topologicalOrder(): string[] {
@@ -160,20 +191,64 @@ export class WorkflowGraph {
     }
 
     // Extract all nodes between begin and end (inclusive) - this includes child steps
-    const subGraphNodeIds = this.topologicalOrder.slice(beginNodeIndex, endNodeIndex + 1);
+    return this.induceSubGraph(this.topologicalOrder.slice(beginNodeIndex, endNodeIndex + 1));
+  }
+
+  /**
+   * Extracts the subgraph reachable from `startNodeId` without crossing `exitNodeId`,
+   * which is how a parallel branch body is addressed (a branch start node up to the
+   * parallel step's shared exit node).
+   *
+   * Reachability rather than a topological slice: sibling branch bodies are
+   * independent subgraphs converging on the same exit node, so a positional slice
+   * is not guaranteed to contain exactly one branch.
+   */
+  public getNodeRangeGraph(startNodeId: string, exitNodeId: string): WorkflowGraph {
+    if (!this.graph.hasNode(startNodeId)) {
+      throw new Error(`Start node ${startNodeId} not found in the workflow graph.`);
+    }
+
+    if (!this.graph.hasNode(exitNodeId)) {
+      throw new Error(`Exit node ${exitNodeId} not found in the workflow graph.`);
+    }
+
+    const collected = new Set<string>();
+    const pending = [startNodeId];
+
+    while (pending.length) {
+      const nodeId = pending.pop() as string;
+
+      if (nodeId !== exitNodeId && !collected.has(nodeId)) {
+        collected.add(nodeId);
+        pending.push(...(this.graph.successors(nodeId) || []));
+      }
+    }
+
+    // Preserve topological order so the extracted graph orders nodes the same way
+    // the graph it came from does.
+    return this.induceSubGraph(this.topologicalOrder.filter((nodeId) => collected.has(nodeId)));
+  }
+
+  /**
+   * Returns a copy of this graph enclosed in a workflow-level timeout zone, so a
+   * graph that becomes an execution of its own carries its own deadline.
+   */
+  public wrapInWorkflowTimeout(timeout: string): WorkflowGraph {
+    return new WorkflowGraph(wrapInWorkflowTimeoutZone(this.graph, timeout));
+  }
+
+  /** Builds the subgraph induced by `nodeIds`: those nodes plus every edge with both endpoints in the set. */
+  private induceSubGraph(nodeIds: string[]): WorkflowGraph {
     const subGraph = createTypedGraph({ directed: true });
 
-    // Add all nodes in the range to subgraph
-    for (const nodeId of subGraphNodeIds) {
+    for (const nodeId of nodeIds) {
       subGraph.setNode(nodeId, this.graph.node(nodeId));
     }
 
-    // Add edges between nodes that are both in the subgraph
-    const nodeIdSet = new Set(subGraphNodeIds);
-    for (const nodeId of subGraphNodeIds) {
+    const nodeIdSet = new Set(nodeIds);
+    for (const nodeId of nodeIds) {
       const successors = this.graph.successors(nodeId) || [];
       for (const succId of successors) {
-        // Only add edge if both nodes are in the subgraph
         if (nodeIdSet.has(succId)) {
           subGraph.setEdge(nodeId, succId);
         }

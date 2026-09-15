@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionError } from '@kbn/workflows/server';
-import type {
-  EsWorkflowExecution,
-  EsWorkflowStepExecution,
-  WorkflowStepExecutionDto,
-} from '@kbn/workflows/types/v1';
+import { readChildExecutionOutcome } from '../../../lib/read_child_execution_outcome';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
@@ -163,160 +156,13 @@ export class WorkflowExecuteSyncStrategy {
         return { status: 'waiting' };
       }
 
-      if (execution.status !== ExecutionStatus.COMPLETED) {
-        return { status: 'failed', error: await this.buildChildFailureError(execution) };
-      }
-
-      let output: JsonValue;
-      if (execution.context?.output) {
-        output = execution.context.output as JsonValue;
-      } else {
-        const stepExecutions =
-          await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
-            state.executionId,
-            execution.stepExecutionIds
-          );
-        const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
-          omit(exec, ['spaceId'])
-        );
-        output = this.getWorkflowOutput(stepExecutionDtos);
-      }
-
-      return {
-        status: 'completed',
-        output: output === null ? undefined : output,
-      };
+      return readChildExecutionOutcome({
+        execution,
+        stepExecutionRepository: this.stepExecutionRepository,
+        logger: this.workflowLogger,
+      });
     } catch (error) {
       return { status: 'failed', error: error as Error };
     }
-  }
-
-  /**
-   * Builds the error a parent step reports when a sub-workflow did not complete,
-   * preferring the most specific detail available over a bare status string.
-   */
-  private async buildChildFailureError(execution: EsWorkflowExecution): Promise<ExecutionError> {
-    if (execution.error) {
-      return new ExecutionError(execution.error);
-    }
-
-    if (execution.cancellationReason) {
-      return new ExecutionError({
-        type: 'Error',
-        message: `Sub-workflow execution ${execution.status}: ${execution.cancellationReason}`,
-      });
-    }
-
-    const failingStep = await this.findFailingChildStep(execution);
-    if (failingStep) {
-      const stepType = failingStep.stepType ? ` (${failingStep.stepType})` : '';
-      const detail = failingStep.error?.message ? `: ${failingStep.error.message}` : '';
-      return new ExecutionError({
-        type: 'Error',
-        message: `Sub-workflow execution ${execution.status} at step '${failingStep.stepId}'${stepType}${detail}`,
-      });
-    }
-
-    return new ExecutionError({
-      type: 'Error',
-      message: `Sub-workflow execution ${execution.status}`,
-    });
-  }
-
-  /**
-   * Finds the child step most responsible for the failure. On timeout the zone
-   * fails the running step with a `TimeoutError` and clears the workflow-level
-   * error, so we look for the latest step carrying an error (or still running)
-   * rather than a top-level error that is no longer there.
-   */
-  private async findFailingChildStep(
-    execution: EsWorkflowExecution
-  ): Promise<EsWorkflowStepExecution | undefined> {
-    try {
-      const stepExecutions =
-        await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
-          execution.id,
-          execution.stepExecutionIds
-        );
-      const candidates = stepExecutions.filter(
-        (step) => step.error != null || !isTerminalStatus(step.status)
-      );
-      if (candidates.length === 0) {
-        return undefined;
-      }
-      return candidates.reduce((latest, step) =>
-        step.globalExecutionIndex > latest.globalExecutionIndex ? step : latest
-      );
-    } catch (error) {
-      // Best-effort: a read failure must not crash the parent step.
-      this.workflowLogger.logDebug(
-        `Failed to read child step executions for failure enrichment: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return undefined;
-    }
-  }
-
-  /**
-   * Recursively extracts the output from a workflow execution's step executions.
-   * At top-level (scopeDepth=0), finds the last step. At nested levels (scopeDepth>0),
-   * considers all steps at that level. If steps have children, recurses into them.
-   * Otherwise, returns their output(s).
-   */
-  private getWorkflowOutput(stepExecutions: WorkflowStepExecutionDto[]): JsonValue {
-    if (stepExecutions.length === 0) {
-      return null;
-    }
-
-    let minDepth = stepExecutions[0].scopeStack.length;
-    for (let i = 1; i < stepExecutions.length; i++) {
-      minDepth = Math.min(minDepth, stepExecutions[i].scopeStack.length);
-    }
-
-    return this.getWorkflowOutputRecursive(stepExecutions, minDepth, minDepth);
-  }
-
-  private getWorkflowOutputRecursive(
-    stepExecutions: WorkflowStepExecutionDto[],
-    scopeDepth: number,
-    minDepth: number
-  ): JsonValue {
-    if (stepExecutions.length === 0) {
-      return null;
-    }
-
-    const stepsAtThisLevel = stepExecutions.filter((step) => step.scopeStack.length === scopeDepth);
-    if (stepsAtThisLevel.length === 0) {
-      return null;
-    }
-
-    const stepsToProcess =
-      scopeDepth === minDepth ? [stepsAtThisLevel[stepsAtThisLevel.length - 1]] : stepsAtThisLevel;
-
-    const children = stepExecutions.filter((step) => {
-      if (step.scopeStack.length !== scopeDepth + 1) return false;
-      const lastFrame = step.scopeStack[step.scopeStack.length - 1];
-      return stepsToProcess.some((parentStep) => lastFrame.stepId === parentStep.stepId);
-    });
-
-    if (children.length > 0) {
-      const descendants = stepExecutions.filter((step) =>
-        step.scopeStack.some((frame) =>
-          stepsToProcess.some((parentStep) => frame.stepId === parentStep.stepId)
-        )
-      );
-      return this.getWorkflowOutputRecursive(descendants, scopeDepth + 1, minDepth);
-    }
-
-    if (scopeDepth === minDepth && stepsToProcess.length === 1) {
-      return stepsToProcess[0].output ?? null;
-    }
-
-    const outputs = stepsToProcess
-      .map((step) => step.output)
-      .filter((output): output is JsonValue => output !== undefined);
-
-    return outputs.length > 0 ? outputs : null;
   }
 }

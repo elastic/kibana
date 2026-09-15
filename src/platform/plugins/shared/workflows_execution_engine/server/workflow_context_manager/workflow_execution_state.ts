@@ -10,12 +10,13 @@
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  StackFrame,
   WorkflowStepTokenUsage,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { sumTokenUsage } from '../utils';
+import { buildStepScopeKey, sumTokenUsage } from '../utils';
 
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
@@ -55,6 +56,7 @@ type CreateStepInput = Omit<Partial<EsWorkflowStepExecution>, 'input' | 'output'
  */
 export type StepIoStateAccessor = Pick<
   WorkflowExecutionState,
+  | 'getWorkflowExecution'
   | 'getStepExecution'
   | 'getLatestStepExecution'
   | 'getAllStepExecutions'
@@ -97,6 +99,22 @@ export class WorkflowExecutionState {
    * (loops, retries).
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
+
+  /**
+   * Maps a step's scope key (see `buildStepScopeKey`) to its execution ID.
+   *
+   * Needed because a step execution's id also hashes in the execution it ran
+   * in, so a parallel branch cannot re-derive the id of a scope it inherited
+   * from its parent. Scope resolution goes through this index instead.
+   */
+  private scopeKeyIndex = new Map<string, string>();
+
+  /**
+   * Step IDs whose executions were inherited from an ancestor execution rather
+   * than produced by this one. Read-only here: the owning execution is the only
+   * writer, so these are never flushed back.
+   */
+  private inheritedStepIds = new Set<string>();
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
@@ -185,6 +203,24 @@ export class WorkflowExecutionState {
   }
 
   /**
+   * Resolves a step execution by scope rather than by id, so scopes inherited
+   * from an ancestor execution (a parallel branch's enclosing frames) resolve
+   * the same way as scopes this execution opened itself.
+   */
+  public getStepExecutionByScope(
+    stepId: string,
+    stackFrames: StackFrame[]
+  ): StepExecutionMetadata | undefined {
+    const stepExecutionId = this.scopeKeyIndex.get(buildStepScopeKey(stepId, stackFrames));
+    return stepExecutionId ? this.stepExecutions.get(stepExecutionId) : undefined;
+  }
+
+  /** Step IDs whose executions came from an ancestor execution. */
+  public getInheritedStepIds(): ReadonlySet<string> {
+    return this.inheritedStepIds;
+  }
+
+  /**
    * Retrieves all executions for a workflow step in chronological order.
    * Returns `[]` when the step has not executed yet.
    *
@@ -201,7 +237,10 @@ export class WorkflowExecutionState {
     const result: StepExecutionMetadata[] = [];
     for (const executionId of executionIds) {
       const exec = this.stepExecutions.get(executionId);
-      if (exec) result.push(exec);
+      // A branch wrapper carries the parallel step's id but is a handle on a
+      // branch, not a run of the step; counting it would shadow the step's own
+      // execution in `steps.<parallelStep>`.
+      if (exec && !exec.isBranchWrapper) result.push(exec);
     }
     return result;
   }
@@ -257,11 +296,18 @@ export class WorkflowExecutionState {
    * service) is responsible for stripping `output` (and ingesting it into
    * its own IO map for pinned step types). State stores the metadata only.
    */
-  public ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void {
+  public ingestLoadedStepDocs(
+    steps: ReadonlyArray<StepExecutionMetadata>,
+    options: { inherited?: boolean } = {}
+  ): void {
     for (const step of steps) {
       this.stepExecutions.set(step.id, step);
+      if (options.inherited && step.stepId) {
+        this.inheritedStepIds.add(step.stepId);
+      }
     }
     this.buildStepIdExecutionIdIndex();
+    this.buildScopeKeyIndex();
   }
 
   public async flushWorkflowDoc(): Promise<void> {
@@ -323,6 +369,9 @@ export class WorkflowExecutionState {
       isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as StepExecutionMetadata;
     this.stepExecutions.set(id, newStep);
+    if (stepId) {
+      this.scopeKeyIndex.set(buildStepScopeKey(stepId, newStep.scopeStack), id);
+    }
     this.stepDocumentsChanges.set(id, newStep);
     // Execution and flushes are synchronous, so an incremental update here
     // preserves the global execution order without depending on what was
@@ -350,6 +399,15 @@ export class WorkflowExecutionState {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
+  }
+
+  private buildScopeKeyIndex(): void {
+    this.scopeKeyIndex.clear();
+    for (const step of this.stepExecutions.values()) {
+      if (step.stepId) {
+        this.scopeKeyIndex.set(buildStepScopeKey(step.stepId, step.scopeStack ?? []), step.id);
+      }
+    }
   }
 
   private buildStepIdExecutionIdIndex(): void {

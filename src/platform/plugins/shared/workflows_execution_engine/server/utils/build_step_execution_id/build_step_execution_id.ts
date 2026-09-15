@@ -39,9 +39,22 @@ export function buildStepExecutionId(
   stepId: string,
   stackFrames: StackFrame[]
 ): string {
+  return createSHA256Hash([executionId, buildStepScopeKey(stepId, stackFrames)].join('_'));
+}
+
+/**
+ * The execution-independent half of {@link buildStepExecutionId}: a step's
+ * identity within its scope, without the execution it ran in.
+ *
+ * A parallel branch runs as its own execution but inherits the parent's scope
+ * stack, so a scope frame the branch inherited hashes to the parent's step
+ * execution id, not one derivable from the branch's own execution id. Keying
+ * ancestor lookups on the scope instead lets a branch resolve the scopes it
+ * inherited (e.g. the `foreach` item its parallel frame carries).
+ */
+export function buildStepScopeKey(stepId: string, stackFrames: StackFrame[]): string {
   const stepPath = stackFrames
     .map((frame) => [frame.stepId, ...frame.nestedScopes.map((s) => s.scopeId || '')])
     .flat();
-  const generatedId = [executionId, ...stepPath, stepId].join('_');
-  return createSHA256Hash(generatedId);
+  return [...stepPath, stepId].join('_');
 }

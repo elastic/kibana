@@ -10,10 +10,7 @@
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
-import {
-  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  isHitlWaitStepType,
-} from '../../common/wait_for_approval';
+import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -690,6 +687,8 @@ function visitOnFailure(
   return result;
 }
 
+const WORKFLOW_LEVEL_TIMEOUT_STEP_ID = 'workflow_level_timeout';
+
 function handleTimeout(
   stepId: string,
   stepType: 'workflow_level_timeout' | 'step_level_timeout',
@@ -717,6 +716,35 @@ function handleTimeout(
   insertGraphBetweenNodes(graph, innerGraph, enterTimeoutZone.id, exitTimeoutZone.id);
   context.stack.pop();
   return graph;
+}
+
+/**
+ * Wraps a standalone graph in a workflow-level timeout zone.
+ *
+ * Used by the parallel step: a branch body becomes its own execution, so wrapping
+ * it at `workflow_level_timeout` makes the branch deadline the existing
+ * workflow-timeout monitor's job, and `getWorkflowLevelTimeout()` reads it back
+ * without any per-branch timeout machinery.
+ *
+ * The zone deliberately reuses the id the compiler gives a workflow's own timeout
+ * zone, so a branch child's outermost scope frame is the same frame its parent
+ * was in and the inherited scope stack still hydrates against the branch graph.
+ */
+export function wrapInWorkflowTimeoutZone(
+  innerGraph: WorkflowGraphType,
+  timeout: string
+): WorkflowGraphType {
+  return handleTimeout(
+    WORKFLOW_LEVEL_TIMEOUT_STEP_ID,
+    'workflow_level_timeout',
+    timeout,
+    innerGraph,
+    {
+      settings: undefined,
+      stack: [],
+      parentKey: '',
+    }
+  );
 }
 
 function handleStepLevelOnFailure(
@@ -1072,73 +1100,18 @@ function createForeachGraphForStepWithForeach(
   return createForeachGraph(generatedStepId, foreachStep, context);
 }
 
-// Compiles a parallel branch body into a real subgraph and enforces the v1
-// branch-body constraints (straight-line only; no `waitForInput`). Returns the
-// subgraph plus its single start node.
+// Compiles a parallel branch body into a real subgraph. Returns the subgraph plus
+// its single start node.
+//
+// The body carries no restrictions: each branch runs as its own workflow
+// execution over this subgraph, so nested flow-control (if/switch/foreach/while),
+// on-failure handlers, step-level timeouts and HITL waits are all driven by the
+// ordinary engine.
 function buildParallelBranchBody(
-  stepId: string,
   steps: BaseStep[],
   context: GraphBuildContext
 ): { bodyGraph: WorkflowGraphType; startNodeId: string } {
-  // The branch body is compiled into a real subgraph so that adding nested
-  // flow-control inside a branch later is an executor change, not a graph one.
-  // v1 supports a straight-line body (one or more atomic/wait steps); nested
-  // flow-control (if/switch/foreach/while) inside a branch is not yet supported
-  // by the parallel executor and is rejected here so it fails loudly at compile
-  // time rather than silently running only one path at runtime.
   const bodyGraph = createStepsSequence(steps || [], context);
-
-  const branchingNode = bodyGraph
-    .nodes()
-    .find((nodeId) => (bodyGraph.outEdges(nodeId)?.length ?? 0) > 1);
-  if (branchingNode) {
-    throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body with nested flow-control, which is not supported yet. ` +
-        `A parallel branch body must be a straight-line sequence of steps (no if/switch/foreach/while inside the branch).`,
-      stepId
-    );
-  }
-
-  // A straight-line body of atomic/connector/wait steps compiles to leaf nodes
-  // only. Any `enter-*`/`exit-*` node means the body was wrapped in flow-control
-  // (if/switch/foreach/while), an `on-failure` handler (retry/continue/fallback),
-  // or a step-level `timeout` zone. The parallel executor walks branch bodies as
-  // a straight line and cannot drive these wrapper nodes, so a branch would hang
-  // at runtime. Reject at compile time with an actionable message instead.
-  const flowControlNode = bodyGraph
-    .nodes()
-    .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => {
-      const type = bodyNode?.type as string | undefined;
-      return type !== undefined && (type.startsWith('enter-') || type.startsWith('exit-'));
-    });
-  if (flowControlNode) {
-    throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
-        `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
-        `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
-        `"if", no step-level "on-failure" handler, and no step-level "timeout".`,
-      stepId
-    );
-  }
-
-  // The parallel executor drives each branch in-process. Timer-based `wait`
-  // steps are supported: a waiting branch parks across ticks and the parallel
-  // re-ticks at the earliest branch `resumeAt`. HITL waits, however, are
-  // indefinite, externally-resumed waits that have no per-branch resume signal,
-  // so they cannot run inside a branch yet — reject them at compile time instead
-  // of hanging or self-resuming the branch at runtime.
-  const unsupportedNode = bodyGraph
-    .nodes()
-    .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
-  if (unsupportedNode) {
-    throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing an unsupported HITL wait step "${unsupportedNode.stepType}". ` +
-        `HITL wait steps are not supported inside a parallel branch yet.`,
-      stepId
-    );
-  }
 
   const startNodeId = bodyGraph
     .nodes()
@@ -1163,9 +1136,9 @@ function createParallelGraph(
     staticBranches
       ? staticBranches.map((branch) => ({
           name: branch.name,
-          ...buildParallelBranchBody(stepId, branch.steps, context),
+          ...buildParallelBranchBody(branch.steps, context),
         }))
-      : [buildParallelBranchBody(stepId, parallelStep.steps || [], context)];
+      : [buildParallelBranchBody(parallelStep.steps || [], context)];
 
   const enterParallelNode: EnterParallelNode = {
     id: enterNodeId,
@@ -1247,16 +1220,17 @@ function createWhileGraph(
   return graph;
 }
 
-function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
+function findEnclosingLoop(context: GraphBuildContext, stepName?: string): LoopEnterNode {
   for (let i = context.stack.length - 1; i >= 0; i--) {
     const node = context.stack[i];
     if (isLoopEnterNode(node)) {
       return node;
     }
   }
-  throw new Error(
+  throw new GraphBuildError(
     'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
-      'Move the step inside a loop, or remove it.'
+      'Move the step inside a loop, or remove it.',
+    stepName
   );
 }
 
@@ -1264,7 +1238,7 @@ function visitLoopBreakStep(
   currentStep: LoopBreakStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const enclosingLoop = findEnclosingLoop(context);
+  const enclosingLoop = findEnclosingLoop(context, currentStep.name);
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
 
@@ -1286,7 +1260,7 @@ function visitLoopContinueStep(
   currentStep: LoopContinueStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const enclosingLoop = findEnclosingLoop(context);
+  const enclosingLoop = findEnclosingLoop(context, currentStep.name);
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
 
@@ -1318,7 +1292,7 @@ export function convertToWorkflowGraph(
 
   if (resolvedSettings?.timeout) {
     finalGraph = handleTimeout(
-      'workflow_level_timeout',
+      WORKFLOW_LEVEL_TIMEOUT_STEP_ID,
       'workflow_level_timeout',
       resolvedSettings.timeout,
       finalGraph,

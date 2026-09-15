@@ -30,7 +30,7 @@ import type { StepExecutionRuntimeFactory } from './step_execution_runtime_facto
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
-import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -68,6 +68,25 @@ interface WorkflowExecutionRuntimeManagerInit {
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
  * and uses topological sorting to determine execution order.
  */
+
+/** How this execution was invoked — outlives the rendered context it is stored beside. */
+const INVOCATION_CONTEXT_KEYS = [
+  'parentWorkflowInvocation',
+  'parentWorkflowId',
+  'parentWorkflowExecutionId',
+  'parentStepId',
+  'parentDepth',
+] as const;
+
+const pickInvocationContext = (
+  context: Record<string, unknown> | undefined
+): Record<string, unknown> =>
+  Object.fromEntries(
+    INVOCATION_CONTEXT_KEYS.filter((key) => context?.[key] !== undefined).map((key) => [
+      key,
+      context?.[key],
+    ])
+  );
 
 export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
@@ -116,6 +135,15 @@ export class WorkflowExecutionRuntimeManager {
 
   public getWorkflowExecutionStatus(): ExecutionStatus {
     return this.workflowExecutionState.getWorkflowExecution().status;
+  }
+
+  /**
+   * Writes a step execution the cursor never visits, for steps that stand in for
+   * work happening elsewhere (today: a parallel step's per-branch wrapper, whose
+   * body runs as its own execution).
+   */
+  public upsertStepExecution(step: Partial<StepExecutionMetadata>): void {
+    this.workflowExecutionState.upsertStep(step);
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -461,6 +489,11 @@ export class WorkflowExecutionRuntimeManager {
       }
     }
 
+    // A fresh execution has no steps of its own, but it may inherit some: a
+    // parallel branch child must see the steps that ran before the fan-out on
+    // its very first run, not only on resume.
+    await this.stepIoService.load();
+
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       currentNodeId: this.workflowExecutionCursor.currentNode?.id,
       scopeStack: [],
@@ -533,11 +566,13 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
-      workflowExecutionUpdate.context = buildWorkflowContext(
-        this.workflowExecution,
-        this.coreStart,
-        this.dependencies
-      );
+      // The terminal context is the rendered snapshot the UI reads back, but it
+      // must not drop how this execution was invoked: a sync child is only able
+      // to wake its parent while its parent linkage survives on the document.
+      workflowExecutionUpdate.context = {
+        ...pickInvocationContext(this.workflowExecution.context),
+        ...buildWorkflowContext(this.workflowExecution, this.coreStart, this.dependencies),
+      };
       this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
 
       // Update the workflow transaction outcome when workflow completes

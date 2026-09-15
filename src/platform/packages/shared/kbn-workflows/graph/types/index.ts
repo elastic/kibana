@@ -110,7 +110,7 @@ export type {
 } from './nodes/switch_nodes';
 
 export type { GraphNodeUnion } from './nodes/union';
-export type { WorkflowGraphType } from './graph';
+export type { SerializedWorkflowGraph, WorkflowGraphType } from './graph';
 
 export {
   isSynthetic,

@@ -37,6 +37,10 @@ export const buildWorkflowExecutionsSearchQuery = (
     must: [userQuery ?? { match_all: {} }, buildWorkflowExecutionsSpaceFilter(spaceId)],
     must_not: [
       { exists: { field: 'stepId' } },
+      // A parallel branch is a fragment of the run it belongs to, not a run of
+      // its own, so it is shown nested inside its parent's detail view rather
+      // than as another entry in this list.
+      { exists: { field: 'parentExecutionId' } },
       ...(options?.includeManagedExecutions ? [] : [buildManagedWorkflowExecutionsFilter()]),
     ],
   },

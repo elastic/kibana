@@ -11,6 +11,7 @@ export {
   convertToWorkflowGraph,
   convertToSerializableGraph,
   visitWaitForInputStep,
+  wrapInWorkflowTimeoutZone,
 } from './build_execution_graph/build_execution_graph';
 export { GraphBuildError, isGraphBuildError } from './build_execution_graph/graph_build_error';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
@@ -74,6 +75,7 @@ export type {
   LoopContinueNode,
   LoopContinueNodeSchema,
   GraphNodeUnion,
+  SerializedWorkflowGraph,
   SyntheticGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowExecuteGraphNodeSchema,

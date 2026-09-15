@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -22,6 +22,7 @@ import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_exec
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
 
@@ -34,6 +35,12 @@ export type PredecessorsResolver = (node: GraphNodeUnion) => ReadonlyArray<Graph
 export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
   state: StepIoStateAccessor;
+  /**
+   * Needed only to walk `parentExecutionId` when this execution is a fragment
+   * of another (a parallel branch), so the branch can see the steps that ran
+   * before the fan-out.
+   */
+  workflowExecutionRepository?: WorkflowExecutionRepository;
   pinnedStepTypes?: ReadonlySet<string>;
   /**
    * Minimum output size in bytes for a completed step to be eligible for eviction.
@@ -143,9 +150,17 @@ export interface StepIoLifecycle {
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: StepIoStateAccessor;
+  private readonly workflowExecutionRepository?: WorkflowExecutionRepository;
   private readonly pinnedStepTypes: ReadonlySet<string>;
   private readonly evictionMinBytes: number;
   private readonly logger?: Logger;
+
+  /**
+   * Executions this one inherits steps from, populated by the ancestor load.
+   * Their step docs legitimately carry a foreign `workflowRunId`, so the
+   * cross-execution guard in {@link rehydrateOutputs} must accept them.
+   */
+  private readonly ancestorExecutionIds = new Set<string>();
 
   // ----- Canonical IO storage ----------------------------------------------
   // These maps are the source of truth for step input/output. State holds
@@ -270,6 +285,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   constructor(init: StepIoServiceInit) {
     this.stepRepository = init.stepRepository;
     this.state = init.state;
+    this.workflowExecutionRepository = init.workflowExecutionRepository;
     this.pinnedStepTypes = init.pinnedStepTypes ?? EVICTION_EXEMPT_STEP_TYPES;
     this.evictionMinBytes = init.evictionMinBytes ?? Infinity;
     this.logger = init.logger;
@@ -516,11 +532,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.dataSetOutputs.clear();
     this.dataSetVariablesCache = undefined;
 
-    const stepExecutionIds = this.state.getWorkflowExecutionStepExecutionIds();
-    if (!stepExecutionIds) {
-      throw new Error(
-        'StepIoService: Workflow execution must have step execution IDs to be loaded'
-      );
+    await this.loadAncestorStepExecutions();
+
+    // Absent on a fresh execution and on a branch child that has not run a step
+    // of its own yet; the ancestor load above may still have produced context.
+    const stepExecutionIds = this.state.getWorkflowExecutionStepExecutionIds() ?? [];
+    if (stepExecutionIds.length === 0) {
+      return;
     }
 
     const foundSteps = await this.stepRepository.getStepExecutionsByIds(
@@ -564,6 +582,67 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
           this.dataSetOutputs.set(doc.id, output);
         }
       }
+    }
+  }
+
+  /**
+   * Loads every step execution of every ancestor, innermost-last, so this
+   * execution reads `steps.*` and its inherited scopes exactly as it would if it
+   * were running inline in its parent.
+   *
+   * Walks `parentExecutionId` upward and fetches each ancestor's steps by id
+   * (mget, never search) using the ids the ancestor already tracks. Ordered
+   * outermost-first so a nearer ancestor's step wins on a stepId collision.
+   */
+  private async loadAncestorStepExecutions(): Promise<void> {
+    const rootExecution = this.state.getWorkflowExecution();
+    if (!rootExecution.parentExecutionId || !this.workflowExecutionRepository) {
+      return;
+    }
+
+    const ancestors: EsWorkflowExecution[] = [];
+    const visited = new Set<string>([rootExecution.id]);
+    let parentExecutionId: string | undefined = rootExecution.parentExecutionId;
+
+    while (parentExecutionId && !visited.has(parentExecutionId)) {
+      visited.add(parentExecutionId);
+      const ancestor: EsWorkflowExecution | null =
+        await this.workflowExecutionRepository.getWorkflowExecutionById(
+          parentExecutionId,
+          rootExecution.spaceId
+        );
+      if (!ancestor) {
+        this.logger?.warn(
+          `StepIoService: ancestor execution ${parentExecutionId} of ${rootExecution.id} not found; ` +
+            `steps from it will not be readable in this execution.`
+        );
+        break;
+      }
+      ancestors.unshift(ancestor);
+      this.ancestorExecutionIds.add(ancestor.id);
+      parentExecutionId = ancestor.parentExecutionId;
+    }
+
+    const ancestorsWithSteps = ancestors.filter((ancestor) => ancestor.stepExecutionIds?.length);
+
+    for (const ancestor of ancestorsWithSteps) {
+      const steps = await this.stepRepository.getStepExecutionsByIds(
+        ancestor.stepExecutionIds ?? []
+      );
+      const metadata: StepExecutionMetadata[] = [];
+      for (const step of steps) {
+        if (step.input !== undefined) {
+          this.inputs.set(step.id, step.input);
+        }
+        if (step.output !== undefined) {
+          this.outputs.set(step.id, step.output);
+        }
+        if (step.stepType === 'data.set') {
+          this.dataSetOutputs.set(step.id, step.output ?? null);
+        }
+        metadata.push(stripIo(step));
+      }
+      this.state.ingestLoadedStepDocs(metadata, { inherited: true });
     }
   }
 
@@ -1066,7 +1145,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // workflowRunId disagrees with the current execution rather than
     // restoring foreign output into memory.
     const docs = fetched.filter((doc) => {
-      if (doc.workflowRunId && doc.workflowRunId !== expectedRunId) {
+      if (
+        doc.workflowRunId &&
+        doc.workflowRunId !== expectedRunId &&
+        !this.ancestorExecutionIds.has(doc.workflowRunId)
+      ) {
         this.logger?.error(
           `Cross-execution doc skipped during rehydration: id=${doc.id} expected runId=${expectedRunId} got=${doc.workflowRunId}`
         );

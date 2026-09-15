@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   AtomicGraphNode,
   EnterCaseBranchNode,
@@ -26,6 +27,7 @@ import type {
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
+  ExitParallelNode,
   ExitRetryNode,
   ExitWhileNode,
   LoopBreakNode,
@@ -69,7 +71,11 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
-import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
+import {
+  EnterParallelNodeImpl,
+  ExitParallelNodeImpl,
+  ParallelBranchCoordinator,
+} from './parallel_step';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -89,6 +95,9 @@ import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../workflow_context_manager/step_io_service';
@@ -226,12 +235,29 @@ export class NodesFactory {
           this.workflowRuntime,
           stepExecutionRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory,
-          this,
-          this.workflowGraph
+          this.createParallelBranchCoordinator(
+            node as EnterParallelNode,
+            stepExecutionRuntime,
+            stepLogger
+          )
         );
-      case 'exit-parallel':
-        return new ExitParallelNodeImpl(this.workflowRuntime);
+      case 'exit-parallel': {
+        const exitNode = node as ExitParallelNode;
+        const enterNode = this.requireEnterParallelNode(exitNode);
+        return new ExitParallelNodeImpl({
+          node: exitNode,
+          enterNode,
+          workflowRuntime: this.workflowRuntime,
+          stepExecutionRuntime,
+          workflowLogger: stepLogger,
+          stepExecutionRepository: this.requireChildExecutionDependencies().stepExecutionRepository,
+          coordinator: this.createParallelBranchCoordinator(
+            enterNode,
+            stepExecutionRuntime,
+            stepLogger
+          ),
+        });
+      }
       case 'loop-break':
         return new LoopBreakNodeImpl(
           node as LoopBreakNode,
@@ -391,38 +417,21 @@ export class NodesFactory {
           stepLogger
         );
       case 'workflow.execute':
-      case 'workflow.executeAsync':
-        if (!this.dependencies.workflowsExecutionEngine) {
-          throw new Error('WorkflowsExecutionEngine is not available in dependencies');
-        }
+      case 'workflow.executeAsync': {
+        const childExecutionDeps = this.requireChildExecutionDependencies();
         if (!this.dependencies.workflowRepository) {
           throw new Error('WorkflowRepository is not available in dependencies');
-        }
-        if (!this.dependencies.workflowExecutionRepository) {
-          throw new Error('WorkflowExecutionRepository is not available in dependencies');
-        }
-        if (!this.dependencies.stepExecutionRepository) {
-          throw new Error('StepExecutionRepository is not available in dependencies');
-        }
-        if (!this.dependencies.spaceId) {
-          throw new Error('spaceId is not available in dependencies');
-        }
-        if (!this.dependencies.request) {
-          throw new Error('request is not available in dependencies');
         }
         return new WorkflowExecuteStepImpl({
           node: node as WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
           stepExecutionRuntime,
           workflowExecutionRuntime: this.workflowRuntime,
           workflowRepository: this.dependencies.workflowRepository,
-          spaceId: this.dependencies.spaceId,
-          request: this.dependencies.request,
-          workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
-          workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
-          stepExecutionRepository: this.dependencies.stepExecutionRepository,
           workflowLogger: this.workflowLogger,
           config: this.dependencies.config,
+          ...childExecutionDeps,
         });
+      }
       case 'workflow.output':
         this.workflowLogger.logDebug(`Creating workflow.output step`, {
           event: { action: 'workflow-output-step-creation', outcome: 'success' },
@@ -438,5 +447,86 @@ export class NodesFactory {
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);
     }
+  }
+
+  /**
+   * The dependencies a step needs to run another execution and follow it —
+   * `workflow.execute` and the parallel step's branches. They are optional on
+   * `ContextDependencies` because most steps never spawn an execution, so the
+   * steps that do assert them here rather than each carrying the optionality.
+   */
+  private requireChildExecutionDependencies(): {
+    workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+    workflowExecutionRepository: WorkflowExecutionRepository;
+    stepExecutionRepository: StepExecutionRepository;
+    spaceId: string;
+    request: KibanaRequest;
+  } {
+    const {
+      workflowsExecutionEngine,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      spaceId,
+      request,
+    } = this.dependencies;
+
+    if (!workflowsExecutionEngine) {
+      throw new Error('WorkflowsExecutionEngine is not available in dependencies');
+    }
+    if (!workflowExecutionRepository) {
+      throw new Error('WorkflowExecutionRepository is not available in dependencies');
+    }
+    if (!stepExecutionRepository) {
+      throw new Error('StepExecutionRepository is not available in dependencies');
+    }
+    if (!spaceId) {
+      throw new Error('spaceId is not available in dependencies');
+    }
+    if (!request) {
+      throw new Error('request is not available in dependencies');
+    }
+
+    return {
+      workflowsExecutionEngine,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      spaceId,
+      request,
+    };
+  }
+
+  /**
+   * Branch bookkeeping shared by a parallel step's enter and exit nodes. Both
+   * halves address branches the same way, so they are built from one place.
+   */
+  private createParallelBranchCoordinator(
+    enterNode: EnterParallelNode,
+    stepExecutionRuntime: StepExecutionRuntime,
+    workflowLogger: IWorkflowEventLogger
+  ): ParallelBranchCoordinator {
+    const { workflowExecutionRepository, workflowsExecutionEngine, request, spaceId } =
+      this.requireChildExecutionDependencies();
+
+    return new ParallelBranchCoordinator({
+      enterNode,
+      workflowRuntime: this.workflowRuntime,
+      stepExecutionRuntime,
+      workflowLogger,
+      workflowGraph: this.workflowGraph,
+      workflowExecutionRepository,
+      workflowsExecutionEngine,
+      request,
+      spaceId,
+    });
+  }
+
+  private requireEnterParallelNode(exitNode: ExitParallelNode): EnterParallelNode {
+    const enterNode = this.workflowGraph.getNode(exitNode.startNodeId);
+    if (!enterNode || enterNode.type !== 'enter-parallel') {
+      throw new Error(
+        `Exit node "${exitNode.id}" could not resolve its enter-parallel node "${exitNode.startNodeId}".`
+      );
+    }
+    return enterNode as EnterParallelNode;
   }
 }

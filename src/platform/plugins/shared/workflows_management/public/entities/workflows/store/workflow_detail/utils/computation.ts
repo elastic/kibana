@@ -51,8 +51,8 @@ export const performComputation = (
   }
 
   // Compiling the definition into an execution graph can throw for valid YAML
-  // that uses an unsupported construct (e.g. a `wait`/`waitForInput` or nested
-  // flow-control inside a parallel branch). Treat that as non-fatal: keep the
+  // that uses a construct in an unsupported position (e.g. a `loop.break`
+  // outside a loop body). Treat that as non-fatal: keep the
   // parsed document, lookup and definition so YAML-only validators still run,
   // and surface the precise error (anchored to the offending step) rather than
   // wiping everything and showing a generic "document not loaded" message.

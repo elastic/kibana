@@ -57,6 +57,24 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Retrieves several workflow executions in one mget, dropping any that are
+   * missing or belong to another space. Order is not guaranteed to match `ids`.
+   */
+  public async getWorkflowExecutionsByIds(
+    workflowExecutionIds: string[],
+    spaceId: string
+  ): Promise<EsWorkflowExecution[]> {
+    if (workflowExecutionIds.length === 0) {
+      return [];
+    }
+
+    const { items } = await this.workflowExecutionsDataClient.getByIds(workflowExecutionIds);
+    return items
+      .map(({ document }) => document)
+      .filter((document) => document?.spaceId === spaceId);
+  }
+
+  /**
    * Creates a new workflow execution document in Elasticsearch.
    *
    * @param workflowExecution - A partial object representing the workflow execution to be created.

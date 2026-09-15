@@ -29,6 +29,7 @@ export interface WorkflowExecutionCursorApi {
   commitPendingNavigation(): void;
   readonly currentNode: GraphNodeUnion | null;
   readonly nextNode: GraphNodeUnion | null;
+  hasNode(nodeId: string): boolean;
   navigateToNode(nodeId: string): void;
   navigateToNextNode(): void;
   navigateToAfterNode(nodeId: string): void;
@@ -133,6 +134,11 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     }
 
     return this.runtimeGraph.getNode(this.nextNodeId) ?? null;
+  }
+
+  /** Whether this execution's graph owns `nodeId`; inherited scopes may not be in it. */
+  public hasNode(nodeId: string): boolean {
+    return this.runtimeGraph.getNode(nodeId) !== undefined;
   }
 
   public navigateToNode(nodeId: string): void {

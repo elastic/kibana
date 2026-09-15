@@ -34,6 +34,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import type { SerializedWorkflowGraph } from '@kbn/workflows/graph';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -81,6 +82,7 @@ import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
+  ExecuteWorkflowOptions,
   ExecuteWorkflowStep,
   InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
@@ -1197,6 +1199,9 @@ export class WorkflowsExecutionEnginePlugin
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
+      executionId?: string;
+      executionGraph?: SerializedWorkflowGraph;
+      parentExecutionId?: string;
     }): Promise<WorkflowExecutionForInputRendering> => {
       return buildWorkflowExecutionDocument({
         ...args,
@@ -1216,10 +1221,13 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: { refresh: boolean | 'wait_for' } = { refresh: false },
+      executeOptions?: ExecuteWorkflowOptions
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
+      /** False when `executeOptions.executionId` already existed, so the caller must not re-run setup. */
+      created: boolean;
     }> => {
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
 
@@ -1235,7 +1243,26 @@ export class WorkflowsExecutionEnginePlugin
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
+        executionId: executeOptions?.executionId,
+        executionGraph: executeOptions?.executionGraph,
+        parentExecutionId: executeOptions?.parentExecutionId,
       });
+
+      // A caller-supplied id is deterministic, so a retried fan-out re-derives the
+      // same id. Reuse the existing execution instead of failing on the duplicate.
+      if (executeOptions?.executionId) {
+        const existing = await workflowExecutionRepository.getWorkflowExecutionById(
+          executeOptions.executionId,
+          workflowExecution.spaceId
+        );
+        if (existing) {
+          return {
+            workflowExecution: existing,
+            repository: workflowExecutionRepository,
+            created: false,
+          };
+        }
+      }
 
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
@@ -1254,7 +1281,7 @@ export class WorkflowsExecutionEnginePlugin
         refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
       });
 
-      return { workflowExecution, repository: workflowExecutionRepository };
+      return { workflowExecution, repository: workflowExecutionRepository, created: true };
     };
 
     // Helper function to create a task instance
@@ -1279,7 +1306,31 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    /**
+     * Schedules an execution's run task if it is not already scheduled.
+     *
+     * Used on the deterministic-id path, where the same execution may be created
+     * and handed to Task Manager more than once: the task id derives from the
+     * execution id, so `ensureScheduled` collapses repeats into one task.
+     */
+    const ensureExecutionTaskScheduled = async (
+      workflowExecution: Partial<EsWorkflowExecution>,
+      request: KibanaRequest
+    ): Promise<void> => {
+      if (isTerminalStatus(workflowExecution.status as ExecutionStatus)) {
+        return;
+      }
+
+      await plugins.taskManager.ensureScheduled(
+        createTaskInstance(workflowExecution, ['workflows']),
+        {
+          request,
+          cloneApiKey: true,
+        }
+      );
+    };
+
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request, executeOptions) => {
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -1308,15 +1359,26 @@ export class WorkflowsExecutionEnginePlugin
         }
       }
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, created } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual',
         request,
-        { refresh: true }
+        { refresh: true },
+        executeOptions
       );
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
+        return {
+          workflowExecutionId: workflowExecution.id,
+        };
+      }
+
+      // Re-entry onto an execution that already exists (deterministic id). It was
+      // already validated and handed to Task Manager; ensure its task is still
+      // there in case the first attempt died between create and schedule.
+      if (!created) {
+        await ensureExecutionTaskScheduled(workflowExecution, request);
         return {
           workflowExecutionId: workflowExecution.id,
         };
@@ -1379,6 +1441,13 @@ export class WorkflowsExecutionEnginePlugin
           meteringService: this.meteringService,
           internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
         });
+      } else if (executeOptions?.executionId) {
+        // Deterministic id: the task id derives from it, so a retried fan-out must
+        // not fail on a duplicate task.
+        await ensureExecutionTaskScheduled(workflowExecution, request as KibanaRequest);
+        this.logger.debug(
+          `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id} (branch child execution)`
+        );
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);

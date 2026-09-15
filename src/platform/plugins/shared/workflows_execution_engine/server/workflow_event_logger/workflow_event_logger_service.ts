@@ -75,7 +75,9 @@ export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
     });
   }
 
-  private transformPaginationParams(params: BaseLogsParams): Partial<SearchLogsParams> {
+  private transformPaginationParams(
+    params: BaseLogsParams & Partial<SearchLogsParams>
+  ): Partial<SearchLogsParams> {
     const { size = 200, page = 1, ...rest } = params;
     return {
       ...rest,
@@ -90,7 +92,12 @@ export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
       throw new Error('Execution logs: Execution ID is required');
     }
 
-    return this.logsRepository.searchLogs(this.transformPaginationParams(params));
+    const { executionId, executionIds, ...rest } = params;
+    return this.logsRepository.searchLogs(
+      this.transformPaginationParams(
+        executionIds?.length ? { ...rest, executionIds } : { ...rest, executionId }
+      )
+    );
   }
 
   public getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {

@@ -163,8 +163,16 @@ export class WorkflowContextManager {
       variables: this.getVariables(),
     };
 
-    this.predecessors.forEach((node) => {
-      const stepId = node.stepId;
+    // Steps inherited from an ancestor execution are not in this graph, so they
+    // have no predecessor node — a parallel branch's graph is only its own body.
+    // They are still in scope for `steps.*`, exactly as they would be if the
+    // branch ran inline in the parent.
+    const visibleStepIds = new Set<string>([
+      ...this.predecessors.map((node) => node.stepId),
+      ...this.workflowExecutionState.getInheritedStepIds(),
+    ]);
+
+    visibleStepIds.forEach((stepId) => {
       const stepData = this.getStepData(stepId);
 
       if (stepData) {
@@ -534,7 +542,6 @@ export class WorkflowContextManager {
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
     let scopeStack = WorkflowScopeStack.fromStackFrames(this.stackFrames);
 
-    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
     const scopeEntries: Array<ScopeEntry> = [];
     const foreachEntries: Array<ScopeEntry> = [];
     const whileEntries: Array<ScopeEntry> = [];
@@ -542,8 +549,12 @@ export class WorkflowContextManager {
     while (!scopeStack.isEmpty()) {
       const topFrame = scopeStack.getCurrentScope();
       scopeStack = scopeStack.exitScope();
-      const stepExecution = this.workflowExecutionState.getStepExecution(
-        buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
+      // By scope, not by id: a parallel branch runs as its own execution but
+      // inherits its parent's frames, whose step executions were hashed with the
+      // parent's execution id.
+      const stepExecution = this.workflowExecutionState.getStepExecutionByScope(
+        topFrame.stepId,
+        scopeStack.stackFrames
       );
       scopeEntries.push({ topFrame, stepExecution });
       // Parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
