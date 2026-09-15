@@ -9,7 +9,7 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   ExecutionStatus,
@@ -230,11 +230,59 @@ describe('WorkflowsManagementApi', () => {
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
       ['workflow-123', 'private-hidden'],
-      'default'
+      'default',
+      { includeDeleted: true }
     );
     expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledTimes(1);
     expect(result.map(({ executionId }) => executionId)).toEqual(['child-0', 'child-2']);
   });
+
+  it.each([
+    { mode: 'public', profileId: 'unlisted', visible: true },
+    { mode: 'private', profileId: 'owner', visible: true },
+    { mode: 'private', profileId: 'recipient', visible: true },
+    { mode: 'private', profileId: 'unlisted', visible: false },
+    { mode: 'private', profileId: null, visible: false },
+  ] as const)(
+    'keeps soft-deleted $mode child history visibility=$visible for $profileId',
+    async ({ mode, profileId, visible }) => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      const childWorkflow: WorkflowDetailDto = {
+        ...workflow,
+        id: 'deleted-child',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: mode,
+          entries: [{ type: 'user', id: 'recipient', role: 'viewer', added_at: '2026-09-10' }],
+        },
+      };
+      const core = coreMock.createStart();
+      core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
+      mockWorkflowsService.getAccessControl.mockResolvedValue(
+        new WorkflowAccessControlService(core, { readModifyWriteWorkflowDocument: jest.fn() })
+      );
+      const children = [
+        {
+          workflowId: childWorkflow.id,
+          executionId: 'child-run',
+          parentStepExecutionId: 'parent-step',
+          workflowName: childWorkflow.name,
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [],
+        },
+      ];
+      mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
+      mockWorkflowsService.getWorkflowsByIds.mockImplementation(async (_ids, _space, options) =>
+        options?.includeDeleted ? [childWorkflow] : []
+      );
+
+      await expect(
+        api.getChildWorkflowExecutions('parent', 'default', mockRequest)
+      ).resolves.toEqual(visible ? children : []);
+      expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request: mockRequest });
+    }
+  );
 
   const createMockZodSchema = () => {
     return z.object({

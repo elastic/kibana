@@ -1048,12 +1048,18 @@ export class WorkflowsManagementApi {
       parentExecutionId,
       spaceId
     );
-    const workflows = await this.getWorkflowsByIds(
+    const workflows = await this.workflowsService.getWorkflowsByIds(
       [...new Set(children.map(({ workflowId }) => workflowId))],
       spaceId,
-      request
+      { includeDeleted: true }
     );
-    const visibleIds = new Set(workflows.map(({ id }) => id));
+    const access = await this.workflowsService.getAccessControl();
+    const permissions = await Promise.all(
+      workflows.map((workflow) => access.permissions(workflow, request))
+    );
+    const visibleIds = new Set(
+      workflows.filter((_, index) => permissions[index].read).map(({ id }) => id)
+    );
     return children.filter(({ workflowId }) => visibleIds.has(workflowId));
   }
 
