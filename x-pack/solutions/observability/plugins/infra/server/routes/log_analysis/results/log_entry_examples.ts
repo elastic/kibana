@@ -17,8 +17,8 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 export const initGetLogEntryExamplesRoute = ({
   framework,
   getStartServices,
-  serverless,
-}: Pick<InfraBackendLibs, 'framework' | 'getStartServices' | 'serverless'>) => {
+  isCpsPlatformGateEnabled,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices' | 'isCpsPlatformGateEnabled'>) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -66,7 +66,7 @@ export const initGetLogEntryExamplesRoute = ({
             exampleCount,
             resolvedLogView,
             framework.callWithRequest,
-            serverless,
+            isCpsPlatformGateEnabled,
             categoryId
           );
 

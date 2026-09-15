@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, {
+  cloneElement,
+  isValidElement,
+  type FunctionComponent,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, useEuiMemoizedStyles } from '@elastic/eui';
+import { EuiLink, EuiText, EuiTextTruncate, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { MetaBlocksProps } from './types';
 
@@ -27,6 +33,11 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       gap: ${euiTheme.size.xs};
       flex: 0 1 auto;
       min-width: 0;
+
+      /* Holds an anchor at body weight, so the sizing copy measures the rendered width. */
+      a {
+        font-weight: ${euiTheme.font.weight.regular};
+      }
     `,
     key: css`
       flex: 0 0 auto;
@@ -39,10 +50,6 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-
-      a {
-        font-weight: ${euiTheme.font.weight.regular};
-      }
     `,
     truncatedValue: css`
       position: relative;
@@ -53,12 +60,53 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
     fullTextSizer: css`
       visibility: hidden;
       white-space: nowrap;
+      /* EuiTextTruncate measures an integer-rounded width; without this cushion a sub-pixel
+         deficit makes it truncate text that already fits. */
+      padding-inline-end: 1px;
     `,
     truncationOverlay: css`
       position: absolute;
       inset: 0;
     `,
   };
+};
+
+interface TruncationHostProps {
+  href?: string;
+  children?: ReactNode;
+}
+
+/**
+ * An anchor is inline text, so it can host the truncation. `EuiTextTruncate` measures a block-level
+ * box, which collapses to zero width inside a shrink-to-fit parent, so two kinds of value cannot
+ * host it: wrappers that size themselves to their content, such as badges, and an `EuiLink` with no
+ * `href`, which renders a `button`.
+ */
+const isTruncationHost = (value: ReactNode): value is ReactElement<TruncationHostProps> =>
+  isValidElement<TruncationHostProps>(value) &&
+  (value.type === 'a' || (value.type === EuiLink && typeof value.props.href === 'string'));
+
+/** The text a value reduces to, or `undefined` when the value is richer than a single string. */
+const getTruncatableText = (value: ReactNode): string | undefined => {
+  if (typeof value === 'string' || typeof value === 'number') {
+    // Inline layout collapses surrounding whitespace, but the truncation measurement counts it,
+    // which reports text that fits as overflowing.
+    return String(value).trim();
+  }
+  if (isTruncationHost(value)) {
+    return getTruncatableText(value.props.children);
+  }
+  return undefined;
+};
+
+/**
+ * Values are often identifiers, where both ends carry meaning. A link stays outside the truncation:
+ * `EuiTextTruncate` marks its truncated text `aria-hidden`, so a link nested within would be
+ * focusable yet unreachable to a screen reader.
+ */
+const renderTruncated = (value: ReactNode, text: string) => {
+  const truncated = <EuiTextTruncate text={text} truncation="middle" />;
+  return isTruncationHost(value) ? cloneElement(value, undefined, truncated) : truncated;
 };
 
 /** A compact, responsive row of key-value pairs. */
@@ -72,18 +120,23 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
   return (
     <div css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
       {items.map((item, index) => {
-        const isStringValue = typeof item.value === 'string';
+        const truncatableText = getTruncatableText(item.value);
 
         return (
-          <EuiText key={index} size="s" css={memoized.item} data-test-subj={item['data-test-subj']}>
+          <EuiText
+            key={item.id ?? index}
+            size="s"
+            css={memoized.item}
+            data-test-subj={item['data-test-subj']}
+          >
             <span css={memoized.key}>{item.title}</span>
-            {isStringValue ? (
+            {truncatableText !== undefined ? (
               <span css={memoized.truncatedValue}>
                 <span css={memoized.fullTextSizer} aria-hidden>
-                  {item.value}
+                  {truncatableText}
                 </span>
                 <span css={memoized.truncationOverlay}>
-                  <EuiTextTruncate text={item.value as string} truncation="middle" />
+                  {renderTruncated(item.value, truncatableText)}
                 </span>
               </span>
             ) : (

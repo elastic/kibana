@@ -11,6 +11,7 @@ import type {
   InvestigationSubjectType,
   InvestigationTriggerType,
   PaginatedResponse,
+  Severity,
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
@@ -33,6 +34,15 @@ export interface InvestigationRecord extends InvestigationAttributes {
   version?: string;
 }
 
+/** An investigation with only `Fields` loaded. `id` and `version` are always present. */
+export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttributes> = Pick<
+  InvestigationAttributes,
+  Fields
+> & {
+  id: string;
+  version?: string;
+};
+
 export interface InvestigationPatch extends InvestigationStructuredOutput {
   status?: InvestigationStatus;
   started_at?: string;
@@ -42,24 +52,73 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   conversation_id?: string;
 }
 
-export interface FindInvestigationsQuery {
+/**
+ * Filters shared by the list query, the severity-count facet and the cross-space sweep.
+ *
+ * Excludes `severities`, pagination and sort: none of them apply to a facet count.
+ * `FindInvestigationsQuery` extends this with the parts that are list-only.
+ */
+export interface SeverityCountsQuery {
   statuses?: InvestigationStatus[];
+  subjectTypes?: InvestigationSubjectType[];
+  /**
+   * Full-text query across subject_summary, summary, and conclusion.
+   * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
+   */
+  query?: string;
   concurrencyKey?: string;
   createdAfter?: string;
   createdBefore?: string;
+  startedAfter?: string;
+  startedBefore?: string;
   completedAfter?: string;
   completedBefore?: string;
-  sortField?: 'created_at' | 'completed_at';
+}
+
+export interface FindInvestigationsQuery<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> extends SeverityCountsQuery {
+  severities?: Severity[];
+  sortField?: 'created_at' | 'completed_at' | 'severity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
+  fields?: Fields[];
 }
 
-export type FindInvestigationsResult = PaginatedResponse<InvestigationRecord>;
+/** Counts of investigations at each severity tier, always zero-filled for all four options. */
+export type SeverityCounts = Record<Severity, number>;
+
+export type FindInvestigationsResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
 
 export interface InvestigationRepository {
   create(params: { id: string; attributes: InvestigationAttributes }): Promise<void>;
   get(id: string): Promise<InvestigationRecord | undefined>;
   update(params: { id: string; patch: InvestigationPatch; version?: string }): Promise<void>;
-  find(query: FindInvestigationsQuery): Promise<FindInvestigationsResult>;
+  find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsResult<Fields>>;
+  countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts>;
+}
+
+export type FindInvestigationsAcrossSpacesResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<{ investigation: ProjectedInvestigationRecord<Fields>; spaceId: string }>;
+
+/**
+ * Reads and writes investigations in every space at once, for background work that runs without a
+ * request and therefore cannot be scoped to one space the way {@link InvestigationRepository} is.
+ */
+export interface InvestigationSweepRepository {
+  findAcrossSpaces<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsAcrossSpacesResult<Fields>>;
+  updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: InvestigationPatch;
+    version?: string;
+  }): Promise<void>;
 }

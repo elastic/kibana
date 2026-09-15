@@ -9,6 +9,7 @@ import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-c
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -55,6 +56,7 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
+        recovery_strategy: 'no_breach',
         grouping: { fields: ['host.name'] },
         state_transition: {
           pending_operator: 'AND',
@@ -72,6 +74,7 @@ describe('createRuleDataSchema', () => {
           metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
+          recovery_strategy: 'no_breach',
           grouping: { fields: ['host.name'] },
           state_transition: {
             pending_operator: 'AND',
@@ -702,6 +705,7 @@ describe('createRuleDataSchema', () => {
     it('accepts state_transition with only recovering fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: {
           recovering_operator: 'OR',
           recovering_count: 5,
@@ -728,6 +732,7 @@ describe('createRuleDataSchema', () => {
     it('accepts recovering_count of 0', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
+        recovery_strategy: 'no_breach',
         state_transition: { recovering_count: 0 },
       });
 
@@ -860,6 +865,83 @@ describe('createRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('recovery delay allowed', () => {
+    it('rejects a recovering_count when recovery_strategy is unset', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { pending_count: 0, recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_count when recovery_strategy is "none"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a recovering_timeframe when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an inert recovery delay even when no_data_strategy is "recover"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        no_data_strategy: 'recover',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+        },
+        state_transition: { recovering_count: 2 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count of 0 when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts pending-only state_transition when recovery is disabled', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 3 },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a recovering delay when recovery_strategy is "no_breach"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 2, recovering_timeframe: '5m' },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -1014,6 +1096,21 @@ describe('updateRuleDataSchema', () => {
       metadata: { description: 'updated description' },
     });
     expect(result.metadata?.description).toBe('updated description');
+  });
+
+  it('accepts a non-empty tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: ['prod', 'infra'] } });
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('accepts metadata.tags set to null (clear all tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('rejects metadata.tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { tags: [] } });
+    expect(result.success).toBe(false);
   });
 
   it('accepts artifacts in update payload and supports null removal', () => {
@@ -1660,5 +1757,61 @@ describe('tagsResponseSchema', () => {
 
   it('rejects a missing tags field', () => {
     expect(() => tagsResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('isRecoveryTransitionConsistentWithStrategy', () => {
+  it('returns true when recovery is enabled, regardless of recovering delay', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      })
+    ).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'query',
+        state_transition: { recovering_count: 3 },
+      })
+    ).toBe(true);
+  });
+
+  it('returns true when recovery is disabled but no recovering delay is set', () => {
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: 'none' })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({ recovery_strategy: null })).toBe(true);
+    expect(isRecoveryTransitionConsistentWithStrategy({})).toBe(true);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: {},
+      })
+    ).toBe(true);
+  });
+
+  it('rejects recovering_count 0 when recovery is disabled (immediate recovery is not a delay)', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 0 },
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for a positive recovering delay when recovery is disabled', () => {
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 1 },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({
+        recovery_strategy: null,
+        state_transition: { recovering_timeframe: '5m' },
+      })
+    ).toBe(false);
+    expect(
+      isRecoveryTransitionConsistentWithStrategy({ state_transition: { recovering_count: 2 } })
+    ).toBe(false);
   });
 });
