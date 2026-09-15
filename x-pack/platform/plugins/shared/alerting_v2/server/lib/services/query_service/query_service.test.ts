@@ -802,12 +802,10 @@ describe('QueryService', () => {
           abortSignal: abortController.signal,
         })) {
           batches.push(batch);
-          // Abort with an explicit `RuleExecutionCancellationError` reason so
-          // `throwIfAborted` rethrows it as-is between batches, exercising the
-          // `isRuleExecutionCancellationError` rethrow branch in
-          // `iterateBatches`. This is NOT how the dispatcher aborts in
-          // production (it calls bare `abort()`, no reason) — see the
-          // companion test below for that path.
+          // An explicit `RuleExecutionCancellationError` reason exercises the
+          // short-circuit in `throwIfAborted`, which rethrows an already
+          // recognized cancellation unchanged. The companion test below covers
+          // the bare `abort()` Task Manager actually issues.
           abortController.abort(new RuleExecutionCancellationError());
         }
       }).rejects.toThrow(RuleExecutionCancellationError);
@@ -819,7 +817,8 @@ describe('QueryService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('[known gap] a bare mid-stream abort (as the dispatcher issues) is not recognized as a cancellation and surfaces as a parse error', async () => {
+    it('reports a bare mid-stream abort (as Task Manager issues) as a cancellation', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       const abortController = new AbortController();
 
       mockHelpersEsqlArrowBatches(mockEsClient, [
@@ -829,13 +828,10 @@ describe('QueryService', () => {
 
       const batches: Array<Record<string, unknown>[]> = [];
 
-      // Documents current behavior, not desired behavior: a standard
-      // `AbortError` (what `abort()` without a reason produces) is not an
-      // `instanceof RuleExecutionCancellationError` and doesn't carry
-      // `code: 'rule_execution_aborted'`, so `isRuleExecutionCancellationError`
-      // returns false and `iterateBatches` wraps it in a parse error instead
-      // of rethrowing it. This predates this refactor (see `buildParseError`
-      // in `query_service.ts`); the fix belongs in `execution_context`, not here.
+      // A bare `abort()` sets `signal.reason` to a DOMException, which carries
+      // neither the class nor `code: 'rule_execution_aborted'`. `throwIfAborted`
+      // normalizes it into a `RuleExecutionCancellationError`, so `iterateBatches`
+      // rethrows it instead of wrapping it as a parse error.
       await expect(async () => {
         for await (const batch of queryService.executeQueryStream({
           query: mockQuery,
@@ -844,7 +840,7 @@ describe('QueryService', () => {
           batches.push(batch);
           abortController.abort();
         }
-      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+      }).rejects.toThrow(RuleExecutionCancellationError);
 
       expect(batches).toEqual([[{ host: 'host-a' }]]);
       expect(mockLogger.debug).toHaveBeenCalledWith(
