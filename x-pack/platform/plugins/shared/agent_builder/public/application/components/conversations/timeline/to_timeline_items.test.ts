@@ -17,6 +17,7 @@ import {
   buildLiveItems,
   assembleTimelineItems,
   activeExecutionToItem,
+  findSavedReplacement,
   ACTIVE_EXECUTION_ITEM_KEY,
 } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
@@ -379,6 +380,7 @@ describe('activeExecutionToItem', () => {
     };
     const item = activeExecutionToItem(draft);
     expect(item.key).toBe('exec-real');
+    expect(item.executionId).toBe('exec-real');
   });
 
   it('uses startedAt from draft when present', () => {
@@ -443,27 +445,45 @@ describe('activeExecutionToItem', () => {
 });
 
 describe('toTimelineItems - dedupe', () => {
-  it('drops the draft when a persisted item with the same executionId already exists', () => {
+  const completedDraft = (executionId: string, triggerEventId?: string): ActiveExecutionDraft => ({
+    status: 'completed',
+    steps: [],
+    message: '',
+    executionId,
+    triggerEventId,
+    terminalEvent: createExecutionTerminatedEvent({ execution_id: executionId }),
+  });
+
+  it('drops the draft when a completed persisted turn with the same executionId exists', () => {
     const terminated = createExecutionTerminatedEvent({
       id: 'term-1',
       execution_id: 'exec-real',
     });
-    const draft: ActiveExecutionDraft = {
-      status: 'completed',
-      steps: [],
-      message: '',
-      executionId: 'exec-real',
-      terminalEvent: terminated,
-    };
 
-    const items = toTimelineItems({ events: [terminated], activeExecution: draft });
+    const items = toTimelineItems({
+      events: [terminated],
+      activeExecution: completedDraft('exec-real'),
+    });
 
-    // Only one agentTurn - the persisted one wins, the draft is deduped away
     const agentTurns = items.filter((it) => it.kind === 'agentTurn');
     expect(agentTurns).toHaveLength(1);
-    if (agentTurns[0].kind === 'agentTurn') {
-      expect(agentTurns[0].key).toBe('exec-real');
-    }
+    expect(agentTurns[0].key).toBe('exec-real');
+  });
+
+  it('keeps the draft when the persisted turn with the same executionId is still running', () => {
+    const started = createExecutionStartedEvent({ id: 'start-1', execution_id: 'exec-real' });
+    const draft: ActiveExecutionDraft = {
+      status: 'running',
+      steps: [],
+      message: 'streaming',
+      executionId: 'exec-real',
+    };
+
+    const items = toTimelineItems({ events: [started], activeExecution: draft });
+
+    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
+    expect(agentTurns).toHaveLength(2);
+    expect(agentTurns[1]).toMatchObject({ key: 'exec-real', response: { message: 'streaming' } });
   });
 
   it('appends the draft when its executionId is not yet in persisted items', () => {
@@ -482,18 +502,88 @@ describe('toTimelineItems - dedupe', () => {
 
     const agentTurns = items.filter((it) => it.kind === 'agentTurn');
     expect(agentTurns).toHaveLength(2);
-    const keys = agentTurns.map((it) => it.key);
-    expect(keys).toContain('exec-other');
-    expect(keys).toContain('exec-new');
+    expect(agentTurns.map((it) => it.key)).toEqual(['exec-other', 'exec-new']);
   });
 
-  it('draft with no executionId always appends (uses ACTIVE_EXECUTION_ITEM_KEY)', () => {
-    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: '' };
-    const items = toTimelineItems({ events: [], activeExecution: draft });
-    expect(items).toHaveLength(1);
-    if (items[0].kind === 'agentTurn') {
-      expect(items[0].key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-    }
+  it('gives the live turn and its saved replacement the same key', () => {
+    const live = toTimelineItems({
+      events: [],
+      activeExecution: completedDraft('exec-1'),
+    });
+    const saved = toTimelineItems({
+      events: [createExecutionTerminatedEvent({ id: 'term-1', execution_id: 'exec-1' })],
+    });
+    expect(live[0].key).toBe('exec-1');
+    expect(saved[0].key).toBe('exec-1');
+  });
+
+  it('drops the pending user message once the saved user message it triggered is present', () => {
+    const savedUser = createUserMessageEvent({ id: 'round-1::user_message' });
+    const pending = createUserMessageEvent({ id: 'pending::user_message' });
+
+    const items = toTimelineItems({
+      events: [savedUser],
+      pendingUserMessage: pending,
+      activeExecution: completedDraft('exec-1', 'round-1::user_message'),
+    });
+
+    const userMessages = items.filter((it) => it.kind === 'userMessage');
+    expect(userMessages).toHaveLength(1);
+    expect(userMessages[0].key).toBe('round-1::user_message');
+  });
+
+  it('keeps the pending user message when the saved user message is not the trigger', () => {
+    const savedUser = createUserMessageEvent({ id: 'round-0::user_message' });
+    const pending = createUserMessageEvent({ id: 'pending::user_message' });
+
+    const items = toTimelineItems({
+      events: [savedUser],
+      pendingUserMessage: pending,
+      activeExecution: completedDraft('exec-1', 'round-1::user_message'),
+    });
+
+    expect(items.filter((it) => it.kind === 'userMessage')).toHaveLength(2);
+  });
+
+  it('keeps the pending user message while the trigger id is unknown', () => {
+    const savedUser = createUserMessageEvent({ id: 'round-1::user_message' });
+    const pending = createUserMessageEvent({ id: 'pending::user_message' });
+
+    const items = toTimelineItems({
+      events: [savedUser],
+      pendingUserMessage: pending,
+      activeExecution: { status: 'running', steps: [], message: '' },
+    });
+
+    expect(items.filter((it) => it.kind === 'userMessage')).toHaveLength(2);
+  });
+});
+
+describe('findSavedReplacement', () => {
+  it('reports both replacements once the saved user message and completed turn exist', () => {
+    const saved = buildSavedItems([
+      createUserMessageEvent({ id: 'round-1::user_message' }),
+      createExecutionTerminatedEvent({ id: 'term-1', execution_id: 'exec-1' }),
+    ]);
+
+    expect(
+      findSavedReplacement(saved, {
+        executionId: 'exec-1',
+        triggerEventId: 'round-1::user_message',
+      })
+    ).toEqual({ turn: true, userMessage: true });
+  });
+
+  it('reports nothing for a draft without identity or without saved counterparts', () => {
+    const saved = buildSavedItems([createUserMessageEvent({ id: 'round-1::user_message' })]);
+
+    expect(findSavedReplacement(saved, null)).toEqual({ turn: false, userMessage: false });
+    expect(findSavedReplacement(saved, { executionId: 'exec-1', triggerEventId: 'other' })).toEqual(
+      {
+        turn: false,
+        userMessage: false,
+      }
+    );
   });
 });
 
