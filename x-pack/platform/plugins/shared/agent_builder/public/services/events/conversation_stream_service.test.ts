@@ -321,4 +321,63 @@ describe('ConversationStreamService', () => {
     expect(newEmissions[0]).toBeNull();
     newSub.unsubscribe();
   });
+
+  it('getSnapshot returns the current draft without subscribing', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    expect(service.getSnapshot('A')).toBeNull();
+
+    service.getActiveStream$('A').subscribe(() => {});
+    getSubject('A').next(messageChunkEvent('partial'));
+
+    expect(service.getSnapshot('A')?.message).toBe('partial');
+  });
+
+  it('clearPersistedExecution drops a completed draft with the matching execution id', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: ActiveExecutionDraft | null | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+    getSubject('A').next(executionTerminatedEvent('exec-1'));
+    endRun('A');
+    expect(state?.status).toBe('completed');
+
+    service.clearPersistedExecution('A', 'exec-1');
+
+    expect(state).toBeNull();
+  });
+
+  it('clearPersistedExecution ignores a different execution id and a running draft', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: ActiveExecutionDraft | null | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    getSubject('A').next(messageChunkEvent('running'));
+    service.clearPersistedExecution('A', 'exec-1');
+    expect(state?.message).toBe('running');
+
+    getSubject('A').next(executionTerminatedEvent('exec-2'));
+    service.clearPersistedExecution('A', 'exec-1');
+    expect(state?.status).toBe('completed');
+  });
+
+  it('clearPersistedExecution tears the stream down when nobody observes it', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+    getSubject('A').next(executionTerminatedEvent('exec-1'));
+    endRun('A');
+    sub.unsubscribe();
+    // A completed, unobserved stream is already reclaimable; re-observe to keep it, then leave.
+    const again = service.getActiveStream$('A').subscribe(() => {});
+    again.unsubscribe();
+
+    expect(() => service.clearPersistedExecution('A', 'exec-1')).not.toThrow();
+    expect(service.getSnapshot('A')).toBeNull();
+  });
 });
