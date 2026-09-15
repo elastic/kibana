@@ -244,6 +244,12 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Last updated',
     }
   ),
+  tableColumnEnabledLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnEnabledLabel',
+    {
+      defaultMessage: 'Enabled',
+    }
+  ),
   tableColumnActionsLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
     {

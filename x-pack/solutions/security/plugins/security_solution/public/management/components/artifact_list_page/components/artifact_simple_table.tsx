@@ -19,6 +19,7 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -32,6 +33,7 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { artifactListPageLabels } from '../translations';
+import { DISABLED_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 import { PolicyAssignmentCell } from './policy_assignment_cell';
 
@@ -60,6 +62,7 @@ export interface ArtifactSimpleTableProps {
   error?: string;
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  allowEnableDisableArtifacts?: boolean;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   sortableFields?: readonly string[];
@@ -96,6 +99,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     error,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
+    allowEnableDisableArtifacts = false,
     sortField,
     sortOrder,
     sortableFields = EMPTY_SORTABLE_FIELDS,
@@ -220,6 +224,22 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         },
       ];
 
+      if (allowEnableDisableArtifacts) {
+        tableColumns.push({
+          name: labels.tableColumnEnabledLabel,
+          width: '90px',
+          render: (item: ExceptionListItemSchema) => (
+            <EuiSwitch
+              label={labels.tableColumnEnabledLabel}
+              showLabel={false}
+              checked={!item.tags.includes(DISABLED_ARTIFACT_TAG)}
+              onChange={() => {}}
+              data-test-subj={getTestId('columnEnabled')}
+            />
+          ),
+        });
+      }
+
       if (allowCardEditAction || allowCardDeleteAction) {
         tableColumns.push({
           field: '',
@@ -275,6 +295,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     }, [
       allowCardDeleteAction,
       allowCardEditAction,
+      allowEnableDisableArtifacts,
       getTestId,
       labels,
       loadingPoliciesList,

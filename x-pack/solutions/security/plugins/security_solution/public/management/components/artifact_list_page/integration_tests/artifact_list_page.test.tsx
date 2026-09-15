@@ -136,6 +136,23 @@ describe('When using the ArtifactListPage component', () => {
         expect(getAllByRole('row')).toHaveLength(11); // header + 10 items
       });
 
+      it('should not show the Enabled column by default', async () => {
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-simpleTable-columnEnabled')).not.toBeInTheDocument();
+      });
+
+      it('should show the Enabled column when allowEnableDisableArtifacts is true', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          allowEnableDisableArtifacts: true,
+        });
+
+        expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
+      });
+
       it('should show table row actions that open edit and delete', async () => {
         const { getByTestId, getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,

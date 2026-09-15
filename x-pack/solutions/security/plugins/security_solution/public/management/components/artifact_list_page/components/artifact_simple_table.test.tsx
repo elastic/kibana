@@ -19,7 +19,10 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { artifactListPageLabels } from '../translations';
 import { ArtifactSimpleTable, type ArtifactSimpleTableProps } from './artifact_simple_table';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import {
+  DISABLED_ARTIFACT_TAG,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../../common/endpoint/service/artifacts';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
@@ -129,6 +132,45 @@ describe('ArtifactSimpleTable', () => {
     expect(renderResult.getByTestId('testTable-columnUpdatedAt')).toHaveTextContent(
       /Dec 5, 2025 @ 12:51:33/
     );
+  });
+
+  it('does not render the enabled column by default', () => {
+    render();
+
+    expect(renderResult.queryByTestId('testTable-columnEnabled')).not.toBeInTheDocument();
+  });
+
+  it('renders the enabled column after last updated when allowEnableDisableArtifacts is true', () => {
+    render({ allowEnableDisableArtifacts: true });
+
+    const columns = renderResult.getAllByRole('columnheader');
+    expect(columns.map((column) => column.textContent)).toEqual([
+      'Name',
+      'Policy assignment',
+      'Operating systems',
+      'Updated by',
+      'Last updated',
+      'Enabled',
+      'Actions',
+    ]);
+  });
+
+  it('renders the enabled switch on when the artifact has no disabled tag', () => {
+    render({
+      allowEnableDisableArtifacts: true,
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).toBeChecked();
+  });
+
+  it('renders the enabled switch off when the artifact has the disabled tag', () => {
+    render({
+      allowEnableDisableArtifacts: true,
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG] })],
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).not.toBeChecked();
   });
 
   it('shows a loading state', () => {
