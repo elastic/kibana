@@ -11,11 +11,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -24,11 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
-import {
-  DYNAMIC_SETTINGS_DEFAULTS,
-  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-} from '../../../../../../common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 import {
   getDynamicSettingsAction,
@@ -40,10 +34,6 @@ export const AdvancedSettingsForm = () => {
   const dispatch = useDispatch();
 
   const { settings, loading } = useSelector(selectDynamicSettings);
-
-  const [syncInterval, setSyncInterval] = useState<number>(
-    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
-  );
 
   const [rebalanceShardsEnabled, setRebalanceShardsEnabled] = useState<boolean>(
     DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ?? true
@@ -59,12 +49,6 @@ export const AdvancedSettingsForm = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (settings?.privateLocationsSyncInterval !== undefined) {
-      setSyncInterval(settings.privateLocationsSyncInterval);
-    }
-  }, [settings]);
-
-  useEffect(() => {
     if (settings?.rebalancePrivateLocationShardsEnabled !== undefined) {
       setRebalanceShardsEnabled(settings.rebalancePrivateLocationShardsEnabled);
     }
@@ -75,20 +59,16 @@ export const AdvancedSettingsForm = () => {
       dispatch(
         setDynamicSettingsAction.get({
           ...settings,
-          privateLocationsSyncInterval: syncInterval,
           rebalancePrivateLocationShardsEnabled: rebalanceShardsEnabled,
         } as DynamicSettings)
       );
     }
   };
 
-  const isFormDirty =
-    !isEqual(syncInterval, settings?.privateLocationsSyncInterval) ||
-    !isEqual(rebalanceShardsEnabled, settings?.rebalancePrivateLocationShardsEnabled ?? true);
-  const isFormValid =
-    syncInterval >= MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
-    syncInterval <= MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
-    Number.isInteger(syncInterval);
+  const isFormDirty = !isEqual(
+    rebalanceShardsEnabled,
+    settings?.rebalancePrivateLocationShardsEnabled ?? true
+  );
 
   return (
     <EuiForm>
@@ -106,56 +86,6 @@ export const AdvancedSettingsForm = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiDescribedFormGroup
-        title={
-          <h4>
-            <FormattedMessage
-              id="xpack.synthetics.settings.advanced.syncInterval.title"
-              defaultMessage="Maintenance windows sync interval"
-            />
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.synthetics.settings.advanced.syncInterval.description"
-            defaultMessage="Configure how frequently private location monitors are synced to apply maintenance window changes."
-          />
-        }
-      >
-        <EuiFormRow
-          label={i18n.translate('xpack.synthetics.settings.advanced.syncInterval.label', {
-            defaultMessage: 'Sync interval (minutes)',
-          })}
-          isInvalid={!isFormValid}
-          error={
-            !isFormValid
-              ? i18n.translate('xpack.synthetics.settings.advanced.syncInterval.error', {
-                  defaultMessage:
-                    'Sync interval must be a whole number between {min} and {max} minutes.',
-                  values: {
-                    min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-                    max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-                  },
-                })
-              : undefined
-          }
-        >
-          <EuiFieldNumber
-            isInvalid={!isFormValid}
-            data-test-subj="syntheticsSyncIntervalField"
-            value={syncInterval}
-            min={MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}
-            max={MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL}
-            step={1}
-            disabled={isDisabled}
-            isLoading={loading}
-            onChange={(e) => {
-              setSyncInterval(Number(e.target.value));
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
           <h4>
@@ -191,10 +121,6 @@ export const AdvancedSettingsForm = () => {
             data-test-subj="syntheticsAdvancedSettingsDiscardButton"
             iconType="cross"
             onClick={() => {
-              setSyncInterval(
-                settings?.privateLocationsSyncInterval ??
-                  DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
-              );
               setRebalanceShardsEnabled(
                 settings?.rebalancePrivateLocationShardsEnabled ??
                   DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ??
@@ -217,7 +143,7 @@ export const AdvancedSettingsForm = () => {
             }}
             fill
             isLoading={loading}
-            isDisabled={!isFormDirty || isDisabled || !isFormValid}
+            isDisabled={!isFormDirty || isDisabled}
           >
             {APPLY_CHANGES}
           </EuiButton>
