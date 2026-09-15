@@ -105,10 +105,6 @@ export async function executeKIQueryGenerationAgent({
   const rawQueries = (finalizedResult.data as { finalized_queries: AcceptedQuery[] })
     .finalized_queries;
 
-  if (!Array.isArray(rawQueries)) {
-    throw new Error('KI query generation agent returned invalid validate_queries output');
-  }
-
   const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
     type: q.type,
     title: q.title,

@@ -166,8 +166,7 @@ export const createValidateQueriesTool = ({
             esql: { query: esql },
           })
         );
-        const finalized =
-          results.length === queries.length && results.every(({ valid }) => valid === true);
+        const finalized = results.every(({ valid }) => valid === true);
 
         return {
           results: [
