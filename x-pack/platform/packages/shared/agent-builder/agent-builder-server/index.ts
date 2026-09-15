@@ -185,3 +185,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';
