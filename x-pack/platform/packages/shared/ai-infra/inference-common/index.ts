@@ -163,9 +163,8 @@ export {
   elasticModelIds,
   type EisInferenceEndpointMetadata,
   type CspRegion,
+  type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
-
-export { type InferenceEndpointRequestBody } from './src/inference_endpoint_schema';
 
 export {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
