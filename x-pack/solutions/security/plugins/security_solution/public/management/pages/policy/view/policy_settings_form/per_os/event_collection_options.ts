@@ -12,11 +12,7 @@ import type {
   SupplementalEventFormOption,
 } from '../components/event_collection_card';
 
-/**
- * Per-OS supplemental option. Extends the shared shape with how the control should render:
- * the mock uses a switch for "Collect session data" and a checkbox for "Capture terminal
- * output". The legacy type is left alone — only the per-OS tree understands `renderAs`.
- */
+/** Per-OS supplemental option, adding the control widget to the shared shape. */
 export type PerOsSupplementalEventFormOption<OS extends OperatingSystem> =
   SupplementalEventFormOption<OS> & { renderAs?: 'switch' | 'checkbox' };
 
@@ -161,10 +157,7 @@ export const LINUX_EVENT_OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.
   },
 ];
 
-/**
- * Accessible group name for the Linux supplemental controls. The mock shows no visible
- * heading, so this is rendered as a hidden fieldset legend rather than displayed text.
- */
+/** Accessible group name for the Linux supplemental controls, rendered as a hidden legend. */
 export const SUPPLEMENTAL_GROUP_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.title',
   {
@@ -176,8 +169,6 @@ export const LINUX_SUPPLEMENTAL_EVENT_OPTIONS: ReadonlyArray<
   PerOsSupplementalEventFormOption<OperatingSystem.LINUX>
 > = [
   {
-    // The mock shows no visible heading or paragraph here — the explanation lives in the
-    // tooltip beside the switch. Same i18n ID and same default text, rendered somewhere else.
     tooltipText: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.description',
       {

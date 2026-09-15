@@ -156,7 +156,6 @@ export const PerOsAntivirusRegistrationCard = memo<PerOsAntivirusRegistrationCar
                   aria-label={ANTIVIRUS_REGISTRATION_MODE_SELECT_ARIA_LABEL}
                 />
               </EuiFlexItem>
-              {/* Only meaningful while the sync mode is selected — it explains that mode. */}
               {currentMode === AntivirusRegistrationModes.sync && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip

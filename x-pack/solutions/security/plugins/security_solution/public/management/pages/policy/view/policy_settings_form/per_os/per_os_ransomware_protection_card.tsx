@@ -54,9 +54,8 @@ export const PerOsRansomwareProtectionCard = memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
-    // A 9.4 policy whose `mac.ransomware.mode` was cleared via the advanced text field can reach
-    // the form with the field missing. Read it as `off` so the row renders a real option rather
-    // than an empty select, matching the guards in `use_fetch_endpoint_policy` and Fleet.
+    // `mac.ransomware.mode` can reach the form missing. Read it as `off` so the row renders a
+    // real option rather than an empty select.
     const selected = RANSOMWARE_OS_VALUES.some(
       (os) => (policy[os].ransomware.mode ?? ProtectionModes.off) !== ProtectionModes.off
     );
@@ -145,11 +144,9 @@ const PerOsRansomwareProtectionRow = <OS extends RansomwareProtectionOSes>({
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.ransomware.mode = nextMode;
-        // Selecting an active mode syncs the host notification, as the legacy Detect/Prevent
-        // radios did (detect_prevent_protection_level.tsx). `off` has no legacy counterpart —
-        // it was only reachable through the master toggle, which still clears popup.enabled for
-        // every OS. A row disabled on its own keeps its stored notification values so
-        // re-enabling it restores them.
+        // An active mode syncs the host notification. `off` leaves it alone, so a row disabled
+        // on its own keeps its stored notification values and re-enabling restores them; the
+        // master toggle is what clears them across every OS.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
           currentOsPolicy.popup.ransomware.enabled = nextMode === ProtectionModes.prevent;
         }

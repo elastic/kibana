@@ -6,10 +6,9 @@
  */
 
 /*
- * Upgrade compatibility for the per-OS policy form (epic 16894, §10.7 QA item
- * "upgrade testing"). A policy saved by 9.4 must load and display correctly once the
- * per-OS form is active. These are the cases where a regression would be silent: the
- * form would render happily while showing a value the customer never set.
+ * A policy stored before the macOS ransomware row existed must display the value it holds,
+ * not a factory default. macOS ransomware defaults to `off` and Windows to `prevent`, so a
+ * row reading the wrong branch would silently misreport the customer's setting.
  */
 
 import React from 'react';
@@ -46,14 +45,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     useGetProtectionsUnavailableComponentMock.mockReturnValue(null);
   });
 
-  /*
-   * §9.5: in 9.4 the only way to set macOS ransomware was the `mac.ransomware.mode`
-   * advanced text field. The per-OS form hides that advanced entry, so the value it wrote
-   * must surface in the new macOS ransomware row. If the row fell back to the factory
-   * default the customer's setting would appear to have been silently discarded — and
-   * macOS ransomware defaults to `off` while Windows defaults to `prevent`, so the
-   * default is exactly the dangerous value to show here.
-   */
+  // `mac.ransomware.mode` was previously only settable through the advanced text field.
   it('shows a macOS ransomware mode set via the 9.4 advanced field in the macOS row', () => {
     policy.mac.ransomware.mode = ProtectionModes.prevent;
     policy.windows.ransomware.mode = ProtectionModes.off;
@@ -75,17 +67,10 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     ).toHaveTextContent(/^Disable$/);
   });
 
-  /*
-   * §8.4: clearing the 9.4 advanced text field could delete `mac.ransomware.mode` while
-   * `supported` kept the parent object alive. Fetch (`use_fetch_endpoint_policy.ts`) and Fleet
-   * (`fleet_integration.ts`) both restore the missing mode to `off` on read; the row applies the
-   * same fallback so a policy that reaches it unguarded still shows a real option. Asserting the
-   * displayed text — not merely that render did not throw — is what catches the dangerous
-   * direction: falling back to Windows' factory default of Detect & prevent would silently
-   * turn macOS ransomware protection on.
-   */
+  // The advanced text field could delete the key while leaving `supported` behind. Falling
+  // back to Windows' default here would show macOS ransomware as on.
   it('shows Disable for a 9.4 policy whose macOS ransomware mode was cleared', () => {
-    // @ts-expect-error reproducing the malformed 9.4 shape the legacy guards exist for
+    // @ts-expect-error reproducing a policy stored without the field
     delete policy.mac.ransomware.mode;
 
     renderResult = mockedContext.render(

@@ -143,11 +143,9 @@ const PerOsMemoryProtectionRow = <OS extends MemoryProtectionOSes>({
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.memory_protection.mode = nextMode;
-        // Selecting an active mode syncs the host notification, as the legacy Detect/Prevent
-        // radios did (detect_prevent_protection_level.tsx). `off` has no legacy counterpart —
-        // it was only reachable through the master toggle, which still clears popup.enabled for
-        // every OS. A row disabled on its own keeps its stored notification values so
-        // re-enabling it restores them.
+        // An active mode syncs the host notification. `off` leaves it alone, so a row disabled
+        // on its own keeps its stored notification values and re-enabling restores them; the
+        // master toggle is what clears them across every OS.
         if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
           currentOsPolicy.popup.memory_protection.enabled = nextMode === ProtectionModes.prevent;
         }

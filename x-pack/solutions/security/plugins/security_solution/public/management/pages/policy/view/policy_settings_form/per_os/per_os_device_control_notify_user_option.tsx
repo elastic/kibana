@@ -113,8 +113,6 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
     />
   );
 
-  // Legacy parity (device_control_notify_user_option.tsx): the notify control is only
-  // shown for Enterprise licences when USB storage is set to Block all (`deny_all`).
   if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
     return null;
   }

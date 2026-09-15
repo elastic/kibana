@@ -177,8 +177,7 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
   const inputIdPrefix = useId();
   const isEditMode = mode === 'edit';
   const totalOptions = options.length;
-  // Legacy `EventCollectionCard` counts only non-supplemental fields, so Linux
-  // session_data / tty_io never contribute to selected or total.
+  // Supplemental fields (Linux session_data / tty_io) never contribute to selected or total.
   const selectedCount = useMemo(
     () => countSelectedEvents(selection, supplementalOptions),
     [selection, supplementalOptions]
@@ -232,7 +231,7 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
         <EuiFormFieldset legend={{ children: SUPPLEMENTAL_GROUP_LABEL, display: 'hidden' }}>
           {supplementalOptions && supplementalOptions.length > 0 && (
             <>
-              {/* Subdued panel with one horizontal row of supplemental controls, per the mock. */}
+              {/* Subdued panel holding one horizontal row of supplemental controls. */}
               <EuiPanel
                 color="subdued"
                 hasShadow={false}

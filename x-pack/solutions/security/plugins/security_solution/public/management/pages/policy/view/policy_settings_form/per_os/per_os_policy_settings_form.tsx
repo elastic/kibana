@@ -27,11 +27,6 @@ import { PerOsMalwareProtectionsCard } from './per_os_malware_protections_card';
 import { PerOsMemoryProtectionCard } from './per_os_memory_protection_card';
 import { PerOsRansomwareProtectionCard } from './per_os_ransomware_protection_card';
 
-// §9.5: the `mac.ransomware.mode` advanced setting is replaced by the macOS row on the
-// per-OS Ransomware card, so it is hidden here to avoid two controls for one field. It is
-// filtered, never deleted from AdvancedPolicySchema — deleting it would leave macOS
-// ransomware with no UI at all while the flag is off. Being inside this component is
-// already equivalent to the flag being on, so this needs no second flag check.
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
   { defaultMessage: 'Protections' }
@@ -42,6 +37,8 @@ const SETTINGS_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+// The macOS row on the Ransomware card owns this field, so it is hidden from the advanced
+// settings rather than offered twice.
 const OMITTED_ADVANCED_KEYS: readonly string[] = ['mac.ransomware.mode'];
 
 export type PerOsPolicySettingsFormProps = PolicyFormComponentCommonProps;
@@ -73,8 +70,6 @@ export const PerOsPolicySettingsForm = memo(
         return null;
       }
 
-      // PerOsDeviceControlCard performs the serverless upsell and Enterprise-licence checks
-      // itself, so this wrapper only applies the trustedDevices flag gate.
       return (
         <>
           <PerOsDeviceControlCard
@@ -104,13 +99,6 @@ export const PerOsPolicySettingsForm = memo(
           </>
         )}
 
-        {/*
-          Card order follows the design (§3.2): Malware, Malicious behavior, Antivirus
-          solution, Ransomware, Memory threat, Device control, Attack surface reduction,
-          Event collection. Antivirus and Event collection are not protections and must
-          still render when the protections upsell replaces the protection cards, so the
-          protection cards sit in two conditional blocks around them rather than one.
-        */}
         {!ProtectionsUpSellingComponent && (
           <>
             <RelatedDetectionRulesCallout />
@@ -158,12 +146,6 @@ export const PerOsPolicySettingsForm = memo(
           </>
         )}
 
-        {/*
-          The Phase 4 reorder to mock order (§3.2) moved Antivirus solution up to third,
-          so it now sits under "Protections". Everything that is genuinely configuration
-          rather than protection — Event collection and the advanced settings — sits under
-          "Settings".
-        */}
         <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
         <EuiSpacer size="s" />
 

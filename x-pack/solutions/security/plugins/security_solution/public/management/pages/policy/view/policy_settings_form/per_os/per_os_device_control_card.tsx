@@ -71,10 +71,8 @@ export const PerOsDeviceControlCard = memo(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isEnterprise = useLicense().isEnterprise();
     const DeviceControlUpsellingComponent = useGetDeviceControlUpsellComponent();
-    // Legacy `deviceControlExists` guard (device_control_card.tsx): both OS branches are
-    // independently optional and may be stripped by `removeDeviceControl`. The master
-    // switch is on only when every supported OS has a defined `device_control` and at
-    // least one of them is enabled.
+    // Both OS branches are independently optional, so the master switch is on only when every
+    // supported OS has a defined `device_control` and at least one of them is enabled.
     const osDeviceControls = DEVICE_CONTROL_OS_VALUES.map(
       (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control
     );
@@ -167,9 +165,6 @@ const PerOsDeviceControlMasterToggle = ({
             ? DeviceControlAccessLevelEnum.deny_all
             : DeviceControlAccessLevelEnum.audit,
         };
-        // Seed the shared default message when the branch is missing entirely, matching the
-        // notify-user checkbox handler. The legacy master switch seeded '' here instead, which
-        // disagreed with its own notify handler.
         osPolicy.popup.device_control ??= {
           enabled,
           message: DefaultPolicyDeviceNotificationMessage,

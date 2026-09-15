@@ -109,7 +109,7 @@ const SHOW = i18n.translate('xpack.securitySolution.endpoint.policy.advanced.sho
 
 export interface AdvancedSectionProps extends PolicyFormComponentCommonProps {
   omitKeys?: readonly string[];
-  /** When true, the show/hide control is full width with a chevron. Defaults to the legacy inline button. */
+  /** When true, the show/hide control is full width with a chevron. Defaults to the inline button. */
   fullWidthToggle?: boolean;
 }
 
