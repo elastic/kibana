@@ -5421,6 +5421,9 @@ importers:
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
+      '@kbn/oxfmt':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-oxfmt
       '@kbn/peggy':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-peggy
@@ -7906,6 +7909,8 @@ importers:
   src/platform/packages/shared/kbn-otel-demo: {}
 
   src/platform/packages/shared/kbn-otel-semantic-conventions: {}
+
+  src/platform/packages/shared/kbn-oxfmt: {}
 
   src/platform/packages/shared/kbn-palettes: {}
 

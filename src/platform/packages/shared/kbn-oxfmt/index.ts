@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { relative } from 'path';
-import { runOxfmt } from '@kbn/oxfmt';
-import { REPO_ROOT } from '@kbn/repo-info';
-
-/**
- * Formats the given file or glob in place. oxfmt only expands globs relative to its cwd, so the
- * path is made relative to the repo root first.
- */
-export async function formatOutput(path: string) {
-  await runOxfmt([relative(REPO_ROOT, path)]);
-}
+export { OXFMT_BIN_PATH, OXFMT_CONFIG_PATH, runOxfmt, formatWithOxfmt } from './src/oxfmt';

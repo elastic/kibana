@@ -133,15 +133,12 @@ export const generate = async (config: GeneratorConfig) => {
     );
   }
 
-  // Fix any eslint errors, then format with oxfmt as the generator produces
-  // unformatted code and eslint fixes are not formatting-aware
+  // The generator produces unformatted code. Format it before running eslint --fix so its
+  // autofixes (e.g. removing unused imports) operate on normalized code, then format again
+  // because eslint fixes are not formatting-aware.
   console.log(`💅  Formatting output`);
-  if (bundle) {
-    await fixEslint(bundle.outFile);
-    await formatOutput(bundle.outFile);
-  } else {
-    const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
-    await fixEslint(generatedArtifactsGlob);
-    await formatOutput(generatedArtifactsGlob);
-  }
+  const target = bundle ? bundle.outFile : resolve(rootDir, './**/*.gen.ts');
+  await formatOutput(target);
+  await fixEslint(target);
+  await formatOutput(target);
 };

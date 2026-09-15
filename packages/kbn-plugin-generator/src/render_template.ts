@@ -13,7 +13,8 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { formatWithOxfmt, transformFileStream } from '@kbn/dev-utils';
+import { transformFileStream } from '@kbn/dev-utils';
+import { formatWithOxfmt } from '@kbn/oxfmt';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
 

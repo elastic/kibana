@@ -9,7 +9,7 @@
 
 import { spawnSync } from 'child_process';
 
-import { OXFMT_BIN_PATH, OXFMT_CONFIG_PATH } from '@kbn/dev-utils';
+import { OXFMT_BIN_PATH, OXFMT_CONFIG_PATH } from '@kbn/oxfmt';
 
 // Thin wrapper around the oxfmt CLI that pins the repo config so it works from any cwd.
 // `node scripts/oxfmt` formats every JS/TS file in the repo; pass paths to narrow it down and

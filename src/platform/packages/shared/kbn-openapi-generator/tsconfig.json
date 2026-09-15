@@ -9,6 +9,6 @@
   "kbn_references": [
     "@kbn/repo-info",
     "@kbn/handlebars",
-    "@kbn/dev-utils",
+    "@kbn/oxfmt",
   ]
 }

@@ -1902,6 +1902,7 @@
     "@kbn/optimizer-webpack-helpers": "workspace:*",
     "@kbn/osquery-plugin-cypress": "workspace:*",
     "@kbn/otel-demo": "workspace:*",
+    "@kbn/oxfmt": "workspace:*",
     "@kbn/peggy": "workspace:*",
     "@kbn/peggy-loader": "workspace:*",
     "@kbn/perf-page-load": "workspace:*",

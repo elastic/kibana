@@ -10,7 +10,7 @@
 import { parseExpression } from '@babel/parser';
 import * as t from '@babel/types';
 import generate from '@babel/generator';
-import { formatWithOxfmt } from '@kbn/dev-utils';
+import { formatWithOxfmt } from '@kbn/oxfmt';
 
 import type { ManagedConfigKey } from './managed_config_keys';
 
