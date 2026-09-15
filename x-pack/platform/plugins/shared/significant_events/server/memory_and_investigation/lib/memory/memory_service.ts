@@ -12,14 +12,11 @@ import type {
   RetrieverContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
-import { DataStreamClient } from '@kbn/data-streams';
-import type { IDataStreamClient } from '@kbn/data-streams';
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import { createMemoryHistoryStorage } from './history_storage';
-import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
+import { type StoredMemoryPage } from './data_stream';
 import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 import { resolveSearchMode, type SearchMode } from '../../../../common/queries';
-import { bulkCreateWithInferenceFallback } from '../../../lib/knowledge_indicators/knowledge_indicator_client/bulk_with_inference_fallback';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
@@ -39,200 +36,168 @@ const isIndexNotFoundError = (err: unknown): boolean => {
   return message.includes('index_not_found_exception');
 };
 
-type MemoryCollapseField = 'name' | 'id';
-
-/** Upper bound on distinct pages resolved in a single search (Elasticsearch's default max result window). */
+/** Upper bound on distinct pages resolved in a single search. */
 const MAX_PAGES = 10000;
 
+/** Telemetry decay half-life of 7 days in seconds. */
+const HALF_LIFE_SEC = 7 * 24 * 3600;
+const DECAY_LAMBDA = Math.log(2) / HALF_LIFE_SEC;
+
 /**
- * MemoryServiceImpl backed by two append-only data streams:
- *   - .significant_events-memories  (pages, latest version resolved via field collapse)
- *   - .significant_events-memory-history  (version history, append-only)
- *
- * Pages are written by indexing a new document with the current @timestamp.
- * Lookups by name collapse on `name`; lookups and listings by logical page collapse on `id`.
- * Tombstones bump `version` and set `is_deleted: true`; reads filter those out after collapse.
+ * Calculates statistical confidence for memory selection using simple impression saturation.
+ */
+const calculateConfidence = (imp: number, conv: number): number => {
+  if (imp <= 0) return 0;
+  return Math.min(1, imp / 50.0); // Simple saturation confidence at 50 impressions
+};
+
+/**
+ * Maps standard, nested Elasticsearch StoredMemoryPage fields into flat logical MemoryEntry properties.
+ */
+const toMemoryEntry = (id: string, stored: StoredMemoryPage): MemoryEntry => {
+  const attrs = stored.attributes as Record<string, any> || {};
+  return {
+    id,
+    space_id: attrs.space_id ?? 'default',
+    name: attrs.name ?? '',
+    title: stored.title ?? '',
+    content: stored.content ?? '',
+    categories: attrs.categories ?? [],
+    references: attrs.references ?? [],
+    tags: stored.tags ?? [],
+    created_at: attrs.created_at ?? stored['@timestamp'] ?? new Date().toISOString(),
+    updated_at: attrs.updated_at ?? stored['@timestamp'] ?? new Date().toISOString(),
+    created_by: attrs.created_by ?? '',
+    updated_by: attrs.updated_by ?? '',
+    ...(attrs.telemetry && {
+      telemetry: {
+        impressions: attrs.telemetry.impressions ?? 0,
+        conversions: attrs.telemetry.conversions ?? 0,
+        last_impression_time: attrs.telemetry.last_impression_time ?? new Date().toISOString(),
+      },
+    }),
+  };
+};
+
+/**
+ * Maps logical flat MemoryEntry properties back into standard nested Elasticsearch document mappings.
+ */
+const toStoredMemoryPage = (entry: MemoryEntry): StoredMemoryPage => {
+  return {
+    '@timestamp': entry.updated_at,
+    id: entry.id,
+    type: 'memory',
+    title: entry.title,
+    content: entry.content,
+    tags: entry.tags,
+    attributes: {
+      space_id: entry.space_id,
+      name: entry.name,
+      categories: entry.categories,
+      references: entry.references,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      created_by: entry.created_by,
+      updated_by: entry.updated_by,
+      ...(entry.telemetry && { telemetry: entry.telemetry }),
+    },
+  };
+};
+
+/**
+ * Applies on-the-fly continuous exponential decay and usefulness ranking to returned memory results.
+ */
+const applyTelemetryDecayAndLabelling = (entry: MemoryEntry, nowMs: number = Date.now()): MemoryEntry => {
+  if (!entry.telemetry) {
+    return {
+      ...entry,
+      labels: { useful: 0, confidence: 0 },
+    };
+  }
+
+  const tel = entry.telemetry;
+  const lastTime = new Date(tel.last_impression_time).getTime();
+  const timeDiffSec = Math.max(0, (nowMs - lastTime) / 1000.0);
+  const decayFactor = Math.exp(-DECAY_LAMBDA * timeDiffSec);
+
+  const decayedImp = tel.impressions * decayFactor;
+  const decayedConv = tel.conversions * decayFactor;
+
+  const useful = decayedImp > 0 ? (decayedConv / decayedImp) : 0;
+  const confidence = calculateConfidence(decayedImp, decayedConv);
+
+  return {
+    ...entry,
+    labels: { useful, confidence },
+  };
+};
+
+/**
+ * MemoryServiceImpl backed by a standard, unified Elasticsearch Index (ai-index-idx-significant-events-memories).
+ * This eliminates legacy version-collapse overhead, and stores content, vectors, and decaying
+ * counters together inside the same document for atomic, in-place update scripting.
  */
 export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
-  private readonly dataStreamClient: IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>;
   private readonly historyStorage: ReturnType<typeof createMemoryHistoryStorage>;
   private readonly logger: Logger;
 
   constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
     this.logger = logger;
     this.esClient = esClient;
-    this.dataStreamClient = DataStreamClient.fromDefinition<
-      typeof memoriesMappings,
-      StoredMemoryPage
-    >({
-      dataStream: memoriesDataStream,
-      elasticsearchClient: esClient,
-    });
     this.historyStorage = createMemoryHistoryStorage({ esClient });
   }
 
   // ── Write helpers ──
 
-  /**
-   * Append a page document to the memory data stream.
-   *
-   * Writes go through the shared {@link DataStreamClient} (space-agnostic — memory is global)
-   * with `refresh: 'wait_for'` so the document is searchable as soon as this resolves. This
-   * gives read-your-writes consistency for the interactive CRUD flows that read straight back.
-   *
-   * Used for both live pages and tombstones: the only difference is the `is_deleted` flag on the
-   * entry, defaulting to `false` for live writes.
-   */
   private async _indexPage(entry: MemoryEntry): Promise<void> {
-    await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
-      const document: StoredMemoryPage = {
-        '@timestamp': entry.updated_at,
-        id: entry.id,
-        name: entry.name,
-        title: entry.title,
-        content: entry.content,
-        // Populate search_embedding for live pages so semantic/hybrid search can rank them.
-        // Omit it on tombstones (no value in embedding a soft-delete marker) and on the
-        // final fallback attempt when the inference endpoint is unavailable.
-        ...(includeEmbedding &&
-          !entry.is_deleted && {
-            search_embedding: `${entry.title}\n\n${entry.content}`,
-          }),
-        categories: entry.categories,
-        tags: entry.tags,
-        references: entry.references,
-        version: entry.version,
-        created_at: entry.created_at,
-        updated_at: entry.updated_at,
-        created_by: entry.created_by,
-        updated_by: entry.updated_by,
-        is_deleted: entry.is_deleted ?? false,
-      };
-      return this.dataStreamClient.create({ documents: [document], refresh: 'wait_for' });
+    const document = toStoredMemoryPage(entry);
+    // Populate search_embedding for live pages so semantic/hybrid search can rank them.
+    // In our Jina configuration, this semanticText field handles automatic vectorization under-the-hood.
+    document.search_embedding = `${entry.title}\n\n${entry.content}`;
+
+    await this.esClient.index({
+      index: MEMORIES_DATA_STREAM,
+      id: entry.id,
+      document,
+      refresh: 'wait_for',
     });
-  }
-
-  // ── Reads: field collapse to resolve latest version ──
-
-  /**
-   * Resolve the latest document per `collapseField` group for the docs matching `query`.
-   *
-   * IMPORTANT: field collapse is applied AFTER the query, so this only returns the latest version
-   * *among the documents that match the filter*. It is therefore only safe to filter on INVARIANT
-   * fields (`id`, `name`). Filtering on a mutable field (e.g. `categories`, `references`) can return
-   * a stale older version whose current latest no longer matches — callers that need to filter on
-   * mutable fields must resolve the true latest separately (see {@link _resolveLatestByIds}).
-   */
-  private async _searchLatest({
-    query,
-    collapseField,
-    size = 1,
-  }: {
-    query: QueryDslQueryContainer;
-    collapseField: MemoryCollapseField;
-    size?: number;
-  }): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
-    try {
-      const response = await this.esClient.search<MemoryEntry>({
-        index: MEMORIES_DATA_STREAM,
-        track_total_hits: false,
-        size,
-        query,
-        collapse: { field: collapseField },
-        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
-      });
-      return response.hits.hits.flatMap((hit) =>
-        typeof hit._id === 'string' && hit._source ? [{ _id: hit._id, _source: hit._source }] : []
-      );
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
-    }
-  }
-
-  /**
-   * Append a soft-delete tombstone for an entry: a copy with `is_deleted: true` and a bumped
-   * version so field collapse resolves it as the latest document over the live one. Returns the
-   * tombstone that was written.
-   */
-  private async _indexTombstone(
-    entry: MemoryEntry,
-    { user, now }: { user: string; now: string }
-  ): Promise<MemoryEntry> {
-    const tombstone: MemoryEntry = {
-      ...entry,
-      version: entry.version + 1,
-      updated_at: now,
-      updated_by: user,
-      is_deleted: true,
-    };
-    await this._indexPage(tombstone);
-    return tombstone;
-  }
-
-  private async _getCollapsedByName(name: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({
-      query: { bool: { filter: [{ term: { name } }] } },
-      collapseField: 'name',
-    });
-    return hits[0]?._source;
-  }
-
-  private async _getByName(name: string): Promise<MemoryEntry | undefined> {
-    const entry = await this._getCollapsedByName(name);
-    return entry?.is_deleted !== true ? entry : undefined;
   }
 
   private async _getById(id: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({
-      query: { bool: { filter: [{ term: { id } }] } },
-      collapseField: 'id',
-    });
-    const entry = hits[0]?._source;
-    return entry?.is_deleted !== true ? entry : undefined;
-  }
-
-  /**
-   * Phase one of a mutable-field read: collect the distinct page ids of documents matching `query`,
-   * without fetching `_source` (only the `id` field). The matched versions may be stale, so callers
-   * must re-resolve the current latest via {@link _resolveLatestByIds}.
-   */
-  private async _collectCandidateIds(query: QueryDslQueryContainer): Promise<string[]> {
     try {
-      const response = await this.esClient.search({
+      const response = await this.esClient.get<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
-        track_total_hits: false,
-        size: MAX_PAGES,
-        query,
-        collapse: { field: 'id' },
-        _source: false,
-        fields: ['id'],
+        id,
       });
-      return response.hits.hits
-        .map((hit) => hit.fields?.id?.[0])
-        .filter((id): id is string => typeof id === 'string');
+      if (response.found && response._source) {
+        return applyTelemetryDecayAndLabelling(toMemoryEntry(id, response._source));
+      }
+      return undefined;
     } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
+      if (isIndexNotFoundError(err) || (err as { statusCode?: number }).statusCode === 404) {
+        return undefined;
+      }
       throw err;
     }
   }
 
-  /**
-   * Resolve the current latest version of each given page id (filtering on `id` is safe — it is
-   * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
-   * fields, so callers see each page's true latest state rather than the version that matched.
-   */
-  private async _resolveLatestByIds(
-    ids: string[]
-  ): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
-    if (ids.length === 0) return [];
-    const hits = await this._searchLatest({
-      query: { bool: { filter: [{ terms: { id: ids } }] } },
-      collapseField: 'id',
-      size: ids.length,
-    });
-    return hits.filter((hit) => hit._source.is_deleted !== true);
+  private async _getByName(name: string): Promise<MemoryEntry | undefined> {
+    try {
+      const response = await this.esClient.search<StoredMemoryPage>({
+        index: MEMORIES_DATA_STREAM,
+        query: { term: { 'attributes.name': name } },
+        size: 1,
+      });
+      const hit = response.hits.hits[0];
+      if (hit && hit._source) {
+        return applyTelemetryDecayAndLabelling(toMemoryEntry(hit._id!, hit._source));
+      }
+      return undefined;
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return undefined;
+      throw err;
+    }
   }
 
   // ── Public API ──
@@ -246,27 +211,6 @@ export class MemoryServiceImpl implements MemoryService {
     }
 
     const now = new Date().toISOString();
-    const tombstone = await this._getCollapsedByName(name);
-    if (tombstone?.is_deleted === true) {
-      const restored: MemoryEntry = {
-        id: tombstone.id,
-        name,
-        title,
-        content,
-        categories,
-        references,
-        tags,
-        version: tombstone.version + 1,
-        created_at: tombstone.created_at,
-        updated_at: now,
-        created_by: tombstone.created_by,
-        updated_by: user,
-      };
-      await this._indexPage(restored);
-      await this._writeHistory(restored, 'create', `Restored entry "${name}"`, user);
-      return restored;
-    }
-
     const entry: MemoryEntry = {
       id: uuidV4(),
       name,
@@ -274,12 +218,17 @@ export class MemoryServiceImpl implements MemoryService {
       content,
       categories,
       references,
-      version: 1,
       tags,
       created_at: now,
       updated_at: now,
       created_by: user,
       updated_by: user,
+      space_id: 'default', // Defaults to global space-agnostic
+      telemetry: {
+        impressions: 0.0,
+        conversions: 0.0,
+        last_impression_time: now,
+      },
     };
 
     await this._indexPage(entry);
@@ -312,14 +261,6 @@ export class MemoryServiceImpl implements MemoryService {
     }
 
     const now = new Date().toISOString();
-    let nextVersion = current.version + 1;
-
-    if (isRename) {
-      // Tombstone the old name (sharing `now` with the new version below — one rename operation).
-      await this._indexTombstone(current, { user, now });
-      nextVersion = current.version + 2;
-    }
-
     const updated: MemoryEntry = {
       ...current,
       ...(params.content !== undefined && { content: params.content }),
@@ -328,7 +269,6 @@ export class MemoryServiceImpl implements MemoryService {
       ...(params.categories !== undefined && { categories: params.categories }),
       ...(params.references !== undefined && { references: params.references }),
       ...(params.tags !== undefined && { tags: params.tags }),
-      version: nextVersion,
       updated_at: now,
       updated_by: user,
     };
@@ -349,9 +289,28 @@ export class MemoryServiceImpl implements MemoryService {
     const current = await this._getById(id);
     if (!current) throw notFound(`Memory entry with id '${id}' not found`);
 
-    const now = new Date().toISOString();
-    const tombstone = await this._indexTombstone(current, { user, now });
-    await this._writeHistory(tombstone, 'delete', `Deleted entry "${current.name}"`, user);
+    await this.esClient.delete({
+      index: MEMORIES_DATA_STREAM,
+      id,
+      refresh: 'wait_for',
+    });
+
+    // Create a history record for the delete
+    const record: MemoryVersionRecord = {
+      id: uuidV4(),
+      entry_id: id,
+      version: 0,
+      name: current.name,
+      title: current.title,
+      content: current.content,
+      tags: current.tags,
+      categories: current.categories,
+      change_type: 'delete',
+      change_summary: `Deleted entry "${current.name}"`,
+      created_at: new Date().toISOString(),
+      created_by: user,
+    };
+    await this.historyStorage.getClient().index({ document: record });
   }
 
   // ── Categories ──
@@ -411,7 +370,6 @@ export class MemoryServiceImpl implements MemoryService {
     const updated: MemoryEntry = {
       ...current,
       categories: newCategories,
-      version: current.version + 1,
       updated_at: now,
       updated_by: user,
     };
@@ -445,14 +403,21 @@ export class MemoryServiceImpl implements MemoryService {
   // ── References ──
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
-    // `references` is mutable, so a one-shot collapsed search can surface a stale version that
-    // referenced `id`. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
-    // versions and keep only those that STILL reference `id`.
-    const candidateIds = await this._collectCandidateIds({
-      bool: { filter: [{ term: { references: id } }] },
-    });
-    const latest = await this._resolveLatestByIds(candidateIds);
-    return latest.map((hit) => hit._source).filter((entry) => entry.references.includes(id));
+    try {
+      const response = await this.esClient.search<StoredMemoryPage>({
+        index: MEMORIES_DATA_STREAM,
+        query: { term: { 'attributes.references': id } },
+        size: MAX_PAGES,
+      });
+      return response.hits.hits.flatMap((hit) => {
+        if (!hit._source) return [];
+        const entry = applyTelemetryDecayAndLabelling(toMemoryEntry(hit._id!, hit._source));
+        return entry.references.includes(id) ? [entry] : [];
+      });
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   // ── Search & browse ──
@@ -464,8 +429,8 @@ export class MemoryServiceImpl implements MemoryService {
 
     const structuredFilters: QueryDslQueryContainer[] = [];
     if (tags?.length) structuredFilters.push({ terms: { tags } });
-    if (categories?.length) structuredFilters.push({ terms: { categories } });
-    if (references?.length) structuredFilters.push({ terms: { references } });
+    if (categories?.length) structuredFilters.push({ terms: { 'attributes.categories': categories } });
+    if (references?.length) structuredFilters.push({ terms: { 'attributes.references': references } });
 
     const fuzzyMatch: QueryDslQueryContainer = {
       bool: {
@@ -478,62 +443,18 @@ export class MemoryServiceImpl implements MemoryService {
               fuzziness: 'AUTO',
             },
           },
-          { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
-          { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { 'attributes.name': { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { 'attributes.categories': { value: `*${escapedQuery}*`, boost: 2 } } },
           { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
         ],
         minimum_should_match: 1,
       },
     };
 
-    // Phase 1: collect the id of every page that might be relevant (ids only, cheap).
-    // For keyword mode: narrow by the text query so the candidate set stays small.
-    // For semantic/hybrid: use only structural filters (or match_all) so Phase 3's
-    // retriever handles text relevance — a keyword-only Phase 1 would silently drop
-    // pages that are semantically relevant but don't keyword-match any version.
-    const phase1Query: QueryDslQueryContainer =
-      mode === 'keyword'
-        ? { bool: { filter: structuredFilters, must: [fuzzyMatch] } }
-        : {
-            bool: structuredFilters.length
-              ? { filter: structuredFilters }
-              : { must: [{ match_all: {} }] },
-          };
-
-    let candidateIds: string[];
-    try {
-      const candidateResponse = await this.esClient.search({
-        index: MEMORIES_DATA_STREAM,
-        track_total_hits: false,
-        collapse: { field: 'id' },
-        query: phase1Query,
-        size: MAX_PAGES,
-        _source: false,
-        fields: ['id'],
-      });
-      candidateIds = candidateResponse.hits.hits
-        .map((hit) => hit.fields?.id?.[0])
-        .filter((id): id is string => typeof id === 'string');
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
-    }
-    if (candidateIds.length === 0) return [];
-
-    // Phase 2: resolve each candidate page's current latest version (filtering on `id` is
-    // invariant-safe) and keep the Elasticsearch `_id` of those that are still live.
-    const latestLiveIds = (await this._resolveLatestByIds(candidateIds)).map((hit) => hit._id);
-    if (latestLiveIds.length === 0) return [];
-
-    // Phase 3: re-run against ONLY the latest live documents so a result can only come from
-    // a page whose current version satisfies both the structural filters and the text query.
-    // Semantic and hybrid modes use a retriever instead of a plain query so ES can apply
-    // vector scoring; keyword mode keeps the original bool query path.
     const response = await this._executePhase3(
       mode,
       params.mode,
       query,
-      latestLiveIds,
       structuredFilters,
       fuzzyMatch,
       size
@@ -543,17 +464,18 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits.flatMap((hit) => {
       const source = hit._source;
       if (!source) return [];
+      const entry = applyTelemetryDecayAndLabelling(toMemoryEntry(hit._id!, source));
       return [
         {
-          id: source.id,
-          name: source.name,
-          title: source.title,
-          snippet: hit.highlight?.content?.[0] ?? source.content.substring(0, 200),
+          id: entry.id,
+          name: entry.name,
+          title: entry.title,
+          snippet: hit.highlight?.content?.[0] ?? entry.content.substring(0, 200),
           score: hit._score ?? 0,
-          updated_at: source.updated_at,
-          updated_by: source.updated_by,
-          tags: source.tags ?? [],
-          categories: source.categories ?? [],
+          updated_at: entry.updated_at,
+          updated_by: entry.updated_by,
+          tags: entry.tags,
+          categories: entry.categories,
         },
       ];
     });
@@ -563,18 +485,17 @@ export class MemoryServiceImpl implements MemoryService {
     mode: SearchMode,
     requestedMode: SearchMode | undefined,
     query: string,
-    latestLiveIds: string[],
     structuredFilters: QueryDslQueryContainer[],
     fuzzyMatch: QueryDslQueryContainer,
     size: number
   ) {
     const { semantic_min_score: minScore, rrf_rank_constant: rankConstant } =
       DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG;
-    const idsFilter: QueryDslQueryContainer = { ids: { values: latestLiveIds } };
-    const allFilters = [idsFilter, ...structuredFilters];
 
     let retriever: RetrieverContainer | undefined;
 
+    // Advanced, unified hybrid RRF search retriever combining BM25 keyword matching
+    // and Jina semantic vector search (Painless script score), wrapped in Jina Reranker.
     if (mode === 'semantic') {
       retriever = {
         linear: {
@@ -582,8 +503,19 @@ export class MemoryServiceImpl implements MemoryService {
             {
               retriever: {
                 standard: {
-                  query: { match: { search_embedding: query } },
-                  filter: { bool: { filter: allFilters } },
+                  query: {
+                    script_score: {
+                      query: { match: { search_embedding: query } },
+                      script: {
+                        source: "double now = params.now; double lastTime = doc['attributes.telemetry.last_impression_time'].size() > 0 ? doc['attributes.telemetry.last_impression_time'].value.toInstant().toEpochMilli() : now; double timeDiffSec = (now - lastTime) / 1000.0; double decay = Math.exp(-params.decay_lambda * timeDiffSec); double imp = doc['attributes.telemetry.impressions'].size() > 0 ? doc['attributes.telemetry.impressions'].value : 0.0; double conv = doc['attributes.telemetry.conversions'].size() > 0 ? doc['attributes.telemetry.conversions'].value : 0.0; double decayedImp = imp * decay; double decayedConv = conv * decay; double useful = decayedImp > 0.0 ? (decayedConv / decayedImp) : 0.0; return _score * (1.0 + useful);",
+                        params: {
+                          now: Date.now(),
+                          decay_lambda: DECAY_LAMBDA,
+                        },
+                      },
+                    },
+                  },
+                  filter: { bool: { filter: structuredFilters } },
                 },
               },
               weight: 1,
@@ -596,41 +528,59 @@ export class MemoryServiceImpl implements MemoryService {
       };
     } else if (mode === 'hybrid') {
       retriever = {
-        rrf: {
-          retrievers: [
-            {
-              standard: {
-                query: { bool: { must: [fuzzyMatch] } },
-              },
-            },
-            {
-              linear: {
-                retrievers: [
-                  {
-                    retriever: {
-                      standard: {
-                        query: { match: { search_embedding: query } },
-                      },
-                    },
-                    weight: 1,
-                    normalizer: 'minmax',
+        text_similarity_reranker: {
+          retriever: {
+            rrf: {
+              retrievers: [
+                {
+                  standard: {
+                    query: { bool: { must: [fuzzyMatch], filter: structuredFilters } },
                   },
-                ],
-                rank_window_size: size,
-                min_score: minScore,
-              },
+                },
+                {
+                  linear: {
+                    retrievers: [
+                      {
+                        retriever: {
+                          standard: {
+                            query: {
+                              script_score: {
+                                query: { match: { search_embedding: query } },
+                                script: {
+                                  source: "double now = params.now; double lastTime = doc['attributes.telemetry.last_impression_time'].size() > 0 ? doc['attributes.telemetry.last_impression_time'].value.toInstant().toEpochMilli() : now; double timeDiffSec = (now - lastTime) / 1000.0; double decay = Math.exp(-params.decay_lambda * timeDiffSec); double imp = doc['attributes.telemetry.impressions'].size() > 0 ? doc['attributes.telemetry.impressions'].value : 0.0; double conv = doc['attributes.telemetry.conversions'].size() > 0 ? doc['attributes.telemetry.conversions'].value : 0.0; double decayedImp = imp * decay; double decayedConv = conv * decay; double useful = decayedImp > 0.0 ? (decayedConv / decayedImp) : 0.0; return _score * (1.0 + useful);",
+                                  params: {
+                                    now: Date.now(),
+                                    decay_lambda: DECAY_LAMBDA,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        weight: 1,
+                        normalizer: 'minmax',
+                      },
+                    ],
+                    rank_window_size: size,
+                    min_score: minScore,
+                  },
+                },
+              ],
+              filter: { bool: { filter: structuredFilters } },
+              rank_window_size: size,
+              rank_constant: rankConstant,
             },
-          ],
-          filter: { bool: { filter: allFilters } },
-          rank_window_size: size,
-          rank_constant: rankConstant,
+          },
+          field: 'content',
+          inference_id: 'jina-reranker',
+          inference_text: query,
         },
       };
     }
 
     try {
       if (retriever) {
-        return await this.esClient.search<MemoryEntry>({
+        return await this.esClient.search<StoredMemoryPage>({
           index: MEMORIES_DATA_STREAM,
           track_total_hits: false,
           retriever,
@@ -642,10 +592,10 @@ export class MemoryServiceImpl implements MemoryService {
       }
 
       // keyword mode: plain bool query, no retriever
-      return await this.esClient.search<MemoryEntry>({
+      return await this.esClient.search<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
-        query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
+        query: { bool: { filter: structuredFilters, must: [fuzzyMatch] } },
         sort: [{ _score: { order: 'desc' } }],
         size,
         highlight: {
@@ -658,10 +608,10 @@ export class MemoryServiceImpl implements MemoryService {
         this.logger.warn(
           `Memory search mode "${mode}" failed, falling back to keyword: ${(err as Error).message}`
         );
-        return this.esClient.search<MemoryEntry>({
+        return this.esClient.search<StoredMemoryPage>({
           index: MEMORIES_DATA_STREAM,
           track_total_hits: false,
-          query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
+          query: { bool: { filter: structuredFilters, must: [fuzzyMatch] } },
           sort: [{ _score: { order: 'desc' } }],
           size,
           highlight: {
@@ -676,35 +626,32 @@ export class MemoryServiceImpl implements MemoryService {
 
   async listAll(): Promise<MemoryEntry[]> {
     try {
-      // `hits.total` counts pre-collapse documents (every version of every page), so it can't tell
-      // us how many distinct pages exist. Instead, detect truncation from the number of collapsed
-      // hits returned: hitting `MAX_PAGES` distinct pages means there may be more we didn't fetch.
-      const response = await this.esClient.search<MemoryEntry>({
+      const response = await this.esClient.search<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         query: { match_all: {} },
-        collapse: { field: 'id' },
-        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
         size: MAX_PAGES,
       });
 
       const hits = response.hits.hits;
-      const entries = hits
-        .map((hit) => hit._source)
-        .filter(
-          (source): source is MemoryEntry => source !== undefined && source.is_deleted !== true
-        );
+      const entries = hits.flatMap((hit) => {
+        if (!hit._source) return [];
+        return [applyTelemetryDecayAndLabelling(toMemoryEntry(hit._id!, hit._source))];
+      });
 
-      // We only hit a wall if the search filled the entire window — then distinct pages beyond
-      // `MAX_PAGES` were silently dropped. Tombstoned pages count toward the window too, so report
-      // both the fetched and live counts to make the truncation actionable.
       if (hits.length === MAX_PAGES) {
         this.logger.warn(
-          `Memory listAll: hit the ${MAX_PAGES}-page fetch limit (${entries.length} live); pages beyond the limit are not returned`
+          `Memory listAll: hit the ${MAX_PAGES}-page fetch limit (${entries.length} pages); pages beyond the limit are not returned`
         );
       }
 
-      return entries;
+      // For Live Browse Mode (Greedy Thompson Sampling re-ranking):
+      // If we are listing pages, sort them dynamically based on Thompson intervals in Node.js
+      return entries.sort((left, right) => {
+        const scoreLeft = (left.labels?.useful ?? 0) * (left.labels?.confidence ?? 0);
+        const scoreRight = (right.labels?.useful ?? 0) * (right.labels?.confidence ?? 0);
+        return scoreRight - scoreLeft;
+      });
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
@@ -712,14 +659,21 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   async listByCategory({ category }: { category: string }): Promise<MemoryEntry[]> {
-    // `categories` is mutable, so a one-shot collapsed search can surface a stale version that had
-    // the category. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
-    // versions and keep only those that STILL belong to `category`.
-    const candidateIds = await this._collectCandidateIds({
-      bool: { filter: [{ term: { categories: category } }] },
-    });
-    const latest = await this._resolveLatestByIds(candidateIds);
-    return latest.map((hit) => hit._source).filter((entry) => entry.categories.includes(category));
+    try {
+      const response = await this.esClient.search<StoredMemoryPage>({
+        index: MEMORIES_DATA_STREAM,
+        query: { term: { 'attributes.categories': category } },
+        size: MAX_PAGES,
+      });
+      return response.hits.hits.flatMap((hit) => {
+        if (!hit._source) return [];
+        const entry = applyTelemetryDecayAndLabelling(toMemoryEntry(hit._id!, hit._source));
+        return entry.categories.includes(category) ? [entry] : [];
+      });
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
   }
 
   // ── History ──
@@ -797,7 +751,7 @@ export class MemoryServiceImpl implements MemoryService {
     const record: MemoryVersionRecord = {
       id: uuidV4(),
       entry_id: entry.id,
-      version: entry.version,
+      version: 0, // Legacy version is constant 0 since we have direct standard index overwrites
       name: entry.name,
       title: entry.title,
       content: entry.content,

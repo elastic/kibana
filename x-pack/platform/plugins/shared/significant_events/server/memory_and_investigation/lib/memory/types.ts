@@ -28,16 +28,25 @@ export interface MemoryEntry {
   categories: string[];
   /** IDs of other pages referenced from this page's content */
   references: string[];
-  /** Monotonically increasing version per entry */
-  version: number;
-  /** Tags for classification */
+  /** Tags for classification (keywords) */
   tags: string[];
   created_at: string;
   updated_at: string;
   created_by: string;
   updated_by: string;
-  /** Present and true for soft-deleted tombstone documents */
-  is_deleted?: boolean;
+  /** Kibana space ID */
+  space_id: string;
+  /** Decaying performance and usage telemetry counters (stored in index) */
+  telemetry?: {
+    impressions: number;
+    conversions: number;
+    last_impression_time: string;
+  };
+  /** Dynamically calculated performance ratings (computed on-the-fly on read) */
+  labels?: {
+    useful: number;
+    confidence: number;
+  };
 }
 
 /**
