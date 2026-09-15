@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. See the Elastic License 2.0 (ELv2)
  * or the Server Side Public License (SSPLv1) for more details.
  */
@@ -70,7 +77,11 @@ export const registerEnableOnboardingRoute = ({
           await core.uiSettings.client.set(ALERTZERO_ENABLED_SETTING, true);
           logger.info(`alertzero:enabled set to true in space "${spaceId}"`);
           return response.ok({
-            body: { outcome: result.outcome, spaceId, installedWorkerIds: result.installedWorkerIds },
+            body: {
+              outcome: result.outcome,
+              spaceId,
+              installedWorkerIds: result.installedWorkerIds,
+            },
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

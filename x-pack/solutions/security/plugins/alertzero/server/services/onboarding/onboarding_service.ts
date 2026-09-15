@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. See the Elastic License 2.0 (ELv2)
  * or the Server Side Public License (SSPLv1) for more details.
  */
 import type { Logger } from '@kbn/core/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import {
-  workerRegistry,
-  installRegisteredWorker,
-} from '../../managed_workflows/worker_registry';
+import { workerRegistry, installRegisteredWorker } from '../../managed_workflows/worker_registry';
 
 export interface OnboardingTransactionResult {
   outcome: 'enabled' | 'disabled' | 'failed';
@@ -78,9 +82,12 @@ export class OnboardingService {
     } catch (error) {
       for (const workerId of installed) {
         try {
-          await managedWorkflows.uninstall(workerId as Parameters<typeof managedWorkflows.uninstall>[0], {
-            spaceId,
-          });
+          await managedWorkflows.uninstall(
+            workerId as Parameters<typeof managedWorkflows.uninstall>[0],
+            {
+              spaceId,
+            }
+          );
         } catch (rollbackError) {
           this.deps.logger.error(
             `AlertZero enable rollback failed for worker "${workerId}" in space "${spaceId}": ${rollbackError}`

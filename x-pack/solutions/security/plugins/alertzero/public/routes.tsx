@@ -45,19 +45,19 @@ const OnboardingGate: React.FC<{ children: React.ReactNode }> = ({ children }) =
  */
 export const AlertZeroRoutes: React.FC = () => (
   <OnboardingGate>
-  <Routes>
-    <Route path="/" exact component={ConversationsPage} />
-    <Route path="/chats" component={ChatsPage} />
-    <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
-    <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
-    <Route path="/records" render={() => <PlaceholderPage title={NAV_RECORDS} />} />
-    <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
-    <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
-    <Route path="/watches" component={WatchesRoutes} />
-    <Route path="/settings" component={SettingsPage} />
-    <Route path="/onboarding" component={OnboardingPage} />
-    <Route path="/investigations/:id/proposals/:proposalId" component={InvestigationDetailPage} />
-    <Route path="/investigations/:id" component={InvestigationDetailPage} />
-  </Routes>
+    <Routes>
+      <Route path="/" exact component={ConversationsPage} />
+      <Route path="/chats" component={ChatsPage} />
+      <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
+      <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
+      <Route path="/records" render={() => <PlaceholderPage title={NAV_RECORDS} />} />
+      <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
+      <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
+      <Route path="/watches" component={WatchesRoutes} />
+      <Route path="/settings" component={SettingsPage} />
+      <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/investigations/:id/proposals/:proposalId" component={InvestigationDetailPage} />
+      <Route path="/investigations/:id" component={InvestigationDetailPage} />
+    </Routes>
   </OnboardingGate>
 );
