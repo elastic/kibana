@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormBasedDataPanelProps } from './datapanel';
 import { FormBasedDataPanel } from './datapanel';
@@ -256,6 +256,9 @@ const renderFormBasedDataPanel = async (propsOverrides?: Partial<FormBasedDataPa
 
 const getAriaDescription = () => screen.getByTestId('lnsIndexPattern__ariaDescription').textContent;
 
+const expectAriaDescription = async (expected: string) =>
+  waitFor(() => expect(getAriaDescription()).toBe(expected));
+
 const getFieldNames = (container = 'fieldList') => {
   return [...within(screen.getByTestId(container)).queryAllByTestId('lnsFieldListPanelField')].map(
     (el) => el.querySelector('.kbnFieldButton__nameInner')?.textContent
@@ -312,7 +315,7 @@ describe('FormBased Data Panel', () => {
         })
       );
       expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
-      expect(getAriaDescription()).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      await expectAriaDescription('2 available fields. 3 empty fields. 0 meta fields.');
     });
 
     it('loads existence data for current index pattern id', async () => {
@@ -335,7 +338,7 @@ describe('FormBased Data Panel', () => {
         })
       );
       expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
-      expect(getAriaDescription()).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      await expectAriaDescription('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
@@ -429,7 +432,7 @@ describe('FormBased Data Panel', () => {
         })
       );
 
-      expect(getAriaDescription()).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      await expectAriaDescription('2 available fields. 3 empty fields. 0 meta fields.');
 
       await rerender({ state: constructState('2') });
 
@@ -444,7 +447,7 @@ describe('FormBased Data Panel', () => {
         })
       );
 
-      expect(getAriaDescription()).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      await expectAriaDescription('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('shows a loading indicator when loading', async () => {
@@ -469,7 +472,7 @@ describe('FormBased Data Panel', () => {
 
       await waitToLoad();
 
-      expect(getAriaDescription()).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      await expectAriaDescription('1 available field. 2 empty fields. 0 meta fields.');
       expect(screen.queryByTestId('fieldListLoading')).not.toBeInTheDocument();
     });
 
@@ -483,7 +486,7 @@ describe('FormBased Data Panel', () => {
 
       expect(defaultProps.showNoDataPopover).toHaveBeenCalled();
 
-      expect(getAriaDescription()).toBe('0 available fields. 5 empty fields. 0 meta fields.');
+      await expectAriaDescription('0 available fields. 5 empty fields. 0 meta fields.');
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
@@ -500,7 +503,7 @@ describe('FormBased Data Panel', () => {
         expect.objectContaining({ dslQuery: { bool: { must_not: { match_all: {} } } } })
       );
 
-      expect(getAriaDescription()).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      await expectAriaDescription('2 available fields. 3 empty fields. 0 meta fields.');
     });
   });
 
