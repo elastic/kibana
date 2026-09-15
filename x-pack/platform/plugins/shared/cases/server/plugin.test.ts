@@ -358,18 +358,27 @@ describe('Cases Plugin', () => {
   });
 
   describe('agent builder tool registration gating', () => {
-    const createServerlessContext = (projectType: string) => {
+    const createServerlessContext = () => {
       const ctx = coreMock.createPluginInitializerContext<ConfigType>(getConfig());
-      // Override the readonly packageInfo with a serverless build flavor
       Object.defineProperty(ctx.env, 'packageInfo', {
         value: { ...ctx.env.packageInfo, buildFlavor: 'serverless' as const },
       });
       return ctx;
     };
 
+    const setupServerlessPlugin = (projectType: string) => {
+      context = createServerlessContext();
+      plugin = new CasePlugin(context);
+      pluginsSetup.cloud = {
+        isServerlessEnabled: true,
+        serverless: { projectType },
+      } as CasesServerSetupDependencies['cloud'];
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
       pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
+      delete pluginsSetup.cloud;
     });
 
     it('registers tools when not in serverless', () => {
@@ -379,56 +388,28 @@ describe('Cases Plugin', () => {
     });
 
     it('registers tools for serverless security projects', () => {
-      context = createServerlessContext('security');
-      plugin = new CasePlugin(context);
-
-      pluginsSetup.cloud = {
-        isServerlessEnabled: true,
-        serverless: { projectType: 'security' },
-      } as CasesServerSetupDependencies['cloud'];
-
+      setupServerlessPlugin('security');
       plugin.setup(coreSetup, pluginsSetup);
 
       expect(registerCasesAgentBuilderTools).toHaveBeenCalled();
     });
 
     it('registers tools for serverless observability projects', () => {
-      context = createServerlessContext('observability');
-      plugin = new CasePlugin(context);
-
-      pluginsSetup.cloud = {
-        isServerlessEnabled: true,
-        serverless: { projectType: 'observability' },
-      } as CasesServerSetupDependencies['cloud'];
-
+      setupServerlessPlugin('observability');
       plugin.setup(coreSetup, pluginsSetup);
 
       expect(registerCasesAgentBuilderTools).toHaveBeenCalled();
     });
 
     it('does not register tools for serverless search projects', () => {
-      context = createServerlessContext('search');
-      plugin = new CasePlugin(context);
-
-      pluginsSetup.cloud = {
-        isServerlessEnabled: true,
-        serverless: { projectType: 'search' },
-      } as CasesServerSetupDependencies['cloud'];
-
+      setupServerlessPlugin('search');
       plugin.setup(coreSetup, pluginsSetup);
 
       expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
     });
 
     it('does not register tools for serverless vectordb projects', () => {
-      context = createServerlessContext('vectordb');
-      plugin = new CasePlugin(context);
-
-      pluginsSetup.cloud = {
-        isServerlessEnabled: true,
-        serverless: { projectType: 'vectordb' },
-      } as CasesServerSetupDependencies['cloud'];
-
+      setupServerlessPlugin('vectordb');
       plugin.setup(coreSetup, pluginsSetup);
 
       expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
