@@ -19,10 +19,6 @@ jest.mock('../component_templates_context', () => ({
   useApi: () => ({ useLoadComponentTemplates: () => mockUseLoadComponentTemplates() }),
 }));
 
-jest.mock('../../template_form/steps/use_creates_data_stream', () => ({
-  useCreatesDataStream: () => false,
-}));
-
 jest.mock('../shared_imports', () => ({
   SectionError: () => <div data-test-subj="sectionError" />,
   SectionLoading: () => <div data-test-subj="sectionLoading" />,
