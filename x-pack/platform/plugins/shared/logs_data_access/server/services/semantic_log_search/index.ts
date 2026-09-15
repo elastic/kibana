@@ -36,45 +36,17 @@ interface TemplateStats {
 }
 
 /**
- * Extract template value from a document based on capabilities.
- *
- * If pattern_text is mapped, the template is in `field.template`.
- * Otherwise, we use the raw field value (will be categorized later).
+ * Extract template_id from a hit's fields (accessed via docvalue_fields).
+ * pattern_text only exposes template_id (a hash), not the template text.
  */
-function extractTemplateFromDoc(
-  doc: SearchHit,
-  field: string,
-  hasPatternCapability: boolean
-): string | undefined {
-  const source = doc._source as Record<string, unknown> | undefined;
-  if (!source) return undefined;
-
-  if (hasPatternCapability) {
-    // pattern_text creates a .template subfield
-    const templateField = `${field}.template`;
-    const parts = templateField.split('.');
-    let value: unknown = source;
-    for (const part of parts) {
-      if (value && typeof value === 'object') {
-        value = (value as Record<string, unknown>)[part];
-      } else {
-        return undefined;
-      }
-    }
-    return typeof value === 'string' ? value : undefined;
-  } else {
-    // No pattern_text, use raw field value
-    const parts = field.split('.');
-    let value: unknown = source;
-    for (const part of parts) {
-      if (value && typeof value === 'object') {
-        value = (value as Record<string, unknown>)[part];
-      } else {
-        return undefined;
-      }
-    }
-    return typeof value === 'string' ? value : undefined;
+function extractTemplateIdFromHit(hit: SearchHit, templateIdField: string): string | undefined {
+  const fields = hit.fields as Record<string, unknown[]> | undefined;
+  if (!fields) return undefined;
+  const values = fields[templateIdField];
+  if (Array.isArray(values) && values.length > 0) {
+    return String(values[0]);
   }
+  return undefined;
 }
 
 /**
@@ -93,7 +65,8 @@ async function searchWithSemanticAndPattern(
   const semanticField = capabilities.primarySemanticField!;
   const patternField = capabilities.primaryPatternField!;
 
-  // Request 1: Semantic query with collapse
+  // Request 1: Semantic query with collapse, requesting template_id via docvalue_fields
+  // pattern_text only exposes template_id (a hash), not the template text
   const searchQuery = buildSemanticSearchQuery({
     target,
     semanticField: semanticField.field,
@@ -103,6 +76,9 @@ async function searchWithSemanticAndPattern(
     size: maxPatterns,
   });
 
+  // Add docvalue_fields to get template_id (it's not in _source)
+  (searchQuery as Record<string, unknown>).docvalue_fields = [patternField.templateIdField];
+
   const searchResponse = await esClient.search(searchQuery);
   const hits = searchResponse.hits.hits;
 
@@ -110,22 +86,27 @@ async function searchWithSemanticAndPattern(
     return { patterns: [] };
   }
 
-  // Extract unique templates and their sample docs
+  // Extract unique template_ids and their sample docs
   const templateSamples = new Map<string, SearchHit>();
   for (const hit of hits) {
-    const template = extractTemplateFromDoc(hit, patternField.field, true);
-    if (template && !templateSamples.has(template)) {
-      templateSamples.set(template, hit);
+    const templateId = extractTemplateIdFromHit(hit, patternField.templateIdField);
+    if (templateId && !templateSamples.has(templateId)) {
+      templateSamples.set(templateId, hit);
     }
   }
 
-  const templateValues = Array.from(templateSamples.keys());
+  const templateIds = Array.from(templateSamples.keys());
 
-  // Request 2: Get counts and time bounds
+  // If no templates were extracted, return empty
+  if (templateIds.length === 0) {
+    return { patterns: [] };
+  }
+
+  // Request 2: Get counts and time bounds using template_id
   const statsQuery = buildTemplateStatsQuery({
     target,
-    templateField: patternField.templateField,
-    templateValues,
+    templateField: patternField.templateIdField, // Use template_id, not template
+    templateValues: templateIds,
     timeRange,
   });
 
@@ -154,13 +135,14 @@ async function searchWithSemanticAndPattern(
   }
 
   // Combine into LogPattern results, preserving relevance order
+  // pattern is the template_id hash; sample contains the human-readable message
   const patterns: LogPattern[] = [];
-  for (const [template, sampleHit] of templateSamples) {
-    const stats = statsMap.get(template);
+  for (const [templateId, sampleHit] of templateSamples) {
+    const stats = statsMap.get(templateId);
     if (stats) {
       patterns.push({
         field: patternField.field,
-        pattern: template,
+        pattern: templateId, // This is the hash, used for expand
         count: stats.count,
         firstSeen: stats.firstSeen,
         lastSeen: stats.lastSeen,
@@ -322,8 +304,11 @@ async function searchWithCategorizeText(
  * - `expand`: retrieves raw documents for a specific pattern
  *
  * Resolution strategy is hidden from callers. When `pattern_text` is mapped,
- * expand uses an exact term filter on the `.template` subfield. Otherwise it
- * uses `getCategoryQuery` which is approximate.
+ * expand uses an exact term filter on the `.template_id` subfield (a hash).
+ * Otherwise it uses approximate match query with `operator: 'and'`.
+ *
+ * Note: pattern_text only exposes template_id (a hash), not the template text.
+ * The pattern in LogPattern is this hash when pattern_text is available.
  */
 export function createSemanticLogSearchService(
   _params: RegisterServicesParams
@@ -365,14 +350,14 @@ export function createSemanticLogSearchService(
       // Choose expand strategy
       let query;
       if (capabilities.hasPatternCapability) {
-        // Exact match on template field
+        // Exact match on template_id (pattern is the hash)
         const patternField = capabilities.patternFields.find((pf) => pf.field === field);
-        const templateField = patternField?.templateField ?? `${field}.template`;
+        const templateIdField = patternField?.templateIdField ?? `${field}.template_id`;
 
         query = buildExpandQueryExact({
           target,
-          templateField,
-          templateValue: pattern,
+          templateField: templateIdField, // Use template_id, not template
+          templateValue: pattern, // pattern is the hash
           timeRange,
           pageSize,
           searchAfter,
