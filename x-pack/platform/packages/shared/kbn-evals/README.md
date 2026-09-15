@@ -92,7 +92,7 @@ If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
 
 </details>
 
@@ -473,7 +473,7 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ### Connector definitions and inference endpoints
 
-Model definitions come from `KIBANA_TESTING_INFERENCE_ENDPOINTS ` (base64-encoded JSON, set by CI or exported by `node scripts/evals init`) or, locally, from `xpack.actions.preconfigured` in `config/kibana.dev.yml`.
+Model definitions come from `KIBANA_TESTING_INFERENCE_ENDPOINTS` (base64-encoded JSON, set by CI or exported by `node scripts/evals init`) or, locally, from `xpack.actions.preconfigured` in `config/kibana.dev.yml`.
 
 #### Inference endpoints vs. stack connectors
 

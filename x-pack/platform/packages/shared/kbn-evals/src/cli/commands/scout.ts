@@ -36,7 +36,7 @@ export const scoutCmd: Command<void> = {
     const connectors = parseConnectorsFromEnv();
     if (connectors.length === 0) {
       log.warning(
-        'No connectors found. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors). Connectors will not be preconfigured in Kibana.'
+        'No connectors found. Set KIBANA_TESTING_INFERENCE_ENDPOINTS. Connectors will not be preconfigured in Kibana.'
       );
       log.warning('Run `node scripts/evals init` first, then export the variable to this shell.');
       log.warning('');

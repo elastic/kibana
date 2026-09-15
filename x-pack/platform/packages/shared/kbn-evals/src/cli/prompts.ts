@@ -147,7 +147,7 @@ export const promptForConnector = async (
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors), or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run `node scripts/evals init`.'
     );
   }
 
@@ -175,7 +175,7 @@ export const promptForProject = async (
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors), or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run `node scripts/evals init`.'
     );
   }
 

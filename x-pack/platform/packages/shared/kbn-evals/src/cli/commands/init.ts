@@ -374,7 +374,7 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
 export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS (inference endpoints) or KIBANA_TESTING_AI_CONNECTORS (stack connectors), or run with a TTY to use the setup wizard.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'
     );
   }
 
@@ -423,7 +423,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
     kibanaDevYmlConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
     log.info('');
     log.info(
-      'These connectors will be used automatically when KIBANA_TESTING_AI_CONNECTORS is not set.'
+      'These connectors will be used automatically when KIBANA_TESTING_INFERENCE_ENDPOINTS is not set.'
     );
     log.info('Set KBN_EVALS_SKIP_CONNECTOR_SETUP=true to skip connector setup/teardown.');
     log.info('');

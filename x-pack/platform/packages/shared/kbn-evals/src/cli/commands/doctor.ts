@@ -63,7 +63,7 @@ export const doctorCmd: Command<void> = {
       checks.push({
         label: 'Connectors (env)',
         status: 'fail',
-        detail: 'KIBANA_TESTING_INFERENCE_ENDPOINTS and KIBANA_TESTING_AI_CONNECTORS are not set',
+        detail: 'KIBANA_TESTING_INFERENCE_ENDPOINTS is not set',
         fix: async () => {
           log.info('Run `node scripts/evals init` to set up connectors.');
         },
