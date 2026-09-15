@@ -93,6 +93,7 @@ export const ListStorage = lazySchema(() =>
     locator: z
       .object({
         index: z.string().optional(),
+        alias: z.string().optional(),
       })
       .optional(),
   })

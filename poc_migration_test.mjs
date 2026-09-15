@@ -20,7 +20,7 @@ const ITEMS_INDEX = `.items-${SPACE}`;
 const MIG_LIST = 'poc-mig-list';
 const MAYBE_LIST = 'poc-mig-maybe';
 const IM_RULE = 'poc-mig-im';
-const MIG_INDEX = `.value-list-${SPACE}-${MIG_LIST}`;
+const MIG_INDEX = `.value-list-v2-${SPACE}-${MIG_LIST}`;
 
 const kh = { authorization: AUTH, 'content-type': 'application/json', 'kbn-xsrf': 'poc', 'x-elastic-internal-origin': 'poc', 'elastic-api-version': '2023-10-31' };
 const ih = { ...kh, 'elastic-api-version': '1' }; // internal route version
@@ -57,7 +57,7 @@ const cleanup = async () => {
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${IM_RULE}`);
   for (const id of [MIG_LIST, MAYBE_LIST]) await kbn('DELETE', `/api/lists?id=${id}&deleteReferences=true`);
   await es('DELETE', `/${MIG_INDEX}`);
-  await es('DELETE', `/.value-list-${SPACE}-${MAYBE_LIST}`);
+  await es('DELETE', `/.value-list-v2-${SPACE}-${MAYBE_LIST}`);
 };
 
 const main = async () => {
@@ -78,7 +78,12 @@ const main = async () => {
   await sleep(1500); // let the rule saved object become searchable
 
   log('\n=== migrate the referenced list ===');
-  const mig = await kbn('POST', '/internal/lists/_migrate', { id: MIG_LIST }, ih);
+  const blocked = await kbn('POST', '/internal/lists/_migrate', { id: MIG_LIST }, ih);
+  log(`  blocked response: ${JSON.stringify(blocked.json).slice(0, 300)}`);
+  check('migration without force is blocked with 409 by the referencing rule', blocked.status === 409 && blocked.json?.attributes?.warningLevel === 'referenced' && String(blocked.json?.message).includes(ruleId));
+  const stillLegacy = await kbn('GET', `/api/lists?id=${MIG_LIST}`);
+  check('blocked migration changed nothing', stillLegacy.json?.storage == null);
+  const mig = await kbn('POST', '/internal/lists/_migrate', { id: MIG_LIST, force: true }, ih);
   if (mig.status >= 400) throw new Error(`migrate failed: ${mig.status} ${JSON.stringify(mig.json)}`);
   log(`  response: ${JSON.stringify(mig.json)}`);
   check('migrated (was legacy) and items copied', mig.json?.migration?.alreadyLookup === false && mig.json?.migration?.itemsCopied >= 1);
@@ -95,7 +100,9 @@ const main = async () => {
   check('storage descriptor flipped to lookup', listMeta.json?.storage?.type === 'lookup_index', JSON.stringify(listMeta.json?.storage ?? {}));
 
   log('\n=== migrate a non-referenced list (rule reads .items but for another list) ===');
-  const migMaybe = await kbn('POST', '/internal/lists/_migrate', { id: MAYBE_LIST }, ih);
+  const maybeBlocked = await kbn('POST', '/internal/lists/_migrate', { id: MAYBE_LIST }, ih);
+  check('a "maybe" warning also blocks without force', maybeBlocked.status === 409 && maybeBlocked.json?.attributes?.warningLevel === 'maybe');
+  const migMaybe = await kbn('POST', '/internal/lists/_migrate', { id: MAYBE_LIST, force: true }, ih);
   log(`  response: ${JSON.stringify(migMaybe.json)}`);
   check('warningLevel = maybe', migMaybe.json?.warningLevel === 'maybe');
 

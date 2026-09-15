@@ -82,6 +82,13 @@ components:
           properties:
             index:
               type: string
+              description: The concrete lookup index that holds the items.
+            alias:
+              type: string
+              description: |
+                The alias every read and write uses while the list is shared. It sits
+                under the `.items*` wildcard that existing roles grant. Absent once the
+                list is restricted to explicit grants on the concrete index.
       required:
         - type
 

@@ -5,35 +5,16 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   FoundAllListItemsSchema,
-  ListItemSchema,
   SearchListItemArraySchema,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { isRangeType } from './build_lookup_mappings';
+import { buildLookupListItem } from './item_crud';
 import { readLookupItemValues } from './read_lookup_items';
-
-const buildListItem = (listId: string, type: Type, value: string, user: string): ListItemSchema => {
-  const now = new Date().toISOString();
-  return {
-    '@timestamp': now,
-    _version: undefined,
-    created_at: now,
-    created_by: user,
-    id: uuidv4(),
-    list_id: listId,
-    meta: undefined,
-    tie_breaker_id: uuidv4(),
-    type,
-    updated_at: now,
-    updated_by: user,
-    value,
-  };
-};
 
 /**
  * Inline exception path: returns every authored value of the lookup list as list
@@ -53,7 +34,7 @@ export const findAllLookupItems = async ({
   user: string;
 }): Promise<FoundAllListItemsSchema> => {
   const values = await readLookupItemValues({ esClient, index, type });
-  const data = values.map((value) => buildListItem(listId, type, value, user));
+  const data = values.map((value) => buildLookupListItem({ listId, type, user, value }));
   return { data, total: data.length };
 };
 
@@ -103,7 +84,7 @@ export const searchLookupItemsByValues = async ({
         });
         const matched = (hit.hits.total as { value: number } | undefined)?.value ?? 0;
         return {
-          items: matched > 0 ? [buildListItem(listId, type, value, user)] : [],
+          items: matched > 0 ? [buildLookupListItem({ listId, type, user, value })] : [],
           value,
         };
       })
@@ -118,7 +99,7 @@ export const searchLookupItemsByValues = async ({
   });
   const found = new Set(response.hits.hits.map((h) => String(h._source?.value)));
   return stringValues.map((value) => ({
-    items: found.has(value) ? [buildListItem(listId, type, value, user)] : [],
+    items: found.has(value) ? [buildLookupListItem({ listId, type, user, value })] : [],
     value,
   }));
 };

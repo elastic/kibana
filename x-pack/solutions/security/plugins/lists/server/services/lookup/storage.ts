@@ -9,10 +9,18 @@ import type { MetaOrUndefined, Storage } from '@kbn/securitysolution-io-ts-list-
 
 /**
  * The storage descriptor lives in a top-level `storage` field on the
- * `.lists-<space>` container document (shape `{ type, locator: { index } }`).
- * Absence reads as a legacy data-stream list, so pre-existing lists need no
- * migration. An earlier POC stashed the descriptor inside `meta` under this key;
- * we still read that so lists migrated by the POC keep resolving.
+ * `.lists-<space>` container document:
+ *
+ *   { type: 'lookup_index', locator: { index: <concrete index>, alias?: <alias> } }
+ *
+ * `index` is always the concrete lookup index. `alias` is present while the list is
+ * shared: the alias sits under the `.items*` wildcard that existing roles grant, so
+ * every read and write addresses `alias ?? index`. Restricting a list removes the
+ * alias, so only roles that grant the concrete name can reach it.
+ *
+ * Absence of `storage` reads as a legacy data-stream list, so pre-existing lists
+ * need no migration. An earlier POC stashed the descriptor inside `meta` under
+ * `STORAGE_META_KEY`; that form is still read so lists it migrated keep resolving.
  */
 export const STORAGE_META_KEY = '__vlStorage';
 
@@ -48,14 +56,27 @@ export const readStorageDescriptor = (list: ListStorageSource): Storage => {
 export const isLookupList = (list: ListStorageSource): boolean =>
   readStorageDescriptor(list).type === 'lookup_index';
 
-/** The concrete lookup index for a list, or undefined when it is not a lookup list. */
+/** The concrete lookup index of a list, or undefined when it is not a lookup list. */
 export const lookupIndexOf = (list: ListStorageSource): string | undefined => {
   const descriptor = readStorageDescriptor(list);
   return descriptor.type === 'lookup_index' ? descriptor.locator?.index : undefined;
 };
 
-/** Build the storage descriptor for a lookup list at the given index. */
-export const lookupStorage = (index: string): Storage => ({
-  locator: { index },
+/** The alias of a shared lookup list, or undefined when the list is restricted or not a lookup list. */
+export const lookupAliasOf = (list: ListStorageSource): string | undefined => {
+  const descriptor = readStorageDescriptor(list);
+  return descriptor.type === 'lookup_index' ? descriptor.locator?.alias : undefined;
+};
+
+/**
+ * The name every read and write uses: the alias while the list is shared, the
+ * concrete index once it is restricted. Undefined when the list is not a lookup list.
+ */
+export const lookupAccessNameOf = (list: ListStorageSource): string | undefined =>
+  lookupAliasOf(list) ?? lookupIndexOf(list);
+
+/** Build the storage descriptor for a lookup list. Omit `alias` for a restricted list. */
+export const lookupStorage = (index: string, alias?: string): Storage => ({
+  locator: alias != null ? { alias, index } : { index },
   type: 'lookup_index',
 });

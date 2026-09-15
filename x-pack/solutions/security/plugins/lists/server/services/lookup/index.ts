@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-export { getLookupIndexName, getLookupIndexPattern } from './get_lookup_index';
+export {
+  getLookupAliasName,
+  getLookupIndexName,
+  getLookupIndexPattern,
+  normalizeListId,
+} from './get_lookup_index';
 export { buildLookupMappings, isRangeType, RANGE_BOUND_TYPE } from './build_lookup_mappings';
-export { createLookupIndex } from './create_lookup_index';
+export { addLookupAlias, createLookupIndex, removeLookupAlias } from './create_lookup_index';
 export { deleteLookupIndex } from './delete_lookup_index';
 export {
   writeLookupItems,
   deleteLookupItemByValue,
+  lookupItemId,
   reconcileCoalesced,
   STATE_DOC_ID,
 } from './write_lookup_items';
+export {
+  buildLookupListItem,
+  findListByLookupIndex,
+  findLookupItems,
+  locateLookupItem,
+} from './item_crud';
 export {
   countLookupItems,
   readLookupItemValues,
@@ -30,6 +42,8 @@ export {
   STORAGE_META_KEY,
   readStorageDescriptor,
   isLookupList,
+  lookupAccessNameOf,
+  lookupAliasOf,
   lookupIndexOf,
   lookupStorage,
 } from './storage';

@@ -53,14 +53,6 @@ export const createListIndicesInitializationFlow: InitializationFlowDefinition<n
       await internalListClient.setListItemTemplate();
     }
 
-    // POC: an existing `.lists` data stream does not pick up new template fields, so
-    // bring it up to date with the additive `storage` field. A new installation gets
-    // the field from the template above, so this is gated on the data stream existing;
-    // it is a no-op unless the lookup-indices feature flag is on.
-    if (listDataStreamExists) {
-      await internalListClient.updateListStorageMapping();
-    }
-
     if (listDataStreamExists && listItemDataStreamExists) {
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
     }

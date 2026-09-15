@@ -21,7 +21,7 @@ export const storageType = t.keyof({
 });
 export type StorageType = t.TypeOf<typeof storageType>;
 
-export const storageLocator = t.partial({ index: t.string });
+export const storageLocator = t.partial({ alias: t.string, index: t.string });
 export type StorageLocator = t.TypeOf<typeof storageLocator>;
 
 export const storage = t.intersection([

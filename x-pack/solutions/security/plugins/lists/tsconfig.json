@@ -14,6 +14,7 @@
     "@kbn/core",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-constants",
     "@kbn/securitysolution-list-hooks",

@@ -1293,17 +1293,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    // per-list lookup indices are one index per list, so the distinct index count is
-    // the number of value lists stored in a lookup index (the new storage)
+    // Count lookup lists from the container itself (`.lists-*`), which the internal
+    // telemetry user can read, filtering on the `storage.type` descriptor. Counting the
+    // per-list `.value-list-*` indices directly returns zero here, because the internal
+    // user has no privileges on that index pattern.
     const storageQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: '.value-list-*',
+      index: '.lists-*',
       ignore_unavailable: true,
       size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
       aggs: {
         lookup_list_count: {
           cardinality: {
-            field: '_index',
+            field: 'name',
           },
         },
       },

@@ -13,6 +13,7 @@ export * from './list_index/create_list_index_route';
 export * from './list_item/create_list_item_route';
 export * from './list/create_list_route';
 export * from './list/migrate_list_route';
+export * from './list/restrict_list_route';
 export * from './delete_endpoint_list_item_route';
 export * from './delete_exception_list_route';
 export * from './delete_exception_list_item_route';

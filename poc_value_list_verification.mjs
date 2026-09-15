@@ -6,7 +6,7 @@
  *
  * Sets up:
  *   - a legacy ip value list (data stream)
- *   - a new ip value list via /api/lists (a `.value-list-default-*` lookup index)
+ *   - a new ip value list via /api/lists (a `.value-list-v2-default-*` lookup index with an `.items-default-*` alias)
  *   - a new ip_range lookup list populated by IMPORT (source + coalesced docs)
  *   - source docs that would become alerts
  *   - a query rule whose exception whitelists on BOTH the legacy and lookup ip lists
@@ -31,8 +31,9 @@ const SRC_INDEX = 'poc-src';
 const LEGACY_LIST = 'poc-legacy-ips';
 const LOOKUP_LIST = 'poc-lookup-ips';
 const RANGE_LIST = 'poc-lookup-ranges';
-const LOOKUP_INDEX = `.value-list-${SPACE}-${LOOKUP_LIST}`;
-const RANGE_INDEX = `.value-list-${SPACE}-${RANGE_LIST}`;
+const LOOKUP_INDEX = `.value-list-v2-${SPACE}-${LOOKUP_LIST}`; // concrete index
+const LOOKUP_ALIAS = `.items-${SPACE}-${LOOKUP_LIST}`; // access name under the .items* wildcard
+const RANGE_INDEX = `.value-list-v2-${SPACE}-${RANGE_LIST}`;
 const EXC_LIST = 'poc-exc-list';
 const EXC_RANGE = 'poc-exc-range-list';
 const RULE_EXC = 'poc-exc-query';
@@ -383,12 +384,12 @@ const ruleDefs = () => ({
     ...baseRule,
     rule_id: RULE_IM_LOOKUP,
     type: 'threat_match',
-    name: 'POC value-list IM lookup (threat index = .value-list)',
+    name: 'POC value-list IM lookup (threat index = list alias)',
     description: 'IM using the per-list lookup index as the threat index',
     index: [SRC_INDEX],
     query: `host.name: "${EQ_HOST}"`,
     language: 'kuery',
-    threat_index: [LOOKUP_INDEX],
+    threat_index: [LOOKUP_ALIAS],
     threat_query: '*:*',
     threat_language: 'kuery',
     threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'value' }] }],

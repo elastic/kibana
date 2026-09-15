@@ -19,6 +19,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ListClient } from './services/lists/list_client';
@@ -35,10 +39,13 @@ export type ListsPluginStart = void;
 // list is only kept correct under concurrent writes by the rebuild task, so a
 // missing scheduler would mean silent corruption, not a degraded optional feature.
 export interface PluginsSetup {
+  // The rebuild task authenticates with an API key kept in an encrypted saved object.
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
 
 export interface PluginsStart {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart | undefined | null;
   spaces: SpacesPluginStart | undefined | null;
   taskManager: TaskManagerStartContract;
@@ -64,32 +71,56 @@ export type GetExceptionListClientType = (
 ) => ExceptionListClient;
 
 /**
- * Result of a value list migration referencing-rule scan. `lists` owns the shape;
- * the implementation (which detection rules reference the list) is supplied by a
- * consumer that knows about rules, so `lists` stays decoupled from alerting.
+ * Result of a referencing-rule scan for a value list. `lists` owns the shape; the
+ * implementation (which detection rules reference the list) is supplied by a consumer
+ * that knows about rules, so `lists` stays decoupled from alerting.
+ * - `referenced`: rules that read this list, through an exception item or as a threat index.
+ * - `maybe`: rules that read the shared `.items` data stream as a threat index without naming the list.
+ * - `unverified`: the scan failed. `none`: nothing found.
  */
-export interface ValueListMigrationReferencingRules {
+export interface ValueListReferencingRule {
+  id: string;
+  name: string;
+  reason: 'exception' | 'threat_index';
+  /** Owner of the API key the rule executes with, when known. */
+  apiKeyOwner?: string | null;
+  /**
+   * Whether the rule's API key can read the index named by `verifyReadOn`. Undefined
+   * when no check was requested, the rule has no key, or the check failed.
+   */
+  canRead?: boolean;
+}
+
+export interface ValueListReferencingRules {
   level: 'referenced' | 'maybe' | 'unverified' | 'none';
   ruleIds?: string[];
+  rules?: ValueListReferencingRule[];
 }
 
 /**
- * A scanner that, for a list being migrated, reports which detection rules reference
- * it. Registered by a consumer (the security solution) through the setup contract and
- * invoked per request by the migrate route.
+ * A scanner that reports which detection rules reference a value list. Registered by a
+ * consumer (the security solution) through the setup contract and invoked per request
+ * by the migrate and restrict routes.
  */
-export type ValueListMigrationRuleScanner = (args: {
+export type ValueListRuleScanner = (args: {
+  /** Names a rule can use to reach this list directly as a threat index: its alias and concrete index. */
+  accessNames: string[];
+  /** Exception lists that hold an item referencing this value list. */
+  exceptionListIds: string[];
+  /** The shared `.items-<space>` data stream, read by legacy threat-index rules. */
   itemsIndex: string;
   listId: string;
   request: KibanaRequest;
-}) => Promise<ValueListMigrationReferencingRules>;
+  /** When set, check each referencing rule's API key for read on this index. */
+  verifyReadOn?: string;
+}) => Promise<ValueListReferencingRules>;
 
 export interface ListPluginSetup {
   getExceptionListClient: GetExceptionListClientType;
   getListClient: GetListClientType;
   registerExtension: ListsServerExtensionRegistrar;
-  /** POC: register the scanner that finds detection rules referencing a migrating list. */
-  registerValueListMigrationRuleScanner: (scanner: ValueListMigrationRuleScanner) => void;
+  /** POC: register the scanner that finds detection rules referencing a value list. */
+  registerValueListRuleScanner: (scanner: ValueListRuleScanner) => void;
 }
 
 /**

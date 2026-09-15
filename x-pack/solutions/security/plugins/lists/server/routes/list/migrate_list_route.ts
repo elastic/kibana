@@ -12,19 +12,19 @@ import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type {
   ListsPluginRouter,
-  ValueListMigrationReferencingRules,
-  ValueListMigrationRuleScanner,
+  ValueListReferencingRules,
+  ValueListRuleScanner,
 } from '../../types';
 import { buildSiemResponse } from '../utils';
-import { getListClient } from '..';
+import { getExceptionListClient, getListClient } from '..';
 
-const warningMessage = (
-  warning: ValueListMigrationReferencingRules,
-  itemsIndex: string
-): string | null => {
+import { restrictListWithChecks } from './restrict_list_route';
+import { scanReferencingRules } from './value_list_references';
+
+const warningMessage = (warning: ValueListReferencingRules, itemsIndex: string): string | null => {
   const ruleIds = (warning.ruleIds ?? []).join(', ');
   if (warning.level === 'referenced') {
-    return `Indicator match rules reference this list as a threat index and now read a frozen copy of it until they are repointed at the new index: ${ruleIds}`;
+    return `Indicator match rules read this list as a threat index through "${itemsIndex}" and now read a frozen copy until they are updated to read the new alias: ${ruleIds}`;
   }
   if (warning.level === 'maybe') {
     return `Some indicator match rules read "${itemsIndex}" as a threat index and may reference this list: ${ruleIds}`;
@@ -37,14 +37,16 @@ const warningMessage = (
 
 /**
  * POC: migrate a legacy value list into its own lookup index (non-destructive), then
- * warn about detection rules that reference it. The rule scan is supplied by a
- * consumer (the security solution) through the setup contract, so this plugin stays
- * decoupled from alerting; if none is registered, no warning is produced. The scan
- * never fails the migration.
+ * warn about indicator match rules that read it through the shared `.items` stream.
+ * Rules that reference the list through exceptions keep working with no change, since
+ * the new alias sits under the `.items*` wildcard their API keys already hold. With
+ * `restrict: true` the list is restricted right after migration, with the same
+ * verification the restrict endpoint applies. Any finding of the referencing-rule scan
+ * blocks the migration unless `force` is set.
  */
 export const migrateListRoute = (
   router: ListsPluginRouter,
-  getMigrationRuleScanner: () => ValueListMigrationRuleScanner | undefined
+  getRuleScanner: () => ValueListRuleScanner | undefined
 ): void => {
   router.versioned
     .post({
@@ -60,7 +62,13 @@ export const migrateListRoute = (
       {
         validate: {
           request: {
-            body: buildRouteValidationWithZod(z.object({ id: z.string().max(1024) })),
+            body: buildRouteValidationWithZod(
+              z.object({
+                force: z.boolean().optional(),
+                id: z.string().max(1024),
+                restrict: z.boolean().optional(),
+              })
+            ),
           },
         },
         version: '1',
@@ -68,26 +76,78 @@ export const migrateListRoute = (
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id } = request.body;
-          const lists = await getListClient(context);
+          const { id, restrict = false, force = false } = request.body;
+          const [lists, exceptionLists] = await Promise.all([
+            getListClient(context),
+            getExceptionListClient(context),
+          ]);
           const itemsIndex = lists.getListItemName();
+          const scanner = getRuleScanner();
+          const { alias } = lists.lookupNamesFor({ id });
+
+          // Verify before copying anything: a rule that references the list through an
+          // exception keeps working only if its API key can read the alias, which a
+          // role holding the exact `.items-<space>` name cannot.
+          const warning = await scanReferencingRules({
+            accessNames: [],
+            exceptionLists,
+            itemsIndex,
+            listId: id,
+            request,
+            scanner,
+            verifyReadOn: alias,
+          });
+          // Any finding blocks the migration unless the caller forces it: a rule whose
+          // key cannot read the alias would fail at its next run, and an indicator match
+          // rule reading the list through `.items` would keep matching a frozen copy.
+          const blockers: string[] = [];
+          const rulesWithoutRead = (warning.rules ?? []).filter(
+            (rule) => rule.reason === 'exception' && rule.canRead === false
+          );
+          if (rulesWithoutRead.length > 0) {
+            const names = rulesWithoutRead
+              .map((rule) => `"${rule.name}" (owner ${rule.apiKeyOwner ?? 'unknown'})`)
+              .join(', ');
+            blockers.push(
+              `${rulesWithoutRead.length} referencing rule(s) execute with an API key that cannot read "${alias}": ${names}. Grant those roles read on ".items-<space-id>*" rather than the exact name, then save each rule so its key is refreshed.`
+            );
+          }
+          const threatIndexWarning = warningMessage(warning, itemsIndex);
+          if (threatIndexWarning != null) {
+            blockers.push(`${threatIndexWarning}.`);
+          }
+          if (blockers.length > 0 && !force) {
+            return response.customError({
+              body: {
+                attributes: { id, referencingRules: warning, warningLevel: warning.level },
+                message: `Migration is blocked: ${blockers.join(
+                  ' '
+                )} Pass force to migrate anyway.`,
+              },
+              statusCode: 409,
+            });
+          }
 
           const migration = await lists.migrateListToLookup({ id });
 
-          const scanner = getMigrationRuleScanner();
-          let warning: ValueListMigrationReferencingRules = { level: 'none' };
-          if (scanner != null) {
-            try {
-              warning = await scanner({ itemsIndex, listId: id, request });
-            } catch {
-              warning = { level: 'unverified' };
-            }
-          }
+          const restriction = restrict
+            ? await restrictListWithChecks({
+                dryRun: false,
+                exceptionLists,
+                force,
+                id,
+                lists,
+                request,
+                scanner,
+              })
+            : undefined;
 
           return response.ok({
             body: {
               id,
               migration,
+              referencingRules: warning,
+              restriction: restriction?.body,
               warning: warningMessage(warning, itemsIndex),
               warningLevel: warning.level,
             },

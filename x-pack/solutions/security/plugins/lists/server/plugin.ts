@@ -13,6 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -29,7 +30,7 @@ import type {
   PluginsSetup,
   PluginsStart,
   ScheduleCoalesceRebuild,
-  ValueListMigrationRuleScanner,
+  ValueListRuleScanner,
 } from './types';
 import {
   registerCoalesceRebuildTask,
@@ -37,7 +38,13 @@ import {
 } from './tasks/coalesce_rebuild_task';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
-import { initSavedObjects } from './saved_objects';
+import type { CoalesceRebuildApiKeyAttributes } from './saved_objects';
+import {
+  COALESCE_REBUILD_API_KEY_SO_TYPE,
+  coalesceRebuildApiKeyEncryption,
+  coalesceRebuildApiKeySoId,
+  initSavedObjects,
+} from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 import type {
   ExtensionPointStorageClientInterface,
@@ -53,14 +60,19 @@ export class ListPlugin
   private readonly extensionPoints: ExtensionPointStorageInterface;
   private spaces: SpacesServiceStart | undefined | null;
   // POC: set by a consumer (the security solution) through the setup contract; read
-  // lazily per request by the migrate route, since it is registered after setup runs.
-  private migrationRuleScanner: ValueListMigrationRuleScanner | undefined;
+  // lazily per request by the migrate and restrict routes, since it is registered
+  // after setup runs.
+  private ruleScanner: ValueListRuleScanner | undefined;
   // POC: Task Manager start contract, captured in start(), used to enqueue the
   // per-list coalesced-range rebuild after a range source mutation.
   private taskManager: TaskManagerStartContract | undefined;
   // POC: security start contract, used to grant a request-scoped API key so the
-  // rebuild task can reach `.value-list-*`, which the internal user cannot.
+  // rebuild task can reach the list index, which the internal user cannot.
   private security: SecurityPluginStart | undefined | null;
+  private coreStart: CoreStart | undefined;
+  // Whether the encrypted saved objects plugin has an encryption key. Without one the
+  // rebuild task's API key cannot be stored, so range rebuilds are skipped with a warning.
+  private canEncrypt = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -80,6 +92,13 @@ export class ListPlugin
     });
 
     initSavedObjects(core.savedObjects);
+    plugins.encryptedSavedObjects.registerType(coalesceRebuildApiKeyEncryption);
+    this.canEncrypt = plugins.encryptedSavedObjects.canEncrypt;
+    if (!this.canEncrypt) {
+      this.logger.warn(
+        'No encryption key is configured, so the coalesced-range rebuild of range value lists is disabled'
+      );
+    }
 
     core.http.registerRouteHandlerContext<ListsRequestHandlerContext, 'lists'>(
       'lists',
@@ -87,7 +106,7 @@ export class ListPlugin
     );
     const router = core.http.createRouter<ListsRequestHandlerContext>();
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
-    initRoutes(router, config, kibanaVersion, () => this.migrationRuleScanner);
+    initRoutes(router, config, kibanaVersion, () => this.ruleScanner);
 
     return {
       getExceptionListClient: (
@@ -114,8 +133,8 @@ export class ListPlugin
       registerExtension: (extension): void => {
         this.extensionPoints.add(extension);
       },
-      registerValueListMigrationRuleScanner: (scanner): void => {
-        this.migrationRuleScanner = scanner;
+      registerValueListRuleScanner: (scanner): void => {
+        this.ruleScanner = scanner;
       },
     };
   }
@@ -125,44 +144,78 @@ export class ListPlugin
     this.spaces = plugins.spaces?.spacesService;
     this.taskManager = plugins.taskManager;
     this.security = plugins.security;
+    this.coreStart = core;
   }
 
-  // Build a request-scoped scheduler: it grants an API key on behalf of the request
-  // user, scoped to the list's own index, then enqueues the rebuild task with it. The
-  // task authenticates with that key, since the internal user cannot reach
-  // `.value-list-*`. Fire-and-forget, because the source write has already succeeded.
+  /**
+   * Build a request-scoped scheduler. It grants an API key on behalf of the request
+   * user, scoped to the list's access name, stores it in an encrypted saved object keyed
+   * by that name, invalidates the key it replaces, and enqueues the rebuild task. The
+   * task reads the key back from the saved object, so the key never rides in task params.
+   * Fire and forget, because the source write has already succeeded.
+   */
   private makeScheduler = (request: KibanaRequest): ScheduleCoalesceRebuild => {
     return ({ index, type }): void => {
-      const { taskManager, security, logger } = this;
-      if (taskManager == null || security == null) {
+      const { taskManager, security, coreStart, logger, canEncrypt } = this;
+      if (taskManager == null || security == null || coreStart == null) {
         logger.warn(`cannot schedule coalesced rebuild for ${index}: dependency unavailable`);
         return;
       }
-      security.authc.apiKeys
-        .grantAsInternalUser(request, {
+      if (!canEncrypt) {
+        logger.warn(`coalesced rebuild for ${index} not scheduled: no encryption key`);
+        return;
+      }
+      const run = async (): Promise<void> => {
+        const grant = await security.authc.apiKeys.grantAsInternalUser(request, {
           expiration: '1h',
           metadata: { description: 'value list coalesced-range rebuild' },
           name: `vl-coalesce-rebuild-${index}`,
           role_descriptors: {
-            // read + write cover the get, search, bulk, delete-by-query and the
-            // conditional update; maintenance covers the refresh the rebuild forces
-            // on its delete-by-query. Nothing broader (no index administration).
+            // read + write cover the get, search, bulk, and the conditional update;
+            // maintenance covers the refresh the rebuild forces. Nothing broader.
             vl_coalesce_rebuild: {
               index: [{ names: [index], privileges: ['read', 'write', 'maintenance'] }],
             },
           },
-        })
-        .then((grant) => {
-          if (grant == null) {
-            logger.warn(`coalesced rebuild for ${index} not scheduled: API keys unavailable`);
-            return;
-          }
-          const apiKey = Buffer.from(`${grant.id}:${grant.api_key}`).toString('base64');
-          scheduleCoalesceRebuildTask({ apiKey, index, logger, taskManager, type });
-        })
-        .catch((err) => {
-          logger.warn(`failed to grant API key for coalesced rebuild of ${index}: ${err.message}`);
         });
+        if (grant == null) {
+          logger.warn(`coalesced rebuild for ${index} not scheduled: API keys unavailable`);
+          return;
+        }
+
+        // A scoped client keeps the encryption extension, so `apiKey` is encrypted at
+        // rest. The internal repository applies no extensions and would store it in the
+        // clear. The security extension is excluded because the type is hidden and not
+        // part of any feature privilege; the route's own authorization already ran.
+        const repository = coreStart.savedObjects.getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [COALESCE_REBUILD_API_KEY_SO_TYPE],
+        });
+        const soId = coalesceRebuildApiKeySoId(index);
+        const previous = await repository
+          .get<CoalesceRebuildApiKeyAttributes>(COALESCE_REBUILD_API_KEY_SO_TYPE, soId)
+          .catch(() => undefined);
+        await repository.create<CoalesceRebuildApiKeyAttributes>(
+          COALESCE_REBUILD_API_KEY_SO_TYPE,
+          {
+            apiKey: Buffer.from(`${grant.id}:${grant.api_key}`).toString('base64'),
+            apiKeyId: grant.id,
+            index,
+          },
+          { id: soId, overwrite: true }
+        );
+        if (previous?.attributes.apiKeyId != null && previous.attributes.apiKeyId !== grant.id) {
+          await security.authc.apiKeys
+            .invalidateAsInternalUser({ ids: [previous.attributes.apiKeyId] })
+            .catch((err) =>
+              logger.debug(`could not invalidate previous rebuild key for ${index}: ${err.message}`)
+            );
+        }
+        scheduleCoalesceRebuildTask({ index, logger, taskManager, type });
+      };
+      run().catch((err) => {
+        logger.warn(`failed to schedule coalesced rebuild for ${index}: ${err.message}`);
+      });
     };
   };
 
@@ -217,6 +270,7 @@ export class ListPlugin
             new ListClient({
               config,
               esClient,
+              internalEsClient,
               scheduleCoalesceRebuild,
               spaceId,
               user,

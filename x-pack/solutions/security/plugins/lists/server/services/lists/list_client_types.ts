@@ -48,6 +48,12 @@ export interface ConstructorOptions {
   user: string;
   /** Enqueue the background coalesced-range rebuild after a range source mutation */
   scheduleCoalesceRebuild: ScheduleCoalesceRebuild;
+  /**
+   * Client for provisioning per-list lookup indices (create, delete, alias changes).
+   * The Kibana system user holds `.value-list-*`, which end user roles do not. Item
+   * reads and writes keep using `esClient`. Falls back to `esClient` when absent.
+   */
+  internalEsClient?: ElasticsearchClient;
 }
 
 /**

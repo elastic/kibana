@@ -27,6 +27,14 @@ const hashId = (value: string): string => createHash('sha256').update(value).dig
 const coalescedId = (bound: CoalescedBound): string =>
   hashId(`${bound.range_start}-${bound.range_end}`);
 
+/**
+ * The document id of an authored value: a hash of the value, prefixed with `src:` on a
+ * range list so source documents never collide with coalesced or bookkeeping ids. This
+ * is also the item id the public item API exposes for a lookup list.
+ */
+export const lookupItemId = (type: Type, value: string): string =>
+  isRangeType(type) ? `src:${hashId(value)}` : hashId(value);
+
 /** The single rebuild bookkeeping doc per range lookup index. */
 export const STATE_DOC_ID = '__state';
 
@@ -387,7 +395,7 @@ export const writeLookupItems = async ({
           ? { kind: 'source', src_end: bound.range_end, src_start: bound.range_start, value }
           : { kind: 'source', value };
       // _id keyed on the authored value => idempotent source upsert
-      return [{ index: { _id: `src:${hashId(value)}` } }, doc];
+      return [{ index: { _id: lookupItemId(type, value) } }, doc];
     });
     await esClient.bulk({ index, operations, refresh: true });
 
@@ -407,7 +415,7 @@ export const writeLookupItems = async ({
     const serialized = serializeEqualityValue(type, value);
     if (serialized === undefined) return [];
     // _id keyed on the authored value => idempotent, deduplicated upsert
-    return [{ index: { _id: hashId(value) } }, { value: serialized }];
+    return [{ index: { _id: lookupItemId(type, value) } }, { value: serialized }];
   });
   if (operations.length === 0) return;
   await esClient.bulk({ index, operations, refresh });
@@ -428,7 +436,7 @@ export const deleteLookupItemByValue = async ({
   refresh?: estypes.Refresh;
 }): Promise<void> => {
   if (isRangeType(type)) {
-    await esClient.delete({ id: `src:${hashId(value)}`, index, refresh: true }).catch(() => {});
+    await esClient.delete({ id: lookupItemId(type, value), index, refresh: true }).catch(() => {});
     // Only a parseable value contributed a bound; an unparseable one changed no
     // interval, so nothing is owed to the coalesced set.
     const bound = parseValueToBound(type, value);
@@ -438,5 +446,5 @@ export const deleteLookupItemByValue = async ({
     }
     return;
   }
-  await esClient.delete({ id: hashId(value), index, refresh }).catch(() => {});
+  await esClient.delete({ id: lookupItemId(type, value), index, refresh }).catch(() => {});
 };

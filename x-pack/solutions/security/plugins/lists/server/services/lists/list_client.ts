@@ -35,6 +35,7 @@ import type {
   ListItemSchema,
   ListSchema,
   SearchListItemArraySchema,
+  Storage,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
@@ -63,17 +64,28 @@ import {
 } from '../items';
 import listsItemsPolicy from '../items/list_item_policy.json';
 import listItemMappings from '../items/list_item_mappings.json';
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
+  addLookupAlias,
+  buildLookupListItem,
   countLookupItems,
   createLookupIndex,
   deleteLookupIndex,
   deleteLookupItemByValue,
   findAllLookupItems,
+  findListByLookupIndex,
+  findLookupItems,
+  getLookupAliasName,
   getLookupIndexName,
   importLookupItemsToStream,
   isRangeType,
+  locateLookupItem,
+  lookupAccessNameOf,
+  lookupAliasOf,
   lookupIndexOf,
+  lookupItemId,
   lookupStorage,
+  removeLookupAlias,
   searchLookupItemsByValues,
   streamLookupItemValues,
   writeLookupItems,
@@ -117,6 +129,9 @@ import {
   updateList,
 } from '.';
 
+/** `.lists-<space>` streams whose `storage` mapping this process has already applied. */
+const storageMappingEnsured = new Set<string>();
+
 /**
  * Class for use for value lists are are associated with exception lists.
  * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
@@ -138,6 +153,12 @@ export class ListClient {
   private readonly scheduleCoalesceRebuild: ScheduleCoalesceRebuild;
 
   /**
+   * Provisions per-list lookup indices as the Kibana system user, which holds
+   * `.value-list-*`. Item reads and writes stay on `esClient`, the calling user.
+   */
+  private readonly provisioningClient: ElasticsearchClient;
+
+  /**
    * Constructs the value list
    * @param options
    * @param options.spaceId Kibana space id the value lists are part of
@@ -146,12 +167,20 @@ export class ListClient {
    * @param options.esClient The elastic search client to do the queries with
    * @param options.scheduleCoalesceRebuild Enqueue the background coalesced-range rebuild
    */
-  constructor({ spaceId, user, config, esClient, scheduleCoalesceRebuild }: ConstructorOptions) {
+  constructor({
+    spaceId,
+    user,
+    config,
+    esClient,
+    scheduleCoalesceRebuild,
+    internalEsClient,
+  }: ConstructorOptions) {
     this.spaceId = spaceId;
     this.user = user;
     this.config = config;
     this.esClient = esClient;
     this.scheduleCoalesceRebuild = scheduleCoalesceRebuild;
+    this.provisioningClient = internalEsClient ?? esClient;
   }
 
   /**
@@ -224,20 +253,30 @@ export class ListClient {
     if (config.enableLookupIndices && !forceLegacy) {
       const listId = id ?? uuidv4();
       const index = getLookupIndexName(spaceId, listId);
-      await createLookupIndex({ esClient, index, type });
-      return createList({
-        description,
-        esClient,
-        id: listId,
-        immutable,
-        listIndex: listName,
-        meta,
-        name,
-        storage: lookupStorage(index),
-        type,
-        user,
-        version,
-      });
+      const alias = getLookupAliasName(this.getListItemName(), listId);
+      await this.ensureStorageMapping();
+      await createLookupIndex({ alias, esClient: this.provisioningClient, index, type });
+      try {
+        return await createList({
+          description,
+          esClient,
+          id: listId,
+          immutable,
+          listIndex: listName,
+          meta,
+          name,
+          storage: lookupStorage(index, alias),
+          type,
+          user,
+          version,
+        });
+      } catch (err) {
+        // The container write failed (for example a duplicate id or a mapping error), so
+        // remove the index just created. Otherwise it stays behind with no list and blocks
+        // the name for every later attempt.
+        await deleteLookupIndex({ esClient: this.provisioningClient, index }).catch(() => {});
+        throw err;
+      }
     }
 
     return createList({
@@ -255,64 +294,179 @@ export class ListClient {
   };
 
   /**
-   * POC: migrate a legacy (shared `.items`) value list into its own lookup index.
-   * Non-destructive: the `.items` rows are intentionally kept, so an existing rule
-   * that points its threat index at `.items` keeps running (against a now-frozen
-   * copy) until it is repointed. This only copies the items and flips the storage
-   * descriptor; it does not touch any rules.
-   * @param options.id The id of the list to migrate
-   * @returns Whether the list was already a lookup list, the target index, and how many items were copied
+   * Writes the storage descriptor on the container document. The `storage` field is
+   * never mutable through the public update and patch API, so migration, restrict, and
+   * un-restrict write it with this internal update.
    */
-  public migrateListToLookup = async ({
-    id,
-  }: {
-    id: string;
-  }): Promise<{ alreadyLookup: boolean; index: string; itemsCopied: number }> => {
-    const { esClient, spaceId, config } = this;
-    if (!config.enableLookupIndices) {
-      throw new Error('Lookup indices are not enabled (xpack.lists.enableLookupIndices)');
-    }
-    const list = await this.getList({ id });
-    if (list == null) {
-      throw new Error(`list "${id}" not found`);
-    }
-    const existingIndex = lookupIndexOf(list);
-    if (existingIndex != null) {
-      return { alreadyLookup: true, index: existingIndex, itemsCopied: 0 };
-    }
-
-    const index = getLookupIndexName(spaceId, id);
-    await createLookupIndex({ esClient, index, type: list.type });
-
-    const listItemIndex = this.getListItemName();
-    let itemsCopied = 0;
-    for await (const batch of streamSharedItemValues({ esClient, listId: id, listItemIndex })) {
-      if (batch.length > 0) {
-        await writeLookupItems({ esClient, index, type: list.type, values: batch });
-        itemsCopied += batch.length;
-      }
-    }
-    if (isRangeType(list.type)) {
-      this.scheduleCoalesceRebuild({ index, type: list.type });
-    }
-
-    // Set the storage descriptor directly on the container document. The `storage`
-    // field is never mutable through the public update/patch API, so migration
-    // writes it with an internal update. The `.items` rows are left in place on
-    // purpose, so an existing rule pointing at `.items` keeps running.
-    await esClient.updateByQuery({
+  private writeStorage = async (id: string, storage: Storage): Promise<void> => {
+    await this.ensureStorageMapping();
+    await this.esClient.updateByQuery({
       conflicts: 'proceed',
       index: this.getListName(),
       query: { ids: { values: [id] } },
       refresh: true,
       script: {
         lang: 'painless',
-        params: { storage: lookupStorage(index) },
+        params: { storage },
         source: 'ctx._source.storage = params.storage;',
       },
     });
+  };
 
-    return { alreadyLookup: false, index, itemsCopied };
+  /**
+   * POC: migrate a legacy (shared `.items`) value list into its own lookup index.
+   * Non-destructive: the `.items` rows are kept, so an existing rule whose threat
+   * index is `.items` keeps running against a frozen copy until the rule is updated.
+   * This copies the items and sets the storage descriptor; it does not touch rules.
+   * The new list is shared: its alias sits under the `.items*` wildcard, so every
+   * role and rule API key that reads `.items` today reads the migrated list.
+   * @param options.id The id of the list to migrate
+   * @returns Whether the list was already a lookup list, its names, and how many items were copied
+   */
+  public migrateListToLookup = async ({
+    id,
+  }: {
+    id: string;
+  }): Promise<{
+    alreadyLookup: boolean;
+    alias: string | undefined;
+    index: string;
+    itemsCopied: number;
+  }> => {
+    const { esClient, spaceId, config } = this;
+    if (!config.enableLookupIndices) {
+      throw new ErrorWithStatusCode(
+        'Lookup indices are not enabled (xpack.lists.enableLookupIndices)',
+        400
+      );
+    }
+    const list = await this.getList({ id });
+    if (list == null) {
+      throw new ErrorWithStatusCode(`list "${id}" not found`, 404);
+    }
+    const existingIndex = lookupIndexOf(list);
+    if (existingIndex != null) {
+      return {
+        alias: lookupAliasOf(list),
+        alreadyLookup: true,
+        index: existingIndex,
+        itemsCopied: 0,
+      };
+    }
+
+    const listItemIndex = this.getListItemName();
+    const index = getLookupIndexName(spaceId, id);
+    const alias = getLookupAliasName(listItemIndex, id);
+    await createLookupIndex({ alias, esClient: this.provisioningClient, index, type: list.type });
+
+    let itemsCopied = 0;
+    try {
+      for await (const batch of streamSharedItemValues({ esClient, listId: id, listItemIndex })) {
+        if (batch.length > 0) {
+          await writeLookupItems({ esClient, index: alias, type: list.type, values: batch });
+          itemsCopied += batch.length;
+        }
+      }
+      await this.writeStorage(id, lookupStorage(index, alias));
+    } catch (err) {
+      // The copy or the descriptor write failed, so the list is still legacy. Remove the
+      // partial index so a rerun starts clean instead of failing on the taken name.
+      await deleteLookupIndex({ esClient, index }).catch(() => {});
+      throw err;
+    }
+    if (isRangeType(list.type)) {
+      this.scheduleCoalesceRebuild({ index: alias, type: list.type });
+    }
+
+    return { alias, alreadyLookup: false, index, itemsCopied };
+  };
+
+  /** The concrete index and alias a list id maps to, whether or not the list exists yet. */
+  public lookupNamesFor = ({ id }: { id: string }): { alias: string; index: string } => ({
+    alias: getLookupAliasName(this.getListItemName(), id),
+    index: getLookupIndexName(this.spaceId, id),
+  });
+
+  /**
+   * Whether the calling user can read an index. Used before restricting a list, so a
+   * caller whose role only grants the `.items*` wildcard does not lock themselves out.
+   */
+  public canReadIndex = async ({ index }: { index: string }): Promise<boolean> => {
+    const response = await this.esClient.security.hasPrivileges({
+      index: [{ names: [index], privileges: ['read'] }],
+    });
+    return response.has_all_requested;
+  };
+
+  /**
+   * POC: restrict a lookup list to explicit grants on its concrete index. Removes the
+   * list from the `.items*` wildcard by dropping its alias. The locator changes first,
+   * so Kibana addresses the concrete index before the alias disappears; the other
+   * order leaves a window where reads hit a missing alias. Both steps are idempotent,
+   * so a rerun finishes an interrupted restrict.
+   * @returns The concrete index, and whether anything changed
+   */
+  public restrictList = async ({
+    id,
+  }: {
+    id: string;
+  }): Promise<{ changed: boolean; index: string }> => {
+    const list = await this.getList({ id });
+    if (list == null) {
+      throw new ErrorWithStatusCode(`list "${id}" not found`, 404);
+    }
+    const index = lookupIndexOf(list);
+    if (index == null) {
+      throw new ErrorWithStatusCode(
+        `list "${id}" is a legacy data stream list. Migrate it before restricting it`,
+        400
+      );
+    }
+    const alias = lookupAliasOf(list);
+    if (alias == null) {
+      return { changed: false, index };
+    }
+
+    await this.writeStorage(id, lookupStorage(index));
+    await removeLookupAlias({ alias, esClient: this.provisioningClient, index });
+    if (isRangeType(list.type)) {
+      // A pending rebuild holds a key scoped to the alias. Enqueue one scoped to the
+      // concrete index so the coalesced set keeps converging.
+      this.scheduleCoalesceRebuild({ index, type: list.type });
+    }
+    return { changed: true, index };
+  };
+
+  /**
+   * POC: return a restricted lookup list to the shared state. Adds the alias back, then
+   * records it in the locator, the reverse order of restrict for the same reason.
+   * @returns The alias, and whether anything changed
+   */
+  public unrestrictList = async ({
+    id,
+  }: {
+    id: string;
+  }): Promise<{ alias: string; changed: boolean; index: string }> => {
+    const list = await this.getList({ id });
+    if (list == null) {
+      throw new ErrorWithStatusCode(`list "${id}" not found`, 404);
+    }
+    const index = lookupIndexOf(list);
+    if (index == null) {
+      throw new ErrorWithStatusCode(`list "${id}" is not a lookup list`, 400);
+    }
+    const existingAlias = lookupAliasOf(list);
+    if (existingAlias != null) {
+      return { alias: existingAlias, changed: false, index };
+    }
+
+    const alias = getLookupAliasName(this.getListItemName(), id);
+    await addLookupAlias({ alias, esClient: this.provisioningClient, index });
+    await this.writeStorage(id, lookupStorage(index, alias));
+    if (isRangeType(list.type)) {
+      this.scheduleCoalesceRebuild({ index: alias, type: list.type });
+    }
+    return { alias, changed: true, index };
   };
 
   /**
@@ -339,8 +493,18 @@ export class ListClient {
     meta,
     version,
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
-    const { esClient, user } = this;
+    const { esClient, user, config } = this;
     const listName = this.getListName();
+
+    // With the flag on, a list created here is a lookup list like any other new list.
+    if (config.enableLookupIndices) {
+      const existing = await this.getList({ id });
+      if (existing != null) {
+        return existing;
+      }
+      return this.createList({ description, id, immutable, meta, name, type, version });
+    }
+
     return createListIfItDoesNotExist({
       description,
       esClient,
@@ -592,25 +756,31 @@ export class ListClient {
   };
 
   /**
-   * POC: bring an already-provisioned `.lists` data stream up to date with the
-   * additive `storage` field. New installations get the field from the index template,
-   * but the startup flow only reapplies the template when it is missing, so an existing
-   * data stream needs this one additive `PUT mapping` (idempotent) before the first
-   * write that sets `storage`. No-op unless the lookup-indices flag is on. The caller
-   * only invokes this when the data stream already exists.
+   * Bring an existing `.lists` data stream up to date with the additive `storage`
+   * field before the first write that sets it. A new installation gets the field from
+   * the index template when the initialization flow creates the stream; an existing
+   * stream keeps its old strict mapping, so it needs one additive `PUT mapping`. The
+   * call is idempotent and runs on the internal client, which holds `manage` on the
+   * stream. It is remembered per space for the life of the process, so it costs one
+   * call per space. No-op unless the lookup-indices flag is on or when the stream does
+   * not exist yet.
    */
-  public updateListStorageMapping = async (): Promise<void> => {
-    const { esClient, config } = this;
-    if (!config.enableLookupIndices) {
+  private ensureStorageMapping = async (): Promise<void> => {
+    const { config } = this;
+    const listName = this.getListName();
+    if (!config.enableLookupIndices || storageMappingEnsured.has(listName)) {
       return;
     }
-    const listName = this.getListName();
-    const storageMapping = (listMappings as { properties: Record<string, MappingProperty> })
-      .properties.storage;
-    await esClient.indices.putMapping({
-      index: listName,
-      properties: { storage: storageMapping },
-    });
+    const exists = await getDataStreamExists(this.provisioningClient, listName);
+    if (exists) {
+      const storageMapping = (listMappings as { properties: Record<string, MappingProperty> })
+        .properties.storage;
+      await this.provisioningClient.indices.putMapping({
+        index: listName,
+        properties: { storage: storageMapping },
+      });
+    }
+    storageMappingEnsured.add(listName);
   };
 
   /**
@@ -777,9 +947,108 @@ export class ListClient {
     id,
     refresh,
   }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-    const { esClient } = this;
+    const { esClient, config, user } = this;
     const listItemName = this.getListItemName();
+
+    // A lookup item id names a value. Locate it, delete the value, and report the item.
+    if (config.enableLookupIndices) {
+      const resolved = await this.resolveLookupItem(id);
+      if (resolved != null) {
+        const { accessName, list, value } = resolved;
+        // A delete by id is a single document; wait for the refresh so the caller's
+        // next read (the items table, a repeated delete) sees it.
+        await deleteLookupItemByValue({
+          esClient,
+          index: accessName,
+          refresh: 'wait_for',
+          type: list.type,
+          value,
+        });
+        if (isRangeType(list.type)) {
+          this.scheduleCoalesceRebuild({ index: accessName, type: list.type });
+        }
+        return buildLookupListItem({ listId: list.id, type: list.type, user, value });
+      }
+    }
+
     return deleteListItem({ esClient, id, listItemIndex: listItemName, refresh });
+  };
+
+  /**
+   * Resolve a lookup item id to its list and authored value. Lookup item ids are
+   * content addressed, so the id is searched across the space's lookup indices and the
+   * owning list is read back from the container by the concrete index of the hit.
+   */
+  private resolveLookupItem = async (
+    id: string
+  ): Promise<{ accessName: string; list: ListSchema; value: string } | undefined> => {
+    const { esClient, spaceId } = this;
+    const located = await locateLookupItem({
+      esClient,
+      id,
+      listItemIndex: this.getListItemName(),
+      spaceId,
+    });
+    if (located == null) {
+      return undefined;
+    }
+    const list = await findListByLookupIndex({
+      esClient,
+      index: located.index,
+      listIndex: this.getListName(),
+    });
+    const accessName = list != null ? lookupAccessNameOf(list) : undefined;
+    if (list == null || accessName == null) {
+      return undefined;
+    }
+    return { accessName, list, value: located.value };
+  };
+
+  /**
+   * Replace the value a lookup item id names. The new value is written before the old
+   * one is removed, so membership never has a window with neither. The item id changes,
+   * because it is a hash of the value. A missing value leaves the item unchanged, since
+   * a lookup item carries nothing else to patch.
+   */
+  private replaceLookupItemValue = async ({
+    id,
+    refresh,
+    value,
+  }: {
+    id: string;
+    refresh: boolean | undefined;
+    value: string | null | undefined;
+  }): Promise<ListItemSchema | null | undefined> => {
+    const { esClient, user } = this;
+    const resolved = await this.resolveLookupItem(id);
+    if (resolved == null) {
+      return undefined;
+    }
+    const { accessName, list, value: current } = resolved;
+    const item = (v: string): ListItemSchema =>
+      buildLookupListItem({ listId: list.id, type: list.type, user, value: v });
+    if (value == null || value === current) {
+      return item(current);
+    }
+    const esRefresh = refresh ? 'wait_for' : undefined;
+    await writeLookupItems({
+      esClient,
+      index: accessName,
+      refresh: esRefresh,
+      type: list.type,
+      values: [value],
+    });
+    await deleteLookupItemByValue({
+      esClient,
+      index: accessName,
+      refresh: esRefresh,
+      type: list.type,
+      value: current,
+    });
+    if (isRangeType(list.type)) {
+      this.scheduleCoalesceRebuild({ index: accessName, type: list.type });
+    }
+    return item(value);
   };
 
   /**
@@ -802,8 +1071,9 @@ export class ListClient {
     // POC: delete an authored value from the per-list lookup index (rebuilds
     // coalesced docs for range lists).
     if (config.enableLookupIndices) {
+      const { user } = this;
       const list = await this.getList({ id: listId });
-      const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
+      const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
       if (list != null && lookupIndex != null) {
         await deleteLookupItemByValue({
           esClient,
@@ -815,7 +1085,27 @@ export class ListClient {
         if (isRangeType(list.type)) {
           this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
         }
-        return [];
+        // Return a representation of the deleted item so callers (and the delete
+        // route, which treats an empty array as "not found") see that the value was
+        // removed. The lookup index keys items by a hash of the value, not a stored
+        // item id, so the id here is synthesized.
+        const now = new Date().toISOString();
+        return [
+          {
+            '@timestamp': now,
+            _version: undefined,
+            created_at: now,
+            created_by: user,
+            id: uuidv4(),
+            list_id: listId,
+            meta: undefined,
+            tie_breaker_id: uuidv4(),
+            type: list.type,
+            updated_at: now,
+            updated_by: user,
+            value,
+          },
+        ];
       }
     }
 
@@ -840,12 +1130,13 @@ export class ListClient {
     const listName = this.getListName();
     const listItemName = this.getListItemName();
 
-    // POC: deleting a lookup list drops its index.
+    // POC: deleting a lookup list drops its concrete index, which removes the alias too.
+    // An index delete must name the concrete index, never the alias.
     if (config.enableLookupIndices) {
       const list = await this.getList({ id });
       const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
       if (lookupIndex != null) {
-        await deleteLookupIndex({ esClient, index: lookupIndex });
+        await deleteLookupIndex({ esClient: this.provisioningClient, index: lookupIndex });
       }
     }
 
@@ -884,7 +1175,7 @@ export class ListClient {
       setTimeout(async (): Promise<void> => {
         try {
           const list = await this.getList({ id: listId });
-          const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
+          const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
           const values =
             list != null && lookupIndex != null
               ? streamLookupItemValues({ esClient, index: lookupIndex, type: list.type })
@@ -958,19 +1249,59 @@ export class ListClient {
 
     // POC: import into a per-list lookup index (dedup for equality, source +
     // coalesced for ranges).
-    if (config.enableLookupIndices && listId != null) {
-      const list = await this.getList({ id: listId });
-      const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
-      if (list != null && lookupIndex != null) {
+    if (config.enableLookupIndices) {
+      if (listId != null) {
+        const list = await this.getList({ id: listId });
+        const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
+        if (list != null && lookupIndex != null) {
+          await importLookupItemsToStream({
+            config,
+            esClient,
+            index: lookupIndex,
+            stream,
+            type: list.type,
+          });
+          if (isRangeType(list.type)) {
+            this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
+          }
+          return list;
+        }
+      } else {
+        // No list id: the list is created, or found, under the uploaded file name, the
+        // same rule the shared stream applies. A file name that names an existing legacy
+        // list is rejected, so a legacy list is never written through this path.
+        let created: ListSchema | null = null;
         await importLookupItemsToStream({
           config,
           esClient,
-          index: lookupIndex,
+          resolveIndex: async (fileName) => {
+            created = await this.createListIfItDoesNotExist({
+              description: `File uploaded from file system of ${fileName}`,
+              id: fileName,
+              immutable: false,
+              meta,
+              name: fileName,
+              type,
+              version,
+            });
+            const accessName = lookupAccessNameOf(created);
+            if (accessName == null) {
+              throw new ErrorWithStatusCode(
+                `list "${fileName}" exists as a legacy list. Pass list_id to import into it`,
+                400
+              );
+            }
+            return accessName;
+          },
           stream,
-          type: list.type,
+          type,
         });
-        if (isRangeType(list.type)) {
-          this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
+        const list: ListSchema | null = created;
+        if (list != null && isRangeType(type)) {
+          const accessName = lookupAccessNameOf(list);
+          if (accessName != null) {
+            this.scheduleCoalesceRebuild({ index: accessName, type });
+          }
         }
         return list;
       }
@@ -1004,8 +1335,16 @@ export class ListClient {
     value,
     type,
   }: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
-    const { esClient } = this;
+    const { esClient, config } = this;
     const listItemName = this.getListItemName();
+
+    if (config.enableLookupIndices) {
+      const items = await this.lookupItemsByValues({ listId, values: [value] });
+      if (items != null) {
+        return items;
+      }
+    }
+
     return getListItemByValue({
       esClient,
       listId,
@@ -1040,7 +1379,7 @@ export class ListClient {
     // POC: route writes to the per-list lookup index when the list is a lookup list.
     if (config.enableLookupIndices) {
       const list = await this.getList({ id: listId });
-      const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
+      const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
       if (list != null && lookupIndex != null) {
         await writeLookupItems({
           esClient,
@@ -1058,7 +1397,8 @@ export class ListClient {
           _version: undefined,
           created_at: now,
           created_by: user,
-          id: id ?? uuidv4(),
+          // Lookup item ids are content addressed, so a caller supplied id is not kept.
+          id: lookupItemId(list.type, value),
           list_id: listId,
           meta,
           tie_breaker_id: uuidv4(),
@@ -1099,8 +1439,16 @@ export class ListClient {
     value,
     meta,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
-    const { esClient, user } = this;
+    const { esClient, user, config } = this;
     const listItemName = this.getListItemName();
+
+    if (config.enableLookupIndices) {
+      const replaced = await this.replaceLookupItemValue({ id, refresh: undefined, value });
+      if (replaced !== undefined) {
+        return replaced;
+      }
+    }
+
     return updateListItem({
       _version,
       esClient,
@@ -1130,8 +1478,16 @@ export class ListClient {
     meta,
     refresh,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
-    const { esClient, user } = this;
+    const { esClient, user, config } = this;
     const listItemName = this.getListItemName();
+
+    if (config.enableLookupIndices) {
+      const replaced = await this.replaceLookupItemValue({ id, refresh, value });
+      if (replaced !== undefined) {
+        return replaced;
+      }
+    }
+
     return updateListItem({
       _version,
       esClient,
@@ -1222,8 +1578,17 @@ export class ListClient {
    * @returns The list item found if it exists, otherwise "null".
    */
   public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
-    const { esClient } = this;
+    const { esClient, config, user } = this;
     const listItemName = this.getListItemName();
+
+    if (config.enableLookupIndices) {
+      const resolved = await this.resolveLookupItem(id);
+      if (resolved != null) {
+        const { list, value } = resolved;
+        return buildLookupListItem({ listId: list.id, type: list.type, user, value });
+      }
+    }
+
     return getListItem({
       esClient,
       id,
@@ -1244,8 +1609,16 @@ export class ListClient {
     listId,
     value,
   }: GetListItemsByValueOptions): Promise<ListItemArraySchema> => {
-    const { esClient } = this;
+    const { esClient, config } = this;
     const listItemName = this.getListItemName();
+
+    if (config.enableLookupIndices) {
+      const items = await this.lookupItemsByValues({ listId, values: value });
+      if (items != null) {
+        return items;
+      }
+    }
+
     return getListItemByValues({
       esClient,
       listId,
@@ -1253,6 +1626,34 @@ export class ListClient {
       type,
       value,
     });
+  };
+
+  /**
+   * The items of a lookup list that hold any of the values, or undefined when the list
+   * is not a lookup list so the caller falls through to the shared stream.
+   */
+  private lookupItemsByValues = async ({
+    listId,
+    values,
+  }: {
+    listId: string;
+    values: string[];
+  }): Promise<ListItemArraySchema | undefined> => {
+    const { esClient, user } = this;
+    const list = await this.getList({ id: listId });
+    const accessName = list != null ? lookupAccessNameOf(list) : undefined;
+    if (list == null || accessName == null) {
+      return undefined;
+    }
+    const found = await searchLookupItemsByValues({
+      esClient,
+      index: accessName,
+      listId,
+      type: list.type,
+      user,
+      values,
+    });
+    return found.flatMap((entry) => entry.items);
   };
 
   /**
@@ -1274,7 +1675,7 @@ export class ListClient {
     // POC: post-filter exception path routed to the per-list lookup index.
     if (config.enableLookupIndices) {
       const list = await this.getList({ id: listId });
-      const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
+      const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
       if (list != null && lookupIndex != null) {
         return searchLookupItemsByValues({
           esClient,
@@ -1361,9 +1762,32 @@ export class ListClient {
     sortOrder,
     searchAfter,
   }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-    const { esClient } = this;
+    const { esClient, config, user } = this;
     const listName = this.getListName();
     const listItemName = this.getListItemName();
+
+    // The items table of a lookup list reads the per-list index, paged by offset.
+    if (config.enableLookupIndices) {
+      const list = await this.getList({ id: listId });
+      const accessName = list != null ? lookupAccessNameOf(list) : undefined;
+      if (list != null && accessName != null) {
+        return findLookupItems({
+          currentIndexPosition,
+          esClient,
+          filter,
+          index: accessName,
+          listId,
+          page,
+          perPage,
+          searchAfter,
+          sortField,
+          sortOrder,
+          type: list.type,
+          user,
+        });
+      }
+    }
+
     return findListItem({
       currentIndexPosition,
       esClient,
@@ -1399,7 +1823,7 @@ export class ListClient {
     }
 
     if (config.enableLookupIndices) {
-      const lookupIndex = lookupIndexOf(list);
+      const lookupIndex = lookupAccessNameOf(list);
       if (lookupIndex != null) {
         const count = await countLookupItems({
           esClient,
@@ -1472,7 +1896,7 @@ export class ListClient {
     // POC: inline exception path routed to the per-list lookup index.
     if (config.enableLookupIndices) {
       const list = await this.getList({ id: listId });
-      const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
+      const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
       if (list != null && lookupIndex != null) {
         return findAllLookupItems({
           esClient,

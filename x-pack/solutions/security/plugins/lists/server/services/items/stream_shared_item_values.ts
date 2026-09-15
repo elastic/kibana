@@ -32,4 +32,7 @@ export const streamSharedItemValues = ({
     extract: (source) => (source != null ? findSourceValue(source) : undefined),
     index: listItemIndex,
     query: { term: { list_id: listId } },
+    // The data stream spans several backing indices, so `_seq_no` is not unique
+    // across it. Every legacy item carries a unique `tie_breaker_id`.
+    sort: [{ tie_breaker_id: 'asc' }],
   });

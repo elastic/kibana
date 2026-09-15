@@ -16,15 +16,27 @@ interface PaginateOptions {
   esClient: ElasticsearchClient;
   index: string;
   query: estypes.QueryDslQueryContainer;
+  /**
+   * Sort key for `search_after`. Defaults to `_seq_no`, which is complete on a single
+   * shard lookup index. A multi shard target such as the legacy `.items` data stream
+   * must pass a key that is unique across shards, for example `tie_breaker_id`.
+   */
+  sort?: estypes.Sort;
 }
 
 /**
- * Pull based streaming read: yields one batch of hits at a time, paging with a
- * point in time and `search_after` so a large result is never truncated at a
- * single `size`, and only one batch is held in memory at once. The caller drives
- * the pace; a `for await` that stops early stops the paging. The point in time
- * pins a consistent snapshot for the whole scan, so callers should refresh before
- * reading if they need to see their own writes.
+ * Pull based streaming read: yields one batch of hits at a time, paging with
+ * `search_after` on `_seq_no` so a large result is never truncated at a single `size`,
+ * and only one batch is held in memory at once. The caller drives the pace; a
+ * `for await` that stops early stops the paging.
+ *
+ * No point in time is used, on purpose. A search that carries a point in time is
+ * authorized against the concrete index encoded in it, so a credential that only holds
+ * the list's alias (every role and rule API key under the `.items*` wildcard) is denied.
+ * A plain search names the alias and is authorized on it. `_seq_no` is unique within a
+ * shard, and a lookup index has one shard, so it is a complete sort key. A document
+ * updated during the scan can appear again with its new sequence number, which the
+ * callers tolerate: they dedupe by id or by value.
  */
 export const paginateHits = async function* <T>({
   _source,
@@ -32,28 +44,24 @@ export const paginateHits = async function* <T>({
   esClient,
   index,
   query,
+  sort = [{ _seq_no: 'asc' }],
 }: PaginateOptions): AsyncGenerator<Array<estypes.SearchHit<T>>, void, void> {
-  const pit = await esClient.openPointInTime({ index, keep_alive: '1m' });
-  try {
-    let searchAfter: estypes.SortResults | undefined;
-    for (;;) {
-      const page = await esClient.search<T>({
-        _source,
-        pit: { id: pit.id, keep_alive: '1m' },
-        query,
-        search_after: searchAfter,
-        size: batchSize,
-        sort: [{ _shard_doc: 'asc' }],
-        track_total_hits: false,
-      });
-      const batch = page.hits.hits;
-      if (batch.length === 0) break;
-      yield batch;
-      if (batch.length < batchSize) break;
-      searchAfter = batch[batch.length - 1].sort;
-    }
-  } finally {
-    await esClient.closePointInTime({ id: pit.id });
+  let searchAfter: estypes.SortResults | undefined;
+  for (;;) {
+    const page = await esClient.search<T>({
+      _source,
+      index,
+      query,
+      search_after: searchAfter,
+      size: batchSize,
+      sort,
+      track_total_hits: false,
+    });
+    const batch = page.hits.hits;
+    if (batch.length === 0) break;
+    yield batch;
+    if (batch.length < batchSize) break;
+    searchAfter = batch[batch.length - 1].sort;
   }
 };
 
@@ -83,14 +91,16 @@ export const streamListValues = async function* <T>({
   extract,
   index,
   query,
+  sort,
 }: {
   _source?: string[];
   esClient: ElasticsearchClient;
   extract: (source: T | undefined) => string | null | undefined;
   index: string;
   query: estypes.QueryDslQueryContainer;
+  sort?: estypes.Sort;
 }): AsyncGenerator<string[], void, void> {
-  for await (const batch of paginateHits<T>({ _source, esClient, index, query })) {
+  for await (const batch of paginateHits<T>({ _source, esClient, index, query, sort })) {
     const values: string[] = [];
     for (const hit of batch) {
       const value = extract(hit._source);

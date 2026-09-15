@@ -15,6 +15,7 @@
       "lists"
     ],
     "requiredPlugins": [
+      "encryptedSavedObjects",
       "taskManager"
     ],
     "optionalPlugins": [

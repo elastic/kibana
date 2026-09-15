@@ -774,12 +774,19 @@ export class Plugin implements ISecuritySolutionPlugin {
     // POC: supply the lists value-list migration endpoint with a detection-rule scanner,
     // so the referencing-rule warning is owned here (rule domain) while the endpoint stays
     // with the rest of list management in the lists plugin.
-    plugins.lists?.registerValueListMigrationRuleScanner(
-      async ({ itemsIndex, listId, request }) => {
+    plugins.lists?.registerValueListRuleScanner(
+      async ({ accessNames, exceptionListIds, itemsIndex, listId, request, verifyReadOn }) => {
         try {
           const [, startPlugins] = await core.getStartServices();
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-          return await findRulesReferencingValueList({ itemsIndex, listId, rulesClient });
+          return await findRulesReferencingValueList({
+            accessNames,
+            exceptionListIds,
+            itemsIndex,
+            listId,
+            rulesClient,
+            verifyReadOn,
+          });
         } catch {
           return { level: 'unverified' };
         }

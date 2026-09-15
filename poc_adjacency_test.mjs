@@ -9,7 +9,7 @@ const kbn = (m, p, b) => fetch(`${KBN}${p}`, { method: m, headers: H, body: b ? 
 const es = (m, p, b) => fetch(`${ES}${p}`, { method: m, headers: { authorization: AUTH, 'content-type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => ({})) }));
 
 const LID = 'poc-adjacency-iprange';
-const INDEX = `.value-list-default-${LID}`;
+const INDEX = `.value-list-v2-default-${LID}`;
 
 const run = async () => {
   await kbn('DELETE', `/api/lists?id=${LID}`);

@@ -19,23 +19,40 @@ import { writeLookupItems } from './write_lookup_items';
  * Imports a newline-delimited value file into a per-list lookup index. Collects
  * the authored values from the stream, then writes them once (dedup for equality,
  * source + coalesced rebuild for ranges).
+ *
+ * The target is either a known access name (`index`), or resolved from the uploaded
+ * file name (`resolveIndex`), which is the path the import route takes when no
+ * `list_id` is given: the list is created, or found, under the file name. The file
+ * name arrives on the stream before the first line, so the resolver runs before any
+ * value is written.
  */
 export const importLookupItemsToStream = ({
   config,
   esClient,
   index,
+  resolveIndex,
   stream,
   type,
 }: {
   config: ConfigType;
   esClient: ElasticsearchClient;
-  index: string;
+  index?: string;
+  resolveIndex?: (fileName: string) => Promise<string>;
   stream: Readable;
   type: Type;
 }): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
     const values: string[] = [];
+    let targetPromise: Promise<string> | undefined =
+      index != null ? Promise.resolve(index) : undefined;
+
+    readBuffer.on('fileName', (fileNameEmitted: string) => {
+      if (targetPromise != null || resolveIndex == null) return;
+      readBuffer.pause();
+      targetPromise = resolveIndex(decodeURIComponent(fileNameEmitted));
+      targetPromise.then(() => readBuffer.resume(), reject);
+    });
 
     readBuffer.on('lines', (lines: string[]) => {
       for (const line of lines) {
@@ -47,7 +64,13 @@ export const importLookupItemsToStream = ({
 
     readBuffer.on('close', async () => {
       try {
-        await writeLookupItems({ esClient, index, type, values });
+        if (targetPromise == null) {
+          throw new Error(
+            'import has no target list: no list_id was given and no file name was found'
+          );
+        }
+        const target = await targetPromise;
+        await writeLookupItems({ esClient, index: target, type, values });
         resolve();
       } catch (err) {
         reject(err);
