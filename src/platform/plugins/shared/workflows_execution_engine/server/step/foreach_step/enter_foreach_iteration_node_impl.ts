@@ -8,11 +8,11 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { extractForeachItemsFromInput, indexFromIterationStepId } from './utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { NodeImplementation } from '../node_implementation';
-import { extractForeachItemsFromInput, indexFromIterationStepId } from './utils';
 
 export class EnterForeachIterationNodeImpl implements NodeImplementation {
   constructor(
@@ -55,4 +55,3 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
     });
   }
 }
-
