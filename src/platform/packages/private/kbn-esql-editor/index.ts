@@ -13,6 +13,8 @@ import { ESQLEditor } from './src/esql_editor';
 export type { ESQLEditorRestorableState } from './src/restorable_state';
 export { ESQLMenu } from './src/editor_menu';
 export { EsqlEditorActionsProvider } from './src/editor_actions_context';
+export { EsqlEditorActionsRegister } from './src/editor_actions_register';
+export type { EsqlEditorActionsRegisterProps } from './src/editor_actions_register';
 export { helpLabel } from './src/editor_menu/menu_i18n';
 
 export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';

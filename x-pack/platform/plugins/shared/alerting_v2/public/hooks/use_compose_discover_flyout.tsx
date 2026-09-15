@@ -16,6 +16,7 @@ import {
   resolveRuleNotificationTag,
   ruleHasNotificationTag,
 } from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -114,6 +115,9 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
     }),
     [
       http,

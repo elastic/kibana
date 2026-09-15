@@ -33,10 +33,22 @@ const LazyHelpPopover = React.lazy(async () => {
 
 export function ESQLMenu({
   hideHistory,
+  hideVisor,
+  hideRecommendedQueries,
   onESQLDocsFlyoutVisibilityChanged,
   docsFlyoutSize,
 }: {
   hideHistory?: boolean;
+  /**
+   * Hides the visor (KQL / natural-language search) button. Use when embedding the menu
+   * without the full editor, which owns the visor surface the button would toggle.
+   */
+  hideVisor?: boolean;
+  /**
+   * Hides the recommended-queries section. Use when no `submitEsqlQuery` action is wired,
+   * so picks can't be applied (e.g. the split fragment editors).
+   */
+  hideRecommendedQueries?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
@@ -77,19 +89,21 @@ export function ESQLMenu({
         padding: ${euiTheme.size.xs};
       `}
     >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-            size="xs"
-            aria-label={searchPlaceholder}
-            onClick={onToggleVisor}
-            isDisabled={!onToggleVisor}
-            data-test-subj="esql-menu-button"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {!hideVisor && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
+              size="xs"
+              aria-label={searchPlaceholder}
+              onClick={onToggleVisor}
+              isDisabled={!onToggleVisor}
+              data-test-subj="esql-menu-button"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       {!hideHistory && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
@@ -144,6 +158,7 @@ export function ESQLMenu({
           <LazyHelpPopover
             onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
             docsFlyoutSize={docsFlyoutSize}
+            hideRecommendedQueries={hideRecommendedQueries}
           />
         </Suspense>
       </EuiFlexItem>
