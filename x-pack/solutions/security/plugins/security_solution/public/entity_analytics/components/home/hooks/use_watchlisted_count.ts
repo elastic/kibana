@@ -31,7 +31,6 @@ export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?:
   const {
     data: result,
     isLoading,
-    isRefetching,
     error,
   } = useQuery(
     queryKey,

@@ -68,7 +68,6 @@ export const useEntitiesWithAlertsCount = ({
   const {
     data: queryResult,
     isLoading,
-    isRefetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['entitiesWithAlertsCount', resolvedIndex?.indexName, spaceId],

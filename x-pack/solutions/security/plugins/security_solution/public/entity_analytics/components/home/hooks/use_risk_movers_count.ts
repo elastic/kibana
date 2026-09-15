@@ -37,7 +37,6 @@ export const useRiskMoversCount = ({ spaceId, skip }: { spaceId: string; skip?: 
   const {
     data: queryResult,
     isLoading,
-    isRefetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['riskMoversCount', query],

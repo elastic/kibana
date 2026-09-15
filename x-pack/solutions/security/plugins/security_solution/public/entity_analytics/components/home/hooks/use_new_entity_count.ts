@@ -31,7 +31,6 @@ export const useNewEntityCount = ({ spaceId, skip }: { spaceId: string; skip?: b
   const {
     data: result,
     isLoading,
-    isRefetching,
     error,
   } = useQuery(
     queryKey,

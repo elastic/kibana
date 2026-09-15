@@ -40,7 +40,6 @@ export const useHighCriticalCount = ({
   const {
     data: result,
     isLoading,
-    isRefetching,
     error,
   } = useQuery(
     queryKey,

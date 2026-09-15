@@ -45,7 +45,6 @@ export const useNewlyHighCriticalCount = ({
   const {
     data: queryResult,
     isLoading,
-    isRefetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['newlyHighCriticalCount', query],
