@@ -89,11 +89,13 @@ const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worke
               },
             }),
       }
-    : worker.settings;  return {
+    : worker.settings;
+  return {
     ...worker,
     enabled,
     state: worker.state === 'unavailable' ? 'unavailable' : enabled ? 'ok' : 'paused',
-    settings,  };
+    settings,
+  };
 };
 
 const replaceWorkerInList = (

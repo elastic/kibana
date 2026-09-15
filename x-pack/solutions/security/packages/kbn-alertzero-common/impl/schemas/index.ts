@@ -47,7 +47,8 @@ export {
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
-  WorkerSettingsWrite,} from './components/watch_settings.gen';
+  WorkerSettingsWrite,
+} from './components/watch_settings.gen';
 
 export {
   TemplateId,

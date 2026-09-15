@@ -156,7 +156,8 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = touchesWorkerSettings(patch);    const managedWorkflows = await this.requireManagedWorkflows();
+    const touchesSettings = touchesWorkerSettings(patch);
+    const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
       spaceId,

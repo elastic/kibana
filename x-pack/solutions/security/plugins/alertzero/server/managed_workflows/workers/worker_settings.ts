@@ -126,13 +126,8 @@ const parseWorkerValues = (
   raw: Record<string, unknown>
 ): WorkerTemplateValues => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const {
-    settingsVersion,
-    autonomyLevel,
-    scheduleInterval,
-    detectionConfig,
-    analysisWindowDays,
-  } = raw;
+  const { settingsVersion, autonomyLevel, scheduleInterval, detectionConfig, analysisWindowDays } =
+    raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
