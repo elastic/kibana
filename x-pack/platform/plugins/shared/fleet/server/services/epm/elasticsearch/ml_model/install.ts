@@ -8,12 +8,12 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import { getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
-import type { AssetsMap, EsAssetReference } from '../../../../../common/types/models';
+import type { EsAssetReference } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
 
@@ -37,17 +37,6 @@ export const installMlModel = async (
     return esReferences;
   }
 
-  const wantedPaths = new Set(mlModelPaths);
-  const mlModelAssetsMap: AssetsMap = new Map();
-  await packageInstallContext.archiveIterator.traverseEntries(
-    async (entry) => {
-      if (entry.buffer) {
-        mlModelAssetsMap.set(entry.path, entry.buffer);
-      }
-    },
-    (path) => wantedPaths.has(path)
-  );
-
   const mlModelRefs = mlModelPaths.map((mlModelPath) => {
     const pathParts = mlModelPath.split('/');
     const modelId = pathParts[pathParts.length - 1].replace('.json', '');
@@ -62,16 +51,22 @@ export const installMlModel = async (
     { assetsToAdd: mlModelRefs }
   );
 
-  for (const mlModelPath of mlModelPaths) {
-    const pathParts = mlModelPath.split('/');
-    const modelId = pathParts[pathParts.length - 1].replace('.json', '');
-    const content = getAssetFromAssetsMap(mlModelAssetsMap, mlModelPath).toString('utf-8');
-    await handleMlModelInstall({
-      esClient,
-      logger,
-      mlModel: { installationName: modelId, content },
-    });
-  }
+  const wantedPaths = new Set(mlModelPaths);
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+      const pathParts = entry.path.split('/');
+      const modelId = pathParts[pathParts.length - 1].replace('.json', '');
+      await handleMlModelInstall({
+        esClient,
+        logger,
+        mlModel: { installationName: modelId, content: entry.buffer.toString('utf-8') },
+      });
+    },
+    (path) => wantedPaths.has(path)
+  );
 
   return esReferences;
 };
