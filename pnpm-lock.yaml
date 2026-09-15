@@ -5418,9 +5418,6 @@ importers:
       '@kbn/openapi-generator':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-generator
-      '@kbn/rspack-optimizer':
-        specifier: workspace:*
-        version: link:packages/kbn-rspack-optimizer
       '@kbn/optimizer-webpack-helpers':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
@@ -5481,6 +5478,9 @@ importers:
       '@kbn/reporting-mocks-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-reporting/mocks_server
+      '@kbn/rspack-optimizer':
+        specifier: workspace:*
+        version: link:packages/kbn-rspack-optimizer
       '@kbn/sample-log-parser':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-sample-parser
@@ -6740,8 +6740,6 @@ importers:
 
   packages/kbn-moon: {}
 
-  packages/kbn-rspack-optimizer: {}
-
   packages/kbn-peggy-loader: {}
 
   packages/kbn-perf-page-load: {}
@@ -6765,6 +6763,8 @@ importers:
   packages/kbn-repo-source-classifier: {}
 
   packages/kbn-repo-source-classifier-cli: {}
+
+  packages/kbn-rspack-optimizer: {}
 
   packages/kbn-set-map: {}
 
