@@ -23,10 +23,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type {
-  FieldSourceNameChange,
-  MappedFieldsEditorProps,
-} from '@kbn/index-management-shared-types';
+import type { FieldSourceNameChange } from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';

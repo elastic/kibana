@@ -105,6 +105,7 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
       ))}
       {isCreateFieldFormOpen ? (
         <div data-test-subj="createFieldForm">
+          <div data-test-subj="fakeCreateFieldFormPanel">
           <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
             Confirm field
           </button>
@@ -115,6 +116,7 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
           >
             Cancel
           </button>
+          </div>
         </div>
       ) : null}
       <button type="button" data-test-subj="addFieldButton" onClick={addManualField}>

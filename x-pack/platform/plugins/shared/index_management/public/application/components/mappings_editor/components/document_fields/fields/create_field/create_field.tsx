@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { TrainedModelStat } from '@kbn/ml-common-types/trained_models';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
@@ -42,6 +42,14 @@ import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { useFieldRenameForm } from '../../use_field_rename_form';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
+import {
+  getInlineFieldRenameFormContainerCss,
+  getInlineFieldRenameFormRowCss,
+  getInlineFieldRenameFormRowGapCss,
+  getInlineFieldRenameIdentityClusterCss,
+  getInlineFieldRenameTypeClusterCss,
+  getInlineFieldRenameTypeFieldCss,
+} from '../inline_field_rename_form_layout';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -105,6 +113,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const {
     value: { closeCreateFieldOnOutsideClick = true, inlineOptionalDateFormatField },
   } = useConfig();
+  const { euiTheme } = useEuiTheme();
   const { fields, mappingViewFields } = useMappingsState();
   const {
     showFieldRename,
@@ -236,62 +245,95 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   }, [showInlineOptionalDateFormat]);
 
-  const renderFormFields = () => (
-    <EuiFlexGroup gutterSize="s">
-      {/* Field type */}
-      <EuiFlexItem grow={false}>
-        <TypeParameter
-          isRootLevelField={isRootLevelField}
-          isMultiField={isMultiField}
-          showDocLink
-          isSemanticTextEnabled={isSemanticTextEnabled}
-          fieldTypeInputRef={fieldTypeInputRef}
-        />
-      </EuiFlexItem>
+  const inlineFieldRenameLayoutCss = useMemo(
+    () => [
+      getInlineFieldRenameFormContainerCss(),
+      getInlineFieldRenameFormRowGapCss({ euiTheme }),
+    ],
+    [euiTheme]
+  );
 
-      {/* Field subType (if any) */}
-      {type !== undefined && (
+  const renderFormFields = () => {
+    const typeParameter = (
+      <TypeParameter
+        isRootLevelField={isRootLevelField}
+        isMultiField={isMultiField}
+        showDocLink
+        isSemanticTextEnabled={isSemanticTextEnabled}
+        fieldTypeInputRef={fieldTypeInputRef}
+      />
+    );
+
+    const subTypeParameter =
+      type !== undefined ? (
         <SubTypeParameter
           key={type?.[0]?.value}
           type={type?.[0]?.value}
           isMultiField={isMultiField ?? false}
           isRootLevelField={isRootLevelField}
         />
-      )}
+      ) : null;
 
-      {/* Field reference_field for semantic_text field type */}
-      {isSemanticText && (
-        <EuiFlexItem grow={false}>
-          <ReferenceFieldSelects />
-        </EuiFlexItem>
-      )}
+    if (showFieldRename) {
+      return (
+        <div css={inlineFieldRenameLayoutCss} data-test-subj="createFieldFieldsLayout">
+          <div css={getInlineFieldRenameFormRowCss()}>
+            <div css={getInlineFieldRenameTypeClusterCss()} data-test-subj="createFieldTypeRow">
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+                <EuiFlexItem grow={false} css={getInlineFieldRenameTypeFieldCss()}>
+                  {typeParameter}
+                </EuiFlexItem>
+                {subTypeParameter}
+              </EuiFlexGroup>
+            </div>
 
-      {/* Field name */}
-      {showFieldRename ? (
-        <>
-          <EuiFlexItem>
-            <SourceNameParameter />
+            <div
+              css={getInlineFieldRenameIdentityClusterCss()}
+              data-test-subj="createFieldIdentityRow"
+            >
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+                {isSemanticText ? (
+                  <EuiFlexItem grow={false}>
+                    <ReferenceFieldSelects />
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem>
+                  <SourceNameParameter />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <RenameFieldParameter />
+                </EuiFlexItem>
+                {showInlineOptionalDateFormat ? (
+                  <EuiFlexItem>
+                    <InlineOptionalDateFormatParameter
+                      labels={inlineOptionalDateFormatField}
+                      value={inlineOptionalDateFormatText}
+                      onChange={setInlineOptionalDateFormatText}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s" responsive={false} data-test-subj="createFieldFieldsLayout">
+        <EuiFlexItem grow={false}>{typeParameter}</EuiFlexItem>
+        {subTypeParameter}
+        {isSemanticText ? (
+          <EuiFlexItem grow={false}>
+            <ReferenceFieldSelects />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <RenameFieldParameter />
-          </EuiFlexItem>
-          {showInlineOptionalDateFormat ? (
-            <EuiFlexItem>
-              <InlineOptionalDateFormatParameter
-                labels={inlineOptionalDateFormatField}
-                value={inlineOptionalDateFormatText}
-                onChange={setInlineOptionalDateFormatText}
-              />
-            </EuiFlexItem>
-          ) : null}
-        </>
-      ) : (
+        ) : null}
         <EuiFlexItem>
           <NameParameter isSemanticText={isSemanticText} />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
+      </EuiFlexGroup>
+    );
+  };
 
   const renderRequiredParametersForm = () => {
     if (!type) return null;
