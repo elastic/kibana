@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-nightshift-micro-evals
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/evals-common'
   - '@kbn/evals-extensions'
   - '@kbn/inference-common'
   - '@kbn/kbn-client'
