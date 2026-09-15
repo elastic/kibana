@@ -8,6 +8,10 @@
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import {
+  KI_SHAPES_REFERENCE_NAME,
+  STRATEGY_CATALOG_REFERENCE_NAME,
+} from '../context_engine_shared';
 import { analyzeAndImproveSkill } from './analyze_and_improve_skill';
 
 describe('analyzeAndImproveSkill', () => {
@@ -34,8 +38,16 @@ describe('analyzeAndImproveSkill', () => {
     expect(analyzeAndImproveSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries no referenced content of its own, having delegated the mechanics', () => {
-    expect(analyzeAndImproveSkill.referencedContent ?? []).toHaveLength(0);
+  it('attaches the shared KI shape and strategy catalog references, and nothing else', () => {
+    const names = (analyzeAndImproveSkill.referencedContent ?? []).map(({ name }) => name);
+
+    expect(names).toEqual([KI_SHAPES_REFERENCE_NAME, STRATEGY_CATALOG_REFERENCE_NAME]);
+  });
+
+  it('mentions every referencedContent entry by name in the skill content', () => {
+    for (const reference of analyzeAndImproveSkill.referencedContent ?? []) {
+      expect(analyzeAndImproveSkill.content).toContain(`\`${reference.name}\``);
+    }
   });
 
   it('binds only the read-only tools judging an index needs', async () => {
@@ -107,6 +119,82 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toContain('KI document shape');
       expect(content).toContain('Access patterns');
       expect(content).toContain('Strategy catalog');
+    });
+
+    it('points at the shared references instead of restating the shape and the table', () => {
+      // The field table and the six-row strategy table now live in the shared references, so a
+      // copy here would be the drift the references exist to prevent.
+      expect(content).not.toMatch(/\| `title` \| text \+ semantic \|/);
+      expect(content).not.toMatch(/\| \*\*Bottom-Up\*\* \| One KI per document \|/);
+      expect(content).toMatch(/`ki_shapes` reference attached to this skill/);
+      expect(content).toMatch(/`strategy_catalog` reference attached to this skill/);
+    });
+
+    it('opens with a scope step, so evidence is read for a named index and window', () => {
+      expect(content).toContain('## Scope comes first');
+      expect(content).toMatch(/\*\*The AI index\*\*/);
+      expect(content).toMatch(/\*\*The window\*\*/);
+      expect(content).toMatch(/Do not invent a scope/);
+    });
+
+    it('scopes evidence by what the user chose, so a fresh sources-only index is not probed for signals', () => {
+      expect(content).toMatch(/decided by what the user chose, not by probing/);
+      expect(content).toMatch(
+        /Sources\s+only, nothing built yet:.*do not\s+query for signals or traces/s
+      );
+      expect(content).toMatch(/The user brought traces in, or the index already has automations/);
+      expect(content).toMatch(
+        /\*\*Sources only, and nothing built yet\.\*\* This is the setup case\. Do not go looking for signals/
+      );
+      expect(content).not.toMatch(/whether signals exist for/);
+    });
+
+    it('states a strategy as three answers, with the named strategies as worked examples', () => {
+      expect(content).toMatch(/\*\*The unit\*\*/);
+      expect(content).toMatch(/\*\*What one KI carries\*\*/);
+      expect(content).toMatch(/\*\*How units are found and refreshed\*\*/);
+      expect(content).toMatch(/as worked examples of those three answers/);
+      expect(content).toMatch(/unsure means Index\/Table Metadata/);
+    });
+
+    it('makes prevalence a requirement on every finding', () => {
+      expect(content).toMatch(/\*\*It carries a count, a denominator and a window\.\*\*/);
+      expect(content).toMatch(/This is the prevalence rule, and it is a\s+requirement/);
+    });
+
+    it('reads traces through the platform skill, for four things, without a loop count', () => {
+      expect(content).toContain('## When traces are in scope');
+      expect(content).toContain('agent-builder-traces');
+      expect(content).toMatch(/pull four things/);
+      expect(content).toMatch(/\*\*Rounds where the agent queried the raw indices/);
+      expect(content).toMatch(/\*\*ES\|QL errors against those indices\.\*\*/);
+      expect(content).toMatch(
+        /\*\*Conversations touching those indices with high token or latency cost\*\*/
+      );
+      expect(content).toMatch(/\*\*Rounds that ended in a soft failure\*\*/);
+      expect(content).toMatch(/Do not count how many queries a round ran as evidence/);
+    });
+
+    it('offers targeted KIs as a proposal outcome, with provenance from ids that already exist', () => {
+      expect(content).toContain('### Targeted KIs as an outcome');
+      for (const kind of ['`constraint`', '`workaround`', '`disambiguation`', '`task_recipe`']) {
+        expect(content).toContain(kind);
+      }
+      expect(content).toMatch(/never written by hand/);
+      expect(content).toMatch(/the ids that already exist/);
+      expect(content).not.toMatch(/finding_id|investigation_id/);
+    });
+
+    it('carries the two discipline rules, one line each', () => {
+      expect(content).toMatch(
+        /\*\*Define a term where it first appears, then use the plain phrase\.\*\*/
+      );
+      expect(content).toMatch(/\*\*Never resend a failed tool call unchanged\.\*\*/);
+      expect(content).not.toMatch(/## Glossary/);
+    });
+
+    it('sends the setup case to sources after the strategy, not before the evidence', () => {
+      expect(content).toMatch(/Load `ai-index-sources` after the\s+strategy/);
     });
 
     it('keeps the corpus filter as a diagnosis, delegating how to configure one', () => {

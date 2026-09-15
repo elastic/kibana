@@ -1,0 +1,111 @@
+version: "1"
+# Targeted KIs — one `constraint`, `workaround`, `disambiguation` or `task_recipe` KI each,
+# written from a counted finding rather than generated over a corpus.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+#
+# There is no model call. The content of each KI is decided in the analysis that proposed it and
+# written here verbatim, so the KI says exactly what the finding supported and a re-run writes
+# the same thing. That is what lets a targeted KI survive re-runs of every other automation on
+# the index: it has a workflow behind it, like any other KI, and that workflow carries its text.
+#
+# To adapt it:
+#   1. Set `ai_index_id`.
+#   2. Replace the example entry in `kis` with one entry per KI the proposal named. `ki_id` is the
+#      stable id a re-run replaces; derive it from the finding (the field, the pair of indices,
+#      the question class), not from a date or a run.
+#   3. Fill the provenance in `attributes` from ids that already exist: the `trace_ids` of the
+#      signals behind the finding, the `conversation_id`, the `error_text` as observed, the
+#      `source_index` the rule is about. At least one of them. Never invent an id.
+#   4. Put any ES|QL the KI recommends in `attributes.esql` as well as in `content`, so the
+#      verifiers run it. A constraint about a query that must be written a certain way carries the
+#      corrected query, not the failing one.
+#
+# Leave the shape alone: the verify/gate/create sequence is what keeps a KI carrying broken ES|QL
+# out of the index.
+name: Targeted KI writer
+description: >
+  Writes one or more targeted Knowledge Indicators (constraint, workaround, disambiguation,
+  task_recipe) from content fixed in consts, each verified before it is written, into a Context
+  Engine AI index.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: my-ai-index
+  # One entry per KI. The example shows every field a targeted KI uses.
+  kis:
+    - ki_id: constraint-my-source-index-backquoted-fields
+      ki:
+        type: constraint
+        title: "my-source-index: field names with spaces must be backquoted in ES|QL"
+        description: >-
+          Queries against my-source-index fail with "Unknown column" when `Order Date` or
+          `Unit Price USD` are written bare. Wrap them in backticks. Seen in 6 of 41 conversations
+          over 30 days.
+        content: |
+          Several fields in my-source-index contain spaces: `Order Date`, `Unit Price USD`,
+          `Product Name`. ES|QL rejects them unquoted ("Unknown column [Order]").
+
+          Write them in backticks:
+            FROM my-source-index | WHERE `Order Date` >= "2024-01-01" | STATS n = COUNT(*) | LIMIT 1
+
+          Applies to every field in the mapping whose name contains a space or a capital letter.
+        tags:
+          - constraint
+          - my-source-index
+        attributes:
+          esql:
+            - 'FROM my-source-index | WHERE `Order Date` >= "2024-01-01" | STATS n = COUNT(*) | LIMIT 1'
+          source_index: my-source-index
+          error_text: 'Unknown column [Order], did you mean [`Order Date`]?'
+          trace_ids:
+            - replace-with-a-real-trace-id
+          conversation_id: replace-with-a-real-conversation-id
+          # How many retrievals hit this out of how many, and over what window: the prevalence
+          # behind the finding, so a reader can judge it.
+          prevalence: "6 of 41 conversations, 30 days"
+
+tags:
+  - targeted-ki
+
+triggers:
+  - type: manual
+
+steps:
+  - name: loop_kis
+    type: foreach
+    foreach: "{{ consts.kis | json }}"
+    # One KI that fails verification must not stop the others from being written.
+    iteration-on-failure:
+      continue: true
+    steps:
+      # `foreach.item.ki` is the whole document; passed typed so nothing is stringified.
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          verifiers:
+            - esql-valid-syntax
+            - esql-valid-runtime
+          ki: "${{ foreach.item.ki }}"
+
+      - name: check_verification
+        type: if
+        condition: "steps.verify_ki.output.passed : true"
+        steps:
+          # `ki_id` comes from the const, so a re-run replaces the KI rather than appending a
+          # second copy. Omit `ki_id` entirely on a data-stream destination, which rejects it.
+          - name: create_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ foreach.item.ki_id }}"
+              ki: "${{ foreach.item.ki }}"
+        else:
+          - name: log_verification_failure
+            type: console
+            with:
+              message: |
+                KI verification failed for "{{ foreach.item.ki_id }}".
+                Results: {{ steps.verify_ki.output.results | json }}

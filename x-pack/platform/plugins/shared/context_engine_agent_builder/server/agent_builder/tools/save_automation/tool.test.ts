@@ -11,7 +11,7 @@ import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attac
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { createSaveAutomationTool } from './tool';
+import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
@@ -486,6 +486,33 @@ describe('save_automation tool', () => {
 
     it('rejects a call with nothing to save or attach', () => {
       expect(parse({}).success).toBe(false);
+    });
+
+    // Some models fill every optional parameter with whitespace instead of omitting it, and then
+    // retry the identical call when it is rejected. A blank carries nothing, so it reads as omitted.
+    it('reads whitespace-only optional ids as omitted rather than as a second definition', () => {
+      expect(
+        parse({ workflowYaml: 'name: x', workflowAttachmentId: ' ', workflowId: ' ' }).success
+      ).toBe(true);
+      expect(parse({ workflowAttachmentId: 'attachment-1', workflowYaml: '' }).success).toBe(true);
+    });
+
+    it('still rejects a call where every definition is blank', () => {
+      expect(parse({ workflowYaml: ' ', workflowAttachmentId: '', workflowId: ' ' }).success).toBe(
+        false
+      );
+    });
+
+    it('drops blank ids before they reach the handler', () => {
+      expect(
+        normalizeSaveAutomationParams({
+          workflowYaml: 'name: x',
+          workflowAttachmentId: ' ',
+          workflowId: '',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      ).toEqual({ workflowYaml: 'name: x', aiIndexId: 'my-ai-index', run: true });
     });
 
     it('does not tie the run to saving, which would read as excluding an attach', () => {
