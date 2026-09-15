@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
@@ -117,13 +117,30 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+  const currentSearchRequestRef = useRef(0);
 
   const onSearchChange = useCallback(
     async (search: string) => {
+      const requestId = currentSearchRequestRef.current + 1;
+      currentSearchRequestRef.current = requestId;
       const indexPattern = isEmpty(search) ? '*' : search;
       setIsIndiciesLoading(true);
-      setIndexOptions(await getIndexOptions(indexPattern));
-      setIsIndiciesLoading(false);
+      // Drop the previous search's options while the new query is in flight so the
+      // async ComboBox shows no stale suggestions until the filtered results arrive.
+      setIndexOptions([]);
+      try {
+        const options = await getIndexOptions(indexPattern);
+
+        if (currentSearchRequestRef.current !== requestId) {
+          return;
+        }
+
+        setIndexOptions(options);
+      } finally {
+        if (currentSearchRequestRef.current === requestId) {
+          setIsIndiciesLoading(false);
+        }
+      }
     },
     [setIsIndiciesLoading, setIndexOptions]
   );
