@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// For a single episode, seed the flyout from `last_tags`. For multiple selections, seed with the
-// union of all selected episodes' tags so users can see everything that's already applied.
+// For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
+// (no single "current" set when replacing tags across groups).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -51,10 +51,7 @@ export const createEditTagsAction = (
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.some((ep) => (ep.source_id == null ? true : extension?.isCompatible(ep) ?? false)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const currentTags =
-      episodes.length === 1
-        ? episodes[0].last_tags ?? []
-        : [...new Set(episodes.flatMap((ep) => ep.last_tags ?? []))];
+    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,
