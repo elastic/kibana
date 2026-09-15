@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
@@ -70,39 +68,19 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
   label,
   fieldTypeLabel,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const iconButton = (
-    <EuiButtonEmpty
-      size="s"
-      aria-label={
-        fieldTypeLabel ??
-        i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
-          defaultMessage: "Show this field's type",
-        })
-      }
-      onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
-    >
-      <EuiToken iconType={iconType} size="s" />
-    </EuiButtonEmpty>
-  );
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
+    <EuiFlexGroup
+      direction="row"
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="flexStart"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
-        {fieldTypeLabel ? (
-          <EuiPopover
-            aria-label={fieldTypeLabel}
-            closePopover={() => setIsPopoverOpen(false)}
-            button={iconButton}
-            isOpen={isPopoverOpen}
-          >
-            {fieldTypeLabel}
-          </EuiPopover>
-        ) : (
-          iconButton
-        )}
+        <EuiToken iconType={iconType} size="s" title={fieldTypeLabel} />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="default">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="default">
           {label}
         </EuiText>
       </EuiFlexItem>
@@ -125,7 +103,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   const resolvedIconType = iconType || (fieldType ? iconMap[fieldType] : defaultToken);
 
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
-    defaultMessage: 'This field is of the type {fieldType}',
+    defaultMessage: 'Field type: {fieldType}',
     values: { fieldType },
   });
 
@@ -165,10 +143,15 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
-      <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        valign="top"
+        truncateText={!isExpanded}
+        width="20%"
+      >
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="top">
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}

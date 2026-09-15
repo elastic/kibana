@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -100,7 +99,7 @@ const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
         )}
         data-test-subj="copyTextToClipboardButton"
         color="text"
-        iconType="copy"
+        iconType={isTextCopied ? 'check' : 'copy'}
         onClick={onClick}
         onBlur={onBlur}
       />
@@ -125,10 +124,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const metaDataIcon = (
     <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        display="empty"
-        size="s"
         iconType="info"
-        color="primary"
+        color="text"
         data-test-subj="documentMetadataButton"
         onClick={(e: React.MouseEvent<HTMLElement>) => {
           e.stopPropagation();
@@ -144,14 +141,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       button={metaDataIcon}
       isOpen={popoverIsOpen}
       closePopover={closePopover}
-      aria-labelledby={popoverTitleId}
+      aria-label={metaDataLabel}
     >
-      <EuiPopoverTitle id={popoverTitleId}>
-        <FormattedMessage
-          id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
-          defaultMessage="Document metadata"
-        />
-      </EuiPopoverTitle>
       <EuiFlexGroup
         gutterSize="s"
         direction="column"
@@ -284,28 +275,26 @@ export const RichResultHeader: React.FC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiText>
-                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                  <EuiFlexItem>
-                    {onTitleClick ? (
-                      <EuiLink onClick={onTitleClick} color="text">
-                        <EuiTitle size="s">
-                          <h4>{title}</h4>
-                        </EuiTitle>
-                      </EuiLink>
-                    ) : (
-                      <EuiTitle size="s">
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                <EuiFlexItem>
+                  {onTitleClick ? (
+                    <EuiLink onClick={onTitleClick} color="text">
+                      <EuiTitle size="xxs">
                         <h4>{title}</h4>
                       </EuiTitle>
-                    )}
-                  </EuiFlexItem>
-                  {!!metaData && (
-                    <EuiFlexItem grow={false}>
-                      <MetadataPopover {...metaData} showScore={showScore} />
-                    </EuiFlexItem>
+                    </EuiLink>
+                  ) : (
+                    <EuiTitle size="xxs">
+                      <h4>{title}</h4>
+                    </EuiTitle>
                   )}
-                </EuiFlexGroup>
-              </EuiText>
+                </EuiFlexItem>
+                {!!metaData && (
+                  <EuiFlexItem grow={false}>
+                    <MetadataPopover {...metaData} showScore={showScore} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

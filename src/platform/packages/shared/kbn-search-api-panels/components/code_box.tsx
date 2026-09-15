@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useId, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -17,11 +17,8 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
-  EuiThemeProvider,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -30,7 +27,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import type { LanguageDefinition } from '../types';
-import * as Styles from './styles';
 
 interface CodeBoxProps {
   languages?: LanguageDefinition[];
@@ -63,8 +59,6 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { euiTheme } = useEuiTheme();
-  const selectLangDescriptionId = useId();
 
   const selectLanguageDescription = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
@@ -109,53 +103,43 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
     : [];
 
   const button = selectedLanguage ? (
-    <EuiThemeProvider colorMode="dark">
-      <span id={selectLangDescriptionId} className="euiScreenReaderOnly" aria-hidden="true">
-        {selectLanguageDescription}
-      </span>
-      <EuiButtonEmpty
-        color="text"
-        iconType="chevronSingleDown"
-        iconSide="left"
-        aria-describedby={selectLangDescriptionId}
-        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      >
-        {selectedLanguage.name}
-      </EuiButtonEmpty>
-    </EuiThemeProvider>
+    <EuiButtonEmpty
+      color="text"
+      iconType="chevronSingleDown"
+      iconSide="right"
+      size="s"
+      aria-label={selectLanguageDescription}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+    >
+      {selectedLanguage.name}
+    </EuiButtonEmpty>
   ) : null;
 
   return (
-    <EuiThemeProvider colorMode="dark">
-      <EuiPanel
-        paddingSize="xs"
-        css={Styles.codeBoxPanel(euiTheme)}
-        data-test-subj="codeBlockControlsPanel"
-      >
-        {showTopBar && (
-          <>
-            <EuiFlexGroup
-              alignItems="center"
-              responsive={false}
-              gutterSize="s"
-              justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
-            >
-              {languages && button && (
-                <EuiFlexItem>
-                  <EuiThemeProvider colorMode="light">
-                    <EuiPopover
-                      aria-label={selectLanguageDescription}
-                      button={button}
-                      isOpen={isPopoverOpen}
-                      closePopover={() => setIsPopoverOpen(false)}
-                      panelPaddingSize="none"
-                      anchorPosition="downLeft"
-                    >
-                      <EuiContextMenuPanel items={items} />
-                    </EuiPopover>
-                  </EuiThemeProvider>
-                </EuiFlexItem>
-              )}
+    <EuiPanel paddingSize="xs" data-test-subj="codeBlockControlsPanel" hasBorder>
+      {showTopBar && (
+        <EuiFlexGroup
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+          justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
+        >
+          {languages && button && (
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                aria-label={selectLanguageDescription}
+                button={button}
+                isOpen={isPopoverOpen}
+                closePopover={() => setIsPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel items={items} />
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={codeSnippet}>
                   {(copy) => (
@@ -184,20 +168,19 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
-            <EuiHorizontalRule margin="none" />
-          </>
-        )}
-        <EuiCodeBlock
-          isCopyable={!showTopBar}
-          transparentBackground
-          fontSize="m"
-          language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
-          overflowHeight={500}
-          css={Styles.codeBoxCodeBlock}
-        >
-          {codeSnippet}
-        </EuiCodeBlock>
-      </EuiPanel>
-    </EuiThemeProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiCodeBlock
+        isCopyable={!showTopBar}
+        transparentBackground
+        fontSize="s"
+        paddingSize="m"
+        language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
+        overflowHeight={500}
+      >
+        {codeSnippet}
+      </EuiCodeBlock>
+    </EuiPanel>
   );
 };
