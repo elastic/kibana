@@ -26,7 +26,10 @@ interface WorkerSettingsPanelProps {
   enabled: boolean;
   settings: WorkerSettings;
   error?: string;
+  /** Settings could not be read for this Worker; controls are locked and the subtitle says why. */
   settingsLocked: boolean;
+  /** A Watch save is in flight; controls are locked so edits cannot slip into a draft about to be cleared. */
+  isSaving: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
 }
@@ -42,10 +45,12 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   settings,
   error,
   settingsLocked,
+  isSaving,
   onEnabledChange,
   onSettingsChange,
 }) => {
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
+  const controlsDisabled = settingsLocked || isSaving;
 
   return (
     <SettingsSection
@@ -60,7 +65,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
       <EuiSwitch
         label={settingsI18n.ENABLED_SWITCH_LABEL}
         checked={enabled}
-        disabled={settingsLocked}
+        disabled={controlsDisabled}
         onChange={(event) => onEnabledChange(event.target.checked)}
         data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
       />
@@ -76,7 +81,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
       <AutonomySlider
         current={settings.autonomy}
         levels={getAllowedAutonomyLevels(worker.id)}
-        isDisabled={settingsLocked}
+        isDisabled={controlsDisabled}
         onChange={(autonomy) => onSettingsChange({ autonomy })}
       />
       {/* Only schedule-driven Workers project an interval; its presence is the signal. */}
@@ -85,7 +90,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           <EuiSpacer size="m" />
           <ScheduleIntervalField
             current={settings.scheduleInterval}
-            isDisabled={settingsLocked}
+            isDisabled={controlsDisabled}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
           />
         </>
@@ -94,7 +99,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
         <CustomSettings
           worker={worker}
           settings={settings}
-          isDisabled={settingsLocked}
+          isDisabled={controlsDisabled}
           onExtrasChange={(extras) => onSettingsChange({ extras })}
         />
       ) : null}

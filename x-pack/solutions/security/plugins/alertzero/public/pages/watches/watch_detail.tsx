@@ -137,7 +137,7 @@ export const WatchDetailPage: React.FC = () => {
               <EuiButton
                 fill
                 onClick={onSave}
-                disabled={!isDirty}
+                disabled={!isDirty || isSaving}
                 isLoading={isSaving}
                 data-test-subj="alertZeroWatchSettingsSave"
               >
@@ -185,6 +185,7 @@ export const WatchDetailPage: React.FC = () => {
                         settings={draft.settings}
                         error={draft.error}
                         settingsLocked={worker.state === 'unavailable'}
+                        isSaving={isSaving}
                         onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
                         onSettingsChange={(patch) => updateSettings(worker, patch)}
                       />

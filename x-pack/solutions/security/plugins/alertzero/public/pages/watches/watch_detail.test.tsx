@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
@@ -23,6 +23,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
+import * as settingsI18n from './settings_translations';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
@@ -297,6 +298,56 @@ describe('WatchDetailPage', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
     expect(screen.queryByTestId(/alertZeroWorkerRun-/)).not.toBeInTheDocument();
+  });
+
+  it('locks every control while a save is in flight and unlocks them when it completes', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    let resolveSave: ((value: { worker: Worker }) => void) | undefined;
+    mutateAsync.mockImplementation(
+      () =>
+        new Promise<{ worker: Worker }>((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const editableControls = () => [
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+      ),
+      within(ruleTuning).getByTestId('alertZeroAutonomySlider'),
+      within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue'),
+      within(ruleTuning).getByTestId('alertZeroScheduleIntervalUnit'),
+      within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays'),
+    ];
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+    const discard = screen.getByTestId('alertZeroWatchSettingsDiscard');
+
+    fireEvent.click(editableControls()[0]);
+    fireEvent.click(save);
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+
+    for (const control of editableControls()) {
+      expect(control).toBeDisabled();
+    }
+    expect(save).toBeDisabled();
+    expect(discard).toBeDisabled();
+
+    await act(async () => {
+      resolveSave!({ worker: { ...detectionWorkers[0], enabled: true } });
+    });
+
+    for (const control of editableControls()) {
+      expect(control).toBeEnabled();
+    }
+    // Clean again, so Save and Discard stay disabled for the usual reason, not because of saving.
+    expect(save).toBeDisabled();
+    expect(discard).toBeDisabled();
+    expect(screen.queryByText(settingsI18n.WORKER_SETTINGS_UNAVAILABLE)).not.toBeInTheDocument();
   });
 
   it('sends the whole extras object under settings when the analysis window is saved', async () => {
