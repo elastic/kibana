@@ -133,7 +133,8 @@
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/discover-session-constants",
   ],
   "exclude": ["target/**/*"]
 }
