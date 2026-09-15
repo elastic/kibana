@@ -66,51 +66,53 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
 };
 
 /** Factory for the browser-side proposal attachment UI definition. */
-export const createProposalAttachmentDefinition = (): AttachmentUIDefinition<ProposalAttachment> => ({
-  getLabel: (attachment) =>
-    attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION,
+export const createProposalAttachmentDefinition =
+  (): AttachmentUIDefinition<ProposalAttachment> => ({
+    getLabel: (attachment) =>
+      attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION,
 
-  getIcon: () => 'lock',
+    getIcon: () => 'lock',
 
-  getHeader: ({ attachment }) => {
-    const { data } = attachment;
-    const badges = [];
+    getHeader: ({ attachment }) => {
+      const { data } = attachment;
+      const badges = [];
 
-    // Status badge — suppressed for pending (the card footer shows the actions instead)
-    if (data.expired) {
+      // Status badge — suppressed for pending (the card footer shows the actions instead)
+      if (data.expired) {
+        badges.push({
+          label: i18n.translate(
+            'xpack.agenticInvestigations.proposals.attachments.expiredBadgeLabel',
+            { defaultMessage: 'Expired' }
+          ),
+          color: 'danger',
+        });
+      } else if (isDecided(data.status)) {
+        badges.push({
+          label: STATUS_BADGE_LABELS[data.status] ?? data.status,
+          color: STATUS_BADGE_COLORS[data.status] ?? 'default',
+        });
+      }
+
+      // Impact badge
       badges.push({
         label: i18n.translate(
-          'xpack.agenticInvestigations.proposals.attachments.expiredBadgeLabel',
-          { defaultMessage: 'Expired' }
+          'xpack.agenticInvestigations.proposals.attachments.impactBadgeLabel',
+          {
+            defaultMessage: '{impact} impact',
+            values: { impact: data.impact },
+          }
         ),
-        color: 'danger',
+        color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
       });
-    } else if (isDecided(data.status)) {
-      badges.push({
-        label: STATUS_BADGE_LABELS[data.status] ?? data.status,
-        color: STATUS_BADGE_COLORS[data.status] ?? 'default',
-      });
-    }
 
-    // Impact badge
-    badges.push({
-      label: i18n.translate('xpack.agenticInvestigations.proposals.attachments.impactBadgeLabel', {
-        defaultMessage: '{impact} impact',
-        values: { impact: data.impact },
-      }),
-      color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
-    });
+      // Confidence badge
+      badges.push({ label: data.confidence });
 
-    // Confidence badge
-    badges.push({ label: data.confidence });
+      return { badges };
+    },
 
-    return { badges };
-  },
-
-  renderInlineContent: (props) => {
-    const proposalId = props.attachment.origin ?? props.attachment.id;
-    return (
-      <ProposalApprovalCard proposalId={proposalId} />
-    );
-  },
-});
+    renderInlineContent: (props) => {
+      const proposalId = props.attachment.origin ?? props.attachment.id;
+      return <ProposalApprovalCard proposalId={proposalId} />;
+    },
+  });

@@ -39,6 +39,8 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
   - '@kbn/std'
+  - '@kbn/react-query'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod
