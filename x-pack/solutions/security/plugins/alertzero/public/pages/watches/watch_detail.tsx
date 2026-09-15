@@ -137,7 +137,9 @@ export const WatchDetailPage: React.FC = () => {
               <EuiButton
                 fill
                 onClick={onSave}
-                disabled={!isDirty || isSaving}
+                // A failed reload leaves stale Workers in the cache; do not write against them
+                // until Retry in the load-error prompt has succeeded.
+                disabled={!isDirty || isSaving || Boolean(workersError)}
                 isLoading={isSaving}
                 data-test-subj="alertZeroWatchSettingsSave"
               >

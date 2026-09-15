@@ -350,6 +350,57 @@ describe('WatchDetailPage', () => {
     expect(screen.queryByText(settingsI18n.WORKER_SETTINGS_UNAVAILABLE)).not.toBeInTheDocument();
   });
 
+  it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
+    const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
+    const workersQuery = (error: Error | null) =>
+      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue(workersQuery(null));
+    const mutateAsync = jest.fn().mockResolvedValue({ worker: installed[0] });
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+    // A fresh element each time, or React bails out of re-rendering an identical element.
+    const tree = () => (
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+    const { rerender } = render(tree());
+
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    fireEvent.change(field, { target: { value: '7' } });
+    fireEvent.blur(field);
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+
+    // The recovery read after a failed PATCH did not succeed: stale Workers stay cached.
+    mockUseWorkers.mockReturnValue(workersQuery(new Error('reload failed')));
+    rerender(tree());
+
+    expect(screen.getByTestId('alertZeroWatchWorkersLoadError')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    // Retry succeeded: the draft and its original revision are still there to retry with.
+    mockUseWorkers.mockReturnValue(workersQuery(null));
+    rerender(tree());
+
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+    });
+  });
+
   it('sends the whole extras object under settings when the analysis window is saved', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
