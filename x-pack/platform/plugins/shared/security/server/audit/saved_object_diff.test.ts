@@ -300,6 +300,29 @@ describe('computeJsonPatch', () => {
     });
   });
 
+  describe('undefined value handling', () => {
+    it('produces no op when an attribute is explicitly undefined in after (treated as absent)', () => {
+      const patch = computeJsonPatch({
+        a: { title: 'old' },
+        b: { title: 'old', extra: undefined },
+      });
+      expect(patch.ops).toHaveLength(0);
+      expect(patch.noOps).toHaveLength(1);
+    });
+
+    it('produces a remove op when an attribute changes from a value to undefined (treated as absent)', () => {
+      const patch = computeJsonPatch({
+        a: { title: 'old', extra: 'present' },
+        b: { title: 'old', extra: undefined },
+      });
+      expect(opAt(patch, '/extra')).toStrictEqual({
+        op: 'remove',
+        path: '/extra',
+        oldValue: 'present',
+      });
+    });
+  });
+
   describe('fieldsToRedact (sensitive field redaction)', () => {
     it('replaces value and oldValue with the redacted sentinel for a changed field', () => {
       const patch = computeJsonPatch({

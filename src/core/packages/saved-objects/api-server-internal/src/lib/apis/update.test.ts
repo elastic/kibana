@@ -1041,6 +1041,33 @@ describe('#update', () => {
         );
       });
 
+      it('records the pre-update value for nested attributes in the before snapshot', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        // Existing doc has a nested attribute; the mock response hardcodes { title: 'Testing' }
+        // so we override the _source to add a nested field.
+        const existingDoc = getMockGetResponse(registry, { type, id });
+        (existingDoc._source as Record<string, unknown>)[type] = {
+          title: 'Testing',
+          state: { color: 'red' },
+        };
+        client.get.mockResponseOnce(existingDoc, { statusCode: 200 });
+        client.index.mockResponseImplementation(
+          (params) =>
+            ({
+              body: { _id: params.id, ...mockVersionProps },
+            } as any)
+        );
+
+        await repository.update(type, id, { state: { color: 'blue' } } as any);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            before: expect.objectContaining({ state: { color: 'red' } }),
+            after: expect.objectContaining({ state: { color: 'blue' } }),
+          })
+        );
+      });
+
       it('emits a diff for an upsert that creates the object', async () => {
         securityExtension.savedObjectDiffEnabled = true;
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));

@@ -892,6 +892,34 @@ describe('#bulkUpdate', () => {
           bulkUpdateSuccess(client, repository, registry, [obj1, obj2])
         ).resolves.toBeDefined();
       });
+
+      it('records the pre-update value for nested attributes in the before snapshot', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const nestedObj: SavedObjectsBulkUpdateObject = {
+          type: 'index-pattern',
+          id: 'nested-test',
+          attributes: { state: { color: 'blue' } },
+        };
+        // Override the mget response to include a nested attribute in the existing document.
+        const mgetResponse = getMockMgetResponse(registry, [nestedObj]);
+        (mgetResponse.docs[0] as any)._source['index-pattern'] = {
+          title: 'Testing',
+          state: { color: 'red' },
+        };
+        client.mget.mockResponseOnce(mgetResponse);
+        client.bulk.mockResponseOnce(
+          getMockBulkUpdateResponse(registry, [nestedObj]) as estypes.BulkResponse
+        );
+
+        await repository.bulkUpdate([nestedObj]);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            before: expect.objectContaining({ state: { color: 'red' } }),
+            after: expect.objectContaining({ state: { color: 'blue' } }),
+          })
+        );
+      });
     });
 
     describe('security', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -302,6 +303,11 @@ export const executeUpdate = async <T>(
       attributes
     );
 
+    // Snapshot before-state before the merge: mergeForUpdate mutates shared
+    // nested objects in place, so cloneDeep is needed to prevent the snapshot
+    // from reflecting post-merge values.
+    auditRecord?.setBefore(cloneDeep(migrated!.attributes ?? {}) as Record<string, unknown>);
+
     const updatedAttributes = mergeAttributes
       ? mergeForUpdate({
           targetAttributes: {
@@ -311,8 +317,6 @@ export const executeUpdate = async <T>(
           typeMappings: typeDefinition.mappings,
         })
       : encryptedUpdatedAttributes;
-    auditRecord?.setBefore((migrated!.attributes ?? {}) as Record<string, unknown>);
-    auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
 
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
@@ -330,6 +334,10 @@ export const executeUpdate = async <T>(
 
     const docToSend = serializer.savedObjectToRaw(
       migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+    );
+
+    auditRecord?.setAfter(
+      (migratedUpdatedSavedObjectDoc.attributes ?? {}) as Record<string, unknown>
     );
 
     // implement creating the call params

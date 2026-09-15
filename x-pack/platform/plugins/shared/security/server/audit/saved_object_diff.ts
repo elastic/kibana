@@ -54,8 +54,10 @@ export const escapeJsonPointerSegment = (segment: string): string =>
  * single segment, so a literal dot in a key is unambiguous: `{"host.name": 1}`
  * flattens to `/host.name` while `{host: {name: 1}}` flattens to `/host/name` —
  * the two can never collide. Primitives, arrays, non-plain objects, and empty
- * plain objects are all leaves; a field changing between `undefined` and `{}`
- * therefore still produces a diff entry instead of vanishing.
+ * plain objects are all leaves; a field changing between absent and `{}`
+ * therefore still produces a diff entry instead of vanishing. `undefined` values
+ * are skipped entirely — they are absent from Elasticsearch documents, so a leaf
+ * with value `undefined` should be treated the same as a missing key.
  */
 const flattenToJsonPointers = (
   obj: Record<string, unknown>,
@@ -63,6 +65,7 @@ const flattenToJsonPointers = (
   result: Record<string, unknown> = {}
 ): Record<string, unknown> => {
   for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined) continue;
     const path = `${prefix}/${escapeJsonPointerSegment(key)}`;
     if (isPlainObject(value) && Object.keys(value as object).length > 0) {
       flattenToJsonPointers(value as Record<string, unknown>, path, result);

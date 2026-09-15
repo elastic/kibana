@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
@@ -357,6 +358,9 @@ export const performBulkUpdate = async <T>(
           documentToSave[type]
         );
 
+        const auditRecord = auditRecords[index];
+        auditRecord?.setBefore(cloneDeep(migrated.attributes) as Record<string, unknown>);
+
         const updatedAttributes = mergeAttributes
           ? mergeForUpdate({
               targetAttributes: {
@@ -388,10 +392,10 @@ export const performBulkUpdate = async <T>(
         const namespaces =
           savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
 
-        // Recorded before the bulk call so a failed write still audits the attempt.
-        const auditRecord = auditRecords[index];
-        auditRecord?.setBefore(migrated.attributes as Record<string, unknown>);
-        auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
+        // Record after-state from the migrated (persisted) form, consistent with create.ts.
+        auditRecord?.setAfter(
+          (migratedUpdatedSavedObjectDoc.attributes ?? {}) as Record<string, unknown>
+        );
 
         const expectedResult = {
           type,
