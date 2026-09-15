@@ -172,7 +172,7 @@ describe('DiscoverMainRoute', () => {
       getDefaultAdHocDataViews: () => defaultAdHocDataViews,
     };
 
-    setupComponent({ hasESData: false, hasUserDataView: false });
+    setupComponent({ hasESData: false, hasDataView: false });
 
     await waitForLoad();
 
