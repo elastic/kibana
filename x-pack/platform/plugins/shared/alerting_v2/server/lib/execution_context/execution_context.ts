@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  RuleExecutionCancellationError,
-  isRuleExecutionCancellationError,
-} from './cancellation_error';
+import { toRuleExecutionCancellationError } from './cancellation_error';
 import { CancellationScope } from './cancellation_scope';
 
 export interface ExecutionContext {
@@ -26,13 +23,7 @@ export class AbortSignalExecutionContext implements ExecutionContext {
       return;
     }
 
-    const reason = this.signal.reason;
-
-    if (isRuleExecutionCancellationError(reason)) {
-      throw reason;
-    }
-
-    throw new RuleExecutionCancellationError(undefined, { cause: reason });
+    throw toRuleExecutionCancellationError(this.signal.reason);
   }
 
   public onAbort(handler: () => void): () => void {
