@@ -29,7 +29,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -59,7 +59,7 @@ describe('WorkflowsManagementApi', () => {
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  const mockPreprocessAlertInputs = jest.mocked(preprocessTriggerInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();

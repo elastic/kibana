@@ -56,6 +56,12 @@ export interface RunWorkflowPanelProps {
    * When omitted all fetched workflows that are enabled are shown.
    */
   filterWorkflow?: (workflow: WorkflowListItemDto) => boolean;
+  /**
+   * Optional content rendered above the workflow selector, e.g. a callout warning that a
+   * large "select all" selection will be capped. Kept generic so callers own the messaging
+   * and styling.
+   */
+  notice?: React.ReactNode;
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -73,6 +79,7 @@ export const RunWorkflowPanel = ({
   visibility,
   sortWorkflow,
   filterWorkflow,
+  notice,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
@@ -190,6 +197,7 @@ export const RunWorkflowPanel = ({
 
   return (
     <>
+      {notice}
       <div css={{ position: 'relative' }}>
         {workflowSelector}
         {isLoading && (
