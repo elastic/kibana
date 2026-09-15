@@ -125,12 +125,13 @@ steps:
   # would fan out over a partial result.
   - name: run_generation
     type: workflow.execute
-    # The child fans out over batches, so this bounds N pipelines, not one. Each
-    # branch carries its own 30m `branch-timeout`; at `concurrency: 5` a run of
-    # up to 100 batches is 20 waves, so no single literal covers the worst case.
-    # 4h is sized for the realistic ceiling (a few waves) while still bounding a
-    # wedged child. The per-branch timeout, not this one, is what attributes a
-    # single stuck batch.
+    # The child fans out over batches, so this bounds N pipelines, not one. No
+    # literal can cover the theoretical worst case: the child runs
+    # `concurrency: max 2` with a 30m `branch-timeout`, so its own ceiling of 100
+    # batches is ~50 waves, and 4h does not come close. That is deliberate — 4h
+    # is sized for the realistic ceiling (a handful of waves over a 24h lookback)
+    # while still bounding a wedged child, and a single stuck batch is attributed
+    # by the child's per-branch timeout rather than by this one.
     #
     # Must stay a literal: the engine hands `timeout` to the duration parser
     # unrendered (elastic/kibana#290258).
@@ -225,15 +226,28 @@ steps:
               workflow-id: system-security-attack-discovery-review
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
-                # stringifies. The run step returns the persist handover, so
-                # `alert_ids` holds DETECTION alert ids. There is no persisted Attack
-                # Discovery `_id` to pass yet. #19022 / #19214 will use it once the
-                # run step returns persist-projected discoveries with document ids
-                # in-context. Do not forward `foreach.item.id`: that optional field
-                # is the LLM UUID, not the document id.
-                title: "{{ foreach.item.title }}"
-                alert_ids: "${{ foreach.item.alert_ids }}"
-                summary_markdown: "{{ foreach.item.summary_markdown }}"
+                # stringifies. `alert_ids` holds DETECTION alert ids. There is no
+                # persisted Attack Discovery `_id` to pass yet. #19022 / #19214 will
+                # use it once the generation output carries document ids in-context.
+                #
+                # Bracket access, not `foreach.item.title`: since generation moved to
+                # the batched child these are the persisted alert `_source` documents,
+                # whose discovery fields are namespaced and written as FLAT dotted keys
+                # (`transform_to_alert_documents` uses computed keys like
+                # `[ALERT_ATTACK_DISCOVERY_TITLE]`, so the key is literally
+                # "kibana.alert.attack_discovery.title" rather than a nested object).
+                # Dotted-path access silently resolves to empty against that shape,
+                # which would dispatch every review with no title and no alert ids --
+                # invisible today only because the review steps are `console` stubs
+                # and an empty title still satisfies the child's `required: [title]`.
+                #
+                # Deliberately the anonymized fields, not their `*_with_replacements`
+                # twins: that matches what the previous inline `discoveriesToPersist`
+                # handover passed. Switching reviews to de-anonymized values is a
+                # behaviour change and belongs with #19022 / #19211.
+                title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
+                alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
+                summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's autonomy enum.
                 autonomy: "${{ inputs.autonomy }}"

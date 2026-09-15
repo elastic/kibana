@@ -421,13 +421,55 @@ describe('Attack Discovery worker chain', () => {
       }
     );
 
-    it('passes title through to the review', () => {
-      expect(branchInputs.title).toContain('foreach.item.title');
-    });
+    // Generation now comes from the batched child, which emits persisted alert
+    // `_source` documents. Their discovery fields are namespaced AND written as
+    // flat dotted keys, so a dotted-path read resolves to empty and every review
+    // would be dispatched with no title and no alert ids -- silently, because the
+    // review steps are stubs and an empty title still satisfies `required`.
+    // Rendering against the real `_source` shape is what makes this a real check;
+    // asserting the template text alone would not catch the shape mismatch.
+    describe('per-attack review inputs', () => {
+      const liquidEngine = createWorkflowLiquidEngine();
+      // Exactly what `transform_to_alert_documents` writes.
+      const persistedAttack = {
+        'kibana.alert.attack_discovery.title': 'Suspicious lateral movement',
+        'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
+        'kibana.alert.attack_discovery.summary_markdown': 'A **summary**',
+      };
 
-    // `${{ }}` preserves the array type; `{{ }}` would stringify it.
-    it('passes alert_ids through as a typed array', () => {
-      expect(branchInputs.alert_ids).toBe('${{ foreach.item.alert_ids }}');
+      const render = (template: unknown) =>
+        liquidEngine.parseAndRender(
+          String(template).replace(/^\$\{\{(.*)\}\}$/s, '{{$1| json }}'),
+          {
+            foreach: { item: persistedAttack },
+          }
+        );
+
+      it('resolves the title against a persisted attack document', async () => {
+        await expect(render(branchInputs.title)).resolves.toBe('Suspicious lateral movement');
+      });
+
+      it('resolves alert_ids against a persisted attack document', async () => {
+        await expect(render(branchInputs.alert_ids)).resolves.toBe('["alert-1","alert-2"]');
+      });
+
+      it('resolves summary_markdown against a persisted attack document', async () => {
+        await expect(render(branchInputs.summary_markdown)).resolves.toBe('A **summary**');
+      });
+
+      // `${{ }}` preserves the array type; `{{ }}` would stringify it.
+      it('passes alert_ids as a typed array rather than a string', () => {
+        expect(String(branchInputs.alert_ids).startsWith('${{')).toBe(true);
+      });
+
+      // The anonymized fields, matching what the previous inline handover passed.
+      // De-anonymizing reviews is a behaviour change owned by #19022 / #19211.
+      it.each(['title', 'alert_ids', 'summary_markdown'])(
+        'reads the anonymized %s, not its _with_replacements twin',
+        (field) => {
+          expect(String(branchInputs[field])).not.toContain('with_replacements');
+        }
+      );
     });
 
     it('passes autonomy through as a typed enum', () => {
