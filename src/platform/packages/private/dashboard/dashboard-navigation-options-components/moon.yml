@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-navigation-options-components'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/dashboard-navigation-options-components'
   description: Moon project for @kbn/dashboard-navigation-options-components
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/private/dashboard/dashboard-navigation-options-components
 dependsOn:
   - '@kbn/i18n'

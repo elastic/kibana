@@ -9,10 +9,7 @@ import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
-import type {
-  BulkCreateAttachmentsRequestV2,
-  FindAttachmentsQueryParams,
-} from '../../../common/types/api';
+import type { FindAttachmentsQueryParams } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 
 /**
@@ -33,10 +30,10 @@ export interface AddArgs {
 export interface BulkCreateArgs {
   caseId: string;
   /**
-   * Mixed v1/unified. Internal bulk_create and connectors still send v1;
-   * convert inside bulkCreate until those callers go unified-only.
+   * Unified payloads only. Callers with mixed wire shapes convert first via
+   * toUnifiedAttachmentRequest.
    */
-  attachments: BulkCreateAttachmentsRequestV2;
+  attachments: UnifiedAttachmentPayload[];
 }
 
 /**
