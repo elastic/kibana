@@ -68,6 +68,23 @@ const parseSseBlocks = (streamText: string): ParsedSseBlock[] => {
  */
 const sseBlockToEvent = (block: ParsedSseBlock): unknown => ({ type: block.type, ...block.data });
 
+/** The text of a model message, whose content is either a string or a list of parts. */
+const promptText = ({ content }: { content?: unknown }): string => {
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((part) =>
+        typeof part === 'string' ? part : String((part as { text?: string }).text ?? '')
+      )
+      .join('\n');
+  }
+
+  return '';
+};
+
 const conversationIdFromSseStream = (streamText: string): string | undefined => {
   for (const block of parseSseBlocks(streamText)) {
     if (
@@ -219,20 +236,26 @@ apiTest.describe(
             )?.requestBody;
           expect(modelRequest).toBeDefined();
 
-          const contents = modelRequest?.messages.map((entry) => String(entry.content ?? '')) ?? [];
+          // Consecutive human turns reach the model as one message whose content is a list of
+          // parts, so flatten everything into the prompt text before asserting on it.
+          const prompt = (modelRequest?.messages ?? []).map(promptText).join('\n');
+
           for (const text of [
             'Pool limit is now 200',
             'Errors returned to normal',
             'Summarize the incident',
           ]) {
-            expect(contents.filter((content) => content.includes(text))).toHaveLength(1);
+            expect(prompt.split(text)).toHaveLength(2);
           }
-          expect(
-            contents.findIndex((content) => content.includes('Pool limit is now 200'))
-          ).toBeLessThan(
-            contents.findIndex((content) => content.includes('Errors returned to normal'))
+
+          expect(prompt.indexOf('Pool limit is now 200')).toBeLessThan(
+            prompt.indexOf('Errors returned to normal')
           );
-          expect(contents.join('\n')).toContain('Alice');
+          expect(prompt.indexOf('Errors returned to normal')).toBeLessThan(
+            prompt.indexOf('Summarize the incident')
+          );
+          // Each appended message keeps its author attribution.
+          expect(prompt).toMatch(/\[User: [^\]]+ — Sent: [^\]]+\]\n\nPool limit is now 200/);
         });
 
         await apiTest.step('the executed round joins the same timeline', async () => {
