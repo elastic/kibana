@@ -14,6 +14,7 @@ import {
   lensPanelRequestSchema,
   vegaPanelRequestSchema,
   editPanelRequestInputSchema,
+  editVisPanelConfigInputSchema,
   type VisPanelResolutionRequest,
 } from './vis';
 import {
@@ -117,6 +118,7 @@ export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
 export const editPanelItemSchema = z.discriminatedUnion('source', [
   editPanelRequestInputSchema,
   z.discriminatedUnion('type', [
+    editVisPanelConfigInputSchema,
     editMarkdownPanelConfigInputSchema,
     editCustomContentPanelConfigInputSchema,
   ]),

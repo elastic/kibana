@@ -41,7 +41,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request" for query/chart-family changes; source: "config", type: "vis" for a presentation patch such as title or legend), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for query edits and should be recreated as new ES|QL-based panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -87,7 +87,8 @@ export const editPanelsOperation = defineOperation({
 
       if (panelInput.source === 'config') {
         const validation = PANEL_TYPE_DEFINITIONS[panelInput.type].validateConfigEdit?.(
-          existingPanel
+          existingPanel,
+          panelInput.config
         ) ?? { ok: true };
         if (!validation.ok) {
           recordFailure(panelInput.panelId, validation.error);
@@ -136,30 +137,33 @@ export const editPanelsOperation = defineOperation({
     let nextDashboardData = dashboardData;
     for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
+        const definition = PANEL_TYPE_DEFINITIONS[panelInput.type];
         let resolvedConfig: typeof panelInput.config | CustomContentState;
         try {
-          resolvedConfig =
-            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
-              ? context.resolveCustomContentTemplate
-                ? await mergeAndResolveCustomContentEdit(
-                    panelInput.config,
-                    existingPanel.config as CustomContentState,
-                    context.resolveCustomContentTemplate
-                  )
-                : {
-                    ...(existingPanel.config as CustomContentState),
-                    ...(panelInput.config.esqlQuery !== undefined
-                      ? { esql_query: toEsqlQueryState(panelInput.config.esqlQuery ?? undefined) }
-                      : {}),
-                  }
-              : panelInput.config;
+          if (definition.applyConfigEdit) {
+            resolvedConfig = definition.applyConfigEdit(existingPanel, panelInput.config);
+          } else if (panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel) {
+            resolvedConfig = context.resolveCustomContentTemplate
+              ? await mergeAndResolveCustomContentEdit(
+                  panelInput.config,
+                  existingPanel.config as CustomContentState,
+                  context.resolveCustomContentTemplate
+                )
+              : {
+                  ...(existingPanel.config as CustomContentState),
+                  ...(panelInput.config.esqlQuery !== undefined
+                    ? { esql_query: toEsqlQueryState(panelInput.config.esqlQuery ?? undefined) }
+                    : {}),
+                };
+          } else {
+            resolvedConfig = panelInput.config;
+          }
         } catch (err) {
           recordFailure(panelInput.panelId, getErrorMessage(err));
           continue;
         }
 
-        const panelContent =
-          PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);
+        const panelContent = definition.buildPanelContent(resolvedConfig);
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,
