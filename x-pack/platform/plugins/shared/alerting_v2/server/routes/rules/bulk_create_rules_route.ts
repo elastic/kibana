@@ -34,6 +34,7 @@ export class BulkCreateRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Create rules in bulk',
     description: `Creates up to ${MAX_BULK_ITEMS} rules in a single request. Each item can include a client-supplied \`id\`. Kibana generates an identifier when \`id\` is omitted. The request succeeds with HTTP 200 even when some rules fail. Created rules are returned in \`rules\`. Failures are returned in \`errors\`. Check \`errors\` before treating the request as fully successful. To create a single rule, use POST /api/alerting/v2/rules.`,
     oasOperationObject: bulkCreateRulesOasExamples,
