@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
-import { useSyncInterval } from './use_sync_interval';
 import { SyncNowLink } from './sync_now_link';
 import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
@@ -23,8 +22,6 @@ export const MwsCalloutContent = ({
   /** Adds a line noting that an outdated agent may keep running through this monitor's active window, instead of a separate callout — keeps this surface to one box. */
   hasOutdatedAgent?: boolean;
 }) => {
-  const syncInterval = useSyncInterval();
-
   if (activeMWs.length) {
     return (
       <>
@@ -55,8 +52,8 @@ export const MwsCalloutContent = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
-              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors. {syncNowLink}"
-              values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
+              defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+              values={{ syncNowLink: <SyncNowLink /> }}
             />
           </EuiText>
           {hasOutdatedAgent && <MwsAgentVersionWarningLine />}

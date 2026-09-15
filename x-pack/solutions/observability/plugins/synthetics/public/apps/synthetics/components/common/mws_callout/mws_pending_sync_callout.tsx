@@ -14,10 +14,8 @@ import { SyncNowLink } from './sync_now_link';
 import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
 export const MwsPendingSyncCallout = ({
-  syncInterval,
   hasOutdatedAgent = false,
 }: {
-  syncInterval: number;
   hasOutdatedAgent?: boolean;
 }) => {
   return (
@@ -36,8 +34,8 @@ export const MwsPendingSyncCallout = ({
         <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
-            defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors. {syncNowLink}"
-            values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
+            defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+            values={{ syncNowLink: <SyncNowLink /> }}
           />
         </EuiText>
         {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
