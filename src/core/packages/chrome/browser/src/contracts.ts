@@ -11,6 +11,8 @@ import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/app-menu';
 import type { ChromeNext } from './chrome_next';
+import type { ChromeControls } from './controls';
+import type { ChromeHelp } from './help';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -71,8 +73,23 @@ export interface ChromeStart {
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
   /**
-   * Chrome Next rollout namespace.
+   * Persistent interactive chrome controls. Chrome decides where they render.
    *
+   * {@inheritdoc ChromeControls}
+   */
+  controls: ChromeControls;
+
+  /**
+   * Newsfeed and Feedback action registration for the Help menu.
+   *
+   * {@inheritdoc ChromeHelp}
+   */
+  help: ChromeHelp;
+
+  /**
+   * Deprecated compatibility facade for the former Chrome Next rollout namespace.
+   *
+   * @deprecated Use {@link ChromeStart.controls} and {@link ChromeStart.help}.
    * {@inheritdoc ChromeNext}
    */
   next: ChromeNext;
