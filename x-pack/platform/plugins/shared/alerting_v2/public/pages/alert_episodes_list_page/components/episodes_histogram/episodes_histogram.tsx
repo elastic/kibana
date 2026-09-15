@@ -258,6 +258,7 @@ export const EpisodesHistogram = ({
       {error ? (
         <EuiCallOut
           announceOnMount
+          data-test-subj="episodesHistogramError"
           title={EPISODES_HISTOGRAM_QUERY_ERROR}
           color="danger"
           iconType="error"

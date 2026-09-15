@@ -60,6 +60,7 @@ export class ObservabilityAlertingPage {
   public readonly episodesKpisAlertActionsPanel: Locator;
   public readonly episodesHistogramPanel: Locator;
   public readonly episodesHistogramChart: Locator;
+  public readonly episodesHistogramError: Locator;
   public readonly episodesTableLoading: Locator;
   public readonly episodesTableToolbar: Locator;
   public readonly episodesItemCount: Locator;
@@ -88,6 +89,7 @@ export class ObservabilityAlertingPage {
     );
     this.episodesHistogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
     this.episodesHistogramChart = this.page.testSubj.locator('unifiedHistogramChart');
+    this.episodesHistogramError = this.page.testSubj.locator('episodesHistogramError');
     this.episodesTableLoading = this.page.testSubj.locator('alertingV2EpisodesListTable-loading');
     this.episodesTableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.episodesItemCount = this.page.testSubj.locator('alertEpisodesItemCount');
