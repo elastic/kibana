@@ -41490,6 +41490,12 @@ paths:
                       - accountType: single-account
                         cloudProvider: aws
                         created_at: '2024-01-15T10:00:00.000Z'
+                        iac_blueprint_id: federated-identity
+                        iac_blueprint_version: 1.0.0
+                        iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                        iac_key: sha256:661cb7def1c7101f
+                        iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                        iac_upgrade_status: up_to_date
                         id: cloud-connector-id-1
                         name: My AWS connector
                         packagePolicyCount: 2
@@ -41506,24 +41512,48 @@ paths:
                       properties:
                         accountType:
                           type: string
-                        blueprintId:
+                        cloudProvider:
+                          type: string
+                        created_at:
+                          type: string
+                        iac_blueprint_id:
                           description: Identifier of the template source last used for this connector. Set to null to remove it.
                           maxLength: 255
                           minLength: 1
                           nullable: true
                           type: string
                           x-state: Experimental
-                        blueprintVersion:
+                        iac_blueprint_version:
                           description: Version of the template source last used for this connector. Set to null to remove it.
                           maxLength: 64
                           minLength: 1
                           nullable: true
                           type: string
                           x-state: Experimental
-                        cloudProvider:
+                        iac_deployment_id:
+                          description: Identifier of the last CloudFormation stack deployed for this connector.
+                          maxLength: 2048
+                          minLength: 1
                           type: string
-                        created_at:
+                          x-state: Experimental
+                        iac_key:
+                          description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                          maxLength: 512
+                          minLength: 1
+                          nullable: true
                           type: string
+                          x-state: Experimental
+                        iac_upgrade_checked_at:
+                          description: When this connector was last checked for a CloudFormation template upgrade.
+                          type: string
+                          x-state: Experimental
+                        iac_upgrade_status:
+                          description: Whether a newer CloudFormation template is available for this connector.
+                          enum:
+                            - up_to_date
+                            - upgrade_available
+                          type: string
+                          x-state: Experimental
                         id:
                           type: string
                         name:
@@ -41532,13 +41562,6 @@ paths:
                           type: string
                         packagePolicyCount:
                           type: number
-                        templateSha:
-                          description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                          maxLength: 255
-                          minLength: 1
-                          nullable: true
-                          type: string
-                          x-state: Experimental
                         updated_at:
                           type: string
                         vars:
@@ -41627,6 +41650,10 @@ paths:
                 value:
                   accountType: single-account
                   cloudProvider: aws
+                  iac_blueprint_id: federated-identity
+                  iac_blueprint_version: 1.0.0
+                  iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                  iac_key: sha256:661cb7def1c7101f
                   name: My AWS connector
                   vars: {}
             schema:
@@ -41646,32 +41673,32 @@ paths:
                     - azure
                     - gcp
                   type: string
-                iac:
-                  additionalProperties: false
-                  description: Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.
-                  type: object
-                  properties:
-                    blueprintId:
-                      description: Identifier of the template source last used for this connector. Set to null to remove it.
-                      maxLength: 255
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
-                    blueprintVersion:
-                      description: Version of the template source last used for this connector. Set to null to remove it.
-                      maxLength: 64
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
-                    templateSha:
-                      description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                      maxLength: 255
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
+                iac_blueprint_id:
+                  description: Identifier of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 255
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental
+                iac_blueprint_version:
+                  description: Version of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental
+                iac_deployment_id:
+                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                  x-state: Experimental
+                iac_key:
+                  description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                  maxLength: 512
+                  minLength: 1
+                  nullable: true
+                  type: string
                   x-state: Experimental
                 name:
                   description: The name of the cloud connector.
@@ -41728,6 +41755,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-2
                       name: My AWS connector
                       packagePolicyCount: 0
@@ -41743,24 +41776,48 @@ paths:
                     properties:
                       accountType:
                         type: string
-                      blueprintId:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      iac_blueprint_id:
                         description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      blueprintVersion:
+                      iac_blueprint_version:
                         description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      cloudProvider:
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
                         type: string
-                      created_at:
+                        x-state: Experimental
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
                         type: string
+                        x-state: Experimental
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental
                       id:
                         type: string
                       name:
@@ -41769,13 +41826,6 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
-                      templateSha:
-                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                        maxLength: 255
-                        minLength: 1
-                        nullable: true
-                        type: string
-                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
@@ -41949,6 +41999,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-1
                       name: My AWS connector
                       packagePolicyCount: 2
@@ -41964,24 +42020,48 @@ paths:
                     properties:
                       accountType:
                         type: string
-                      blueprintId:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      iac_blueprint_id:
                         description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      blueprintVersion:
+                      iac_blueprint_version:
                         description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      cloudProvider:
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
                         type: string
-                      created_at:
+                        x-state: Experimental
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
                         type: string
+                        x-state: Experimental
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental
                       id:
                         type: string
                       name:
@@ -41990,13 +42070,6 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
-                      templateSha:
-                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                        maxLength: 255
-                        minLength: 1
-                        nullable: true
-                        type: string
-                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
@@ -42087,6 +42160,10 @@ paths:
               putCloudConnectorRequestExample:
                 description: Update a Fleet cloud connector
                 value:
+                  iac_blueprint_id: federated-identity
+                  iac_blueprint_version: 1.0.0
+                  iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                  iac_key: sha256:661cb7def1c7101f
                   name: Updated AWS connector
                   vars: {}
             schema:
@@ -42099,32 +42176,32 @@ paths:
                     - single-account
                     - organization-account
                   type: string
-                iac:
-                  additionalProperties: false
-                  description: Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.
-                  type: object
-                  properties:
-                    blueprintId:
-                      description: Identifier of the template source last used for this connector. Set to null to remove it.
-                      maxLength: 255
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
-                    blueprintVersion:
-                      description: Version of the template source last used for this connector. Set to null to remove it.
-                      maxLength: 64
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
-                    templateSha:
-                      description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                      maxLength: 255
-                      minLength: 1
-                      nullable: true
-                      type: string
-                      x-state: Experimental
+                iac_blueprint_id:
+                  description: Identifier of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 255
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental
+                iac_blueprint_version:
+                  description: Version of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental
+                iac_deployment_id:
+                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                  x-state: Experimental
+                iac_key:
+                  description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                  maxLength: 512
+                  minLength: 1
+                  nullable: true
+                  type: string
                   x-state: Experimental
                 name:
                   description: The name of the cloud connector.
@@ -42177,6 +42254,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T11:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-1
                       name: Updated AWS connector
                       packagePolicyCount: 2
@@ -42192,24 +42275,48 @@ paths:
                     properties:
                       accountType:
                         type: string
-                      blueprintId:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      iac_blueprint_id:
                         description: Identifier of the template source last used for this connector. Set to null to remove it.
                         maxLength: 255
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      blueprintVersion:
+                      iac_blueprint_version:
                         description: Version of the template source last used for this connector. Set to null to remove it.
                         maxLength: 64
                         minLength: 1
                         nullable: true
                         type: string
                         x-state: Experimental
-                      cloudProvider:
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
                         type: string
-                      created_at:
+                        x-state: Experimental
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
                         type: string
+                        x-state: Experimental
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental
                       id:
                         type: string
                       name:
@@ -42218,13 +42325,6 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
-                      templateSha:
-                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
-                        maxLength: 255
-                        minLength: 1
-                        nullable: true
-                        type: string
-                        x-state: Experimental
                       updated_at:
                         type: string
                       vars:
