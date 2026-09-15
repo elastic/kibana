@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
@@ -33,9 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `Moyenne de ${field}` : `Moyenne`;
       case 'sum':
         return 'somme';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '(null)';
       default:
         return term;
     }
@@ -56,9 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} の平均` : `平均`;
       case 'sum':
         return '合計';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '（null）';
       default:
         return term;
     }
@@ -79,9 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的平均值` : '平均值';
       case 'sum':
         return '求和';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '（空）';
       default:
         return term;
     }
@@ -109,27 +100,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'sum':
         // xpack.maps.aggType.sumLabel
         return 'Summe';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '(Null)';
       default:
         return term;
     }
   }
 
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
-    switch (locale) {
-      case 'ja-JP':
-        return getTranslationJa;
-      case 'zh-CN':
-        return getTranslationZh;
-      case 'fr-FR':
-        return getTranslationFr;
-      case 'de-DE':
-        return getTranslationDe;
-      default:
-        return (v: string, field?: string) => (v === 'null' ? NULL_LABEL : v);
-    }
+    const translate = ((): ((term: string, field?: string) => string) => {
+      switch (locale) {
+        case 'ja-JP':
+          return getTranslationJa;
+        case 'zh-CN':
+          return getTranslationZh;
+        case 'fr-FR':
+          return getTranslationFr;
+        case 'de-DE':
+          return getTranslationDe;
+        default:
+          return (v: string) => v;
+      }
+    })();
+
+    // The datatable renders null values as a dash, which is identical in every locale.
+    return (term, field) => (term === 'null' ? NULL_TOKEN : translate(term, field));
   }
 
   describe('lens smokescreen tests', () => {

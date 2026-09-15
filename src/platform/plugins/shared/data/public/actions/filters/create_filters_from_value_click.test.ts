@@ -279,6 +279,32 @@ describe('createFiltersFromClickEvent', () => {
         );
       });
 
+      test('should create a negated exists filter for a missing raw value', async () => {
+        const mockFilterableField = {
+          name: 'message',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+        table.rows[0]['1-1'] = null;
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([
+          {
+            meta: {
+              index: 'logs*',
+              negate: true,
+            },
+            query: {
+              exists: {
+                field: 'message',
+              },
+            },
+          },
+        ]);
+      });
+
       test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
         table.columns[0].isComputedColumn = true;
         mockFieldByName.mockReturnValue({

@@ -156,6 +156,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
           fieldFormats={this.props.fieldFormats}
           uiActions={this.props.uiActions}
           isFilterable={this.props.isFilterable}
+          missingValueDisplay={this.state.adapters.tables.missingValueDisplay}
         />
       </>
     );

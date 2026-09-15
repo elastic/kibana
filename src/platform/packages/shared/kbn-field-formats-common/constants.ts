@@ -16,8 +16,15 @@ export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
 
 export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
   defaultMessage: '(null)',
-  description: 'Represents the label used to replace an null value in tables and charts',
+  description:
+    'Represents the label used to replace a null value in charts, and the tooltip describing the dash shown in tables and Discover',
 });
+
+/**
+ * Displayed in place of a null value in tables and Discover, where a tooltip can carry the
+ * meaning. Not translated: a dash is locale-independent.
+ */
+export const NULL_TOKEN = '-';
 
 export const NAN_LABEL = 'NaN';
 

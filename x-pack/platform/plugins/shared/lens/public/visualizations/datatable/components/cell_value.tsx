@@ -16,6 +16,7 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { DataGridDensity } from '@kbn/lens-common';
+import { isMissingValue } from '@kbn/field-formats-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -256,6 +257,10 @@ export const createGridCell = (
         );
 
       case 'link': {
+        const linkContent =
+          formatter && isMissingValue(rawValue)
+            ? formatter.convertToReact(rawValue)
+            : formatter?.convertToText(rawValue) ?? fallbackText;
         const backgroundColor =
           colorMode === 'cell' && !isEmptyValue(rawValue)
             ? getCellColor(columnId, palette, colorMapping)(rawValue)
@@ -271,7 +276,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={formatter?.convertToText(rawValue) ?? fallbackText}
+            content={linkContent}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
