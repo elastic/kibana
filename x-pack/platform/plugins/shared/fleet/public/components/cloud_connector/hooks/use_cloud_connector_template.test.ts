@@ -175,6 +175,35 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
+    it('sends the integrations payload when the caller supplies several packages', async () => {
+      const integrations = [
+        {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+        },
+        {
+          name: 'aws_securityhub',
+          policyTemplates: [{ name: 'aws_securityhub', enabledInputs: ['aws-s3'] }],
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: 'ignored',
+          policyTemplates: [{ name: 'unused', enabledInputs: ['input'] }],
+          integrations,
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        workflow: 'federated_identity',
+        flow: 'cloud_connector',
+        integrations,
+      });
+    });
+
     it('falls back to the static URL without rendering when no policy template is enabled', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [] })

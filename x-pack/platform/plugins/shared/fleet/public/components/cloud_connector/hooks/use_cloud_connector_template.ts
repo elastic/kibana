@@ -23,6 +23,7 @@ import {
 import {
   IAC_FEDERATED_IDENTITY_WORKFLOW,
   type IacPolicyTemplateSelection,
+  type RenderIacTemplateIntegration,
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
@@ -48,11 +49,34 @@ export interface UseCloudConnectorTemplateParams {
    */
   policyTemplates?: IacPolicyTemplateSelection[];
   /**
+   * Multi-package render payload. When set, takes precedence over
+   * `packageName` + `policyTemplates` (Ingest Hub can cover several packages
+   * in one Launch).
+   */
+  integrations?: RenderIacTemplateIntegration[];
+  /**
    * Stored template digest from this connector. Omit on first render and
    * after a static-template fallback.
    */
   templateSha?: string;
 }
+
+const toRenderIntegrations = ({
+  integrations,
+  packageName,
+  policyTemplates,
+}: Pick<UseCloudConnectorTemplateParams, 'integrations' | 'packageName' | 'policyTemplates'>):
+  | RenderIacTemplateIntegration[]
+  | undefined => {
+  if (integrations?.length) {
+    const usable = integrations.filter((integration) => integration.policyTemplates.length > 0);
+    return usable.length > 0 ? usable : undefined;
+  }
+  if (packageName && policyTemplates?.length) {
+    return [{ name: packageName, policyTemplates }];
+  }
+  return undefined;
+};
 
 export type CloudConnectorLaunchButtonProps =
   /**
@@ -84,6 +108,7 @@ export const useCloudConnectorTemplate = ({
   iacTemplateUrl,
   packageName,
   policyTemplates,
+  integrations,
   templateSha,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
@@ -120,9 +145,14 @@ export const useCloudConnectorTemplate = ({
     // URL must contain a templateURL param: it is the quick-create scaffold
     // the rendered artifact gets swapped into, and String.replace on a
     // non-matching URL would silently discard the render.
+    const renderIntegrations = toRenderIntegrations({
+      integrations,
+      packageName,
+      policyTemplates,
+    });
+
     if (
-      !packageName ||
-      !policyTemplates?.length ||
+      !renderIntegrations ||
       !staticTemplateUrl ||
       !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
     ) {
@@ -167,7 +197,7 @@ export const useCloudConnectorTemplate = ({
         provider: AWS_CLOUD_PROVIDER,
         workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: [{ name: packageName, policyTemplates }],
+        integrations: renderIntegrations,
         ...(templateSha ? { templateSha } : {}),
       });
 
@@ -219,7 +249,7 @@ export const useCloudConnectorTemplate = ({
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, staticTemplateUrl, templateSha]);
+  }, [analytics, integrations, packageName, policyTemplates, staticTemplateUrl, templateSha]);
 
   if (!isIacProvisionerEnabled) {
     return {
