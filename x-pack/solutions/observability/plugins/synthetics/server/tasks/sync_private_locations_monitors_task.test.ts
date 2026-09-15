@@ -119,9 +119,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   });
 
   describe('start', () => {
-    it('uses the existing task schedule when task already exists', async () => {
+    it('always schedules the safety-net interval', async () => {
       mockTaskManagerStart.get.mockResolvedValue({
-        schedule: { interval: '10m' },
+        schedule: { interval: DEFAULT_TASK_SCHEDULE },
       } as any);
 
       await task.start();
@@ -130,11 +130,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         'Synthetics:Sync-Private-Location-Monitors-single-instance'
       );
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({ schedule: { interval: '10m' } })
+        expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
       );
+      expect(mockTaskManagerStart.runSoon).not.toHaveBeenCalled();
     });
 
-    it('falls back to DEFAULT_TASK_SCHEDULE when task does not exist yet', async () => {
+    it('schedules DEFAULT_TASK_SCHEDULE when the task does not exist yet', async () => {
       mockTaskManagerStart.get.mockRejectedValue({ statusCode: 404 });
 
       await task.start();
@@ -142,15 +143,20 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
       );
+      expect(mockTaskManagerStart.runSoon).not.toHaveBeenCalled();
     });
 
-    it('uses DEFAULT_TASK_SCHEDULE when existing task has no schedule', async () => {
-      mockTaskManagerStart.get.mockResolvedValue({ schedule: undefined } as any);
+    it('overwrites a leftover 5m interval and runs the task soon', async () => {
+      mockTaskManagerStart.get.mockResolvedValue({ schedule: { interval: '5m' } } as any);
+      mockTaskManagerStart.runSoon.mockResolvedValue({} as any);
 
       await task.start();
 
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
+      );
+      expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(
+        'Synthetics:Sync-Private-Location-Monitors-single-instance'
       );
     });
   });
@@ -855,6 +861,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1'];
         })()
       );
+      mockFleet.packagePolicyService.delete.mockImplementation(
+        async (_so: unknown, _es: unknown, ids: string[]) =>
+          ids.map((id) => ({ id, success: true, policy_ids: ['agent-a'] }))
+      );
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -998,13 +1008,60 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(true);
     });
 
+    it('should charge retries when extra package policies fail to delete', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+      mockFleet.packagePolicyService.delete.mockResolvedValue([
+        { id: 'unexpected-policy', success: false },
+      ]);
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+
+      expect(result.performCleanupSync).toBe(false);
+      expect(state.maxCleanUpRetries).toBe(2);
+      expect(state.hasAlreadyDoneCleanup).toBe(false);
+    });
+
+    it('should stop retrying extra deletes once the retry budget is exhausted', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+      mockFleet.packagePolicyService.delete.mockResolvedValue([
+        { id: 'unexpected-policy', success: false },
+      ]);
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+      }
+      expect(state.maxCleanUpRetries).toBe(0);
+      expect(state.hasAlreadyDoneCleanup).toBe(true);
+
+      mockFleet.packagePolicyService.delete.mockClear();
+      const exhausted = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(exhausted.performCleanupSync).toBe(false);
+      expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('max retries have been reached')
+      );
+    });
+
     it('should delete extra package policies even when hasAlreadyDoneCleanup is true', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
         (async function* () {
           yield ['monitor1-loc1', 'monitor1-loc1-stores'];
         })()
       );
-      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 0 };
+      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
 
       expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
@@ -1073,13 +1130,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .mockResolvedValue(mockPrivateLocations as any);
     });
 
-    it('uses the task schedule interval when present', async () => {
-      const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '15m' } };
+    it('returns the safety-net interval even when the instance still has a 5m schedule', async () => {
+      const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '5m' } };
       const result = await task.runTask({ taskInstance });
-      expect(scheduleOf(result)).toEqual({ interval: '15m' });
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
     });
 
-    it('falls back to DEFAULT_TASK_SCHEDULE when task has no schedule', async () => {
+    it('returns DEFAULT_TASK_SCHEDULE when the instance has no schedule', async () => {
       const taskInstance = getMockTaskInstance();
       const result = await task.runTask({ taskInstance });
       expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });

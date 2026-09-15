@@ -32,10 +32,9 @@ export async function cleanUpDuplicatedPackagePolicies(
     logger.debug(`[PrivateLocationCleanUpTask] ${msg}`);
   };
 
-  // Do not skip the extras scan when latched: leftover `{config}-{loc}-{space}`
-  // ids are just unexpected package policies. Blindly clearing the latch every
-  // interval would also restore the recreate retry budget forever.
-  if (!taskState.hasAlreadyDoneCleanup && taskState.maxCleanUpRetries <= 0) {
+  // Same budget for leftover deletes and recreate. Clearing it on every
+  // extras pass would retry a failing delete forever.
+  if (taskState.maxCleanUpRetries <= 0) {
     // `warn`, not `debug`: this is cleanup giving up, and the caller still gets a
     // success response. Leave the spent budget on the state so the exhaustion is
     // visible — `resetSyncPrivateCleanUpState` restores it when cleanup is
@@ -115,15 +114,26 @@ export async function cleanUpDuplicatedPackagePolicies(
     }
 
     if (hasExtras) {
-      await deleteDuplicatePackagePolicies(
+      const deletedCount = await deleteDuplicatePackagePolicies(
         packagePoliciesToDelete,
         soClient,
         esClient,
         serverSetup
       );
-      taskState.hasAlreadyDoneCleanup = false;
-      taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
-      performCleanupSync = true;
+      if (deletedCount > 0) {
+        taskState.hasAlreadyDoneCleanup = false;
+        taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
+        performCleanupSync = true;
+      } else {
+        taskState.maxCleanUpRetries -= 1;
+        if (taskState.maxCleanUpRetries <= 0) {
+          logger.warn(
+            `[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached. ` +
+              `Request cleanup again to retry.`
+          );
+          taskState.hasAlreadyDoneCleanup = true;
+        }
+      }
     }
 
     if (hasMissing) {
@@ -163,7 +173,7 @@ export async function deleteDuplicatePackagePolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   serverSetup: SyntheticsServerSetup
-) {
+): Promise<number> {
   const { logger } = serverSetup;
   const { fleet } = serverSetup.pluginsStart;
 
@@ -173,6 +183,7 @@ export async function deleteDuplicatePackagePolicies(
   const total = packagePoliciesToDelete.length;
   const totalBatches = Math.ceil(total / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
   const agentPolicyIds = new Set<string>();
+  let deletedCount = 0;
   for (let i = 0; i < total; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
     const batch = packagePoliciesToDelete.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
     const batchIndex = Math.floor(i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) + 1;
@@ -194,6 +205,7 @@ export async function deleteDuplicatePackagePolicies(
       if (!result.success) {
         continue;
       }
+      deletedCount += 1;
       for (const policyId of result.policy_ids ?? []) {
         agentPolicyIds.add(policyId);
       }
@@ -204,7 +216,7 @@ export async function deleteDuplicatePackagePolicies(
   }
 
   if (agentPolicyIds.size === 0) {
-    return;
+    return deletedCount;
   }
 
   logger.info(
@@ -217,4 +229,5 @@ export async function deleteDuplicatePackagePolicies(
       asyncDeploy: true,
     });
   }
+  return deletedCount;
 }
