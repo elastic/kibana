@@ -22,9 +22,16 @@ import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './use_watches_api';
 
 /**
- * Pending proposals, already grouped and ranked by the API (category, then
- * impact, confidence and deadline). Expired ones are dropped: a deadline that
- * has passed is no longer a decision anyone can make.
+ * Proposals awaiting a human, already ranked by the API (impact, then
+ * confidence and deadline). Superseded ones are dropped, so a retried proposal
+ * appears once rather than per attempt.
+ *
+ * `status: 'pending'` is the whole "awaiting" condition: that status is only
+ * ever valid while undecided. `excludeExpired` is still needed alongside it,
+ * because it filters on the deadline *date* — between the deadline passing and
+ * the gate workflow settling the record as `expired` there is task lag during
+ * which it still reads `pending`, and a decision nobody can make any more has
+ * no business in the queue.
  */
 export const usePendingProposals = (conversationId?: string) => {
   const { services } = useKibana();
@@ -37,6 +44,7 @@ export const usePendingProposals = (conversationId?: string) => {
         query: {
           status: 'pending',
           excludeExpired: true,
+          excludeSuperseded: true,
           ...(conversationId ? { conversationId } : {}),
         },
       }),
@@ -64,6 +72,30 @@ export const useProposal = (id: string | undefined) => {
 };
 
 /**
+ * Both decision mutations refetch rather than reading the response body.
+ *
+ * The route only releases the gating workflow; the decision itself is written
+ * by that workflow's post-gate steps, which run after the resume call has
+ * already returned. The response therefore still describes an undecided
+ * proposal, and using it would show the analyst the state they just changed.
+ * `invalidateQueries` is awaited via `refetchType: 'all'` so the queue reflects
+ * the write once it lands rather than on the next mount.
+ */
+const invalidateProposal = (
+  queryClient: ReturnType<typeof useQueryClient>,
+  { id }: { id: string }
+) => {
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.proposals.all,
+    refetchType: 'all',
+  });
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.proposals.detail(id),
+    refetchType: 'all',
+  });
+};
+
+/**
  * Approving submits the action input the analyst was shown, so the API can
  * refuse an approval that no longer matches the record.
  */
@@ -77,12 +109,7 @@ export const useApproveProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
   });
 };
 
@@ -96,11 +123,6 @@ export const useDismissProposal = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
+    onSuccess: (_proposal, { id }) => invalidateProposal(queryClient, { id }),
   });
 };

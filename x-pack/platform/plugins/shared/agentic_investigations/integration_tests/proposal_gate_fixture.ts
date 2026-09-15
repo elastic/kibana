@@ -1,0 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ExecutionStatus } from '@kbn/workflows';
+import {
+  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  getManagedWorkflowDefinition,
+} from '@kbn/workflows/managed';
+import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
+import type { Proposal } from '../common/proposals/proposal';
+import type {
+  ProposalDocument,
+  ProposalsStorageClient,
+} from '../server/proposals/storage/proposals_storage';
+import { ProposalsService } from '../server/proposals/services/proposals_service';
+import type { ProposalPrivilegesChecker } from '../server/proposals/services/check_proposal_privileges';
+import { registerStepDefinitionsForTest } from './register_step_definitions_for_test';
+
+/**
+ * The real definition as shipped, so the test cannot drift from the YAML that
+ * actually installs.
+ */
+export const gateWorkflowYaml = (): string => {
+  const definition = getManagedWorkflowDefinition(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
+  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+    throw new Error(`Managed definition ${CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID} has no yaml`);
+  }
+  return definition.yaml;
+};
+
+/**
+ * Elasticsearch replaced by a Map, so the real `ProposalsService` runs with its
+ * real guards — the valid decision/status pairs and the immutability checks are
+ * exactly what a workflow can get wrong, so stubbing the service out would
+ * remove the point of the test.
+ */
+const createInMemoryStorage = () => {
+  const documents = new Map<string, { document: ProposalDocument; seqNo: number }>();
+  let seqNo = 0;
+
+  /** Only the `ids` + `spaceId` shape `ProposalsService.load` issues. */
+  const idFromQuery = (query: unknown): string | undefined => {
+    const filter =
+      (query as { bool?: { filter?: Array<Record<string, any>> } })?.bool?.filter ?? [];
+    for (const clause of filter) {
+      const values = clause?.ids?.values;
+      if (Array.isArray(values)) {
+        return values[0];
+      }
+    }
+    return undefined;
+  };
+
+  return {
+    documents,
+    client: {
+      index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
+        documents.set(id, { document, seqNo: (seqNo += 1) });
+        return { _id: id };
+      }),
+      search: jest.fn(async ({ query }: { query: unknown }) => {
+        const id = idFromQuery(query);
+        const entry = id ? documents.get(id) : undefined;
+        const hits = entry
+          ? [{ _id: id!, _source: entry.document, _seq_no: entry.seqNo, _primary_term: 1 }]
+          : [];
+        return { hits: { hits, total: { value: hits.length } } };
+      }),
+    } as unknown as ProposalsStorageClient,
+  };
+};
+
+export interface ProposalGateFixture {
+  engine: WorkflowRunFixture;
+  /** Every proposal written so far, in insertion order. */
+  proposals: () => Array<Proposal & { id: string }>;
+  /** The only proposal, asserting there is exactly one. */
+  onlyProposal: () => Proposal & { id: string };
+  executionStatus: () => ExecutionStatus | undefined;
+  /** Step executions for a step id, oldest first. */
+  stepExecutions: (stepId: string) => Array<{ status: string; output?: unknown }>;
+  /** Runs the workflow to its first park (or to completion). */
+  start: (inputs?: Record<string, unknown>) => Promise<void>;
+  /** Answers the parked gate as a human would through a resume surface. */
+  resume: (approved: boolean, respondedBy?: string) => Promise<void>;
+  /** Flips what `investigations.checkDecidePrivileges` reports. */
+  setCanDecide: (canDecide: boolean) => void;
+}
+
+export const createProposalGateFixture = (): ProposalGateFixture => {
+  const engine = new WorkflowRunFixture();
+  const { documents, client } = createInMemoryStorage();
+  let canDecide = true;
+
+  const workflowsApi = {
+    // Supplies the action metadata `create` and `get` resolve. No `triggers`,
+    // so the best-effort action-input validation is skipped.
+    getWorkflow: jest.fn().mockResolvedValue({
+      definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+    }),
+    getWorkflowExecution: jest.fn(),
+    resumeWorkflowExecution: jest.fn(),
+  };
+
+  const service = new ProposalsService({
+    storage: client,
+    logger: loggerMock.create(),
+    getWorkflowsApi: () => workflowsApi as never,
+  });
+
+  const privileges: ProposalPrivilegesChecker = {
+    assertCanManage: async () => undefined,
+    assertCanRead: async () => undefined,
+    canManage: async () => canDecide,
+  };
+
+  registerStepDefinitionsForTest({
+    engine,
+    getProposalsService: () => service,
+    privileges,
+  });
+
+  const proposals = () =>
+    [...documents.entries()].map(
+      ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
+    );
+
+  return {
+    engine,
+    proposals,
+    onlyProposal: () => {
+      const all = proposals();
+      if (all.length !== 1) {
+        throw new Error(`Expected exactly one proposal, found ${all.length}`);
+      }
+      return all[0];
+    },
+    executionStatus: () =>
+      engine.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
+        ?.status,
+    stepExecutions: (stepId) =>
+      [...engine.stepExecutionRepositoryMock.stepExecutions.values()]
+        .filter((step) => step.stepId === stepId)
+        .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0)),
+    start: async (inputs = {}) => {
+      await engine.runWorkflow({
+        workflowYaml: gateWorkflowYaml(),
+        inputs: { conversationId: 'conv-1', comment: 'Tune the noisy rule', ...inputs },
+      });
+    },
+    resume: async (approved, respondedBy = 'analyst') => {
+      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      )!;
+      // The shape `waitForApproval` reduces a resume payload to. Anything else
+      // a caller sends is discarded by the platform, which is why the route
+      // has to write the dismiss reason itself.
+      execution.context = {
+        ...execution.context,
+        resumeInput: { approved },
+        resumedBy: respondedBy,
+      };
+      engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
+      await engine.resumeWorkflow();
+    },
+    setCanDecide: (value) => {
+      canDecide = value;
+    },
+  };
+};

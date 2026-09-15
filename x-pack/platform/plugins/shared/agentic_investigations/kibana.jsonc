@@ -11,7 +11,10 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["spaces"],
+    // `security` is optional because Kibana can run without it, but the
+    // proposal privilege checks fail closed when it is absent: a workflow whose
+    // principal cannot be evaluated must not write proposals.
+    "optionalPlugins": ["security", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

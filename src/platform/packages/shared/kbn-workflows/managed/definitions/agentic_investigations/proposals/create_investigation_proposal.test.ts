@@ -17,11 +17,15 @@ interface WorkflowStep {
   condition?: string;
   if?: string;
   timeout?: string;
+  'on-failure'?: { continue?: boolean | string; fallback?: WorkflowStep[] };
+  'max-iterations'?: number | { limit?: number; 'on-limit'?: string };
+  'iteration-timeout'?: string;
   with?: Record<string, unknown>;
   steps?: WorkflowStep[];
 }
 
 interface ParsedWorkflow {
+  consts?: Record<string, unknown>;
   settings?: {
     timeout?: string;
     'on-failure'?: { fallback?: WorkflowStep[] };
@@ -41,7 +45,7 @@ const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined
     if (step.name === name) {
       return step;
     }
-    const nested = (step as { steps?: WorkflowStep[] }).steps;
+    const nested = step.steps;
     if (nested) {
       const match = findStep(nested, name);
       if (match) {
@@ -51,6 +55,10 @@ const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined
   }
   return undefined;
 };
+
+/** Every descendant of a step, so containment can be asserted. */
+const collectNames = (steps: WorkflowStep[]): string[] =>
+  steps.flatMap((step) => [step.name ?? '', ...collectNames(step.steps ?? [])]);
 
 const durationToMs = (duration: string): number => {
   const match = /^(\d+)(ms|[smhdw])$/.exec(duration);
@@ -63,139 +71,440 @@ const durationToMs = (duration: string): number => {
   return Number(match[1]) * unit;
 };
 
+const gate = () => findStep(workflow.steps, 'await_decision')!;
+const loop = () => findStep(workflow.steps, 'decision_loop')!;
+
+/**
+ * Mirrors `VALID_STATUSES` in the plugin's `proposals_service`. Duplicated
+ * rather than imported because a package cannot depend on a plugin, and the
+ * pairing rule is worth enforcing here: the service rejects an illegal pair at
+ * runtime, which in a workflow means a failed execution rather than a type
+ * error.
+ */
+const VALID_STATUSES: Record<string, readonly string[]> = {
+  undecided: ['pending', 'expired'],
+  dismissed: ['no_action'],
+  approved: ['no_action', 'executing', 'succeeded', 'failed'],
+};
+
+/** Every `investigations.updateProposal` step anywhere in the definition. */
+const updateProposalSteps = (): WorkflowStep[] => {
+  const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
+    steps.flatMap((step) => [
+      ...(step.type === 'investigations.updateProposal' ? [step] : []),
+      ...collect(step.steps ?? []),
+    ]);
+
+  return [
+    ...collect(workflow.steps),
+    ...collect(workflow.settings?.['on-failure']?.fallback ?? []),
+  ];
+};
+
 describe('create-investigation-proposal workflow', () => {
-  it('declares inputs under the manual trigger, since a top-level inputs block is not valid', () => {
-    const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
+  describe('contract', () => {
+    it('declares inputs under the manual trigger, since a top-level inputs block is not valid', () => {
+      const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
 
-    expect(manualTrigger?.inputs?.properties).toEqual(
-      expect.objectContaining({
-        conversationId: expect.anything(),
-        actionWorkflowId: expect.anything(),
-        actionInput: expect.anything(),
-        autoApprove: expect.anything(),
-      })
-    );
+      expect(manualTrigger?.inputs?.properties).toEqual(
+        expect.objectContaining({
+          conversationId: expect.anything(),
+          actionWorkflowId: expect.anything(),
+          actionInput: expect.anything(),
+          impact: expect.anything(),
+          category: expect.anything(),
+          autoApprove: expect.anything(),
+        })
+      );
+    });
+
+    it('forwards the grouping overrides, or a non-action proposal cannot be grouped', () => {
+      // `category` is the only way a proposal with no action gets one, and
+      // consumers drop what they cannot group.
+      const create = findStep(workflow.steps, 'create_proposal');
+
+      expect(String(create?.with?.category)).toContain('inputs.category');
+      expect(String(create?.with?.impact)).toContain('inputs.impact');
+    });
+
+    it('types actionInput as a free-form object so any action shape can pass through', () => {
+      const actionInput = workflow.triggers.find(({ type }) => type === 'manual')?.inputs
+        ?.properties?.actionInput as { type?: string; additionalProperties?: boolean };
+
+      expect(actionInput.type).toBe('object');
+      expect(actionInput.additionalProperties).toBe(true);
+    });
+
+    it('requires a comment so every proposal carries something a human can read', () => {
+      const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
+
+      expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment']);
+    });
+
+    it('declares the outputs a caller gets back from workflow.execute', () => {
+      expect(workflow.outputs?.map(({ name }) => name)).toEqual([
+        'proposalId',
+        'status',
+        'decision',
+      ]);
+    });
   });
 
-  it('types actionInput as a free-form object so any action shape can pass through', () => {
-    const actionInput = workflow.triggers.find(({ type }) => type === 'manual')?.inputs?.properties
-      ?.actionInput as { type?: string; additionalProperties?: boolean };
+  describe('timeouts', () => {
+    it('gates on waitForApproval so the release signal is fail-closed', () => {
+      expect(gate().type).toBe('waitForApproval');
+    });
 
-    expect(actionInput.type).toBe('object');
-    expect(actionInput.additionalProperties).toBe(true);
+    it('keeps the gate timeout static, since the engine does not template-render it', () => {
+      // A template here reaches the duration parser unrendered and throws at
+      // execution time. See elastic/kibana#290258.
+      expect(gate().timeout).not.toContain('{{');
+      expect(() => durationToMs(gate().timeout ?? '')).not.toThrow();
+    });
+
+    it('uses one literal for the gate, the workflow ceiling and the recorded deadline', () => {
+      // Deliberately equal until the templated HITL timeout lands: three
+      // different numbers would each need their own justification, and the
+      // relationship between them is what #290258 changes.
+      const create = findStep(workflow.steps, 'create_proposal');
+
+      expect(gate().timeout).toBe(workflow.settings?.timeout);
+      expect(create?.with?.expiresIn).toBe(gate().timeout);
+    });
+
+    it('does not set iteration-timeout, which would truncate the parked gate', () => {
+      expect(loop()['iteration-timeout']).toBeUndefined();
+    });
   });
 
-  it('declares the outputs a caller gets back from workflow.execute', () => {
-    expect(workflow.outputs?.map(({ name }) => name)).toEqual(['proposalId', 'status']);
+  describe('the decision loop', () => {
+    it('loops while no decision has settled the proposal', () => {
+      expect(loop().type).toBe('while');
+      expect(loop().condition).toContain('variables.completed');
+    });
+
+    it('bounds itself in-loop as well as with max-iterations', () => {
+      const maxIterations = loop()['max-iterations'] as { limit?: number; 'on-limit'?: string };
+
+      // `on-limit: fail` alone cannot settle the record: a `while` is a
+      // flow-control step, so it is excluded from the workflow-level
+      // `on-failure` wrapping and its throw reaches no handler. The in-loop
+      // budget check is what actually writes a terminal status.
+      expect(maxIterations.limit).toBe(workflow.consts?.max_attempts);
+      expect(maxIterations['on-limit']).toBe('fail');
+      expect(findStep(workflow.steps, 'settle_exhausted')).toBeDefined();
+      expect(findStep(workflow.steps, 'break_exhausted')?.type).toBe('loop.break');
+    });
+
+    it('derives each attempt from the fixed deadline, so a retry cannot extend it', () => {
+      const init = findStep(workflow.steps, 'init_state');
+      const remaining = findStep(workflow.steps, 'compute_remaining');
+
+      expect(String(init?.with?.expires_epoch)).toContain('steps.create_proposal.output.expiresAt');
+      expect(String(remaining?.with?.remaining_seconds)).toContain('variables.expires_epoch');
+    });
+
+    it('computes the epoch and the difference in separate steps', () => {
+      // Liquid cannot read a variable written by the same `data.set`.
+      expect(findStep(workflow.steps, 'compute_now')?.with?.now_epoch).toBeDefined();
+      expect(findStep(workflow.steps, 'compute_remaining')?.with?.remaining_seconds).toBeDefined();
+    });
+
+    it('settles an expired proposal rather than parking on a non-positive duration', () => {
+      const settle = findStep(workflow.steps, 'settle_expired');
+
+      expect(settle?.condition).toContain('variables.remaining_seconds <= 0');
+      expect(findStep(workflow.steps, 'record_expiry')?.with?.status).toBe('expired');
+      expect(findStep(workflow.steps, 'break_expired')?.type).toBe('loop.break');
+    });
+
+    it('only treats a deadline as passed when the proposal has one', () => {
+      expect(findStep(workflow.steps, 'settle_expired')?.condition).toContain(
+        'variables.has_deadline'
+      );
+    });
+
+    it('avoids mixing and/or in a condition, which Liquid binds unpredictably', () => {
+      const conditions = collectNames(workflow.steps)
+        .map((name) => findStep(workflow.steps, name)?.condition)
+        .filter((condition): condition is string => typeof condition === 'string');
+
+      for (const condition of conditions) {
+        expect(condition.includes(' and ') && condition.includes(' or ')).toBe(false);
+      }
+    });
+
+    it('copies the gate output into variables inside the iteration that produced it', () => {
+      // A step output resolves to its latest execution, so a later iteration
+      // that skipped the gate would otherwise read this pass's values.
+      const resolve = findStep(workflow.steps, 'resolve_gate');
+
+      expect(resolve?.type).toBe('data.set');
+      expect(collectNames(findStep(workflow.steps, 'gate_branch')?.steps ?? [])).toContain(
+        'resolve_gate'
+      );
+    });
+
+    it('reads only variables after the loop, since loop step outputs are evicted', () => {
+      const output = workflow.steps.find(({ name }) => name === 'output_result');
+
+      for (const value of Object.values(output?.with ?? {})) {
+        expect(String(value)).not.toContain('steps.');
+      }
+    });
   });
 
-  it('gates on waitForApproval so the release signal is fail-closed', () => {
-    const gate = findStep(workflow.steps, 'await_decision');
+  describe('the decision/status pairs it writes', () => {
+    it('pairs every decision it writes with a status the service accepts', () => {
+      // The service enforces this at runtime, where a violation is a failed
+      // execution rather than a type error, so it is worth catching statically.
+      // A decision written on its own leaves the record at `pending`, which is
+      // illegal under either decision — the bug this guards against.
+      const decisionWrites = updateProposalSteps().filter(
+        (step) => step.with?.decision !== undefined
+      );
 
-    expect(gate?.type).toBe('waitForApproval');
+      expect(decisionWrites.length).toBeGreaterThan(0);
+      for (const step of decisionWrites) {
+        const decision = step.with!.decision as string;
+        const status = step.with!.status as string | undefined;
+
+        expect(VALID_STATUSES[decision]).toBeDefined();
+        expect(status).toBeDefined();
+        expect(VALID_STATUSES[decision]).toContain(status);
+      }
+    });
+
+    it('writes a recognised status everywhere else', () => {
+      // A status-only write inherits whatever decision the record already
+      // carries, which the YAML cannot know — so this only catches a status
+      // outside the vocabulary altogether.
+      const known = new Set(Object.values(VALID_STATUSES).flat());
+      const statusWrites = updateProposalSteps().filter(
+        (step) => step.with?.decision === undefined && step.with?.status !== undefined
+      );
+
+      for (const step of statusWrites) {
+        expect(known).toContain(step.with!.status as string);
+      }
+    });
   });
 
-  it('records the same deadline it gates on, so the queue and the gate cannot disagree', () => {
-    const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
-    const create = findStep(workflow.steps, 'create_proposal');
+  describe('privilege check', () => {
+    it('checks the resumer after the gate and before any write', () => {
+      const body = (loop().steps ?? []).map(({ name }) => name);
+      const checkIndex = body.indexOf('check_privileges');
 
-    expect(gate.timeout).toBe(create?.with?.expiresIn);
+      expect(checkIndex).toBeGreaterThan(body.indexOf('gate_branch'));
+      // If a write came first and threw instead, the gate would already be
+      // spent and the proposal would strand with no way to retry.
+      for (const branch of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
+        expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
+      }
+    });
+
+    it('re-parks on a denial and writes nothing', () => {
+      const reject = findStep(workflow.steps, 'reject_unprivileged');
+
+      expect(reject?.condition).toContain('steps.check_privileges.output.canDecide');
+      expect(reject?.steps?.map(({ type }) => type)).toEqual(['loop.continue']);
+    });
+
+    it('passes the gate responder, or an external resume decides as the Worker', () => {
+      // An external resume carries no request, so the execution wakes under the
+      // workflow runner's key — which always holds the privilege, having
+      // created the proposal. `respondedBy` is the only thing that tells that
+      // apart from a human.
+      expect(String(findStep(workflow.steps, 'check_privileges')?.with?.respondedBy)).toContain(
+        'variables.decided_by'
+      );
+    });
   });
 
-  it('keeps the gate timeout static, since the engine does not template-render it', () => {
-    const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
+  describe('the deadline after the gate returns', () => {
+    it('re-reads the clock before deciding, not only before parking', () => {
+      // The pre-gate check was evaluated before a park that may have lasted
+      // days, and only the HTTP routes refuse an expired decision — so a
+      // resume through the platform API or the Inbox would otherwise be
+      // recorded and run its action past the deadline.
+      const body = (loop().steps ?? []).map(({ name }) => name);
 
-    // A template here reaches the duration parser unrendered and throws at
-    // execution time. See elastic/kibana#290258.
-    expect(gate.timeout).not.toContain('{{');
-    expect(() => durationToMs(gate.timeout ?? '')).not.toThrow();
+      expect(body.indexOf('recompute_remaining')).toBeGreaterThan(body.indexOf('gate_branch'));
+      expect(body.indexOf('recompute_remaining')).toBeLessThan(body.indexOf('check_privileges'));
+    });
+
+    it('settles a late decision as expired and breaks', () => {
+      const settle = findStep(workflow.steps, 'settle_expired_after_gate');
+
+      expect(settle?.condition).toContain('variables.remaining_seconds <= 0');
+      expect(findStep(workflow.steps, 'record_late_expiry')?.with?.status).toBe('expired');
+      expect(findStep(workflow.steps, 'break_late_expiry')?.type).toBe('loop.break');
+    });
+
+    it('recomputes in separate steps, since Liquid cannot chain within one', () => {
+      expect(findStep(workflow.steps, 'recompute_now')?.with?.now_epoch).toBeDefined();
+      expect(
+        findStep(workflow.steps, 'recompute_remaining')?.with?.remaining_seconds
+      ).toBeDefined();
+    });
   });
 
-  it('sets a workflow timeout longer than the gate timeout, or the parked wait expires early', () => {
-    const gate = findStep(workflow.steps, 'await_decision') as { timeout?: string };
+  describe('gate failures', () => {
+    it('lets the gate continue on failure so a timeout re-parks', () => {
+      // Without this the workflow-level handler would settle the proposal on
+      // the first gate timeout, with time still left on the deadline.
+      expect(gate()['on-failure']?.continue).toBe(true);
+    });
 
-    expect(workflow.settings?.timeout).toBeDefined();
-    expect(durationToMs(workflow.settings!.timeout!)).toBeGreaterThanOrEqual(
-      durationToMs(gate.timeout!)
-    );
+    it('re-parks after a gate failure instead of deciding on an absent response', () => {
+      const retry = findStep(workflow.steps, 'retry_after_gate_failure');
+
+      expect(retry?.condition).toContain('variables.gate_failed');
+      expect(retry?.steps?.map(({ type }) => type)).toEqual(['loop.continue']);
+    });
   });
 
-  it('records a failure from the workflow-level on-failure, since HITL steps take none', () => {
-    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+  describe('dismissal', () => {
+    it('branches to dismissed unless the platform boolean is exactly true', () => {
+      const dismissal = findStep(workflow.steps, 'handle_dismissal');
 
-    expect(fallback.map(({ type }) => type)).toContain('investigations.updateProposal');
+      expect(dismissal?.condition).toContain('variables.gate_approved');
+      expect(dismissal?.condition).toContain('!= true');
+    });
+
+    it('records dismissed with no_action, since a human answered and nothing runs', () => {
+      const record = findStep(workflow.steps, 'record_dismissal');
+
+      expect(record?.with?.decision).toBe('dismissed');
+      expect(record?.with?.status).toBe('no_action');
+      expect(findStep(workflow.steps, 'break_dismissed')?.type).toBe('loop.break');
+    });
+
+    it('adopts a successor when the proposal was superseded under the parked gate', () => {
+      const adopt = findStep(workflow.steps, 'adopt_superseded');
+
+      expect(adopt?.condition).toContain('steps.read_proposal.output.supersededBy');
+      expect(collectNames(adopt?.steps ?? [])).toContain('park_on_successor');
+    });
   });
 
-  it('skips the failure handler when creation itself failed and there is no proposal id', () => {
-    const recordFailure = (workflow.settings?.['on-failure']?.fallback ?? []).find(
-      ({ name }) => name === 'record_failure'
-    );
+  describe('approval', () => {
+    it.each([
+      ['record_approval_no_action', 'no_action'],
+      ['record_approval_executing', 'executing'],
+    ])('writes the decision and status together in %s', (step, status) => {
+      // `approved` + `pending` is not a legal pair, so writing the decision on
+      // its own would leave the record claiming an approval with no outcome.
+      const write = findStep(workflow.steps, step);
 
-    expect(recordFailure?.if).toContain('steps.create_proposal.output.proposalId');
+      expect(write?.with?.decision).toBe('approved');
+      expect(write?.with?.status).toBe(status);
+    });
+
+    it('settles a non-action approval at no_action rather than leaving it awaiting', () => {
+      const noAction = findStep(workflow.steps, 'approve_without_action');
+
+      expect(noAction?.condition).toContain('variables.action_workflow_id == blank');
+      expect(findStep(workflow.steps, 'break_no_action')?.type).toBe('loop.break');
+    });
+
+    it('executes the action only when the proposal carries one', () => {
+      expect(findStep(workflow.steps, 'approve_with_action')?.condition).toContain(
+        'variables.action_workflow_id != blank'
+      );
+    });
+
+    it('passes the action input through under a single actionInput key', () => {
+      const execute = findStep(workflow.steps, 'execute_action');
+      const settings = execute?.with as {
+        'workflow-id'?: string;
+        inputs?: Record<string, unknown>;
+      };
+
+      // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
+      expect(settings['workflow-id']).toContain('variables.action_workflow_id');
+      expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
+    });
+
+    it('records the execution outcome after the action', () => {
+      expect(findStep(workflow.steps, 'record_success')?.with?.status).toBe('succeeded');
+      expect(findStep(workflow.steps, 'break_succeeded')?.type).toBe('loop.break');
+    });
+
+    it('keeps an action failure inside the loop so it can be re-offered', () => {
+      // Without the step-level continue the workflow-level handler would settle
+      // the proposal and stop, making the clone branch unreachable.
+      expect(findStep(workflow.steps, 'execute_action')?.['on-failure']?.continue).toBe(true);
+      expect(findStep(workflow.steps, 'record_action_failure')?.with?.status).toBe('failed');
+      expect(findStep(workflow.steps, 'clone_proposal')?.type).toBe('investigations.cloneProposal');
+    });
+
+    it('advances the carried id inside the branch that produced the clone', () => {
+      const adopt = findStep(workflow.steps, 'adopt_clone');
+
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.clone_proposal.output.proposalId'
+      );
+      expect(adopt?.with?.needs_gate).toBe(true);
+      expect(findStep(workflow.steps, 'park_on_clone')?.type).toBe('loop.continue');
+    });
   });
 
-  it('skips the gate when the caller already resolved autonomy for an action', () => {
-    const gateBranch = workflow.steps.find(({ name }) => name === 'decision_gate') as {
-      condition?: string;
-    };
+  describe('autonomy', () => {
+    it('skips the gate when the caller already resolved autonomy for an action', () => {
+      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
+        'autoApprove'
+      );
+    });
 
-    expect(gateBranch.condition).toContain('autoApprove');
+    it('always gates a non-action proposal, since there is no autonomy to resolve', () => {
+      // Without this the flag would skip the gate and approval — the whole
+      // lifecycle of a non-action proposal — would never be recorded.
+      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
+        'inputs.actionWorkflowId'
+      );
+    });
   });
 
-  it('always gates a non-action proposal, since there is no autonomy to resolve', () => {
-    const gateBranch = workflow.steps.find(({ name }) => name === 'decision_gate') as {
-      condition?: string;
-    };
+  describe('workflow-level failure handling', () => {
+    it('records a failure from the workflow-level on-failure, since HITL steps take none', () => {
+      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-    // Without this the flag would skip the gate and nothing would ever move the
-    // record off `pending`: there is no action run to report a result.
-    expect(gateBranch.condition).toContain('inputs.actionWorkflowId');
-  });
+      expect(fallback.map(({ type }) => type)).toContain('investigations.updateProposal');
+    });
 
-  it('lands an expired gate on dismissed rather than failed', () => {
-    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-    const expiry = fallback.find(({ name }) => name === 'record_expiry');
-    const failure = fallback.find(({ name }) => name === 'record_failure');
+    it('settles from the carried id, not the create step output that a clone invalidates', () => {
+      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-    expect(expiry?.with?.status).toBe('dismissed');
-    expect(expiry?.if).toContain("error.type == 'TimeoutError'");
-    // The two branches must be mutually exclusive or both would write.
-    expect(failure?.if).toContain("error.type != 'TimeoutError'");
-  });
+      for (const step of fallback) {
+        expect(String(step.with?.proposalId)).toContain('variables.current_proposal_id');
+      }
+    });
 
-  it('requires a comment so every proposal carries something a human can read', () => {
-    const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
+    it('skips every handler when creation itself failed and there is no proposal id', () => {
+      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-    expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment']);
-  });
+      for (const step of fallback) {
+        expect(step.if).toContain('variables.current_proposal_id != blank');
+      }
+    });
 
-  it('branches to dismissed unless the platform boolean is exactly true', () => {
-    const dismissal = findStep(workflow.steps, 'handle_dismissal') as { condition?: string };
+    it('discriminates on the proposal decision rather than on the error type', () => {
+      // All three timeout sources share `type: TimeoutError`, and
+      // `ExecutionError` carries nothing else to tell them apart.
+      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+      const afterDecision = fallback.find(({ name }) => name === 'record_failure_after_decision');
+      const beforeDecision = fallback.find(({ name }) => name === 'record_failure_before_decision');
 
-    expect(dismissal.condition).toContain('steps.await_decision.output.response.approved');
-    expect(dismissal.condition).toContain('!= true');
-  });
-
-  it('executes the action only when the proposal carries one', () => {
-    const runAction = workflow.steps.find(({ name }) => name === 'run_action') as {
-      condition?: string;
-    };
-
-    expect(runAction.condition).toContain('inputs.actionWorkflowId');
-  });
-
-  it('passes the action input through under a single actionInput key', () => {
-    const execute = findStep(workflow.steps, 'execute_action') as {
-      with?: { 'workflow-id'?: string; inputs?: Record<string, unknown> };
-    };
-
-    // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
-    expect(execute.with?.['workflow-id']).toContain('inputs.actionWorkflowId');
-    expect(Object.keys(execute.with?.inputs ?? {})).toEqual(['actionInput']);
-  });
-
-  it('records the execution outcome around the action', () => {
-    expect(findStep(workflow.steps, 'mark_executing')?.type).toBe('investigations.updateProposal');
-    expect(findStep(workflow.steps, 'record_success')?.type).toBe('investigations.updateProposal');
+      expect(afterDecision?.if).toContain(
+        'steps.read_proposal_on_failure.output.decision != blank'
+      );
+      expect(afterDecision?.with?.status).toBe('failed');
+      // `expired` is the only terminal status an undecided proposal has.
+      expect(beforeDecision?.if).toContain(
+        'steps.read_proposal_on_failure.output.decision == blank'
+      );
+      expect(beforeDecision?.with?.status).toBe('expired');
+    });
   });
 });
