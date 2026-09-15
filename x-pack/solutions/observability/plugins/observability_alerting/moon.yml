@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/rule-data-utils'
-  - '@kbn/scout'
 tags:
   - plugin
   - prod

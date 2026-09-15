@@ -20,7 +20,6 @@
     "@kbn/app-header",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }
