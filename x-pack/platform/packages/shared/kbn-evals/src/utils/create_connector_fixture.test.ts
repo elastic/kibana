@@ -8,6 +8,7 @@
 import { v5 } from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 import type { StackConnectorDefinition } from './eval_connector';
 import { createConnectorFixture } from './create_connector_fixture';
@@ -61,7 +62,7 @@ describe('createConnectorFixture', () => {
       expect(mockUse).toHaveBeenCalledWith({ ...emailConnector, id: uuid });
     });
 
-    it('delegates AvailableConnectorWithId (.inference) without inferenceId to stack path', async () => {
+    it('delegates a StackConnectorDefinition with actionTypeId .inference to the stack path', async () => {
       const stackInference: StackConnectorDefinition = {
         type: 'stack_connector',
         id: 'local-inference',
@@ -177,7 +178,7 @@ describe('createConnectorFixture', () => {
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('uses the predefined connector as-is (skips provisioning))', async () => {
+    it('uses the predefined connector as-is (skips provisioning)', async () => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
 
       await createConnectorFixture({
@@ -341,6 +342,34 @@ describe('createConnectorFixture', () => {
     });
 
     it('treats an already-exists error on create as success (parallel workers)', async () => {
+      const existsError = new KbnClientRequesterError(
+        `[POST http://localhost:5620/internal/_inference/_add] 400 Bad Request -- ${JSON.stringify({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Inference endpoint [${openRouterEndpoint.inferenceId}] already exists`,
+        })}`,
+        { status: 400 }
+      );
+
+      mockFetch
+        .mockResolvedValueOnce({ isEndpointExists: false })
+        .mockRejectedValueOnce(existsError);
+
+      await createConnectorFixture({
+        predefinedConnector: openRouterEndpoint,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expectNoActionsCalls();
+      expect(mockUse).toHaveBeenCalledWith({
+        ...openRouterEndpoint,
+        id: openRouterEndpoint.inferenceId,
+      });
+    });
+
+    it('also recognizes an already-exists error carrying the body on `response.data`', async () => {
       const existsError = Object.assign(new Error('Bad Request'), {
         status: 400,
         response: {
@@ -390,7 +419,7 @@ describe('createConnectorFixture', () => {
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields an AvailableConnectorWithId)', async () => {
+    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (binds to the endpoint as-is)', async () => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
 
       await createConnectorFixture({
