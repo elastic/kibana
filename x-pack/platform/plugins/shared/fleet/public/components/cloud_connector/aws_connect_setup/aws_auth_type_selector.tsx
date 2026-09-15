@@ -16,9 +16,6 @@ import {
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 } from './test_subjects';
 
-// TODO: consolidate with ingest_hub's CredentialMethodSelector — both are AWS auth-type selectors.
-// AwsAuthTypeSelector is only used by LazyAwsConnectSetup (currently unused externally).
-// Track: https://github.com/elastic/ingest-dev/issues/9576
 export type AwsAuthType = 'identity_federation' | 'static_keys' | 'temporary_keys';
 
 export {
