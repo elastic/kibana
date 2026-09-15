@@ -157,6 +157,9 @@ export async function cleanUpDuplicatedPackagePolicies(
   }
 }
 
+/** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
+export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
+
 export async function deleteDuplicatePackagePolicies(
   packagePoliciesToDelete: string[],
   soClient: SavedObjectsClientContract,
@@ -169,22 +172,51 @@ export async function deleteDuplicatePackagePolicies(
   logger.info(
     `[PrivateLocationCleanUpTask] Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`
   );
-  // Delete it in batches of 100 to avoid sending too large payloads at once.
-  const BATCH_SIZE = 100;
   const total = packagePoliciesToDelete.length;
-  const totalBatches = Math.ceil(total / BATCH_SIZE);
-  for (let i = 0; i < total; i += BATCH_SIZE) {
-    const batch = packagePoliciesToDelete.slice(i, i + BATCH_SIZE);
-    const batchIndex = Math.floor(i / BATCH_SIZE) + 1;
+  const totalBatches = Math.ceil(total / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
+  const agentPolicyIds = new Set<string>();
+  for (let i = 0; i < total; i += DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) {
+    const batch = packagePoliciesToDelete.slice(i, i + DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE);
+    const batchIndex = Math.floor(i / DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE) + 1;
     logger.info(
       `[PrivateLocationCleanUpTask] Deleting batch ${batchIndex}/${totalBatches} (size=${
         batch.length
       }), with ids [${batch.join(`, `)}]`
     );
-    await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+    // `bumpRevision: false`: one agent-policy bump after every leftover is
+    // gone. Default bump-per-delete would redeploy the full policy once per
+    // batch (thousands of units on a Windows private location).
+    const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
       force: true,
       spaceIds: ['*'],
       ignoreMissing: true,
+      bumpRevision: false,
+    });
+    for (const result of results ?? []) {
+      if (!result.success) {
+        continue;
+      }
+      for (const policyId of result.policy_ids ?? []) {
+        agentPolicyIds.add(policyId);
+      }
+      if (result.policy_id) {
+        agentPolicyIds.add(result.policy_id);
+      }
+    }
+  }
+
+  if (agentPolicyIds.size === 0) {
+    return;
+  }
+
+  logger.info(
+    `[PrivateLocationCleanUpTask] Bumping agent policy revision once for [${[
+      ...agentPolicyIds,
+    ].join(', ')}] after leftover package-policy deletes`
+  );
+  for (const policyId of agentPolicyIds) {
+    await fleet.agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+      asyncDeploy: true,
     });
   }
 }
