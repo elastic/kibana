@@ -17,6 +17,7 @@ export const SYNTHETICS_API_URLS = {
   SYNTHETICS_MONITORS: '/api/synthetics/monitors',
   CERTS: '/internal/synthetics/certs',
   CERTS_FACETS: '/internal/synthetics/certs/facets',
+  INSPECT_STATUS_RULE: '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE: '/internal/synthetics/inspect_tls_rule',
   GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
   TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
@@ -50,6 +51,15 @@ export const INTERNAL_API_VERSION = '1';
  * private location survive across specs (matching the FTR suite's design).
  */
 export const SYNTHETICS_MONITOR_SO_TYPES = ['synthetics-monitor', 'synthetics-monitor-multi-space'];
+
+/** Alerts-as-data index backing the Synthetics uptime rules (status + TLS). */
+export const SYNTHETICS_ALERTS_INDEX = '.alerts-observability.uptime.alerts-default*';
+
+export interface SyntheticsAlertDoc {
+  'kibana.alert.status'?: string;
+  'kibana.alert.reason'?: string;
+  'kibana.alert.instance.id'?: string;
+}
 
 /**
  * Elastic-managed "local" public location available in the test environment.
