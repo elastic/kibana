@@ -95,7 +95,7 @@ describe('useAiIndexOverviewSections', () => {
 
   it('shows signals when signal groups exist even without automations', () => {
     mockUseSignalGroups.mockReturnValue({
-      groups: [{ tag: 'missing-context', count: 2 }],
+      groups: [{ tag: 'coverage_gap', count: 2 }],
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
