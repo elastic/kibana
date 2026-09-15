@@ -15,8 +15,6 @@ import { extractConversationId, toolSpanJoinClauses } from './tool_routing';
 // Provisional: sized from the skill's prescribed path, not from sampled traces.
 const MAX_TOOL_CALLS = 8;
 
-const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
-
 interface EsqlResponse {
   columns: Array<{ name: string }>;
   values: Array<Array<string | null>>;
@@ -45,23 +43,22 @@ const fetchToolCalls = async (
   const response = (await traceEsClient.esql.query({
     // tool.call.id is set only on calls the LLM issued; helper spans tools open internally
     // (e.g. search's natural_language_search) have none and are not part of the trajectory.
-    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, ${TOOL_NAME_COLUMN}`,
+    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
   })) as unknown as EsqlResponse;
-  const col = (name: string) => response.columns.findIndex((c) => c.name === name);
-  const [spanIdx, traceIdx, nameIdx] = [col('span_id'), col('trace_id'), col(TOOL_NAME_COLUMN)];
-  if (spanIdx === -1 || traceIdx === -1 || nameIdx === -1) return undefined;
-  // Spans are exported to two data streams (agent_builder.otel and generic.otel); the same
-  // span_id appearing twice is one call, not two.
-  const byNameOrder = new Map<string, string>();
+
+  const seen = new Set<string>();
+  const toolNames: string[] = [];
   let agentTraceId: string | undefined;
-  for (const row of response.values) {
-    const [spanId, traceId, name] = [row[spanIdx], row[traceIdx], row[nameIdx]];
-    if (typeof spanId === 'string' && typeof name === 'string' && name.length > 0) {
-      if (!byNameOrder.has(spanId)) byNameOrder.set(spanId, name);
-      if (agentTraceId === undefined && typeof traceId === 'string') agentTraceId = traceId;
+  // Rows arrive in KEEP order. Spans are indexed into two data streams, so the same span_id
+  // can appear twice; it is one call.
+  for (const [spanId, traceId, toolName] of response.values) {
+    const isNewSpan = spanId != null && !seen.has(spanId);
+    if (isNewSpan && toolName) {
+      seen.add(spanId);
+      toolNames.push(toolName);
+      agentTraceId ??= traceId ?? undefined;
     }
   }
-  const toolNames = [...byNameOrder.values()];
   // No rows means this join key reached no spans: unmeasured, not an empty trajectory.
   return toolNames.length > 0 ? { toolNames, agentTraceId } : undefined;
 };
@@ -91,11 +88,6 @@ export const createTrajectoryFetcher = ({
     }
 
     type Read = ToolCalls & { joinedOn: string };
-    const describe = ({ toolNames, agentTraceId }: Read) =>
-      `agent trace ${agentTraceId ?? '?'} — ${toolNames.length} tool call(s): ${toolNames.join(
-        ' → '
-      )}`;
-
     let last: Read | undefined;
     for (let poll = 1; poll <= maxPolls; poll++) {
       let current: Read | undefined;
@@ -115,7 +107,6 @@ export const createTrajectoryFetcher = ({
         }
       }
       if (current && last && current.toolNames.length === last.toolNames.length) {
-        log.info(`Trajectory: ${describe(current)}`);
         return { available: true, ...current, settled: true };
       }
       last = current ?? last;
@@ -124,9 +115,7 @@ export const createTrajectoryFetcher = ({
 
     if (last) {
       log.warning(
-        `Trajectory span set never settled after ${maxPolls} polls — scoring potentially incomplete. ${describe(
-          last
-        )}`
+        `Trajectory span set never settled after ${maxPolls} polls (${last.toolNames.length} calls) — scoring potentially incomplete`
       );
       return { available: true, ...last, settled: false };
     }
