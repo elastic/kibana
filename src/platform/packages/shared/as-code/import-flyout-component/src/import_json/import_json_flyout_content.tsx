@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -35,8 +35,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { importJsonFlyoutStrings } from './import_json_strings';
-import { MAX_IMPORT_JSON_FILE_BYTES } from './constants';
 import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
+
+/** Matches core `server.maxPayload` default (1 MiB). */
+const MAX_IMPORT_JSON_FILE_BYTES = 1_048_576;
 
 export interface ImportJsonFlyoutContentProps<SanitizedState> {
   title: string;
@@ -84,6 +86,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
   const [isImporting, setIsImporting] = useState(false);
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
+  const sanitizeAbortRef = useRef<AbortController | null>(null);
 
   const warningsListStyles = useMemo(
     () => css`
@@ -94,6 +97,17 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
     `,
     [euiThemeContext]
   );
+
+  const abortSanitize = useCallback(() => {
+    sanitizeAbortRef.current?.abort();
+    sanitizeAbortRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      abortSanitize();
+    };
+  }, [abortSanitize]);
 
   const resetState = useCallback(() => {
     setFilePickerError(null);
@@ -106,19 +120,28 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
 
   const onFileChange = useCallback(
     async (files: FileList | null) => {
+      abortSanitize();
       resetState();
       const selected = files?.[0] ?? null;
 
-      if (!selected) return;
-
-      if (selected.size > MAX_IMPORT_JSON_FILE_BYTES) {
-        setFilePickerError(importJsonFlyoutStrings.getFileTooLargeError());
+      if (!selected) {
+        setIsValidating(false);
         return;
       }
 
+      if (selected.size > MAX_IMPORT_JSON_FILE_BYTES) {
+        setFilePickerError(importJsonFlyoutStrings.getFileTooLargeError());
+        setIsValidating(false);
+        return;
+      }
+
+      const abortController = new AbortController();
+      sanitizeAbortRef.current = abortController;
       setIsValidating(true);
       try {
         const text = await selected.text();
+        if (abortController.signal.aborted) return;
+
         let raw: unknown;
         try {
           raw = JSON.parse(text);
@@ -128,17 +151,30 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
         }
 
         try {
-          const { data, warnings: sanitizeWarnings } = await sanitizeImportJson(raw);
+          const { data, warnings: sanitizeWarnings } = await sanitizeImportJson(
+            raw,
+            abortController.signal
+          );
+          if (abortController.signal.aborted) return;
           setWarnings(sanitizeWarnings);
           setSanitizedState(data);
-        } catch {
+        } catch (error) {
+          const wasAborted =
+            abortController.signal.aborted ||
+            (error instanceof Error && error.name === 'AbortError');
+          if (wasAborted) {
+            return;
+          }
           setServerError(serverValidationError);
         }
       } finally {
-        setIsValidating(false);
+        if (sanitizeAbortRef.current === abortController) {
+          sanitizeAbortRef.current = null;
+          setIsValidating(false);
+        }
       }
     },
-    [resetState, sanitizeImportJson, serverValidationError]
+    [abortSanitize, resetState, sanitizeImportJson, serverValidationError]
   );
 
   const onImport = useCallback(async () => {

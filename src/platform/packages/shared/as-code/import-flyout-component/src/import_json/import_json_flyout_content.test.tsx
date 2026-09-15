@@ -95,10 +95,10 @@ describe('ImportJsonFlyoutContent', () => {
   it('shows a file size error without reading an oversized file', async () => {
     const { sanitizeImportJson } = renderFlyout();
     const oversized = new File(['{}'], 'big.json', { type: 'application/json' });
-    Object.defineProperty(oversized, 'size', { value: 26_214_401 });
+    Object.defineProperty(oversized, 'size', { value: 1_048_577 });
     await pickFile(oversized);
     await waitFor(() =>
-      expect(screen.getByText(/maximum size is 25 MB/)).toBeInTheDocument()
+      expect(screen.getByText(/maximum size is 1 MB/)).toBeInTheDocument()
     );
     expect(sanitizeImportJson).not.toHaveBeenCalled();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
@@ -116,8 +116,75 @@ describe('ImportJsonFlyoutContent', () => {
   it('enables Import after a valid file is chosen', async () => {
     const { sanitizeImportJson } = renderFlyout();
     await pickFile(VALID_FILE);
-    await waitFor(() => expect(sanitizeImportJson).toHaveBeenCalledWith(VALID_STATE));
+    await waitFor(() =>
+      expect(sanitizeImportJson).toHaveBeenCalledWith(VALID_STATE, expect.any(AbortSignal))
+    );
     expect(screen.getByTestId('testImportButton')).toBeEnabled();
+  });
+
+  it('aborts sanitize when the file is cleared', async () => {
+    let resolveSanitize: ((value: { data: typeof VALID_STATE; warnings: string[] }) => void) | undefined;
+    const sanitizeImportJson = jest.fn(
+      (_raw: unknown, signal?: AbortSignal) =>
+        new Promise<{ data: typeof VALID_STATE; warnings: string[] }>((resolve, reject) => {
+          resolveSanitize = resolve;
+          signal?.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+          });
+        })
+    );
+    renderFlyout({ sanitizeImportJson });
+    await pickFile(VALID_FILE);
+    await waitFor(() => expect(sanitizeImportJson).toHaveBeenCalled());
+
+    const signal = sanitizeImportJson.mock.calls[0][1] as AbortSignal;
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await act(async () => {
+      await userEvent.upload(input, []);
+    });
+
+    expect(signal.aborted).toBe(true);
+    expect(screen.queryByTestId('testServerError')).not.toBeInTheDocument();
+    expect(screen.getByTestId('testImportButton')).toBeDisabled();
+    // Ensure a late resolve from the aborted request cannot enable import
+    await act(async () => {
+      resolveSanitize?.({ data: VALID_STATE, warnings: [] });
+    });
+    expect(screen.getByTestId('testImportButton')).toBeDisabled();
+  });
+
+  it('aborts sanitize when the flyout unmounts', async () => {
+    const sanitizeImportJson = jest.fn(
+      (_raw: unknown, signal?: AbortSignal) =>
+        new Promise((_resolve, reject) => {
+          signal?.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+          });
+        })
+    );
+    const { unmount } = render(
+      <I18nProvider>
+        <ImportJsonFlyoutContent
+          title="Import object"
+          titleId="import-json-title"
+          closeFlyout={jest.fn()}
+          dataTestSubjPrefix="test"
+          exportApplication="Test application"
+          services={createServices()}
+          isTechnicalPreview
+          serverValidationError="The file could not be imported."
+          sanitizeImportJson={sanitizeImportJson}
+          createFromJson={jest.fn()}
+          onImportSuccess={jest.fn()}
+        />
+      </I18nProvider>
+    );
+    await pickFile(VALID_FILE);
+    await waitFor(() => expect(sanitizeImportJson).toHaveBeenCalled());
+
+    const signal = sanitizeImportJson.mock.calls[0][1] as AbortSignal;
+    unmount();
+    expect(signal.aborted).toBe(true);
   });
 
   it('shows collapsible warnings above the file picker but still allows import', async () => {

@@ -13,7 +13,8 @@ export interface SanitizeImportJsonResult<SanitizedState> {
 }
 
 export type SanitizeImportJson<SanitizedState> = (
-  raw: unknown
+  raw: unknown,
+  signal?: AbortSignal
 ) => Promise<SanitizeImportJsonResult<SanitizedState>>;
 
 export interface CreateFromJsonResult {

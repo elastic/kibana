@@ -32,7 +32,7 @@ export const importJsonFlyoutStrings = {
     }),
   getFileTooLargeError: () =>
     i18n.translate('asCodeImport.importJson.fileTooLargeError', {
-      defaultMessage: 'The selected file is too large. The maximum size is 25 MB.',
+      defaultMessage: 'The selected file is too large. The maximum size is 1 MB.',
     }),
   getTechnicalPreviewBadgeLabel: () =>
     i18n.translate('asCodeImport.importJson.technicalPreviewBadgeLabel', {

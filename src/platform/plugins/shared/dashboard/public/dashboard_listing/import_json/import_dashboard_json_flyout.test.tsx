@@ -97,7 +97,9 @@ describe('ImportDashboardJsonFlyout', () => {
   it('calls sanitize and enables Import after a valid file is chosen', async () => {
     renderFlyout();
     await pickFile(VALID_FILE);
-    await waitFor(() => expect(mockSanitizeDashboard).toHaveBeenCalledWith(VALID_STATE));
+    await waitFor(() =>
+      expect(mockSanitizeDashboard).toHaveBeenCalledWith(VALID_STATE, expect.any(AbortSignal))
+    );
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 

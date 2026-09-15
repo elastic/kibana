@@ -12,12 +12,13 @@ import { DASHBOARD_INTERNAL_API_PATH } from '../../../../../common/constants';
 import type { DashboardSanitizeResponseBody } from '../../../../../server';
 import { coreServices } from '../../../../services/kibana_services';
 
-export async function sanitizeDashboard(dashboardState: unknown) {
+export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortSignal) {
   const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
     `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     {
       version: '1',
       body: JSON.stringify(dashboardState),
+      signal,
     }
   );
 
