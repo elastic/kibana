@@ -150,4 +150,71 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
       await expect(discover.getHistogramChart()).toBeVisible();
     }
   );
+
+  spaceTest(
+    'recovers the histogram after an empty time range',
+    { tag: '@local-stateful-classic' },
+    async ({ page, pageObjects, discoverScoutSpace }) => {
+      const { datePicker, discover } = pageObjects;
+
+      await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+
+      try {
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+        await discover.waitUntilSearchingHasFinished();
+        await datePicker.setAbsoluteRange({
+          from: 'Sep 19, 2015 @ 00:00:00.000',
+          to: 'Sep 19, 2015 @ 00:00:00.000',
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHistogramChart()).toBeHidden();
+
+        await datePicker.setAbsoluteRange({
+          from: 'Sep 20, 2015 @ 00:00:00.000',
+          to: 'Sep 20, 2015 @ 00:00:00.000',
+        });
+        await discover.waitUntilSearchingHasFinished();
+
+        await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHitCountLocator()).toHaveText('1');
+        expect(await discover.getHistogramSuggestionType()).toBe('histogramForDataView');
+      } finally {
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
+      }
+    }
+  );
+
+  spaceTest(
+    'persists a narrowed histogram time range on a saved session',
+    { tag: '@local-stateful-classic' },
+    async ({ page, pageObjects, scoutSpace, discoverScoutSpace }) => {
+      const { datePicker, discover } = pageObjects;
+      const sessionName = `narrowed histogram ${scoutSpace.id}`;
+
+      await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+
+      try {
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+        await discover.waitUntilSearchingHasFinished();
+        await datePicker.setAbsoluteRange({
+          from: 'Sep 20, 2015 @ 00:00:00.000',
+          to: 'Sep 20, 2015 @ 23:50:13.253',
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHitCountLocator()).toHaveText('4,756');
+
+        await discover.saveSearch(sessionName);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHitCountLocator()).toHaveText('4,756');
+      } finally {
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
+      }
+    }
+  );
 });
