@@ -332,6 +332,7 @@ type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
 export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
   timeRange?: TimeRange;
+  parentApi?: unknown;
 };
 
 /**
@@ -375,7 +376,7 @@ export type LensInternalApi = Simplify<
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
-      disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
+      disableTriggers$: PublishingSubject<boolean>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
       isNewlyCreated$: PublishingSubject<boolean>;
@@ -390,7 +391,6 @@ export type LensInternalApi = Simplify<
       updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
-      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;

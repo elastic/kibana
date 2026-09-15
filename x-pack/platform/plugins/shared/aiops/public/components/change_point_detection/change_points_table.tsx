@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import {
   EuiBadge,
   EuiEmptyPrompt,
@@ -17,6 +18,7 @@ import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
+import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -35,6 +37,7 @@ export interface ChangePointsTableProps {
   isLoading: boolean;
   onSelectionChange?: (update: SelectedChangePoint[]) => void;
   onRenderComplete?: () => void;
+  parentApi: unknown;
 }
 
 function getFilterConfig(
@@ -75,7 +78,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   fieldConfig,
   onSelectionChange,
   onRenderComplete,
+  parentApi,
 }) => {
+  const disableTriggers = useStateFromPublishingSubject(
+    apiHasDisableTriggers(parentApi)
+      ? parentApi.disableTriggers$
+      : new BehaviorSubject<boolean>(false)
+  );
+  const isInteractive = !disableTriggers;
+
   const {
     fieldFormats,
     data: {
@@ -171,6 +182,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (annotation: ChangePointAnnotation) => {
         return (
           <MiniChartPreview
+            parentApi={parentApi}
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
@@ -330,7 +342,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       pagination={
         pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
       }
-      sorting={sorting}
+      sorting={isInteractive ? sorting : undefined}
       onTableChange={onTableChange}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
@@ -362,6 +374,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   annotation,
   onRenderComplete,
   onLoading,
+  parentApi,
 }) => {
   const {
     lens: { EmbeddableComponent },
@@ -416,6 +429,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
           name: 'Change point detection',
         }}
         onLoad={onLoading}
+        parentApi={parentApi}
       />
     </div>
   );

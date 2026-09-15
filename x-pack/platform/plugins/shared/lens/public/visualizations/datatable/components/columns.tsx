@@ -61,7 +61,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  isInteractive?: boolean
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
@@ -304,6 +305,7 @@ export const createGridColumns = (
         display: <div css={columnStyle}>{name}</div>,
         displayAsText: name,
         schema: field,
+        isResizable: isInteractive,
         actions: {
           showHide: false,
           showMoveLeft: false,

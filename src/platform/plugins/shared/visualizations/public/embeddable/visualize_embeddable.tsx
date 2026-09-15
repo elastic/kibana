@@ -183,10 +183,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ? parentApi.executionContext
       : undefined;
 
-    const disableTriggers = apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers
-      : undefined;
-
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -414,7 +410,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               esqlVariables: data.esqlVariables,
               vis: vis$.getValue(),
               settings,
-              disableTriggers,
+              disableTriggers: apiHasDisableTriggers(parentApi)
+                ? parentApi.disableTriggers$.getValue()
+                : undefined,
               searchSessionId,
               parentExecutionContext: executionContext,
               abortController: expressionAbortController$.getValue(),
@@ -456,6 +454,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
                   return;
                 }
                 const currentVis = vis$.getValue();
+                const disableTriggers = apiHasDisableTriggers(parentApi)
+                  ? parentApi.disableTriggers$.getValue()
+                  : undefined;
+                console.log({ disableTriggers });
                 if (!disableTriggers) {
                   const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,

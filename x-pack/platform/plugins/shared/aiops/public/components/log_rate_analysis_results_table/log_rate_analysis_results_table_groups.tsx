@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
@@ -37,6 +38,7 @@ import {
   type GroupTableItem,
 } from '@kbn/aiops-log-rate-analysis/state';
 import { stringHash } from '@kbn/ml-string-hash';
+import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -62,6 +64,8 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -71,6 +75,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  parentApi,
 }) => {
   const prevSkippedColumns = usePrevious(skippedColumns);
 
@@ -251,9 +256,16 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     },
   ];
 
+  const disableTriggers = useStateFromPublishingSubject(
+    apiHasDisableTriggers(parentApi)
+      ? parentApi.disableTriggers$
+      : new BehaviorSubject<boolean>(false)
+  );
+  const isInteractive = !disableTriggers;
+
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    skippedColumns,
+    isInteractive ? skippedColumns : [...skippedColumns, 'Actions'],
     searchQuery,
     barColorOverride,
     barHighlightColorOverride
@@ -402,7 +414,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       onChange={onChange}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
-      sorting={sorting as EuiTableSortingType<GroupTableItem>}
+      sorting={isInteractive ? (sorting as EuiTableSortingType<GroupTableItem>) : undefined}
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsGroupsTableRow row-${group.id}`,
