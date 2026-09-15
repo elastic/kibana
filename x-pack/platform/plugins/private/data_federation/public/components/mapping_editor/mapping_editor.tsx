@@ -7,7 +7,15 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -98,6 +106,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   docLinks,
   showJsonPreview = true,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
   const validation = useMemo(() => validateMappingEditorValue(value), [value]);
@@ -319,7 +328,19 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                 : undefined;
               return (
                 <EuiFlexItem key={f.id}>
-                  <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+                  <div
+                    css={css`
+                      background: ${isEditing
+                        ? euiTheme.colors.backgroundBaseSubdued
+                        : euiTheme.colors.backgroundBasePlain};
+                      padding: ${euiTheme.size.s};
+                      border-top: 0;
+                      border-left: 0;
+                      border-right: 0;
+                      border-bottom: ${euiTheme.border.thin};
+                      border-radius: 0;
+                    `}
+                  >
                     <EuiFlexGroup gutterSize="m" alignItems="flexStart">
                       {isEditing ? (
                         <FieldMappingForm
@@ -349,7 +370,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                         />
                       )}
                     </EuiFlexGroup>
-                  </EuiPanel>
+                  </div>
                 </EuiFlexItem>
               );
             })}

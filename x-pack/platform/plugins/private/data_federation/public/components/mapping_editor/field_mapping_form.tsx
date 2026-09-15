@@ -173,7 +173,7 @@ export function FieldMappingForm({
                 defaultMessage: 'Source file path (optional)',
               })}
               helpText={i18n.translate('xpack.dataFederation.mappingEditor.physicalPathHelp', {
-                defaultMessage: 'Physical column name, if differs from name.',
+                defaultMessage: 'Physical column name, if differs from field name.',
               })}
               fullWidth
             >
