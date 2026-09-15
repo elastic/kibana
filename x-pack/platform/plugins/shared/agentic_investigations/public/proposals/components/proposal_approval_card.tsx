@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -127,8 +127,20 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   }, [resetMutations]);
 
   const liveProposal = proposalQuery.data;
-  if (!liveProposal) {
-    return null;
+
+  if (proposalQuery.isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  if (proposalQuery.isError || !liveProposal) {
+    return (
+      <KbnDangerCallout
+        size="s"
+        title={i18n.translate('xpack.agenticInvestigations.proposalCard.loadError', {
+          defaultMessage: 'Unable to load this proposal. Try refreshing the page.',
+        })}
+      />
+    );
   }
 
   const actionName =
