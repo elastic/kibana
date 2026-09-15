@@ -31,18 +31,22 @@ export function useWaitingStepResume(
   const queryClient = useQueryClient();
 
   const waitingStep = useMemo(() => {
-    if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+    if (
+      !workflowExecution ||
+      workflowExecution.id !== executionId ||
+      workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT
+    ) {
       return undefined;
     }
     return workflowExecution.stepExecutions?.find(
       (step) => step.status === ExecutionStatus.WAITING_FOR_INPUT
     );
-  }, [workflowExecution]);
+  }, [executionId, workflowExecution]);
 
   const waitingStepExecutionId = waitingStep?.id;
   const waitingStepStartedAt = waitingStep?.startedAt;
 
-  const { data: pausedStepFullData } = useStepExecution(
+  const { data: pausedStepFullData, isLoading: isPausedStepLoading } = useStepExecution(
     executionId,
     waitingStepExecutionId,
     ExecutionStatus.WAITING_FOR_INPUT
@@ -60,7 +64,7 @@ export function useWaitingStepResume(
   }, [waitingStepExecutionId, executionId, queryClient]);
 
   return useMemo(() => {
-    if (!waitingStepExecutionId) {
+    if (!waitingStepExecutionId || isPausedStepLoading) {
       return {
         waitingStepExecutionId: undefined,
         waitingStepStartedAt: undefined,
@@ -90,5 +94,5 @@ export function useWaitingStepResume(
       resumeSchema: stepInput?.schema,
       approvalLabels: labels,
     };
-  }, [pausedStepFullData, waitingStepExecutionId, waitingStepStartedAt]);
+  }, [isPausedStepLoading, pausedStepFullData, waitingStepExecutionId, waitingStepStartedAt]);
 }

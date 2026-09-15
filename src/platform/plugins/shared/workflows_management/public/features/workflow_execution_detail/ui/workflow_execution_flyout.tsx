@@ -473,6 +473,28 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       resumeSchema,
       approvalLabels,
     } = useWaitingStepResume(executionId, workflowExecution);
+    const [isResumeSubmitting, setIsResumeSubmitting] = useState(false);
+    const [isResumeSubmitted, setIsResumeSubmitted] = useState(false);
+    const resumeSubmitState = useMemo(
+      () => ({
+        isSubmitting: isResumeSubmitting,
+        isSubmitted: isResumeSubmitted,
+        setSubmitting: setIsResumeSubmitting,
+        setSubmitted: setIsResumeSubmitted,
+      }),
+      [isResumeSubmitting, isResumeSubmitted]
+    );
+
+    useEffect(() => {
+      setSelectedStepExecutionId(null);
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [executionId]);
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [waitingStepExecutionId]);
 
     const workflowName =
       workflowNameProp ||
@@ -966,6 +988,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                             resumeSchema={resumeSchema}
                             approvalLabels={approvalLabels}
                             waitingStepExecutionId={selectedStepExecutionId}
+                            submitState={resumeSubmitState}
                           />
                         </div>
                       )}
@@ -1352,6 +1375,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     approvalLabels={approvalLabels}
                     autoOpen={shouldAutoResume}
                     waitingStepExecutionId={waitingStepExecutionId}
+                    submitState={resumeSubmitState}
                   />
                 )}
               </div>

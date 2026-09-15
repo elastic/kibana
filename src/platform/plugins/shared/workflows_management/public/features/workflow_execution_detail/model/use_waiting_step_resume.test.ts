@@ -127,4 +127,63 @@ describe('useWaitingStepResume', () => {
       queryKey: ['stepExecution', 'exec-1'],
     });
   });
+
+  it('does not return a waiting step while the full step input is loading', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: true } as ReturnType<
+      typeof useStepExecution
+    >);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current.waitingStepExecutionId).toBeUndefined();
+    expect(result.current.approvalLabels).toBeUndefined();
+  });
+
+  it('ignores a stale waiting execution after executionId changes', () => {
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-wait',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { message: 'Approve this' },
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useStepExecution>);
+
+    const waiting = createMockWorkflowExecutionDto({
+      id: 'exec-old',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-wait',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+    });
+
+    const { result, rerender } = renderHook(
+      ({ executionId, execution }) => useWaitingStepResume(executionId, execution),
+      { initialProps: { executionId: 'exec-old', execution: waiting } }
+    );
+
+    expect(result.current.waitingStepExecutionId).toBe('step-wait');
+
+    rerender({ executionId: 'exec-new', execution: waiting });
+
+    expect(result.current.waitingStepExecutionId).toBeUndefined();
+    expect(mockUseStepExecution).toHaveBeenLastCalledWith(
+      'exec-new',
+      undefined,
+      ExecutionStatus.WAITING_FOR_INPUT
+    );
+  });
 });

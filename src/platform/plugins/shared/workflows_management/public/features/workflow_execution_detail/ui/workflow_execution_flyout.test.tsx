@@ -195,6 +195,14 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 
+  it('does not show resume from ?resume=true until the waiting step is ready', () => {
+    mockUrlState.shouldAutoResume = true;
+
+    renderFlyout();
+
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+  });
+
   it('shows Provide action on the run and honors ?resume=true', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
