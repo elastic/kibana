@@ -30,6 +30,8 @@ import type {
   AlertZeroStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
+import { registerAlertZeroUiSettings } from './settings/register_ui_settings';
+import { OnboardingService } from './services/onboarding/onboarding_service';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
@@ -59,6 +61,7 @@ export class AlertZeroPlugin
   private actionsService?: ActionsService;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
+  private onboardingService?: OnboardingService;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -114,6 +117,7 @@ export class AlertZeroPlugin
       },
     });
 
+    registerAlertZeroUiSettings(coreSetup);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -125,6 +129,7 @@ export class AlertZeroPlugin
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
+      getOnboardingService: () => this.requireOnboardingService(),
     });
 
     return {};
@@ -176,6 +181,14 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
+    this.onboardingService = new OnboardingService({
+      logger: this.logger,
+      getManagedWorkflows: async () => managedWorkflows,
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) =>
+            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        : undefined,
+    });
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
       ensureAgentForSpace: plugins.agentBuilder
         ? (spaceId) =>
@@ -201,6 +214,14 @@ export class AlertZeroPlugin
     }
     return this.actionsService;
   }
+
+  private requireOnboardingService(): OnboardingService {
+    if (!this.onboardingService) {
+      throw new Error('Onboarding service is not available until the AlertZero plugin has started');
+    }
+    return this.onboardingService;
+  }
+
   private requireWorkersService(): WorkersService {
     if (!this.workersService) {
       throw new Error('Workers service is not available until the AlertZero plugin has started');

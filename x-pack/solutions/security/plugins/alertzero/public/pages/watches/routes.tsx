@@ -8,10 +8,32 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/alertzero-common';
+import { useQueryClient } from '@kbn/react-query';
+import type { ListWatchesResponse } from '@kbn/alertzero-common';
+import { queryKeys } from '../../query_keys';
+import { useWatches } from '../../hooks/use_watches_api';
 import { WatchDetailPage } from './watch_detail';
 
-const DEFAULT_WATCH_PATH = `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`;
+/**
+ * Landing redirect for the Watches section. The gate (see `routes.tsx`) already renders the S2
+ * empty state while watches are still resolving, so by the time this renders a watch exists.
+ * Resolves the installed watches from the react-query cache first (populated by the gate's
+ * `useOnboardingState`, so no extra request) and falls back to the live query. It redirects to the
+ * first catalog watch rather than a hardcoded floor id, which may not exist in this space.
+ */
+const WatchesIndexRedirect: React.FC = () => {
+  const queryClient = useQueryClient();
+  const cached = queryClient.getQueryData<ListWatchesResponse>(queryKeys.watches.list());
+  // Skip the network call when the gate already cached the list; use it only as a fallback.
+  const { data: fetched } = useWatches({ enabled: cached === undefined });
+
+  const firstWatchId = (cached?.watches ?? fetched?.watches)?.[0]?.id;
+
+  if (!firstWatchId) {
+    return null;
+  }
+  return <Redirect to={`/watches/${firstWatchId}`} />;
+};
 
 /**
  * Routes owned by the Watches section. The app's route table only knows about `/watches`, so adding a
@@ -22,7 +44,6 @@ export const WatchesRoutes: React.FC = () => (
     {/* Literal /watches/<section> routes must precede /watches/:watchId, or the section name is
         read as a watch id. */}
     <Route path="/watches/:watchId" component={WatchDetailPage} />
-    {/* Land on the first catalog Watch so live mode is not dumped onto mock-only Workers. */}
-    <Route path="/watches" exact render={() => <Redirect to={DEFAULT_WATCH_PATH} />} />
+    <Route path="/watches" exact component={WatchesIndexRedirect} />
   </Routes>
 );
