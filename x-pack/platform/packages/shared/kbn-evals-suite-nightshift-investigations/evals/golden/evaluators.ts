@@ -32,11 +32,24 @@ const judgeToolSchema = (schema: z.ZodObject): ToolSchema => {
   return { type: 'object', properties, required } as ToolSchema;
 };
 
-const round = (value: number): number => {
-  const scaled = value * 1000;
-  const floor = Math.floor(scaled);
-  return (scaled - floor === 0.5 ? floor + (floor % 2) : Math.round(scaled)) / 1000;
+const round = (value: number, digits = 3): number => {
+  if (!Number.isFinite(value)) return value;
+  // Python rounds the exact binary float, not a float first multiplied by 10 ** digits.
+  const binary = new DataView(new ArrayBuffer(8));
+  binary.setFloat64(0, value);
+  const bits = binary.getBigUint64(0);
+  const exponentBits = Number((bits / 2n ** 52n) % 2048n);
+  const significand = (bits % 2n ** 52n) + (exponentBits ? 2n ** 52n : 0n);
+  const exponent = (exponentBits || 1) - 1023 - 52;
+  const numerator = significand * 10n ** BigInt(digits) * 2n ** BigInt(Math.max(0, exponent));
+  const denominator = 2n ** BigInt(Math.max(0, -exponent));
+  const quotient = numerator / denominator;
+  const remainder = (numerator % denominator) * 2n;
+  const increment = remainder > denominator || (remainder === denominator && quotient % 2n === 1n);
+  const rounded = Number(quotient + (increment ? 1n : 0n)) / 10 ** digits;
+  return bits / 2n ** 63n ? -rounded : rounded;
 };
+const format = (value: number, digits: number): string => round(value, digits).toFixed(digits);
 const pythonBool = (value: boolean): string => (value ? 'True' : 'False');
 const falsePositivePattern =
   /\b(false[- ]positive|false[- ]alarm|spurious|no[- ]real[- ]issue|5[- ]min[- ]blip|short[- ]blip|transient[- ]blip|auto[- ]resolv|already[- ]recover|normal[- ]levels|within[- ]normal)\b/i;
@@ -48,9 +61,10 @@ export const codeEvaluators: GoldenEvaluator[] = [
     direction: 'maximize',
     evaluate: async ({ output }) => ({
       score: Number(output.latency_seconds <= output.max_latency_seconds),
-      explanation: `latency=${output.latency_seconds.toFixed(
+      explanation: `latency=${format(output.latency_seconds, 3)}s budget=${format(
+        output.max_latency_seconds,
         3
-      )}s budget=${output.max_latency_seconds.toFixed(3)}s`,
+      )}s`,
     }),
   },
   ...(
@@ -143,9 +157,10 @@ export const codeEvaluators: GoldenEvaluator[] = [
         : 1;
       return {
         score: round((countScore + failScore + redundancyScore) / 3),
-        explanation: `tools=${total} failed=${failed} unique_cmds=${unique} redundant=${redundant} | count=${countScore.toFixed(
+        explanation: `tools=${total} failed=${failed} unique_cmds=${unique} redundant=${redundant} | count=${format(
+          countScore,
           2
-        )} fail=${failScore.toFixed(2)} redundancy=${redundancyScore.toFixed(2)}`,
+        )} fail=${format(failScore, 2)} redundancy=${format(redundancyScore, 2)}`,
       };
     },
   },
@@ -256,8 +271,9 @@ const createSemanticEvaluators = (
           case 'rca_confidence_ok':
             return {
               score: Number(!scores.confidence_overconfident),
-              explanation: `stated_confidence=${Math.round(
-                (confidence ?? 0) * 100
+              explanation: `stated_confidence=${round(
+                (confidence ?? 0) * 100,
+                0
               )}% overconfident=${pythonBool(scores.confidence_overconfident)}`,
             };
         }
@@ -386,7 +402,7 @@ export const createGoldenEvaluators = (
               4
           ),
           explanation: `hypotheses=${hypotheses} top_p=${
-            probability === null ? 'unstated' : `${Math.round(probability * 100)}%`
+            probability === null ? 'unstated' : `${round(probability * 100, 0)}%`
           } distinct=${pythonBool(scores.hypotheses_are_distinct)} specific=${pythonBool(
             scores.primary_hypothesis_is_specific
           )} | ${scores.reasoning}`,

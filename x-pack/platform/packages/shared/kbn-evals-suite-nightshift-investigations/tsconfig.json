@@ -20,6 +20,8 @@
     "@kbn/tooling-log",
     "@kbn/workflows",
     "@kbn/zod",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/significant-events-schema",
+    "@kbn/evals-common"
   ]
 }

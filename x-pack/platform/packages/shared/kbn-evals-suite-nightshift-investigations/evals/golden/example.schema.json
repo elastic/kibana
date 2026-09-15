@@ -8,7 +8,7 @@
         "question": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 100000
+          "maxLength": 9508
         }
       },
       "required": [
@@ -19,39 +19,45 @@
       }
     },
     "output": {
-      "type": "object",
-      "properties": {
-        "reference_answer": {
-          "type": "string",
-          "maxLength": 100000
-        },
-        "answer": {
-          "type": "string",
-          "maxLength": 100000
-        }
-      },
-      "additionalProperties": {
-        "$ref": "#/$defs/__schema1"
-      },
       "anyOf": [
         {
+          "type": "object",
+          "properties": {
+            "reference_answer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100000
+            },
+            "answer": {
+              "type": "string",
+              "maxLength": 100000
+            }
+          },
           "required": [
             "reference_answer"
           ],
-          "properties": {
-            "reference_answer": {
-              "minLength": 1
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema1"
           }
         },
         {
+          "type": "object",
+          "properties": {
+            "reference_answer": {
+              "type": "string",
+              "maxLength": 100000
+            },
+            "answer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100000
+            }
+          },
           "required": [
             "answer"
           ],
-          "properties": {
-            "answer": {
-              "minLength": 1
-            }
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema1"
           }
         }
       ]

@@ -108,7 +108,7 @@ Temporary source data is removed after the run.
 
 | Field | Requirement and meaning |
 | --- | --- |
-| `input.question` | Required nonempty string, up to 100,000 characters. Only this text plus the exact eval constraints suffix reaches the investigator. |
+| `input.question` | Required nonempty string, up to 9,508 characters (the product limit of 10,000 minus the 492-character suffix). Only this text plus the exact eval constraints suffix reaches the investigator. |
 | `output.reference_answer` | Expected answer for the RCA graders, up to 100,000 characters. Supply this for new examples. |
 | `output.answer` | Legacy goal-grader fallback when `reference_answer` is absent. At least one answer must be nonempty. RCA graders use `reference_answer`. |
 | `metadata.langsmith_example_id` | Required source LangSmith example ID, retained for comparison joins. |
@@ -119,6 +119,19 @@ Temporary source data is removed after the run.
 | `metadata.category` | Optional rubric selector. `investigate` selects the investigation rubric; so do supported alert-debug question prefixes. |
 | `metadata.status` | Optional lifecycle state; `archived` examples are excluded. |
 | Additional input, output, metadata fields | Preserved as JSON, including provenance and existing split tags. |
+
+The JSON schema is generated from the runtime definition and a Jest test checks they match.
+After changing the contract, regenerate it from the repository root:
+
+```bash
+node -r @kbn/setup-node-env <<'JS'
+const fs = require('fs');
+const { z } = require('@kbn/zod/v4');
+const directory = 'x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/evals/golden';
+const { goldenExampleSchema } = require(`./${directory}/types`);
+fs.writeFileSync(`${directory}/example.schema.json`, JSON.stringify(z.toJSONSchema(goldenExampleSchema), null, 2) + '\n');
+JS
+```
 
 The full investigate slice and Turing/copilot evaluations are deferred.
 

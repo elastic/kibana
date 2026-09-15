@@ -54,6 +54,27 @@ const evaluateCode = async (
   );
 
 describe('golden CODE evaluators', () => {
+  it('matches Python rounding of binary floats at a decimal half boundary', async () => {
+    const trajectory = Array.from({ length: 5 }, (_, index) => ({
+      step_type: 'tool_call' as const,
+      content: '',
+      tool_name: 'bash',
+      tool_args: { command: `synthetic ${index % 4}` },
+      tool_output: null,
+      success: true,
+    }));
+    const scores = await evaluateCode({
+      ...output,
+      total_tool_calls: 16,
+      failed_tool_calls: 3,
+      trajectory,
+      latency_seconds: 0.0625,
+      max_latency_seconds: 0.0625,
+    });
+    expect(scores.rca_investigation_efficiency.score).toBe(0.487);
+    expect(scores.latency_ok.explanation).toBe('latency=0.062s budget=0.062s');
+  });
+
   it('reproduces the numeric CODE scores from the Phase C reference document', async () => {
     // Phase C experiment e9a22c6f-c9ab-4c02-999b-7a044a480a39, example 0; all text is synthetic.
     const commands = Array.from({ length: 57 }, (_, index) => ({
@@ -241,55 +262,65 @@ describe('golden judge evaluators', () => {
     expect(inferenceOutput).toHaveBeenCalledTimes(2);
   });
 
-  it('shares a single semantic judgment across the six scores, including concurrent evaluators', async () => {
-    const inferenceOutput = jest.fn().mockResolvedValue({
-      output: {
-        reference_mechanism_class: 'deployment',
-        agent_mechanism_class: 'deployment',
-        mechanism_class_match: true,
-        timeline_contradiction_found: false,
-        timeline_reasoning: 'Cause precedes effect',
-        signal_coverage_score: 0.5,
-        signal_coverage_reasoning: 'Half the signals',
-        is_combined_cause: true,
-        cause_completeness_score: 0.5,
-        stated_confidence: 0.8,
-        confidence_overconfident: false,
-        used_post_incident_evidence: true,
-        anti_leakage_reasoning: 'Used resolution text',
-      },
-    });
-    const names = [
-      'rca_mechanism_class',
-      'rca_timeline_ok',
-      'rca_signal_coverage',
-      'rca_cause_completeness',
-      'rca_confidence_ok',
-      'rca_anti_leakage',
-    ];
-    const taskOutput = { ...output, final_answer: 'Deployment, 80% confidence. Resolved at noon.' };
-    const scores = await Promise.all(
-      createGoldenEvaluators({ output: inferenceOutput })
-        .filter(({ name }) => names.includes(name))
-        .map((evaluator) =>
-          evaluator.evaluate({
-            input: { question: output.query },
-            output: { ...taskOutput },
-            expected: { reference_answer: 'Synthetic reference' },
-            metadata: { langsmith_example_id: 'id', max_latency_seconds: 300, dataset_split: [] },
-          })
-        )
-    );
-    expect(scores).toEqual([
-      { score: 1, explanation: 'reference=deployment agent=deployment' },
-      { score: 1, explanation: 'Cause precedes effect' },
-      { score: 0.5, explanation: 'Half the signals' },
-      { score: 0.5, explanation: 'is_combined=True' },
-      { score: 1, explanation: 'stated_confidence=80% overconfident=False' },
-      { score: 0, explanation: 'Used resolution text' },
-    ]);
-    expect(inferenceOutput).toHaveBeenCalledTimes(1);
-  });
+  it.each([
+    [0.5, 0.5],
+    [0.1235, 0.123],
+    [0.0005, 0.001],
+  ])(
+    'shares a single semantic judgment and matches Python rounding of %p',
+    async (signalScore, expectedScore) => {
+      const inferenceOutput = jest.fn().mockResolvedValue({
+        output: {
+          reference_mechanism_class: 'deployment',
+          agent_mechanism_class: 'deployment',
+          mechanism_class_match: true,
+          timeline_contradiction_found: false,
+          timeline_reasoning: 'Cause precedes effect',
+          signal_coverage_score: signalScore,
+          signal_coverage_reasoning: 'Half the signals',
+          is_combined_cause: true,
+          cause_completeness_score: 0.5,
+          stated_confidence: 0.8,
+          confidence_overconfident: false,
+          used_post_incident_evidence: true,
+          anti_leakage_reasoning: 'Used resolution text',
+        },
+      });
+      const names = [
+        'rca_mechanism_class',
+        'rca_timeline_ok',
+        'rca_signal_coverage',
+        'rca_cause_completeness',
+        'rca_confidence_ok',
+        'rca_anti_leakage',
+      ];
+      const taskOutput = {
+        ...output,
+        final_answer: 'Deployment, 80% confidence. Resolved at noon.',
+      };
+      const scores = await Promise.all(
+        createGoldenEvaluators({ output: inferenceOutput })
+          .filter(({ name }) => names.includes(name))
+          .map((evaluator) =>
+            evaluator.evaluate({
+              input: { question: output.query },
+              output: { ...taskOutput },
+              expected: { reference_answer: 'Synthetic reference' },
+              metadata: { langsmith_example_id: 'id', max_latency_seconds: 300, dataset_split: [] },
+            })
+          )
+      );
+      expect(scores).toEqual([
+        { score: 1, explanation: 'reference=deployment agent=deployment' },
+        { score: 1, explanation: 'Cause precedes effect' },
+        { score: expectedScore, explanation: 'Half the signals' },
+        { score: 0.5, explanation: 'is_combined=True' },
+        { score: 1, explanation: 'stated_confidence=80% overconfident=False' },
+        { score: 0, explanation: 'Used resolution text' },
+      ]);
+      expect(inferenceOutput).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it('uses the investigation rubric and preserves the graded goal score', async () => {
     const inferenceOutput = jest

@@ -6,22 +6,33 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Evaluator } from '@kbn/evals';
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
 import type { ToolCallStep } from '@kbn/agent-builder-common';
+import { DOORDASH_ALERT_EVAL_CONSTRAINTS } from './prompts';
+
+const answerSchema = z.string().min(1).max(100_000);
+const expectedSchema = z
+  .object({
+    reference_answer: z.string().max(100_000).optional(),
+    answer: z.string().max(100_000).optional(),
+  })
+  .catchall(z.json());
 
 export const goldenExampleSchema = z.object({
-  input: z.object({ question: z.string().min(1).max(100_000) }).catchall(z.json()),
-  output: z
+  input: z
     .object({
-      reference_answer: z.string().max(100_000).optional(),
-      answer: z.string().max(100_000).optional(),
+      question: z
+        .string()
+        .min(1)
+        .max(MAX_TEXT_LENGTH - DOORDASH_ALERT_EVAL_CONSTRAINTS.length),
     })
-    .catchall(z.json())
-    .refine(
-      (output) => Boolean(output.reference_answer || output.answer),
-      'Reference answer is required'
-    ),
+    .catchall(z.json()),
+  output: z.union([
+    expectedSchema.extend({ reference_answer: answerSchema }),
+    expectedSchema.extend({ answer: answerSchema }),
+  ]),
   metadata: z
     .object({
       langsmith_example_id: z.string().min(1).max(500),

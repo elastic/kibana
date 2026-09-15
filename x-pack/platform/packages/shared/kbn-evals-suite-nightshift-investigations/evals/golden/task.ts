@@ -58,8 +58,12 @@ export const buildTrajectory = (
 };
 
 /** Renders the report deterministically in the ranked format understood by the golden judges. */
-export const renderFinalAnswer = (report: InvestigationStructuredOutput): string =>
-  [
+export const renderFinalAnswer = (report: InvestigationStructuredOutput): string => {
+  const hasReport = Object.values(report).some(
+    (value) => value !== undefined && (Array.isArray(value) ? value.length > 0 : Boolean(value))
+  );
+  if (!hasReport) return '';
+  return [
     '## Conclusion',
     report.conclusion ?? report.summary ?? '',
     `Severity: ${report.severity ?? 'unknown'}`,
@@ -89,6 +93,7 @@ export const renderFinalAnswer = (report: InvestigationStructuredOutput): string
     '## Blind spots',
     ...(report.blind_spots ?? []).map(({ title, description }) => `- ${title}: ${description}`),
   ].join('\n');
+};
 
 /** Resolves the agent's trace ID across conversation API string and array representations. */
 export const getConversationTraceId = (
@@ -185,6 +190,7 @@ export const runGoldenInvestigation = async (
       impact,
     };
     output.final_answer = renderFinalAnswer(output.structured_report);
+    if (!output.final_answer) output.structured_report = null;
     if (output.conversation_id) {
       const conversation = await fetch<{ rounds: ConversationRound[] }>(
         `/api/agent_builder/conversations/${encodeURIComponent(output.conversation_id)}`,
@@ -207,7 +213,7 @@ export const runGoldenInvestigation = async (
       ({ step_type, success }) => step_type === 'tool_result' && !success
     ).length;
   } catch (error) {
-    output.execution_error = error instanceof Error ? error.message : String(error);
+    output.execution_error ??= error instanceof Error ? error.message : String(error);
   }
   output.latency_seconds = (Date.now() - started) / 1000;
   return output;

@@ -5,12 +5,37 @@
  * 2.0.
  */
 
-import { mkdtempSync, writeFileSync, rmSync } from 'fs';
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { readGoldenDataset } from './datasets';
+import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { goldenExampleSchema } from './types';
+import { DOORDASH_ALERT_EVAL_CONSTRAINTS } from './prompts';
 
 describe('golden dataset derivation', () => {
+  it('keeps the procurement schema identical to runtime validation', () => {
+    expect(JSON.parse(readFileSync(join(__dirname, 'example.schema.json'), 'utf8'))).toEqual(
+      z.toJSONSchema(goldenExampleSchema)
+    );
+  });
+
+  it('accepts only questions that fit the product message limit with the constraints suffix', () => {
+    const example = {
+      input: { question: 'x'.repeat(MAX_TEXT_LENGTH - DOORDASH_ALERT_EVAL_CONSTRAINTS.length) },
+      output: { reference_answer: 'Synthetic cause' },
+      metadata: { langsmith_example_id: 'id', max_latency_seconds: 300, dataset_split: [] },
+    };
+    expect(goldenExampleSchema.safeParse(example).success).toBe(true);
+    expect(
+      goldenExampleSchema.safeParse({
+        ...example,
+        input: { question: example.input.question + 'x' },
+      }).success
+    ).toBe(false);
+  });
+
   it.each([300, '300'])(
     'preserves source fields, including budget %p, while intersecting splits and excluding archived examples',
     (budget) => {

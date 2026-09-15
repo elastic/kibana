@@ -6,7 +6,12 @@
  */
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
-import { buildTrajectory, renderFinalAnswer, getConversationTraceId } from './task';
+import {
+  buildTrajectory,
+  renderFinalAnswer,
+  getConversationTraceId,
+  runGoldenInvestigation,
+} from './task';
 
 describe('conversation trajectory', () => {
   it('uses the latest agent trace across string and array round formats', () => {
@@ -72,6 +77,11 @@ describe('conversation trajectory', () => {
 });
 
 describe('structured final answer', () => {
+  it('keeps absent failure reports empty so missing-evidence graders retain their null semantics', () => {
+    expect(renderFinalAnswer({})).toBe('');
+    expect(renderFinalAnswer({ hypotheses: [], recommendations: [], blind_spots: [] })).toBe('');
+  });
+
   it('renders ranked hypotheses, confidence and recommendations without mutating the report', () => {
     const hypotheses = [
       {
@@ -103,5 +113,36 @@ describe('structured final answer', () => {
     expect(answer).toContain('Revert deployment');
     expect(answer).toContain('No request traces');
     expect(hypotheses[0].candidate).toBe('Traffic');
+  });
+});
+
+describe('failed investigation evidence', () => {
+  it('retains the investigate-step error and absent report when conversation retrieval also fails', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'investigation' })
+      .mockResolvedValueOnce({
+        status: 'failed',
+        conversation_id: 'conversation',
+        error: 'Workflow failed',
+      })
+      .mockResolvedValueOnce({
+        status: 'failed',
+        stepExecutions: [{ stepId: 'investigate', error: { message: 'Model unavailable' } }],
+      })
+      .mockRejectedValueOnce(new Error('Conversation unavailable'));
+    const result = await runGoldenInvestigation(fetch, {
+      input: { question: 'Investigate synthetic signal' },
+      output: { reference_answer: 'Synthetic cause' },
+      metadata: { langsmith_example_id: 'source', max_latency_seconds: 300, dataset_split: [] },
+    });
+    expect(result).toMatchObject({
+      investigation_id: 'investigation',
+      conversation_id: 'conversation',
+      workflow_status: 'failed',
+      execution_error: 'Model unavailable',
+      final_answer: '',
+      structured_report: null,
+    });
   });
 });
