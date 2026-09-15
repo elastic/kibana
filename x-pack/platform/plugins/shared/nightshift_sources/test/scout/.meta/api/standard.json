@@ -1,0 +1,328 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2c18bbcc7238a65-8abd26b7d5e05b0",
+      "title": "Nightshift sources authorization lets a Nightshift reader read but not write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
+        "line": 63,
+        "column": 13
+      }
+    },
+    {
+      "id": "2c18bbcc7238a65-9c37f7f90173447",
+      "title": "Nightshift sources authorization reports unknown health to a reader without Elasticsearch view privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
+        "line": 70,
+        "column": 15
+      }
+    },
+    {
+      "id": "2c18bbcc7238a65-fe4c40f9fcb3b61",
+      "title": "Nightshift sources authorization denies a user without Nightshift privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
+        "line": 82,
+        "column": 14
+      }
+    },
+    {
+      "id": "ee06a7dc35918e2-581872c8017d129",
+      "title": "Nightshift sources lifecycle creates a source, tracks view health, repairs through PUT and deletes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 55,
+        "column": 40
+      }
+    },
+    {
+      "id": "ee06a7dc35918e2-6bbd672edd5e01f",
+      "title": "Nightshift sources lifecycle bumps esql_updated_at only when the query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 119,
+        "column": 23
+      }
+    },
+    {
+      "id": "ee06a7dc35918e2-0dc8d0b43a95fc7",
+      "title": "Nightshift sources lifecycle flips enabled through _disable and _enable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 147,
+        "column": 16
+      }
+    },
+    {
+      "id": "ee06a7dc35918e2-1a24de7fe449485",
+      "title": "Nightshift sources lifecycle paginates sorted by title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 166,
+        "column": 84
+      }
+    },
+    {
+      "id": "ee06a7dc35918e2-83d37050ad41195",
+      "title": "Nightshift sources lifecycle returns 404 for an unknown source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 207,
+        "column": 14
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-41bcb357e37152f",
+      "title": "POST /internal/nightshift/sources validation rejects a query that does not parse with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-39c6cb5faeb0144",
+      "title": "POST /internal/nightshift/sources validation rejects a first command that is not FROM or TS with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-128aa7c43703f5b",
+      "title": "POST /internal/nightshift/sources validation rejects EVAL with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-1d81b088cebe2e3",
+      "title": "POST /internal/nightshift/sources validation rejects STATS with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-ceb09901f28da78",
+      "title": "POST /internal/nightshift/sources validation rejects LIMIT with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-9f5344bbaf601ff",
+      "title": "POST /internal/nightshift/sources validation rejects METADATA with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-efb0e42f1c1ddb7",
+      "title": "POST /internal/nightshift/sources validation rejects a remote cluster prefix with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 85,
+        "column": 57
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-decf5ed3cad46cf",
+      "title": "POST /internal/nightshift/sources validation rejects a field ES cannot resolve on an existing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 75,
+        "column": 27
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-b05e431f6219fc2",
+      "title": "POST /internal/nightshift/sources validation rejects a body without a title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 99,
+        "column": 15
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-35d071ffdeb85e1",
+      "title": "POST /internal/nightshift/sources validation accepts FROM with WHERE filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 105,
+        "column": 5
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-5343124ec890df5",
+      "title": "POST /internal/nightshift/sources validation accepts TS over a pattern with no indices yet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 114,
+        "column": 29
+      }
+    },
+    {
+      "id": "7e39439ffe5cdd8-90484abfe65ab1a",
+      "title": "POST /internal/nightshift/sources validation accepts FROM over a pattern with no indices yet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 109,
+        "column": 27
+      }
+    }
+  ]
+}

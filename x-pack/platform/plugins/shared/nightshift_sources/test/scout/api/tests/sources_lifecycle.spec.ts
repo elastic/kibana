@@ -1,0 +1,230 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
+import type { RoleSessionCredentials } from '@kbn/scout';
+import { getNightshiftSourceViewName } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_MANAGER_ROLE,
+  apiTest,
+  cleanupSources,
+  createSource,
+  createTestIndex,
+  deleteSource,
+  deleteTestIndex,
+  getSource,
+  listSources,
+  readView,
+  setSourceEnabled,
+  testIndexName,
+  uniqueSuffix,
+  updateSource,
+} from '../fixtures';
+
+const TITLE_PREFIX = 'scout-sources-lifecycle';
+
+interface ListedSource {
+  source: { id: string; title: string };
+  health: string;
+}
+
+const findListed = (body: { sources: ListedSource[] }, id: string): ListedSource | undefined =>
+  body.sources.find((entry) => entry.source.id === id);
+
+const listedIds = (body: { sources: ListedSource[] }): string[] =>
+  body.sources.map((entry) => entry.source.id);
+
+apiTest.describe(
+  'Nightshift sources lifecycle',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    const suffix = uniqueSuffix();
+    const index = testIndexName(suffix);
+    let manager: RoleSessionCredentials;
+
+    apiTest.beforeAll(async ({ esClient, samlAuth }) => {
+      manager = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGER_ROLE);
+      await createTestIndex(esClient, index);
+    });
+
+    apiTest.afterAll(async ({ apiClient, esClient }) => {
+      await cleanupSources(apiClient, manager.cookieHeader, TITLE_PREFIX);
+      await deleteTestIndex(esClient, index);
+    });
+
+    apiTest(
+      'creates a source, tracks view health, repairs through PUT and deletes',
+      async ({ apiClient, esClient }) => {
+        const body = {
+          title: `${TITLE_PREFIX}-${suffix}`,
+          description: 'nginx 5xx',
+          tags: ['nginx'],
+          esql: `FROM ${index} | WHERE status >= 500`,
+        };
+
+        const created = await createSource(apiClient, manager.cookieHeader, body);
+        expect(created).toHaveStatusCode(200);
+        const { source } = created.body;
+        const viewName = getNightshiftSourceViewName(source.id);
+        expect(source).toMatchObject({
+          ...body,
+          view_name: viewName,
+          enabled: true,
+        });
+        expect(source.esql_updated_at).toBe(source.created_at);
+
+        expect(await readView(esClient, viewName)).toStrictEqual({
+          name: viewName,
+          query: body.esql,
+        });
+
+        const listed = await listSources(apiClient, manager.cookieHeader);
+        expect(listed).toHaveStatusCode(200);
+        expect(findListed(listed.body, source.id)).toStrictEqual({ source, health: 'ok' });
+
+        const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(fetched).toHaveStatusCode(200);
+        expect(fetched.body).toStrictEqual({ source, health: 'ok' });
+
+        // Out-of-band deletion is what the health badge exists for.
+        await esClient.esql.deleteView({ name: viewName });
+        const missing = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(missing.body.health).toBe('view_missing');
+
+        const repaired = await updateSource(apiClient, manager.cookieHeader, source.id, body);
+        expect(repaired).toHaveStatusCode(200);
+        expect(repaired.body.source.esql_updated_at).toBe(source.esql_updated_at);
+        expect((await getSource(apiClient, manager.cookieHeader, source.id)).body.health).toBe(
+          'ok'
+        );
+
+        await esClient.esql.putView({
+          name: viewName,
+          query: `FROM ${index} | WHERE status >= 400`,
+        });
+        const drifted = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(drifted.body.health).toBe('view_drift');
+
+        await updateSource(apiClient, manager.cookieHeader, source.id, body);
+        expect((await getSource(apiClient, manager.cookieHeader, source.id)).body.health).toBe(
+          'ok'
+        );
+        expect(await readView(esClient, viewName)).toStrictEqual({
+          name: viewName,
+          query: body.esql,
+        });
+
+        const deleted = await deleteSource(apiClient, manager.cookieHeader, source.id);
+        expect(deleted).toHaveStatusCode(200);
+        expect(deleted.body).toStrictEqual({ acknowledged: true });
+        expect(await getSource(apiClient, manager.cookieHeader, source.id)).toHaveStatusCode(404);
+        expect(await readView(esClient, viewName)).toBeUndefined();
+      }
+    );
+
+    apiTest(
+      'bumps esql_updated_at only when the query changes',
+      async ({ apiClient, esClient }) => {
+        const body = {
+          title: `${TITLE_PREFIX}-${suffix}-esql`,
+          tags: [],
+          esql: `FROM ${index} | WHERE status >= 500`,
+        };
+        const { source } = (await createSource(apiClient, manager.cookieHeader, body)).body;
+
+        const renamed = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          title: `${body.title}-renamed`,
+          esql: `from ${index}\n| where status >= 500`,
+        });
+        expect(renamed).toHaveStatusCode(200);
+        expect(renamed.body.source.title).toBe(`${body.title}-renamed`);
+        expect(renamed.body.source.esql_updated_at).toBe(source.esql_updated_at);
+        expect(renamed.body.source.updated_at).not.toBe(source.updated_at);
+
+        const newEsql = `FROM ${index} | WHERE status >= 400`;
+        const requeried = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: newEsql,
+        });
+        expect(requeried).toHaveStatusCode(200);
+        expect(requeried.body.source.esql_updated_at).not.toBe(source.esql_updated_at);
+        expect(await readView(esClient, source.view_name)).toStrictEqual({
+          name: source.view_name,
+          query: newEsql,
+        });
+
+        await deleteSource(apiClient, manager.cookieHeader, source.id);
+      }
+    );
+
+    apiTest('flips enabled through _disable and _enable', async ({ apiClient }) => {
+      const { source } = (
+        await createSource(apiClient, manager.cookieHeader, {
+          title: `${TITLE_PREFIX}-${suffix}-enabled`,
+          esql: `FROM ${index}`,
+        })
+      ).body;
+
+      const disabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, false);
+      expect(disabled).toHaveStatusCode(200);
+      expect(disabled.body.source.enabled).toBe(false);
+      expect(disabled.body.source.esql_updated_at).toBe(source.esql_updated_at);
+
+      const onlyDisabled = await listSources(apiClient, manager.cookieHeader, 'enabled=false');
+      expect(listedIds(onlyDisabled.body)).toContain(source.id);
+      const onlyEnabled = await listSources(apiClient, manager.cookieHeader, 'enabled=true');
+      expect(listedIds(onlyEnabled.body)).not.toContain(source.id);
+
+      const enabled = await setSourceEnabled(apiClient, manager.cookieHeader, source.id, true);
+      expect(enabled.body.source.enabled).toBe(true);
+
+      await deleteSource(apiClient, manager.cookieHeader, source.id);
+    });
+
+    apiTest('paginates sorted by title', async ({ apiClient }) => {
+      const titles = ['a', 'b', 'c'].map((letter) => `${TITLE_PREFIX}-${suffix}-page-${letter}`);
+      const ids: string[] = [];
+      for (const title of titles) {
+        const { source } = (
+          await createSource(apiClient, manager.cookieHeader, { title, esql: `FROM ${index}` })
+        ).body;
+        ids.push(source.id);
+      }
+
+      const firstPage = await listSources(apiClient, manager.cookieHeader, 'page=1&per_page=2');
+      expect(firstPage).toHaveStatusCode(200);
+      expect(firstPage.body).toMatchObject({ page: 1, per_page: 2 });
+      expect(firstPage.body.total).toBeGreaterThanOrEqual(3);
+      expect(firstPage.body.sources).toHaveLength(2);
+
+      const secondPage = await listSources(apiClient, manager.cookieHeader, 'page=2&per_page=2');
+      expect(secondPage.body).toMatchObject({ page: 2, per_page: 2 });
+
+      const seen = [...firstPage.body.sources, ...secondPage.body.sources].map(
+        (entry: ListedSource) => entry.source.title
+      );
+      const ours = seen.filter((title) => titles.includes(title));
+      expect(ours).toStrictEqual([...ours].sort());
+      expect(new Set(seen).size).toBe(seen.length);
+
+      const tooMany = await listSources(apiClient, manager.cookieHeader, 'per_page=101');
+      expect(tooMany).toHaveStatusCode(400);
+
+      for (const id of ids) {
+        await deleteSource(apiClient, manager.cookieHeader, id);
+      }
+    });
+
+    apiTest('returns 404 for an unknown source', async ({ apiClient }) => {
+      const response = await getSource(apiClient, manager.cookieHeader, 'does-not-exist');
+      expect(response).toHaveStatusCode(404);
+      expect(response.body.message).toBe('Source does-not-exist not found');
+    });
+  }
+);
