@@ -17,11 +17,7 @@ export interface BridgedToolResponse {
   [key: string]: unknown;
 }
 
-/**
- * Maps Agent Builder tool results into a plain, LLM-friendly payload.
- * Error results are surfaced under `error`; everything else is passed through
- * as `{ type, data }` so the consumer can read the tool output.
- */
+/** Maps Agent Builder tool results into a plain, LLM-friendly payload. */
 export const formatToolResults = (results: ToolResult[] | undefined): BridgedToolResponse => {
   const list = results ?? [];
   const errors = list

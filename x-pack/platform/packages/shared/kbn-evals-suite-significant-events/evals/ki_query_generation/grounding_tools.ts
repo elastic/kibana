@@ -7,9 +7,7 @@
 
 /**
  * Semantic Code Search (SCS) grounding configuration for the KI query
- * generation eval. Grounded runs rely on the SCS Agent Builder tools exposed
- * to the deployed KI query generation agent; this module only resolves which
- * grounding modes to run and which code index backs each dataset.
+ * generation eval; the SCS tools themselves are exposed by the deployed agent.
  */
 
 export type GroundingMode = 'baseline' | 'grounded';
