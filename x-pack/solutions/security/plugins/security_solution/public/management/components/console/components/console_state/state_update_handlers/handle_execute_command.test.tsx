@@ -129,7 +129,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd2 foo --file test');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      "Positional arguments (foo ) are not supported. All command arguments must be prefixed with '--'"
+      "Positional arguments (foo) are not supported. All command arguments must be prefixed with '--'"
     );
   });
 
@@ -147,7 +147,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd2 one two --file test');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      "Positional arguments (one two ) are not supported. All command arguments must be prefixed with '--'"
+      "Positional arguments (one two) are not supported. All command arguments must be prefixed with '--'"
     );
   });
 
@@ -156,7 +156,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd2 foo --help');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      "Positional arguments (foo ) are not supported. All command arguments must be prefixed with '--'"
+      "Positional arguments (foo) are not supported. All command arguments must be prefixed with '--'"
     );
   });
 
