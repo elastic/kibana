@@ -6,17 +6,11 @@
  */
 
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@kbn/react-query';
-import { useRef } from 'react';
 import type { IToasts } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  API_VERSIONS,
-  ALERTZERO_WORKERS_URL,
-  applyWorkerSettingsWrite,
-  buildWorkerUrl,
-} from '@kbn/alertzero-common';
+import { API_VERSIONS, ALERTZERO_WORKERS_URL, buildWorkerUrl } from '@kbn/alertzero-common';
 import type {
   ListWorkersResponse,
   UpdateWorkerRequestBody,
@@ -68,19 +62,6 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
   toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
 };
 
-const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worker => {
-  const enabled = patch.enabled ?? worker.enabled;
-  const settings = patch.settings
-    ? applyWorkerSettingsWrite(worker.settings, patch.settings)
-    : worker.settings;
-  return {
-    ...worker,
-    enabled,
-    state: worker.state === 'unavailable' ? 'unavailable' : enabled ? 'ok' : 'paused',
-    settings,
-  };
-};
-
 const replaceWorkerInList = (
   queryClient: QueryClient,
   queryKey: ReturnType<typeof queryKeys.workers.list>,
@@ -104,7 +85,6 @@ export const useUpdateWorker = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.workers.list();
-  const mutationQueue = useRef<Promise<void>>(Promise.resolve());
 
   return useMutation({
     mutationFn: ({
@@ -113,47 +93,20 @@ export const useUpdateWorker = () => {
     }: {
       workerId: string;
       patch: UpdateWorkerRequestBody;
-    }): Promise<UpdateWorkerResponse> => {
-      const execute = async (): Promise<UpdateWorkerResponse> => {
-        const response = await services.http!.patch<UpdateWorkerResponse>(
-          buildWorkerUrl(workerId),
-          {
-            version: API_VERSIONS.internal.v1,
-            body: JSON.stringify(patch),
-          }
-        );
-        // Reconcile inside the queued operation so the next request sees the new revision.
-        replaceWorkerInList(queryClient, queryKey, response.worker);
-        return response;
-      };
-      const operation = mutationQueue.current.then(execute, execute);
-      mutationQueue.current = operation.then(
-        () => undefined,
-        () => undefined
-      );
-      return operation;
-    },
-    onMutate: async ({ workerId, patch }) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<ListWorkersResponse>(queryKey);
-      if (previous) {
-        queryClient.setQueryData<ListWorkersResponse>(queryKey, {
-          workers: previous.workers.map((worker) =>
-            worker.id === workerId ? applyWorkerPatch(worker, patch) : worker
-          ),
-        });
-      }
-      return { previous };
-    },
-    onError: (error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKey, context.previous);
-      }
-      notifyWorkerUpdateError(services.notifications!.toasts, error);
-    },
+    }): Promise<UpdateWorkerResponse> =>
+      services.http!.patch<UpdateWorkerResponse>(buildWorkerUrl(workerId), {
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify(patch),
+      }),
+    // Only the confirmed Worker touches the cache; nothing is written before the server answers.
     onSuccess: (data) => {
       replaceWorkerInList(queryClient, queryKey, data.worker);
     },
+    onError: (error) => {
+      notifyWorkerUpdateError(services.notifications!.toasts, error);
+    },
+    // Awaited so mutateAsync resolves after the reload attempt. A failed reload surfaces as the
+    // workers query error, which the Watch page uses to block Save.
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey });
     },
