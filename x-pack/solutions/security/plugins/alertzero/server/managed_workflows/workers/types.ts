@@ -8,8 +8,6 @@
 import type { WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
-export type WorkerSettingsPatch = WorkerSettingsWrite;
-
 export interface WorkerSettingsRegistration {
   /** Template values for a fresh per-space install. */
   createDefaultValues(): ManagedWorkflowTemplateValues;
@@ -19,7 +17,7 @@ export interface WorkerSettingsRegistration {
    */
   applyPatch(
     values: ManagedWorkflowTemplateValues,
-    patch: WorkerSettingsPatch
+    patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
   /**
    * Parses persisted template values into complete settings. Throws when they do not match the
