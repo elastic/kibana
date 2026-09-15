@@ -31,14 +31,13 @@ export async function seedQueries(
   }));
 
   for (const { q, queryId, esql } of prepared) {
-    const path = `/api/streams/${encodeURIComponent(ctx.streamName)}/queries/${encodeURIComponent(
-      queryId
-    )}`;
+    const path = `/internal/significant_events/queries/${encodeURIComponent(queryId)}`;
     const body = {
       title: q.title,
       esql: { query: esql },
       ...(q.severityScore !== undefined ? { severity_score: q.severityScore } : {}),
       description: q.description ?? '',
+      target_name: ctx.streamName,
     };
     const res = await kibanaRequest(config, 'PUT', path, body, ctx.space);
     if (res.status >= 300) {
