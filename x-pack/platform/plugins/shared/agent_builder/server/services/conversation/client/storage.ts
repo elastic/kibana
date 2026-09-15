@@ -36,7 +36,12 @@ const storageSettings = {
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
-      title: types.text({ fields: { keyword: types.keyword() } }),
+      title: types.text({
+        fields: {
+          keyword: types.keyword(),
+          caseless: types.keyword({ normalizer: 'lowercase' }),
+        },
+      }),
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({

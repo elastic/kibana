@@ -26,14 +26,14 @@ describe('buildSearchSort', () => {
   it('demotes an explicit sort below relevance when a query is present', () => {
     expect(buildSearchSort({ sort: { field: 'title', order: 'asc' }, hasQuery: true })).toEqual([
       { _score: { order: 'desc' } },
-      { 'title.keyword': { order: 'asc' } },
+      { 'title.caseless': { order: 'asc' } },
       { created_at: { order: 'asc' } },
     ]);
   });
 
-  it('sorts title on its keyword sub-field', () => {
+  it('sorts title on its normalized sub-field rather than the byte-ordered keyword', () => {
     expect(buildSearchSort({ sort: { field: 'title', order: 'asc' }, hasQuery: false })).toEqual([
-      { 'title.keyword': { order: 'asc' } },
+      { 'title.caseless': { order: 'asc' } },
       { created_at: { order: 'asc' } },
     ]);
   });
