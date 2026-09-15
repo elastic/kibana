@@ -22,6 +22,32 @@ export interface TestWorkflowParams {
   triggerTab?: WorkflowTriggerTab;
 }
 
+// A single validation reason can be huge when it echoes a whole schema
+// (e.g. the Elasticsearch `filter` union lists every query type). Cap each
+// reason for the *displayed* toast body so it stays readable; the untruncated
+// text is kept on the error object (see `buildValidationError`) so Kibana's
+// "See the full error" modal can show and copy the complete reasons.
+const MAX_REASON_LENGTH = 200;
+
+const truncateReason = (reason: string): string =>
+  reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH).trimEnd()}…` : reason;
+
+const formatReasons = (reasons: string[], transform: (reason: string) => string): string =>
+  reasons.map((reason) => `• ${transform(reason)}`).join('\n');
+
+// Build an Error whose `message` is the trimmed, display-friendly text and
+// whose `stack` carries the full untruncated reasons. Kibana's error toast
+// renders `message` in the toast body and exposes `stack` in a copyable code
+// block behind the "See the full error" button, so users get a compact toast
+// but can still read/copy the complete validation output when needed.
+const buildValidationError = (baseMessage: string, reasons: string[]): Error => {
+  const displayMessage = `${baseMessage}:\n${formatReasons(reasons, truncateReason)}`;
+  const fullMessage = `${baseMessage}:\n${formatReasons(reasons, (reason) => reason)}`;
+  const error = new Error(displayMessage);
+  error.stack = fullMessage;
+  return error;
+};
+
 export interface TestWorkflowResponse {
   workflowExecutionId: string;
 }
@@ -90,11 +116,14 @@ export const testWorkflowThunk = createAsyncThunk<
       const baseMessage = error.body?.message || error.message || 'Failed to test workflow';
       const validationErrors: string[] | undefined =
         error.body?.attributes?.validationErrors ?? error.body?.validationErrors;
-      const errorMessage =
+      const errorObj =
         Array.isArray(validationErrors) && validationErrors.length > 0
-          ? `${baseMessage}:\n${validationErrors.map((reason) => `• ${reason}`).join('\n')}`
-          : baseMessage;
-      const errorObj = error instanceof Error ? error : new Error(errorMessage);
+          ? buildValidationError(baseMessage, validationErrors)
+          : error instanceof Error
+          ? error
+          : new Error(baseMessage);
+      // Displayed toast body (trimmed for validation errors, plain otherwise).
+      const errorMessage = errorObj.message;
 
       const errorState = getState();
       const workflow = selectWorkflow(errorState);
@@ -114,7 +143,7 @@ export const testWorkflowThunk = createAsyncThunk<
         hasCustomEventTrigger,
       });
 
-      notifications.toasts.addError(new Error(errorMessage), {
+      notifications.toasts.addError(errorObj, {
         title: i18n.translate('workflows.detail.testWorkflow.error', {
           defaultMessage: 'Failed to test workflow',
         }),
