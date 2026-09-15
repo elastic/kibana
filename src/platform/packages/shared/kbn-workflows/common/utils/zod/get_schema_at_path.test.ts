@@ -136,12 +136,38 @@ describe('getSchemaAtPath', () => {
     expectZodSchemaEqual(result.schema as z.ZodType, z.unknown());
   });
 
+  it('typed catchall walks into the value shape and rejects unknown value fields', () => {
+    const schema = z.object({}).catchall(z.object({ name: z.string() }));
+    expect(getSchemaAtPath(schema, 'rule-1.name').schema).not.toBeNull();
+    expect(getSchemaAtPath(schema, 'rule-1.nmae').schema).toBeNull();
+  });
+
+  it('does not walk an unknown catchall (open map)', () => {
+    const schema = z.object({}).catchall(z.unknown());
+    expect(getSchemaAtPath(schema, 'anything').schema).toBeNull();
+  });
+
   it('treats a Liquid dynamic subscript as one map key', () => {
     const schema = z.object({
       rules: z.record(z.string(), z.object({ name: z.string() })),
     });
     expect(getSchemaAtPath(schema, 'rules[ep.rule_id].name').schema).not.toBeNull();
     expect(getSchemaAtPath(schema, 'rules[ep.rule_id].nmae').schema).toBeNull();
+  });
+
+  it('treats a Liquid dynamic subscript as one catchall map key', () => {
+    const schema = z.object({
+      rules: z.object({}).catchall(z.object({ name: z.string() })),
+    });
+    expect(getSchemaAtPath(schema, 'rules[ep.rule_id].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(schema, 'rules[ep.rule_id].nmae').schema).toBeNull();
+  });
+
+  it('does not resolve a Liquid dynamic subscript on a closed object', () => {
+    const schema = z.object({
+      rules: z.object({ name: z.string() }),
+    });
+    expect(getSchemaAtPath(schema, 'rules[ep.rule_id].name').schema).toBeNull();
   });
 
   it('treats a Liquid dynamic subscript as one array element', () => {
