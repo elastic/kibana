@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ATTACK_DISCOVERY_GENERATION_YAML from './attack_discovery_generation.yaml';
+import ATTACK_DISCOVERY_BATCHED_GENERATION_YAML from './attack_discovery_batched_generation.yaml';
 import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
 import ATTACK_DISCOVERY_RUNNER_YAML from './attack_discovery_runner.yaml';
 import {
@@ -19,13 +19,14 @@ import type { ManagedWorkflowDefinition } from '../../types';
 
 // `system-attack-discovery-generation` is already taken by the discoveries plugin,
 // so these mirror the `system-security-rule-tuning-worker` / `-review` pair instead.
-// The `-generation` suffix below is free because of the `security-` segment.
+// The `-batched-generation` suffix below does not collide with it — both the
+// `security-` segment and the `batched-` qualifier keep the two distinct.
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID =
   'system-security-attack-discovery-worker';
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID =
   'system-security-attack-discovery-review';
-export const ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID =
-  'system-security-attack-discovery-generation';
+export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
+  'system-security-attack-discovery-batched-generation';
 
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
@@ -51,11 +52,11 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  */
-export const ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW = {
+export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: ATTACK_DISCOVERY_GENERATION_YAML,
+  yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

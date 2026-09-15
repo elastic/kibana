@@ -1,5 +1,5 @@
 version: "1"
-name: Attack Discovery Generation
+name: Attack Discovery Batched Generation
 description: |
   Runs Attack Discovery over the whole open alert population for a lookback
   window instead of a single truncated slice: retrieve once sorted by
