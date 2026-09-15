@@ -8,7 +8,14 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_DETECTION_COVERAGE_WORKFLOW, ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID } from '.';
+import {
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+  ALERTZERO_DETECTION_COVERAGE_WORKFLOW,
+  ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
+  ALERTZERO_RULE_CREATION_WORKFLOW_ID,
+} from '.';
+import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from '../agentic_investigations';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
@@ -23,17 +30,20 @@ const VERDICTS = [
   'no_coverage',
 ] as const;
 
-/** Verdicts that must have a dedicated switch case. */
-const ACTIONABLE_VERDICTS = [
-  'no_coverage',
-  'covered_disabled',
-  'prebuilt_available',
-  'covered_enabled',
-] as const;
+/** Every verdict must select exactly one route flag. */
+const ROUTE_BY_VERDICT = {
+  covered_disabled: 'enable',
+  prebuilt_available: 'install',
+  covered_enabled: 'confirm',
+  no_coverage: 'create',
+} as const;
+
+const PROPOSAL_STEPS = ['propose_enable', 'propose_install', 'propose_confirm', 'propose_report'];
 
 interface YamlStep {
   name: string;
   type: string;
+  if?: string;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
   else?: YamlStep[];
@@ -42,11 +52,18 @@ interface YamlStep {
   'on-failure'?: { continue?: boolean };
 }
 
-const workerDefinition = parse(ALERTZERO_DETECTION_COVERAGE_WORKFLOW.yaml) as {
+interface YamlWorkflow {
+  settings?: { timeout?: string };
   steps: YamlStep[];
   outputs?: Array<{ name: string }>;
-  triggers?: Array<{ type: string }>;
-};
+  triggers?: Array<{
+    type: string;
+    inputs?: { properties?: Record<string, { type?: string; maxLength?: number }> };
+  }>;
+}
+
+const workerDefinition = parse(ALERTZERO_DETECTION_COVERAGE_WORKFLOW.yaml) as YamlWorkflow;
+const gateDefinition = parse(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
   steps.flatMap((step) => [
@@ -59,7 +76,10 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 
 const allWorkerSteps = flatten(workerDefinition.steps);
 const stepByName = (name: string) => allWorkerSteps.find((step) => step.name === name);
-const verdictSwitch = stepByName('handle_verdict');
+const stepIndex = (name: string) => allWorkerSteps.findIndex((step) => step.name === name);
+const inputsOf = (step: YamlStep | undefined) =>
+  (step?.with?.inputs ?? {}) as Record<string, unknown>;
+const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
 describe('Detection Coverage worker', () => {
   it('is registered as a worker, not a catalog watch', () => {
@@ -82,26 +102,174 @@ describe('Detection Coverage worker', () => {
       expect(schema?.required).toContain('verdict');
     });
 
-    it('has one switch case per actionable verdict and no stray cases', () => {
-      const matches = (verdictSwitch?.cases ?? []).map((c) => c.match);
-      expect(new Set(matches)).toEqual(new Set(ACTIONABLE_VERDICTS));
-      expect(matches).toHaveLength(ACTIONABLE_VERDICTS.length);
+    it('routes every canonical verdict to exactly one flag', () => {
+      const routes = stepByName('route_verdict')?.with as Record<string, string>;
+      expect(Object.keys(routes).sort()).toEqual(Object.values(ROUTE_BY_VERDICT).slice().sort());
+      for (const verdict of VERDICTS) {
+        const owners = Object.entries(routes)
+          .filter(([, expression]) => expression.includes(`verdict == '${verdict}'`))
+          .map(([flag]) => flag);
+        expect(owners).toEqual([ROUTE_BY_VERDICT[verdict]]);
+      }
     });
 
-    it('routes every remaining verdict to a report-only default arm', () => {
-      const uncased = VERDICTS.filter(
-        (verdict) => !(ACTIONABLE_VERDICTS as readonly string[]).includes(verdict)
+    // A verdict the actions cannot honour must surface to the analyst, not vanish.
+    it('reports whenever no route matched', () => {
+      const report = String((stepByName('route_fallback')?.with as Record<string, string>).report);
+      for (const flag of Object.values(ROUTE_BY_VERDICT)) {
+        expect(report).toContain(`steps.route_verdict.output.${flag} != true`);
+      }
+      expect(stepByName('propose_report')?.if).toContain(
+        'steps.route_fallback.output.report == true'
       );
-      // All canonical verdicts now have dedicated cases; the default arm handles only
-      // unexpected verdicts (e.g. a model hallucinating outside the enum).
-      expect(uncased).toEqual([]);
-      expect((verdictSwitch?.default ?? []).map((step) => step.name)).toEqual(['report_only']);
     });
 
-    it('switches on the verdict itself, so a missing verdict cannot match a case', () => {
-      expect(verdictSwitch?.type).toBe('switch');
-      expect((verdictSwitch as unknown as { expression?: string }).expression).toContain(
-        'structured_output.verdict'
+    it('offers the enable action only for a rule resolved to a saved object', () => {
+      const routes = stepByName('route_verdict')?.with as Record<string, string>;
+      expect(routes.enable).toContain('steps.resolve_rule.output.id != null');
+      expect(routes.install).toContain('structured_output.prebuilt_version > 0');
+    });
+  });
+
+  describe('investigation', () => {
+    it('resolves the saved object from the signature id before proposing', () => {
+      const resolve = stepByName('resolve_rule');
+      expect(resolve?.type).toBe('kibana.request');
+      expect(String(resolve?.with?.path)).toContain(
+        'rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}'
+      );
+      expect(stepIndex('resolve_rule')).toBeLessThan(stepIndex('route_verdict'));
+    });
+
+    // Without an investigation there is nowhere to propose, so a failed create must
+    // fail the run rather than continue into a proposal with an empty conversation id.
+    it('opens an investigation from the template for every verdict but no_coverage', () => {
+      const create = stepByName('create_investigation');
+      expect(create?.type).toBe('ai.conversation.create');
+      expect(create?.with?.template_id).toBe('investigation');
+      expect(create?.if).toContain("verdict != 'no_coverage'");
+      expect(create).not.toHaveProperty('on-failure');
+    });
+
+    it('attaches the matched rule by reference under a fixed attachment id', () => {
+      const attach = stepByName('attach_rule');
+      const body = attach?.with?.body as Record<string, string>;
+      expect(body.type).toBe('security.rule');
+      expect(body.id).toBe('coverage-rule');
+      expect(body.origin).toBe('{{ steps.coverage_check.output.structured_output.rule_id }}');
+      expect(attach?.if).toContain('steps.resolve_rule.output.id != null');
+    });
+
+    it('refreshes the attachment with the rule as it exists after the action', () => {
+      const refetch = stepByName('refetch_rule');
+      const refresh = stepByName('refresh_rule_attachment');
+      const attachInstalled = stepByName('attach_installed_rule');
+
+      expect(refetch?.if).toContain('steps.record_decision.output.applied == true');
+      expect(String(refetch?.with?.path)).toContain(
+        'id={{ steps.resolve_rule.output.id | url_encode }}'
+      );
+      expect(String(refetch?.with?.path)).toContain(
+        'rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}'
+      );
+
+      expect(refresh?.with?.method).toBe('PUT');
+      expect(String(refresh?.with?.path)).toContain('/attachments/coverage-rule');
+      expect(JSON.stringify(refresh?.with)).toContain('steps.refetch_rule.output | json');
+      expect(refresh?.if).toContain('steps.refetch_rule.output.id != null');
+
+      // A prebuilt rule has no saved object until installed, so it is attached afterwards.
+      expect(attachInstalled?.with?.method).toBe('POST');
+      expect(attachInstalled?.if).toContain('steps.route_verdict.output.install == true');
+      expect((attachInstalled?.with?.body as Record<string, string>).id).toBe('coverage-rule');
+    });
+
+    it('closes the investigation on a decision and leaves it open on a timeout', () => {
+      const resolved = stepByName('close_investigation_resolved');
+      const dismissed = stepByName('close_investigation_dismissed');
+      expect(resolved?.type).toBe('ai.conversation.metadata.patch');
+      expect(resolved?.if).toContain('steps.record_decision.output.approved == true');
+      expect(dismissed?.if).toContain('steps.record_decision.output.dismissed == true');
+      expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
+      expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+  });
+
+  describe('proposal gate', () => {
+    // The worker has no gate of its own: the decision lives on the investigation as a
+    // proposal, and the gate workflow runs the action as the approver.
+    it('has no approval gate of its own', () => {
+      const types = allWorkerSteps.map(({ type }) => type);
+      expect(types).not.toContain('waitForApproval');
+      expect(types).not.toContain('waitForInput');
+      expect(types).not.toContain('security.enableRule');
+    });
+
+    it('proposes through the investigation gate, one proposal per route', () => {
+      const proposals = allWorkerSteps.filter(
+        ({ type, with: input }) =>
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.id
+      );
+      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+
+      for (const proposal of proposals) {
+        expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
+        // A failed or timed-out gate must fail the run rather than read as a decision.
+        expect(proposal).not.toHaveProperty('on-failure');
+        expect(inputsOf(proposal).conversationId).toBe(
+          '{{ steps.create_investigation.output.conversation_id }}'
+        );
+      }
+    });
+
+    it('runs the enable action against the resolved saved-object id', () => {
+      const enable = inputsOf(stepByName('propose_enable'));
+      expect(enable.actionWorkflowId).toBe(ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID);
+      expect(enable.actionInput).toEqual({ id: '{{ steps.resolve_rule.output.id }}' });
+      expect(enable.autoApprove).toBe(false);
+      expect(stepByName('propose_enable')?.if).toContain(
+        'steps.route_verdict.output.enable == true'
+      );
+    });
+
+    // The rule has no saved object until installed, so the install action is the one
+    // place the signature id is the handle.
+    it('runs the install action against the signature id and package version', () => {
+      const install = inputsOf(stepByName('propose_install'));
+      expect(install.actionWorkflowId).toBe(ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID);
+      expect(install.actionInput).toEqual({
+        rule_id: '{{ steps.coverage_check.output.structured_output.rule_id }}',
+        version: '${{ steps.coverage_check.output.structured_output.prebuilt_version }}',
+      });
+      expect(install.autoApprove).toBe(false);
+      expect(stepByName('propose_install')?.if).toContain(
+        'steps.route_verdict.output.install == true'
+      );
+    });
+
+    // The gate types actionInput as an object, so action-less proposals omit the keys
+    // rather than pass an empty value.
+    it.each(['propose_confirm', 'propose_report'])('%s carries no action', (name) => {
+      const inputs = inputsOf(stepByName(name));
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+    });
+
+    it('dispatches rule creation only for no_coverage and outside the gate', () => {
+      const creation = stepByName('run_rule_creation');
+      expect(creation?.type).toBe('workflow.execute');
+      expect(creation?.with?.['workflow-id']).toBe(ALERTZERO_RULE_CREATION_WORKFLOW_ID);
+      expect(creation?.if).toContain('steps.route_verdict.output.create == true');
+      expect(creation?.['on-failure']?.continue).toBe(true);
+    });
+
+    // The worker parks in WAITING_FOR_CHILD while the gate holds the decision for up to
+    // 72h (80h with the gate's own margin); the engine's default 6h timeout would cancel it.
+    it('outlives the proposal gate it waits on', () => {
+      expect(String(workerDefinition.settings?.timeout)).toMatch(/^\d+h$/);
+      expect(hours(workerDefinition.settings?.timeout)).toBeGreaterThan(
+        hours(gateDefinition.settings?.timeout)
       );
     });
   });
@@ -111,66 +279,80 @@ describe('Detection Coverage worker', () => {
     // Every step that calls out must let the run reach `emit_result` and report the truth.
     it.each([
       'coverage_check',
-      'enable_existing_rule',
-      'install_prebuilt_rule',
+      'resolve_rule',
+      'attach_rule',
       'run_rule_creation',
+      'refetch_rule',
+      'refresh_rule_attachment',
+      'attach_installed_rule',
+      'close_investigation_resolved',
+      'close_investigation_dismissed',
     ])('%s continues on failure so the run still reports', (name) => {
       expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
-    });
-
-    it('gates every mutation behind an approval response', () => {
-      for (const [action, gate] of [
-        ['enable_existing_rule', 'review_enable'],
-        ['install_prebuilt_rule', 'review_install'],
-      ] as const) {
-        const condition = (stepByName(action) as unknown as { if?: string })?.if ?? '';
-        expect(condition).toContain(`steps.${gate}.output.response.approved == true`);
-      }
     });
   });
 
   describe('outcome flags', () => {
     const emit = stepByName('emit_result')?.with as Record<string, string> | undefined;
+    const decision = stepByName('record_decision')?.with as Record<string, string> | undefined;
 
-    // A step whose `if` was false is skipped, and a skipped step has no error. Deriving a
-    // flag from `error == null` therefore reports success for work that never ran, e.g. an
-    // approved action whose guard then declined it. Every flag must assert evidence from
-    // the API response.
+    // The gate reports `succeeded` only after the action workflow completed, `approved`
+    // for an action-less proposal, `dismissed` otherwise. A run that never proposed
+    // matches none of them.
+    it('derives every decision flag from the gate status', () => {
+      expect(String(decision?.applied)).toContain(
+        "steps.propose_enable.output.status == 'succeeded'"
+      );
+      expect(String(decision?.applied)).toContain(
+        "steps.propose_install.output.status == 'succeeded'"
+      );
+      expect(String(decision?.approved)).toContain(
+        "steps.propose_confirm.output.status == 'approved'"
+      );
+      expect(String(decision?.approved)).toContain(
+        "steps.propose_report.output.status == 'approved'"
+      );
+      for (const name of PROPOSAL_STEPS) {
+        expect(String(decision?.dismissed)).toContain(`steps.${name}.output.status == 'dismissed'`);
+      }
+    });
+
+    // The action ran inside the gate, and `succeeded` only says the action workflow
+    // completed: an install whose package had nothing to install still completes. Every
+    // flag must assert evidence from the re-read rule, never the gate status alone.
     it.each([
-      ['rule_enabled', 'steps.enable_existing_rule.output.succeeded > 0'],
-      ['rule_installed', 'steps.install_prebuilt_rule.output.summary.succeeded > 0'],
-    ])('%s asserts mutation evidence, not the absence of an error', (flag, expression) => {
+      ['rule_enabled', 'steps.refetch_rule.output.enabled == true'],
+      ['rule_installed', 'steps.refetch_rule.output.id != null'],
+    ])('%s asserts mutation evidence, not the gate status alone', (flag, expression) => {
       expect(emit?.[flag]).toContain(expression);
-      expect(emit?.[flag]).not.toContain('error == null');
+      expect(emit?.[flag]).not.toContain('error == null }}');
     });
 
-    // One field per action tells the caller exactly which approved operation was not applied.
+    // One field per action tells the caller exactly which approved operation left no trace.
     it.each([
-      ['enable_approved_not_applied', 'review_enable', 'enable_existing_rule'],
-      ['install_approved_not_applied', 'review_install', 'install_prebuilt_rule'],
-    ])('%s flags an approval the guards did not honour', (flag, gate, action) => {
-      expect(emit?.[flag]).toContain(`steps.${gate}.output.response.approved == true`);
-      expect(emit?.[flag]).toContain(`steps.${action}.output`);
+      [
+        'enable_approved_not_applied',
+        'propose_enable',
+        'steps.refetch_rule.output.enabled == true',
+      ],
+      ['install_approved_not_applied', 'propose_install', 'steps.refetch_rule.output.id != null'],
+    ])('%s flags an approval that left no evidence', (flag, gate, evidence) => {
+      expect(emit?.[flag]).toContain(`steps.${gate}.output.status == 'succeeded'`);
+      expect(emit?.[flag]).toContain(`not (`);
+      expect(emit?.[flag]).toContain(evidence);
     });
 
-    it('treats an installation skipped because the rule is already present as available', () => {
-      expect(emit?.install_approved_not_applied).toContain(
-        'steps.install_prebuilt_rule.output.summary.skipped > 0'
-      );
+    it('separates an installed rule that stayed off from a missing install', () => {
       expect(emit?.installed_not_enabled).toContain(
-        'steps.install_prebuilt_rule.output.summary.succeeded > 0'
+        "steps.propose_install.output.status == 'succeeded'"
       );
-      expect(emit?.installed_not_enabled).toContain(
-        'steps.install_prebuilt_rule.output.summary.skipped > 0'
-      );
-      expect(emit?.installed_not_enabled).toContain(
-        'not (steps.enable_installed_rule.output.succeeded > 0'
-      );
+      expect(emit?.installed_not_enabled).toContain('steps.refetch_rule.output.id != null');
+      expect(emit?.installed_not_enabled).toContain('steps.refetch_rule.output.enabled != true');
     });
 
     it('reports whether the analyst confirmed an enabled rule covers the gap', () => {
       expect(emit?.coverage_confirmed).toContain(
-        'steps.confirm_coverage.output.response.approved == true'
+        "steps.propose_confirm.output.status == 'approved'"
       );
     });
 
@@ -182,18 +364,17 @@ describe('Detection Coverage worker', () => {
       expect(emit?.rule_created).toContain('steps.run_rule_creation.output.created');
       expect(emit?.created_rule_name).toContain('steps.run_rule_creation.output.rule_name');
     });
+
+    it('hands the investigation back to the caller', () => {
+      expect(emit?.investigation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+    });
   });
 
   describe('preconditions and unsupported paths', () => {
     it('caps every free-text input before it reaches the model', () => {
-      const triggers = (
-        workerDefinition as unknown as {
-          triggers?: Array<{
-            inputs?: { properties?: Record<string, { type?: string; maxLength?: number }> };
-          }>;
-        }
-      ).triggers;
-      const props = triggers?.[0]?.inputs?.properties;
+      const props = workerDefinition.triggers?.[0]?.inputs?.properties;
       expect(Object.keys(props ?? {}).length).toBeGreaterThan(0);
       // Report every offender at once, and name it: an uncapped field is the one that
       // reaches the model with an unbounded prompt.
@@ -210,6 +391,7 @@ describe('Detection Coverage worker', () => {
       expect.arrayContaining([
         'verdict',
         'existing_rule',
+        'investigation_id',
         'coverage_confirmed',
         'rule_enabled',
         'rule_installed',

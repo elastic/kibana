@@ -29,7 +29,7 @@ export const ALERTZERO_DETECTION_COVERAGE_WORKFLOW = {
   id: ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: DETECTION_COVERAGE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
