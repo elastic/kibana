@@ -151,6 +151,21 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     });
   });
 
+  describe('authorization errors', () => {
+    it('should mark security_exception from a shard failure string as user error', () => {
+      const error =
+        'cluster: "kayak" index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized for API key id [abc] of user [analyst]" type: "security_exception"';
+      expect(checkErrorDetails(error)).toEqual({ isUserError: true });
+    });
+
+    it('should mark security_exception from an Error message as user error', () => {
+      const error = new Error(
+        'security_exception: action [indices:data/read/search] is unauthorized for user [analyst]'
+      );
+      expect(checkErrorDetails(error)).toEqual({ isUserError: true });
+    });
+  });
+
   describe('non user errors', () => {
     it('should not mark as user error shard exception', () => {
       const errorResponse = {

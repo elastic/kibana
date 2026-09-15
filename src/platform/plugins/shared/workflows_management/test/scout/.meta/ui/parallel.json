@@ -1,5 +1,5 @@
 {
-  "sha1": "3591ec83708de47af129304c217552bbca49c7a4",
+  "sha1": "75c3d44e893a64ec4e2c449b5065f80c8d7731e8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -604,8 +604,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 142,
-        "column": 22
+        "line": 141,
+        "column": 51
       }
     },
     {
@@ -622,8 +622,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 157,
-        "column": 20
+        "line": 154,
+        "column": 87
       }
     },
     {

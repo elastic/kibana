@@ -1302,6 +1302,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'
   - 'x-pack/platform/packages/shared/kbn-mcp-client'
   - 'x-pack/platform/packages/shared/kbn-nightshift-ai'
+  - 'x-pack/platform/packages/shared/kbn-nightshift-shared'
   - 'x-pack/platform/packages/shared/kbn-profiler-cli'
   - 'x-pack/platform/packages/shared/kbn-sample-parser'
   - 'x-pack/platform/packages/shared/kbn-search-index-documents'
@@ -1667,3 +1668,6 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
+
+# Keep a last field entry, because a trailing comment might be removed by some parsers. 
+lockfile: true

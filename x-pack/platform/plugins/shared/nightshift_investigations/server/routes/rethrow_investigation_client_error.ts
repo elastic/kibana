@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { badRequest, conflict, notFound, serverUnavailable } from '@hapi/boom';
+import { badRequest, conflict, notFound, serverUnavailable, tooManyRequests } from '@hapi/boom';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvestigationQuotaDeniedError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
@@ -23,6 +24,9 @@ export function rethrowInvestigationClientError(error: unknown): never {
   }
   if (error instanceof InvestigationConflictError) {
     throw conflict(error.message);
+  }
+  if (error instanceof InvestigationQuotaDeniedError) {
+    throw tooManyRequests(error.message);
   }
   if (error instanceof InvalidInvestigationContextError) {
     throw badRequest(error.message);

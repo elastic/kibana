@@ -1113,6 +1113,7 @@ x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
@@ -2623,6 +2624,8 @@ src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_* @el
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
+src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/generic_db_connector* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/mcp/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
@@ -2664,6 +2667,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/mysql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/okta/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
@@ -3880,6 +3884,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 
 /.mise.toml @elastic/kibana-operations
+
+# PNPM
+pnpm-workspace.yaml @elastic/kibana-operations
+.pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
 

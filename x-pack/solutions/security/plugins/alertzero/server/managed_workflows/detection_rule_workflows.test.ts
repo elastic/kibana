@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -379,7 +380,7 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
         expect(applied.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
@@ -387,8 +388,15 @@ describe('detection rule workflows', () => {
         // Approving a recommendation the pipeline cannot apply itself acknowledges
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
-        expect(acknowledged.if).toContain('steps.review_tuning.output.response.approved == true');
-        expect(acknowledged.if).toContain('steps.record_apply_path.output.auto == false');
+        expect(acknowledged.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
+        );
+        expect(acknowledged.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+        );
+        expect(acknowledged.if).toContain(
+          'steps.can_preview_query_change.output.supported == false'
+        );
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.acknowledged_tag }}',
@@ -405,9 +413,63 @@ describe('detection rule workflows', () => {
 
         expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
 
+        // record_outcome reads from record_apply_results to avoid Liquid parentheses.
         const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
         expect(String(outcome.with?.rule_patched)).toContain(
+          'steps.record_apply_results.output.query_applied == true'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.query_applied)).toContain(
           'steps.apply_query_tuning.error == null'
+        );
+      });
+
+      it('applies exceptions via security.createRuleException for approved exception proposals', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_exception_tuning')!;
+        expect(apply.type).toBe('security.createRuleException');
+        expect(apply.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
+        );
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        expect(apply.with?.rule_id).toBe('{{ inputs.rule_uuid }}');
+        expect(apply.with?.entries).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
+        );
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          'steps.apply_exception_tuning.error == null'
+        );
+      });
+
+      it('applies risk score changes via security.patchRule for approved risk score proposals', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_risk_score_tuning')!;
+        expect(apply.type).toBe('security.patchRule');
+        expect(apply.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
+        );
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        const patch = apply.with?.patch as Record<string, string>;
+        expect(patch.id).toBe('{{ inputs.rule_uuid }}');
+        expect(patch.risk_score).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}'
+        );
+        expect(patch.severity).toBe(
+          '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
+        );
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          'steps.apply_risk_score_tuning.error == null'
         );
       });
 
@@ -419,12 +481,11 @@ describe('detection rule workflows', () => {
           ['fetch_rule', 'refetch_rule'].includes(name)
         );
         const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         expect(fetches).toHaveLength(2);
         for (const fetch of fetches) {
           expect(String(fetch.with?.path)).toContain('?id={{ inputs.rule_uuid | url_encode }}');
         }
-        expect(String(eligibility.with?.eligible)).toContain(
+        expect(String(apply.if)).toContain(
           'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
         );
         expect(apply.type).toBe('security.patchRule');
@@ -457,13 +518,107 @@ describe('detection rule workflows', () => {
       });
 
       it('requires both previews before applying a query change', () => {
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
-        const condition = String(eligibility.with?.eligible);
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        const condition = String(apply.if);
 
         expect(condition).toContain('current_succeeded == true');
         expect(condition).toContain('current_is_aborted == false');
         expect(condition).toContain('proposed_succeeded == true');
         expect(condition).toContain('proposed_is_aborted == false');
+      });
+
+      it.each([
+        { scenario: 'eligible proposal', overrides: {}, expected: true },
+        { scenario: 'not approved', overrides: { approved: false }, expected: false },
+        { scenario: 'unsupported rule', overrides: { supported: false }, expected: false },
+        {
+          scenario: 'failed current preview',
+          overrides: { currentSucceeded: false },
+          expected: false,
+        },
+        {
+          scenario: 'aborted current preview',
+          overrides: { currentIsAborted: true },
+          expected: false,
+        },
+        {
+          scenario: 'failed proposed preview',
+          overrides: { proposedSucceeded: false },
+          expected: false,
+        },
+        {
+          scenario: 'aborted proposed preview',
+          overrides: { proposedIsAborted: true },
+          expected: false,
+        },
+        {
+          scenario: 'failed refetch',
+          overrides: { refetchError: 'Rule not found' },
+          expected: false,
+        },
+        {
+          scenario: 'rule edited during approval',
+          overrides: { updatedAt: 'newer' },
+          expected: false,
+        },
+      ])('applies a query only when eligible: $scenario', ({ overrides, expected }) => {
+        const {
+          approved,
+          supported,
+          currentSucceeded,
+          currentIsAborted,
+          proposedSucceeded,
+          proposedIsAborted,
+          refetchError,
+          updatedAt,
+        } = {
+          approved: true,
+          supported: true,
+          currentSucceeded: true,
+          currentIsAborted: false,
+          proposedSucceeded: true,
+          proposedIsAborted: false,
+          refetchError: null,
+          updatedAt: 'original',
+          ...overrides,
+        };
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning');
+        const expression = String(apply?.if).slice(3, -2).trim();
+
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: {
+              review_tuning: { output: { response: { approved } } },
+              can_preview_query_change: { output: { supported } },
+              record_preview_outcome: {
+                output: {
+                  current_succeeded: currentSucceeded,
+                  current_is_aborted: currentIsAborted,
+                  proposed_succeeded: proposedSucceeded,
+                  proposed_is_aborted: proposedIsAborted,
+                },
+              },
+              fetch_rule: { output: { updated_at: 'original' } },
+              refetch_rule: { error: refetchError, output: { updated_at: updatedAt } },
+            },
+          })
+        ).toBe(expected);
+      });
+
+      it.each([
+        ['skipped', undefined, false],
+        ['failed', { error: 'Patch failed' }, false],
+        ['missing response', {}, false],
+        ['succeeded', { output: { id: 'rule-id' } }, true],
+      ])('records query application only after success: %s', (_scenario, result, expected) => {
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results');
+        const expression = String(applyResults?.with?.query_applied).slice(3, -2).trim();
+
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: { apply_query_tuning: result },
+          })
+        ).toBe(expected);
       });
 
       // A partial or timed-out alert count would understate a backtest, so the
@@ -488,10 +643,7 @@ describe('detection rule workflows', () => {
       });
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
-        const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
-        const condition = String(eligibility.with?.eligible);
-
+        const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.data_view_id == null'
         );
@@ -501,7 +653,17 @@ describe('detection rule workflows', () => {
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.alert_suppression == null'
         );
-        expect(condition).toContain('steps.record_auto_apply_support.output.supported == true');
+        expect(String(support.with?.supported)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+        );
+        expect(String(support.with?.supported)).toContain(
+          "steps.fetch_rule.output.type == 'query'"
+        );
+
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        const condition = String(apply.if);
+
+        expect(condition).toContain('steps.can_preview_query_change.output.supported == true');
       });
 
       it('bounds direct review inputs', () => {
@@ -567,10 +729,11 @@ describe('detection rule workflows', () => {
         expect(message).not.toContain('time_window_hours');
       });
 
-      it('does not use classify_review or can_apply', () => {
+      it('does not use redundant proposal classification steps', () => {
         for (const steps of [tuningSteps, reviewSteps]) {
           expect(steps.some(({ name }) => name === 'classify_review')).toBe(false);
-          expect(JSON.stringify(steps)).not.toContain('can_apply');
+          expect(steps.some(({ name }) => name === 'record_apply_path')).toBe(false);
+          expect(steps.some(({ name }) => name === 'classify_proposal')).toBe(false);
         }
       });
 
