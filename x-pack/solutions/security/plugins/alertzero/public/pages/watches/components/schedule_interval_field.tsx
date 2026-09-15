@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { WORKER_SCHEDULE_UNITS, type WorkerScheduleUnit } from '@kbn/alertzero-common';
 import * as i18n from '../settings_translations';
@@ -33,68 +33,57 @@ const parseInterval = (interval: string): ParsedInterval | undefined => {
  * Interval control for a schedule-driven Worker, mirroring the Attack Discovery schedule form's
  * number + unit pairing.
  *
- * EuiFieldNumber fires onChange per keystroke, so the value is persisted on blur (and immediately
- * on a unit change) — otherwise typing "30" would save "3h" and then "30h", rewriting the workflow
- * and re-registering its Task Manager schedule twice.
+ * The number half is buffered locally and committed to the page draft on blur (the unit commits
+ * immediately with the buffered number), so an intermediate "3" on the way to "30" never reaches
+ * the draft. The buffer follows `current`, which is what resets the field on Discard or refresh.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   current,
   isDisabled,
   onChange,
 }) => {
-  const parsedCurrent = parseInterval(current) ?? DEFAULT_PARSED_INTERVAL;
-  const [draft, setDraft] = useState<ParsedInterval>(parsedCurrent);
-  const draftRef = useRef<ParsedInterval>(parsedCurrent);
-  const lastPersistedRef = useRef(current);
-  const onChangeRef = useRef(onChange);
+  const [draft, setDraft] = useState<ParsedInterval>(
+    () => parseInterval(current) ?? DEFAULT_PARSED_INTERVAL
+  );
 
-  onChangeRef.current = onChange;
-
-  // Re-sync when the server echoes a different value than the one typed — the mutation is
-  // optimistic and rolls back on a settings conflict.
   useEffect(() => {
-    lastPersistedRef.current = current;
     const next = parseInterval(current);
-    if (!next) {
-      return;
+    if (next) {
+      setDraft(next);
     }
-    draftRef.current = next;
-    setDraft(next);
   }, [current]);
 
-  const persist = useCallback(({ value, unit }: ParsedInterval) => {
-    const interval = `${value}${unit}`;
-    if (interval === lastPersistedRef.current) {
-      return;
-    }
-    lastPersistedRef.current = interval;
-    onChangeRef.current(interval);
-  }, []);
+  const commit = useCallback(
+    ({ value, unit }: ParsedInterval) => {
+      const interval = `${value}${unit}`;
+      if (interval !== current) {
+        onChange(interval);
+      }
+    },
+    [current, onChange]
+  );
 
   const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const raw = event.target.value.trim();
+    // Anything but a positive integer is rejected outright rather than buffered.
     if (!/^[1-9][0-9]*$/.test(raw)) {
       return;
     }
-    const next = { ...draftRef.current, value: Number(raw) };
-    draftRef.current = next;
-    setDraft(next);
+    setDraft((previous) => ({ ...previous, value: Number(raw) }));
   }, []);
 
   const onUnitChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const unit = event.target.value as WorkerScheduleUnit;
-      const next = { ...draftRef.current, unit };
-      draftRef.current = next;
+      const next = { ...draft, unit: event.target.value as WorkerScheduleUnit };
       setDraft(next);
-      persist(next);
+      commit(next);
     },
-    [persist]
+    [commit, draft]
   );
 
   const onValueBlur = useCallback(() => {
-    persist(draftRef.current);
-  }, [persist]);
+    commit(draft);
+  }, [commit, draft]);
 
   const unitOptions = useMemo(
     () =>
