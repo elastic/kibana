@@ -134,6 +134,8 @@ export const aggregateProfile = (profile: HeapAllocationProfile): HeapProfileAgg
   for (const sample of profile.samples ?? []) {
     const dim = dimensionFromLabels(sample.labels);
     const group = bucket(dim.kind);
+    // `count` is already Poisson-scaled by V8 (SamplingHeapProfiler::ScaleSample),
+    // so size * count is the unbiased live-bytes estimate. Do not scale again.
     addToMap(group.sampled, dim.key, (Number(sample.size) || 0) * (Number(sample.count) || 0));
     addToMap(group.sampleCounts, dim.key, Number(sample.count) || 0);
   }
@@ -262,8 +264,9 @@ export const startHeapProfileLabelsMetrics = (
       valueType: ValueType.INT,
     });
     const sampleCountGauge = meter.createObservableGauge(HEAP_PROFILE_SAMPLE_COUNT_METRIC, {
-      description: 'Count of live heap-profile samples attributed to a task type or HTTP route.',
-      unit: '{sample}',
+      description:
+        'Estimated count of live heap objects attributed to a task type or HTTP route (sum of V8 scaled sample counts, not physical samples).',
+      unit: '{object}',
       valueType: ValueType.INT,
     });
     const scrapeDurationGauge = meter.createObservableGauge(HEAP_PROFILE_SCRAPE_DURATION_METRIC, {

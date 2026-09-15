@@ -10,7 +10,7 @@ custom Node.js heap-profile labels API, then export stock gauges:
 | Signal | Source | Confidence |
 | --- | --- | --- |
 | Live `Buffer` / `ArrayBuffer` bytes | `getAllocationProfile().externalBytes` | **exact** (`memory.source=exact`) |
-| Live V8 heap bytes | `samples[].size * samples[].count` | **sampled** (`memory.source=sampled_heap`) — no Poisson scale |
+| Live V8 heap bytes | `samples[].size * samples[].count` | **sampled** (`memory.source=sampled_heap`) — `count` is already Poisson-scaled by V8 |
 
 This is **stock-only** attribution (what is retained *now*). It is not flow
 (allocated/freed in an interval). See
@@ -129,7 +129,7 @@ harness still uses an isolated `MeterProvider` for local runs).
 | Name | Type | Unit | Attributes |
 | --- | --- | --- | --- |
 | `nodejs.heap_profile.live` | ObservableGauge | `By` | task rows: `task.type`, `memory.source`; route rows: `http.route`, `http.request.method`, `memory.source` |
-| `nodejs.heap_profile.sample.count` | ObservableGauge | `{sample}` | task rows: `task.type`; route rows: `http.route`, `http.request.method` |
+| `nodejs.heap_profile.sample.count` | ObservableGauge | `{object}` | task rows: `task.type`; route rows: `http.route`, `http.request.method`. Sum of V8's scaled `count`, i.e. the estimated number of live objects, not the number of physical samples |
 | `nodejs.heap_profile.scrape.duration` | ObservableGauge | `ms` | — |
 
 Aggregation: per-`task.type` and per-(`http.route`,`http.request.method`)
@@ -205,8 +205,13 @@ experiment.
   allocations that freed before the scrape do not appear. Route flow counters
   (`getHeapRouteStats`) are a different API; see the Node design docs.
 - **Sampled vs exact.** Heap `samples` are a statistical estimate
-  (`size * count`). Do not Poisson-scale. `externalBytes` are exact live
-  backing-store bytes. Keep them on separate `memory.source` series.
+  (`size * count`). V8 already scales each sample's `count` by
+  `1 / (1 - exp(-size / sampleInterval))` (`SamplingHeapProfiler::ScaleSample`),
+  so the estimate is unbiased for small objects; do not scale it again. The
+  estimate's variance depends on the number of physical samples, which is not
+  exported: `sample.count` is the scaled object count and cannot be used as a
+  confidence signal. `externalBytes` are exact live backing-store bytes. Keep
+  them on separate `memory.source` series.
 - **async-context-frame required.** Labels propagate via
   `AsyncLocalStorage` + ContinuationPreservedEmbedderData. Default ON;
   `--no-async-context-frame` empties every `labels` object (Node emits
