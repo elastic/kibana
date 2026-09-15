@@ -19,7 +19,7 @@ export const upsertActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
       name: 'upsertActionPolicyRequest',
-      summary: 'Action policy to create or replace at the given id',
+      summary: 'Action policy to create or replace at the given ID',
       value: CREATE_ACTION_POLICY_REQUEST,
     },
     responses: {
