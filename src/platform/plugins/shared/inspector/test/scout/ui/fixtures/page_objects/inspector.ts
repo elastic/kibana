@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -18,6 +17,7 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
 };
 
 export class Inspector {
+  private readonly appMenu: AppMenu;
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
@@ -35,6 +35,7 @@ export class Inspector {
   };
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
@@ -53,14 +54,7 @@ export class Inspector {
   }
 
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    const openButton = this.page.testSubj.locator(openButtonTestSubj);
-    if (!(await openButton.isVisible())) {
-      const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
-      if (await overflowButton.isVisible()) {
-        await overflowButton.click();
-      }
-    }
-    await openButton.click();
+    await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
 
