@@ -824,10 +824,6 @@ describe('createSmlIndexer', () => {
 
     describe('ensureDefaultAiIndex', () => {
       it('calls ensureDefaultAiIndex once per space before deleteEntry on write', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
@@ -856,10 +852,6 @@ describe('createSmlIndexer', () => {
       });
 
       it('continues indexing when ensureDefaultAiIndex fails', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
@@ -892,10 +884,6 @@ describe('createSmlIndexer', () => {
       });
 
       it('does not call ensureDefaultAiIndex again for a space after success', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
@@ -930,10 +918,6 @@ describe('createSmlIndexer', () => {
       });
 
       it('calls ensureDefaultAiIndex again for a space it reported as not ensured', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
@@ -969,10 +953,6 @@ describe('createSmlIndexer', () => {
       });
 
       it('does not call ensureDefaultAiIndex for * or empty space ids', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
