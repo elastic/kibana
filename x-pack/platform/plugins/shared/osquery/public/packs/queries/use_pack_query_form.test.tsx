@@ -425,4 +425,84 @@ describe('usePackQueryForm', () => {
       expect(result.current.deserializedSchedule.startDate.getTime()).toBe(firstStartDate);
     });
   });
+
+  describe('V5: pack execution defaults', () => {
+    it('seeds result_type on the add path so overriding another field does not pin the pack default', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packResultType: 'differential',
+          packPlatform: 'linux',
+        })
+      );
+
+      expect(result.current.getValues('result_type')).toBe('differential');
+
+      const saved = result.current.serializer({
+        ...result.current.getValues(),
+        id: 'new-query',
+        query: 'select 1;',
+        override_pack_defaults: true,
+        platform: 'windows',
+      });
+
+      expect(saved.platform).toBe('windows');
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
+    it('displays and seeds the pack result type for a legacy snapshot:true query', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packResultType: 'differential',
+          packPlatform: 'linux',
+          defaultValue: makeSOPayload({ snapshot: true, removed: false, platform: 'windows' }),
+        })
+      );
+
+      expect(result.current.getValues('override_pack_defaults')).toBe(true);
+      expect(result.current.getValues('result_type')).toBe('differential');
+      expect(result.current.getValues('snapshot')).toBe(false);
+      expect(result.current.getValues('removed')).toBe(true);
+
+      const saved = result.current.serializer(result.current.getValues());
+      expect(saved.platform).toBe('windows');
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
+    it('still displays Snapshot for a stored snapshot pair when the pack has no result type', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ snapshot: true, removed: false }),
+        })
+      );
+
+      expect(result.current.getValues('result_type')).toBe('snapshot');
+      expect(result.current.getValues('snapshot')).toBe(true);
+    });
+
+    it('strips a reordered matching platform CSV as inheritance', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packPlatform: 'linux,windows',
+        })
+      );
+
+      const saved = result.current.serializer({
+        ...result.current.getValues(),
+        id: 'q1',
+        query: 'select 1;',
+        override_pack_defaults: true,
+        platform: 'windows,linux',
+      });
+
+      expect(saved).not.toHaveProperty('platform');
+    });
+  });
 });

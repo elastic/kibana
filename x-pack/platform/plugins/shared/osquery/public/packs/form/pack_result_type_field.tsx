@@ -36,7 +36,7 @@ const PACK_RESULT_TYPE_OPTIONS = [
     inputDisplay: (
       <FormattedMessage
         id="xpack.osquery.pack.form.packResultTypeField.differentialAddedOnlyLabel"
-        defaultMessage="Differential (Ignore removals)"
+        defaultMessage="Differential (ignore removals)"
       />
     ),
   },

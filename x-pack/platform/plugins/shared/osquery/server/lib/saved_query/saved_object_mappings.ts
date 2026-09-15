@@ -173,21 +173,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       dynamic: false,
       properties: {},
     },
-    min_osquery_version: {
-      type: 'keyword',
-      ignore_above: 1024,
-    },
-    result_type: {
-      type: 'keyword',
-      ignore_above: 1024,
-    },
-    // Pack-level platform DEFAULT (comma-separated tokens) that fans out onto
-    // inheriting queries — distinct from the per-query `queries.platform`
-    // below, and not osquery's native pack-level gate.
-    platform: {
-      type: 'keyword',
-      ignore_above: 1024,
-    },
     queries: {
       dynamic: false,
       properties: {

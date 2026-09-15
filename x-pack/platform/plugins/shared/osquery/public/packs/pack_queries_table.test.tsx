@@ -226,6 +226,17 @@ describe('PackQueriesTable', () => {
         'Actions',
       ]);
     });
+
+    it('treats a reordered all-OS platform as inheriting the pack default', () => {
+      renderTable({
+        data: [baseQuery({ platform: 'linux,darwin,windows' })],
+        packPlatform: 'linux',
+      });
+
+      expect(screen.getByText('Linux')).toBeInTheDocument();
+      expect(screen.queryByText('macOS')).not.toBeInTheDocument();
+      expect(screen.getByText('(pack default)')).toBeInTheDocument();
+    });
   });
 
   describe('Schedule column truncation', () => {
@@ -261,7 +272,7 @@ describe('PackQueriesTable', () => {
       });
 
       const full = 'Every week on Sun, Mon, Tue, Wed, Thu, Fri, Sat';
-      // 46 chars — under the 48 budget, so it must NOT truncate.
+      // 47 chars — under the 48 budget, so it must NOT truncate.
       expect(full.length).toBeLessThanOrEqual(48);
       expect(screen.getByText(full)).toBeInTheDocument();
       setFlag(false);

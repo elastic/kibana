@@ -8,6 +8,19 @@
 import { pick, reduce } from 'lodash';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
+/**
+ * Normalise a per-query `version` from either the read-pack API (string) or
+ * the flyout form (`string[]`). `version[0]` on a string is the first
+ * character (`'5.10.0'` → `'5'`), which collapsed distinct versions.
+ */
+export const storedQueryVersion = (version: string | string[] | undefined): string => {
+  if (Array.isArray(version)) {
+    return version[0] ?? '';
+  }
+
+  return version ?? '';
+};
+
 export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFormData, 'id'>>) =>
   reduce(
     queries,

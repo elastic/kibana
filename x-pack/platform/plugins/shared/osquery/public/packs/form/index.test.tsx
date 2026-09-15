@@ -955,6 +955,20 @@ describe('PackForm', () => {
       expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
     });
 
+    it('shows migration advisory for non-uniform per-query version strings from the API', () => {
+      const nonUniformVersions = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, version: '5.10.0', ecs_mapping: {} },
+          q2: { query: 'SELECT 2;', interval: 60, version: '5.12.0', ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformVersions as never} />
+      );
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+    });
+
     // Platform is now an editable pack-level *default* that fans out onto
     // queries which do not set their own, replacing the earlier read-only
     // badge group derived from the queries' union.

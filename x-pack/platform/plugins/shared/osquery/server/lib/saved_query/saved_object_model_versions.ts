@@ -194,31 +194,21 @@ export const packSavedObjectModelVersion4: SavedObjectsModelVersion = {
 };
 
 /**
- * V5 adds three pack-level execution defaults: `min_osquery_version` (keyword),
- * `result_type` (keyword), and `platform` (keyword). Forward-additive: existing
- * packs with none of these fields are valid; pre-V5 Kibana silently ignores the
- * new fields on write.
+ * V5 adds three pack-level execution defaults: `min_osquery_version`,
+ * `result_type`, and `platform`. They are stored unindexed (`dynamic: false`
+ * on the type): nothing searches, filters, sorts or aggregates on them, and
+ * mappings cannot be removed once released. Existing packs with none of these
+ * fields are valid; pre-V5 Kibana silently ignores the new fields on write.
  * Per-query `enabled` lives in the `queries` map which is `dynamic: false` with
  * `unknowns: 'allow'`, so no mappings addition is needed there.
  */
 export const packSavedObjectModelVersion5: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        min_osquery_version: { type: 'keyword', ignore_above: 1024 },
-        result_type: { type: 'keyword', ignore_above: 1024 },
-        platform: { type: 'keyword', ignore_above: 1024 },
-      },
-    },
-  ],
+  changes: [],
   schemas: {
     forwardCompatibility: packSchemaV5.extends({}, { unknowns: 'ignore' }),
     create: packSchemaV5.extends({}, { unknowns: 'allow' }),
   },
 };
-
-export const packSavedObjectModelVersion6 = packSavedObjectModelVersion5;
 
 export const packAssetSavedObjectModelVersion1: SavedObjectsModelVersion = {
   changes: [

@@ -31,7 +31,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
-import { DEFAULT_PLATFORM } from '../../../common/constants';
+import { isAllPlatforms } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import type { ResultType } from '../../../common/result_type';
@@ -184,7 +184,7 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
             ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
             : { ecs_mapping }
           : {}),
-        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+        ...(isAllPlatforms(platform) || platform === undefined ? {} : { platform }),
       };
 
       return acc;
@@ -404,33 +404,6 @@ export interface PackConfigOutput {
 
 // Builds the Fleet packs.{key}.queries config plus pack-level defaults;
 // per-query fields only emitted when they override the pack default.
-/**
- * True when a platform string names every OS in {@link DEFAULT_PLATFORM},
- * regardless of token order or spacing.
- *
- * The comparison is set-based rather than a string equality check: the stored
- * value's token order depends on how it was produced (the flyout's seeded
- * default, a pack upload, or a hand-edited saved object), so
- * `'linux,darwin,windows'` and `'linux,windows,darwin'` must be treated alike.
- */
-const ALL_PLATFORM_TOKENS = new Set(DEFAULT_PLATFORM.split(',').map((token) => token.trim()));
-
-const isAllPlatforms = (value?: string): boolean => {
-  if (!value) {
-    return false;
-  }
-
-  const tokens = value
-    .split(',')
-    .map((token) => token.trim())
-    .filter((token) => token.length > 0);
-
-  return (
-    tokens.length === ALL_PLATFORM_TOKENS.size &&
-    tokens.every((token) => ALL_PLATFORM_TOKENS.has(token))
-  );
-};
-
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions

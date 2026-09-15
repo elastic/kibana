@@ -92,7 +92,7 @@ const packDataSchema = schema.object(
       )
     ),
     read_only: schema.maybe(schema.boolean()),
-    // V5/V6: pack-level execution defaults
+    // V5: pack-level execution defaults
     min_osquery_version: schema.maybe(schema.nullable(schema.string())),
     platform: schema.maybe(schema.nullable(schema.string())),
     result_type: schema.maybe(

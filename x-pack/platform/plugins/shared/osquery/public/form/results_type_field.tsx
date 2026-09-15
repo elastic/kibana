@@ -36,8 +36,8 @@ const DIFFERENTIAL_ADDED_ONLY_OPTION = {
   value: 'added_only',
   inputDisplay: (
     <FormattedMessage
-      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyValueLabel"
-      defaultMessage="Differential (Ignore removals)"
+      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyLabel"
+      defaultMessage="Differential (ignore removals)"
     />
   ),
 };

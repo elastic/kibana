@@ -90,6 +90,18 @@ describe('Pack utils', () => {
       );
       expect(convertedQueries).toStrictEqual(getTestQueries({ removed: false, snapshot: false }));
     });
+
+    test('strips DEFAULT_PLATFORM regardless of token order', () => {
+      const convertedQueries = convertSOQueriesToPack(
+        getTestQueries({ platform: 'linux,darwin,windows' })
+      );
+      expect(convertedQueries.default).not.toHaveProperty('platform');
+    });
+
+    test('keeps a real per-query platform restriction', () => {
+      const convertedQueries = convertSOQueriesToPack(getTestQueries({ platform: 'linux' }));
+      expect(convertedQueries.default.platform).toBe('linux');
+    });
   });
 
   describe('convertSOQueriesToPackConfig (legacy / no packSchedule)', () => {
@@ -1962,6 +1974,14 @@ describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () =>
         baseOpts
       );
       expect(queries.q1).not.toHaveProperty('platform');
+    });
+
+    it('does not treat duplicate tokens of one OS as all platforms', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ platform: 'linux,linux,linux' }),
+        { ...baseOpts, packExecutionDefaults: { platform: 'windows' } }
+      );
+      expect(queries.q1.platform).toBe('linux,linux,linux');
     });
   });
 

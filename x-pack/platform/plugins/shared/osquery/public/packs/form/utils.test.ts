@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import { convertSOQueriesToPack, convertPackQueriesToSO, storedQueryVersion } from './utils';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 const makeQuery = (overrides: Partial<PackQueryFormData>): PackQueryFormData =>
@@ -68,5 +68,24 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
     const backToRecord = convertSOQueriesToPack(renamed, { includeId: true });
     expect(Object.keys(backToRecord)).toEqual(['renamed']);
     expect(backToRecord.renamed).toMatchObject({ id: 'processes' });
+  });
+});
+
+describe('storedQueryVersion', () => {
+  it('returns a wire string unchanged', () => {
+    expect(storedQueryVersion('5.10.0')).toBe('5.10.0');
+  });
+
+  it('returns the first form-array entry', () => {
+    expect(storedQueryVersion(['5.12.0'])).toBe('5.12.0');
+  });
+
+  it('does not treat a string as a character array', () => {
+    expect(storedQueryVersion('5.10.0')).not.toBe('5');
+  });
+
+  it('returns empty for missing values', () => {
+    expect(storedQueryVersion(undefined)).toBe('');
+    expect(storedQueryVersion([])).toBe('');
   });
 });

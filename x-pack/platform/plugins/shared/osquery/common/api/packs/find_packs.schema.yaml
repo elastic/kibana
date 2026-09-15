@@ -67,6 +67,10 @@ components:
                       $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
                     rrule_schedule:
                       $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
+                    enabled:
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/QueryEnabledOrUndefined'
+                    result_type:
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultTypeOrUndefined'
               version:
                 description: 'The pack version number.'
                 type: integer

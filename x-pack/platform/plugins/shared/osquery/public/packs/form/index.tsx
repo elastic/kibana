@@ -32,7 +32,7 @@ import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
-import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack, storedQueryVersion } from './utils';
 import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
@@ -453,7 +453,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     if (queryList.length === 0) return false;
 
     // Non-uniform per-query version (needs at least two queries to differ).
-    const versions = new Set(queryList.map((q) => q.version?.[0] ?? ''));
+    const versions = new Set(queryList.map((q) => storedQueryVersion(q.version)));
     if (versions.size > 1) return true;
 
     // Per-query result type, derived from the legacy snapshot/removed booleans.
@@ -539,10 +539,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
-        {/* `alignItems="flexStart"` keeps both controls top-aligned: the result
-            type label carries a BETA badge, which makes its label row taller
-            than the version label's. Without this the two inputs sit at
-            different heights. */}
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem>
             <PackVersionField euiFieldProps={euiFieldProps} />

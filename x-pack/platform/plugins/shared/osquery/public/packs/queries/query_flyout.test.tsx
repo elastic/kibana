@@ -628,6 +628,15 @@ describe('QueryFlyout', () => {
       expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeInTheDocument();
     });
 
+    it('explains that selecting every OS still inherits the pack platform default', () => {
+      renderFlyout({ uniqueQueryIds: [], packPlatform: 'linux' });
+      expect(
+        screen.getByText(
+          'Selecting every operating system does not override the pack default; this query keeps inheriting it. Choose a subset to restrict this query.'
+        )
+      ).toBeInTheDocument();
+    });
+
     it('strips every execution default when the toggle is off', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
       renderFlyout({
@@ -820,6 +829,60 @@ describe('QueryFlyout', () => {
       expect(saved).not.toHaveProperty('result_type');
       expect(saved).not.toHaveProperty('snapshot');
       expect(saved).not.toHaveProperty('removed');
+    });
+
+    it('does not pin a newly attached query to the pack result type when overriding another field', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: [],
+        packResultType: 'differential',
+        packPlatform: 'linux',
+      });
+
+      fireEvent.change(screen.getByRole('textbox', { name: /ID/i }), {
+        target: { value: 'new-query' },
+      });
+
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).not.toBeChecked();
+      act(() => {
+        fireEvent.click(toggle);
+      });
+      expect(toggle).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
+    it('resets result_type when a saved query is loaded after a result-type change', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({ onSave, uniqueQueryIds: [] });
+
+      fireEvent.click(screen.getByTestId('resultsTypeField'));
+      fireEvent.click(screen.getByRole('option', { name: /^Differential$/ }));
+
+      expect(savedQueryOnChange).not.toBeNull();
+      act(() => {
+        savedQueryOnChange!({
+          id: 'from-saved',
+          query: 'select * from uptime;',
+          snapshot: true,
+          removed: false,
+        });
+      });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved.result_type).not.toBe('differential');
+      expect(saved.snapshot).toBe(true);
     });
   });
 });

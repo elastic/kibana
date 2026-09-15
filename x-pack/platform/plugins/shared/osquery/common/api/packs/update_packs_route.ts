@@ -11,6 +11,7 @@ import {
   packQueryRecordPartialRt,
   resultTypeRt,
   rruleScheduleConfigPartialRt,
+  boundedString,
 } from './shared_schemas';
 
 export const updatePacksRequestBodySchema = t.partial({
@@ -24,9 +25,9 @@ export const updatePacksRequestBodySchema = t.partial({
   interval: t.union([toNumberRt, t.null]),
   rrule_schedule: t.union([rruleScheduleConfigPartialRt, t.null]),
   // V5: pack-level execution defaults (nullable to allow explicit clear)
-  min_osquery_version: t.union([t.string, t.null]),
+  min_osquery_version: t.union([boundedString(64), t.null]),
   result_type: t.union([resultTypeRt, t.null]),
-  platform: t.union([t.string, t.null]),
+  platform: t.union([boundedString(256), t.null]),
 });
 
 export type UpdatePacksRequestBodySchema = t.OutputOf<typeof updatePacksRequestBodySchema>;

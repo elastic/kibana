@@ -1441,6 +1441,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabledOrUndefined'
         id:
           $ref: '#/components/schemas/QueryId'
         platform:
@@ -1449,6 +1451,8 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultTypeOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -1513,6 +1517,8 @@ components:
                 properties:
                   ecs_mapping:
                     $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                  enabled:
+                    $ref: '#/components/schemas/QueryEnabledOrUndefined'
                   id:
                     type: string
                   interval:
@@ -1523,6 +1529,8 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  result_type:
+                    $ref: '#/components/schemas/ResultTypeOrUndefined'
                   rrule_schedule:
                     $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                   schedule_type:
@@ -2631,6 +2639,8 @@ components:
                   properties:
                     ecs_mapping:
                       $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                    enabled:
+                      $ref: '#/components/schemas/QueryEnabledOrUndefined'
                     id:
                       type: string
                     interval:
@@ -2641,6 +2651,8 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    result_type:
+                      $ref: '#/components/schemas/ResultTypeOrUndefined'
                     rrule_schedule:
                       $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                     schedule_type:
@@ -3095,9 +3107,10 @@ components:
             - sourceType
             - source
     MinOsqueryVersion:
-      description: Minimum osquery agent version required to run this pack or query.
+      description: Minimum osquery version required to run this pack or query.
         Formatted as a semver string, e.g. `"5.10.0"`.
       example: 5.10.0
+      maxLength: 64
       type: string
     MinOsqueryVersionOrUndefined:
       $ref: '#/components/schemas/MinOsqueryVersion'
@@ -3112,6 +3125,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabledOrUndefined'
         id:
           $ref: '#/components/schemas/QueryId'
         interval:
@@ -3129,6 +3144,8 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultTypeOrUndefined'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         saved_query_id:
@@ -3181,6 +3198,7 @@ components:
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
       example: linux,darwin
+      maxLength: 256
       type: string
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
@@ -3200,6 +3218,14 @@ components:
       description: The SQL query you want to run.
       example: select * from uptime;
       type: string
+    QueryEnabled:
+      description: Whether this query is enabled. When false, the query is omitted
+        from the Fleet policy. Default is true.
+      example: true
+      type: boolean
+    QueryEnabledOrUndefined:
+      $ref: '#/components/schemas/QueryEnabled'
+      nullable: true
     QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334

@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
+import { mapWireToResultType } from '../../../common/result_type';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import {
   QueryIdField,
@@ -72,7 +73,7 @@ interface QueryFlyoutProps {
 }
 
 const ALL_VERSIONS_PLACEHOLDER = i18n.translate(
-  'xpack.osquery.queriesTable.osqueryVersionAllLabel',
+  'xpack.osquery.queryFlyoutForm.versionAllPlaceholder',
   { defaultMessage: 'All' }
 );
 
@@ -285,6 +286,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
         resetField('removed', { defaultValue: savedQuery.removed });
+        resetField('result_type', {
+          defaultValue: mapWireToResultType({
+            snapshot: savedQuery.snapshot ?? true,
+            removed: savedQuery.removed,
+          }),
+        });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
@@ -367,11 +374,14 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           {packHasDefaults ? (
             <>
               <ToggleableRow
-                title={i18n.translate('xpack.osquery.queryFlyout.overridePackDefaultsToggleLabel', {
-                  defaultMessage: 'Override pack defaults',
-                })}
+                title={i18n.translate(
+                  'xpack.osquery.queryFlyoutForm.overridePackDefaultsToggleLabel',
+                  {
+                    defaultMessage: 'Override pack defaults',
+                  }
+                )}
                 description={i18n.translate(
-                  'xpack.osquery.queryFlyout.overridePackDefaultsToggleDescription',
+                  'xpack.osquery.queryFlyoutForm.overridePackDefaultsToggleDescription',
                   {
                     defaultMessage:
                       'Set this query\u2019s minimum osquery version, result type and operating systems instead of inheriting the pack\u2019s.',
@@ -388,7 +398,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                     <ResultsTypeField euiFieldProps={resultTypeFieldProps} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <PlatformCheckBoxGroupField euiFieldProps={platformFieldProps} />
+                    <PlatformCheckBoxGroupField
+                      euiFieldProps={platformFieldProps}
+                      helpText={
+                        packPlatform
+                          ? i18n.translate(
+                              'xpack.osquery.queryFlyoutForm.osAllPlatformsInheritsPackHelp',
+                              {
+                                defaultMessage:
+                                  'Selecting every operating system does not override the pack default; this query keeps inheriting it. Choose a subset to restrict this query.',
+                              }
+                            )
+                          : undefined
+                      }
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </ToggleableRow>

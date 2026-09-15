@@ -12,6 +12,7 @@ import { produce } from 'immer-v9';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
+import { platformSetsEqual } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { ResultType } from '../../../common/result_type';
 import {
@@ -212,22 +213,26 @@ const deserializer = (
   // pre-V5 query that only ever stored the booleans is still recognised as
   // holding its own result type.
   //
-  // Two different decoders are needed here, because "what should the control
-  // display" and "does this query hold an override" are different questions:
+  // Two different decoders are needed here, because "does this query hold an
+  // override" and "what should the control display when there is no pack
+  // default" are different questions:
   //
-  //  - display uses the faithful inverse, so a query storing `snapshot: true`
-  //    still renders as Snapshot;
   //  - the override predicate uses the explicit-only decoder, because the
   //    flyout used to seed `snapshot: true, removed: false` into every new
   //    query. Counting that pair as an override would force the toggle ON for
-  //    virtually every pre-existing query in every pack.
-  const storedResultType =
+  //    virtually every pre-existing query in every pack;
+  //  - with no pack default, display uses the faithful inverse so a query
+  //    storing `snapshot: true` still renders as Snapshot.
+  //
+  // When a pack default *is* present, seeding and display use the explicit
+  // decoder too — matching Fleet emit. The faithful inverse would show
+  // Snapshot for the pre-V5 seed while the agent inherits the pack default,
+  // and enabling the toggle to change another field would then persist that
+  // Snapshot as a real override.
+  const storedExplicitResultType =
     payload.result_type ??
-    mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
-  const hasStoredResultType =
-    (payload.result_type ??
-      mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed })) !==
-    undefined;
+    mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed });
+  const hasStoredResultType = storedExplicitResultType !== undefined;
   const hasVersionOverride = payload.version !== undefined;
   // Not gated on `packResultType`, matching the two predicates around it. The
   // toggle governs all three fields at once, so gating this one alone rendered
@@ -244,10 +249,14 @@ const deserializer = (
   // inheriting query into an overriding one.
   const effectivePlatform = payload.platform || packPlatform || DEFAULT_PLATFORM;
   const effectiveVersion = payload.version ?? packMinOsqueryVersion;
-  // The query's own stored type (including a legacy boolean-only one) wins
-  // over the pack default, otherwise opening a legacy differential query in a
-  // pack that defaults to snapshot would display — and then save — snapshot.
-  const effectiveResultType = storedResultType ?? packResultType;
+  // An explicit per-query type (canonical field, or a deliberate
+  // `snapshot: false` pair) wins over the pack default, otherwise opening a
+  // legacy differential query in a pack that defaults to snapshot would
+  // display — and then save — snapshot. The flyout seed is not explicit.
+  const effectiveResultType = packResultType
+    ? storedExplicitResultType ?? packResultType
+    : payload.result_type ??
+      mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
 
   // `ResultsTypeField` derives its display from the `snapshot`/`removed`
   // booleans, not from `result_type`, so the inherited value has to be
@@ -381,7 +390,10 @@ const serializer = (
           delete draft.removed;
         }
 
-        if (packDefaults.packPlatform && draft.platform === packDefaults.packPlatform) {
+        if (
+          packDefaults.packPlatform &&
+          platformSetsEqual(draft.platform, packDefaults.packPlatform)
+        ) {
           delete draft.platform;
         }
       }
@@ -461,7 +473,12 @@ export const usePackQueryForm = ({
             // Seed a new query from the pack's execution defaults so the
             // disabled controls show what it will actually inherit.
             ...(packResultType
-              ? { snapshot: true, removed: false, ...mapResultTypeToWire(packResultType) }
+              ? {
+                  snapshot: true,
+                  removed: false,
+                  ...mapResultTypeToWire(packResultType),
+                  result_type: packResultType,
+                }
               : { snapshot: true, removed: false }),
             platform: packPlatform || DEFAULT_PLATFORM,
             version: packMinOsqueryVersion ? [packMinOsqueryVersion] : [],

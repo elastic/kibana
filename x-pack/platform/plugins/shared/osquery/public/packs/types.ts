@@ -13,6 +13,12 @@ export interface PackSavedObject {
   saved_object_id: string;
   name: string;
   description: string | undefined;
+  /**
+   * Per-query fields as returned by the read-pack API. `version` is a string
+   * on the wire; the flyout form wraps it into `string[]`. The migration
+   * advisory must not assume the form shape (`version[0]` on a string is the
+   * first character).
+   */
   queries: Record<string, Omit<PackQueryFormData, 'id'>>;
   version?: number;
   enabled: boolean | undefined;

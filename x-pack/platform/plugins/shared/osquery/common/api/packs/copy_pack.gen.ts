@@ -22,6 +22,8 @@ import {
   ECSMappingArrayOrUndefined,
   ScheduleTypeOrUndefined,
   RRuleScheduleConfigOrUndefined,
+  QueryEnabledOrUndefined,
+  ResultTypeOrUndefined,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
@@ -59,6 +61,8 @@ export const CopyPacksResponse = lazySchema(() =>
             ecs_mapping: ECSMappingArrayOrUndefined.optional(),
             schedule_type: ScheduleTypeOrUndefined.optional(),
             rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+            enabled: QueryEnabledOrUndefined.optional(),
+            result_type: ResultTypeOrUndefined.optional(),
           })
         )
         .optional()

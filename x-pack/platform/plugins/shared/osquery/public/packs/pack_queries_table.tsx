@@ -22,6 +22,7 @@ import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pac
 import { resolveInheritedScheduleInput } from './queries/use_pack_query_form';
 import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
 import { formatQuerySchedule } from './format_query_schedule';
+import { isAllPlatforms } from '../../common/platform';
 
 export interface PackQueriesTableProps {
   data: PackQueryFormData[];
@@ -48,10 +49,38 @@ export interface PackQueriesTableProps {
 
 const DISABLED_ROW_STYLE: React.CSSProperties = { opacity: 0.6 };
 
+const QueryEnabledSwitch: React.FC<{
+  item: PackQueryFormData;
+  isReadOnly?: boolean;
+  onToggleEnabled?: (item: PackQueryFormData, enabled: boolean) => void;
+}> = ({ item, isReadOnly, onToggleEnabled }) => {
+  const handleChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      onToggleEnabled?.(item, e.target.checked);
+    },
+    [item, onToggleEnabled]
+  );
+
+  return (
+    <EuiSwitch
+      label=""
+      checked={item.enabled !== false}
+      onChange={handleChange}
+      disabled={isReadOnly || !onToggleEnabled}
+      compressed
+      data-test-subj={`query-enabled-switch-${item.id}`}
+      aria-label={i18n.translate('xpack.osquery.pack.queriesTable.enabledSwitchAriaLabel', {
+        defaultMessage: 'Toggle query {queryId} enabled',
+        values: { queryId: item.id },
+      })}
+    />
+  );
+};
+
 /**
  * Character budget for the Schedule cell before it truncates behind a tooltip.
  * The longest untruncated output today is a six-weekday custom rule
- * (`Every week on Sun, Mon, Tue, Wed, Thu, Fri`, 43 chars), so 48 leaves the
+ * (`Every week on Sun, Mon, Tue, Wed, Thu, Fri`, 42 chars), so 48 leaves the
  * common cases intact while still catching a full seven-day list or a
  * large-interval variant.
  */
@@ -176,8 +205,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   // are marked so they stay distinguishable from a per-query platform.
   const renderPlatformColumn = useCallback(
     (platform: string) => {
-      const effectivePlatform = platform || packPlatform;
-      const inherited = !platform && !!packPlatform;
+      const hasOwnPlatform = !!platform && !isAllPlatforms(platform);
+      const effectivePlatform = hasOwnPlatform ? platform : packPlatform;
+      const inherited = !hasOwnPlatform && !!packPlatform;
       const ids = effectivePlatform
         ? effectivePlatform
             .split(',')
@@ -225,7 +255,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         });
       }
 
-      return i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
+      return i18n.translate('xpack.osquery.pack.queriesTable.versionAllLabel', {
         defaultMessage: 'All',
       });
     },
@@ -233,27 +263,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   const renderEnabledColumn = useCallback(
-    (_: unknown, item: PackQueryFormData) => {
-      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
-      const handleChange = (e: EuiSwitchEvent) =>
-        onToggleEnabled && onToggleEnabled(item, e.target.checked);
-
-      return (
-        <EuiSwitch
-          label=""
-          checked={item.enabled !== false}
-          // eslint-disable-next-line react/jsx-no-bind
-          onChange={handleChange}
-          disabled={isReadOnly || !onToggleEnabled}
-          compressed
-          data-test-subj={`query-enabled-switch-${item.id}`}
-          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.enabledSwitchAriaLabel', {
-            defaultMessage: 'Toggle query {queryId} enabled',
-            values: { queryId: item.id },
-          })}
-        />
-      );
-    },
+    (_: unknown, item: PackQueryFormData) => (
+      <QueryEnabledSwitch item={item} isReadOnly={isReadOnly} onToggleEnabled={onToggleEnabled} />
+    ),
     [isReadOnly, onToggleEnabled]
   );
 
