@@ -8,6 +8,7 @@
  */
 
 import agent from 'elastic-apm-node';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, SerializedError, StackFrame } from '@kbn/workflows';
@@ -36,6 +37,8 @@ import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { BranchExecutor } from '../workflow_execution_loop/branch_executor';
+import { canWriteExecution } from '../workflow_execution_loop/execution_fence';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -70,10 +73,13 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 
 export class WorkflowExecutionRuntimeManager {
+  public branchExecutor?: BranchExecutor;
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
-  private readonly workflowExecutionCursor: WorkflowExecutionCursor;
+  private readonly rootExecutionCursor: WorkflowExecutionCursor;
+  private readonly branchExecutionCursor = new AsyncLocalStorage<WorkflowExecutionCursor>();
+
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
@@ -85,7 +91,7 @@ export class WorkflowExecutionRuntimeManager {
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
-    this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
+    this.rootExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
@@ -94,6 +100,14 @@ export class WorkflowExecutionRuntimeManager {
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
+  }
+
+  private get workflowExecutionCursor(): WorkflowExecutionCursor {
+    return this.branchExecutionCursor.getStore() ?? this.rootExecutionCursor;
+  }
+
+  public withExecutionCursor<T>(cursor: WorkflowExecutionCursor, run: () => T): T {
+    return this.branchExecutionCursor.run(cursor, run);
   }
 
   public get workflowExecution() {
@@ -154,6 +168,7 @@ export class WorkflowExecutionRuntimeManager {
    * branch's scope so per-branch context (e.g. {{ foreach.item }}) resolves.
    */
   public setScopeStack(scopeStack: StackFrame[]): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({ scopeStack: [...scopeStack] });
   }
 
@@ -179,6 +194,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({
       context: {
         ...(this.workflowExecution.context || {}),
@@ -188,6 +204,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public setWorkflowStatus(status: ExecutionStatus): void {
+    if (!canWriteExecution()) return;
     this.workflowExecutionState.updateWorkflowExecution({ status });
 
     if (isTerminalStatus(status)) {
@@ -200,6 +217,7 @@ export class WorkflowExecutionRuntimeManager {
    * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
    */
   public setWorkflowCancelled(reason: string): void {
+    if (!canWriteExecution()) return;
     const cancelledAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.CANCELLED,
@@ -280,6 +298,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public markWorkflowTimeouted(): void {
+    if (!canWriteExecution()) return;
     const finishedAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.TIMED_OUT,

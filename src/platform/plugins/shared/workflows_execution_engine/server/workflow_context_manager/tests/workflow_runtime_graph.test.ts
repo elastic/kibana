@@ -301,3 +301,32 @@ describe('WorkflowExecutionCursor synthetic commit', () => {
     expect(cursor.currentNode?.type).toBe('enter-iteration');
   });
 });
+
+describe('parallel runtime graph isolation', () => {
+  it('keeps concurrent branch loop scopes separate from siblings and the root', async () => {
+    const graph = new WorkflowRuntimeGraph(
+      WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml),
+      []
+    );
+    const rootOrder = graph.topologicalOrder;
+    const runBranch = (iteration: string, siblingIteration: string) =>
+      graph.withBranchScope([], async () => {
+        const ownNode = graph.insertSyntheticScope(
+          'enterForeach_outerLoop',
+          iteration,
+          'iteration'
+        );
+        await Promise.resolve();
+        expect(graph.getNode(ownNode)).toBeDefined();
+        expect(graph.getNode(ownNode.replace(iteration, siblingIteration))).toBeUndefined();
+        expect(graph.getNavigationOrder(rootOrder)).toContain(ownNode);
+        const frames = graph.getNodeStack('enterForeach_innerLoop').stackFrames;
+        graph.withBranchScope(frames, () => {
+          expect(graph.getNode(ownNode)).toBeDefined();
+        });
+        expect(graph.getNode(ownNode)).toBeDefined();
+      });
+    await Promise.all([runBranch('branch_a', 'branch_b'), runBranch('branch_b', 'branch_a')]);
+    expect(graph.topologicalOrder).toEqual(rootOrder);
+  });
+});
