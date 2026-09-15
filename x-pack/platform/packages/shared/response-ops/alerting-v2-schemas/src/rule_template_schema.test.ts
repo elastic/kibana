@@ -481,7 +481,7 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "string",
                 },
               ],
-              "description": "The condition that marks an alert recovered. If omitted or set to \`no_breach\`, the alert recovers when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. With \`none\`, the alert stays \`active\`, even after the breach query stops returning matches.",
+              "description": "The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`.",
             },
             "schedule": Object {
               "$ref": "#/definitions/alerting_rule_schedule",

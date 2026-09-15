@@ -454,6 +454,21 @@ const artifactsSchema = z
 
 /** Create rule API schema */
 
+const TIME_FIELD_DESCRIPTION =
+  'Document field used as the event time when applying the lookback window.';
+const TIME_FIELD_CREATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} Defaults to \`@timestamp\`.`;
+const TIME_FIELD_UPDATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} If omitted, the existing value is kept.`;
+
+const RECOVERY_STRATEGY_NO_BREACH_AND_QUERY_DESCRIPTION =
+  'Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.';
+const RECOVERY_STRATEGY_CREATE_DESCRIPTION = `The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. ${RECOVERY_STRATEGY_NO_BREACH_AND_QUERY_DESCRIPTION}`;
+const RECOVERY_STRATEGY_UPDATE_DESCRIPTION = `The condition that marks an alert recovered. If omitted, the existing value is kept. Set to \`null\` to clear it (recovery is then disabled). ${RECOVERY_STRATEGY_NO_BREACH_AND_QUERY_DESCRIPTION} With \`none\`, the alert stays \`active\`, even after the breach query stops returning matches. \`state_transition.recovering_count\` and \`recovering_timeframe\` require an explicit \`recovery_strategy\` other than \`none\`.`;
+
+const NO_DATA_STRATEGY_VALUES_DESCRIPTION =
+  'If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.';
+const NO_DATA_STRATEGY_CREATE_DESCRIPTION = `How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. ${NO_DATA_STRATEGY_VALUES_DESCRIPTION}`;
+const NO_DATA_STRATEGY_UPDATE_DESCRIPTION = `How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to \`null\` to clear it (those runs are then ignored). ${NO_DATA_STRATEGY_VALUES_DESCRIPTION}`;
+
 /**
  * Base schema without refinements - used for extending in response schema and
  * for introspection by the immutability classification meta-tests.
@@ -468,21 +483,13 @@ export const createRuleDataBaseSchema = z
       .min(1)
       .max(128)
       .default(DEFAULT_TIME_FIELD)
-      .describe(
-        'Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.'
-      ),
+      .describe(TIME_FIELD_CREATE_DESCRIPTION),
     schedule: scheduleSchema,
     query: querySchema,
     recovery_strategy: recoveryStrategySchema
       .optional()
-      .describe(
-        'The condition that marks an alert recovered. If omitted or set to `no_breach`, the alert recovers when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`. With `none`, the alert stays `active`, even after the breach query stops returning matches.'
-      ),
-    no_data_strategy: noDataStrategySchema
-      .optional()
-      .describe(
-        'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
-      ),
+      .describe(RECOVERY_STRATEGY_CREATE_DESCRIPTION),
+    no_data_strategy: noDataStrategySchema.optional().describe(NO_DATA_STRATEGY_CREATE_DESCRIPTION),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     artifacts: artifactsSchema.optional(),
@@ -668,11 +675,17 @@ export const updateRuleDataSchema = z
         tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),
-    time_field: z.string().min(1).max(128).optional(),
+    time_field: z.string().min(1).max(128).optional().describe(TIME_FIELD_UPDATE_DESCRIPTION),
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
-    recovery_strategy: recoveryStrategySchema.optional().nullable(),
-    no_data_strategy: noDataStrategySchema.optional().nullable(),
+    recovery_strategy: recoveryStrategySchema
+      .optional()
+      .nullable()
+      .describe(RECOVERY_STRATEGY_UPDATE_DESCRIPTION),
+    no_data_strategy: noDataStrategySchema
+      .optional()
+      .nullable()
+      .describe(NO_DATA_STRATEGY_UPDATE_DESCRIPTION),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: artifactsSchema.optional().nullable(),
