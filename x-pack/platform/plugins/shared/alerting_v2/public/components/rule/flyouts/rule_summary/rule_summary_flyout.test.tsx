@@ -9,60 +9,92 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
-import type { RuleApiResponse } from '../../../services/rules_api';
+import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
+import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
-import { createMockLocators, MockLocatorProvider } from '../../../test_utils/test_providers';
-import { AlertingV2RulesLocatorDefinition } from '../../../locators';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+import { AlertingV2RulesLocatorDefinition } from '../../../../locators';
 
 const mockLocators = createMockLocators();
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useRuleAutoAttach: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/use_rule_audit_metadata', () => ({
+  useRuleAuditMetadata: () => ({
+    createdByDisplay: 'Alice',
+    createdAtFormatted: 'Mar 1, 2026',
+    updatedByDisplay: 'Bob',
+    updatedAtFormatted: 'Mar 4, 2026',
+  }),
+}));
+
+jest.mock('../../../../services/user_capabilities', () => ({
+  UserCapabilities: 'UserCapabilities',
+}));
+
 jest.mock('@kbn/core-di-browser', () => {
+  const canRead = jest.fn(() => true);
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
       }
+      if (token === 'UserCapabilities') {
+        return { canRead, canWrite: () => true };
+      }
       return {};
     },
     CoreStart: (key: string) => key,
+    mockCanRead: canRead,
   };
 });
 
-jest.mock('../../rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
-    <span data-test-subj="mockRuleTitleWithBadges" data-variant={variant}>
-      Rule title
-    </span>
-  ),
-}));
+const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+  mockCanRead: jest.Mock;
+};
 
-jest.mock('../../rule_details/sidebar/rule_conditions', () => ({
+jest.mock('../../../rule_details/sidebar/rule_conditions', () => ({
   RuleConditions: ({ variant }: { variant?: string }) => (
     <div data-test-subj="mockRuleConditions" data-variant={variant} />
   ),
 }));
 
-jest.mock('../../rule_details/sidebar/rule_metadata', () => ({
-  RuleMetadata: () => <div data-test-subj="mockRuleMetadata" />,
+jest.mock('../../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => ({
+  DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
 }));
 
-const baseRule = {
+jest.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
+  ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
+}));
+
+jest.mock('./rule_summary_runbook_card', () => ({
+  RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
+}));
+
+const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'My Rule' },
-} as RuleApiResponse;
+  metadata: { name: 'My Rule', description: 'A rule description', version: 1 },
+  artifacts: [],
+  time_field: '@timestamp',
+  schedule: { every: '5m' },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | LIMIT 1' },
+  },
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
+};
 
 const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
-const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummaryFlyout>> = {}) => {
-  const props = {
+const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
+  const props: RuleSummaryFlyoutProps = {
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
@@ -70,6 +102,7 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
     onRun: jest.fn(),
+    session: 'never',
     ...overrides,
   };
 
@@ -85,32 +118,51 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
 };
 
 describe('RuleSummaryFlyout', () => {
-  it('renders the flyout with the rule title, header description, conditions, and metadata', () => {
+  beforeEach(() => {
+    mockCanRead.mockImplementation(() => true);
+  });
+
+  it('renders the template flyout with header, accordion sections, and take action', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('mockRuleTitleWithBadges')).toHaveAttribute(
-      'data-variant',
-      'summary'
-    );
-    expect(screen.getByTestId('mockRuleHeaderDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
+    expect(screen.getByTestId('ruleSummaryFlyoutAbout')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutAboutCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
+    expect(screen.getByTestId('ruleSummaryFlyoutInvestigation')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutActionPolicies')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutArtifacts')).toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
-    expect(screen.getByTestId('mockRuleMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockActionPoliciesArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRunbookCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryFlyoutFooterCloseButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
   });
 
-  it('calls onClose when the close icon button is clicked', () => {
-    const { props } = renderFlyout();
+  it('omits action policies when the user cannot read them', () => {
+    mockCanRead.mockImplementation((capability: string) => capability !== 'actionPolicies');
+    renderFlyout();
 
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutCloseButton'));
-
-    expect(props.onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('ruleSummaryFlyoutActionPolicies')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutArtifacts')).toBeInTheDocument();
   });
 
-  it('calls onClose when the footer close button is clicked', () => {
+  it('shows last-update timestamp and audit info blocks in the header', () => {
+    renderFlyout();
+
+    expect(screen.getByText('Mar 4, 2026')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCreatedByBlock')).toHaveTextContent('Alice');
+    expect(screen.getByTestId('ruleSummaryFlyoutUpdatedByBlock')).toHaveTextContent('Bob');
+  });
+
+  it('calls onClose when the flyout close button is clicked', () => {
     const { props } = renderFlyout();
 
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton'));
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
@@ -118,11 +170,24 @@ describe('RuleSummaryFlyout', () => {
   it('does not render any rule actions in the header', () => {
     renderFlyout();
 
-    // Header actions were moved to the footer Take action menu.
     expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
-    // The close control remains in the header.
-    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+  });
+
+  it('toggles enabled from the header switch', () => {
+    const { props } = renderFlyout();
+
+    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutEnabledSwitch'));
+
+    expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('replaces the switch with a spinner while the toggle is in flight', () => {
+    renderFlyout({ isToggleLoading: true });
+
+    expect(screen.getByTestId('ruleSummaryFlyoutEnabledSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryFlyoutEnabledSwitch')).not.toBeInTheDocument();
   });
 
   describe('Take action menu', () => {
@@ -160,7 +225,7 @@ describe('RuleSummaryFlyout', () => {
     it('forwards the raw rule id to the details locator', () => {
       const { rulesLocators } = mockLocators;
       renderFlyout({
-        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+        rule: { ...baseRule, id: 'rule with spaces/and slash' },
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
@@ -237,7 +302,6 @@ describe('RuleSummaryFlyout', () => {
       ];
       const panel = screen.getByTestId('viewRuleDetails-rule-1').closest('.euiContextMenuPanel');
 
-      // Items appear in the expected document order.
       const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
         .map((element) => element.getAttribute('data-test-subj'))
         .filter((testId) => expectedOrder.includes(testId ?? ''));
@@ -258,14 +322,10 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout({ canWrite: false, onViewChangeHistory: jest.fn() });
       openMenu();
 
-      // Read actions stay available.
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
       expect(screen.getByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
-      // Write actions are hidden.
       expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
-      // Close still available.
-      expect(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton')).toBeInTheDocument();
     });
 
     it('shows View change history in the read group when onViewChangeHistory is provided', () => {

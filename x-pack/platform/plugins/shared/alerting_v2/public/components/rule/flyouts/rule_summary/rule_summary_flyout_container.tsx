@@ -9,18 +9,18 @@ import React, { useState } from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import { useDeleteRule } from '../../../hooks/use_delete_rule';
-import { useToggleRuleEnabled } from '../../../hooks/use_toggle_rule_enabled';
-import { useRunRule } from '../../../hooks/use_run_rule';
-import { useBulkUpdateRuleApiKey } from '../../../hooks/use_bulk_update_rule_api_key';
-import { UserCapabilities } from '../../../services/user_capabilities';
-import type { RuleApiResponse } from '../../../services/rules_api';
-import { DeleteConfirmationModal } from '../modals/delete_confirmation_modal';
-import { UpdateApiKeyConfirmationModal } from '../modals/update_api_key_confirmation_modal';
-import { useRuleChangeHistoryModal } from '../modals/change_history';
-import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
-import { LoadingFlyout } from '../../loading_flyout';
+import { useFetchRule } from '../../../../hooks/use_fetch_rule';
+import { useDeleteRule } from '../../../../hooks/use_delete_rule';
+import { useToggleRuleEnabled } from '../../../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../../../hooks/use_run_rule';
+import { useBulkUpdateRuleApiKey } from '../../../../hooks/use_bulk_update_rule_api_key';
+import { UserCapabilities } from '../../../../services/user_capabilities';
+import type { RuleApiResponse } from '../../../../services/rules_api';
+import { DeleteConfirmationModal } from '../../modals/delete_confirmation_modal';
+import { UpdateApiKeyConfirmationModal } from '../../modals/update_api_key_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../../modals/change_history';
+import { EntityNotFoundFlyout } from '../../../entity_not_found_flyout';
+import { LoadingFlyout } from '../../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 
 interface Props {
@@ -45,7 +45,7 @@ export const RuleSummaryFlyoutContainer = ({
 
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
-  const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
+  const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
@@ -73,8 +73,8 @@ export const RuleSummaryFlyoutContainer = ({
       <RuleSummaryFlyout
         rule={rule}
         canWrite={canWrite}
+        isToggleLoading={isToggling}
         type={type}
-        hasAnimation={false}
         ownFocus={false}
         session="start"
         onClose={onClose}

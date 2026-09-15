@@ -100,7 +100,7 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   }),
 }));
 
-jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
+jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
   RuleSummaryFlyoutContainer: ({
     ruleId,
     onClose,

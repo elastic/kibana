@@ -25,6 +25,9 @@ const OR_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConn
   defaultMessage: 'or',
 });
 
+const QUERY_OVERFLOW_MAX_VISIBLE_LINES = 5;
+const QUERY_OVERFLOW_HEIGHT = 240;
+
 /**
  * Builds a human-readable delay string from a count, timeframe, and operator.
  *
@@ -153,6 +156,35 @@ export function getRecoverEsqlSegment(
     return query.recovery.segment;
   }
   return query.recovery.query;
+}
+
+/**
+ * Display parts for the conditions panel. Composed rules use the stored base /
+ * breach segment; standalone rules have a single query and no alert condition.
+ */
+export function getDisplayQueryParts(query: Query): {
+  baseQuery: string;
+  alertCondition?: string;
+} {
+  if (query.format === 'composed') {
+    const segment = query.breach?.segment?.trim();
+    return {
+      baseQuery: query.base,
+      ...(segment ? { alertCondition: segment } : {}),
+    };
+  }
+
+  return { baseQuery: query.breach.query };
+}
+
+export function getQueryOverflowHeight(query: string): number | undefined {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > QUERY_OVERFLOW_MAX_VISIBLE_LINES
+    ? QUERY_OVERFLOW_HEIGHT
+    : undefined;
 }
 
 const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
