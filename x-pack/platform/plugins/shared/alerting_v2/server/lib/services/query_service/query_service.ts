@@ -114,6 +114,8 @@ export class QueryService implements QueryServiceContract {
         buildFormatRequestOptions(context, params)
       );
 
+      context.throwIfAborted();
+
       yield* this.iterateBatches<T>(source, context);
 
       this.logger.debug({
