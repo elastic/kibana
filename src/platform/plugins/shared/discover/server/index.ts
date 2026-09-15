@@ -41,7 +41,6 @@ export interface DiscoverServerPluginStart {
 
 export { config } from './config';
 export { discoverSessionApiResponseSchema } from './api/schema';
-export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiResponse,
   DiscoverSessionSanitizeResponse,
