@@ -45,11 +45,6 @@ jest.mock('../../services/download_source', () => ({
   },
 }));
 
-jest.mock('../../../common/services/validate_fleet_id', () => ({
-  validateFleetSavedObjectId: jest.fn(),
-}));
-
-import { validateFleetSavedObjectId } from '../../../common/services/validate_fleet_id';
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -275,43 +270,6 @@ describe('schema validation', () => {
       );
 
       expect(response.ok).toHaveBeenCalled();
-    });
-
-    it('should invoke validateFleetSavedObjectId when body id matches path sourceId', async () => {
-      await putDownloadSourcesHandler(
-        context,
-        {
-          body: { id: 'source1', name: 'Updated', host: 'http://test.co' },
-          params: { sourceId: 'source1' },
-        } as any,
-        response
-      );
-
-      expect(validateFleetSavedObjectId).toHaveBeenCalledWith('source1');
-    });
-
-    it('should propagate FleetError from validateFleetSavedObjectId as unhandled (400 via router)', async () => {
-      (validateFleetSavedObjectId as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('id is not valid: mock');
-      });
-
-      let caughtError: Error | undefined;
-      try {
-        await putDownloadSourcesHandler(
-          context,
-          {
-            body: { id: 'source1', name: 'Updated', host: 'http://test.co' },
-            params: { sourceId: 'source1' },
-          } as any,
-          response
-        );
-      } catch (e) {
-        caughtError = e;
-      }
-
-      expect(caughtError).toBeDefined();
-      expect(caughtError!.message).toContain('id is not valid');
-      expect(downloadSourceService.update).not.toHaveBeenCalled();
     });
 
     it('should not pass id to downloadSourceService.update', async () => {

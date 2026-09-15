@@ -26,7 +26,6 @@ import type {
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
 import { throwIfSslPathInvalid } from '../utils/ssl_utils';
-import { validateFleetSavedObjectId } from '../../../common/services';
 
 // Support clearing auth via PUT requests
 export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
@@ -142,15 +141,12 @@ export const putDownloadSourcesHandler: RequestHandler<
     id?: string;
   };
 
-  if (bodyId !== undefined) {
-    if (bodyId !== request.params.sourceId) {
-      return response.badRequest({
-        body: {
-          message: `Cannot change download source ID: body id does not match path sourceId "${request.params.sourceId}"`,
-        },
-      });
-    }
-    validateFleetSavedObjectId(bodyId);
+  if (bodyId !== undefined && bodyId !== request.params.sourceId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change download source ID: body id does not match path sourceId "${request.params.sourceId}"`,
+      },
+    });
   }
 
   const data = restBody as DownloadSourceWithNullableAuth;
