@@ -11,32 +11,27 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type {
   ChildWorkflowExecutionItem,
   WorkflowStepExecutionDto,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
-import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ForeachIterationsSection } from './foreach_iterations_section';
+import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
-import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -77,24 +72,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     parentWorkflowExecution,
     onSelectStepExecution,
   }) => {
-    const { euiTheme } = useEuiTheme();
-    const workflowNav = useNavigateToExecution(
-      childWorkflowExecution
-        ? {
-            workflowId: childWorkflowExecution.workflowId,
-            executionId: childWorkflowExecution.executionId,
-          }
-        : { workflowId: '' }
-    );
-    const parentWorkflowNav = useNavigateToExecution(
-      parentWorkflowExecution
-        ? {
-            workflowId: parentWorkflowExecution.workflowId,
-            executionId: parentWorkflowExecution.executionId,
-          }
-        : { workflowId: '' }
-    );
-
     const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
 
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
@@ -107,29 +84,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const isWorkflowExecuteStep = isExecuteSyncStepType(stepExecution?.stepType);
-
-    const handleWorkflowLinkClick = useCallback(
-      (e: React.MouseEvent) => {
-        if (hasActiveModifierKey(e)) return;
-        if (childWorkflowExecution) {
-          e.preventDefault();
-          workflowNav.navigate();
-        }
-      },
-      [childWorkflowExecution, workflowNav]
-    );
-
-    const handleParentWorkflowLinkClick = useCallback(
-      (e: React.MouseEvent) => {
-        if (hasActiveModifierKey(e)) return;
-        if (parentWorkflowExecution) {
-          e.preventDefault();
-          parentWorkflowNav.navigate();
-        }
-      },
-      [parentWorkflowExecution, parentWorkflowNav]
-    );
 
     // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
     const triggerType = isTriggerPseudoStep
@@ -202,43 +156,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {isWorkflowExecuteStep && childWorkflowExecution && (
+          {(childWorkflowExecution || parentWorkflowExecution) && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, childWorkflowExecution.status)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>
-                      <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
-                        {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
-                      </EuiLink>
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {parentWorkflowExecution && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, parentWorkflowExecution.status)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>
-                      <EuiLink
-                        href={parentWorkflowNav.href}
-                        onClick={handleParentWorkflowLinkClick}
-                      >
-                        {`${parentWorkflowExecution.workflowName}: ${stepExecution?.stepId}`}
-                      </EuiLink>
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <NestedWorkflowExecutionLinks
+                stepExecution={stepExecution}
+                childWorkflowExecution={childWorkflowExecution}
+                parentWorkflowExecution={parentWorkflowExecution}
+              />
             </EuiFlexItem>
           )}
           {isFinished ? (
