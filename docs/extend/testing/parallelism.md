@@ -19,7 +19,7 @@ Parallelism happens at the **file** level: Playwright runs test files in paralle
 ## When to use parallel vs sequential [scout-parallelism-differences]
 
 - **Parallel** (`parallel_tests/`, `workers > 1`): UI suites that can share pre-ingested data and isolate state per space with `spaceTest`.
-- **Sequential** (`tests/`, one worker): suites that require a “clean” cluster state or need global mutations that aren’t space-scoped. They run in the default space with `test`; `spaceTest` isn’t needed there, and switching a sequential suite from `spaceTest` to `test` doesn’t weaken its isolation.
+- **Sequential** (`tests/`, one worker): suites that require a “clean” cluster state or need global mutations that aren’t space-scoped. Additionally, test suites whose performance degrades when other workers share the same Kibana and Elasticsearch servers. They run in the default space with `test`.
 
 ## Enable parallel UI suites [enable-parallel-tests]
 
