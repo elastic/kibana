@@ -528,7 +528,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('sets the closed by profile uid in the case and comment', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
             auth: null,
@@ -561,9 +561,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('falls back to authc to get the user information when the profile uid is not available', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
+            auth: { user: superUser, space: null },
           });
 
           const patchedCase = await createComment({
