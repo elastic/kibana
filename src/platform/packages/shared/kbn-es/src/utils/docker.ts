@@ -511,14 +511,39 @@ export async function isDockerImageAvailableLocally(image: string) {
 }
 
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
-  log.info(chalk.bold(`Checking for image: ${image}`));
+  const preferCached = shouldPreferCachedSnapshot();
+  const cachedEnv = process.env.KBN_ES_SNAPSHOT_USE_CACHED ?? 'unset';
 
-  if (shouldPreferCachedSnapshot() && (await isDockerImageAvailableLocally(image))) {
+  log.info(`Checking docker image ${chalk.bold(image)}`);
+  log.indent(4);
+  try {
     log.info(
-      'prefer-cached enabled, skipping pull of locally available image %s',
-      chalk.bold(image)
+      `prefer-cached: ${
+        preferCached ? 'enabled' : 'disabled'
+      } (KBN_ES_SNAPSHOT_USE_CACHED=${cachedEnv})`
     );
-    return;
+
+    if (!preferCached) {
+      log.info('decision: pull (prefer-cached is disabled)');
+    } else {
+      try {
+        const { stdout } = await execa('docker', ['images', '-q', image]);
+        const localImageId = stdout.trim();
+        if (localImageId) {
+          log.info(`local image: found (${localImageId})`);
+          log.info('decision: skip pull');
+          return;
+        }
+        log.info('local image: not found');
+        log.info('decision: pull (image is not available locally)');
+      } catch (error) {
+        const message = (error as { message?: unknown })?.message ?? error;
+        log.warning(`local image check failed (${message}); treating as not found`);
+        log.info('decision: pull (local image check failed)');
+      }
+    }
+  } finally {
+    log.indent(-4);
   }
 
   await pRetry(
@@ -1010,7 +1035,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.info(`[runServerlessCluster] Docker environment ready (${elapsed()})`);
 
   const esServerlessImage = getServerlessImage({ image: options.image, tag: options.tag });
-  log.info(`[runServerlessCluster] Pulling Docker image(s) for: ${esServerlessImage}...`);
+  log.info(`[runServerlessCluster] Resolving Docker image(s) for: ${esServerlessImage}...`);
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
     ...(options.uiam
