@@ -51,6 +51,15 @@ const getLogsSchema = z.object({
          - "NOT message: \\"GET /health\\" AND NOT kubernetes.namespace: \\"kube-system\\"",
          - "error.message: * AND NOT message: \\"Known benign warning\\"".`)
     ),
+  semanticFilter: z
+    .string()
+    .max(MAX_SHORT_STRING_LENGTH)
+    .optional()
+    .describe(
+      dedent(`Natural language filter for logs. Use this when you know WHAT you're looking for but not the exact log message format.
+        Examples: "connection failures", "authentication errors", "timeout issues", "database connection problems".
+        Internally converts to pattern-based filtering. Can be combined with kqlFilter for additional refinement.`)
+    ),
   limit: z
     .number()
     .int()
@@ -104,9 +113,10 @@ export function createGetLogsTool({
       - Investigating log spikes, errors, or anomalies by iteratively narrowing down with KQL filters
       - Getting an overview of log volume and trends for a time window
       - Drilling into specific services, hosts, or containers during incident investigation
+      - Using natural language to find relevant log patterns (via semanticFilter)
 
       How to use (the "funnel" workflow):
-      1. Start with a broad filter (or no kqlFilter) to see the landscape
+      1. Start with a broad filter (or no kqlFilter) to see the landscape. Alternatively, use semanticFilter with a natural language description like "connection failures" or "authentication errors".
       2. Review the totalCount, categories, and samples — identify noise (health checks, cron jobs, verbose info logs)
       3. Call again with NOT clauses added to kqlFilter to exclude noise
       4. Repeat until categories shows fewer than 20 distinct patterns or samples show the root cause
@@ -133,7 +143,9 @@ export function createGetLogsTool({
     },
     handler: async (toolParams, { esClient }) => {
       try {
+        const [, pluginsStart] = await core.getStartServices();
         const logIndexPatterns = await getLogsIndices({ core, logger });
+        const semanticLogSearch = pluginsStart.logsDataAccess.services.semanticLogSearch;
 
         const startMs = parseDatemath(toolParams.start)!;
         const endMs = parseDatemath(toolParams.end, { roundUp: true })!;
@@ -146,11 +158,13 @@ export function createGetLogsTool({
             end: toolParams.end,
             index: toolParams.index ?? logIndexPatterns.join(','),
             kqlFilter: toolParams.kqlFilter,
+            semanticFilter: toolParams.semanticFilter,
             limit: toolParams.limit,
             bucketSize,
             groupBy: toolParams.groupBy,
             fields: toolParams.fields,
           },
+          semanticLogSearch,
         });
 
         return {

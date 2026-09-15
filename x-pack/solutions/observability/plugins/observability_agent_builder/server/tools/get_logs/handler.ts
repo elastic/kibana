@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { orderBy, uniq } from 'lodash';
 import moment from 'moment';
 import { ERROR_EXC_MESSAGE } from '@kbn/apm-types';
+import type { SemanticLogSearchService, LogPattern } from '@kbn/logs-data-access-plugin/server';
 import { computeSamplingProbability } from '../../utils/compute_sampling_probability';
 import { timeRangeFilter, kqlFilter as kqlFilterToDsl } from '../../utils/dsl_filters';
 import type { TypedSearch } from '../../utils/get_typed_search';
@@ -31,6 +32,7 @@ interface GetLogsParams {
   end: string;
   index: string;
   kqlFilter?: string;
+  semanticFilter?: string;
   limit: number;
   bucketSize: string;
   groupBy?: string;
@@ -53,11 +55,23 @@ export interface GetLogsResult {
 export async function getLogsHandler({
   esClient,
   params,
+  semanticLogSearch,
 }: {
   esClient: ElasticsearchClient;
   params: GetLogsParams;
+  semanticLogSearch?: SemanticLogSearchService;
 }): Promise<GetLogsResult> {
-  const { start, end, index, kqlFilter, limit, bucketSize, groupBy: groupByField, fields } = params;
+  const {
+    start,
+    end,
+    index,
+    kqlFilter,
+    semanticFilter,
+    limit,
+    bucketSize,
+    groupBy: groupByField,
+    fields,
+  } = params;
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
@@ -65,10 +79,25 @@ export async function getLogsHandler({
     throw new Error(`Invalid date range: start="${start}", end="${end}"`);
   }
 
+  // If semantic filter is provided, build DSL filter for patterns
+  let semanticPatternFilter: QueryDslQueryContainer[] = [];
+  if (semanticFilter && semanticLogSearch) {
+    const semanticResult = await semanticLogSearch.search({
+      esClient,
+      target: index,
+      nlQuery: semanticFilter,
+      timeRange: { start: startMs, end: endMs },
+      maxPatterns: 10,
+    });
+
+    semanticPatternFilter = buildSemanticPatternFilter(semanticResult.patterns);
+  }
+
   const searchClient = getTypedSearch(esClient);
   const baseFilter = [
     ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
     ...kqlFilterToDsl(kqlFilter),
+    ...semanticPatternFilter,
   ];
 
   const countResponse = await searchClient({
@@ -276,6 +305,31 @@ function parseTopValues(response: LogSearchResponse) {
   }
 
   return topValues;
+}
+
+/**
+ * Builds ES DSL filter for semantic search patterns.
+ * Uses match_phrase to find logs containing the sample messages.
+ */
+function buildSemanticPatternFilter(patterns: LogPattern[]): QueryDslQueryContainer[] {
+  const messageFilters = patterns
+    .map((p) => p.sample?.message)
+    .filter((msg): msg is string => typeof msg === 'string');
+
+  if (messageFilters.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      bool: {
+        should: messageFilters.map((msg) => ({
+          match_phrase: { message: msg },
+        })),
+        minimum_should_match: 1,
+      },
+    },
+  ];
 }
 
 function truncateFieldValue(value: unknown): unknown {
