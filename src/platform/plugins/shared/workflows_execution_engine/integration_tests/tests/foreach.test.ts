@@ -140,6 +140,71 @@ steps:
       expect(stepExecutions.length).toBe(outerArray.length);
     });
 
+    it('persists nested iteration steps with item snapshots and stacked scopes', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: buildYaml(),
+        inputs: { innerArray },
+      });
+      const stepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      );
+      const iterations = stepExecutions.filter((se) => se.stepType === 'foreach-iteration');
+      const outerIterations = iterations.filter(
+        (se) =>
+          se.scopeStack?.some((frame) => frame.stepId === 'outerForeachStep') &&
+          !se.scopeStack?.some((frame) => frame.stepId === 'innerForeachStep')
+      );
+      const innerIterations = iterations.filter((se) =>
+        se.scopeStack?.some((frame) => frame.stepId === 'innerForeachStep')
+      );
+
+      expect(outerIterations).toHaveLength(outerArray.length);
+      expect(innerIterations).toHaveLength(outerArray.length * innerArray.length);
+
+      const outerForeach = stepExecutions.find((se) => se.stepId === 'outerForeachStep');
+      expect(outerForeach?.input).toEqual(
+        expect.objectContaining({
+          items: outerArray,
+        })
+      );
+
+      outerArray.forEach((item, index) => {
+        const iteration = outerIterations.find((se) => se.stepId === `iteration-${index}`);
+        expect(iteration?.input).toEqual({ item });
+      });
+
+      outerArray.forEach((_, outerIndex) => {
+        innerArray.forEach((innerItem, innerIndex) => {
+          const iteration = innerIterations.find(
+            (se) =>
+              se.stepId === `iteration-${innerIndex}` &&
+              se.scopeStack?.some((frame) => frame.stepId === `iteration-${outerIndex}`)
+          );
+          expect(iteration?.input).toEqual({ item: innerItem });
+        });
+      });
+
+      const innerChild = stepExecutions.find(
+        (se) =>
+          se.stepId === 'innerForeachChildConnectorStep' &&
+          se.scopeStack?.some((frame) => frame.stepId === 'iteration-0') &&
+          se.scopeStack?.some((frame) => frame.stepId === 'innerForeachStep')
+      );
+      const childStepIds = innerChild?.scopeStack?.map((frame) => frame.stepId) ?? [];
+      expect(childStepIds).toEqual(
+        expect.arrayContaining([
+          'outerForeachStep',
+          'iteration-0',
+          'innerForeachStep',
+          'iteration-0',
+        ])
+      );
+      const innerForeachIndex = childStepIds.lastIndexOf('innerForeachStep');
+      const outerForeachIndex = childStepIds.indexOf('outerForeachStep');
+      expect(outerForeachIndex).toBeGreaterThanOrEqual(0);
+      expect(innerForeachIndex).toBeGreaterThan(outerForeachIndex);
+    });
+
     it('should invoke connector with correct foreach context in innerForeachChildConnectorStep', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -282,6 +347,66 @@ steps:
           });
         });
       });
+    });
+  });
+
+  describe('foreach item snapshot when the source list mutates', () => {
+    it('keeps iteration input and {{foreach.item}} on the enter-time list', async () => {
+      const yaml = `
+steps:
+  - name: seed
+    type: data.set
+    with:
+      items:
+        - a
+        - b
+  - name: loop
+    foreach: '{{variables.items}}'
+    type: foreach
+    steps:
+      - name: logItem
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: '{{foreach.item}}'
+      - name: mutate
+        type: data.set
+        with:
+          items:
+            - x
+            - y
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: { message: 'a' },
+        })
+      );
+      expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: { message: 'b' },
+        })
+      );
+      expect(workflowRunFixture.unsecuredActionsClientMock.execute).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: { message: 'y' },
+        })
+      );
+
+      const iterations = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepType === 'foreach-iteration');
+      expect(iterations.find((se) => se.stepId === 'iteration-0')?.input).toEqual({ item: 'a' });
+      expect(iterations.find((se) => se.stepId === 'iteration-1')?.input).toEqual({ item: 'b' });
     });
   });
 

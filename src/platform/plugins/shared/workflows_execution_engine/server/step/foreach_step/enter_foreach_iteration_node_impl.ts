@@ -8,11 +8,11 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { indexFromIterationStepId } from './utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { NodeImplementation } from '../node_implementation';
+import { extractForeachItemsFromInput, indexFromIterationStepId } from './utils';
 
 export class EnterForeachIterationNodeImpl implements NodeImplementation {
   constructor(
@@ -26,7 +26,7 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
     this.stepExecutionRuntime.startStep();
 
     const foreachStepRuntime = this.getEnclosingForeachStepRuntime();
-    const items = extractItems(foreachStepRuntime.getCurrentStepResult()?.input);
+    const items = extractForeachItemsFromInput(foreachStepRuntime.getCurrentStepResult()?.input);
     const index = indexFromIterationStepId(this.node.stepId);
 
     if (!items) {
@@ -56,11 +56,3 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
   }
 }
 
-function extractItems(input: unknown): unknown[] | undefined {
-  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
-    return undefined;
-  }
-
-  const { items } = input as { items?: unknown };
-  return Array.isArray(items) ? items : undefined;
-}

@@ -308,12 +308,12 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+      it('should render templates inside the native array', async () => {
         await underTest.run();
 
         expect(
           stepExecutionRuntime.contextManager.renderValueAccordingToContext
-        ).not.toHaveBeenCalled();
+        ).toHaveBeenCalledWith(['a', 'b', 'c']);
         expect(
           stepExecutionRuntime.contextManager.evaluateExpressionInContext
         ).not.toHaveBeenCalled();

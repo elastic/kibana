@@ -18,3 +18,13 @@ export function iterationStepIdFromIndex(index: number): string {
 export function indexFromIterationStepId(stepId: string): number {
   return Number(stepId.replace(ITERATION_STEP_ID_PREFIX, ''));
 }
+
+/** Evaluated list snapshotted onto foreach `input.items` at loop entry. */
+export function extractForeachItemsFromInput(input: unknown): unknown[] | undefined {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return undefined;
+  }
+
+  const { items } = input as { items?: unknown };
+  return Array.isArray(items) ? items : undefined;
+}

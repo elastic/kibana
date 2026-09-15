@@ -37,12 +37,12 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
     const foreachConfig = this.node.configuration.foreach;
-    // Pin the loop's source outputs for the lifetime of the loop. The foreach
-    // re-evaluates its source expression synchronously on every iteration
-    // (WorkflowContextManager.buildForeachContext); without pinning, a
-    // concurrent flush can evict the source between an inner step's
-    // prepareForRead and that re-evaluation, blanking the loop item. Unpinned
-    // in ExitForeachNodeImpl.
+    // Pin the loop's source outputs for the lifetime of the loop. Enter still
+    // evaluates the source expression once; older executions without
+    // `input.items` re-evaluate it in WorkflowContextManager.buildForeachContext.
+    // Without pinning, a concurrent flush can evict the source between an inner
+    // step's prepareForRead and that read, blanking the loop item. Unpinned in
+    // ExitForeachNodeImpl.
     this.stepIoService.pinForeachSource(this.node.stepId, foreachConfig);
 
     const evaluatedItems = this.getItems();
@@ -158,7 +158,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     }
 
     if (Array.isArray(expression)) {
-      return expression;
+      return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
     }
 
     if (isTemplateExpression(expression)) {
