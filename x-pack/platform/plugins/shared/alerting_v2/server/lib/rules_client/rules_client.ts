@@ -876,7 +876,7 @@ export class RulesClient {
     const { attrs } = await this.getExistingRule(id);
 
     if (!attrs.enabled) {
-      throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
+      throw Boom.badRequest(`Rule with ID "${id}" is disabled and cannot be run`, {
         code: ALERTING_ERROR_CODES.RULE_DISABLED,
         details: { rule_id: id },
       });
