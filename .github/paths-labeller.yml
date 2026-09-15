@@ -76,3 +76,5 @@
     - '.buildkite/scripts/steps/evals/**/*.*'
     - 'x-pack/platform/plugins/shared/inference/**/*.*'
     - 'x-pack/platform/packages/shared/ai-infra/**/*.*'
+- 'evals:nightshift-micro-evals':
+    - 'x-pack/platform/packages/shared/kbn-evals-suite-nightshift-micro-evals/**/*.*'

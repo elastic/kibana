@@ -1,0 +1,20 @@
+{
+  "input": {
+    "user_message": "[Synthetic] Monitor 12345: demo-api latency is high",
+    "existing_monitors": [
+      [
+        "12345",
+        "demo-api latency"
+      ]
+    ]
+  },
+  "output": {
+    "expected_monitor_id": "12345"
+  },
+  "metadata": {
+    "langsmith_example_id": "synthetic-monitor-1",
+    "dataset_split": [
+      "suite/baseline"
+    ]
+  }
+}

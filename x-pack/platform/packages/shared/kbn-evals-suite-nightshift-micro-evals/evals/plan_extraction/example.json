@@ -1,0 +1,24 @@
+{
+  "input": {
+    "messages": [
+      {
+        "type": "human",
+        "content": "Investigate synthetic demo-api latency."
+      },
+      {
+        "type": "ai",
+        "content": "Synthetic request latency rose after a demo deployment. The demo deployment was rolled back and latency recovered."
+      }
+    ]
+  },
+  "output": {
+    "expected_tree_mermaid": "flowchart TD\nS1([Service latency alert])\nE1[Inspect service latency and deployments]\nX1((Deployment regression))\nX2((Investigate other causes))\nS1 -->|✅ inspect| E1\nE1 -->|✅ deployment correlated| X1\nE1 -->|no correlation| X2"
+  },
+  "metadata": {
+    "langsmith_example_id": "synthetic-extraction-1",
+    "dataset_split": [
+      "suite/doordashv2"
+    ],
+    "case_type": "new_tree"
+  }
+}

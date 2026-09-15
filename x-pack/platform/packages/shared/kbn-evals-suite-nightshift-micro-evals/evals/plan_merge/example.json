@@ -1,0 +1,27 @@
+{
+  "input": {
+    "initial_tree_mermaid": "flowchart TD\nS1([Service latency alert])\nE1[Inspect deployments]\nX1((Deployment regression))\nX2((Other cause))\nS1 -->|inspect| E1\nE1 -->|deployment correlated| X1\nE1 -->|no correlation| X2",
+    "causal_summary": "Synthetic deployment regression confirmed; mark the path to X1.",
+    "question": "Apply synthetic causal feedback."
+  },
+  "output": {
+    "mutation_spec": {
+      "preserved_node_ids": [
+        "S1",
+        "E1",
+        "X1",
+        "X2"
+      ],
+      "nodes_added": [],
+      "nodes_deleted": [],
+      "correct_terminal": "X1",
+      "terminals_without_checkmark": [
+        "X2"
+      ]
+    }
+  },
+  "metadata": {
+    "langsmith_example_id": "synthetic-merge-1",
+    "dataset_split": []
+  }
+}

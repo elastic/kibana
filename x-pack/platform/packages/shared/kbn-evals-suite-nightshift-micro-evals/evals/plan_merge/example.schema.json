@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "object",
+      "properties": {
+        "initial_tree_mermaid": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "causal_summary": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "expected_merged_mermaid": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mutation_spec": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "preserved_node_ids": {
+                  "anyOf": [
+                    {
+                      "maxItems": 10000,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "nodes_added": {
+                  "anyOf": [
+                    {
+                      "maxItems": 10000,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "nodes_deleted": {
+                  "anyOf": [
+                    {
+                      "maxItems": 10000,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "correct_terminal": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "terminals_without_checkmark": {
+                  "anyOf": [
+                    {
+                      "maxItems": 10000,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/__schema1"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema2"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "langsmith_example_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "source_kbn_example_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "dataset_split": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "case_type": {
+          "type": "string",
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "langsmith_example_id"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/__schema3"
+      }
+    }
+  },
+  "required": [
+    "input",
+    "output",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
+    },
+    "__schema1": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema1"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema1"
+          }
+        }
+      ]
+    },
+    "__schema2": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema2"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema2"
+          }
+        }
+      ]
+    },
+    "__schema3": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema3"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema3"
+          }
+        }
+      ]
+    }
+  }
+}
