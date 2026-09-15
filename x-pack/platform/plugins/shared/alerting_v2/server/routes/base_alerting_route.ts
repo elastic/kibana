@@ -99,7 +99,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     503: {
       body: () => errorResponseSchema,
       description:
-        'This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.',
+        'Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.',
     },
   };
 
