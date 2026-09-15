@@ -90,6 +90,8 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
     <EuiPanel
       paddingSize="m"
       hasBorder
+      hasShadow={false}
+      borderRadius="m"
       css={activeBorderStyle}
       data-test-subj="agentBuilderSkillReferencedContentFileCard"
     >

@@ -42,6 +42,7 @@ export const useEmbeddableConsoleContentStyles = () => {
     animation-iteration-count: 1;
     animation-timing-function: ${euiTheme.animation.resistance};
     color: ${euiTheme.colors.textParagraph};
+    border-radius: 0 0 ${euiTheme.border.radius.frame} ${euiTheme.border.radius.frame};
 
     #consoleRoot {
       height: 100%;
