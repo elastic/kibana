@@ -19,7 +19,7 @@ import type {
 } from './types';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
-const PRETTIFY_DASHBOARD_ENABLED = false;
+const PRETTIFY_DASHBOARD_ENABLED = true;
 
 export class AgentBuilderDashboardsPlugin
   implements

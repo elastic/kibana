@@ -49,6 +49,8 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  /** Edit only the panel's presentation; keep its query and column bindings. */
+  appearanceOnly?: boolean;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -186,6 +188,12 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .optional()
       .describe(
         '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+      ),
+    appearanceOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds): the existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
       ),
   });
 
