@@ -44,9 +44,7 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },

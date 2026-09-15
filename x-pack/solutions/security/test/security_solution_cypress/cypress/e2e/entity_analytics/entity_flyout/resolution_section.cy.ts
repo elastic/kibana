@@ -70,9 +70,7 @@ describe(
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },
