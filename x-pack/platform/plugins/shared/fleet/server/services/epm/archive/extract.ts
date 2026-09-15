@@ -52,24 +52,32 @@ export async function unzipBuffer(
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry = async (entry: ArchiveEntry): Promise<void> => {},
   shouldReadBuffer?: (path: string) => boolean
-): Promise<unknown> {
+): Promise<void> {
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
-  zipfile.on('entry', async (entry: yauzl.Entry) => {
-    const path = entry.fileName;
-    if (!filter({ path })) return zipfile.readEntry();
-
-    try {
-      if (shouldReadBuffer && !shouldReadBuffer(path)) {
-        return onEntry({ path });
+  return new Promise((resolve, reject) => {
+    zipfile.on('entry', async (entry: yauzl.Entry) => {
+      const path = entry.fileName;
+      if (!filter({ path })) {
+        zipfile.readEntry();
+        return;
       }
-      const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
-      await onEntry({ buffer: entryBuffer, path });
-    } finally {
-      zipfile.readEntry();
-    }
+
+      try {
+        if (shouldReadBuffer && !shouldReadBuffer(path)) {
+          await onEntry({ path });
+        } else {
+          const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
+          await onEntry({ buffer: entryBuffer, path });
+        }
+        zipfile.readEntry();
+      } catch (err) {
+        reject(err);
+      }
+    });
+    zipfile.on('end', resolve);
+    zipfile.on('error', reject);
   });
-  return new Promise((resolve, reject) => zipfile.on('end', resolve).on('error', reject));
 }
 
 type BufferExtractor = typeof unzipBuffer | typeof untarBuffer;

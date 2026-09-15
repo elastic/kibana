@@ -10,11 +10,26 @@ import os from 'os';
 import path from 'path';
 import { PassThrough } from 'stream';
 
+import archiver from 'archiver';
 import * as tar from 'tar';
 
 import type { AssetParts } from '../../../types';
 
 import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '.';
+
+function createZipBuffer(files: Array<{ name: string; content: string }>): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const archive = archiver('zip');
+    const chunks: Buffer[] = [];
+    archive.on('data', (c: Buffer) => chunks.push(c));
+    archive.on('end', () => resolve(Buffer.concat(chunks)));
+    archive.on('error', reject);
+    for (const { name, content } of files) {
+      archive.append(content, { name });
+    }
+    archive.finalize();
+  });
+}
 
 async function createTarGzBuffer(
   files: Array<{ relativePath: string; content: string }>
@@ -144,6 +159,32 @@ describe('untarBuffer', () => {
     // itself should propagate the raw error so callers can inspect its type.
     await expect(
       untarBuffer(tarGzBuffer, undefined, async () => {
+        throw originalError;
+      })
+    ).rejects.toBe(originalError);
+  });
+});
+
+describe('unzipBuffer', () => {
+  let zipBuffer: Buffer;
+
+  beforeAll(async () => {
+    zipBuffer = await createZipBuffer([{ name: 'pkg-1.0.0/file.json', content: '{"test":true}' }]);
+  });
+
+  it('awaits onEntry promises before resolving', async () => {
+    let callbackSettled = false;
+    await unzipBuffer(zipBuffer, undefined, async () => {
+      await new Promise<void>((resolve) => setTimeout(resolve, 10));
+      callbackSettled = true;
+    });
+    expect(callbackSettled).toBe(true);
+  });
+
+  it('propagates onEntry errors without wrapping them', async () => {
+    const originalError = new Error('callback error');
+    await expect(
+      unzipBuffer(zipBuffer, undefined, async () => {
         throw originalError;
       })
     ).rejects.toBe(originalError);
