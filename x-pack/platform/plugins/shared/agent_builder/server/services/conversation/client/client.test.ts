@@ -776,14 +776,14 @@ describe.skip('ConversationClient', () => {
       );
     });
 
-    it('applies an explicit sort below relevance when a query is present', async () => {
+    it('applies an explicit sort instead of relevance when a query is present', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
       await client.search({ query: 'anything', sort: { field: 'created_at', order: 'asc' } });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          sort: [{ _score: { order: 'desc' } }, { created_at: { order: 'asc' } }],
+          sort: [{ created_at: { order: 'asc' } }],
         })
       );
     });
