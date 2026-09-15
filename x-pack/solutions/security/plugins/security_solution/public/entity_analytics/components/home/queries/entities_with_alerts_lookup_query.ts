@@ -36,6 +36,10 @@ export const buildEntitiesWithAlertsCountQuery = (
   parts.push(`| RENAME @timestamp AS event_timestamp`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   parts.push(`| RENAME event_timestamp AS @timestamp`);
+  // Discard alert rows that did not match any entity in entity-latest.
+  // Without this filter, alerts whose derived EUID has no entity-latest entry pass
+  // through the LEFT JOIN and inflate COUNT_DISTINCT with unrecognised identifiers.
+  parts.push(`| WHERE entity.name IS NOT NULL`);
 
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
