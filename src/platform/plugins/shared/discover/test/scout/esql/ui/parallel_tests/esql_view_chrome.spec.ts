@@ -127,7 +127,7 @@ spaceTest.describe(
 
     spaceTest(
       'restores results after moving away from and back to a populated time range',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { discover, datePicker, dataGrid } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(STATS_QUERY);
@@ -137,13 +137,12 @@ spaceTest.describe(
         await expect(dataGrid.getCellValue(0, 'countB')).toHaveText('1');
 
         // Collapse the time range to a single instant so the query matches nothing.
-        // The empty state itself is asserted in no_results.test.tsx, where the data
-        // check is mocked — a shared deployment can't guarantee a zero-result query.
         await datePicker.setAbsoluteRange({
           from: 'Sep 19, 2015 @ 06:31:44.000',
           to: 'Sep 19, 2015 @ 06:31:44.000',
         });
         await discover.waitUntilTabIsLoaded();
+        await expect(page.testSubj.locator('discoverNoResults')).toBeVisible();
 
         // Restore the default time range → data returns.
         await datePicker.setAbsoluteRange(DEFAULT_TIME_RANGE_DISPLAY);

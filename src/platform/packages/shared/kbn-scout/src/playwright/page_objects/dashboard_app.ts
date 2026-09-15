@@ -324,9 +324,9 @@ export class DashboardApp {
 
       // Strip whitespace only: the panel header builds this subject with
       // `replace(/\s/g, '')`, so titles keep their hyphens.
-      await expect(
-        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/\s/g, '')}`)
-      ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
+      await this.page.testSubj
+        .locator(`embeddablePanelHeading-${names[i].replace(/\s/g, '')}`)
+        .waitFor({ state: 'visible', timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
     await this.closeLibraryFlyout();
   }

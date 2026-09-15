@@ -17,8 +17,15 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     await discoverScoutSpace.setupDiscoverDefaults();
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    const { discover } = pageObjects;
     await browserAuth.loginAsPrivilegedUser();
+    await discover.goto({ queryMode: 'esql' });
+    // Submit explicitly rather than relying on the query Discover opens with: the
+    // default is deployment-specific — the observability root profile overrides it
+    // to `FROM <allLogsIndexPattern>`, which has no `extension` field to break down on.
+    await discover.writeAndSubmitEsqlQuery('from logstash-*');
+    await discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -27,9 +34,6 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
 
   spaceTest('choose breakdown field from dropdown', async ({ pageObjects }) => {
     const { discover } = pageObjects;
-    await discover.goto({ queryMode: 'esql' });
-    await discover.writeAndSubmitEsqlQuery('from logstash-*');
-    await discover.waitUntilTabIsLoaded();
     await discover.chooseBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
     await expect
@@ -41,9 +45,6 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     'filter from histogram legend value appends WHERE to query',
     async ({ pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
-      await discover.goto({ queryMode: 'esql' });
-      await discover.writeAndSubmitEsqlQuery('from logstash-*');
-      await discover.waitUntilTabIsLoaded();
       await discover.chooseBreakdownField('extension');
       await discover.waitUntilTabIsLoaded();
       await discover.clickLegendFilter('png', '+');
@@ -59,9 +60,6 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
       const { discover } = pageObjects;
       const savedSearchTitle = `esql view with breakdown ${scoutSpace.id}`;
 
-      await discover.goto({ queryMode: 'esql' });
-      await discover.writeAndSubmitEsqlQuery('from logstash-*');
-      await discover.waitUntilTabIsLoaded();
       await discover.chooseBreakdownField('extension');
       await discover.waitUntilTabIsLoaded();
 
@@ -80,9 +78,6 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
 
   spaceTest('choose breakdown from field stats', async ({ pageObjects }) => {
     const { discover, unifiedFieldList } = pageObjects;
-    await discover.goto({ queryMode: 'esql' });
-    await discover.writeAndSubmitEsqlQuery('from logstash-*');
-    await discover.waitUntilTabIsLoaded();
     await unifiedFieldList.clickFieldListAddBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
     await expect

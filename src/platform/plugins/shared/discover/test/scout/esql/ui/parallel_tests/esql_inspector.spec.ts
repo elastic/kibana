@@ -25,9 +25,12 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('lists the Table and Visualization requests', async ({ page, pageObjects }) => {
+  spaceTest('lists the Table and Visualization requests', async ({ pageObjects }) => {
     const { discover, inspector, unifiedTabs } = pageObjects;
 
+    // Submit explicitly rather than relying on the query Discover opens with: the
+    // default is deployment-specific — the observability root profile overrides it
+    // to `FROM <allLogsIndexPattern>` — so the requests below would not be logstash's.
     await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
     await unifiedTabs.openInspectorForActiveTab();
@@ -37,18 +40,12 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
     // count before reading the names — otherwise only "Table" is listed.
     await expect(inspector.panel.getByText(/^2 requests were made$/)).toBeVisible();
 
-    const requestNames = await page.components
-      .comboBox('inspectorRequestChooser')
-      .getAllVisibleOptions();
-    expect(requestNames).toStrictEqual(['Table', 'Visualization']);
-
-    // Reading the options leaves the list open, where it covers the detail tabs.
-    await page.keyboard.press('Escape');
+    expect(await inspector.getRequestNames()).toStrictEqual(['Table', 'Visualization']);
 
     await inspector.requests.requestTab.click();
     const request = await discover.codeEditor.getCodeEditorValueByTestSubj(
       'inspectorRequestCodeViewerContainer'
     );
-    expect(request).toContain('POST /_query/async');
+    expect(request).toContain('POST /_query/async?drop_null_columns=true');
   });
 });
