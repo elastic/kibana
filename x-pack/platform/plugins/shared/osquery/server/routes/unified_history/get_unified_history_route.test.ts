@@ -47,7 +47,7 @@ describe('getUnifiedHistoryRoute', () => {
     mockScopedEsClient = { search: jest.fn() };
 
     mockOsqueryContext = {
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       logFactory: {
         get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn(), error: jest.fn() }),
       },
@@ -85,7 +85,7 @@ describe('getUnifiedHistoryRoute', () => {
     beforeEach(() => {
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
       } as unknown as OsqueryAppContext;
 
       mockScopedEsClient.search
@@ -141,6 +141,37 @@ describe('getUnifiedHistoryRoute', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       expect(mockScopedEsClient.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when no linked projects are visible to the principal', () => {
+    it('uses the internal ES client and never scopes the cluster client', async () => {
+      const asScoped = jest.fn();
+      mockOsqueryContext.getStartServices = jest.fn().mockResolvedValue([
+        {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockEsClient,
+              asScoped,
+            },
+          },
+        },
+      ]);
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce(emptyScheduledAggregations);
+
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockOsqueryContext.isCpsActive).toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalled();
+      expect(asScoped).not.toHaveBeenCalled();
     });
   });
 
