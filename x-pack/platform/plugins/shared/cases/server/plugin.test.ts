@@ -357,6 +357,91 @@ describe('Cases Plugin', () => {
     });
   });
 
+  describe('agent builder tool registration gating', () => {
+    const createServerlessContext = (projectType: string) => {
+      const ctx = coreMock.createPluginInitializerContext<ConfigType>(getConfig());
+      // Override the readonly packageInfo with a serverless build flavor
+      Object.defineProperty(ctx.env, 'packageInfo', {
+        value: { ...ctx.env.packageInfo, buildFlavor: 'serverless' as const },
+      });
+      return ctx;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
+    });
+
+    it('registers tools when not in serverless', () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).toHaveBeenCalled();
+    });
+
+    it('registers tools for serverless security projects', () => {
+      context = createServerlessContext('security');
+      plugin = new CasePlugin(context);
+
+      pluginsSetup.cloud = {
+        isServerlessEnabled: true,
+        serverless: { projectType: 'security' },
+      } as CasesServerSetupDependencies['cloud'];
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).toHaveBeenCalled();
+    });
+
+    it('registers tools for serverless observability projects', () => {
+      context = createServerlessContext('observability');
+      plugin = new CasePlugin(context);
+
+      pluginsSetup.cloud = {
+        isServerlessEnabled: true,
+        serverless: { projectType: 'observability' },
+      } as CasesServerSetupDependencies['cloud'];
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).toHaveBeenCalled();
+    });
+
+    it('does not register tools for serverless search projects', () => {
+      context = createServerlessContext('search');
+      plugin = new CasePlugin(context);
+
+      pluginsSetup.cloud = {
+        isServerlessEnabled: true,
+        serverless: { projectType: 'search' },
+      } as CasesServerSetupDependencies['cloud'];
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
+    });
+
+    it('does not register tools for serverless vectordb projects', () => {
+      context = createServerlessContext('vectordb');
+      plugin = new CasePlugin(context);
+
+      pluginsSetup.cloud = {
+        isServerlessEnabled: true,
+        serverless: { projectType: 'vectordb' },
+      } as CasesServerSetupDependencies['cloud'];
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
+    });
+
+    it('does not register tools when agentBuilder plugin is not available', () => {
+      delete pluginsSetup.agentBuilder;
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
+    });
+  });
+
   describe('client source propagation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
