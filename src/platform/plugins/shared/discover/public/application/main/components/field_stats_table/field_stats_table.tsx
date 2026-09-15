@@ -40,6 +40,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     totalHits,
     updateState,
     onFieldsCountChange,
+    previewMode,
   } = props;
 
   // If `_source` is in the columns, we should exclude it for Field Statistics
@@ -76,7 +77,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   );
 
   if (!dataVisualizerService) return null;
-
+  console.log({ previewMode });
   return (
     <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
       <dataVisualizerService.FieldStatisticsTable
@@ -99,6 +100,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         overridableServices={overridableServices}
         timeRange={timeRange}
         onFieldsCountChange={onFieldsCountChange}
+        previewMode={previewMode}
       />
     </EuiFlexItem>
   );

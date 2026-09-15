@@ -196,4 +196,6 @@ export interface FieldStatisticsTableProps {
    * Reports `undefined` while a (re)load is in progress.
    */
   onFieldsCountChange?: (fieldsCount: number | undefined) => void;
+
+  previewMode?: boolean;
 }

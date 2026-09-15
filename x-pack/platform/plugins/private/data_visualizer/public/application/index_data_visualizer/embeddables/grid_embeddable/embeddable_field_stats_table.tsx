@@ -48,7 +48,11 @@ const EmbeddableFieldStatsTableWrapper = (
     overallStats,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(props, dataVisualizerListState);
+  } = useDataVisualizerGridData({
+    input: props,
+    dataVisualizerListState,
+    previewMode: props.previewMode,
+  });
 
   const totalCount = overallStats?.totalCount;
 
@@ -104,6 +108,7 @@ const EmbeddableFieldStatsTableWrapper = (
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}
+      previewMode={props.previewMode}
     />
   );
 };
