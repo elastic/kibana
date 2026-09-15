@@ -246,6 +246,47 @@ describe('test endpoint app context services', () => {
     });
   });
 
+  describe('getCurrentUsername', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    let getCurrentUserMock: jest.Mock;
+
+    const startService = () => {
+      startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it("returns the authenticated user's username for the request", () => {
+      startService();
+      getCurrentUserMock.mockReturnValue({ username: 'some-analyst' });
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('some-analyst');
+      expect(getCurrentUserMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns undefined when the request is unauthenticated', () => {
+      startService();
+      getCurrentUserMock.mockReturnValue(null);
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+    });
+
+    it('returns undefined when the security plugin is not available', () => {
+      // no setup/start — `this.security` is null
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+    });
+  });
+
   describe('getInternalResponseActionsClient', () => {
     let service: EndpointAppContextService;
 
