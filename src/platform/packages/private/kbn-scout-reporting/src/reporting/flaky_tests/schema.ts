@@ -61,9 +61,25 @@ export const FlakyTestBranchStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Absent when the test never failed on this branch. */
   lastFailedAt: z.optional(z.coerce.date()),
+  /** Most recent execution, i.e. run that was not skipped; absent when every run was skipped. */
+  latestExecutionAt: z.optional(z.coerce.date()),
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
 });
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
+
+/**
+ * Build counts of one test per UTC day over the last `days` days of the report scope, oldest
+ * first; the last day is the one containing the window end and is usually partial. Days without
+ * builds are 0.
+ */
+export const FlakyTestTrendSchema = z.object({
+  days: z.int().min(1),
+  /** Start of the first day. */
+  from: z.coerce.date(),
+  buildsPerDay: z.array(z.int()),
+  failedBuildsPerDay: z.array(z.int()),
+});
+export type FlakyTestTrend = z.infer<typeof FlakyTestTrendSchema>;
 
 /**
  * One test aggregated over the report window. Counts are per execution (one per test run;
@@ -73,6 +89,8 @@ export const FlakyTestEntrySchema = z.object({
   testId: z.string(),
   framework: TestFrameworkSchema,
   title: z.string(),
+  /** Title of the enclosing suite (describe blocks), when the framework reports one. */
+  suiteTitle: z.optional(z.string()),
   filePath: z.string(),
   configPath: z.optional(z.string()),
   owners: z.array(z.string()),
@@ -100,8 +118,39 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
+  /** Absent in reports written before trends existed or when `trendDays` is 0. */
+  trend: z.optional(FlakyTestTrendSchema),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
+
+/** Build counts on one Buildkite pipeline, any branch, for the tests of one file. */
+export const FlakyTestPipelineStatsSchema = z.object({
+  pipeline: z.string(),
+  builds: z.int(),
+  failedBuilds: z.int(),
+  /** `failedBuilds / builds` on this pipeline. */
+  buildFailRate: z.number(),
+  /** Distinct branches with at least one failed execution. */
+  failedBranches: z.int(),
+  lastFailedAt: z.optional(z.coerce.date()),
+  /** The most recent build with a failure, when its number was recorded. */
+  lastFailedBuildUrl: z.optional(z.string()),
+});
+export type FlakyTestPipelineStats = z.infer<typeof FlakyTestPipelineStatsSchema>;
+
+/**
+ * The tests of one file that made it into the report, with their failures broken down by
+ * pipeline across every pipeline and branch in the window, not just the report scope. A build
+ * counts once however many of the file's tests failed in it.
+ */
+export const FlakyTestFileStatsSchema = z.object({
+  filePath: z.string(),
+  framework: TestFrameworkSchema,
+  testIds: z.array(z.string()),
+  /** Most failed builds first. */
+  byPipeline: z.array(FlakyTestPipelineStatsSchema),
+});
+export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
 
 export const FlakyTestReportThresholdsSchema = z.object({
   /** Tests seen in fewer builds than this are ignored. */
@@ -110,6 +159,12 @@ export const FlakyTestReportThresholdsSchema = z.object({
   minFailedBuilds: z.int().min(1),
   /** Maximum number of tests kept per list. */
   maxTests: z.int().min(1),
+  /**
+   * Tests without an execution (a run that was not skipped) in this many hours before the
+   * window end are dropped: they were skipped, moved or deleted since, so there is nothing left
+   * to fix. Defaults so that reports written before the field existed still parse.
+   */
+  maxInactiveHours: z.int().min(1).default(24),
 });
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
 
@@ -122,6 +177,8 @@ export interface FlakyTestReportOptions {
   classifications: FlakyTestClassification[];
   thresholds: FlakyTestReportThresholds;
   samplesPerTest: number;
+  /** Days of per-day build counts attached to each test; 0 disables the trend. */
+  trendDays: number;
   /** Upper bound of the window; defaults to the current time. */
   now?: Date;
 }
@@ -136,8 +193,10 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
     minBuilds: 10,
     minFailedBuilds: 2,
     maxTests: 200,
+    maxInactiveHours: 24,
   },
   samplesPerTest: 3,
+  trendDays: 14,
 };
 
 export const FlakyTestReportSchema = z.object({
@@ -171,5 +230,10 @@ export const FlakyTestReportSchema = z.object({
   flaky: z.array(FlakyTestEntrySchema),
   /** Tests that never had a clean pass in the window; broken rather than flaky. */
   consistentlyFailing: z.array(FlakyTestEntrySchema),
+  /**
+   * Per-file, per-pipeline breakdown for the tests of both lists. Defaults so that reports
+   * written before the field existed still parse.
+   */
+  files: z.array(FlakyTestFileStatsSchema).default([]),
 });
 export type FlakyTestReport = z.infer<typeof FlakyTestReportSchema>;

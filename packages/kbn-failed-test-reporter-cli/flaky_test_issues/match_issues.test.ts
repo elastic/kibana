@@ -67,10 +67,22 @@ describe('describeIssue', () => {
     });
   });
 
-  it('reads the suite file of a suite issue title', () => {
+  it('reads the suite file from the suite metadata, or from a legacy suite issue title', () => {
+    expect(
+      describeIssue(
+        githubIssue({
+          number: 4,
+          title: '[Synthetics] Flaky Scout test suite: default status alert',
+          body: `text\n\n<!-- kibanaCiData = {"flaky-test-suite":{"suite.filePath":"${SUITE_PATH}"}} -->`,
+        })
+      )
+    ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
     expect(
       describeIssue(githubIssue({ number: 5, title: `Flaky FTR test suite: ${SUITE_PATH}` }))
     ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
+    expect(
+      describeIssue(githubIssue({ number: 6, title: '[Lens] Flaky Scout test suite: two words' }))
+    ).toMatchObject({ suiteFilePath: undefined });
   });
 
   it('restores dots in file paths and copes with hand-written issues', () => {

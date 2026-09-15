@@ -22,6 +22,61 @@ describe('groupIntoSuites', () => {
     expect(suites[0].tests.map((test) => test.testId)).toEqual(['a2', 'a1']);
   });
 
+  it('describes a suite from its tests and picks up the per-pipeline stats of its file', () => {
+    const byPipeline = [
+      {
+        pipeline: 'kibana-on-merge',
+        builds: 10,
+        failedBuilds: 4,
+        buildFailRate: 0.4,
+        failedBranches: 1,
+      },
+    ];
+    const [suite] = groupIntoSuites(
+      [
+        flakyTest({
+          testId: 'a1',
+          filePath: 'a.spec.ts',
+          failedBuilds: 2,
+          suiteTitle: undefined,
+          configPath: undefined,
+          owners: ['elastic/team-a'],
+        }),
+        flakyTest({
+          testId: 'a2',
+          filePath: 'a.spec.ts',
+          failedBuilds: 9,
+          suiteTitle: 'suite a',
+          configPath: 'a.config.ts',
+          owners: ['elastic/team-b', 'elastic/team-a'],
+        }),
+      ],
+      [
+        { filePath: 'a.spec.ts', framework: 'playwright', testIds: ['a1', 'a2'], byPipeline },
+        { filePath: 'a.spec.ts', framework: 'jest', testIds: ['other'], byPipeline: [] },
+      ]
+    );
+
+    expect(suite).toMatchObject({
+      filePath: 'a.spec.ts',
+      framework: 'playwright',
+      suiteTitle: 'suite a',
+      configPath: 'a.config.ts',
+      owners: ['elastic/team-b', 'elastic/team-a'],
+      byPipeline,
+    });
+  });
+
+  it('keeps the same file apart per framework', () => {
+    const suites = groupIntoSuites([
+      flakyTest({ testId: 'j', filePath: 'a.ts', framework: 'jest' }),
+      flakyTest({ testId: 'p', filePath: 'a.ts', framework: 'playwright' }),
+    ]);
+
+    expect(suites.map((suite) => suite.framework).sort()).toEqual(['jest', 'playwright']);
+    expect(suites[0].byPipeline).toEqual([]);
+  });
+
   it('returns no suites for an empty report', () => {
     expect(groupIntoSuites([])).toEqual([]);
   });
