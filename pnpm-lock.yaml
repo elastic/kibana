@@ -116,8 +116,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4110,8 +4108,8 @@ importers:
         specifier: 1.5.1
         version: 1.5.1
       bitmap-sdf:
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
       blurhash:
         specifier: 2.0.5
         version: 2.0.5
@@ -4131,8 +4129,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       canvg:
-        specifier: 3.0.11
-        version: 3.0.11
+        specifier: 4.0.3
+        version: 4.0.3
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -4564,13 +4562,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -16370,8 +16368,8 @@ packages:
   bind-event-listener@3.0.0:
     resolution: {integrity: sha512-PJvH288AWQhKs2v9zyfYdPzlPqf5bXbGMmhmUIY9x4dAUGIWgomO771oBQNwJnMQSnUIXhKu6sgzpBRXTlvb8Q==}
 
-  bitmap-sdf@1.0.3:
-    resolution: {integrity: sha512-ojYySSvWTx21cbgntR942zgEgqj38wHctN64vr4vYRFf3GKVmI23YlA94meWGkFslidwLwGCsMy2laJ3g/94Sg==}
+  bitmap-sdf@1.0.4:
+    resolution: {integrity: sha512-1G3U4n5JE6RAiALMxu0p1XmeZkTeCwGKykzsLTCqVzfSDaN6S7fKnkIkfejogz+iwqBWc0UYAIKnKHNN7pSfDg==}
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -16631,9 +16629,9 @@ packages:
   caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
 
-  canvg@3.0.11:
-    resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
-    engines: {node: '>=10.0.0'}
+  canvg@4.0.3:
+    resolution: {integrity: sha512-fKzMoMBwus3CWo1Uy8XJc4tqqn98RoRrGV6CsIkaNiQT5lOeHuMh4fOt+LXLzn2Wqtr4p/c2TOLz4xtu4oBlFA==}
+    engines: {node: '>=12.0.0'}
 
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
@@ -16787,9 +16785,6 @@ packages:
 
   cjs-module-lexer@2.2.1:
     resolution: {integrity: sha512-Ca8swihM+/4yKecYHY52kgJd300hi2lADU/a1RxNTRe+RJ9jvqQlESpbz9DnG9mowez8qwXHB8qYdIUw9e+F5Q==}
-
-  clamp@1.0.1:
-    resolution: {integrity: sha512-kgMuFyE78OC6Dyu3Dy7vcx4uy97EIbVxJB/B0eJ3bUNAkwdNcxYzgKltnyADiYwsR7SEqkkUPsEUT//OVS6XMA==}
 
   clarify@2.2.0:
     resolution: {integrity: sha512-B8nwvHDPTmS0IZ32mwuBkSz/17HXtpu1h+RshXe/tLIS9PX8g4tHWyN+mS8gha0Cu+3W7IUsqStS7KIrzo2dsA==}
@@ -23227,12 +23222,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -23264,9 +23263,6 @@ packages:
 
   regenerate@1.4.2:
     resolution: {integrity: sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==}
-
-  regenerator-runtime@0.13.11:
-    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
   regex-recursion@6.0.2:
     resolution: {integrity: sha512-0YCaSCq2VRIebiaUviZNs0cBz1kg5kVS2UKUfNIx8YVs1cN3AV7NTctO5FOKBA+UT2BPJIWZauYHPqJODG50cg==}
@@ -30937,7 +30933,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -33996,9 +33992,7 @@ snapshots:
 
   bind-event-listener@3.0.0: {}
 
-  bitmap-sdf@1.0.3:
-    dependencies:
-      clamp: 1.0.1
+  bitmap-sdf@1.0.4: {}
 
   bl@4.1.0:
     dependencies:
@@ -34323,13 +34317,10 @@ snapshots:
 
   caniuse-lite@1.0.30001810: {}
 
-  canvg@3.0.11:
+  canvg@4.0.3:
     dependencies:
-      '@babel/runtime': 7.29.7
       '@types/raf': 3.4.3
-      core-js: 3.50.0
       raf: 3.4.1
-      regenerator-runtime: 0.13.11
       rgbcolor: 1.0.1
       stackblur-canvas: 2.7.0
       svg-pathdata: 6.0.3
@@ -34508,8 +34499,6 @@ snapshots:
   cjs-module-lexer@1.4.3: {}
 
   cjs-module-lexer@2.2.1: {}
-
-  clamp@1.0.1: {}
 
   clarify@2.2.0:
     dependencies:
@@ -42382,17 +42371,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
@@ -42437,8 +42430,6 @@ snapshots:
       regenerate: 1.4.2
 
   regenerate@1.4.2: {}
-
-  regenerator-runtime@0.13.11: {}
 
   regex-recursion@6.0.2:
     dependencies:
