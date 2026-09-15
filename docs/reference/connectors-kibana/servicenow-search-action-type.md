@@ -164,6 +164,11 @@ Close incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 
 Create security incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new Security Operations (SecOps/SIR) incident in the `sn_si_incident` table. Use this for cyber security incidents and threat investigations rather than ITSM incidents. Returns the created incident with its `sys_id`.
+
+    ::::{note}
+    Requires the **ServiceNow Security Incident Response (SIR)** plugin to be installed on the ServiceNow instance. The connector user must have the `sn_si_incident_write` role. If the plugin is absent, the connector returns a 400 error stating that the table does not exist.
+    ::::
+
     - `short_description` (required): Brief summary of the security incident.
     - `description` (optional): Detailed description.
     - `priority` (optional): Priority — `1`=Critical, `2`=High, `3`=Moderate, `4`=Low, `5`=Planning.
@@ -177,7 +182,12 @@ Create security incident {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
     - `business_criticality` (optional): Business criticality — `1`=Critical, `2`=High, `3`=Medium, `4`=Low, `5`=Negligible.
 
 Create event {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Send an ITOM event to ServiceNow Event Management. Creates or updates an alert in the Event Management console. Use `message_key` to deduplicate: events with the same `source`, `node`, `type`, and `message_key` update the existing alert instead of creating a new one.
+:   Send an ITOM event to ServiceNow Event Management via `/api/global/em/jsonv2`. Creates or updates an alert in the Event Management console. Use `message_key` to deduplicate: events with the same `source`, `node`, `type`, and `message_key` update the existing alert instead of creating a new one.
+
+    ::::{note}
+    Requires the **ServiceNow Event Management (ITOM)** plugin to be installed on the ServiceNow instance. The connector user must have the `evt_mgmt_integration` role (or `evt_mgmt_operator`/`evt_mgmt_admin`). If the plugin is absent or the role is missing, the connector returns a 400 error.
+    ::::
+
     - `source` (required): Event source system (for example, `"Elastic"`, `"monitoring-agent"`).
     - `type` (required): Event type or category (for example, `"high_cpu"`, `"service_down"`).
     - `node` (optional): Hostname or IP address of the affected node.
