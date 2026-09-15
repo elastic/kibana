@@ -60,8 +60,9 @@ describe('deleteDuplicatePackagePolicies', () => {
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
-    await deleteDuplicatePackagePolicies([], soClient, esClient, serverSetup);
+    const deletedCount = await deleteDuplicatePackagePolicies([], soClient, esClient, serverSetup);
 
+    expect(deletedCount).toBe(0);
     expect(deleteMock).not.toHaveBeenCalled();
     expect(bumpRevisionMock).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
@@ -82,7 +83,13 @@ describe('deleteDuplicatePackagePolicies', () => {
     const esClient = {} as ElasticsearchClient;
 
     const packages = ['p-1', 'p-2', 'p-3'];
-    await deleteDuplicatePackagePolicies(packages, soClient, esClient, serverSetup);
+    const deletedCount = await deleteDuplicatePackagePolicies(
+      packages,
+      soClient,
+      esClient,
+      serverSetup
+    );
+    expect(deletedCount).toBe(3);
 
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
@@ -179,8 +186,84 @@ describe('deleteDuplicatePackagePolicies', () => {
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
 
-    await deleteDuplicatePackagePolicies(['p-1'], soClient, esClient, serverSetup);
+    const deletedCount = await deleteDuplicatePackagePolicies(
+      ['p-1'],
+      soClient,
+      esClient,
+      serverSetup
+    );
 
+    expect(deletedCount).toBe(0);
+    expect(bumpRevisionMock).not.toHaveBeenCalled();
+  });
+
+  test('bumps from policy_id when policy_ids is missing', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockResolvedValue([{ id: 'p-1', success: true, policy_id: 'agent-a' }]);
+    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const soClient = {} as SavedObjectsClientContract;
+    const esClient = {} as ElasticsearchClient;
+
+    const deletedCount = await deleteDuplicatePackagePolicies(
+      ['p-1'],
+      soClient,
+      esClient,
+      serverSetup
+    );
+
+    expect(deletedCount).toBe(1);
+    expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
+    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
+      asyncDeploy: true,
+    });
+  });
+
+  test('counts and bumps only successful deletes', async () => {
+    const deleteMock = jest
+      .fn()
+      .mockResolvedValue([
+        deleted('p-1', ['agent-a']),
+        { id: 'p-2', success: false, policy_ids: ['agent-b'] },
+      ]);
+    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const soClient = {} as SavedObjectsClientContract;
+    const esClient = {} as ElasticsearchClient;
+
+    const deletedCount = await deleteDuplicatePackagePolicies(
+      ['p-1', 'p-2'],
+      soClient,
+      esClient,
+      serverSetup
+    );
+
+    expect(deletedCount).toBe(1);
+    expect(bumpRevisionMock).toHaveBeenCalledTimes(1);
+    expect(bumpRevisionMock).toHaveBeenCalledWith(soClient, esClient, 'agent-a', {
+      asyncDeploy: true,
+    });
+    expect(bumpRevisionMock).not.toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'agent-b',
+      expect.anything()
+    );
+  });
+
+  test('treats a missing delete result list as zero deletes', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const { serverSetup, bumpRevisionMock } = makeServerSetup({ deleteMock });
+    const soClient = {} as SavedObjectsClientContract;
+    const esClient = {} as ElasticsearchClient;
+
+    const deletedCount = await deleteDuplicatePackagePolicies(
+      ['p-1'],
+      soClient,
+      esClient,
+      serverSetup
+    );
+
+    expect(deletedCount).toBe(0);
     expect(bumpRevisionMock).not.toHaveBeenCalled();
   });
 });
