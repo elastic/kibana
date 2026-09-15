@@ -100,6 +100,7 @@ export interface ImportRulesArgs {
   overwriteRules: boolean;
   allowMissingConnectorSecrets?: boolean;
   changeTracking?: SecurityRuleChangeTracking;
+  batchSize?: number;
 }
 
 export interface GetHistoryForRuleArgs {

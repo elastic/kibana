@@ -9,16 +9,10 @@ import type { RuleToImport } from '../../../../../../../../common/api/detection_
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 
-/**
- * Prebuilt-rule lookups the import path needs before it can classify rules
- * and calculate `rule_source`:
- *
- * - `matchingAssetsByRuleId`  — prebuilt asset for the imported `(rule_id, version)`
- * - `availableRuleAssetIds`   — set of `rule_id`s the current prebuilt package
- *                               (or its deprecated tail) recognises
- */
 export interface PrebuiltImportContext {
+  /** Prebuilt asset for the imported `(rule_id, version)`. */
   matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
+  /** `rule_id`s the current prebuilt package (or its deprecated tail) recognises. */
   availableRuleAssetIds: Set<string>;
 }
 

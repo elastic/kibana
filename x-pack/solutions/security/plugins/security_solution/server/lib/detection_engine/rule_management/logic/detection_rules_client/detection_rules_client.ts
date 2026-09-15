@@ -246,11 +246,13 @@ export const createDetectionRulesClient = ({
             overwriteRules: args.overwriteRules,
             allowMissingConnectorSecrets: args.allowMissingConnectorSecrets,
             changeTracking: args.changeTracking,
+            batchSize: args.batchSize,
           },
           deps: {
             actionsClient,
             rulesClient,
             savedObjectsClient,
+            prebuiltRuleAssetClient,
             mlAuthz,
           },
         });

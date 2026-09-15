@@ -15,9 +15,9 @@ export const RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS = 3600000 as const;
 export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
 
 /**
- * Rules per `bulkCreateRules` batch during import. Used both as the outer
- * chunk size in `logic/import/import_rules.ts` and passed to
- * `rulesClient.bulkCreateRules` as its `batchSize`.
+ * Default import batch size: outer chunk (find/validate/KQL) and inner
+ * `bulkCreateRules` `batchSize`. Same value so each outer batch is one
+ * alerting bulk request.
  */
 export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 200;
 

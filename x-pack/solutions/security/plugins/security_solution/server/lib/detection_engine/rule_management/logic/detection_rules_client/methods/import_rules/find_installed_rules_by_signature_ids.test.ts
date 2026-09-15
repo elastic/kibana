@@ -9,7 +9,7 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getRuleMock } from '../../../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../../../api/constants';
-import { findInstalledRulesByRuleIds } from './find_installed_rules_by_rule_ids';
+import { findInstalledRulesBySignatureIds } from './find_installed_rules_by_signature_ids';
 
 /**
  * ES's `indices.query.bool.max_clause_count` defaults to 1024 on low-heap
@@ -19,7 +19,7 @@ import { findInstalledRulesByRuleIds } from './find_installed_rules_by_rule_ids'
  */
 const ES_MIN_MAX_CLAUSE_COUNT = 1024;
 
-describe('findInstalledRulesByRuleIds', () => {
+describe('findInstalledRulesBySignatureIds', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
   const noInstalled = () => {
@@ -41,13 +41,13 @@ describe('findInstalledRulesByRuleIds', () => {
   });
 
   it('returns an empty map and skips ES for an empty ruleIds array', async () => {
-    const result = await findInstalledRulesByRuleIds({ rulesClient, ruleIds: [] });
+    const result = await findInstalledRulesBySignatureIds({ rulesClient, ruleIds: [] });
     expect(rulesClient.find).not.toHaveBeenCalled();
     expect(result).toEqual({});
   });
 
   it('KQL filter wraps and OR-joins rule_ids', async () => {
-    await findInstalledRulesByRuleIds({ rulesClient, ruleIds: ['id-a', 'id-b'] });
+    await findInstalledRulesBySignatureIds({ rulesClient, ruleIds: ['id-a', 'id-b'] });
 
     const opts = rulesClient.find.mock.calls[0][0]?.options ?? {};
     expect(opts.filter).toContain('alert.attributes.params.ruleId: ("id-a" OR "id-b")');
@@ -59,7 +59,7 @@ describe('findInstalledRulesByRuleIds', () => {
       (_, i) => `rule-${i}`
     );
 
-    await findInstalledRulesByRuleIds({ rulesClient, ruleIds });
+    await findInstalledRulesBySignatureIds({ rulesClient, ruleIds });
 
     const opts = rulesClient.find.mock.calls[0][0]?.options ?? {};
     const ruleIdGroup = opts.filter?.match(/alert\.attributes\.params\.ruleId: \(([^)]*)\)/)?.[1];
@@ -83,7 +83,7 @@ describe('findInstalledRulesByRuleIds', () => {
     it('escapes `\\` and `"` in the KQL filter and returns the matching installed rule', async () => {
       withInstalled(ruleId);
 
-      const result = await findInstalledRulesByRuleIds({ rulesClient, ruleIds: [ruleId] });
+      const result = await findInstalledRulesBySignatureIds({ rulesClient, ruleIds: [ruleId] });
 
       expect(rulesClient.find).toHaveBeenCalledTimes(1);
       const opts = rulesClient.find.mock.calls[0][0]?.options ?? {};

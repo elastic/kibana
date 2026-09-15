@@ -35,7 +35,7 @@ import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { checkRuleExceptionReferences } from './methods/import_rules/check_rule_exception_references';
 import { fetchPrebuiltImportContext } from './methods/import_rules/fetch_prebuilt_import_context';
-import { findInstalledRulesByRuleIds } from './methods/import_rules/find_installed_rules_by_rule_ids';
+import { findInstalledRulesBySignatureIds } from './methods/import_rules/find_installed_rules_by_signature_ids';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
@@ -43,7 +43,7 @@ jest.mock('../../../../machine_learning/validation');
 jest.mock('./methods/get_rule_by_rule_id');
 jest.mock('./methods/import_rules/check_rule_exception_references');
 jest.mock('./methods/import_rules/fetch_prebuilt_import_context');
-jest.mock('./methods/import_rules/find_installed_rules_by_rule_ids');
+jest.mock('./methods/import_rules/find_installed_rules_by_signature_ids');
 
 describe('DetectionRulesClient change tracking', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -72,7 +72,7 @@ describe('DetectionRulesClient change tracking', () => {
       matchingAssetsByRuleId: {},
       availableRuleAssetIds: new Set<string>(),
     });
-    (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValue({});
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValue({});
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
       errors: [],
@@ -148,7 +148,7 @@ describe('DetectionRulesClient change tracking', () => {
     describe('importRules', () => {
       it('forwards caller-supplied changeTracking when overwriting an existing rule', async () => {
         const existingRule = getRulesSchemaMock();
-        (findInstalledRulesByRuleIds as jest.Mock).mockResolvedValueOnce({
+        (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
           [existingRule.rule_id]: existingRule,
         });
 

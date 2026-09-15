@@ -24,7 +24,7 @@ import { buildSiemResponse, createBulkErrorObject } from '../../../../routes/uti
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
-import { importRules } from '../../../logic/import/import_rules';
+import type { ImportRuleError } from '../../../logic/detection_rules_client/detection_rules_client_interface';
 
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
@@ -179,7 +179,7 @@ export const importRulesRoute = (
                 ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
-          const { successes, errors: importErrors } = await importRules({
+          const { successes, errors: importErrors } = await detectionRulesClient.importRules({
             rules: validatedResponseActionsRules,
             changeTracking: {
               action: SecurityRuleChangeTrackingAction.ruleImport,
@@ -189,7 +189,6 @@ export const importRulesRoute = (
             },
             overwriteRules: request.query.overwrite,
             allowMissingConnectorSecrets: !!actionConnectors.length,
-            detectionRulesClient,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>
@@ -201,7 +200,7 @@ export const importRulesRoute = (
           const errors = [
             ...parseErrors,
             ...duplicateIdErrors,
-            ...importErrors,
+            ...importErrors.map(toErrorResponse),
             ...missingActionErrors,
             ...responseActionsErrors,
           ];
@@ -231,4 +230,14 @@ export const importRulesRoute = (
         }
       }
     );
+};
+
+const toErrorResponse = (item: ImportRuleError) => {
+  const { ruleId, message, type } = item.error;
+
+  return createBulkErrorObject({
+    message,
+    statusCode: type === 'conflict' ? 409 : 400,
+    ruleId,
+  });
 };

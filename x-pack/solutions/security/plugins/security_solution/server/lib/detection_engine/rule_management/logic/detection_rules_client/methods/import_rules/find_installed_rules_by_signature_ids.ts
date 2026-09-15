@@ -7,7 +7,10 @@
 
 import { escapeQuotes } from '@kbn/es-query';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import type {
+  RuleResponse,
+  RuleSignatureId,
+} from '../../../../../../../../common/api/detection_engine';
 import { internalRuleToAPIResponse } from '../../converters/internal_rule_to_api_response';
 import { findRules } from '../../../search/find_rules';
 
@@ -22,12 +25,12 @@ import { findRules } from '../../../search/find_rules';
  *   other metacharacters (`()`, `*`, `<>`, `and`/`or`/`not`) stay inside the quoted literal.
  * @returns Installed rules keyed by `rule_id`. Empty for an empty input.
  */
-export const findInstalledRulesByRuleIds = async ({
+export const findInstalledRulesBySignatureIds = async ({
   rulesClient,
   ruleIds,
 }: {
   rulesClient: RulesClient;
-  ruleIds: string[];
+  ruleIds: RuleSignatureId[];
 }): Promise<Record<string, RuleResponse>> => {
   if (ruleIds.length === 0) return {};
 

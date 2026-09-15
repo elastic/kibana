@@ -16,7 +16,6 @@ import type { RuleParams } from '../../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../../mergers/apply_rule_defaults';
 import { createRuleImportErrorObject } from './errors';
-import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../../../api/constants';
 import type {
   ImportRuleSuccess,
   ImportRuleError,
@@ -33,6 +32,7 @@ interface CreateRulesParams {
 interface CreateRulesOptions {
   allowMissingConnectorSecrets?: boolean;
   changeTracking?: SecurityRuleChangeTracking;
+  batchSize: number;
 }
 
 interface CreateRulesDeps {
@@ -99,7 +99,7 @@ export async function createRules({
 
   const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
     rules: bulkInputs,
-    batchSize: RULE_IMPORT_BULK_CREATE_BATCH_SIZE,
+    batchSize: options.batchSize,
     changeTracking: options.changeTracking,
   });
 

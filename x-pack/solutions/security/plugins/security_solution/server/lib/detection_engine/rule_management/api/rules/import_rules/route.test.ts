@@ -20,7 +20,7 @@ import { importRuleActionConnectors } from '../../../logic/import/action_connect
 import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import { importRules } from '../../../logic/import/import_rules';
+import { createRuleImportErrorObject } from '../../../logic/detection_rules_client/methods/import_rules/errors';
 import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
@@ -38,7 +38,6 @@ jest.mock('../../../logic/import/action_connectors/import_rule_action_connectors
 jest.mock('../../../logic/import/action_connectors/validate_rule_actions');
 jest.mock('../../../logic/import/create_promise_from_rule_import_stream');
 jest.mock('../../../logic/import/import_rule_exceptions');
-jest.mock('../../../logic/import/import_rules');
 jest.mock('../../../utils/utils');
 
 const stream = createPromiseFromRuleImportStream as jest.MockedFunction<
@@ -59,8 +58,6 @@ const actions = validateRuleActions as jest.MockedFunction<typeof validateRuleAc
 const responseActions = validateRuleImportResponseActions as jest.MockedFunction<
   typeof validateRuleImportResponseActions
 >;
-const importBatch = importRules as jest.MockedFunction<typeof importRules>;
-
 const emptyConnectors = {
   successCount: 0,
   success: true,
@@ -99,7 +96,15 @@ describe('Import rules route', () => {
     packageInstall.mockResolvedValue(undefined);
     actions.mockResolvedValue({ validatedActionRules: [rule], missingActionErrors: [] });
     responseActions.mockResolvedValue({ valid: [rule], errors: [] });
-    importBatch.mockResolvedValue({ successes: [{ rule_id: rule.rule_id }], errors: [] });
+    clients.detectionRulesClient.importRules.mockResolvedValue({
+      successes: [
+        {
+          rule_id: rule.rule_id,
+          telemetry: { id: 'id-1', type: 'query', rule_source: { type: 'internal' } },
+        },
+      ],
+      errors: [],
+    });
 
     importRulesRoute(server.router, config, clients.logger);
   });
@@ -109,7 +114,7 @@ describe('Import rules route', () => {
 
     expect(response.status).toEqual(400);
     expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
-    expect(importBatch).not.toHaveBeenCalled();
+    expect(clients.detectionRulesClient.importRules).not.toHaveBeenCalled();
   });
 
   it('returns 500 when a collaborator throws', async () => {
@@ -131,7 +136,7 @@ describe('Import rules route', () => {
       context.securitySolution,
       clients.logger
     );
-    expect(importBatch).toHaveBeenCalledWith({
+    expect(clients.detectionRulesClient.importRules).toHaveBeenCalledWith({
       rules: [rule],
       changeTracking: {
         action: SecurityRuleChangeTrackingAction.ruleImport,
@@ -139,7 +144,6 @@ describe('Import rules route', () => {
       },
       overwriteRules: true,
       allowMissingConnectorSecrets: false,
-      detectionRulesClient: clients.detectionRulesClient,
     });
     expect(response.body).toEqual({
       success: true,
@@ -163,7 +167,7 @@ describe('Import rules route', () => {
 
     await inject();
 
-    expect(importBatch).toHaveBeenCalledWith(
+    expect(clients.detectionRulesClient.importRules).toHaveBeenCalledWith(
       expect.objectContaining({ allowMissingConnectorSecrets: true })
     );
   });
@@ -184,9 +188,16 @@ describe('Import rules route', () => {
       valid: [rule],
       errors: [{ rule_id: 'rule-1', error: { status_code: 400, message: 'bad response action' } }],
     });
-    importBatch.mockResolvedValue({
+    clients.detectionRulesClient.importRules.mockResolvedValue({
       successes: [],
-      errors: [{ rule_id: 'rule-1', error: { status_code: 400, message: 'import failed' } }],
+      errors: [
+        createRuleImportErrorObject({ ruleId: 'rule-1', message: 'import failed' }),
+        createRuleImportErrorObject({
+          ruleId: 'rule-2',
+          message: 'already exists',
+          type: 'conflict',
+        }),
+      ],
     });
 
     const response = await inject();
@@ -198,8 +209,38 @@ describe('Import rules route', () => {
       { error: { status_code: 400, message: 'bad json' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'duplicate' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'import failed' } },
+      { rule_id: 'rule-2', error: { status_code: 409, message: 'already exists' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'missing action' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'bad response action' } },
+    ]);
+  });
+
+  it('maps mixed import successes and errors to success_count plus 400/409', async () => {
+    clients.detectionRulesClient.importRules.mockResolvedValue({
+      successes: [
+        {
+          rule_id: 'rule-b',
+          telemetry: { id: 'id-rule-b', type: 'query', rule_source: { type: 'internal' } },
+        },
+      ],
+      errors: [
+        createRuleImportErrorObject({ ruleId: 'rule-a', message: 'boom' }),
+        createRuleImportErrorObject({
+          ruleId: 'rule-c',
+          message: 'conflict',
+          type: 'conflict',
+        }),
+      ],
+    });
+
+    const response = await inject();
+
+    expect(response.status).toEqual(200);
+    expect(response.body.success).toEqual(false);
+    expect(response.body.success_count).toEqual(1);
+    expect(response.body.errors).toEqual([
+      { rule_id: 'rule-a', error: { status_code: 400, message: 'boom' } },
+      { rule_id: 'rule-c', error: { status_code: 409, message: 'conflict' } },
     ]);
   });
 });
