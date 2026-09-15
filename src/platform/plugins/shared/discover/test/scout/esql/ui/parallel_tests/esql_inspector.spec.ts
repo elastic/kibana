@@ -7,8 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest, tags } from '../fixtures';
+
+const SEARCH_DELAY_MS = 5_000;
+// Search start only; delaying the polls inflates `pollSearch`'s back-off instead.
+const isEsqlSearchStart = (url: URL) => url.pathname.endsWith('/internal/search/esql_async');
+
+/**
+ * Opens the inspector's Requests view and asserts the listed request names, leaving
+ * the panel open. Reopens rather than waiting on the open panel: `getInspectorRequestAdapters`
+ * (use_inspector.ts) freezes the set of adapters when the panel opens, and the chart
+ * publishes its adapter only once its own search has loaded — so a panel opened too
+ * early never picks the visualization entry up, however long it stays open.
+ */
+const expectRequestNames = async (
+  { inspector, unifiedTabs }: Pick<DiscoverPageObjects, 'inspector' | 'unifiedTabs'>,
+  names: string[]
+) => {
+  await expect
+    .poll(async () => {
+      if (await inspector.panel.isVisible()) {
+        await inspector.close();
+      }
+      await unifiedTabs.openInspectorForActiveTab();
+      await inspector.openInspectorRequestsView();
+      return inspector.getRequestNames();
+    })
+    .toStrictEqual(names);
+};
 
 spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -32,14 +61,7 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
     // so the requests below would not be logstash's.
     await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
-    await unifiedTabs.openInspectorForActiveTab();
-    await inspector.openInspectorRequestsView();
-
-    // The table request registers before the visualization one, so wait on the
-    // count before reading the names — otherwise only "Table" is listed.
-    await expect(inspector.panel.getByText(/^2 requests were made$/)).toBeVisible();
-
-    expect(await inspector.getRequestNames()).toStrictEqual(['Table', 'Visualization']);
+    await expectRequestNames({ inspector, unifiedTabs }, ['Table', 'Visualization']);
 
     await inspector.requests.requestTab.click();
     const request = await discover.codeEditor.getCodeEditorValueByTestSubj(
@@ -47,4 +69,29 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
     );
     expect(request).toContain('POST /_query/async?drop_null_columns=true');
   });
+
+  spaceTest(
+    'registers one entry per request when the search is slow',
+    async ({ page, pageObjects }) => {
+      const { discover, inspector, unifiedTabs } = pageObjects;
+
+      // Delay the search at the network layer rather than stalling it in ES: the
+      // `error_query` hook the FTR test used returns warnings, which leave the
+      // histogram empty and suppress the visualization request altogether.
+      await page.route(isEsqlSearchStart, async (route) => {
+        await delay(SEARCH_DELAY_MS);
+        await route.continue();
+      });
+
+      await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
+      await discover.waitUntilTabIsLoaded();
+
+      // Async-search polling must not register a second entry per request, so this
+      // settles at exactly these two however many polls it took to resolve them.
+      await expectRequestNames({ inspector, unifiedTabs }, ['Table', 'Visualization']);
+
+      // Confirms the delay was actually in force for the reported request.
+      expect(await inspector.getRequestTotalTime()).toBeGreaterThan(SEARCH_DELAY_MS);
+    }
+  );
 });

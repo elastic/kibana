@@ -129,6 +129,13 @@ export class Inspector {
     return names;
   }
 
+  /** The selected request's total time, in milliseconds, as the Requests view reports it. */
+  async getRequestTotalTime(): Promise<number> {
+    const badge = this.page.testSubj.locator('inspectorRequestTotalTime');
+    await badge.waitFor({ state: 'visible' });
+    return parseFloat((await badge.innerText()).replace('ms', ''));
+  }
+
   async openRequestsStatisticsTab() {
     await this.requests.statisticsTab.click();
   }
