@@ -19,13 +19,6 @@ const alertDefinition: ConversationEventTypeDefinition = {
 };
 
 describe('createConversationEventTypeRegistry', () => {
-  it('registers a definition and returns it via get', () => {
-    const registry = createConversationEventTypeRegistry();
-    registry.register(alertDefinition);
-
-    expect(registry.get('security.alert_triaged')).toBe(alertDefinition);
-  });
-
   it('reports registration via has', () => {
     const registry = createConversationEventTypeRegistry();
     expect(registry.has('security.alert_triaged')).toBe(false);

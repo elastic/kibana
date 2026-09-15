@@ -13,10 +13,10 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAccessControl,
+  ConversationEvent,
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
-  TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
@@ -153,7 +153,7 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
-  events?: TimelineEvent[];
+  events?: ConversationEvent[];
   active_execution?: ActiveExecution;
   schema_version?: number;
   attachments?: VersionedAttachment[];

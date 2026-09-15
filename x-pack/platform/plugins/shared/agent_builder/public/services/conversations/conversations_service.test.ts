@@ -32,6 +32,33 @@ describe('ConversationsService', () => {
     });
   });
 
+  it('posts events to the _add_events endpoint', async () => {
+    const responseBody = {
+      events: [
+        {
+          id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          type: 'security.alert_triaged',
+          created_at: '2026-09-14T10:00:00.000Z',
+          actor: { type: 'user', id: 'u_1', username: 'alice' },
+          data: { verdict: 'benign' },
+        },
+      ],
+    };
+    const post = jest.fn().mockResolvedValue(responseBody);
+    const service = new ConversationsService({ http: { post } as never });
+
+    const result = await service.addEvents({
+      conversationId: 'conv-1',
+      events: [{ type: 'security.alert_triaged', data: { verdict: 'benign' } }],
+    });
+
+    expect(post).toHaveBeenCalledWith(
+      `${publicApiPath}/conversations/conv-1/_add_events`,
+      { body: JSON.stringify({ events: [{ type: 'security.alert_triaged', data: { verdict: 'benign' } }] }) }
+    );
+    expect(result).toEqual(responseBody);
+  });
+
   it('updates conversation access control', async () => {
     const put = jest.fn().mockResolvedValue({
       access_mode: ConversationAccessControlMode.Private,

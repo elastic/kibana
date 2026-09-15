@@ -8,13 +8,13 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationWithoutRounds,
   CurrentUser,
   RoundInput,
   ToolResult,
-  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
@@ -88,7 +88,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
 };
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
-const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+const hasResumeExecution = (roundId: string, storedEvents: ConversationEvent[]): boolean =>
   storedEvents.some((event) => {
     const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
     return execution?.roundId === roundId && execution.index > 0;
@@ -99,11 +99,11 @@ const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boo
  * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
  * original user message. Undefined refs mean no update; an empty array explicitly clears them.
  */
-const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
   const stored = merged.events ?? [];
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
 
-  const roundDerived: TimelineEvent[] = [];
+  const roundDerived: ConversationEvent[] = [];
   for (const round of merged.rounds) {
     const storedForRound = stored.filter(
       (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
@@ -119,7 +119,7 @@ const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
           return {
             ...event,
             data: { ...data, attachment_refs: round.input.attachment_refs },
-          } as TimelineEvent;
+          } as ConversationEvent;
         })
       );
     } else {

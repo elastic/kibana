@@ -731,3 +731,123 @@ describe('POST /conversations', () => {
     });
   });
 });
+
+describe('POST /conversations/{conversation_id}/_add_events', () => {
+  const ADD_EVENTS_PATH = `${publicApiPath}/conversations/{conversation_id}/_add_events`;
+
+  const makeRouter = (
+    onPost: (handler: (ctx: any, req: any, res: any) => Promise<any>) => void,
+    onSchema?: (versionConfig: any) => void
+  ) => ({
+    versioned: {
+      get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      post: jest.fn().mockImplementation((config: { path: string }) => ({
+        addVersion: jest.fn().mockImplementation((versionConfig: any, handler: any) => {
+          if (config.path === ADD_EVENTS_PATH) {
+            onPost(handler);
+            onSchema?.(versionConfig);
+          }
+        }),
+      })),
+    },
+  });
+
+  const defaultCtx = {
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  };
+
+  const defaultResponse = {
+    ok: jest.fn(({ body }: any) => ({ status: 200, payload: body })),
+    notFound: jest.fn(({ body }: any) => ({ status: 404, payload: body })),
+    forbidden: jest.fn(),
+    customError: jest.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls addEvents with the parsed body and returns the materialized events', async () => {
+    const materializedEvents = [
+      {
+        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        type: 'security.alert_triaged',
+        created_at: '2026-09-14T10:00:00.000Z',
+        actor: { type: 'user', id: 'u_profile_1', username: 'alice' },
+        data: { alert_id: 'a1', verdict: 'benign' },
+      },
+    ];
+    const mockAddEvents = jest.fn().mockResolvedValue(materializedEvents);
+    let handler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+
+    const router = makeRouter((h) => {
+      handler = h;
+    });
+
+    registerConversationRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ addEvents: mockAddEvents }),
+        },
+      }),
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const requestBody = { events: [{ type: 'security.alert_triaged', data: { alert_id: 'a1', verdict: 'benign' } }] };
+    const result = await handler!(
+      defaultCtx,
+      { params: { conversation_id: 'conv-1' }, body: requestBody },
+      defaultResponse
+    );
+
+    expect(mockAddEvents).toHaveBeenCalledWith({ id: 'conv-1', events: requestBody.events });
+    expect(result.status).toBe(200);
+    expect(result.payload).toEqual({ events: materializedEvents });
+  });
+
+  describe('body schema', () => {
+    const getBodySchema = () => {
+      let capturedConfig: any;
+      const router = makeRouter(
+        () => {},
+        (versionConfig) => {
+          capturedConfig = versionConfig;
+        }
+      );
+      registerConversationRoutes({
+        router,
+        getInternalServices: jest.fn(),
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+      return capturedConfig.validate.request.body;
+    };
+
+    it('accepts a valid events array', () => {
+      expect(() =>
+        getBodySchema().validate({ events: [{ type: 'scratch.note', data: { note: 'hello' } }] })
+      ).not.toThrow();
+    });
+
+    it('rejects an empty events array', () => {
+      expect(() => getBodySchema().validate({ events: [] })).toThrow();
+    });
+
+    it('rejects events missing type', () => {
+      expect(() => getBodySchema().validate({ events: [{ data: { note: 'hello' } }] })).toThrow();
+    });
+
+    it('accepts data with arbitrary extra keys (opaque payload)', () => {
+      expect(() =>
+        getBodySchema().validate({
+          events: [{ type: 'scratch.note', data: { a: 1, b: 'two', c: { nested: true } } }],
+        })
+      ).not.toThrow();
+    });
+  });
+});
