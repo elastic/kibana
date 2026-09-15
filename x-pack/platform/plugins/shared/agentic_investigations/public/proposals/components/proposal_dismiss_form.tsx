@@ -89,11 +89,12 @@ export const ProposalDismissForm = memo<ProposalDismissFormProps>(
             defaultMessage: 'Rationale',
           })}
           helpText={i18n.translate('xpack.agenticInvestigations.proposalCard.rationaleHelpText', {
-            defaultMessage: 'Optional — explain why this proposal is being dismissed.',
+            defaultMessage: 'Explain why this proposal is being dismissed.',
           })}
         >
           <EuiTextArea
             value={rationale}
+            required
             onChange={(e) => onRationaleChange(e.target.value)}
             placeholder={i18n.translate(
               'xpack.agenticInvestigations.proposalCard.rationalePlaceholder',
