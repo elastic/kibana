@@ -11,7 +11,7 @@ import {
   buildAddAttachmentsStepCommonDefinition,
   type AddAttachmentsStepInput,
 } from '../../../common/workflows/steps/add_attachments';
-import type { BulkCreateAttachmentsRequestV2 } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { toLegacyCaseResponse } from '../../common/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { CasesClient } from '../../client';
@@ -48,7 +48,7 @@ export const addAttachmentsStepDefinition = (
           const attachments = input.attachments.map((attachment) => ({
             ...(attachment as Record<string, unknown>),
             owner,
-          })) as BulkCreateAttachmentsRequestV2;
+          })) as UnifiedAttachmentPayload[];
 
           const updatedCase = await client.attachments.bulkCreate({
             caseId: input.case_id,
