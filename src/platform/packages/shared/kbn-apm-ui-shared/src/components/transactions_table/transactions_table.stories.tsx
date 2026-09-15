@@ -424,7 +424,7 @@ export const Complete: StoryFn = () => (
       <EuiText size="s" style={{ maxWidth: 448 }}>
         The cardinality of APM data being collected is too high. Please review{' '}
         <EuiLink
-          href="https://www.elastic.co/guide/en/kibana/8.7/troubleshooting.html#troubleshooting-too-many-transactions"
+          href="https://www.elastic.co/docs/troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions"
           target="_blank"
         >
           docs

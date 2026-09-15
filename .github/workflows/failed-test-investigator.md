@@ -38,13 +38,30 @@ if: >-
   || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
-  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  # Keep one investigation lane per issue. Events that can't activate this workflow still
+  # create a run that claims the concurrency group before the `if` above is evaluated, so
+  # with `cancel-in-progress` they would kill an in-flight investigation and then skip
+  # themselves. Give those events their own group suffix:
+  # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
+  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !(
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.issue.body, '"test.failCount":2,') ||
+            contains(github.event.issue.body, '"test.failCount":2}')
+          )
+        ) &&
+        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
@@ -267,7 +284,13 @@ Request an automatic fix immediately for a fixable **`application`** failure. Fo
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
 
-An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+
+#### Teams opted out of automatic fix requests
+
+Some teams prefer to request fixes themselves. When the issue carries one of these `Team:` labels, never add `ai:fix-flaky` — regardless of classification or `failCount`. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip in "Comment format" so the team sees how to request one.
+
+- `Team:Kibana Management`
 
 ### "Previous fix didn't hold" label
 
@@ -353,6 +376,15 @@ If a fix PR is already up (in draft or in review) in the Kibana repository — t
 > [!TIP]
 > Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
 ```
+
+**Fix available, team opted out** — you added `failure:ai-fixable` without `ai:fix-flaky` because the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
+
+```markdown
+> [!TIP]
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR — `<Team: label>` has opted out of automatic fix requests.
+```
+
+Fill `<Team: label>` with the issue's opted-out team label, e.g. `Team:Kibana Management`.
 
 ### 1. Visible header (required)
 
