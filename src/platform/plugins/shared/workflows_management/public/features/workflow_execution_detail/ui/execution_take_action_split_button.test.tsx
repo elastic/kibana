@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -57,10 +58,10 @@ describe('ExecutionTakeActionSplitButton', () => {
     services.application.navigateToApp = navigateToApp;
 
     render(
-      <>
+      <Route path="/:id">
         <ExecutionTakeActionSplitButton execution={execution} />
         <LocationSearch />
-      </>,
+      </Route>,
       {
         wrapper: getTestProvider({
           services,
@@ -82,12 +83,17 @@ describe('ExecutionTakeActionSplitButton', () => {
     const navigateToApp = jest.fn();
     services.application.navigateToApp = navigateToApp;
 
-    render(<ExecutionTakeActionSplitButton execution={execution} />, {
-      wrapper: getTestProvider({
-        services,
-        initialEntries: ['/executions?executionId=exec-1'],
-      }),
-    });
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/executions?executionId=exec-1'],
+        }),
+      }
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
 
@@ -106,10 +112,10 @@ describe('ExecutionTakeActionSplitButton', () => {
     });
 
     render(
-      <>
+      <Route path="/:id">
         <ExecutionTakeActionSplitButton execution={execution} />
         <LocationSearch />
-      </>,
+      </Route>,
       {
         wrapper: getTestProvider({
           services,
@@ -122,5 +128,30 @@ describe('ExecutionTakeActionSplitButton', () => {
 
     expect(navigateToApp).not.toHaveBeenCalled();
     expect(screen.getByTestId('location-search')).not.toHaveTextContent('replayExecutionId');
+  });
+
+  it('opens the replay modal when the workflow route has a trailing slash', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1/?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(navigateToApp).not.toHaveBeenCalled();
   });
 });
