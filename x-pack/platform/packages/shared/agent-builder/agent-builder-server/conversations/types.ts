@@ -66,7 +66,7 @@ export interface ConversationPublicClient {
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
    * Append custom events to a conversation timeline. Requires converse access.
-   * Only custom (non-internal) event types are accepted.
+   * Only custom event types are accepted; built-in timeline event types are rejected.
    */
   addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
 }
