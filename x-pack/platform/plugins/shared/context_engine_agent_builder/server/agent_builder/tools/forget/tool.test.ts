@@ -80,12 +80,12 @@ describe('forget tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session_fact',
+              type: 'memory.session_fact',
               title: 'Duration mapping',
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { session_id: 'conversation-1' },
+              attributes: { memory: { session_id: 'conversation-1' } },
             },
           },
         ],
@@ -123,7 +123,7 @@ describe('forget tool', () => {
         '@timestamp': '2026-09-01T00:00:00.000Z',
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { session_id: 'conversation-1' },
+        attributes: { memory: { session_id: 'conversation-1' } },
         governance: {
           lifecycle: {
             status: 'deleted',
@@ -157,12 +157,12 @@ describe('forget tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session',
+              type: 'memory.session',
               title: 'Session summary',
               description: 'Summary',
               content: 'Summary',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { session_id: 'conversation-1' },
+              attributes: { memory: { session_id: 'conversation-1' } },
             },
           },
         ],
@@ -185,7 +185,7 @@ describe('forget tool', () => {
         '@timestamp': expect.any(String),
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { session_id: 'conversation-1' },
+        attributes: { memory: { session_id: 'conversation-1' } },
         governance: {
           lifecycle: {
             status: 'deleted',
@@ -211,12 +211,12 @@ describe('forget tool', () => {
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
               id: 'memory-1',
-              type: 'memory_session_fact',
+              type: 'memory.session_fact',
               title: 'Duration mapping',
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { session_id: 'conversation-1' },
+              attributes: { memory: { session_id: 'conversation-1' } },
               governance: { lifecycle: { status: 'deleted' } },
             },
           },
