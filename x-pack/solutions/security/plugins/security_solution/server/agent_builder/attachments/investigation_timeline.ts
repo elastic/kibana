@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 
@@ -67,18 +66,13 @@ export const createInvestigationTimelineAttachmentType = (): AttachmentTypeDefin
       return { valid: false, error: parseResult.error.message };
     },
     format: (attachment) => {
-      const parseResult = investigationTimelineAttachmentDataSchema.safeParse(attachment.data);
-      if (!parseResult.success) {
-        throw new Error(
-          `Invalid investigation timeline attachment data for attachment ${attachment.id}`
-        );
-      }
-      const data = parseResult.data;
       return {
-        getRepresentation: () => ({ type: 'text', value: formatTimelineForAgent(data) }),
+        getRepresentation: () => ({
+          type: 'text',
+          value: formatTimelineForAgent(attachment.data as InvestigationTimelineAttachmentData),
+        }),
       };
     },
-    getTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
     getAgentDescription: () => {
       return `A ${SecurityAgentBuilderAttachments.investigationTimeline} attachment holds the chronological attack reconstruction for an investigation.
 
@@ -86,7 +80,7 @@ The payload is the event list itself, ordered earliest first: an array of { time
 
 Every event names the host it occurred on, so a chain that moves between hosts can be read directly. \`description\` already carries the specifics (processes, PIDs, users, paths, command lines, addresses) — quote it rather than re-summarizing it into a classification.
 
-The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them. To extend the reconstruction beyond what is attached, run a new scoped ES|QL query rather than inferring additional events.`;
+The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them.`;
     },
   };
 };

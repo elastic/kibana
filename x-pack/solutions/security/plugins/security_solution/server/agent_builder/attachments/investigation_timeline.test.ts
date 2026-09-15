@@ -6,7 +6,6 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
@@ -117,21 +116,6 @@ describe('createInvestigationTimelineAttachmentType', () => {
       if (representation?.type === 'text') {
         expect(representation.value).toContain('No events were reconstructed');
       }
-    });
-
-    it('throws when the persisted data no longer matches the schema', () => {
-      expect(() => attachmentType.format(makeAttachment('nope'), formatContext)).toThrow(
-        'Invalid investigation timeline attachment data'
-      );
-    });
-  });
-
-  describe('getTools', () => {
-    it('offers the ES|QL tools for extending the reconstruction', () => {
-      expect(attachmentType.getTools?.()).toEqual([
-        platformCoreTools.generateEsql,
-        platformCoreTools.executeEsql,
-      ]);
     });
   });
 
