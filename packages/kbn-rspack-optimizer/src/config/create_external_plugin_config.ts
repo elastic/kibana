@@ -12,7 +12,7 @@ import Fs from 'fs';
 import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import { parseKbnImportReq } from '@kbn/repo-packages';
+import { Jsonc, parseKbnImportReq } from '@kbn/repo-packages';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
 import { discoverPlugins } from '../utils/plugin_discovery';
@@ -236,7 +236,9 @@ export async function createExternalPluginConfig(
       cacheRoot: pluginDir,
       versionPrefix: 'external-plugin-v4', // bumped for the Rspack 2.x cache format
       configFiles: CACHE_CONFIG_FILES,
-      extraBuildDependencies: [Path.resolve(pluginDir, 'package.json')],
+      // The manifest drives extraPublicDirs and the allowed cross-plugin
+      // imports, so editing it must invalidate the cache.
+      extraBuildDependencies: [Path.resolve(pluginDir, 'package.json'), manifest.path],
     }),
 
     plugins: [
@@ -350,20 +352,18 @@ export function createCrossPluginExternals(
 
 /**
  * Read the plugin's `kibana.jsonc` manifest. Returns an empty manifest (no
- * extra targets, no declared dependencies) if it doesn't exist / is malformed.
+ * extra targets, no declared dependencies) if it doesn't exist; a malformed
+ * manifest is a hard error rather than silently dropping declarations.
  */
-function readPluginManifest(pluginDir: string): ExternalPluginManifest {
+export function readPluginManifest(pluginDir: string): ExternalPluginManifest {
   const path = Path.join(pluginDir, 'kibana.jsonc');
-  try {
-    const raw = Fs.readFileSync(path, 'utf-8');
-    // kibana.jsonc may contain comments; strip them with a simple regex
-    // (JSON5/JSONC parsing — only single-line and block comments)
-    const stripped = raw.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-    const parsed: { plugin?: Omit<ExternalPluginManifest, 'path'> } = JSON.parse(stripped);
-    return { path, ...parsed.plugin };
-  } catch {
+  if (!Fs.existsSync(path)) {
     return { path };
   }
+  const parsed = Jsonc.parse(Fs.readFileSync(path, 'utf-8')) as {
+    plugin?: Omit<ExternalPluginManifest, 'path'>;
+  };
+  return { path, ...parsed.plugin };
 }
 
 /**
