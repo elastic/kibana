@@ -380,12 +380,7 @@ export class WorkflowsManagementApi {
         strict: true,
       });
     } else {
-      await this.smlClient?.indexAttachment({
-        request,
-        originId: id,
-        attachmentType: WORKFLOW_KI_TYPE,
-        action: 'update',
-      });
+      this.notifySml(id, 'update', request);
     }
     return result;
   }

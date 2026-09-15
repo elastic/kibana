@@ -1472,7 +1472,7 @@ steps:
       );
     });
 
-    it('waits for SML before completing an access update', async () => {
+    it('waits for SML deletion before completing a private access update', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const saved = createWorkflowDto({ access_control: { access_mode: 'private', entries: [] } });
       jest.mocked(access.update).mockResolvedValue(saved);
@@ -1497,11 +1497,33 @@ steps:
       await expect(update).resolves.toBe(saved);
     });
 
-    it('surfaces SML failure during an access update', async () => {
+    it('surfaces SML deletion failure during a private access update', async () => {
       mockSmlDelete.mockRejectedValue(new Error('SML unavailable'));
       await expect(
         api.updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest)
       ).rejects.toThrow('SML unavailable');
+    });
+
+    it('saves public access when SML indexing fails', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const saved = createWorkflowDto({ access_control: { access_mode: 'public', entries: [] } });
+      jest.mocked(access.update).mockResolvedValue(saved);
+      mockSmlIndex.mockRejectedValue(new Error('SML unavailable'));
+
+      await expect(
+        api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest)
+      ).resolves.toBe(saved);
+
+      expect(mockSmlIndex).toHaveBeenCalledWith({
+        request: mockRequest,
+        originId: 'wf-1',
+        attachmentType: WORKFLOW_KI_TYPE,
+        action: 'update',
+      });
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      expect(mockSmlLogger.warn).toHaveBeenCalledWith(
+        "Failed to update SML index for workflow 'wf-1': SML unavailable"
+      );
     });
 
     it('does not notify SML when setSmlClient has not been called', async () => {
