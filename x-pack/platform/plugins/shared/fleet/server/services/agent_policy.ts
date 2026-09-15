@@ -1323,20 +1323,56 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
+    // A single, field-projected query covers both the per-policy version condition (falling back to
+    // the installed package's condition below) and the `inputs_for_versions` template-condition check.
+    // `inputs_for_versions` is stripped from the mapped PackagePolicy type by
+    // mapPackagePolicySavedObjectToPackagePolicy, so this reads the saved object directly rather than
+    // going through packagePolicyService.findAllForAgentPolicy (which would also over-fetch full
+    // policy documents — inputs, streams, vars — that aren't needed here).
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const packagePolicySOs = await soClient
+      .find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+        ),
+        fields: ['package', 'package_agent_version_condition', 'inputs_for_versions'],
+        perPage: SO_SEARCH_LIMIT,
+      })
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          `Error encountered while attempting to get all package policies for agent policy [${policyId}]`
+        )
+      );
 
+    // compilePackagePolicyForVersions only populates `inputs_for_versions` when
+    // hasAgentVersionConditionInInputTemplate is true, so its presence means the policy requires
+    // version-specific behaviour (HBS templates referencing _meta.agent.version).
+    let hasTemplateConditions = false;
     const conditions: AgentPolicyAgentVersionCondition[] = [];
-    for (const pp of packagePolicies) {
-      let versionCondition = pp.package_agent_version_condition;
+
+    for (const so of packagePolicySOs.saved_objects) {
+      const {
+        package: pkg,
+        package_agent_version_condition: condition,
+        inputs_for_versions: inputsForVersions,
+      } = so.attributes;
+
+      if (inputsForVersions && Object.keys(inputsForVersions).length > 0) {
+        hasTemplateConditions = true;
+      }
+
+      let versionCondition = condition;
 
       // For package policies created before this field was introduced, fall back
       // to looking up the installed package info to get the version condition.
-      if (!versionCondition && pp.package?.name && pp.package?.version) {
+      if (!versionCondition && pkg?.name && pkg?.version) {
         try {
           const pkgInfo = await getPackageInfo({
             savedObjectsClient: soClient,
-            pkgName: pp.package.name,
-            pkgVersion: pp.package.version,
+            pkgName: pkg.name,
+            pkgVersion: pkg.version,
             prerelease: true,
           });
           versionCondition = pkgInfo.conditions?.agent?.version;
@@ -1347,33 +1383,12 @@ class AgentPolicyService {
 
       if (versionCondition) {
         conditions.push({
-          name: pp.package?.name ?? '',
-          title: pp.package?.title ?? '',
+          name: pkg?.name ?? '',
+          title: pkg?.title ?? '',
           version_condition: versionCondition,
         });
       }
     }
-
-    // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
-    // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
-    // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
-    // is true, so its presence means the policy requires version-specific behaviour.
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const rawResult = await Promise.resolve(
-      soClient.find<PackagePolicySOAttributes>({
-        type: savedObjectType,
-        filter: buildCurrentRevisionFilter(
-          savedObjectType,
-          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
-        ),
-        perPage: SO_SEARCH_LIMIT,
-      })
-    ).catch(() => undefined);
-    const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
-      (so) =>
-        so.attributes.inputs_for_versions &&
-        Object.keys(so.attributes.inputs_for_versions).length > 0
-    );
 
     const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
 
