@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiLink, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { AppHeaderBadge } from '@kbn/app-header';
@@ -46,6 +46,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   rightColumn,
 }) => {
   const { getHref } = useLink();
+  const { euiTheme } = useEuiTheme();
   const { agents } = useConfig();
   const authz = useAuthz();
   const { docLinks } = useStartServices();
@@ -142,6 +143,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         <KbnInfoCallout
           announceOnMount
           size="s"
+          css={{ margin: euiTheme.size.s }}
           onDismiss={granularPrivilegesCallout.dismiss}
           title={
             <>

@@ -87,7 +87,6 @@ export function ActionsContextMenu({
           css: {
             fontWeight: 700,
             color: euiTheme.colors.text,
-            borderBottom: euiTheme.border.thin,
             marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
           },
           'data-test-subj': `${dataTestSubjPrefix}Group-${group.id}`,

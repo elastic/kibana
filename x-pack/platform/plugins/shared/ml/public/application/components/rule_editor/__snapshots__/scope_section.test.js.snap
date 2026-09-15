@@ -451,7 +451,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
             <p>
               To configure scope, you must first use the 
               <button
-                class="euiLink emotion-euiLink-primary"
+                class="euiLink emotion-euiLink-text"
                 data-test-subj="mlScopeNoFilterListsLink"
                 type="button"
               >

@@ -93,6 +93,7 @@ export const LinksEditorSingleLink = ({
           <EuiPanel
             color="transparent"
             paddingSize="none"
+            hasBorder={false}
             {...dragHandleProps}
             aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
             data-test-subj="panelEditorLink--dragHandle"
