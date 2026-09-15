@@ -161,7 +161,7 @@ evaluate.describe(
 
               // Fresh alert id, rule uuid, and entity ids per run so concurrent repetitions never
               // share state: the unique `_id` bypasses the workflow's `already_analyzed` tag gate,
-              // the unique rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes
+              // the unique rule uuid (which `preprocessTriggerInputs` maps to `event.rule.id`) scopes
               // rule-filtered enrichment queries, and unique entity ids keep `get_related_alerts`
               // from correlating in-flight repetitions of the same base alert. Overriding flattened
               // keys via spread is safe because `base.doc` stores dotted keys as top-level properties

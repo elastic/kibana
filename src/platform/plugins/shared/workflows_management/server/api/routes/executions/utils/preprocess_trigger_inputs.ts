@@ -25,7 +25,7 @@ import type {
   DocumentTriggerInput,
 } from '../../../../../common/types/document_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
-import type { AlertPreprocessingContext } from '../../../workflows_management_api';
+import type { TriggerInputPreprocessingContext } from '../../../workflows_management_api';
 
 /**
  * Extracts rule information from an alert's _source
@@ -101,7 +101,9 @@ function selectPrimaryRule(
  */
 function formatAlertHits(
   rawHits: RawDocumentHit[],
-  ruleTypeRegistryMap: ReturnType<Awaited<AlertPreprocessingContext['alerting']>['listTypes']>
+  ruleTypeRegistryMap: ReturnType<
+    Awaited<TriggerInputPreprocessingContext['alerting']>['listTypes']
+  >
 ): AlertHit[] {
   return rawHits.map(({ _id, _index, _source }) => {
     let alert = _source as Alert;
@@ -125,7 +127,7 @@ function formatAlertHits(
 async function preprocessAlertEvent(
   inputs: Record<string, unknown>,
   event: AlertTriggerInput['event'],
-  context: AlertPreprocessingContext,
+  context: TriggerInputPreprocessingContext,
   spaceId: string,
   logger: Logger
 ): Promise<Record<string, unknown>> {
@@ -204,7 +206,7 @@ async function preprocessAlertEvent(
 async function preprocessDocumentEvent(
   inputs: Record<string, unknown>,
   event: DocumentTriggerInput['event'],
-  context: AlertPreprocessingContext,
+  context: TriggerInputPreprocessingContext,
   logger: Logger
 ): Promise<Record<string, unknown>> {
   // Pre-expanded documents: nothing to fetch.
@@ -264,7 +266,7 @@ async function preprocessDocumentEvent(
  */
 export async function preprocessTriggerInputs(
   inputs: Record<string, unknown>,
-  context: AlertPreprocessingContext,
+  context: TriggerInputPreprocessingContext,
   spaceId: string,
   logger: Logger
 ): Promise<Record<string, unknown>> {

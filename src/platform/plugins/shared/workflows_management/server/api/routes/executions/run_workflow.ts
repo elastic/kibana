@@ -79,7 +79,7 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
 
           const { inputs, metadata } = request.body;
 
-          const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
+          const { workflowExecutionId } = await api.runWorkflowWithPreprocessing({
             workflow: toWorkflowExecutionEngineModel(workflow),
             spaceId,
             inputs,

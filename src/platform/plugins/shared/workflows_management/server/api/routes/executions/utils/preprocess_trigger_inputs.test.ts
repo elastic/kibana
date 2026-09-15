@@ -9,7 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { preprocessTriggerInputs } from './preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './preprocess_trigger_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
 describe('preprocessTriggerInputs', () => {
