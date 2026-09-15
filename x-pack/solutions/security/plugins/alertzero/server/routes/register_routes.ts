@@ -12,6 +12,7 @@ import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
 import type { ActionsService } from '../services/actions/actions_service';
+import type { OnboardingService } from '../services/onboarding/onboarding_service';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -21,6 +22,10 @@ import { registerGetInvestigationRoute } from './investigations/get_investigatio
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
 import { registerGetProposalsRoute } from './proposals/get_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
+import {
+  registerEnableOnboardingRoute,
+  registerDisableOnboardingRoute,
+} from './onboarding/enable_onboarding';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -31,6 +36,7 @@ export interface RouteDependencies {
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;
   getActionsService: () => ActionsService;
+  getOnboardingService: () => OnboardingService;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -43,4 +49,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationProposalsRoute(deps);
   registerGetProposalsRoute(deps);
   registerListActionsRoute(deps);
+  registerEnableOnboardingRoute(deps);
+  registerDisableOnboardingRoute(deps);
 };
