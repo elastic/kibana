@@ -101,7 +101,7 @@ export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
   {
     defaultMessage:
-      'The rule type will change if you update this rule. As a result, exceptions and actions you added may stop working or behave differently.',
+      'Updating this rule changes its type. Exceptions and actions may stop working or behave differently.',
   }
 );
 
@@ -116,7 +116,7 @@ export const RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION = i18n.tra
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeWithCustomizationCalloutDescription',
   {
     defaultMessage:
-      'The rule type will change if you update this rule, and your changes will be erased. To save them, first duplicate the rule, then update it. Exceptions and actions you added will not be erased, but may stop working or behave differently.',
+      "Updating this rule changes its type and overwrites modified fields. Duplicate the rule first to keep them. Exceptions and actions won't be overwritten, but may stop working or behave differently.",
   }
 );
 

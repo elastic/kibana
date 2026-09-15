@@ -13,7 +13,7 @@ import type { RuleUpgradeCustomizationCounts } from '../../../../../rule_managem
 export const FORCE_UPGRADE_TO_TARGET_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.forceUpgradeToTargetModal.messageTitle',
   {
-    defaultMessage: 'This will overwrite rule customizations',
+    defaultMessage: "Updating will overwrite your modifications with the rule's latest version.",
   }
 );
 
@@ -37,7 +37,7 @@ export const ForceUpgradeToTargetModalBody = ({
 }: RuleUpgradeCustomizationCounts) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.forceUpgradeToTargetModal.body"
-    defaultMessage="{total} {total, plural, one {rule} other {rules}} will be updated to the exact Elastic version. {customizedCountBold} of {totalBold} {customizedCount, plural, one {is a rule} other {are rules}} you've customized — updating will permanently discard those customizations."
+    defaultMessage="{total} {total, plural, one {rule} other {rules}} will be updated to Elastic's version. {customizedCountBold} of {totalBold} {customizedCount, plural, one {has} other {have}} customizations that will be overwritten."
     values={{
       total,
       customizedCount,
