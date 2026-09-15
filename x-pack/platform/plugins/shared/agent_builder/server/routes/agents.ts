@@ -180,6 +180,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
           minLength: 1,
           maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
           meta: {
+            availability: { stability: 'tech_preview', since: '9.6.0' },
             description:
               'Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.',
           },
@@ -220,7 +221,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
     maxSize: AGENT_ACCESS_CONTROL_MAX_ENTRIES,
     meta: {
       description:
-        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `role`, and either an `id` (the principal user profile uid, preferred) or a deprecated `name` (username).',
+        'Access-control entries to apply to the agent. Each entry has a `type` (for example `user`), a `role`, and either an `id` (the principal user profile uid, preferred) or a deprecated `name` (username).',
     },
   }
 );
@@ -684,7 +685,7 @@ export function registerAgentRoutes({
         'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { since: '9.5.0' },
+        availability: { stability: 'tech_preview', since: '9.5.0' },
       },
     })
     .addVersion(
@@ -723,10 +724,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access-control entries. Each entry identifies one user by their stable user profile `id` (preferred) or, for entries created before ids were adopted, by `name`. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. Each entry grants one user a role on this agent. Identify the user by their Kibana user profile uid (`id`). Entries created before profile uids were adopted may use `name` (deprecated) instead. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { since: '9.5.0' },
+        availability: { stability: 'tech_preview', since: '9.5.0' },
       },
     })
     .addVersion(

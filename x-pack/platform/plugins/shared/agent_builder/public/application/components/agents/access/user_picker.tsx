@@ -24,15 +24,11 @@ import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import { accessFlyoutAddPeoplePlaceholder } from './access_i18n';
 
 interface UserPickerProps {
-  /** Profile uids already added to the ACL (excluded from the dropdown). */
-  excludedUids: string[];
-  /** Usernames of legacy name-only entries already in the ACL (excluded from the dropdown). */
-  excludedUsernames?: string[];
+  /** Usernames already added to the ACL (excluded from the dropdown). */
+  excludedUsernames: string[];
   onAdd: (profile: UserProfileWithAvatar) => void;
   isDisabled?: boolean;
 }
-
-const EMPTY_USERNAMES: string[] = [];
 
 interface UserOption extends EuiComboBoxOptionOption<string> {
   profile: UserProfileWithAvatar;
@@ -60,25 +56,16 @@ const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   profile,
 });
 
-export const UserPicker: React.FC<UserPickerProps> = ({
-  excludedUids,
-  excludedUsernames = EMPTY_USERNAMES,
-  onAdd,
-  isDisabled,
-}) => {
+export const UserPicker: React.FC<UserPickerProps> = ({ excludedUsernames, onAdd, isDisabled }) => {
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
   const { data: profiles, isFetching } = useSuggestUsers(debouncedSearch);
-  const excludedUidSet = useMemo(() => new Set(excludedUids), [excludedUids]);
-  const excludedUsernameSet = useMemo(() => new Set(excludedUsernames), [excludedUsernames]);
+  const excludedSet = useMemo(() => new Set(excludedUsernames), [excludedUsernames]);
 
   const options = useMemo<UserOption[]>(
-    () =>
-      (profiles ?? [])
-        .filter((p) => !excludedUidSet.has(p.uid) && !excludedUsernameSet.has(p.user.username))
-        .map(profileToOption),
-    [profiles, excludedUidSet, excludedUsernameSet]
+    () => (profiles ?? []).filter((p) => !excludedSet.has(p.user.username)).map(profileToOption),
+    [profiles, excludedSet]
   );
 
   const onChange = useCallback(

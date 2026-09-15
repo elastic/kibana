@@ -33,7 +33,6 @@ import {
   AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
   ACCESS_CONTROL_MODE_ICON,
-  type AgentAccessControlEntry,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -41,7 +40,6 @@ import type { Control, FormState } from 'react-hook-form';
 import { Controller, useWatch } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AccessForm } from '../../access/access_form';
-import { useAccessControlEntryProfiles } from '../../../../hooks/agents/use_access_control_entry_profiles';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -549,8 +547,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 name="access_control.entries"
                 control={control}
                 render={({ field }) => (
-                  <AccessFormWithProfiles
-                    accessFormAgent={accessFormAgent}
+                  <AccessForm
+                    agent={accessFormAgent}
                     entries={field.value ?? []}
                     ownerName={owner?.username}
                     isDisabled={isFormDisabled || !canChangeAccessControl}
@@ -906,27 +904,5 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
       <SubagentsSection agentId={agentId} />
     </>
-  );
-};
-
-/** Resolves user profiles for id-backed entries before rendering `AccessForm`. */
-const AccessFormWithProfiles: React.FC<{
-  accessFormAgent: React.ComponentProps<typeof AccessForm>['agent'];
-  entries: AgentAccessControlEntry[];
-  ownerName?: string;
-  isDisabled?: boolean;
-  onChange: (entries: AgentAccessControlEntry[]) => void;
-}> = ({ accessFormAgent, entries, ownerName, isDisabled, onChange }) => {
-  const profileByUid = useAccessControlEntryProfiles(entries);
-
-  return (
-    <AccessForm
-      agent={accessFormAgent}
-      entries={entries}
-      profileByUid={profileByUid}
-      ownerName={ownerName}
-      isDisabled={isDisabled}
-      onChange={onChange}
-    />
   );
 };

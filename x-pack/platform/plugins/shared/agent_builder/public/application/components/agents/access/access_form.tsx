@@ -29,6 +29,7 @@ import {
 import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import {
   accessFlyoutNoPeople,
   accessFlyoutPeopleHelp,
@@ -38,8 +39,6 @@ import {
 interface AccessFormProps {
   agent: Pick<AgentDefinition, 'access_control'>;
   entries: AgentAccessControlEntry[];
-  /** Resolved user profiles for id-backed entries, keyed by profile uid. */
-  profileByUid: Map<string, UserProfileWithAvatar>;
   ownerName?: string;
   isDisabled?: boolean;
   onChange: (entries: AgentAccessControlEntry[]) => void;
@@ -92,31 +91,36 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 const sameEntry = (a: AgentAccessControlEntry, b: AgentAccessControlEntry): boolean =>
   getAccessControlEntryKey(a) === getAccessControlEntryKey(b);
 
+/**
+ * Renders the per-agent access-control entries editor. Resolves user profiles for id-backed
+ * entries internally so callers only need to pass the entries themselves.
+ */
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
-  profileByUid,
   ownerName,
   isDisabled,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
   const accessControlMode = agent.access_control?.access_mode;
+  const profileByUid = useAccessControlEntryProfiles(entries);
 
   const defaultRole = useMemo(() => {
     const allowed = selectableRolesForAccessControlMode(accessControlMode);
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  // Legacy name-only entries are excluded by username so the same person is not offered twice.
-  const excluded = useMemo(
-    () => ({
-      uids: entries.flatMap((entry) => (entry.id !== undefined ? [entry.id] : [])),
-      usernames: entries.flatMap((entry) =>
-        entry.id === undefined && entry.name !== undefined ? [entry.name] : []
-      ),
-    }),
-    [entries]
+  // The picker excludes people already in the list by username. Id-backed entries resolve their
+  // username through the fetched profile, so they are only excluded once that profile has loaded.
+  const excludedUsernames = useMemo(
+    () =>
+      entries.flatMap((entry) => {
+        const username =
+          entry.id !== undefined ? profileByUid.get(entry.id)?.user.username : entry.name;
+        return username !== undefined ? [username] : [];
+      }),
+    [entries, profileByUid]
   );
 
   const handleAdd = (profile: UserProfileWithAvatar) => {
@@ -138,12 +142,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
-      <UserPicker
-        excludedUids={excluded.uids}
-        excludedUsernames={excluded.usernames}
-        isDisabled={isDisabled}
-        onAdd={handleAdd}
-      />
+      <UserPicker excludedUsernames={excludedUsernames} isDisabled={isDisabled} onAdd={handleAdd} />
       {entries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
