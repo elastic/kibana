@@ -34,15 +34,10 @@ const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
 );
 
 const CloudOnboardingDeploymentMechanismSchema = schema.oneOf(
-  [
-    schema.literal('agentless'),
-    schema.literal('firehose'),
-    schema.literal('cloud_forwarder'),
-    schema.literal('agent_based'),
-  ],
+  [schema.literal('managed_integration'), schema.literal('ecf'), schema.literal('agent_based')],
   {
     meta: {
-      description: 'Delivery mechanism: agentless, firehose, cloud_forwarder, or agent_based.',
+      description: 'Delivery mechanism: managed_integration, ecf, or agent_based.',
     },
   }
 );
@@ -57,18 +52,21 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-const ServiceVarsEntrySchema = schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
-  maxSize: 100,
+const DataFormatSchema = schema.oneOf([schema.literal('ecs'), schema.literal('otel')], {
+  meta: { description: 'Data format: ecs or otel.' },
 });
 
+const ServiceVarsEntrySchema = schema.recordOf(schema.string({ maxLength: 256 }), schema.any());
+
 const RequestServiceVarsSchema = schema.recordOf(
-  schema.string({ minLength: 1 }),
+  schema.string({ minLength: 1, maxLength: 256 }),
   ServiceVarsEntrySchema,
-  { meta: { description: 'Per-service source configs.' } }
+  { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
+    maxLength: 255,
     meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
   }),
 });
@@ -78,9 +76,14 @@ const OnboardingDeploymentIdParamSchema = schema.object({
 const CloudOnboardingDeploymentItemSchema = schema.object({
   id: schema.string(),
   provider: CloudOnboardingDeploymentProviderSchema,
-  connectorId: schema.string({
-    meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to.' },
-  }),
+  connectorId: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.',
+      },
+    })
+  ),
   mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, { maxSize: 10 }),
   deploymentId: schema.maybe(
     schema.string({
@@ -106,8 +109,21 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.recordOf(schema.string(), ServiceVarsEntrySchema, {
       meta: {
         description:
-          'Per-service config keyed by service ID. Each entry is an array of source configs (regions, S3 bucket ARN, etc.).',
+          'Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.',
       },
+    })
+  ),
+  globalRegion: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Global AWS region from the Service Settings step.',
+      },
+    })
+  ),
+  dataFormat: schema.maybe(DataFormatSchema),
+  authMethod: schema.maybe(
+    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
+      meta: { description: 'Authentication method for managed integrations.' },
     })
   ),
   agentPolicyId: schema.maybe(
@@ -122,8 +138,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.arrayOf(schema.string(), {
       maxSize: 100,
       meta: {
-        description:
-          'Package policy IDs created for agentless services. Present only when agentless is in mechanisms.',
+        description: 'Package policy IDs created for managed_integration services.',
       },
     })
   ),
@@ -131,7 +146,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend; used for key rotation/revocation.',
+          'Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.',
       },
     })
   ),
@@ -153,10 +168,16 @@ const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeployment
 export const CreateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
     provider: CloudOnboardingDeploymentProviderSchema,
-    connectorId: schema.string({
-      minLength: 1,
-      meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment.' },
-    }),
+    connectorId: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description:
+            'ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.',
+        },
+      })
+    ),
     mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
       maxSize: 10,
       meta: { description: 'Delivery mechanisms active in this deployment.' },
@@ -167,6 +188,18 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       meta: { description: 'Service IDs to be covered by this deployment.' },
     }),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    globalRegion: schema.maybe(
+      schema.string({
+        maxLength: 64,
+        meta: { description: 'Global AWS region from the Service Settings step.' },
+      })
+    ),
+    dataFormat: schema.maybe(DataFormatSchema),
+    authMethod: schema.maybe(
+      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
+        meta: { description: 'Authentication method for managed integrations.' },
+      })
+    ),
   }),
 };
 
@@ -196,24 +229,30 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
     status: schema.maybe(CloudOnboardingDeploymentStatusSchema),
     statusMessage: schema.maybe(
-      schema.string({ meta: { description: 'Error context; set when transitioning to failed.' } })
+      schema.string({
+        maxLength: 1000,
+        meta: { description: 'Error context; set when transitioning to failed.' },
+      })
     ),
     deploymentId: schema.maybe(
       schema.string({
+        maxLength: 2048,
         meta: {
           description:
             'CFN stack ARN (or equivalent); provided by the client after manual deployment.',
         },
       })
     ),
-    deploymentName: schema.maybe(schema.string()),
+    deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
-    agentPolicyId: schema.maybe(schema.string()),
-    packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-    apiKeyId: schema.maybe(schema.string()),
+    agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
+    packagePolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+    ),
+    apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,
