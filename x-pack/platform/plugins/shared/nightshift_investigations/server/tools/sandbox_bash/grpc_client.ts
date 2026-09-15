@@ -452,13 +452,13 @@ export class SandboxApiClient {
     port: number;
     apiKey: string;
     rootCertPem?: Buffer;
-    clientCertPem?: Buffer;
-    clientKeyPem?: Buffer;
+    clientCertPem: Buffer;
+    clientKeyPem: Buffer;
   }) {
     const credentials = grpc.credentials.createSsl(
       rootCertPem ?? null,
-      clientKeyPem ?? null,
-      clientCertPem ?? null
+      clientKeyPem,
+      clientCertPem
     );
     this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
     this.apiKey = apiKey;
@@ -584,11 +584,11 @@ export class SandboxConnectionManager {
       host: config.host,
       port: config.port,
       apiKey: config.api_key,
-      rootCertPem: config.ssl?.certificate_authorities
+      rootCertPem: config.ssl.certificate_authorities
         ? Buffer.from(config.ssl.certificate_authorities)
         : undefined,
-      clientCertPem: config.ssl?.certificate ? Buffer.from(config.ssl.certificate) : undefined,
-      clientKeyPem: config.ssl?.key ? Buffer.from(config.ssl.key) : undefined,
+      clientCertPem: Buffer.from(config.ssl.certificate),
+      clientKeyPem: Buffer.from(config.ssl.key),
     });
   }
 

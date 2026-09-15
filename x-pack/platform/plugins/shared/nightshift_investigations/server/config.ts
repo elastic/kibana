@@ -11,8 +11,8 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const sandboxSslConfigSchema = schema.object({
   certificate_authorities: schema.maybe(schema.string()),
-  certificate: schema.maybe(schema.string()),
-  key: schema.maybe(schema.string()),
+  certificate: schema.string(),
+  key: schema.string(),
 });
 
 const sandboxConfigSchema = schema.object({
