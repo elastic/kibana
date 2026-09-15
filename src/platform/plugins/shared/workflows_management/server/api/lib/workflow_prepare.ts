@@ -122,7 +122,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   );
   if (logger && ignoredFetcherSteps.length > 0) {
     logger.warn(
-      `Workflow "${workflowToCreate.name}" contains a deprecated kibana step "fetcher" setting that is ignored. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
+      `Workflow "${workflowToCreate.name}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
       { workflowId: id, stepNames: ignoredFetcherSteps }
     );
   }

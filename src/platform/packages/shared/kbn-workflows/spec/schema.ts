@@ -390,7 +390,7 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
-  'The "fetcher" setting is deprecated and currently ignored by the system. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+  'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
 
 const FetcherConfigObjectSchema = z
   .object({
