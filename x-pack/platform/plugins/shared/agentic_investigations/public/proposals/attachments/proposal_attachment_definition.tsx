@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import { PROPOSAL_WITHOUT_ACTION, isDecided } from '../../../common';
 import type {
   ProposalWithMetadata,
@@ -21,10 +20,6 @@ import { ProposalApprovalCard } from '../components/proposal_approval_card';
 
 /** The attachment as stored in agent_builder conversations. */
 export type ProposalAttachment = Attachment<typeof PROPOSAL_ATTACHMENT_TYPE, ProposalWithMetadata>;
-
-interface CreateProposalAttachmentDefinitionArgs {
-  http: HttpSetup;
-}
 
 /** Badge color map for proposal impact values. */
 const IMPACT_BADGE_COLORS: Record<ProposalImpact, string> = {
@@ -72,18 +67,8 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
   dismissed: 'default',
 };
 
-/**
- * Factory for the browser-side proposal attachment UI definition.
- *
- * `http` is captured at `start()` and closed over by the factory so renderers
- * can reach the API at any point after mount.
- *
- * The renderer runs inside Agent Builder's React tree. It manages its own
- * lightweight HTTP state rather than bridging into an external QueryClient.
- */
-export const createProposalAttachmentDefinition = ({
-  http,
-}: CreateProposalAttachmentDefinitionArgs): AttachmentUIDefinition<ProposalAttachment> => ({
+/** Factory for the browser-side proposal attachment UI definition. */
+export const createProposalAttachmentDefinition = (): AttachmentUIDefinition<ProposalAttachment> => ({
   getLabel: (attachment) =>
     attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION,
 
@@ -127,7 +112,7 @@ export const createProposalAttachmentDefinition = ({
   renderInlineContent: (props) => {
     const proposalId = props.attachment.origin ?? props.attachment.id;
     return (
-      <ProposalApprovalCard proposal={props.attachment.data} proposalId={proposalId} http={http} />
+      <ProposalApprovalCard proposalId={proposalId} />
     );
   },
 });

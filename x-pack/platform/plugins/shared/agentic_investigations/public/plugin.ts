@@ -32,7 +32,7 @@ export class AgenticInvestigationsPublicPlugin
     if (startDeps.agentBuilder) {
       const agentBuilder = startDeps.agentBuilder;
       void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
-        registerProposalAttachmentTypes(agentBuilder, core.http);
+        registerProposalAttachmentTypes(agentBuilder);
       });
     }
     return {};

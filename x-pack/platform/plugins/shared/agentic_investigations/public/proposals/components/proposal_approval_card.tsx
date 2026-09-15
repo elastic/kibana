@@ -5,33 +5,62 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSAL_WITHOUT_ACTION,
-  PROPOSALS_INTERNAL_URL,
-  isDecided,
-} from '../../../common';
-import type { DismissReason, ProposalWithMetadata } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION, isDecided } from '../../../common';
+import type { DismissReason } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
-import { useProposalDecision } from '../hooks/use_proposal_decision';
+import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 
 type CardMode = 'view' | 'dismissing';
 
+type ErrorCallout =
+  | { type: 'conflict'; message: string }
+  | { type: 'expired'; message: string }
+  | { type: 'error'; message: string };
+
+const mapError = (error: unknown): ErrorCallout => {
+  if (isHttpFetchError(error)) {
+    if (error.response?.status === 409) {
+      return {
+        type: 'conflict',
+        message: i18n.translate('xpack.agenticInvestigations.proposalCard.conflictError', {
+          defaultMessage:
+            'This proposal has already been decided. Refresh the page to see its status.',
+        }),
+      };
+    }
+    if (error.response?.status === 410) {
+      return {
+        type: 'expired',
+        message: i18n.translate('xpack.agenticInvestigations.proposalCard.expiredError', {
+          defaultMessage:
+            'The decision deadline has passed and this proposal can no longer be decided.',
+        }),
+      };
+    }
+  }
+  return {
+    type: 'error',
+    message:
+      error instanceof Error
+        ? error.message
+        : i18n.translate('xpack.agenticInvestigations.proposalCard.genericError', {
+            defaultMessage: 'The decision could not be recorded. Please try again.',
+          }),
+  };
+};
+
 export interface ProposalApprovalCardProps {
-  /** Initial snapshot from the attachment — used for the first render while re-reading live data. */
-  proposal: ProposalWithMetadata;
   /** Proposal id from `attachment.origin ?? attachment.id`. */
   proposalId: string;
-  http: HttpSetup;
 }
 
 /**
@@ -40,211 +69,214 @@ export interface ProposalApprovalCardProps {
  *
  * Renders inside the framework's `EuiSplitPanel.Inner paddingSize="none"`, so
  * the card adds its own horizontal padding.
- *
- * On mount, re-reads the live proposal from the API so stale attachment
- * snapshots don't show wrong button states (silently falls back to the snapshot
- * if the request fails).
  */
-export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
-  ({ proposal: initialProposal, proposalId, http }) => {
-    const { euiTheme } = useEuiTheme();
-    const [liveProposal, setLiveProposal] = useState<ProposalWithMetadata>(initialProposal);
-    const [mode, setMode] = useState<CardMode>('view');
-    const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
-    const [rationale, setRationale] = useState('');
-    const { decisionState, approve, dismiss, reset } = useProposalDecision(http);
+export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalId }) => {
+  const { euiTheme } = useEuiTheme();
+  const [mode, setMode] = useState<CardMode>('view');
+  const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
+  const [rationale, setRationale] = useState('');
 
-    // Re-read on mount so stale snapshots don't show wrong button states.
-    useEffect(() => {
-      http
-        .get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(proposalId)}`, {
-          version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        })
-        .then(setLiveProposal)
-        .catch(() => {
-          // Fall back to snapshot silently if the request fails.
-        });
-    }, [http, proposalId]);
+  const proposalQuery = useProposal(proposalId);
+  const approveMutation = useApproveProposal();
+  const dismissMutation = useDismissProposal();
 
-    // Reflect a just-made decision without a full re-fetch.
-    useEffect(() => {
-      if (decisionState.status === 'success') {
-        setLiveProposal((prev) => ({ ...prev, ...decisionState.proposal }));
-        setMode('view');
-      }
-    }, [decisionState]);
+  const isLoading = approveMutation.isLoading || dismissMutation.isLoading;
+  const mutationError = approveMutation.error ?? dismissMutation.error;
+  const errorCallout = mutationError ? mapError(mutationError) : null;
 
-    const actionName =
-      liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION;
+  const resetMutations = useCallback(() => {
+    approveMutation.reset();
+    dismissMutation.reset();
+  }, [approveMutation, dismissMutation]);
 
-    const isPending = liveProposal.status === 'pending';
-    const isExpired = liveProposal.expired;
-    const isLoading = decisionState.status === 'loading';
-    const isAlreadyDecided = isDecided(liveProposal.status);
-
-    const tone =
-      liveProposal.action?.impact === 'high' || liveProposal.action?.impact === 'critical'
-        ? ('danger' as const)
-        : ('primary' as const);
-
-    // --- Approve handler ---
-    const handleApprove = useCallback(async () => {
-      reset();
-      await approve(proposalId, { actionInput: liveProposal.actionInput });
-    }, [approve, liveProposal.actionInput, proposalId, reset]);
-
-    // --- Dismiss handlers ---
-    const handleDismissClick = useCallback(() => {
-      reset();
-      setMode('dismissing');
-    }, [reset]);
-
-    const handleDismissConfirm = useCallback(async () => {
-      await dismiss(proposalId, { dismissReason, rationale: rationale || undefined });
-    }, [dismiss, dismissReason, proposalId, rationale]);
-
-    const handleDismissCancel = useCallback(() => {
+  const handleApprove = useCallback(async () => {
+    resetMutations();
+    try {
+      await approveMutation.mutateAsync({
+        id: proposalId,
+        body: { actionInput: proposalQuery.data?.actionInput },
+      });
       setMode('view');
-      setRationale('');
-      reset();
-    }, [reset]);
+    } catch {
+      // shown via errorCallout
+    }
+  }, [approveMutation, proposalQuery.data?.actionInput, proposalId, resetMutations]);
 
-    // --- Derive actions for ApprovalContent ---
-    let primaryAction: ApprovalAction | undefined;
-    let secondaryActions: ApprovalAction[] | undefined;
+  const handleDismissClick = useCallback(() => {
+    resetMutations();
+    setMode('dismissing');
+  }, [resetMutations]);
 
-    if (isPending) {
-      if (mode === 'view') {
-        primaryAction = {
-          label: i18n.translate('xpack.agenticInvestigations.proposalCard.approve', {
-            defaultMessage: 'Approve',
-          }),
-          color: 'success',
-          onClick: handleApprove,
-          isDisabled: isExpired || isLoading,
-          isLoading,
-          'data-test-subj': `agenticInvestigationsProposalApprove-${proposalId}`,
-        };
-        secondaryActions = [
-          {
-            label: i18n.translate('xpack.agenticInvestigations.proposalCard.dismiss', {
-              defaultMessage: 'Dismiss',
-            }),
-            color: 'danger',
-            onClick: handleDismissClick,
-            isDisabled: isExpired || isLoading,
-            'data-test-subj': `agenticInvestigationsProposalDismiss-${proposalId}`,
-          },
-        ];
-      } else {
-        // mode === 'dismissing'
-        primaryAction = {
-          label: i18n.translate('xpack.agenticInvestigations.proposalCard.confirmDismiss', {
-            defaultMessage: 'Confirm dismiss',
+  const handleDismissConfirm = useCallback(async () => {
+    resetMutations();
+    try {
+      await dismissMutation.mutateAsync({
+        id: proposalId,
+        body: { dismissReason, rationale: rationale || undefined },
+      });
+      setMode('view');
+    } catch {
+      // shown via errorCallout
+    }
+  }, [dismissMutation, dismissReason, proposalId, rationale, resetMutations]);
+
+  const handleDismissCancel = useCallback(() => {
+    setMode('view');
+    setRationale('');
+    resetMutations();
+  }, [resetMutations]);
+
+  const liveProposal = proposalQuery.data;
+  if (!liveProposal) {
+    return null;
+  }
+
+  const actionName =
+    liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION;
+
+  const isPending = liveProposal.status === 'pending';
+  const isExpired = liveProposal.expired;
+  const isAlreadyDecided = isDecided(liveProposal.status);
+
+  const tone =
+    liveProposal.action?.impact === 'high' || liveProposal.action?.impact === 'critical'
+      ? ('danger' as const)
+      : ('primary' as const);
+
+  let primaryAction: ApprovalAction | undefined;
+  let secondaryActions: ApprovalAction[] | undefined;
+
+  if (isPending) {
+    if (mode === 'view') {
+      primaryAction = {
+        label: i18n.translate('xpack.agenticInvestigations.proposalCard.approve', {
+          defaultMessage: 'Approve',
+        }),
+        color: 'success',
+        onClick: handleApprove,
+        isDisabled: isExpired || isLoading,
+        isLoading,
+        'data-test-subj': `agenticInvestigationsProposalApprove-${proposalId}`,
+      };
+      secondaryActions = [
+        {
+          label: i18n.translate('xpack.agenticInvestigations.proposalCard.dismiss', {
+            defaultMessage: 'Dismiss',
           }),
           color: 'danger',
-          onClick: handleDismissConfirm,
+          onClick: handleDismissClick,
+          isDisabled: isExpired || isLoading,
+          'data-test-subj': `agenticInvestigationsProposalDismiss-${proposalId}`,
+        },
+      ];
+    } else {
+      // mode === 'dismissing'
+      primaryAction = {
+        label: i18n.translate('xpack.agenticInvestigations.proposalCard.confirmDismiss', {
+          defaultMessage: 'Confirm dismiss',
+        }),
+        color: 'danger',
+        onClick: handleDismissConfirm,
+        isDisabled: isLoading,
+        isLoading,
+        'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
+      };
+      secondaryActions = [
+        {
+          label: i18n.translate('xpack.agenticInvestigations.proposalCard.cancel', {
+            defaultMessage: 'Cancel',
+          }),
+          color: 'text',
+          onClick: handleDismissCancel,
           isDisabled: isLoading,
-          isLoading,
-          'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
-        };
-        secondaryActions = [
-          {
-            label: i18n.translate('xpack.agenticInvestigations.proposalCard.cancel', {
-              defaultMessage: 'Cancel',
-            }),
-            color: 'text',
-            onClick: handleDismissCancel,
-            isDisabled: isLoading,
-            'data-test-subj': `agenticInvestigationsProposalDismissCancel-${proposalId}`,
-          },
-        ];
-      }
+          'data-test-subj': `agenticInvestigationsProposalDismissCancel-${proposalId}`,
+        },
+      ];
     }
-
-    return (
-      <div
-        css={css({ padding: `${euiTheme.size.m}` })}
-        data-test-subj={`agenticInvestigationsProposalCard-${proposalId}`}
-      >
-        <ApprovalContent
-          showHeader={false}
-          title={actionName}
-          tone={tone}
-          iconType="lock"
-          description={liveProposal.comment}
-          blastRadius={{ variant: 'list', items: toBlastRadiusItems(liveProposal) }}
-          primaryAction={primaryAction}
-          secondaryActions={secondaryActions}
-        >
-          {/* Outcome callouts for decided/expired states */}
-          {isExpired && (
-            <>
-              <EuiSpacer size="m" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnWarningCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.translate('xpack.agenticInvestigations.proposalCard.expiredCallout', {
-                    defaultMessage:
-                      'The decision deadline has passed. This proposal can no longer be actioned.',
-                  })}
-                />
-              </div>
-            </>
-          )}
-          {isAlreadyDecided && (
-            <>
-              <EuiSpacer size="m" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnInfoCallout
-                  announceOnMount
-                  size="s"
-                  title={i18n.translate('xpack.agenticInvestigations.proposalCard.decidedCallout', {
-                    defaultMessage:
-                      'This proposal has already been decided ({status}). No further action is needed.',
-                    values: { status: liveProposal.status },
-                  })}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Inline dismiss form */}
-          {mode === 'dismissing' && (
-            <>
-              <EuiSpacer size="m" />
-              <ProposalDismissForm
-                dismissReason={dismissReason}
-                rationale={rationale}
-                onDismissReasonChange={setDismissReason}
-                onRationaleChange={setRationale}
-                data-test-subj={`agenticInvestigationsProposalDismissForm-${proposalId}`}
-              />
-            </>
-          )}
-
-          {/* Decision mutation error feedback */}
-          {decisionState.status === 'conflict' && (
-            <>
-              <EuiSpacer size="s" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnWarningCallout announceOnMount size="s" title={decisionState.message} />
-              </div>
-            </>
-          )}
-          {(decisionState.status === 'expired' || decisionState.status === 'error') && (
-            <>
-              <EuiSpacer size="s" />
-              <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-                <KbnDangerCallout announceOnMount size="s" title={decisionState.message} />
-              </div>
-            </>
-          )}
-        </ApprovalContent>
-      </div>
-    );
   }
-);
+
+  return (
+    <div
+      css={css({ padding: `${euiTheme.size.m}` })}
+      data-test-subj={`agenticInvestigationsProposalCard-${proposalId}`}
+    >
+      <ApprovalContent
+        showHeader={false}
+        title={actionName}
+        tone={tone}
+        iconType="lock"
+        description={liveProposal.comment}
+        blastRadius={{ variant: 'list', items: toBlastRadiusItems(liveProposal) }}
+        primaryAction={primaryAction}
+        secondaryActions={secondaryActions}
+      >
+        {/* Outcome callouts for decided/expired states */}
+        {isExpired && !isAlreadyDecided && (
+          <>
+            <EuiSpacer size="m" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.agenticInvestigations.proposalCard.expiredCallout', {
+                  defaultMessage:
+                    'The decision deadline has passed. This proposal can no longer be actioned.',
+                })}
+              />
+            </div>
+          </>
+        )}
+        {isAlreadyDecided && (
+          <>
+            <EuiSpacer size="m" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnInfoCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.agenticInvestigations.proposalCard.decidedCallout', {
+                  defaultMessage:
+                    'This proposal has already been decided ({status}). No further action is needed.',
+                  values: { status: liveProposal.status },
+                })}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Inline dismiss form */}
+        {mode === 'dismissing' && (
+          <>
+            <EuiSpacer size="m" />
+            <ProposalDismissForm
+              dismissReason={dismissReason}
+              rationale={rationale}
+              onDismissReasonChange={setDismissReason}
+              onRationaleChange={setRationale}
+              data-test-subj={`agenticInvestigationsProposalDismissForm-${proposalId}`}
+            />
+          </>
+        )}
+
+        {/* Decision mutation error feedback */}
+        {errorCallout?.type === 'conflict' && (
+          <>
+            <EuiSpacer size="s" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnWarningCallout announceOnMount size="s" title={errorCallout.message} />
+            </div>
+          </>
+        )}
+        {(errorCallout?.type === 'expired' || errorCallout?.type === 'error') && (
+          <>
+            <EuiSpacer size="s" />
+            <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
+              <KbnDangerCallout announceOnMount size="s" title={errorCallout.message} />
+            </div>
+          </>
+        )}
+      </ApprovalContent>
+    </div>
+  );
+});
 
 ProposalApprovalCard.displayName = 'ProposalApprovalCard';
