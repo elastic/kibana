@@ -6,7 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { TRACE_ID, TRANSACTION_ID, type WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
+import type { WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
+import { toAnyOfKuery } from '../../../../../../common/utils/kuery_utils';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 
@@ -21,10 +23,15 @@ export function useGetErrorMarkerHrefFromRouter(): WaterfallGetErrorMarkerHref {
   const serviceGroup = 'serviceGroup' in query ? query.serviceGroup : '';
 
   return useCallback(
-    ({ serviceName, errorGroupId, traceId, transactionId }) => {
+    ({ serviceName, errorGroupId, traceId, transactionId, spanId }) => {
       const kueryParts = [
         traceId && `${TRACE_ID} : "${traceId}"`,
-        transactionId && `${TRANSACTION_ID} : "${transactionId}"`,
+        // OTel-native error documents only carry `span.id`, so fall back to it when the error
+        // has no `transaction.id`.
+        toAnyOfKuery([
+          [TRANSACTION_ID, transactionId],
+          [SPAN_ID, spanId],
+        ]),
       ].filter(Boolean);
 
       return router.link('/services/{serviceName}/errors/{groupId}', {
