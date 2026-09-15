@@ -7,9 +7,11 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
+import { coalesceRebuildApiKeyType } from './coalesce_rebuild_api_key';
 import { exceptionListAgnosticType, exceptionListType } from './exception_list';
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']): void => {
   savedObjects.registerType(exceptionListAgnosticType);
   savedObjects.registerType(exceptionListType);
+  savedObjects.registerType(coalesceRebuildApiKeyType);
 };

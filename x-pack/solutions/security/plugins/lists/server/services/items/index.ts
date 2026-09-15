@@ -22,5 +22,6 @@ export * from './update_list_item';
 export * from './write_lines_to_bulk_list_items';
 export * from './write_list_items_to_stream';
 export * from './search_list_item_by_values';
+export * from './stream_shared_item_values';
 export * from './update_list_item';
 export * from './write_list_items_to_stream';

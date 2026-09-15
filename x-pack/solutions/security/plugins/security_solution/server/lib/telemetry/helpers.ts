@@ -296,34 +296,44 @@ export const formatValueListMetaData = (
   valueListResponse: ValueListResponse,
   clusterInfo: ESClusterInfo,
   licenseInfo: Nullable<ESLicense>
-) => ({
-  '@timestamp': moment().toISOString(),
-  cluster_uuid: clusterInfo.cluster_uuid,
-  cluster_name: clusterInfo.cluster_name,
-  license_id: licenseInfo?.uid,
-  total_list_count:
-    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count?.value ?? 0,
-  types:
-    valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map(
-      (breakdown) => ({
-        type: breakdown.key,
-        count: breakdown.doc_count,
-      })
-    ) ?? [],
-  lists:
-    valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map(
-      (itemCount) => ({
-        id: itemCount.key,
-        count: itemCount.doc_count,
-      })
-    ) ?? [],
-  included_in_exception_lists_count:
-    valueListResponse.exceptionListMetricsResponse?.aggregations
-      ?.vl_included_in_exception_lists_count?.value ?? 0,
-  used_in_indicator_match_rule_count:
-    valueListResponse.indicatorMatchMetricsResponse?.aggregations
-      ?.vl_used_in_indicator_match_rule_count?.value ?? 0,
-});
+) => {
+  const totalListCount =
+    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count?.value ?? 0;
+  const lookupListCount =
+    valueListResponse.storageMetricsResponse?.aggregations?.lookup_list_count?.value ?? 0;
+  return {
+    '@timestamp': moment().toISOString(),
+    cluster_uuid: clusterInfo.cluster_uuid,
+    cluster_name: clusterInfo.cluster_name,
+    license_id: licenseInfo?.uid,
+    total_list_count: totalListCount,
+    lookup_list_count: lookupListCount,
+    legacy_list_count: Math.max(totalListCount - lookupListCount, 0),
+    types:
+      valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map(
+        (breakdown) => ({
+          type: breakdown.key,
+          count: breakdown.doc_count,
+        })
+      ) ?? [],
+    lists:
+      valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map(
+        (itemCount) => ({
+          id: itemCount.key,
+          count: itemCount.doc_count,
+        })
+      ) ?? [],
+    included_in_exception_lists_count:
+      valueListResponse.exceptionListMetricsResponse?.aggregations
+        ?.vl_included_in_exception_lists_count?.value ?? 0,
+    used_in_indicator_match_rule_count:
+      valueListResponse.indicatorMatchMetricsResponse?.aggregations
+        ?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+    used_in_indicator_match_rule_via_lookup_count:
+      valueListResponse.indicatorMatchLookupMetricsResponse?.aggregations
+        ?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+  };
+};
 
 export let isElasticCloudDeployment = false;
 export let clusterInfo: Nullable<ESClusterInfo>;

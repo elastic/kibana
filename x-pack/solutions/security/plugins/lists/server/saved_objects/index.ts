@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './coalesce_rebuild_api_key';
 export * from './exception_list';
 export * from './init_saved_objects';

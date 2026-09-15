@@ -13,6 +13,7 @@ import {
   immutable,
   name,
   nullableMetaOrUndefined,
+  nullableStorageOrUndefined,
   tie_breaker_id,
   timestampFromEsResponse,
   type,
@@ -22,20 +23,25 @@ import {
 import { version } from '@kbn/securitysolution-io-ts-types';
 
 export const searchEsListSchema = t.exact(
-  t.type({
-    '@timestamp': timestampFromEsResponse,
-    created_at,
-    created_by,
-    description,
-    immutable,
-    meta: nullableMetaOrUndefined,
-    name,
-    tie_breaker_id,
-    type,
-    updated_at,
-    updated_by,
-    version,
-  })
+  t.intersection([
+    t.type({
+      '@timestamp': timestampFromEsResponse,
+      created_at,
+      created_by,
+      description,
+      immutable,
+      meta: nullableMetaOrUndefined,
+      name,
+      tie_breaker_id,
+      type,
+      updated_at,
+      updated_by,
+      version,
+    }),
+    t.partial({
+      storage: nullableStorageOrUndefined,
+    }),
+  ])
 );
 
 export type SearchEsListSchema = t.TypeOf<typeof searchEsListSchema>;

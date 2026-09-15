@@ -81,6 +81,26 @@ export const ListMetadata = lazySchema(() => z.object({}).catchall(z.unknown()))
 export type ListMetadata = z.infer<typeof ListMetadata>;
 
 /**
+  * Storage descriptor for the value list. Names the storage kind, and for a
+lookup list the concrete index that holds its items. Absent for legacy
+data-stream lists. This field is read-only and is never set through the
+update or patch APIs.
+
+  */
+export const ListStorage = lazySchema(() =>
+  z.object({
+    type: z.enum(['data_stream', 'lookup_index', 'regular_index']),
+    locator: z
+      .object({
+        index: z.string().optional(),
+        alias: z.string().optional(),
+      })
+      .optional(),
+  })
+);
+export type ListStorage = z.infer<typeof ListStorage>;
+
+/**
  * The document version number.
  */
 export const ListVersion = lazySchema(() => z.number().int().min(1));

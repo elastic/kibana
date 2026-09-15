@@ -79,6 +79,7 @@ import type {
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
+  ValueListStorageResponseAggregation,
   Nullable,
   EndpointMetricsAggregation,
   EndpointMetricsAbstract,
@@ -1273,24 +1274,74 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
-      await Promise.all([
-        this.esClient().search(listQuery),
-        this.esClient().search(itemQuery),
-        this.esClient().search(exceptionListQuery),
-        this.esClient().search(indicatorMatchRuleQuery),
-      ]);
+    // indicator-match rules whose threat index points at a per-list lookup index
+    const indicatorMatchLookupRuleQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: this.getIndexForType?.('alert'),
+      ignore_unavailable: true,
+      size: 0,
+      query: {
+        bool: {
+          must: [{ prefix: { 'alert.params.threatIndex': '.value-list' } }],
+        },
+      },
+      aggs: {
+        vl_used_in_indicator_match_rule_count: {
+          cardinality: {
+            field: 'alert.params.ruleId',
+          },
+        },
+      },
+    };
+    // Count lookup lists from the container itself (`.lists-*`), which the internal
+    // telemetry user can read, filtering on the `storage.type` descriptor. Counting the
+    // per-list `.value-list-*` indices directly returns zero here, because the internal
+    // user has no privileges on that index pattern.
+    const storageQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
+      aggs: {
+        lookup_list_count: {
+          cardinality: {
+            field: 'name',
+          },
+        },
+      },
+    };
+    const [
+      listMetrics,
+      itemMetrics,
+      exceptionListMetrics,
+      indicatorMatchMetrics,
+      indicatorMatchLookupMetrics,
+      storageMetrics,
+    ] = await Promise.all([
+      this.esClient().search(listQuery),
+      this.esClient().search(itemQuery),
+      this.esClient().search(exceptionListQuery),
+      this.esClient().search(indicatorMatchRuleQuery),
+      this.esClient().search(indicatorMatchLookupRuleQuery),
+      this.esClient().search(storageQuery),
+    ]);
     const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
     const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
     const exceptionListMetricsResponse =
       exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
     const indicatorMatchMetricsResponse =
       indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const indicatorMatchLookupMetricsResponse =
+      indicatorMatchLookupMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const storageMetricsResponse = storageMetrics as unknown as ValueListStorageResponseAggregation;
     return {
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
       indicatorMatchMetricsResponse,
+      indicatorMatchLookupMetricsResponse,
+      storageMetricsResponse,
     };
   }
 

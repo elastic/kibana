@@ -63,6 +63,35 @@ components:
       additionalProperties: true
       description: Placeholder for metadata about the value list.
 
+    ListStorage:
+      type: object
+      description: |
+        Storage descriptor for the value list. Names the storage kind, and for a
+        lookup list the concrete index that holds its items. Absent for legacy
+        data-stream lists. This field is read-only and is never set through the
+        update or patch APIs.
+      properties:
+        type:
+          type: string
+          enum:
+            - data_stream
+            - lookup_index
+            - regular_index
+        locator:
+          type: object
+          properties:
+            index:
+              type: string
+              description: The concrete lookup index that holds the items.
+            alias:
+              type: string
+              description: |
+                The alias every read and write uses while the list is shared. It sits
+                under the `.items*` wildcard that existing roles grant. Absent once the
+                list is restricted to explicit grants on the concrete index.
+      required:
+        - type
+
     ListVersion:
       type: integer
       minimum: 1

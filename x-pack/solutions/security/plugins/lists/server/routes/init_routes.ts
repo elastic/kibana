@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
+import type { ListsPluginRouter, ValueListRuleScanner } from '../types';
 import type { ConfigType } from '../config';
 
 import {
@@ -35,6 +35,7 @@ import {
   importExceptionsRoute,
   importListItemRoute,
   internalCreateExceptionListRoute,
+  migrateListRoute,
   patchListItemRoute,
   patchListRoute,
   readEndpointListItemRoute,
@@ -44,6 +45,7 @@ import {
   readListItemRoute,
   readListRoute,
   readPrivilegesRoute,
+  restrictListRoute,
   summaryExceptionListRoute,
   updateEndpointListItemRoute,
   updateExceptionListItemRoute,
@@ -55,7 +57,8 @@ import {
 export const initRoutes = (
   router: ListsPluginRouter,
   config: ConfigType,
-  kibanaVersion: string
+  kibanaVersion: string,
+  getRuleScanner: () => ValueListRuleScanner | undefined
 ): void => {
   // lists
   createListRoute(router, kibanaVersion);
@@ -66,6 +69,8 @@ export const initRoutes = (
   findListRoute(router);
   readPrivilegesRoute(router);
   findListsBySizeRoute(router);
+  migrateListRoute(router, getRuleScanner); // POC: migrate a list to a lookup index + warn about referencing rules
+  restrictListRoute(router, getRuleScanner); // POC: restrict or un-restrict a lookup list to explicit index grants
 
   // list items
   createListItemRoute(router);

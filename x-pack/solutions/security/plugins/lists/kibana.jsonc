@@ -14,6 +14,10 @@
       "xpack",
       "lists"
     ],
+    "requiredPlugins": [
+      "encryptedSavedObjects",
+      "taskManager"
+    ],
     "optionalPlugins": [
       "spaces",
       "security"
