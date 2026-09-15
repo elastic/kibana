@@ -11,10 +11,10 @@ import type { RecommendedAction, Investigation } from '../types';
 export const getEmptyValue = () => '—';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, IconType> = {
-  contain: 'lock',
+  respond: 'lock',
   investigate: 'external',
-  tune: 'gear',
-  escalate: 'lock',
+  configure: 'gear',
+  closed: 'check',
 };
 
 export const getActionButtonIconProps = (
@@ -26,11 +26,20 @@ export const getActionButtonIconProps = (
   if (!investigation.recommendedAction) {
     return { type: 'flag', color: 'warning' };
   }
-  if (investigation.recommendedAction === 'contain' && investigation.severity === 'high') {
+  if (investigation.recommendedAction === 'closed') {
+    return { type: 'check', color: 'success' };
+  }
+  if (investigation.recommendedAction === 'respond' && investigation.severity === 'high') {
     return { type: 'cross', color: 'danger' };
   }
   return {
     type: ACTION_ICONS_MAP[investigation.recommendedAction],
-    color: ['investigate', 'tune'].includes(investigation.recommendedAction) ? 'primary' : 'danger',
+    // Use typed array so a stale literal becomes a compile error rather than
+    // silently turning every non-matching bucket's card button red.
+    color: (['investigate', 'configure'] as RecommendedAction[]).includes(
+      investigation.recommendedAction
+    )
+      ? 'primary'
+      : 'danger',
   };
 };

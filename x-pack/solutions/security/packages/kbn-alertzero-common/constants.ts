@@ -230,8 +230,8 @@ export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
   'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'accentSecondary',
-  tune: 'accent',
+  respond: 'danger',
+  investigate: 'warning',
+  configure: 'accentSecondary',
+  closed: 'accent',
 };

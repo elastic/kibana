@@ -12,7 +12,7 @@ components:
 
     RecommendedAction:
       type: string
-      enum: [contain, escalate, investigate, tune]
+      enum: [respond, investigate, configure, closed]
       description: Brief bucket recommendation for an investigation
 
     ProposalStatus:

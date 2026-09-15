@@ -27,18 +27,22 @@ import {
   ConversationDetailsFlyout,
   BlastRadius,
   AssignActionModal,
-  BaseActionModal,
-  MODAL_TRANSLATIONS,
   ApprovalModal,
 } from '@kbn/agentic-investigations-common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useInvestigations } from '../../hooks/use_investigations_api';
+import {
+  useProposalsList,
+  useApproveProposal,
+  useDismissProposal,
+} from '../../hooks/use_proposals_api';
 import { QUEUE_PAGE_INFO } from './translations';
-import { PendingProposalsPanel } from '../../components/pending_proposals';
-import { usePendingProposals } from '../../hooks/use_proposals_api';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
+import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
+import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
+import type { ProposalItem } from '../../../common/proposals/list';
+import { proposalToInvestigation } from './proposal_to_investigation';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -47,7 +51,9 @@ const isQueueRow = (investigation: Investigation): boolean =>
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { data, isLoading, error } = useInvestigations();
+  const { data, isLoading, error } = useProposalsList();
+  const approve = useApproveProposal();
+  const dismiss = useDismissProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -62,19 +68,30 @@ export const ConversationsPage: React.FC = () => {
     assignee?: string | null;
   }>({ type: null, recordId: null, assignee: null });
 
-  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
-  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+  // Raw proposals indexed by id so that approve can submit the original
+  // actionInput without it needing a field on Investigation.
+  const proposalsById = useMemo((): Map<string, ProposalItem> => {
+    const all: ProposalItem[] = (Object.values(data?.groups ?? {}) as ProposalItem[][]).flat();
+    return new Map(all.map((p) => [p.id, p]));
+  }, [data?.groups]);
 
-  // The header's count comes from the proposals list API, which already returns a
-  // `track_total_hits` total for the same set the queue acts on — not summed in
-  // the browser, and deliberately independent of the trend chart's own query, so
-  // a chart failure can neither zero the count nor hold the header in loading.
-  const {
-    data: pendingProposalsData,
-    isLoading: isPendingProposalsLoading,
-    error: pendingProposalsError,
-  } = usePendingProposals();
-  const proposalCount = pendingProposalsData?.total ?? 0;
+  // Adapt all proposals (including closed) into Investigation shape. The
+  // adapter sets recommendedAction: 'closed' for decided ones, which routes
+  // them into the Closed accordion via groupedBriefingItems below.
+  const conversations = useMemo(
+    () => [...proposalsById.values()].map(proposalToInvestigation),
+    [proposalsById]
+  );
+
+  // Header count: pending groups only — closed proposals are excluded.
+  // "3 actions need you" must not count decisions already made.
+  const openCount = useMemo(
+    () =>
+      (Object.entries(data?.groups ?? {}) as Array<[string, ProposalItem[]]>)
+        .filter(([key]) => key !== CLOSED_GROUP_KEY)
+        .reduce((sum, [, items]) => sum + items.length, 0),
+    [data?.groups]
+  );
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -163,10 +180,13 @@ export const ConversationsPage: React.FC = () => {
       {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
         <ApprovalModal
           selectedRecommendedActionConversation={selectedRecommendedActionConversation}
-          onConfirm={() =>
-            // TODO: use action API call hook
-            setSelectedIdForRecommendedAction(undefined)
-          }
+          onConfirm={() => {
+            const proposal = proposalsById.get(selectedIdForRecommendedAction);
+            approve.mutate(
+              { id: selectedIdForRecommendedAction, body: { actionInput: proposal?.actionInput } },
+              { onSettled: () => setSelectedIdForRecommendedAction(undefined) }
+            );
+          }}
           onClose={() => setSelectedIdForRecommendedAction(undefined)}
         />
       )}
@@ -193,33 +213,27 @@ export const ConversationsPage: React.FC = () => {
       )}
 
       {modalState.type === 'dismiss' && modalState.recordId && (
-        <BaseActionModal
-          type="dismiss"
-          title={MODAL_TRANSLATIONS.dismiss.title}
-          recordId={modalState.recordId}
+        <DismissProposalModal
+          proposalId={modalState.recordId}
           onClose={() => setModalState({ type: null, recordId: null })}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-            onClick: () => {
-              // TODO: use dismiss action API call hook
-              setModalState({ type: null, recordId: null });
-            },
-          }}
+          onConfirm={({ dismissReason, rationale }) =>
+            dismiss.mutate(
+              { id: modalState.recordId!, body: { dismissReason, rationale } },
+              { onSettled: () => setModalState({ type: null, recordId: null }) }
+            )
+          }
         />
       )}
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
-            // Both queries the header speaks for — the conversation queue and
-            // the proposal count — so settling one while the other is in flight
-            // would flash a title the next render contradicts.
-            isLoading={isLoading || isPendingProposalsLoading}
-            hasError={Boolean(pendingProposalsError)}
-            isQueueEmpty={sortedConversations.length === 0 && proposalCount === 0}
-            eventCount={proposalCount}
+            isLoading={isLoading}
+            // Keep the count visible during a background refetch: only hide it
+            // when there is an error AND no previously-loaded data to show.
+            hasError={Boolean(error) && !data}
+            isQueueEmpty={conversations.length === 0}
+            eventCount={openCount}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -233,12 +247,6 @@ export const ConversationsPage: React.FC = () => {
           />
         </EuiFlexItem>
 
-        {/* Durable proposals from the investigation proposals API. Hidden when
-            empty so the queue below is unaffected when nothing is pending. */}
-        <EuiFlexItem grow={false}>
-          <PendingProposalsPanel hideWhenEmpty />
-        </EuiFlexItem>
-
         {isLoading ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
@@ -249,13 +257,13 @@ export const ConversationsPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        {error ? (
+        {error && !data ? (
           <EuiFlexItem grow={false}>
             <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
           </EuiFlexItem>
         ) : null}
 
-        {!isLoading && !error && filteredQueueItems.length === 0 ? (
+        {!isLoading && !(error && !data) && filteredQueueItems.length === 0 ? (
           <EuiFlexItem grow={false}>
             <EuiEmptyPrompt
               iconType="chartTagCloud"
@@ -264,7 +272,7 @@ export const ConversationsPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        {!isLoading && !error
+        {!isLoading && !(error && !data)
           ? groupedBriefingItems.map((group) => (
               <EuiFlexItem key={group.id} grow={false}>
                 <ConversationQueue
