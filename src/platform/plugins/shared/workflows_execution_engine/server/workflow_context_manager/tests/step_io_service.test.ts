@@ -2588,4 +2588,52 @@ describe('StepIoService', () => {
       });
     });
   });
+
+  // The downstream symptom is a `parallel` step's aggregate reading back as
+  // `null` for every step after it. Every branch's `prepareForRead` names the
+  // enclosing parallel step as a rehydration target, so with `concurrency > 1`
+  // the same id is rehydrated more than once in a single tick.
+  describe('rehydration must not clobber a freshly written output', () => {
+    it('keeps an output that was rewritten after being rehydrated twice in one tick', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+
+      // Get it into the evicted set the ordinary way: a large output, then the
+      // two flush cycles the deferred eviction queue needs.
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // The step is still running, so its doc carries no aggregate yet.
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        { id, output: null, workflowRunId: 'test-workflow-execution-id' },
+      ]);
+
+      // Two branches in the same tick each name the enclosing parallel step.
+      // Concurrently, not in sequence: that is what `concurrency > 1` means
+      // here, and it is load-bearing. Both calls read `evictedOutputIds`
+      // before either finishes clearing it, so both fetch and both record a
+      // transient for the same id.
+      await Promise.all([service.rehydrateOutputs([id]), service.rehydrateOutputs([id])]);
+
+      // The parallel step then writes its real aggregate. Its own write must
+      // reclaim the id: the transient tracking no longer owns it.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // A later step needs none of the transients. Before the fix the stale
+      // duplicate entry survived here and released the aggregate, after which
+      // the next read re-fetched the pre-write doc and installed `null`.
+      await service.prepareForRead({
+        node: { id: 'later', stepId: 'later', type: 'atomic' } as never,
+        predecessorsResolver: () => [],
+        consumerId: 'later',
+      });
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
+  });
 });
