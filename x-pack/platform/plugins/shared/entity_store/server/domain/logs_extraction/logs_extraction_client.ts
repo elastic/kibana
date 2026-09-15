@@ -164,18 +164,32 @@ export class LogsExtractionClient {
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
         : engineDescriptor.logExtractionState;
     return {
-      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      config: getMergedConfig(
+        type,
+        globalOverrides,
+        engineDescriptor.logExtractionConfig,
+        this.extractionMode
+      ),
       engineState,
     };
   }
 
-  /** Config in effect for one entity type, without requiring the engine to be started. */
-  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+  /** Config in effect for one entity type and extraction process, without requiring the engine to
+   * be started. Defaults to this client's own mode. */
+  public async getMergedConfigForType(
+    type: EntityType,
+    extractionMode: ExtractionMode = this.extractionMode
+  ): Promise<LogExtractionConfig> {
     const [globalOverrides, engineDescriptor] = await Promise.all([
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
     ]);
-    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
+    return getMergedConfig(
+      type,
+      globalOverrides,
+      engineDescriptor.logExtractionConfig,
+      extractionMode
+    );
   }
 
   public async extractLogs(

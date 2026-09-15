@@ -18,10 +18,10 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import moment from 'moment';
-import { TasksConfig } from './config';
+import { TasksConfig, type EntityStoreTaskConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
-import type { EntityType } from '../../common/domain/definitions/entity_schema';
+import type { EntityType, ExtractionMode } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { isDualProcessEnabled } from '../infra/feature_flags';
 import { resolveExtractionMode } from '../../common/domain/definitions/registry';
@@ -29,13 +29,30 @@ import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
-function getTaskType(entityType: EntityType): string {
-  const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
-  return `${config.type}:${entityType}`;
+/** The priority and single processes share one task; non-priority has its own so the two can run
+ * on independent schedules and be started, stopped and monitored separately. */
+const TASK_CONFIG_BY_MODE = {
+  single: TasksConfig[EntityStoreTaskType.enum.extractEntity],
+  priority: TasksConfig[EntityStoreTaskType.enum.extractEntity],
+  nonPriority: TasksConfig[EntityStoreTaskType.enum.extractEntityNonPriority],
+} as const satisfies Record<ExtractionMode, EntityStoreTaskConfig>;
+
+export function getExtractEntityTaskConfig(
+  extractionMode: ExtractionMode = 'single'
+): EntityStoreTaskConfig {
+  return TASK_CONFIG_BY_MODE[extractionMode];
 }
 
-export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
-  return `${getTaskType(entityType)}:${namespace}`;
+function getTaskType(entityType: EntityType, extractionMode: ExtractionMode = 'single'): string {
+  return `${getExtractEntityTaskConfig(extractionMode).type}:${entityType}`;
+}
+
+export function getExtractEntityTaskId(
+  entityType: EntityType,
+  namespace: string,
+  extractionMode: ExtractionMode = 'single'
+): string {
+  return `${getTaskType(entityType, extractionMode)}:${namespace}`;
 }
 
 export const getNewSchedule = (
