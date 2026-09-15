@@ -97,8 +97,10 @@ describe('set signal status', () => {
       );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: expect.objectContaining({
-            bool: { filter: typicalSetStatusSignalByQueryPayload().query },
+          body: expect.objectContaining({
+            query: expect.objectContaining({
+              bool: { filter: typicalSetStatusSignalByQueryPayload().query },
+            }),
           }),
         })
       );
@@ -111,7 +113,9 @@ describe('set signal status', () => {
       );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
+          body: expect.objectContaining({
+            query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
+          }),
         })
       );
     });
