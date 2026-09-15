@@ -83717,7 +83717,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: Omit embedded step executions from the response.
+        - description: When `true`, omit the embedded `stepExecutions` array. Defaults to `false`. When this is `false`, the embed is capped at 5000 steps.
           in: query
           name: omitStepExecutions
           required: false
@@ -84234,7 +84234,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-steps
       parameters:
         - description: Workflow execution ID
@@ -84288,7 +84288,7 @@ paths:
                         workflowRunId: exec-a1b2c3d4-e5f6-7890
                     size: 1000
                     total: 1
-          description: Indicates a successful response
+          description: "Indicates a successful response. If the page exceeds Kibana's response buffer, the handler still returns 200 with results: [] and the page total."
       summary: Get execution step executions
       tags:
         - workflows
