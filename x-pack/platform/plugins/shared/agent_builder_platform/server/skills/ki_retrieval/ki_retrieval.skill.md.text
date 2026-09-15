@@ -24,6 +24,11 @@ Use `platform.core.list_indices` to discover which ones exist.
 | `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 | `spaces` | keyword | Optional — Kibana spaces a KI belongs to; absent means visible from every space. Filter via the `filter` parameter of `execute_esql`, never `WHERE` (see Space scoping) |
 
+**Memory entries** — AI indices with memory enabled can also contain `memory.session` and
+`memory.session_fact` KIs written by agents. Unless the task specifically calls for memory,
+exclude both types from ordinary KI retrieval before `FORK`. See Memory retrieval below when
+the task does call for memory.
+
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
 
 ### `attributes.esql` — a KI's runnable ES|QL
@@ -124,6 +129,7 @@ to deduplicate across branches.
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -151,6 +157,7 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
@@ -174,6 +181,64 @@ FROM ai-index-* METADATA _id, _index, _score
 ```
 
 Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
+
+---
+
+## Memory retrieval
+
+Do not assume that an AI index accepts or contains memory. Use `describe_ai_index` to identify
+memory-enabled indices and the destination to query. Which index should hold memory is adopter
+policy, not something this skill chooses.
+
+Memory documents use two types:
+
+- `memory.session_fact` — a granular fact learned during a conversation.
+- `memory.session` — a broader synthesis of a conversation.
+
+Data-stream destinations retain earlier revisions. Always restrict results to the newest
+`@timestamp` for each logical `id` before excluding deleted or expired memories. Filtering first
+would allow an older active revision to reappear after its latest revision was tombstoned.
+
+For cross-session recall, search granular facts using the same hybrid retrieval pattern:
+
+```esql
+FROM <target> METADATA _id, _index, _score
+| WHERE type == "memory.session_fact"
+| INLINE STATS latest_at = MAX(@timestamp) BY id
+| WHERE @timestamp == latest_at
+  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")
+  AND (expires_at IS NULL OR expires_at > NOW())
+| FORK
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| KEEP id, title, description, content, type, tags, updated_at,
+       references.uri, references.relation, references.description
+| LIMIT <n>
+```
+
+For session-scoped recall, extract the server-populated session identifier from the flattened
+`attributes` field:
+
+```esql
+FROM <target>
+| WHERE type IN ("memory.session", "memory.session_fact")
+| INLINE STATS latest_at = MAX(@timestamp) BY id
+| WHERE @timestamp == latest_at
+  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")
+  AND (expires_at IS NULL OR expires_at > NOW())
+| EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")
+| WHERE session_id == "<conversation-id>"
+| SORT @timestamp ASC
+| KEEP id, title, description, content, type, tags, updated_at,
+       references.uri, references.relation, references.description
+```
+
+Memory references identify the Agent Builder conversations from which the memory was derived.
+
+This section covers how to retrieve memory. The `remember` tool description governs when to
+write memory, and adopter instructions govern what is worth remembering.
 
 ---
 
@@ -202,5 +267,3 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
    without a separate aggregation.
 
 ---
-
-
