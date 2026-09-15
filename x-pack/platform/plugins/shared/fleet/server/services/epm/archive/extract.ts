@@ -20,23 +20,31 @@ export async function untarBuffer(
   shouldReadBuffer?: (path: string) => boolean
 ) {
   const deflatedStream = bufferToStream(buffer);
+  const entryPromises: Array<Promise<void>> = [];
+
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry) => {
     const path = entry.path || '';
     if (!filter({ path })) return;
 
     if (shouldReadBuffer && !shouldReadBuffer(path)) {
-      return onEntry({ path }).catch(() => {});
+      entryPromises.push(onEntry({ path }));
+      return;
     }
 
-    streamToBuffer(entry as unknown as NodeJS.ReadableStream)
-      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
-      .catch(() => {});
+    // streamToBuffer must be called synchronously here to consume the entry stream
+    // before tar advances to the next entry; the resulting promise is awaited below.
+    entryPromises.push(
+      streamToBuffer(entry as unknown as NodeJS.ReadableStream).then((entryBuffer) =>
+        onEntry({ buffer: entryBuffer, path })
+      )
+    );
   });
 
   deflatedStream.pipe(inflateStream);
 
   await finished(inflateStream);
+  await Promise.all(entryPromises);
 }
 
 export async function unzipBuffer(
