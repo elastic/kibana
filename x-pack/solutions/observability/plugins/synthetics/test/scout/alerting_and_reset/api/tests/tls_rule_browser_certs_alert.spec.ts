@@ -6,6 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import {
   apiTest,
@@ -51,7 +52,7 @@ const EXPECTED_ALERT_ID = `browser-cert:${CERT_COMMON_NAME}:${CERT_ISSUER}`;
 apiTest.describe(
   'tlsRuleBrowserCertsAlert',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;
