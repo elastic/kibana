@@ -342,7 +342,7 @@ export const RunLimitsSection = () => {
                         'xpack.significantEventsApp.settings.runLimits.readOnlyDescription',
                         {
                           defaultMessage:
-                            'Changing enforcement or daily limits requires the Streams manage privilege in every space.',
+                            'Changing enforcement or daily limits requires the Nightshift Manage engines privilege.',
                         }
                       )}
                     </p>
