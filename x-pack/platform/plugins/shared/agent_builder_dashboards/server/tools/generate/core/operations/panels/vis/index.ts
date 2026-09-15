@@ -8,6 +8,10 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import {
+  presentationModeSchema,
+  type PresentationMode,
+} from '@kbn/agent-builder-visualizations-server';
+import {
   MAX_VEGA_SPEC_LENGTH,
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
@@ -49,6 +53,9 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  /** Edit only the panel's presentation; keep its query and column bindings. */
+  appearanceOnly?: boolean;
+  presentationMode?: PresentationMode;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -123,7 +130,7 @@ const panelRequestBaseSchema = z.object({
     .max(256)
     .optional()
     .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+      'Exact index, alias, or datastream identified for this panel. Pass it whenever known: each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
     ),
   esql: z
     .string()
@@ -186,6 +193,17 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .optional()
       .describe(
         '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+      ),
+    appearanceOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds): the existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
+      ),
+    presentationMode: presentationModeSchema
+      .optional()
+      .describe(
+        'Lens only. "enhance" applies all presentation defaults, replacing custom styling; "focused" (default) changes only requested settings. Independent of appearanceOnly: enhancement can accompany a query change.'
       ),
   });
 

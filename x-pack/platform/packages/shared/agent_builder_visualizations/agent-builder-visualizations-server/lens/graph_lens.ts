@@ -13,6 +13,7 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
+import type { PresentationMode } from './types';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
@@ -84,7 +85,7 @@ export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrie
  * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
  * For XY charts with multiple layers, returns all unique ESQL queries.
  */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+export function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   if (!config) return [];
 
   const queries: string[] = [];
@@ -106,6 +107,12 @@ const VisualizationStateAnnotation = Annotation.Root({
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
+  /**
+   * Appearance-only edit: the existing per-layer `data_source` is kept verbatim
+   * instead of being replaced by the (single) resolved query.
+   */
+  appearanceOnly: Annotation<boolean>(),
+  presentationMode: Annotation<PresentationMode>(),
   // internal
   esqlQuery: Annotation<string>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
@@ -220,6 +227,9 @@ export const createVisualizationGraph = async (
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
+      parsedExistingConfig: state.parsedExistingConfig,
+      appearanceOnly: state.appearanceOnly,
+      presentationMode: state.presentationMode,
       additionalContext,
     });
 
@@ -230,13 +240,20 @@ export const createVisualizationGraph = async (
       const responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
-      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it.
-      if (esqlQuery) {
-        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
+      // Pin the ES|QL query before config validation. ES|QL generation owns the query;
+      // config generation only binds columns from it. An appearance-only edit keeps
+      // each layer's existing data_source instead, so multi-query layers survive intact.
+      const existingCarriers = state.appearanceOnly
+        ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
+        : [];
+      getEsqlDataSourceCarriers(configResponse).forEach((carrier, index) => {
+        const existingDataSource = (existingCarriers[index] ?? existingCarriers[0])?.data_source;
+        if (existingDataSource) {
+          carrier.data_source = existingDataSource;
+        } else if (esqlQuery) {
           carrier.data_source = { type: 'esql', query: esqlQuery };
         }
-      }
+      });
 
       action = {
         type: 'generate_config',

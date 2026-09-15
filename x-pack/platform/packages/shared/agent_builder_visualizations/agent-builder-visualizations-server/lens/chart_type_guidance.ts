@@ -6,7 +6,23 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ChartRule } from './chart_type_registry';
 import { chartTypeRegistry } from './chart_type_registry';
+import { colorDesignPromptContent } from './color_palettes';
+import { generalChartRules } from './general_rules';
+
+const toBullets = (rules: readonly string[]): string[] => rules.map((rule) => `- ${rule}`);
+
+const designBullets = (rules: readonly ChartRule[]): string[] =>
+  toBullets(rules.flatMap(({ design }) => (design ? [design] : [])));
+
+const configBullets = (rules: readonly ChartRule[]): string[] =>
+  toBullets(
+    rules.flatMap(({ design, config }) => {
+      const text = config ?? design;
+      return text ? [text] : [];
+    })
+  );
 
 export const getChartTypeSelectionPromptContent = () =>
   [
@@ -16,46 +32,35 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
-export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const rules = chartTypeRegistry[chartType].prompt.config?.rules;
-
-  if (!rules?.length) {
-    return '';
-  }
-
-  return [
-    `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...rules.map((rule) => `- ${rule}`),
+/**
+ * Design guidance across all chart types for the visualization agent: the
+ * `design` side of every rule plus the color design guidance. Contains no
+ * Lens JSON.
+ */
+export const getChartDesignPromptContent = (): string =>
+  [
+    'CHART DESIGN GUIDANCE:',
+    'The Lens config author follows the same guidance; state the design choices you want and it expresses them in the chart settings.',
+    '',
+    'General:',
+    ...designBullets(generalChartRules),
+    '',
+    ...Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
+      const bullets = designBullets(prompt.rules ?? []);
+      return bullets.length ? [`${chartType}:`, ...bullets, ''] : [];
+    }),
+    colorDesignPromptContent,
   ].join('\n');
-};
 
 /**
- * Compiles vis-author `config.rules` plus `review.critical` and
- * `review.suggestions` for every chart type that has any of them. Prettify
- * uses this so it can detect painted issues and describe the wanted edition;
- * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ * Rules for authoring one chart type's Lens config: the `config` side of every
+ * general and chart-specific rule, falling back to `design` where a rule has
+ * no Lens-specific wording. Color mechanics are compiled separately by
+ * `getColorConfigPromptContent`.
  */
-export const getChartTypeReviewPromptContent = (): string => {
-  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
-    const configRules: string[] = prompt.config?.rules ?? [];
-    const critical: string[] = prompt.review?.critical ?? [];
-    const suggestions: string[] = prompt.review?.suggestions ?? [];
-
-    if (!configRules.length && !critical.length && !suggestions.length) {
-      return [];
-    }
-
-    return [
-      `### ${chartType}`,
-      ...configRules.map((rule) => `- ${rule}`),
-      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
-      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
-    ];
-  });
-
-  if (!sections.length) {
-    return '';
-  }
-
-  return ['CHART REVIEW RULES:', ...sections].join('\n');
-};
+export const getChartTypeConfigPromptContent = (chartType: SupportedChartType): string =>
+  [
+    `CHART RULES FOR ${chartType.toUpperCase()}:`,
+    ...configBullets(generalChartRules),
+    ...configBullets(chartTypeRegistry[chartType].prompt.rules ?? []),
+  ].join('\n');

@@ -13,7 +13,10 @@ import { defineOperation } from './types';
 export const removeSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('remove_section'),
-    id: z.string().max(256).describe('Section id to remove.'),
+    id: z
+      .string()
+      .max(256)
+      .describe('Existing section id or the key of an add_section earlier in this call to remove.'),
     panelAction: z
       .enum(['promote', 'delete'])
       .describe('How to handle section panels: promote to top-level or delete them.'),

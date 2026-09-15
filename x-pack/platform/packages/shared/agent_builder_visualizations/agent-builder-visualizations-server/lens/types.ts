@@ -5,4 +5,11 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+
 export type { VisualizationConfig } from './chart_type_registry';
+
+/** How a Lens edit treats existing presentation: focused on the request, or enhanced to defaults. */
+export const presentationModeSchema = z.enum(['focused', 'enhance']);
+
+export type PresentationMode = z.infer<typeof presentationModeSchema>;

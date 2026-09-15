@@ -194,6 +194,38 @@ describe('buildVegaConfig', () => {
       });
     });
 
+    it('reuses the recovered ES|QL as the trusted query for an appearance-only edit', async () => {
+      await buildVegaConfig({
+        nlQuery: 'make the bars blue',
+        existingSpec,
+        appearanceOnly: true,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      });
+
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        esqlQuery: PROVIDED_ESQL,
+        existingEsql: PROVIDED_ESQL,
+      });
+    });
+
+    it('rejects an appearance-only edit when the spec has no ES|QL to recover', async () => {
+      await expect(
+        buildVegaConfig({
+          nlQuery: 'make the bars blue',
+          existingSpec: JSON.stringify({ mark: 'bar', data: { values: [{ a: 1 }] } }),
+          appearanceOnly: true,
+          modelProvider,
+          logger,
+          events,
+          esClient,
+        })
+      ).rejects.toThrow('An appearance-only edit requires an existing Vega spec');
+      expect(invoke).not.toHaveBeenCalled();
+    });
+
     it('prefers a valid provided ES|QL over the query embedded in the spec', async () => {
       const newEsql = 'FROM metrics-* | STATS avg = AVG(value)';
 

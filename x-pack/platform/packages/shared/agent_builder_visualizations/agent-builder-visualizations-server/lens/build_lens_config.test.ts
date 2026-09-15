@@ -23,6 +23,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
 }));
 
 jest.mock('./graph_lens', () => ({
+  ...jest.requireActual('./graph_lens'),
   createVisualizationGraph: jest.fn(),
 }));
 
@@ -129,6 +130,23 @@ describe('buildLensConfig', () => {
     expect(mockedCreateGraph).not.toHaveBeenCalled();
   });
 
+  it('rejects an appearance-only edit when the existing config has no ES|QL query', async () => {
+    await expect(
+      buildLensConfig({
+        nlQuery: 'hide the title',
+        parsedExistingConfig: { type: SupportedChartType.XY, layers: [] },
+        appearanceOnly: true,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      })
+    ).rejects.toThrow(
+      'An appearance-only edit requires an existing ES|QL-backed Lens configuration'
+    );
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 
@@ -180,5 +198,35 @@ describe('buildLensConfig', () => {
 
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
+
+  it.each([
+    { appearanceOnly: true, presentationMode: undefined },
+    { appearanceOnly: true, presentationMode: 'enhance' as const },
+    { appearanceOnly: false, presentationMode: 'enhance' as const },
+  ])('keeps query resolution independent of presentation mode: %j', async (options) => {
+    const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    await buildLensConfig({
+      nlQuery: 'hide the title',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: existingQuery },
+        metrics: [{ column: 'count', type: 'primary' }],
+        ignore_global_filters: false,
+        sampling: 100,
+      },
+      ...options,
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(invoke.mock.calls[0][0]).toMatchObject({
+      appearanceOnly: options.appearanceOnly,
+      presentationMode: options.presentationMode ?? 'focused',
+      esqlQuery: options.appearanceOnly ? existingQuery : '',
+    });
   });
 });
