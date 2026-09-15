@@ -67,4 +67,20 @@ describe('createRuleManagementSkill', () => {
     expect(skill.content).not.toContain('Part 2: Action Policies');
     expect(skill.content).not.toContain('Part 3: Default Notification Setup');
   });
+
+  it('exposes an alert-grouping reference and points always-loaded content at it', () => {
+    const skill = createRuleManagementSkill(createDeps());
+    const groupingRef = skill.referencedContent?.find((entry) => entry.name === 'alert-grouping');
+
+    expect(groupingRef?.content).toContain('# Alert Grouping');
+    expect(groupingRef?.content).toContain('STATS ... BY');
+    expect(groupingRef?.content).toContain('action-policy-management');
+    expect(groupingRef?.content).not.toContain('groupingMode');
+    expect(groupingRef?.content).toContain('### Per-host');
+    expect(groupingRef?.content).toContain('### Ungrouped');
+
+    expect(skill.content).toContain('alert-grouping.md');
+    expect(skill.content).toContain('Pair `STATS ... BY <field>` with `set_grouping`');
+    expect(skill.content).toContain('### Alert grouping');
+  });
 });
