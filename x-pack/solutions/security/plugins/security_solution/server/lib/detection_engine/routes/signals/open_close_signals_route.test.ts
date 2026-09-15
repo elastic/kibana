@@ -165,6 +165,91 @@ describe('set signal status', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
     });
 
+    test('returns 400 when runtime_mappings alone exceeds the per-request entry limit', async () => {
+      const runtimeMappings = Object.fromEntries(
+        Array.from({ length: MAX_RUNTIME_FIELDS_PER_REQUEST + 1 }, (_, i) => [
+          `custom.field_${i}`,
+          { type: RuntimeFieldTypeEnum.keyword },
+        ])
+      );
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            runtime_mappings: runtimeMappings,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 400 when runtime_fields + runtime_mappings union exceeds the limit (even with overlap)', async () => {
+      // 50 fields in runtime_fields, 51 in runtime_mappings, 0 overlap = 101 unique → over limit.
+      const runtimeFields = Object.fromEntries(
+        Array.from({ length: 50 }, (_, i) => [`rf_field_${i}`, RuntimeFieldTypeEnum.keyword])
+      );
+      const runtimeMappings = Object.fromEntries(
+        Array.from({ length: 51 }, (_, i) => [
+          `rm_field_${i}`,
+          { type: RuntimeFieldTypeEnum.keyword },
+        ])
+      );
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            runtime_fields: runtimeFields,
+            runtime_mappings: runtimeMappings,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 200 when runtime_fields + runtime_mappings share a key (union counts it once, staying at the limit)', async () => {
+      // runtime_fields has 100 keys (99 rf_field_* + sharedKey); runtime_mappings has 1 key
+      // (sharedKey). The union is 100 unique keys — exactly at the limit, so the request succeeds.
+      const sharedKey = 'custom.shared_field';
+      const runtimeFields = Object.fromEntries([
+        ...Array.from({ length: 99 }, (_, i) => [`rf_field_${i}`, RuntimeFieldTypeEnum.keyword]),
+        [sharedKey, RuntimeFieldTypeEnum.keyword],
+      ]);
+      const runtimeMappings = {
+        [sharedKey]: {
+          type: RuntimeFieldTypeEnum.keyword,
+          script: { source: "emit(doc['process.name'].value)" },
+        },
+      };
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            runtime_fields: runtimeFields,
+            runtime_mappings: runtimeMappings,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
+    });
+
     test('returns 400 when closing reason is invalid', async () => {
       const response = await server.inject(
         requestMock.create({

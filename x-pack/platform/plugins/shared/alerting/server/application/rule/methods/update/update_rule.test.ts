@@ -1811,7 +1811,10 @@ describe('update()', () => {
       },
     });
 
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: myType/my alert name',
+      undefined
+    );
   });
 
   it('should update rule flapping', async () => {
