@@ -6,15 +6,14 @@
  */
 
 import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { AttachmentType } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { AttachmentType, type Case, type Observable } from '../../../common/types/domain';
+import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { createCasesClientMockArgs } from '../mocks';
 import { createCaseServiceMock, createLicensingServiceMock } from '../../services/mocks';
 import { mockCases } from '../../mocks';
 import { extractAndAddObservables } from './extract_observables';
-import type { Case } from '../../../common/types/domain';
 import type { AlertService } from '../../services';
 
 const caseSO = mockCases[0];
@@ -263,6 +262,20 @@ describe('extractAndAddObservables', () => {
           }),
         })
       );
+
+      expect(clientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({
+          caseId: caseSO.id,
+          owner: caseSO.attributes.owner,
+          observableIds: [expect.any(String)],
+          observableTypeKeys: [OBSERVABLE_TYPE_IPV4.key],
+        })
+      );
+      const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+      expect(payload).not.toHaveProperty('value');
+      expect(payload).not.toHaveProperty('description');
+      expect(payload).not.toHaveProperty('observables');
     });
 
     it('skips patchCase when extracted observables array is empty (no matching ECS fields)', async () => {
@@ -290,6 +303,37 @@ describe('extractAndAddObservables', () => {
 
       expect(clientArgs.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Added 1 observable')
+      );
+    });
+
+    it('does not emit and logs when extraction only finds existing observables', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+      });
+      const existingObservable: Observable = {
+        id: '5c431380-c6ef-459f-b0fe-1699e978517b',
+        typeKey: OBSERVABLE_TYPE_IPV4.key,
+        value: '1.2.3.4',
+        description: null,
+        createdAt: '2026-09-08T00:00:00.000Z',
+        updatedAt: '2026-09-08T00:00:00.000Z',
+      };
+      caseService.getCase.mockResolvedValue({
+        ...caseSO,
+        attributes: {
+          ...caseSO.attributes,
+          observables: [existingObservable],
+        },
+      });
+      const theCase = makeCase(true);
+
+      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+
+      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+      expect(clientArgs.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('No new observables added')
       );
     });
   });
