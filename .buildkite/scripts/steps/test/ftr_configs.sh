@@ -62,6 +62,8 @@ results=()
 # POC: in-VM spot preemption detection (see preemption_watcher.sh). With
 # FTR_PREEMPTION_STOP_AGENT the watcher also stops the agent on preemption so the
 # job fails fast (signal_reason=agent_stop) instead of waiting for lost-agent detection.
+# FTR_PREEMPTION_SIMULATE_GROUP=<group key> + FTR_PREEMPTION_SIMULATE_AFTER=<s> fake a
+# preemption in that one group on its first attempt, to exercise the stop path on demand.
 PREEMPTION_WATCHER_PID=""
 if [[ "${FTR_PREEMPTION_WATCH:-}" =~ ^(1|true)$ ]]; then
   PREEMPTED_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_preempted"
@@ -69,10 +71,16 @@ if [[ "${FTR_PREEMPTION_WATCH:-}" =~ ^(1|true)$ ]]; then
     previousPreemption=$(buildkite-agent meta-data get "$PREEMPTED_KEY" --default '' --log-level error || true)
     if [[ "$previousPreemption" ]]; then
       echo "--- Previous attempt was preempted: $previousPreemption"
+      echo "stop-agent result: $(buildkite-agent meta-data get "${PREEMPTED_KEY}_stop" --default '<none>' --log-level error || true)"
     fi
   fi
+  simulateAfter=""
+  if [[ "${FTR_PREEMPTION_SIMULATE_GROUP:-}" == "$FTR_CONFIG_GROUP_KEY" && "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
+    simulateAfter="${FTR_PREEMPTION_SIMULATE_AFTER:-60}"
+  fi
   mkdir -p target/preemption
-  PREEMPTION_STOP_AGENT="${FTR_PREEMPTION_STOP_AGENT:-}" .buildkite/scripts/common/preemption_watcher.sh &
+  PREEMPTION_STOP_AGENT="${FTR_PREEMPTION_STOP_AGENT:-}" PREEMPTION_SIMULATE_AFTER="$simulateAfter" \
+    .buildkite/scripts/common/preemption_watcher.sh &
   PREEMPTION_WATCHER_PID=$!
   trap 'kill "$PREEMPTION_WATCHER_PID" 2>/dev/null || true' EXIT
 fi

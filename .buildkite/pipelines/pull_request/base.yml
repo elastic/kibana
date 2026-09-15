@@ -4,6 +4,9 @@ env:
   # STOP_AGENT fails the job fast on preemption instead of waiting for lost-agent detection
   FTR_PREEMPTION_WATCH: 'true'
   FTR_PREEMPTION_STOP_AGENT: 'true'
+  # Fake one preemption in this group (first attempt only) to exercise the stop path on demand
+  FTR_PREEMPTION_SIMULATE_GROUP: 'ftr_configs_1'
+  FTR_PREEMPTION_SIMULATE_AFTER: '90'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
