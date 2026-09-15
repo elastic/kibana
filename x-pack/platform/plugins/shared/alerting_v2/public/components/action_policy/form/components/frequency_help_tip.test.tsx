@@ -51,7 +51,6 @@ describe('FrequencyHelpTip', () => {
 
     await userEvent.hover(screen.getByTestId('frequencyHelpTip'));
 
-
     expect(await screen.findByText('Frequency options explained')).toBeInTheDocument();
   });
 });
