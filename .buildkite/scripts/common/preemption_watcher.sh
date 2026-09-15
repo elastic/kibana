@@ -98,6 +98,8 @@ buildkite-agent annotate --style warning --context "preemption-${BUILDKITE_JOB_I
 # it has within cancel-cleanup-timeout, and report signal_reason=agent_stop,
 # which the step's retry rules match immediately. Ordered last: the writes above
 # must land before the job's process tree (including this watcher) is killed.
+# The agent tears the job down within ~1s of SIGQUIT, so anything that must
+# survive is written before the signal; the kill result only goes to the log.
 if [[ "${PREEMPTION_STOP_AGENT:-}" =~ ^(1|true)$ ]]; then
   agent_pid="${BUILDKITE_AGENT_PID:-}"
   if [[ -z "$agent_pid" ]]; then
@@ -106,13 +108,14 @@ if [[ "${PREEMPTION_STOP_AGENT:-}" =~ ^(1|true)$ ]]; then
     agent_pid=$(pgrep -f 'buildkite-agent start' || true)
   fi
   if [[ -z "$agent_pid" ]]; then
-    stop_result="no agent pid found"
+    log "stop agent: no agent pid found; leaving job to lost-agent detection"
+    buildkite-agent meta-data set "${META_KEY}_stop" "no agent pid found" || true
   elif [[ "$(echo "$agent_pid" | wc -l)" -ne 1 ]]; then
-    stop_result="ambiguous agent pids: $(echo "$agent_pid" | paste -sd, -)"
+    log "stop agent: ambiguous agent pids ($(echo "$agent_pid" | paste -sd, -)); leaving job to lost-agent detection"
+    buildkite-agent meta-data set "${META_KEY}_stop" "ambiguous agent pids" || true
   else
+    buildkite-agent meta-data set "${META_KEY}_stop" "$(date -u +%Y-%m-%dT%H:%M:%SZ) SIGQUIT pid=$agent_pid" || true
     kill_err=$(kill -QUIT "$agent_pid" 2>&1); kill_rc=$?
-    stop_result="SIGQUIT pid=$agent_pid rc=$kill_rc${kill_err:+ ($kill_err)}"
+    log "stop agent: SIGQUIT pid=$agent_pid rc=$kill_rc${kill_err:+ ($kill_err)}"
   fi
-  log "stop agent: $stop_result"
-  buildkite-agent meta-data set "${META_KEY}_stop" "$(date -u +%Y-%m-%dT%H:%M:%SZ) $stop_result" || true
 fi

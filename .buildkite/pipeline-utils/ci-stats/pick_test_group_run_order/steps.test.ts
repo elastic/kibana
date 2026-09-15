@@ -117,7 +117,6 @@ describe('buildFunctionalStepGroup', () => {
       LABEL: 'v',
     });
     expect(first.retry.automatic).toEqual([
-      { signal_reason: 'agent_stop', limit: 3 },
       { exit_status: '-1', limit: 3 },
       { exit_status: '*', limit: 1 },
     ]);

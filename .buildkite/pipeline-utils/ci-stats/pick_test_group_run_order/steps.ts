@@ -85,8 +85,6 @@ export function buildFunctionalStepGroup(
         },
         retry: {
           automatic: [
-            // agent_stop: preemption watcher stopped the agent (see preemption_watcher.sh)
-            { signal_reason: 'agent_stop', limit: RETRIES.INFRA },
             { exit_status: '-1', limit: RETRIES.INFRA },
             ...(opts.retryCount > 0 ? [{ exit_status: '*', limit: opts.retryCount }] : []),
           ],
