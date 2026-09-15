@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. See the Elastic License 2.0 (ELv2)
- * or the Server Side Public License (SSPL v1), whichever you elect as
- * appropriate, in accordance with such license.
- */
-import { FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
 import { spaceTest, expect, tags } from '../fixtures';
+import { FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
 
-/** Internal-origin + API-version headers required by AlertZero internal routes. */
 const INTERNAL_HEADERS = {
   'x-elastic-internal-origin': 'alertzero',
   'elastic-api-version': '1',
