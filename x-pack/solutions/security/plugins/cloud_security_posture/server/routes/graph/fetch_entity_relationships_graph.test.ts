@@ -893,4 +893,82 @@ describe('enrichEntityRecords', () => {
     expect(result[0].type).toBe('user');
     expect(result[0].sub_type).toBe('admin');
   });
+
+  // The entities query builds docData inline in ES|QL and never passes through
+  // rebuildDocData, so risk/criticality have to be injected onto these records explicitly —
+  // otherwise an entity-only graph request (entityIds, no originEventIds) returns neither.
+  it('applies risk score and asset criticality, including into docData', () => {
+    const record: EntityRecord = {
+      id: 'user:alice@example.com@okta',
+      name: 'alice@example.com',
+      type: 'Identity',
+      sub_type: 'Okta User',
+      docData: JSON.stringify({
+        id: 'user:alice@example.com@okta',
+        type: 'entity',
+        entity: { availableInEntityStore: true, name: 'alice@example.com' },
+      }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice@example.com@okta',
+        { name: 'alice@example.com', riskScore: 91, assetCriticality: 'extreme_impact' },
+      ],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(result.riskScore).toBe(91);
+    expect(result.assetCriticality).toBe('extreme_impact');
+
+    const doc = JSON.parse(result.docData);
+    expect(doc.entity.riskScore).toBe(91);
+    expect(doc.entity.assetCriticality).toBe('extreme_impact');
+    // Existing docData fields survive the injection.
+    expect(doc.entity.availableInEntityStore).toBe(true);
+    expect(doc.entity.name).toBe('alice@example.com');
+  });
+
+  it('leaves docData untouched when the entity has neither value', () => {
+    const docData = JSON.stringify({
+      id: 'user:alice',
+      type: 'entity',
+      entity: { availableInEntityStore: true },
+    });
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData,
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'alice', riskScore: null, assetCriticality: null }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(result.docData).toBe(docData);
+    const doc = JSON.parse(result.docData);
+    expect(doc.entity).not.toHaveProperty('riskScore');
+    expect(doc.entity).not.toHaveProperty('assetCriticality');
+  });
+
+  it('returns unparseable docData unchanged rather than throwing', () => {
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData: 'not-valid-json',
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { riskScore: 50 }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(result.docData).toBe('not-valid-json');
+    expect(result.riskScore).toBe(50);
+  });
 });

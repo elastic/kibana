@@ -1172,6 +1172,58 @@ describe('parseRecords', () => {
       const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
       expect(actorNode.riskScore).toEqual({ min: 78.13, max: 78.13 });
     });
+
+    // Entity-only requests (entityIds, no originEventIds — the entity flyout path) produce
+    // standalone entity nodes from entityRecords rather than from event/relationship edges.
+    it('exposes the aggregates on a standalone entity node', () => {
+      const result = parseRecords(
+        mockLogger,
+        [],
+        [],
+        [
+          {
+            id: 'user:alice@example.com@okta',
+            name: 'alice@example.com',
+            type: 'Identity',
+            sub_type: 'Okta User',
+            docData: JSON.stringify({
+              id: 'user:alice@example.com@okta',
+              type: 'entity',
+              entity: { availableInEntityStore: true },
+            }),
+            riskScore: 91,
+            assetCriticality: 'extreme_impact',
+          },
+        ]
+      );
+
+      const node = result.nodes.find(
+        (n) => n.id === 'user:alice@example.com@okta'
+      ) as EntityNodeDataModel;
+      expect(node.riskScore).toEqual({ min: 91, max: 91 });
+      expect(node.assetCriticality).toEqual([{ level: 'extreme_impact', count: 1 }]);
+    });
+
+    it('omits both keys on a standalone entity node with neither value', () => {
+      const result = parseRecords(
+        mockLogger,
+        [],
+        [],
+        [
+          {
+            id: 'user:bob',
+            name: 'bob',
+            type: 'Identity',
+            sub_type: 'Okta User',
+            docData: JSON.stringify({ id: 'user:bob', type: 'entity', entity: {} }),
+          },
+        ]
+      );
+
+      const node = result.nodes.find((n) => n.id === 'user:bob') as EntityNodeDataModel;
+      expect(node).not.toHaveProperty('riskScore');
+      expect(node).not.toHaveProperty('assetCriticality');
+    });
   });
 
   describe('entities enrichment', () => {

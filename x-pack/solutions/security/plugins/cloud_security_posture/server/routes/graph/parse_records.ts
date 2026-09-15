@@ -46,6 +46,7 @@ import {
   aggregateAssetCriticality,
 } from './utils';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 interface ConnectorEdges {
   source: string;
@@ -129,6 +130,14 @@ export const parseRecords = (
           entitySubType: entity.sub_type,
           entityName: entity.name,
           docData: entity.docData ? castArray(entity.docData) : [],
+          // A standalone entity node always represents exactly one entity, so the range
+          // collapses to a single value and the distribution to a single entry.
+          riskScore:
+            entity.riskScore != null ? { min: entity.riskScore, max: entity.riskScore } : undefined,
+          assetCriticality:
+            entity.assetCriticality != null && isKnownAssetCriticalityLevel(entity.assetCriticality)
+              ? [{ level: entity.assetCriticality, count: 1 }]
+              : undefined,
         },
         ctx.logger
       );
@@ -1408,11 +1417,43 @@ export const enrichRelationshipDocData = (
 };
 
 /**
+ * Injects risk score / asset criticality into an entities-query `docData` JSON string.
+ *
+ * The entities query builds `docData` inline in ES|QL (it does not pass through
+ * `rebuildDocData`), so these two fields have to be merged into the already-serialized
+ * `entity` object here. Absent values add no key at all. A `docData` that fails to parse is
+ * returned unchanged — it must already be schema-valid, same contract as `rebuildDocData`.
+ */
+const injectEntityDocDataEnrichment = (
+  docData: string,
+  enrichment: EntityEnrichmentFields,
+  logger?: Logger
+): string => {
+  if (enrichment.riskScore == null && enrichment.assetCriticality == null) return docData;
+
+  let doc: Record<string, unknown>;
+  try {
+    doc = JSON.parse(docData);
+  } catch (e) {
+    logger?.warn(`Failed to parse entity docData for enrichment injection: ${e}`);
+    return docData;
+  }
+
+  const entity = (doc.entity ?? {}) as Record<string, unknown>;
+  if (enrichment.riskScore != null) entity.riskScore = enrichment.riskScore;
+  if (enrichment.assetCriticality != null) entity.assetCriticality = enrichment.assetCriticality;
+  doc.entity = entity;
+
+  return JSON.stringify(doc);
+};
+
+/**
  * Applies enrichment to entity records from the entity store.
  */
 export const enrichEntityRecords = (
   records: EntityRecord[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>
+  enrichmentMap: Map<string, EntityEnrichmentFields>,
+  logger?: Logger
 ): EntityRecord[] => {
   return records.map((record) => {
     const enrichment = enrichmentMap.get(record.id);
@@ -1422,6 +1463,11 @@ export const enrichEntityRecords = (
       name: enrichment.name ?? record.name,
       type: enrichment.type ?? record.type,
       sub_type: enrichment.subType ?? record.sub_type,
+      riskScore: enrichment.riskScore,
+      assetCriticality: enrichment.assetCriticality,
+      docData: record.docData
+        ? injectEntityDocDataEnrichment(record.docData, enrichment, logger)
+        : record.docData,
     };
   });
 };
