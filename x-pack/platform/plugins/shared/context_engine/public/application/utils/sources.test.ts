@@ -6,7 +6,7 @@
  */
 
 import type { SelectedSource } from '../components/source_picker';
-import { toAiIndexSources, toSelectedSources, toSourceType } from './sources';
+import { createIndexEsqlQuery, toAiIndexSources, toSelectedSources, toSourceType } from './sources';
 
 describe('sources utils', () => {
   describe('toAiIndexSources', () => {
@@ -41,6 +41,13 @@ describe('sources utils', () => {
     it('maps stored source types to UI source types', () => {
       expect(toSourceType('esql')).toBe('esql');
       expect(toSourceType('connector')).toBe('connector');
+    });
+  });
+
+  describe('createIndexEsqlQuery', () => {
+    it('builds a FROM query for the given index or data stream', () => {
+      expect(createIndexEsqlQuery('logs-*')).toBe('FROM logs-*');
+      expect(createIndexEsqlQuery('.ds-logs-default')).toBe('FROM .ds-logs-default');
     });
   });
 });
