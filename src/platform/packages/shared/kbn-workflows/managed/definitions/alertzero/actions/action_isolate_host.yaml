@@ -1,0 +1,169 @@
+version: "1"
+name: Isolate host
+description: >
+  AlertZero action: isolates one or more endpoints from the network. Executed
+  by the investigation proposal gate once an analyst approves, so the response
+  action is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Isolate host
+    description: Isolates endpoint host(s) from the network until they are released.
+    category: contain
+    impact: high
+    reversible: true
+    approvalPolicy: always-gate
+  # Sentinel id used only to probe Actions-log privilege before isolating.
+  # A 404 means the privilege is present; anything else must fail closed.
+  privilege_probe_action_id: "00000000-0000-0000-0000-000000000000"
+  # Keep equal to `max-iterations.limit` on the poll loop. 180 × 10s ≈ 30 min.
+  max_poll_attempts: 180
+settings:
+  # Ceiling above the 30 min poll so a timeout zone does not cut the wait short.
+  timeout: "35m"
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Isolate fields. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names. Callers pass endpoint/agent ids (for
+            example `agent.id` on an Elastic Defend alert), not hostnames.
+          properties:
+            endpoint_ids:
+              type: array
+              items:
+                type: string
+              minItems: 1
+              description: Agent ids of the hosts to isolate.
+          required:
+            - endpoint_ids
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: actionId
+    type: string
+  - name: status
+    type: string
+  - name: wasSuccessful
+    type: boolean
+steps:
+  # GET details requires Actions log (Platinum+), isolate only needs Host
+  # isolation. Probe the same route the poll uses so a missing privilege fails
+  # before the host is touched. kibana.request throws `HTTP <status>: …`.
+  - name: probe_action_details
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  # Separate step: Liquid cannot read a variable written by the same data.set.
+  - name: capture_probe_status
+    type: data.set
+    with:
+      probe_http_status: "{{ steps.probe_action_details.error.message | slice: 0, 8 }}"
+
+  - name: fail_if_cannot_poll
+    type: if
+    condition: '${{ steps.probe_action_details.error != blank and variables.probe_http_status != "HTTP 404" }}'
+    steps:
+      - name: missing_actions_log_privilege
+        type: workflow.fail
+        with:
+          message: >
+            Cannot wait for isolate completion: GET /api/endpoint/action/{id}
+            failed ({{ steps.probe_action_details.error.message }}). The
+            approver needs the Actions log privilege in addition to Host
+            isolation.
+
+  - name: isolate_host
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/endpoint/action/isolate"
+      headers:
+        elastic-api-version: "2023-10-31"
+      body:
+        endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
+
+  - name: store_action_id
+    type: data.set
+    with:
+      action_id: "{{ steps.isolate_host.output.data.id }}"
+
+  # do-while: the first GET always runs (third-party agents may complete
+  # immediately). Wait only while the action is still outstanding.
+  - name: poll_until_done
+    type: while
+    condition: "${{ steps.get_action_details.output.data.isCompleted != true and steps.get_action_details.output.data.isExpired != true }}"
+    max-iterations:
+      limit: 180
+      on-limit: continue
+    steps:
+      - name: get_action_details
+        type: kibana.request
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ variables.action_id }}"
+          headers:
+            elastic-api-version: "2023-10-31"
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+      # Snapshot before the loop exits: loop-body step outputs are evicted.
+      - name: capture_action_details
+        type: data.set
+        with:
+          is_completed: "${{ steps.get_action_details.output.data.isCompleted }}"
+          is_expired: "${{ steps.get_action_details.output.data.isExpired }}"
+          was_successful: "${{ steps.get_action_details.output.data.wasSuccessful }}"
+          action_status: "{{ steps.get_action_details.output.data.status }}"
+      - name: wait_if_pending
+        type: if
+        condition: "${{ steps.get_action_details.output.data.isCompleted != true and steps.get_action_details.output.data.isExpired != true }}"
+        steps:
+          - name: poll_delay
+            type: wait
+            with:
+              duration: "10s"
+
+  - name: fail_if_not_successful
+    type: if
+    condition: "${{ variables.is_completed != true or variables.was_successful != true }}"
+    steps:
+      - name: isolate_did_not_succeed
+        type: workflow.fail
+        with:
+          message: >
+            Isolate action {{ variables.action_id }} did not complete
+            successfully after {{ consts.max_poll_attempts }} polls
+            (status={{ variables.action_status }},
+            isExpired={{ variables.is_expired }},
+            wasSuccessful={{ variables.was_successful }}).
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      actionId: "{{ variables.action_id }}"
+      status: "{{ variables.action_status }}"
+      wasSuccessful: "${{ variables.was_successful }}"
