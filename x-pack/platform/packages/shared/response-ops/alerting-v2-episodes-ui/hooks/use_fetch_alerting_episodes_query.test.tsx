@@ -281,4 +281,46 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { sourceId: 'test-source', error: new Error('source failure') },
     ]);
   });
+
+  it('returns classic-only episodes and reports the error when the v2 fetch fails', async () => {
+    const pageSize = 10;
+    const v2Error = new Error('v2 failure');
+    const sourceEpisodes: AlertEpisode[] = [
+      {
+        '@timestamp': '2024-03-01T11:00:00Z',
+        'episode.id': 'source-episode-1',
+        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        'rule.id': 'source-rule-1',
+        group_hash: 'source-gh-1',
+        first_timestamp: '2024-03-01T11:00:00Z',
+        last_timestamp: '2024-03-01T11:00:00Z',
+        duration: 0,
+        supports_actions: false,
+        supports_timeline: false,
+      },
+    ];
+
+    fetchAlertingEpisodesMock.mockRejectedValue(v2Error);
+
+    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize,
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual(sourceEpisodes);
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
+  });
 });

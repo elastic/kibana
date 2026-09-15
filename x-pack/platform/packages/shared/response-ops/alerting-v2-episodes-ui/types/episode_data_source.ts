@@ -64,7 +64,10 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
+
 export interface EpisodeDataSource {
+  /** Short source label, interpolated into fetch error toast titles (e.g. `v1`). */
   id: string;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
