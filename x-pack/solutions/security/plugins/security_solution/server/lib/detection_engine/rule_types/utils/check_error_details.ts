@@ -12,6 +12,9 @@ const USER_ERRORS_EXCEPTIONS = [
   'verification_exception',
   'parsing_exception',
   'x_content_parse_exception',
+  // Raised when the rule owner's credentials are not authorized for the search, e.g. a missing
+  // `read` index privilege or a cross-project search linked project that rejects the request.
+  'security_exception',
 ];
 
 /**
