@@ -92,6 +92,25 @@ describe('getConnectorIdSuggestions', () => {
     expect(result[0].insertText).toBe('public-slack');
   });
 
+  it('should suggest slack connectors for waitForInput channel connector-id', () => {
+    const line = '        connector-id: ';
+    const result = getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
+      focusedStepInfo: { stepType: 'waitForInput' },
+      focusedYamlPair: {
+        path: ['with', 'channels', 'slack', 'connector-id'],
+      },
+      path: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+      dynamicConnectorTypes: fakeConnectorTypes,
+    } as unknown as AutocompleteContext);
+
+    expect(result).toHaveLength(3);
+    expect(result[0].insertText).toBe('public-slack');
+    expect(result[2].command?.arguments?.[0].connectorType).toBe('.slack');
+  });
+
   it('should suggest inbound webhook instances for a trigger connector-id', () => {
     const line = '    connector-id: ';
     const yamlDocument = parseDocument(`triggers:
