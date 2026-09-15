@@ -108,6 +108,18 @@ export interface LogsExtractionClientDependencies {
 }
 
 export class LogsExtractionClient {
+  /** Maps each extraction mode to the field holding its extraction state. single and priority share
+   * logExtractionState; nonPriority has its own field so the two processes do not overwrite each
+   * other's position. */
+  private static readonly EXTRACTION_STATE_FIELD_BY_MODE: Record<
+    ExtractionMode,
+    keyof EngineDescriptor
+  > = {
+    single: 'logExtractionState',
+    priority: 'logExtractionState',
+    nonPriority: 'nonPriorityLogExtractionState',
+  };
+
   logger: Logger;
   namespace: string;
   esClient: ElasticsearchClient;
@@ -133,17 +145,9 @@ export class LogsExtractionClient {
     this.extractionMode = extractionMode ?? 'single';
   }
 
-  /** Maps each extraction mode to its cursor field. single and priority share logExtractionState;
-   * nonPriority has its own field so the two processes do not overwrite each other's position. */
-  private static readonly CURSOR_FIELD: Record<ExtractionMode, keyof EngineDescriptor> = {
-    single: 'logExtractionState',
-    priority: 'logExtractionState',
-    nonPriority: 'nonPriorityLogExtractionState',
-  };
-
-  private cursorPatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
+  private extractionStatePatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
     return {
-      [LogsExtractionClient.CURSOR_FIELD[this.extractionMode]]: state,
+      [LogsExtractionClient.EXTRACTION_STATE_FIELD_BY_MODE[this.extractionMode]]: state,
     } as Partial<EngineDescriptor>;
   }
 
@@ -225,7 +229,7 @@ export class LogsExtractionClient {
         await this.engineDescriptorClient.update(type, { error: null });
       } else {
         await this.engineDescriptorClient.update(type, {
-          ...this.cursorPatch({
+          ...this.extractionStatePatch({
             checkpointTimestamp: null,
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
@@ -978,7 +982,7 @@ export class LogsExtractionClient {
     }
     await this.engineDescriptorClient.update(
       type,
-      this.cursorPatch(logExtractionState as EngineLogExtractionState)
+      this.extractionStatePatch(logExtractionState as EngineLogExtractionState)
     );
   }
 
