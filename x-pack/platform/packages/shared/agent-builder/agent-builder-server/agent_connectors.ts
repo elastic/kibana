@@ -44,20 +44,21 @@ export const listAgentConnectors = async (
   { allowedIds }: { allowedIds?: string[] }
 ): Promise<ConnectorSummary[]> => {
   const allConnectors = await actionsClient.getAll();
+  const allowedSet = allowedIds !== undefined ? new Set(allowedIds) : null;
 
-  return allConnectors.flatMap((connector) => {
-    const spec = getConnectorSpec(connector.actionTypeId);
-    if (!spec) return [];
-    if (allowedIds !== undefined && !allowedIds.includes(connector.id)) return [];
-    return [
-      {
-        id: connector.id,
-        name: connector.name,
-        type: connector.actionTypeId,
-        description: spec.metadata.description ?? connector.name,
-      },
-    ];
-  });
+  return allConnectors
+    .filter(
+      (c) => !!getConnectorSpec(c.actionTypeId) && (allowedSet === null || allowedSet.has(c.id))
+    )
+    .map((c) => {
+      const spec = getConnectorSpec(c.actionTypeId)!;
+      return {
+        id: c.id,
+        name: c.name,
+        type: c.actionTypeId,
+        description: spec.metadata.description ?? c.name,
+      };
+    });
 };
 
 /**
