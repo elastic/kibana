@@ -1,0 +1,466 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-15
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-15
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 289580.yaml
+    checksum: d33f9de9b45f25ffd0a9e49f698e0cc5b3f4330f
+  type: bug-fix
+  title: Fix `elasticsearch.index.exist` connector output
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The `elasticsearch.index.exist` connector action now returns the correct boolean response. Previously it returned an unexpected value, causing downstream conditions that rely on this check to behave incorrectly.
+  prs:
+  - https://github.com/elastic/kibana/pull/289580
+- file:
+    name: 289328.yaml
+    checksum: 5612442b16dbb68d0326aa2c3280002262a7e981
+  type: enhancement
+  title: Default to `FROM` instead of `TS` for `*:*` index pattern
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/289328
+  issues:
+  - https://github.com/elastic/kibana/issues/286579
+- file:
+    name: 277103.yaml
+    checksum: 1a52d91a19a1c3d64d030452b267249e51af569d
+  type: feature
+  title: Add support for undo and redo in {{kib}} dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Kibana dashboards now support undo (`Cmd+Z / Ctrl+Z`) and redo (`Cmd+Y / Ctrl+Y`), allowing you to step backward and forward through changes made during a Dashboard session. This gives you more confidence to experiment with dashboard layouts, panel configurations, and other edits, knowing you can easily revert unwanted changes.
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/277103
+  issues:
+  - https://github.com/elastic/kibana/issues/262117
+- file:
+    name: 289801.yaml
+    checksum: 925b1db091ba22537a918c7052786e1608c13d32
+  type: bug-fix
+  title: Hide deactivated-user activation action for read-only users
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/289801
+  issues:
+  - https://github.com/elastic/kibana/issues/288661
+- file:
+    name: 287736.yaml
+    checksum: d8891352cb8c81ae99871eae9a108a739ecd5e3e
+  type: enhancement
+  title: Update Infrastructure Hosts page to use shared app header
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The Hosts page now uses the shared Kibana app header.
+  prs:
+  - https://github.com/elastic/kibana/pull/287736
+  issues:
+  - https://github.com/elastic/kibana/issues/287801
+- file:
+    name: 289342.yaml
+    checksum: f953260725698a594570dcb03d4cc75813ee7d4d
+  type: bug-fix
+  title: Fix fake modal appearing when saving a dashboard for the first time
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289342
+  issues:
+  - https://github.com/elastic/kibana/issues/280687
+- file:
+    name: 290181.yaml
+    checksum: 205b574fdda43e0ac700752ec94d8892568cbe80
+  type: bug-fix
+  title: Force-revoke agents when deleting an agentless policy
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/290181
+  issues:
+  - https://github.com/elastic/kibana/issues/289381
+- file:
+    name: 290314.yaml
+    checksum: 5c0ad235ab57834002cadf549d5caccd85cbfe25
+  type: bug-fix
+  title: Increase expression length limit
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/290314
+  issues:
+  - https://github.com/elastic/kibana/issues/290311
+- file:
+    name: 289532.yaml
+    checksum: 13ff5724658b6705e3bad12343da452ddf960a51
+  type: enhancement
+  title: Add live validation and completions to ES|QL rule sandbox editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The ES|QL query sandbox in the rule authoring flyout now surfaces live in-editor validation (error/warning squiggles) and inline completions (Tab-to-accept ghost text), and upgrades identifier highlighting to be ES|QL-aware.
+  prs:
+  - https://github.com/elastic/kibana/pull/289532
+- file:
+    name: 287890.yaml
+    checksum: 9a6d1efaa6e99a7bf285c86bd88ef3487f070922
+  type: enhancement
+  title: Add out-of-the-box SID, GUID, and UPN entity resolution rules
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287890
+- file:
+    name: 290050.yaml
+    checksum: 44eb3621c837df70e885c9474aabbac457a65532
+  type: enhancement
+  title: Visually highlight results when using the HIGHLIGHT command
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/290050
+  issues:
+  - https://github.com/elastic/kibana/issues/288121
+- file:
+    name: 290115.yaml
+    checksum: 71bd9dd474690c1ba48096e56b6b525f23893738
+  type: bug-fix
+  title: Disable isolate host action for unsupported Endpoint versions
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290115
+- file:
+    name: 290457.yaml
+    checksum: 93f9eddad6a7d7c8349355764043dfb0b1016322
+  type: bug-fix
+  title: Make feature settings reading work for users without inference privileges
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290457
+- file:
+    name: 289314.yaml
+    checksum: a435c2200525b35fc4e662fae1ec3983209f832f
+  type: feature
+  title: Wire Classic/v2 heading tabs on both Rules pages
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: For users of alerting v2, rules in stack management (v1) will be presented on the same view as alerting v2.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289314
+  issues:
+  - '# PRIVATE: https://github.com/elastic/rna-program/issues/962'
+  - '# PRIVATE: https://github.com/elastic/rna-program/issues/964'
+- file:
+    name: 282149.yaml
+    checksum: 47cb56a5313aebeea0aba053d5cb1f2988d3a403
+  type: enhancement
+  title: Add "Run tests manually" sub-feature privilege (monitor:run-manually)
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/282149
+- file:
+    name: 290363.yaml
+    checksum: 14dc1d8f280b0d361772159d3b30b4a8625f9ac2
+  type: bug-fix
+  title: Fix Go to URL drilldown not replacing template values in the link name
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/290363
+  issues:
+  - https://github.com/elastic/kibana/issues/264746
+- file:
+    name: 289881.yaml
+    checksum: 4daa12805f02184f7b9a6c43635e65dfd3b7b9ff
+  type: enhancement
+  title: Removes the deprecated `platform.core.cases.attachments` tool
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Agents/Skills should instead be using `platform.core.cases.get_attachments` and `platform.core.cases.manage_attachments`
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/289881
+- file:
+    name: 290244.yaml
+    checksum: 8d5dd7189583cce73dd37f59b0699aabdff5761e
+  type: bug-fix
+  title: Skip log rate analysis and log categories when no entity filters are present
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290244
+- file:
+    name: 289927.yaml
+    checksum: b68104332989a8914dcddf2e9270380de29d68da
+  type: bug-fix
+  title: Fix false ungrouped no-data alert on grouped rules
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a bug where healthy rules with groupings would generate no data alerts.
+  prs:
+  - https://github.com/elastic/kibana/pull/289927
+  issues:
+  - https://github.com/elastic/kibana/issues/289497
+- file:
+    name: 288930.yaml
+    checksum: a1e1c825eb4733a6e98f7e54ae5526d4974e407b
+  type: bug-fix
+  title: Render the alert details chart components in the service flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288930
+  issues:
+  - https://github.com/elastic/kibana/issues/286913
+- file:
+    name: 289635.yaml
+    checksum: 5263fef703160b76a59a3535f8debddd88b5c7fa
+  type: feature
+  title: Add post-execution workflow hook
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Workflow automations now support a post-execution hook that runs custom logic automatically after a workflow completes, enabling downstream actions such as notifications or cleanup tasks.
+  prs:
+  - https://github.com/elastic/kibana/pull/289635
+- file:
+    name: 289506.yaml
+    checksum: 9936e2308681bb05af41cd0f12db64d705f70b6a
+  type: feature
+  title: Render custom panels inside the AI Assistant conversation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Custom panels generated by AI Assistant tools and skills now render directly inside the conversation, so you can view and interact with visualizations without leaving the chat.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289506
+- file:
+    name: 286173.yaml
+    checksum: d86141247a0c524cde0ed40240e868f59e5e576f
+  type: enhancement
+  title: Show a sparkline chart in the change point summary column
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286173
+- file:
+    name: 289906.yaml
+    checksum: 9cd9d4543ead4307b350793e700bf93e3bd7ac1e
+  type: enhancement
+  title: Clean up the Region preferences redesign flag
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves the Region preferences confirmation so it always lists the selected locations and any in-use problems before the policy is saved.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/289906
+- file:
+    name: 289707.yaml
+    checksum: 9ca997422a66110a946325f47be501621bf2863b
+  type: deprecation
+  title: Retire the casesRedesign feature flag
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The internal `xpack.cases.casesRedesign.list`, `xpack.cases.casesRedesign.details`, and `xpack.cases.casesRedesign.settings` settings have been removed. The redesigned Cases UI they gated is now the only implementation. Kibana still starts if these settings are present, logging a deprecation warning; remove them from `kibana.yml` to clear it.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289707
+- file:
+    name: 290219.yaml
+    checksum: 03fac149691b0f0edc04dc6721dcc63e51fc3e6f
+  type: enhancement
+  title: Add custom panels from chat directly to dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Visualizations created in AI Assistant conversations can now be added directly to a dashboard from chat, without navigating away from the conversation.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/290219
+- file:
+    name: 289541.yaml
+    checksum: 88a2478e6de15b13fd69240d93c66f14dc524782
+  type: enhancement
+  title: Refine dashboard panels with chat preview
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Dashboard panels can now be refined interactively using a chat preview. Describe your adjustments in natural language and preview the result before applying it to the panel.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289541
+- file:
+    name: 220097.yaml
+    checksum: 3e05e0ee27fdb6e44b709416ded9fd227a77da37
+  type: bug-fix
+  title: Fix focus on pinned and unpinned cells in doc viewer table
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Kibana platform
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/220097
+- file:
+    name: 290259.yaml
+    checksum: eed0946b32639a562311bfb38259fe5578843abe
+  type: bug-fix
+  title: Fix `STATS BY` when grouping by a previously aggregated field
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/290259
+  issues:
+  - https://github.com/elastic/kibana/issues/290060
+- file:
+    name: 289428.yaml
+    checksum: b8cd4b47d4c63cd757241de332345cc073b4db4f
+  type: bug-fix
+  title: Nullify unmapped fields in metric chart queries
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Metric charts in Discover no longer fail with an unknown-column ES|QL error when a parent filter references a field that the metric data stream does not map.
+  prs:
+  - https://github.com/elastic/kibana/pull/289428
+- file:
+    name: 286231.yaml
+    checksum: b1a847444d34264acc900dff6ece57480e679d84
+  type: enhancement
+  title: Replace pagination with a single, scrollable list in the Table tab in {{kib}} 
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The document viewer's Table tab (used in Discover and shared across other Kibana apps) no longer paginates fields. All fields now render in a single scrollable and searchable list.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/286231
+  issues:
+  - https://github.com/elastic/kibana/issues/214551
+  - https://github.com/elastic/kibana/issues/286137
+- file:
+    name: 287729.yaml
+    checksum: 72ee35b8357880511cde2be22015f4f632e83c5e
+  type: breaking-change
+  title: Change `actions` case attachments to return `security.endpoint` shape
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The legacy `actions` attachment type in Cases is now normalized to the `security.endpoint` / `externalReference` shape on all read and write API responses. Documented attachment types (`user` and `alert`) are byte-identical and unchanged.
+  impact: Any consumer reading `actions` attachments from Cases endpoints (`GET /api/cases/{caseId}/comments`, `_find`, POST/PATCH responses) now receives the `security.endpoint` / `externalReference` shape instead of the `actions` shape.
+  action: Update any code that inspects `actions` attachment responses to handle the `security.endpoint` / `externalReference` shape. No changes are required for `user` or `alert` attachment types.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/287729
+- file:
+    name: 290279.yaml
+    checksum: 6bab0b6f898091e363d0bfcd74b0b5745940f6e9
+  type: bug-fix
+  title: Register project routing on Observability alert details page
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/290279
+  issues:
+  - https://github.com/elastic/kibana/issues/289889
+- file:
+    name: 287744.yaml
+    checksum: 58d7f844c7d10c6f9b6f62ccc9db36faff1a96b7
+  type: enhancement
+  title: Allow Agent Builder to find case templates by name
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287744
+- file:
+    name: 275716.yaml
+    checksum: b22adef55368d8d88e657c0b02ea292b3b0b0e9d
+  type: breaking-change
+  title: Enforce size limits on Detection Engine rule response action payloads
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Detection Engine rule response-action payloads now enforce nested size limits on Osquery and Endpoint fields across create, update, patch, preview, and import operations.
+  impact: API requests that include `response_actions` fields exceeding the new limits are rejected. Stored rules with oversized values can fail when read or executed through validated paths.
+  action: 'Review all `response_actions` payloads sent to Detection Engine rules APIs and ensure values stay within limits: Osquery SQL, ECS mapping values, and Endpoint comments up to 30,000 characters; IDs, query metadata, and script identifiers up to 256 characters; run-script input up to 8,192 characters; ECS mapping field paths up to 2,000 characters. Update any stored rules that exceed these limits before using create, update, patch, preview, or import endpoints.'
+  prs:
+  - https://github.com/elastic/kibana/pull/275716
+- file:
+    name: 289432.yaml
+    checksum: fccbb28ec45309b72df3e487b01ad862d365153c
+  type: enhancement
+  title: Update Infrastructure Settings page to use shared app header
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Infrastructure settings now uses the shared Kibana app header.
+  prs:
+  - https://github.com/elastic/kibana/pull/289432
+  issues:
+  - https://github.com/elastic/kibana/issues/287804
