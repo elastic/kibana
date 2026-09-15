@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { UpdateWorkerRequestBody, Worker, WorkerSettingsWrite } from '@kbn/alertzero-common';
 
