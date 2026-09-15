@@ -157,10 +157,8 @@ export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
-export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
-export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
   'securitySolution.useNewEntityAnalyticsPage' as const;
