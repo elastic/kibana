@@ -84,8 +84,6 @@ export const command = {
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
-    console.log('frozenLockfile', { frozenLockfile, frozenLockfileFlag, IS_CI });
-
     // generate the package map and update package.json file, if necessary
     const [packages] = await Promise.all([
       time('regenerate package map', async () => {
