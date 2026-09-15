@@ -78,15 +78,26 @@ export const getAllColumns = (
  *    field; preserving the dimension is preferred over dropping it)
  *
  * Query columns with no match produce fresh columns keyed by the query column id.
+ *
+ * `preferredColumnIds` (typically the columns bound to configured dimensions)
+ * win ties within the exact-match and type-match tiers, so orphan duplicates
+ * with the same fieldName cannot shadow a dimension-bound column.
  */
 export const reconcileQueryColumns = (
   existingColumns: TextBasedLayerColumn[],
-  columnsFromQuery: DatatableColumn[]
+  columnsFromQuery: DatatableColumn[],
+  preferredColumnIds: Set<string> = new Set()
 ): TextBasedLayerColumn[] => {
   const usedColumnIds = new Set<string>();
+  const findPreferredFirst = (
+    predicate: (column: TextBasedLayerColumn) => boolean
+  ): TextBasedLayerColumn | undefined =>
+    existingColumns.find(
+      (column) => preferredColumnIds.has(column.columnId) && predicate(column)
+    ) ?? existingColumns.find(predicate);
 
   return columnsFromQuery.map((queryColumn, index) => {
-    const exactMatch = existingColumns.find(
+    const exactMatch = findPreferredFirst(
       (column) =>
         !usedColumnIds.has(column.columnId) &&
         (column.fieldName === queryColumn.id || column.fieldName === queryColumn.name)
@@ -98,7 +109,7 @@ export const reconcileQueryColumns = (
       positionalMatch.meta?.type === queryColumn.meta?.type
         ? positionalMatch
         : undefined;
-    const compatibleMatch = existingColumns.find(
+    const compatibleMatch = findPreferredFirst(
       (column) =>
         !usedColumnIds.has(column.columnId) && column.meta?.type === queryColumn.meta?.type
     );

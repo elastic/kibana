@@ -357,7 +357,11 @@ export function LayerPanel(props: LayerPanelProps) {
         return;
       }
 
-      const reconciledColumns = reconcileQueryColumns(layer.columns, columns);
+      const reconciledColumns = reconcileQueryColumns(
+        layer.columns,
+        columns,
+        new Set(allAccessors)
+      );
       const reconciledColumnIds = new Set(reconciledColumns.map(({ columnId }) => columnId));
       const hasMissingDimension = allAccessors.some(
         (columnId) => !reconciledColumnIds.has(columnId)
