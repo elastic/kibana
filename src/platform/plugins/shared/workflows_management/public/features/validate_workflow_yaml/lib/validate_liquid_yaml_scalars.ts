@@ -66,6 +66,10 @@ export function validateLiquidYamlScalars(
   workflowGraph?: WorkflowGraph,
   workflowDefinition?: WorkflowYaml
 ): YamlValidationResult[] {
+  if (lineCounter.lineStarts.length === 0) {
+    throw new Error('LineCounter must be initialized by parsing the YAML source');
+  }
+
   const results: YamlValidationResult[] = [];
   const forLoopContext: ForLoopValidationContext | null =
     workflowGraph != null && workflowDefinition != null
