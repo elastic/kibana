@@ -195,7 +195,7 @@ These are the ten surfaces in the Phase C design contract.
 | Gate | Original rubric selection and graded `goal_pass`; latency scored separately. Python null, failure and N/A semantics retained. |
 | Score keys | All 18 investigate keys plus five native trace metrics. `cost_usd` is explicit null with Deductive's explanation. |
 | Experiment | Native UUID, permanent experiment URL, per-example agent task trace and evaluator trace IDs, and task output in score documents. No Postgres integration is added. |
-| Run metadata | Reasoning mode, exact suffix, judge, backend, runner, target, Cortex, persistence and dataset recorded in every score's `evaluator.metadata.experiment`; native runner also retains experiment metadata locally. The server's closed top-level metadata schema remains a gap. |
+| Run metadata | Reasoning mode, exact suffix, judge, backend, runner, target, Cortex, persistence and dataset recorded in every score's `evaluator.metadata.experiment`; native runner also retains experiment metadata locally. Native git revision/hostname replace Python package/runtime-cluster metadata. The server's closed top-level metadata schema remains a gap. |
 | Cost and export | No dollar rollup. Native span export and token metrics use the full Agent Builder trace. Source LangSmith flushing/cost rereads are backend-specific. |
 
 Known server gaps remain: approximately five-second score refresh, HTTP 413 for large score
