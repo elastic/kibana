@@ -67,7 +67,7 @@ describe('isEsqlUnknownColumnError', () => {
   const responseError = (statusCode: number, type: string, reason: string) =>
     new errors.ResponseError({
       warnings: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       meta: {} as any,
       statusCode,
       body: { error: { type, reason } },
@@ -89,8 +89,12 @@ describe('isEsqlUnknownColumnError', () => {
     expect(
       isEsqlUnknownColumnError(responseError(400, 'verification_exception', 'Unknown index [x]'))
     ).toBe(false);
-    expect(isEsqlUnknownColumnError(responseError(404, 'verification_exception', 'Unknown column [x]'))).toBe(false);
-    expect(isEsqlUnknownColumnError(responseError(400, 'parse_exception', 'Unknown column [x]'))).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(responseError(404, 'verification_exception', 'Unknown column [x]'))
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(responseError(400, 'parse_exception', 'Unknown column [x]'))
+    ).toBe(false);
     expect(isEsqlUnknownColumnError(new Error('Unknown column [x]'))).toBe(false);
   });
 });
@@ -292,7 +296,7 @@ describe('signal generator task run()', () => {
     // than throw into the task manager's retry budget.
     const unknownColumn = new errors.ResponseError({
       warnings: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       meta: {} as any,
       statusCode: 400,
       body: {
