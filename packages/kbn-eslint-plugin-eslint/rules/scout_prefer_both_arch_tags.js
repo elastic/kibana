@@ -113,10 +113,18 @@ module.exports = {
         const optionsArg = node.arguments[1];
         if (optionsArg.type !== 'ObjectExpression') return;
 
-        const tagProp = optionsArg.properties.find(
+        const tagPropIndex = optionsArg.properties.findIndex(
           (p) => p.type === 'Property' && p.key.type === 'Identifier' && p.key.name === 'tag'
         );
-        if (!tagProp) return;
+        if (tagPropIndex === -1) return;
+
+        // A spread after the tag property can override it — suppress conservatively
+        const hasSpreadAfterTag = optionsArg.properties
+          .slice(tagPropIndex + 1)
+          .some((p) => p.type === 'SpreadElement');
+        if (hasSpreadAfterTag) return;
+
+        const tagProp = optionsArg.properties[tagPropIndex];
 
         const { hasStateful, hasServerless, hasUnknown } = getArchInfo(tagProp.value);
 

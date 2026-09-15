@@ -118,6 +118,15 @@ ruleTester.run('@kbn/eslint/scout_prefer_both_arch_tags', rule, {
         });
       `,
     },
+    // Spread after tag property can override it — suppress conservatively
+    {
+      code: dedent`
+        import { tags } from '@kbn/scout';
+        test.describe('my suite', { tag: tags.stateful.classic, ...sharedOptions }, () => {
+          test('works', () => {});
+        });
+      `,
+    },
     // apiTest.describe with both archs
     {
       code: dedent`
