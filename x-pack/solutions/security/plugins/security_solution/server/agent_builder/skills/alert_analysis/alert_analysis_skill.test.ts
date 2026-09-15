@@ -50,6 +50,33 @@ const makeSuccess = (
 });
 
 describe('alertAnalysisSkill', () => {
+  describe('prose guards', () => {
+    it('forbids speculative platform tools unconditionally, not just for inventory/count queries', () => {
+      expect(alertAnalysisSkill.content).toMatch(/Do NOT use platform\.core\.generate_esql[^.]*\./);
+      expect(alertAnalysisSkill.content).toContain('regardless of the question type');
+    });
+
+    it('short-circuits on already-provided data instead of re-fetching', () => {
+      expect(alertAnalysisSkill.content).toContain('reuse them');
+      expect(alertAnalysisSkill.content).toMatch(/do not re-fetch data you already hold/);
+    });
+
+    it('bounds corroboration calls per alert and forbids retry on empty results', () => {
+      expect(alertAnalysisSkill.content).toContain(
+        "at most one 'security.security_labs_search' call"
+      );
+      expect(alertAnalysisSkill.content).toContain("at most one 'security.entity_risk_score' call");
+      expect(alertAnalysisSkill.content).toContain('do not retry with reformulated queries');
+    });
+
+    it('forbids any tool call after the analysis and disposition are written', () => {
+      expect(alertAnalysisSkill.content).toContain(
+        'Do not issue any tool call after the analysis and disposition have been written'
+      );
+      expect(alertAnalysisSkill.content).toContain('the investigation is complete');
+    });
+  });
+
   describe('get-related-alerts inline tool', () => {
     it('schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools?.();

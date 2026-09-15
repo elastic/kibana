@@ -83,7 +83,8 @@ Use this skill when:
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools in this skill, regardless of the question type. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- If alert details, entity values, counts, or related-alerts results were already provided in the conversation or returned by a previous tool call, reuse them; do not re-fetch data you already hold with 'security.alerts' or 'security.alert-analysis.get-related-alerts'.
 
 ## Best Practices
 - Always start with the alert details before expanding investigation scope
@@ -91,7 +92,11 @@ Use this skill when:
 - Maintain chronological context when analyzing events and alerts
 - Prioritize high-severity alerts and entities with critical asset criticality
 - Document your analysis reasoning for future reference
-- Cross-reference multiple data points before making disposition decisions`,
+- Cross-reference multiple data points before making disposition decisions
+
+## Investigation Boundaries
+- Corroboration is bounded: at most one 'security.security_labs_search' call and at most one 'security.entity_risk_score' call per investigated alert, plus one 'security.alert-analysis.get-related-alerts' call per time window. If a corroboration call returns nothing, treat that as absence of evidence and proceed to disposition — do not retry with reformulated queries.
+- Do not issue any tool call after the analysis and disposition have been written: once step 6 (Synthesize Findings) output exists, the investigation is complete and no further 'security.alerts', 'security.security_labs_search', 'security.entity_risk_score', or 'security.alert-analysis.get-related-alerts' calls may be made.`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
