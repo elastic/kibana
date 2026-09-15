@@ -10,13 +10,17 @@ import type { Dispatch, Store } from 'redux-v4';
 import { applyMiddleware, createStore } from 'redux-v4';
 import type { PolicyDetailsAction } from '.';
 import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
-import { policyConfig } from './selectors';
-import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyConfig, policyDetails } from './selectors';
+import {
+  DefaultPolicyNotificationMessage,
+  policyFactory,
+} from '../../../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig, PolicyData } from '../../../../../../common/endpoint/types';
 import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { AppAction } from '../../../../../common/store/actions';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -24,7 +28,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 describe('policy details: ', () => {
   let store: Store;
   let getState: (typeof store)['getState'];
-  let dispatch: Dispatch<PolicyDetailsAction>;
+  let dispatch: Dispatch<PolicyDetailsAction | AppAction>;
   let policyItem: PolicyData;
 
   const generateNewPolicyItemMock = (): PolicyData => {
@@ -435,6 +439,71 @@ describe('policy details: ', () => {
       const failureAction = await waitForAction('serverReturnedPolicyDetailsUpdateFailure');
       expect(failureAction.payload?.error).toBeInstanceOf(Error);
       expect(failureAction.payload?.error?.message).toEqual('not found');
+    });
+  });
+
+  describe('when loading policy data', () => {
+    let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
+    let http: AppContextTestRender['coreStart']['http'];
+
+    beforeEach(() => {
+      let actionSpyMiddleware: MiddlewareActionSpyHelper<PolicyDetailsState>['actionSpyMiddleware'];
+      const { coreStart, depsStart } = createAppRootMockRenderer();
+      ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<PolicyDetailsState>());
+      http = coreStart.http;
+
+      store = createStore(
+        policyDetailsReducer,
+        undefined,
+        applyMiddleware(policyDetailsMiddlewareFactory(coreStart, depsStart), actionSpyMiddleware)
+      );
+      getState = store.getState;
+      dispatch = store.dispatch;
+    });
+
+    const loadPolicyFromUrl = async (item: PolicyData) => {
+      item.policy_ids = [];
+      http.get.mockResolvedValueOnce({
+        item,
+        success: true,
+      });
+
+      const serverReturnedPolicy = waitForAction('serverReturnedPolicyDetailsData');
+      dispatch({
+        type: 'userChangedUrl',
+        payload: {
+          pathname: `/administration/policy/${item.id || 'policy-1'}/settings`,
+          search: '',
+          hash: '',
+        },
+      });
+      await serverReturnedPolicy;
+    };
+
+    it('should keep a custom macOS malware message when Windows malware message is empty', async () => {
+      const customMacMalwareMessage = 'Custom macOS malware notification';
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.inputs[0].config.policy.value.windows.popup.malware.message = '';
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.malware.message =
+        customMacMalwareMessage;
+
+      await loadPolicyFromUrl(loadedPolicy);
+
+      const loadedConfig = policyDetails(getState())?.inputs[0].config.policy.value;
+      expect(loadedConfig?.windows.popup.malware.message).toEqual(DefaultPolicyNotificationMessage);
+      expect(loadedConfig?.mac.popup.malware.message).toEqual(customMacMalwareMessage);
+    });
+
+    it('should default an empty macOS ransomware message on load', async () => {
+      const loadedPolicy = generateNewPolicyItemMock();
+      loadedPolicy.id = 'policy-1';
+      loadedPolicy.inputs[0].config.policy.value.mac.popup.ransomware.message = '';
+
+      await loadPolicyFromUrl(loadedPolicy);
+
+      const loadedConfig = policyDetails(getState())?.inputs[0].config.policy.value;
+      expect(loadedConfig?.mac.popup.ransomware.message).toEqual(DefaultPolicyNotificationMessage);
     });
   });
 });

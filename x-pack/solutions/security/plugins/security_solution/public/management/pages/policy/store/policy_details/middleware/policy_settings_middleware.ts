@@ -41,17 +41,25 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
 
     try {
       policyItem = (await sendGetPackagePolicy(http, id)).item;
-      // sets default user notification message if policy config message is empty
+      // Default each OS notification message from its own stored value when empty.
       if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
           DefaultPolicyNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.mac.popup.malware.message =
           DefaultPolicyNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.linux.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.linux.popup.malware.message =
           DefaultPolicyNotificationMessage;
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message =
+          DefaultPolicyNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message === '') {
+        policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message =
           DefaultPolicyNotificationMessage;
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === '') {
