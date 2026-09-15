@@ -69,7 +69,6 @@ describe('QualitySummaryCards', () => {
 
   const defaultProps = {
     selectedCard: 'failed' as const,
-    setSelectedCard: jest.fn(),
   };
 
   beforeEach(() => {
@@ -137,21 +136,14 @@ describe('QualitySummaryCards', () => {
     expect(screen.queryByTestId('datasetQualityDetailsEnableFailureStoreButton')).toBe(null);
   });
 
-  it('calls handleDocsTrendChartChange and setSelectedCard when degraded card is clicked', () => {
-    const setSelectedCard = jest.fn();
+  it('calls handleDocsTrendChartChange when degraded card is clicked', () => {
     const handleDocsTrendChartChange = jest.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
     });
 
-    renderWithI18n(
-      <QualitySummaryCards
-        {...defaultProps}
-        selectedCard="failed"
-        setSelectedCard={setSelectedCard}
-      />
-    );
+    renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="failed" />);
 
     const degradedCard = screen.getByTestId(
       'datasetQualityDetailsSummaryKpiCard-Degraded documents'
@@ -159,30 +151,21 @@ describe('QualitySummaryCards', () => {
     fireEvent.click(degradedCard);
 
     expect(handleDocsTrendChartChange).toHaveBeenCalledWith('degraded');
-    expect(setSelectedCard).toHaveBeenCalledWith('degraded');
   });
 
-  it('calls handleDocsTrendChartChange and setSelectedCard when failed card is clicked', () => {
-    const setSelectedCard = jest.fn();
+  it('calls handleDocsTrendChartChange when failed card is clicked', () => {
     const handleDocsTrendChartChange = jest.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
       handleDocsTrendChartChange,
     });
 
-    renderWithI18n(
-      <QualitySummaryCards
-        {...defaultProps}
-        selectedCard="degraded"
-        setSelectedCard={setSelectedCard}
-      />
-    );
+    renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     const failedCard = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents');
     fireEvent.click(failedCard);
 
     expect(handleDocsTrendChartChange).toHaveBeenCalledWith('failed');
-    expect(setSelectedCard).toHaveBeenCalledWith('failed');
   });
 
   it('indicates when degraded card is selected', () => {
@@ -196,8 +179,7 @@ describe('QualitySummaryCards', () => {
     ).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('does not call handleDocsTrendChartChange or setSelectedCard when the already-selected card is clicked', () => {
-    const setSelectedCard = jest.fn();
+  it('does not call handleDocsTrendChartChange when the already-selected card is clicked', () => {
     const handleDocsTrendChartChange = jest.fn();
 
     mockUseQualityIssuesDocsChart.mockReturnValue({
@@ -205,13 +187,7 @@ describe('QualitySummaryCards', () => {
     });
 
     // degraded card is selected — it renders without an onClick handler, so clicks do nothing
-    renderWithI18n(
-      <QualitySummaryCards
-        {...defaultProps}
-        selectedCard="degraded"
-        setSelectedCard={setSelectedCard}
-      />
-    );
+    renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     const selectedDegradedCard = screen.getByTestId(
       'datasetQualityDetailsSummaryKpiCard-Degraded documents'
@@ -219,7 +195,6 @@ describe('QualitySummaryCards', () => {
     fireEvent.click(selectedDegradedCard);
 
     expect(handleDocsTrendChartChange).not.toHaveBeenCalled();
-    expect(setSelectedCard).not.toHaveBeenCalled();
   });
 
   it('shows enable failure store button when user can manage failure store but no failure store exists', () => {
