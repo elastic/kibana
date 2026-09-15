@@ -329,7 +329,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
