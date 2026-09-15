@@ -16,7 +16,6 @@ type BlastRadiusItem = BlastRadiusItemProps['item'];
  * for the `BlastRadiusSection` list variant.
  *
  * Rows, in order:
- * - One row per target entity (field:value format, split on the first `:`)
  * - Category (from action metadata when available, else proposal's own)
  * - Impact
  * - Reversibility (only when the action carries this flag)
