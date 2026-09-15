@@ -28,9 +28,8 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
   spaceTest('lists the Table and Visualization requests', async ({ pageObjects }) => {
     const { discover, inspector, unifiedTabs } = pageObjects;
 
-    // Submit explicitly rather than relying on the query Discover opens with: the
-    // default is deployment-specific — the observability root profile overrides it
-    // to `FROM <allLogsIndexPattern>` — so the requests below would not be logstash's.
+    // the observability root profile overrides it to `FROM <allLogsIndexPattern>`
+    // so the requests below would not be logstash's.
     await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
     await unifiedTabs.openInspectorForActiveTab();

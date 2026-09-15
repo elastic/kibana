@@ -21,9 +21,8 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     const { discover } = pageObjects;
     await browserAuth.loginAsPrivilegedUser();
     await discover.goto({ queryMode: 'esql' });
-    // Submit explicitly rather than relying on the query Discover opens with: the
-    // default is deployment-specific — the observability root profile overrides it
-    // to `FROM <allLogsIndexPattern>`, which has no `extension` field to break down on.
+    // the observability root profile overrides it to `FROM <allLogsIndexPattern>`,
+    // which has no `extension` field to break down on.
     await discover.writeAndSubmitEsqlQuery('from logstash-*');
     await discover.waitUntilTabIsLoaded();
   });
