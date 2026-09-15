@@ -39,7 +39,10 @@ export const isInvestigationAvailable = async ({
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): Promise<boolean> => {
-  if (featureFlags && !(await featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false))) {
+  if (
+    featureFlags &&
+    !(await featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false))
+  ) {
     return false;
   }
 
