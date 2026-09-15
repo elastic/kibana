@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MainCategories, PipelineDataFlowHealth, PipelineStats } from '@kbn/siem-readiness';
+import type { PipelineDataFlowHealth, PipelineStats } from '@kbn/siem-readiness';
 import {
   CATEGORY_ORDER,
   filterPipelinesByCategories,
@@ -79,18 +79,6 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   // If any pipeline has statsAvailable: false, stats are not available for this environment
   const statsAvailable = pipelineItems ? pipelineItems.every((p) => p.statsAvailable) : true;
 
-  // Build index → all-categories map from the categories API response
-  const indexToCategoriesMap = useMemo(() => {
-    const map = new Map<string, MainCategories[]>();
-    categoriesData?.mainCategoriesMap?.forEach((group) => {
-      group.indices.forEach((idx) => {
-        const existing = map.get(idx.indexName) ?? [];
-        map.set(idx.indexName, [...existing, group.category as MainCategories]);
-      });
-    });
-    return map;
-  }, [categoriesData]);
-
   // Shared filter: same predicate used by the agent tool.
   // Produces the flat list of pipelines that serve at least one categorized SIEM index.
   const filteredPipelineItems = useMemo(
@@ -98,7 +86,9 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     [pipelineItems, categoriesData]
   );
 
-  // Group filtered pipelines by category (UI-only: adds status fields and respects activeCategories).
+  // Group filtered pipelines by the server-computed categories union (UI-only: adds status
+  // fields and respects activeCategories). Must not recompute category membership locally —
+  // pipeline.categories is the single source of truth shared with the agent.
   const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
     if (!filteredPipelineItems.length) return [];
 
@@ -114,12 +104,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         continuityDataFlowHealth: getContinuityDataFlowHealth(pipeline),
       };
 
-      const pipelineCategories = new Set<MainCategories>();
-      pipeline.indices.forEach((indexName) => {
-        (indexToCategoriesMap.get(indexName) ?? []).forEach((cat) => pipelineCategories.add(cat));
-      });
-
-      pipelineCategories.forEach((category) => {
+      (pipeline.categories ?? []).forEach((category) => {
         if (activeCategories.includes(category)) {
           const existing = categoryPipelinesMap.get(category) ?? [];
           existing.push(pipelineWithStats);
@@ -135,7 +120,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     });
 
     return result;
-  }, [filteredPipelineItems, indexToCategoriesMap, activeCategories]);
+  }, [filteredPipelineItems, activeCategories]);
 
   const hasUnfilteredData = (pipelineItems?.length ?? 0) > 0;
 
