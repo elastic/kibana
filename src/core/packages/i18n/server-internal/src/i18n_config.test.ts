@@ -40,7 +40,7 @@ describe('i18n config', () => {
     it('defaults to the five bundled locales and English defaultLocale', () => {
       const validated = config.schema.validate({});
       expect(validated).toEqual({
-        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'],
+        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
         defaultLocale: 'en',
         allowLocaleCookie: true,
       });
