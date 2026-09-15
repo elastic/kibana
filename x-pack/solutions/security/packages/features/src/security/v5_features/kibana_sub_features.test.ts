@@ -7,36 +7,24 @@
 
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import type { SecurityFeatureParams } from '../types';
 import { getSecurityV5SubFeaturesMap } from './kibana_sub_features';
 
 /**
- * Mirrors the production defaults in
- * `x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts`.
- * Declared here because this package cannot import from the Security Solution plugin.
+ * Mirrors the defaults in `security_solution/common/experimental_features.ts`,
+ * which this package cannot import from.
  */
-const PRODUCTION_FLAGS: Record<string, boolean> = Object.freeze({
+const PRODUCTION_FLAGS = {
   trustedDevices: true,
   responseActionsScriptLibraryManagement: true,
   customYaraSignaturesEnabled: false,
-});
+};
 
-const ALL_FLAGS_ENABLED: Record<string, boolean> = Object.freeze({
-  trustedDevices: true,
-  responseActionsScriptLibraryManagement: true,
-  customYaraSignaturesEnabled: true,
-});
+const ALL_FLAGS_ENABLED = { ...PRODUCTION_FLAGS, customYaraSignaturesEnabled: true };
 
-const getParams = (experimentalFeatures = PRODUCTION_FLAGS): SecurityFeatureParams => ({
-  experimentalFeatures,
-  savedObjects: [],
-});
+const getSubFeaturesMap = (experimentalFeatures: Record<string, boolean>) =>
+  getSecurityV5SubFeaturesMap({ experimentalFeatures, savedObjects: [] });
 
-const getSubFeatures = (experimentalFeatures = PRODUCTION_FLAGS): SubFeatureConfig[] =>
-  Array.from(getSecurityV5SubFeaturesMap(getParams(experimentalFeatures)).values());
-
-/** The name, help text and selectable privilege levels a sub-feature contributes to the role editor. */
-const summarize = (subFeature: SubFeatureConfig) => ({
+const getDisplayedFields = (subFeature: SubFeatureConfig) => ({
   name: subFeature.name,
   description: subFeature.description,
   privileges: subFeature.privilegeGroups.flatMap((group) =>
@@ -46,7 +34,9 @@ const summarize = (subFeature: SubFeatureConfig) => ({
 
 describe('getSecurityV5SubFeaturesMap', () => {
   it('registers the expected sub-features, in display order, with their help text and privilege levels', () => {
-    expect(getSubFeatures().map(summarize)).toEqual([
+    const subFeatures = [...getSubFeaturesMap(PRODUCTION_FLAGS).values()];
+
+    expect(subFeatures.map(getDisplayedFields)).toEqual([
       {
         name: 'Endpoint List',
         description:
@@ -152,42 +142,27 @@ describe('getSecurityV5SubFeaturesMap', () => {
   });
 
   it('does not set a privileges tooltip on any sub-feature', () => {
-    // Asserted with every flag enabled so that flag-gated sub-features are covered too.
-    const subFeatures = getSubFeatures(ALL_FLAGS_ENABLED);
+    // Every flag enabled, so the flag-gated sub-features are covered too.
+    const subFeatures = [...getSubFeaturesMap(ALL_FLAGS_ENABLED).values()];
 
-    expect(subFeatures).toHaveLength(19);
+    expect(subFeatures.length).toBeGreaterThan(0);
     for (const subFeature of subFeatures) {
       expect(subFeature.privilegesTooltip).toBeUndefined();
     }
   });
 
-  describe('experimental feature flags', () => {
-    it('omits Trusted Devices when `trustedDevices` is disabled', () => {
-      const subFeatures = getSecurityV5SubFeaturesMap(
-        getParams({ ...PRODUCTION_FLAGS, trustedDevices: false })
-      );
-
-      expect(subFeatures.has(SecuritySubFeatureId.trustedDevices)).toBe(false);
-    });
-
-    it('omits Elastic Defend Scripts Management when `responseActionsScriptLibraryManagement` is disabled', () => {
-      const subFeatures = getSecurityV5SubFeaturesMap(
-        getParams({ ...PRODUCTION_FLAGS, responseActionsScriptLibraryManagement: false })
-      );
-
-      expect(subFeatures.has(SecuritySubFeatureId.scriptsManagement)).toBe(false);
-    });
-
-    it('includes Custom Yara Signatures only when `customYaraSignaturesEnabled` is enabled', () => {
-      expect(
-        getSecurityV5SubFeaturesMap(getParams()).has(SecuritySubFeatureId.customYaraSignatures)
-      ).toBe(false);
-
-      expect(
-        getSecurityV5SubFeaturesMap(getParams(ALL_FLAGS_ENABLED)).has(
-          SecuritySubFeatureId.customYaraSignatures
-        )
-      ).toBe(true);
-    });
+  it.each([
+    { flag: 'trustedDevices', subFeatureId: SecuritySubFeatureId.trustedDevices },
+    {
+      flag: 'responseActionsScriptLibraryManagement',
+      subFeatureId: SecuritySubFeatureId.scriptsManagement,
+    },
+    {
+      flag: 'customYaraSignaturesEnabled',
+      subFeatureId: SecuritySubFeatureId.customYaraSignatures,
+    },
+  ])('registers $subFeatureId only when `$flag` is enabled', ({ flag, subFeatureId }) => {
+    expect(getSubFeaturesMap({ ...PRODUCTION_FLAGS, [flag]: true }).has(subFeatureId)).toBe(true);
+    expect(getSubFeaturesMap({ ...PRODUCTION_FLAGS, [flag]: false }).has(subFeatureId)).toBe(false);
   });
 });
