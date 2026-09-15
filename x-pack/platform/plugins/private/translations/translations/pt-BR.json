@@ -16685,7 +16685,6 @@
     "xpack.cases.caseTable.select": "Selecionar",
     "xpack.cases.caseTable.severity": "Gravidade",
     "xpack.cases.caseTable.showAllCases": "Mostrar todos os casos",
-    "xpack.cases.caseTable.showingCasesTitle": "Mostrando {pageSize} de {totalRules} {totalRules, plural, =1 {case} other {casos}}",
     "xpack.cases.caseTable.snIncident": "Incidente externo",
     "xpack.cases.caseTable.status": "Status",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {case} other {cases}}",

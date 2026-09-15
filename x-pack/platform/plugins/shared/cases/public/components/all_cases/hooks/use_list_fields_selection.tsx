@@ -11,8 +11,8 @@ import { omit } from 'lodash';
 import type { CasesColumnSelection } from '../types';
 
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
-import type { CasesColumnsConfiguration } from '../use_cases_columns_configuration';
-import { useCasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import type { CasesColumnsConfiguration } from './use_cases_columns_configuration';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import {
   getColumnBaseKey,
   mergeSelectedColumnsWithConfiguration,
@@ -20,7 +20,7 @@ import {
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { LIST_ALWAYS_VISIBLE_FIELDS } from '../constants';
 import { useGlobalInlineFields } from './use_global_inline_fields';
-import { getExtendedFieldColumnKey } from '../extended_field_columns';
+import { getExtendedFieldColumnKey } from '../components/extended_field_columns';
 import { useCasesConfig } from '../../../common/lib/kibana';
 
 const getListFieldsConfiguration = (

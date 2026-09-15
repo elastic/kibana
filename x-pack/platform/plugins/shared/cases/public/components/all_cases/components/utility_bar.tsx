@@ -23,8 +23,8 @@ import {
 import * as i18n from '../translations';
 import type { CasesUI } from '../../../../common/ui/types';
 import { MAX_DOCS_PER_PAGE, LOCAL_STORAGE_KEYS } from '../../../../common/constants';
-import { useRefreshCases } from '../use_on_refresh_cases';
-import { useBulkActions } from '../use_bulk_actions';
+import { useRefreshCases } from '../hooks/use_on_refresh_cases';
+import { useBulkActions } from '../hooks/use_bulk_actions';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { VIEW_TOGGLE_LIST_ID, type ViewToggleId } from '../constants';

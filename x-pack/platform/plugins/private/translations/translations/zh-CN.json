@@ -16699,7 +16699,6 @@
     "xpack.cases.caseTable.selectedCasesTitle": "已选择 {totalRules} 个{totalRules, plural, =1 {case} other {案例}}",
     "xpack.cases.caseTable.severity": "严重性",
     "xpack.cases.caseTable.showAllCases": "显示所有案例",
-    "xpack.cases.caseTable.showingCasesTitle": "正在显示 {pageSize} 个（共 {totalRules} 个）案例",
     "xpack.cases.caseTable.snIncident": "外部事件",
     "xpack.cases.caseTable.status": "状态",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {case} other {案例}}",

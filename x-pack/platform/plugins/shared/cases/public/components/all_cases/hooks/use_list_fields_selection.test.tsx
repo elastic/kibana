@@ -12,11 +12,11 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { TestProviders } from '../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import { useListFieldsSelection } from './use_list_fields_selection';
-import { useCasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useGlobalInlineFields } from './use_global_inline_fields';
 
-jest.mock('../use_cases_columns_configuration');
+jest.mock('./use_cases_columns_configuration');
 jest.mock('../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../common/lib/kibana'),
   useCasesConfig: jest.fn(),

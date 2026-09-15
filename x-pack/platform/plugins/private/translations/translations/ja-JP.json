@@ -16694,7 +16694,6 @@
     "xpack.cases.caseTable.selectedCasesTitle": "{totalRules} {totalRules, plural, =1 {case} other {ケース}} を選択しました",
     "xpack.cases.caseTable.severity": "深刻度",
     "xpack.cases.caseTable.showAllCases": "すべてのケースを表示",
-    "xpack.cases.caseTable.showingCasesTitle": "{pageSize}の{totalRules}{totalRules, plural, =1 {case} other {個のケース}}を表示中",
     "xpack.cases.caseTable.snIncident": "外部インシデント",
     "xpack.cases.caseTable.status": "ステータス",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {case} other {ケース}}",

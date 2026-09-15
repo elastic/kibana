@@ -13,7 +13,7 @@ import { getExtendedFieldContent, getListItemFieldContent } from './field_conten
 import { ListItemFieldText } from './list_item_field_text';
 import type { ListItemFieldContent, ListItemOptionalFieldsProps } from './types';
 import { useCasesConfig } from '../../../../../common/lib/kibana';
-import { getExtendedFieldColumnKey } from '../../../extended_field_columns';
+import { getExtendedFieldColumnKey } from '../../extended_field_columns';
 import { useGlobalInlineFields } from '../../../hooks/use_global_inline_fields';
 
 export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({

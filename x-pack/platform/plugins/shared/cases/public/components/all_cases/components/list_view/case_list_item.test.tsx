@@ -26,8 +26,8 @@ jest.mock('../../../../common/navigation/hooks', () => ({
   }),
 }));
 
-jest.mock('../../use_actions', () => ({
-  ...jest.requireActual('../../use_actions'),
+jest.mock('../../hooks/use_actions', () => ({
+  ...jest.requireActual('../../hooks/use_actions'),
   ActionColumnComponent: () => (
     <button type="button" data-test-subj="mock-action-column">
       {'...'}

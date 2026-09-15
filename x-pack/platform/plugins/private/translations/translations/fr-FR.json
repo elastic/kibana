@@ -16626,7 +16626,6 @@
     "xpack.cases.caseTable.selectedCasesTitle": "Sélection de {totalRules} {totalRules, plural, =1 {case} other {cas}}",
     "xpack.cases.caseTable.severity": "Sévérité",
     "xpack.cases.caseTable.showAllCases": "Afficher tous les cas",
-    "xpack.cases.caseTable.showingCasesTitle": "Affichage de {pageSize} sur {totalRules} {totalRules, plural, =1 {case} other {cas}}",
     "xpack.cases.caseTable.snIncident": "Incident externe",
     "xpack.cases.caseTable.status": "État",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {case} other {cas}}",
