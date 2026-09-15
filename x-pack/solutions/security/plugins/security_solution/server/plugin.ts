@@ -141,7 +141,6 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
@@ -421,16 +420,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
     plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
     plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
-
-    registerPrivilegeMonitoringTask({
-      getStartServices: core.getStartServices,
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      telemetry: core.analytics,
-      kibanaVersion: pluginContext.env.packageInfo.version,
-      experimentalFeatures,
-      config: this.config,
-    });
 
     registerLeadGenerationTask({
       getStartServices: core.getStartServices,
@@ -1098,6 +1087,21 @@ export class Plugin implements ISecuritySolutionPlugin {
           esClient: core.elasticsearch.client.asInternalUser,
         })
         .catch(() => {}); // it shouldn't refuse, but just in case
+
+      // The privilege monitoring task type is no longer registered. Remove any
+      // leftover Task Manager documents so they don't produce "unrecognized task
+      // type" warnings on every poll cycle after upgrade.
+      const taskRepo = core.savedObjects.createInternalRepository(['task']);
+      taskRepo
+        .find({
+          type: 'task',
+          filter: `task.attributes.taskType: "entity_analytics:monitoring:privileges:engine"`,
+          perPage: 100,
+        })
+        .then(({ saved_objects: tasks }) =>
+          Promise.all(tasks.map((task) => taskRepo.delete('task', task.id).catch(() => {})))
+        )
+        .catch(() => {});
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
