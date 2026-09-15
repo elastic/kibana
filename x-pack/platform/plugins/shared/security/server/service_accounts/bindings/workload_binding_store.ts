@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
@@ -41,11 +42,7 @@ const toBinding = (attributes: WorkloadBindingAttributes): ServiceAccountWorkloa
 });
 
 /**
- * Persistence for workload bindings, and the only place that touches the binding saved object.
- *
- * Bindings are written whole and never partially updated: their attributes are authenticated by
- * the encrypted canary, and a partial update would rewrite the document without re-deriving that
- * authentication — silently making the binding undecryptable.
+ * Persistence for workload bindings.
  */
 export class WorkloadBindingStore {
   private readonly client: SavedObjectsClientContract;
@@ -70,7 +67,7 @@ export class WorkloadBindingStore {
     await this.client.create<WorkloadBindingAttributes>(
       SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
       attributes,
-      { id, overwrite: true, refresh: 'wait_for' }
+      { id, namespace: attributes.spaceId, overwrite: true, refresh: 'wait_for' }
     );
 
     return toBinding(attributes);
@@ -85,7 +82,7 @@ export class WorkloadBindingStore {
       await this.client.delete(
         SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
         getWorkloadBindingId(coordinates),
-        { refresh: 'wait_for' }
+        { namespace: coordinates.spaceId, refresh: 'wait_for' }
       );
       return true;
     } catch (e) {
@@ -113,7 +110,8 @@ export class WorkloadBindingStore {
       ({ attributes } =
         await this.encryptedClient.getDecryptedAsInternalUser<WorkloadBindingAttributes>(
           SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-          id
+          id,
+          { namespace: coordinates.spaceId }
         ));
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -177,6 +175,9 @@ export class WorkloadBindingStore {
     const finder = this.client.createPointInTimeFinder<WorkloadBindingAttributes>({
       type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
       perPage: FIND_PAGE_SIZE,
+      // TODO(legrego): This will need a more refined approach once service accounts
+      // support fine-grained authorization checks.
+      namespaces: [ALL_NAMESPACES_STRING],
       filter: nodeBuilder.is(
         `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`,
         serviceAccountId

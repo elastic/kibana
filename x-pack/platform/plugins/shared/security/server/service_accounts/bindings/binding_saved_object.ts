@@ -108,33 +108,19 @@ export const registerWorkloadBindingSavedObjectType = (
   savedObjects.registerType({
     name: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
     hidden: true,
-    // Service accounts are project-scoped rather than space-scoped, and bindings are managed
-    // globally: listing every workload bound to a service account must not require a per-space
-    // sweep. The workload's own space is an authenticated attribute instead of the document's
-    // namespace.
-    namespaceType: 'agnostic',
+    namespaceType: 'multiple-isolated',
     mappings: {
       dynamic: false,
       properties: {
         // Answers "which workloads run as this service account?".
         serviceAccountId: { type: 'keyword', ignore_above: 1024 },
-        // These documents are namespace-agnostic, so they outlive the space their workload lived
-        // in. Mapped ahead of the cleanup that will need it, since adding it later would cost a
-        // model version.
-        spaceId: { type: 'keyword', ignore_above: 1024 },
-        // Mapped now so bindings can later be reported on by age without a migration.
+        // Mapped so bindings can later be reported on by age without a migration.
         boundAt: { type: 'date' },
         // The management UI groups a service account's workloads by operation and labels them by
-        // workload type, so both have to be filterable and aggregatable. Mapped now for the same
-        // reason as `spaceId`: adding them once bindings exist costs a model version.
+        // workload type, so both have to be filterable and aggregatable. Mapped now because
+        // adding a mapping once bindings exist costs a model version.
         operationType: { type: 'keyword', ignore_above: 1024 },
         workloadType: { type: 'keyword', ignore_above: 1024 },
-        // A union of binder variants flattened into one object: `type` selects which of the
-        // fields below a given document populates. `userProfileId` is the useful one — it is
-        // present on both the `user` and `api_key` variants, so "bound by this person"
-        // resolves regardless of which credential did the binding. Note that
-        // `boundBy.serviceAccountId` is the account that *bound* the workload, which is a
-        // different question from the top-level `serviceAccountId` the workload *runs as*.
         boundBy: {
           // Explicit, so that adding a fourth variant is a deliberate mapping decision rather
           // than something that starts indexing on its own.

@@ -85,6 +85,8 @@ describe('WorkloadBindingStore', () => {
 
       expect(client.create).toHaveBeenCalledWith(SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE, written, {
         id: getWorkloadBindingId(COORDINATES),
+        // The binding lives in the workload's space, which is what retires it with that space.
+        namespace: 'default',
         overwrite: true,
         refresh: 'wait_for',
       });
@@ -100,6 +102,16 @@ describe('WorkloadBindingStore', () => {
       // The canary is an implementation detail of integrity and never surfaces to callers.
       expect(binding).not.toHaveProperty('canary');
     });
+
+    it('writes into the workload’s own space, not the client’s', async () => {
+      await store.set(attributes({ spaceId: 'marketing' }));
+
+      expect(client.create).toHaveBeenCalledWith(
+        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        expect.objectContaining({ spaceId: 'marketing' }),
+        expect.objectContaining({ namespace: 'marketing' })
+      );
+    });
   });
 
   describe('#delete', () => {
@@ -108,7 +120,18 @@ describe('WorkloadBindingStore', () => {
       expect(client.delete).toHaveBeenCalledWith(
         SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
         getWorkloadBindingId(COORDINATES),
-        { refresh: 'wait_for' }
+        { namespace: 'default', refresh: 'wait_for' }
+      );
+    });
+
+    it('removes the binding from the workload’s own space', async () => {
+      const coordinates = { ...COORDINATES, spaceId: 'marketing' };
+      await store.delete(coordinates);
+
+      expect(client.delete).toHaveBeenCalledWith(
+        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        getWorkloadBindingId(coordinates),
+        expect.objectContaining({ namespace: 'marketing' })
       );
     });
 
@@ -147,7 +170,8 @@ describe('WorkloadBindingStore', () => {
 
       expect(encryptedClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
         SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
-        getWorkloadBindingId(COORDINATES)
+        getWorkloadBindingId(COORDINATES),
+        { namespace: 'default' }
       );
     });
 
@@ -251,6 +275,8 @@ describe('WorkloadBindingStore', () => {
       const [[findOptions]] = client.createPointInTimeFinder.mock.calls;
       expect(findOptions.type).toBe(SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE);
       expect(JSON.stringify(findOptions.filter)).toContain('serviceAccountId');
+      // A service account is project-scoped, so its workloads are looked for in every space.
+      expect(findOptions.namespaces).toEqual(['*']);
     });
 
     it('closes the finder even when a page fails', async () => {
