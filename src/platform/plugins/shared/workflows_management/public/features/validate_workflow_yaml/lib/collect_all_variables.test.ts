@@ -13,6 +13,22 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 
 describe('collectAllVariables', () => {
+  it('throws when the line counter was not initialized by the parser', () => {
+    const yaml = 'name: Test Workflow';
+    const yamlDocument = parseDocument(yaml);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition({
+      version: '1',
+      name: 'Test Workflow',
+      enabled: false,
+      triggers: [],
+      steps: [],
+    });
+
+    expect(() => collectAllVariables(yaml, yamlDocument, new LineCounter(), workflowGraph)).toThrow(
+      'LineCounter must be initialized by parsing the YAML source'
+    );
+  });
+
   it('should collect mustache template variables', () => {
     const yaml = `
 name: Test Workflow

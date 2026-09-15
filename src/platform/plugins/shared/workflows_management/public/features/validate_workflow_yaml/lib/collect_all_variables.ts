@@ -73,6 +73,10 @@ export function collectAllVariables(
   lineCounter: LineCounter,
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
+  if (lineCounter.lineStarts.length === 0) {
+    throw new Error('LineCounter must be initialized by parsing the YAML source');
+  }
+
   const scalarIndex = getScalarIndex(yamlDocument);
   const variableItems: VariableItem[] = [];
 

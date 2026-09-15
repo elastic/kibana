@@ -65,7 +65,7 @@ export function runWorkflowYamlValidations({
     ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
   ];
 
-  if (workflowLookup && lineCounter) {
+  if (workflowLookup) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
       ...validateIfConditions(workflowLookup, lineCounter),
