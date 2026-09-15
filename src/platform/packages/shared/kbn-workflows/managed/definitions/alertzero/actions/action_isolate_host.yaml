@@ -63,12 +63,9 @@ outputs:
 steps:
   # POST queues the command; 200 means accepted, not that the host is isolated.
   # kibana.request is sent verbatim, so the path is prefixed with the executing space.
+  # No retries: the API is non-idempotent — each POST creates a new action ID.
   - name: dispatch
     type: kibana.request
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/isolate"
@@ -114,11 +111,22 @@ steps:
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
+  # Fail the workflow when the endpoint-side action did not succeed so the
+  # proposal gate's on-failure path fires instead of record_success.
   - name: emit_result
-    type: workflow.output
-    status: completed
-    with:
-      action_id: "{{ steps.poll_status.output.data.id }}"
-      status: "{{ steps.poll_status.output.data.status }}"
-      was_successful: "${{ steps.poll_status.output.data.wasSuccessful }}"
-      message: "{% if steps.poll_status.output.data.wasSuccessful %}{{ consts.actionLabel }} completed successfully. Action ID: {{ steps.poll_status.output.data.id }}{% else %}{{ consts.actionLabel }} failed. Action ID: {{ steps.poll_status.output.data.id }}{% endif %}"
+    type: if
+    condition: "${{ steps.poll_status.output.data.wasSuccessful == true }}"
+    steps:
+      - name: emit_success
+        type: workflow.output
+        status: completed
+        with:
+          action_id: "{{ steps.poll_status.output.data.id }}"
+          status: "{{ steps.poll_status.output.data.status }}"
+          was_successful: true
+          message: "{{ consts.actionLabel }} completed successfully. Action ID: {{ steps.poll_status.output.data.id }}"
+    else:
+      - name: emit_failure
+        type: workflow.fail
+        with:
+          message: "{{ consts.actionLabel }} failed. Action ID: {{ steps.poll_status.output.data.id }}"

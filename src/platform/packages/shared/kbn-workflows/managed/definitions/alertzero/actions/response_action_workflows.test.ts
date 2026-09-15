@@ -148,18 +148,30 @@ describe('AlertZero response-action workflows', () => {
       expect(pollDelay?.with?.duration).toBe('10s');
     });
 
-    it('emits the same result shape the custom steps returned', () => {
-      const emit = stepByName('emit_result');
+    it('branches on wasSuccessful: succeeds with output fields, fails the workflow otherwise', () => {
+      const emitResult = stepByName('emit_result');
+      const emitSuccess = stepByName('emit_success');
+      const emitFailure = stepByName('emit_failure');
       const outputNames = (parsed.outputs ?? []).map((output) => output.name);
 
-      expect(emit?.type).toBe('workflow.output');
+      // emit_result gates on wasSuccessful so the proposal gate's on-failure path fires
+      expect(emitResult?.type).toBe('if');
+      expect(emitResult?.condition).toContain('wasSuccessful');
+
+      // success path: workflow.output with the same shape callers expect
+      expect(emitSuccess?.type).toBe('workflow.output');
       expect(outputNames).toEqual(['action_id', 'status', 'was_successful', 'message']);
-      expect(emit?.with).toEqual(
+      expect(emitSuccess?.with).toEqual(
         expect.objectContaining({
           action_id: expect.stringContaining('steps.poll_status.output.data.id'),
           status: expect.stringContaining('steps.poll_status.output.data.status'),
-          was_successful: expect.stringContaining('steps.poll_status.output.data.wasSuccessful'),
         })
+      );
+
+      // failure path: workflow.fail so the parent workflow.execute propagates an error
+      expect(emitFailure?.type).toBe('workflow.fail');
+      expect(emitFailure?.with?.message).toEqual(
+        expect.stringContaining('steps.poll_status.output.data.id')
       );
     });
   });
