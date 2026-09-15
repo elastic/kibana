@@ -284,15 +284,17 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
-        await cisIntegration.inputUniqueIntegrationName();
+        const integrationName = await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
-            (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-              roleArn
+            (await cisIntegration.getFieldValueInEditPage(
+              AWS_INPUT_TEST_SUBJECTS.ROLE_ARN,
+              integrationName
+            )) === roleArn
           ).to.be(true);
         });
       });
