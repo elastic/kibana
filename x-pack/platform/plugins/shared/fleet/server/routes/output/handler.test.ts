@@ -477,7 +477,6 @@ describe('Outputs handler', () => {
       const updateCallArgs = (outputService.update as jest.Mock).mock.calls[0];
       expect(updateCallArgs[2]).toBe('output1');
       expect(updateCallArgs[3]).not.toHaveProperty('id');
-
     });
   });
 });
