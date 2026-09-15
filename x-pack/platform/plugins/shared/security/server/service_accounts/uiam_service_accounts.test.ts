@@ -200,7 +200,7 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Service account creation denied: missing `manage_security` cluster privilege'
+        'Refused to create a service account: missing `manage_security` cluster privilege'
       );
     });
 
@@ -549,6 +549,30 @@ describe('UiamServiceAccounts', () => {
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
         expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+    });
+
+    describe('#releaseFakeRequest', () => {
+      it('permanently disables credential replacement for the request', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+
+        serviceAccounts.releaseFakeRequest(request);
+
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+        // The request rides out its current token; nothing is replaced.
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('is a no-op for requests this backend did not mint', () => {
+        expect(() =>
+          serviceAccounts.releaseFakeRequest(httpServerMock.createFakeKibanaRequest({}))
+        ).not.toThrow();
       });
     });
   });

@@ -217,8 +217,8 @@ describe('buildSecurityApi', () => {
 
       await api.serviceAccounts.create(request, params);
 
-      expect(serviceAccounts!.create).toHaveBeenCalledTimes(1);
-      expect(serviceAccounts!.create).toHaveBeenCalledWith(request, params);
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledWith(request, params);
     });
 
     it('returns the result from the service', async () => {
@@ -230,7 +230,7 @@ describe('buildSecurityApi', () => {
         role_assignments: {},
         assumable_by: [],
       };
-      serviceAccounts!.create.mockResolvedValue(created);
+      serviceAccounts!.backend.create.mockResolvedValue(created);
 
       await expect(
         api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
@@ -243,6 +243,92 @@ describe('buildSecurityApi', () => {
       await expect(
         api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
+  describe('workload bindings', () => {
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+
+    it('delegates bindWorkload, forwarding the operation type Core supplied', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
+
+      await api.serviceAccounts.bindWorkload('alerting_rule', request, params);
+
+      expect(serviceAccounts!.workloads.bindWorkload).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        params
+      );
+    });
+
+    it('delegates unbindWorkload', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.unbindWorkload('alerting_rule', request, WORKLOAD);
+
+      expect(serviceAccounts!.workloads.unbindWorkload).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        WORKLOAD
+      );
+    });
+
+    it('delegates getBinding and returns its result', async () => {
+      const binding = { operationType: 'alerting_rule' } as never;
+      serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
+
+      await expect(api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD)).resolves.toBe(
+        binding
+      );
+      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith('alerting_rule', WORKLOAD);
+    });
+
+    it('delegates withScopedRequest, passing the callback through', async () => {
+      const fn = jest.fn();
+
+      await api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, fn);
+
+      expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
+        'alerting_rule',
+        WORKLOAD,
+        fn
+      );
+    });
+
+    it.each([
+      [
+        'bindWorkload',
+        () =>
+          api.serviceAccounts.bindWorkload('alerting_rule', httpServerMock.createKibanaRequest(), {
+            serviceAccountId: 'sa',
+            ...WORKLOAD,
+          }),
+      ],
+      [
+        'unbindWorkload',
+        () =>
+          api.serviceAccounts.unbindWorkload(
+            'alerting_rule',
+            httpServerMock.createKibanaRequest(),
+            WORKLOAD
+          ),
+      ],
+      [
+        'getWorkloadBinding',
+        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD),
+      ],
+      [
+        'withScopedRequestForWorkload',
+        () =>
+          api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, jest.fn()),
+      ],
+    ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
+      serviceAccounts = null;
+
+      await expect(invoke()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Service accounts are not enabled"`
+      );
     });
   });
 

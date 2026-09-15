@@ -21,6 +21,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { GenerateOpenApiDocumentOptionsFilters } from '@kbn/router-to-openapispec';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
@@ -90,6 +91,19 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
   isListening: () => boolean;
   setRedactedSessionIdGetter: (
     getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) => void;
+  /**
+   * Set the provider the HTTP self client uses to stamp the UIAM internal-caller attestation on a
+   * self call that carries a Kibana-minted UIAM credential. The attestation is an HMAC bound to
+   * the exact credential, so the self client re-derives it for every attempt rather than taking a
+   * precomputed value from its caller.
+   *
+   * Injected as a callback rather than the security service itself: `@kbn/core-security-server-internal`
+   * references `@kbn/core-http-server-mocks`, so depending on it from here would close a
+   * project-reference cycle.
+   */
+  setSelfClientInternalCallerAttestationProvider: (
+    provider: (credential: HTTPAuthorizationHeader) => Record<string, string>
   ) => void;
 }
 

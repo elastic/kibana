@@ -606,6 +606,10 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    httpStart.setSelfClientInternalCallerAttestationProvider(
+      (credential) =>
+        securityStart.authc.apiKeys.uiam?.getInternalCallerAttestationHeaders(credential) ?? {}
+    );
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,

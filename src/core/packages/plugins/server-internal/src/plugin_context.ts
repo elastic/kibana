@@ -257,6 +257,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
+      setSelfClientUnauthorizedErrorHandler: deps.http.setSelfClientUnauthorizedErrorHandler,
     },
     i18n: deps.i18n,
     logging: {
@@ -316,6 +317,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
       acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      serviceAccounts: {
+        registerOperation: (registration) =>
+          deps.security.serviceAccounts.registerOperation(registration),
+      },
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>

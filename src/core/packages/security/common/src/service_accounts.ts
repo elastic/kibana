@@ -49,6 +49,67 @@ export interface CreateServiceAccountParams {
 }
 
 /**
+ * The principal that bound a service account to a workload. Always the most specific stable
+ * identifier available for whatever actually acted: a machine identity, else the credential, else
+ * the user.
+ *
+ * @public
+ */
+export type ServiceAccountWorkloadBinder =
+  | {
+      type: 'user';
+      username: string;
+      userProfileId?: string;
+    }
+  | {
+      type: 'api_key';
+      apiKeyId: string;
+      variant: 'stack' | 'uiam';
+      userProfileId?: string;
+    }
+  | { type: 'service_account'; serviceAccountId: string };
+
+/**
+ * A persisted binding of a service account to a workload of a registered operation type.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadBinding {
+  operationType: string;
+  workloadType: string;
+  workloadId: string;
+  serviceAccountId: string;
+  spaceId: string;
+  boundBy: ServiceAccountWorkloadBinder;
+  /** ISO-8601 timestamp of the bind. */
+  boundAt: string;
+}
+
+/**
+ * Identifies a workload. Workload IDs are not guaranteed unique across spaces, so the space is
+ * part of a binding's identity and is supplied explicitly on every path: a binding is written,
+ * read, removed and executed under one and the same set of coordinates.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadCoordinates {
+  /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
+  workloadType: string;
+  workloadId: string;
+  /** The space the workload lives in. */
+  spaceId: string;
+}
+
+/**
+ * Parameters for binding a service account to a workload.
+ *
+ * @public
+ */
+export interface BindServiceAccountWorkloadParams extends ServiceAccountWorkloadCoordinates {
+  serviceAccountId: string;
+}
+
+/**
  * A service account.
  *
  * @public

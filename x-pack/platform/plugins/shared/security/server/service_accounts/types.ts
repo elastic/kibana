@@ -12,6 +12,7 @@ import type {
   UiamProjectType,
 } from '@kbn/core-security-server';
 
+import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 
 /**
@@ -32,10 +33,16 @@ export interface ServiceAccountsBackend {
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
 
   /**
-   * Replaces the credential of a service-account-bound fake request after the ES client reported
-   * a token-expiry 401 for it, returning the auth headers to retry with, or `null` when the request is not
+   * Replaces the credential of a service-account-bound fake request after a 401 was attributed to
+   * an expired token, returning the auth headers to retry with, or `null` when the request is not
    * bound to a service account or a replacement could not be minted. Only meant to be called by
-   * the ES-client unauthorized-error handler.
+   * the two unauthorized-error handlers that own a retry: the Elasticsearch client's, and Core's
+   * HTTP self client's.
+   *
+   * The result is credential-only by design. The Elasticsearch client merges it into the headers
+   * it sends upstream, so nothing that must not reach Elasticsearch — notably the UIAM
+   * internal-caller attestation — belongs here. The self client derives that itself, per attempt,
+   * from whichever credential it is about to send.
    *
    * Only requests minted by this backend are ever refreshed. Fake requests carrying external
    * (user-created) UIAM credentials and real inbound requests that happen to carry a service
@@ -43,13 +50,31 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Drops a fake request from the refresh registry: transparent credential replacement is
+   * permanently disabled and the request rides out the remainder of its current short-lived
+   * token. Idempotent, and a no-op for requests this backend did not mint.
+   */
+  releaseFakeRequest(request: KibanaRequest): void;
 }
 
 /**
  * Start contract of the service accounts service. `null` when the feature is
  * disabled.
  */
-export type ServiceAccountsServiceStart = ServiceAccountsBackend;
+export interface ServiceAccountsServiceStart {
+  /** Service account management and credential minting for this deployment's backend. */
+  backend: ServiceAccountsBackend;
+
+  /**
+   * Workload binding management and execution. Consumed exclusively by the Core security
+   * delegate, which reaches it through operation capability handles — it is deliberately absent
+   * from the security plugin's own public contract, so no plugin can address a workload binding
+   * without having claimed the operation type it belongs to.
+   */
+  workloads: ServiceAccountWorkloadBindingsApi;
+}
 
 export interface CloudProjectContext {
   organizationId: string;
