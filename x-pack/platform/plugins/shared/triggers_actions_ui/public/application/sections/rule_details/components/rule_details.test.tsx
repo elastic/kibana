@@ -324,6 +324,42 @@ describe('rule_details', () => {
       expect(screen.queryByTestId('apiKeyOwnerLabel')).not.toBeInTheDocument();
     });
 
+    it('renders the created/updated metadata using createdBy/updatedBy when no profile uid is set', () => {
+      const rule = mockRule({ createdBy: 'jdoe', updatedBy: 'asmith' });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleCreatedMetadata')).toHaveTextContent('Created by jdoe on');
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent('Last updated by asmith on');
+    });
+
+    it('renders the created/updated metadata using the resolved user profile when createdByProfileUid/updatedByProfileUid are set', async () => {
+      useKibanaMock().services.userProfile.bulkGet = jest.fn().mockResolvedValue([
+        {
+          uid: 'created-uid',
+          user: { username: 'jdoe', full_name: 'Jane Doe' },
+          data: {},
+        },
+        {
+          uid: 'updated-uid',
+          user: { username: 'asmith', full_name: 'Alex Smith' },
+          data: {},
+        },
+      ]);
+      const rule = mockRule({
+        createdBy: 'jdoe',
+        updatedBy: 'asmith',
+        createdByProfileUid: 'created-uid',
+        updatedByProfileUid: 'updated-uid',
+      });
+      renderPage(rule);
+
+      expect(await screen.findByTestId('ruleCreatedMetadata')).toHaveTextContent(
+        'Created by Jane Doe on'
+      );
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by Alex Smith on'
+      );
+    });
+
     it('does not render the actions menu if the user has only read permissions', async () => {
       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);

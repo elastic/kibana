@@ -70,6 +70,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
@@ -131,6 +132,21 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     useState<boolean>(false);
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
+
+  // Batch both uids into a single bulkGet request instead of fetching separately.
+  const auditProfileUids = useMemo(
+    () =>
+      [rule.createdByProfileUid, rule.updatedByProfileUid].filter((uid): uid is string => !!uid),
+    [rule.createdByProfileUid, rule.updatedByProfileUid]
+  );
+
+  const profilesByUid = useBulkGetUserProfiles({ uids: auditProfileUids });
+  const creator = rule.createdByProfileUid
+    ? profilesByUid.get(rule.createdByProfileUid)
+    : rule.createdBy ?? '';
+  const updater = rule.updatedByProfileUid
+    ? profilesByUid.get(rule.updatedByProfileUid)
+    : rule.updatedBy ?? '';
 
   useEffect(() => {
     (async () => {
@@ -349,7 +365,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.createdAt', {
           defaultMessage: 'Created by {creator} on {createdAt}',
           values: {
-            creator: rule.createdBy ?? '',
+            creator,
             createdAt: moment(rule.createdAt).format('ll'),
           },
         }),
@@ -361,7 +377,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.updatedAt', {
           defaultMessage: 'Last updated by {updater} on {updatedAt}',
           values: {
-            updater: rule.updatedBy ?? '',
+            updater,
             updatedAt: moment(rule.updatedAt).format('ll'),
           },
         }),
@@ -382,14 +398,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
 
     return items as unknown as AppHeaderMetadataItems;
-  }, [
-    rule.createdBy,
-    rule.createdAt,
-    rule.updatedBy,
-    rule.updatedAt,
-    rule.apiKeyOwner,
-    capabilities,
-  ]);
+  }, [creator, rule.createdAt, updater, rule.updatedAt, rule.apiKeyOwner, capabilities]);
 
   const appMenu = useRuleDetailsAppMenu({
     rule,
