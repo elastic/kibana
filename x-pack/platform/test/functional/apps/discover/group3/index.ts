@@ -17,7 +17,6 @@
  * - visualize_field: MIXED (12 tests; 2 delete, 2 hand to Lens, rest migrate)
  * - value_suggestions: DELETED (fully ported to Scout)
  * - value_suggestions_non_timebased: DELETED (fully ported to Scout)
- * - saved_search_embeddable: MIXED (1 delete, 1 cover with unit test, 3 migrate)
  * - esql_starred: MIXED, mostly covered by existing jest and Scout API tests
  * - rule_creation: cover with a unit test, then DELETE
  */
@@ -28,7 +27,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover - group 3', function () {
     loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./visualize_field'));
-    loadTestFile(require.resolve('./saved_search_embeddable'));
     loadTestFile(require.resolve('./esql_starred'));
     loadTestFile(require.resolve('./rule_creation'));
   });
