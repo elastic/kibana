@@ -26,6 +26,14 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     tools: {
       register: jest.fn(),
     },
+    management: {
+      getAgent: jest.fn(),
+      createOrUpdateAgent: jest.fn(),
+      deletePackageManagedAgent: jest.fn(),
+      createOrUpdateSkill: jest.fn(),
+      deletePackageManagedSkill: jest.fn(),
+      listPackageManagedSkills: jest.fn().mockResolvedValue([]),
+    },
     attachments: {
       registerType: jest.fn(),
     },

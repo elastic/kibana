@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AgentBuilderManagementApi } from './api/agent_builder_management_api';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
@@ -321,6 +322,9 @@ export class AgentBuilderPlugin
         ),
       },
       topSnippets: this.config.topSnippets,
+      // AB-004/AB-005: Fleet package installs create/update package-managed
+      // agents and skills through this system-level management surface.
+      management: new AgentBuilderManagementApi(coreSetup.getStartServices, this.logger),
     };
   }
 

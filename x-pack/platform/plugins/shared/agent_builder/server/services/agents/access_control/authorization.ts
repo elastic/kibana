@@ -31,6 +31,13 @@ export interface AgentAuthzArgs {
  * realm-qualified id). Username matching is kept only for legacy documents that never stored an
  * id, so those owners are not orphaned after upgrade. That legacy path cannot distinguish
  * same-username principals across realms.
+ *
+ * A resolved current-user id is not guaranteed: `security.authc.getCurrentUser()` can omit
+ * `authentication_realm`, in which case `toStableUserId` yields `undefined` and a strict id
+ * comparison would orphan the real owner of a private agent. When that happens we only accept
+ * the username encoded inside the owner's own `realm:` id, so the match still comes from the
+ * stored principal rather than an unrelated username collision. Profile-uid owners never take
+ * this path.
  */
 export const isAgentOwner = ({
   owner,
@@ -53,7 +60,32 @@ export const isAgentOwner = ({
   ) {
     return owner.username === currentUser.username;
   }
+  // Unresolvable current-user id against a realm-qualified owner: compare against the username
+  // encoded in the owner id itself. Profile-uid owners are excluded.
+  if (
+    owner.id !== undefined &&
+    currentUser.id === undefined &&
+    currentUser.username !== undefined
+  ) {
+    return realmIdUsername(owner.id) === currentUser.username;
+  }
   return false;
+};
+
+/**
+ * Extracts the username from a `realm:["type","name","username"]` id, or `undefined` when the id
+ * is not a realm-qualified id (for example a Kibana profile uid).
+ */
+const realmIdUsername = (ownerId: string): string | undefined => {
+  if (!ownerId.startsWith('realm:')) {
+    return undefined;
+  }
+  try {
+    const parts = JSON.parse(ownerId.slice('realm:'.length));
+    return Array.isArray(parts) && typeof parts[2] === 'string' ? parts[2] : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 /**

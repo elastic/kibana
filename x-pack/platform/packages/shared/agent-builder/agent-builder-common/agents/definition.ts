@@ -82,6 +82,7 @@ export interface AgentDefinition {
    * Optional labels used to organize or filter agents
    */
   labels?: string[];
+  /** True when the agent is managed by a package and must not be edited by users. */
   /**
    * Optional avatar eui icon for built-in agents
    */

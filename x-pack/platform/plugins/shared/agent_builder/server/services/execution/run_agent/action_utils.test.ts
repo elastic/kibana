@@ -30,13 +30,25 @@ describe('processStructuredAnswerResponse', () => {
   });
 
   describe.each([
-    ['a string', 'not an object'],
     ['null', null],
     ['undefined', undefined],
-    ['a number', 42],
   ])('when the response is %s', (_label, response) => {
     it('returns an error action', () => {
       expect(processStructuredAnswerResponse(response).type).toBe(AgentActionType.Error);
+    });
+  });
+
+  describe.each([
+    ['a string', 'not an object'],
+    ['a number', 42],
+    ['zero', 0],
+    ['an empty string', ''],
+    ['false', false],
+  ])('when the response is %s', (_label, response) => {
+    it('returns a structured answer action carrying the value', () => {
+      const action = processStructuredAnswerResponse(response) as StructuredAnswerAction;
+      expect(action.type).toBe(AgentActionType.StructuredAnswer);
+      expect(action.data).toBe(response);
     });
   });
 });
