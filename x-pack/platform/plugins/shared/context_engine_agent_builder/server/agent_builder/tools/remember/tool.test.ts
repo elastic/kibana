@@ -260,6 +260,46 @@ describe('remember tool', () => {
     });
   });
 
+  it('does not revise a tombstoned memory', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              type: 'memory_session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              spaces: ['space-1'],
+              updated_at: '2026-09-01T00:00:00.000Z',
+              attributes: { revision: 2 },
+              governance: { lifecycle: { status: 'deleted' } },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1' }, 'conversation-1');
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: "Failed to store memory: Memory 'memory-1' was deleted and cannot be revised.",
+          },
+        },
+      ],
+    });
+  });
+
   it('appends an existing memory revision to its data stream', async () => {
     search.mockResolvedValue({
       hits: {
