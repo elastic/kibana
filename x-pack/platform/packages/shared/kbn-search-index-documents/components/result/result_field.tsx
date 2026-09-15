@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
   EuiToken,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -70,35 +69,17 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
   label,
   fieldTypeLabel,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const iconButton = (
-    <EuiButtonEmpty
-      size="s"
-      aria-label={
-        fieldTypeLabel ??
-        i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
-          defaultMessage: "Show this field's type",
-        })
-      }
-      onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
-    >
-      <EuiToken iconType={iconType} size="s" />
-    </EuiButtonEmpty>
-  );
+  const token = <EuiToken iconType={iconType} size="s" aria-label={fieldTypeLabel} />;
+
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m" wrap={false}>
       <EuiFlexItem grow={false}>
         {fieldTypeLabel ? (
-          <EuiPopover
-            aria-label={fieldTypeLabel}
-            closePopover={() => setIsPopoverOpen(false)}
-            button={iconButton}
-            isOpen={isPopoverOpen}
-          >
-            {fieldTypeLabel}
-          </EuiPopover>
+          <EuiToolTip content={fieldTypeLabel} display="flex" disableScreenReaderOutput>
+            {token}
+          </EuiToolTip>
         ) : (
-          iconButton
+          token
         )}
       </EuiFlexItem>
       <EuiFlexItem>
