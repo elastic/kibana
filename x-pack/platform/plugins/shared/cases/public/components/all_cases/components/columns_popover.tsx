@@ -142,7 +142,6 @@ export const ColumnsPopover: React.FC<Props> = ({
       closePopover={closePopover}
       panelPaddingSize="s"
       anchorPosition="leftUp"
-      zIndex={0}
       data-test-subj="column-selection-popover"
       button={
         <EuiButton

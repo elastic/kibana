@@ -242,21 +242,23 @@ const CasesTableFiltersComponent = ({
               <SortFilter sortOrder={sortOrder} onChange={onSortOrderChange} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            {viewMode === VIEW_TOGGLE_TABLE_ID ? (
-              <ColumnsPopover
-                selectedColumns={selectedColumns}
-                onSelectedColumnsChange={onSelectedColumnsChange}
-              />
-            ) : (
-              <ColumnsPopover
-                selectedColumns={listFields}
-                onSelectedColumnsChange={onListFieldsChange}
-                buttonLabel={i18n.FIELDS_BUTTON_LABEL}
-                buttonIconType="listBullet"
-              />
-            )}
-          </EuiFlexItem>
+          {!isSelectorView && (
+            <EuiFlexItem grow={false}>
+              {viewMode === VIEW_TOGGLE_TABLE_ID ? (
+                <ColumnsPopover
+                  selectedColumns={selectedColumns}
+                  onSelectedColumnsChange={onSelectedColumnsChange}
+                />
+              ) : (
+                <ColumnsPopover
+                  selectedColumns={listFields}
+                  onSelectedColumnsChange={onListFieldsChange}
+                  buttonLabel={i18n.FIELDS_BUTTON_LABEL}
+                  buttonIconType="listBullet"
+                />
+              )}
+            </EuiFlexItem>
+          )}
           {!isSelectorView && (
             <EuiFlexItem grow={false}>
               <ViewToggle idSelected={viewMode} onChange={onViewModeChange} />
