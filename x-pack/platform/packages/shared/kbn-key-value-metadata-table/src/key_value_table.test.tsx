@@ -73,10 +73,6 @@ describe('KeyValueTable', () => {
   });
 
   describe('column alignment', () => {
-    // Consumers render one table per section, so the key column has to be sized
-    // independently of its content - otherwise the value column starts at a different
-    // x-position in every section (elastic/kibana#290168). It also must not be
-    // allowed to collapse below a readable width (elastic/kibana#275904).
     const longKey = 'error.exception.attributes.some.very.long.nested.field.name';
 
     it('gives the key column a content-independent width that wraps instead of overflowing', () => {
@@ -86,14 +82,10 @@ describe('KeyValueTable', () => {
 
       const keyCell = output.getByTestId('dot-key').closest('td');
       expect(keyCell).toHaveStyle({ width: '24em' });
-      // `nowrap` made the key column size itself to its longest key under an auto layout,
-      // and would make it overflow rather than wrap under a fixed one.
       expect(keyCell).not.toHaveStyle({ whiteSpace: 'nowrap' });
     });
 
     it('uses a fixed table layout even when the host app defaults EuiTable to auto', () => {
-      // Kibana's EuiProvider sets `EuiTable: { tableLayout: 'auto' }` globally, which is
-      // what made the key column collapse to its longest key per section.
       const { container } = render(
         <EuiProvider componentDefaults={{ EuiTable: { tableLayout: 'auto' } }}>
           <KeyValueTable keyValuePairs={[{ key: longKey, value: 'value' }]} />

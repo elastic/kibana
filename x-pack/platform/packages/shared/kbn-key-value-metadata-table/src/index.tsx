@@ -14,12 +14,6 @@ import { FormattedValue } from './formatted_value';
 import type { RenderKeyValue } from './formatted_value';
 import type { KeyValuePair } from './utils/get_flattened_key_value_pairs';
 
-// Consumers render one table per section (see APM's metadata tab), and CSS column widths
-// are never shared between sibling tables. Combined with `tableLayout: 'fixed'`, an explicit
-// key-column width keeps the value column at the same x-position in every table, independently
-// of how long the longest key in any given section happens to be. `em` rather than a
-// percentage because EUI warns against relative units for cell widths, and because it keeps
-// the column readable at high zoom instead of scaling with the container.
 const KEY_COLUMN_WIDTH = '24em';
 
 export function KeyValueTable({
@@ -51,8 +45,8 @@ export function KeyValueTable({
               />
             ) : (
               <ul>
-                {asArray.map((val, index) => (
-                  <li key={index}>
+                {asArray.map((val) => (
+                  <li key={`${key}-${String(val)}`}>
                     <FormattedValue
                       value={val}
                       dateFormat={dateFormat}
