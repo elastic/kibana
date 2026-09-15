@@ -223,6 +223,8 @@
     "console",
     "context-engine.createKi",
     "context-engine.deleteKi",
+    "context-engine.getFeedbackContext",
+    "context-engine.recordImprovements",
     "context-engine.updateKi",
     "context-engine.verifyKi",
     "d3security.run",
@@ -523,7 +525,6 @@
     "kibana.getCaseDefaultSpace",
     "kibana.request",
     "kibana.streams.get",
-    "kibana.streams.getSignificantEvents",
     "kibana.streams.list",
     "kibana.updateCase",
     "kibana.updateCaseDefaultSpace",
@@ -936,11 +937,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "49da68975a7c0ec71b0e791d403fce8c520c2ee1b1bb2a5068ed544d5604613d"
+      "sha256": "c21f115fcaf70e443cc7ef826bfb50ad0c9d5038530c9eb6dae4ef6d30ffb2ec"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "84b5ee6af021052bb13356ad5a17a3a85e1b8b69a35f300d42ad70411b5a23f9"
+      "sha256": "c9a7f4a6e6a1f6d20b6d8a58a7b818ee12bcf1b59550c1d07c5da9274adeb36d"
     }
   }
 }
