@@ -38,7 +38,9 @@ export const FieldMappingDisplayMode = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {field.type ? (
-          <EuiBadge color="hollow">{typeLabel ?? field.type}</EuiBadge>
+          <div style={{ width: 'fit-content' }}>
+            <EuiBadge color="hollow">{typeLabel ?? field.type}</EuiBadge>
+          </div>
         ) : (
           <span aria-hidden="true">&nbsp;</span>
         )}
