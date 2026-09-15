@@ -30,8 +30,11 @@ import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { memoryHydrateStepDefinition } from './step_definitions/memory_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex, createMemoryStore } from './memory/register_memory';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -99,6 +102,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -202,10 +206,23 @@ export class NightshiftInvestigationsPlugin
             })
           );
           plugins.workflowsExtensions.registerStepDefinition(
+            memoryHydrateStepDefinition({
+              getConnectionManager: () => this.sandboxConnectionManager,
+              logger: this.logger.get('memory'),
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
               logger: this.logger.get('cortex'),
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
+            memoryOptimizeStepDefinition({
+              getInference: () => this.inference,
+              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              logger: this.logger.get('memory'),
             })
           );
         }

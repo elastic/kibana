@@ -30,6 +30,9 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
+const NIGHTSHIFT_MEMORY_HYDRATE_WORKFLOW_ID = 'system-memory-hydrate';
+const NIGHTSHIFT_MEMORY_OPTIMIZE_WORKFLOW_ID = 'system-memory-optimize';
+
 export const DEDUCTIVE_INVESTIGATION_AGENT_NAME = 'Nightshift Deductive Investigator';
 export const DEDUCTIVE_INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
@@ -68,13 +71,12 @@ export const getDeductiveInvestigationAgentType = ({
     ],
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    // Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
-    // the sandbox and Cortex; without the sandbox the step would throw on every round.
+    // Cortex and Memory hydrate run as beforeAgent and post_execution hooks.
     ...(sandboxEnabled && cortexEnabled
-      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
+      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID, NIGHTSHIFT_MEMORY_HYDRATE_WORKFLOW_ID] }
       : {}),
     ...(cortexEnabled
-      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID] }
+      ? { post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_MEMORY_OPTIMIZE_WORKFLOW_ID] }
       : {}),
   },
 });
