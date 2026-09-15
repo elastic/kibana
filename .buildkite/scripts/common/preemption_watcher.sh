@@ -89,3 +89,23 @@ printf '{"detected_at":"%s","job_id":"%s","retry_count":"%s","config":"%s"}\n' \
 
 buildkite-agent annotate --style warning --context "preemption-${BUILDKITE_JOB_ID:-local}" \
   "Spot preemption detected at ${detected_at} in job \`${BUILDKITE_LABEL:-$META_KEY}\` (attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1))) while running \`${current_config:-<none>}\`" || true
+
+# Optional: stop the agent now instead of letting Buildkite discover it as lost.
+# A lost agent costs ~3 min heartbeat timeout + up to 60s reaper tick before the
+# job fails with exit -1 and becomes retryable. SIGQUIT makes the agent cancel
+# the job (cancel-signal, then SIGKILL after cancel-signal-timeout), upload what
+# it has within cancel-cleanup-timeout, and report signal_reason=agent_stop,
+# which the step's retry rules match immediately. Ordered last: the writes above
+# must land before the job's process tree (including this watcher) is killed.
+if [[ "${PREEMPTION_STOP_AGENT:-}" =~ ^(1|true)$ ]]; then
+  agent_pid="${BUILDKITE_AGENT_PID:-}"
+  if [[ -z "$agent_pid" ]]; then
+    agent_pid=$(pgrep -o -x buildkite-agent || true)
+  fi
+  if [[ "$agent_pid" ]]; then
+    log "sending SIGQUIT to buildkite-agent (pid $agent_pid) to fail the job fast with signal_reason=agent_stop"
+    kill -QUIT "$agent_pid" || log "failed to signal agent pid $agent_pid"
+  else
+    log "could not determine buildkite-agent pid; leaving job to lost-agent detection"
+  fi
+fi
