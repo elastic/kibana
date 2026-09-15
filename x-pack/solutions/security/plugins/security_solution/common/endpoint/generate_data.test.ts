@@ -151,6 +151,39 @@ describe('data generator', () => {
     expect(processEvent.process?.name).not.toBeNull();
   });
 
+  it('adds custom YARA signature fields to memory signature alerts', () => {
+    const alert = generator.generateMemoryAlert();
+    expect(alert.event?.code).toEqual('memory_signature');
+    expect(alert.rule?.custom_yara_signature?.entry_id).toBeTruthy();
+    expect(alert.rule?.custom_yara_signature?.entry_name).toBeTruthy();
+    expect(alert.rule?.custom_yara_signature?.rule_identifier).toBeTruthy();
+    expect(alert.rule?.name).toBeTruthy();
+  });
+
+  it('omits custom YARA signature fields when customYaraSignature is false', () => {
+    const alert = generator.generateMemoryAlert({ customYaraSignature: false });
+    expect(alert.rule?.custom_yara_signature).toBeUndefined();
+  });
+
+  it('uses provided custom YARA signature fields on memory signature alerts', () => {
+    const alert = generator.generateMemoryAlert({
+      customYaraSignature: {
+        entry_id: '123-456',
+        entry_name: 'User defined entry name',
+        rule_identifier: 'User_Defined_Rule_Identifier_1',
+        name: 'user_yara_scan_test',
+      },
+    });
+    expect(alert.rule).toEqual({
+      name: 'user_yara_scan_test',
+      custom_yara_signature: {
+        entry_id: '123-456',
+        entry_name: 'User defined entry name',
+        rule_identifier: 'User_Defined_Rule_Identifier_1',
+      },
+    });
+  });
+
   it('creates other event documents', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp, eventCategory: 'dns' });

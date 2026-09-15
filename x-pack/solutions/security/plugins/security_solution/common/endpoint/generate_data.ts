@@ -320,6 +320,13 @@ enum AlertTypes {
   BEHAVIOR = 'BEHAVIOR',
 }
 
+export interface CustomYaraSignatureAlertFields {
+  entry_name: string;
+  rule_identifier: string;
+  entry_id: string;
+  name?: string;
+}
+
 const alertsDefaultDataStream = {
   type: 'logs',
   dataset: 'endpoint.alerts',
@@ -626,6 +633,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
     alertType,
+    customYaraSignature,
   }: {
     ts?: number;
     sessionEntryLeader?: string;
@@ -634,9 +642,23 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ancestry?: string[];
     alertsDataStream?: DataStream;
     alertType?: AlertTypes;
+    /**
+     * Custom YARA Signature fields to attach to memory-signature alerts.
+     * Pass `false` to omit them. When omitted, memory-signature alerts get generated CYS fields.
+     */
+    customYaraSignature?: CustomYaraSignatureAlertFields | false;
   } = {}): AlertEvent {
     const processName = this.randomProcessName();
     const isShellcode = alertType === AlertTypes.MEMORY_SHELLCODE;
+    const resolvedCustomYaraSignature =
+      isShellcode || customYaraSignature === false
+        ? undefined
+        : customYaraSignature ?? {
+            entry_name: `YARA Signature ${this.randomString(5)}`,
+            rule_identifier: `User_Defined_Rule_Identifier_${this.randomString(5)}`,
+            entry_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
+            name: `user_yara_scan_test_${this.randomString(5)}`,
+          };
     const newAlert: AlertEvent = {
       ...this.commonInfo,
       data_stream: alertsDataStream,
@@ -644,6 +666,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ecs: {
         version: '1.6.0',
       },
+      ...(resolvedCustomYaraSignature
+        ? {
+            rule: {
+              name: resolvedCustomYaraSignature.name ?? resolvedCustomYaraSignature.rule_identifier,
+              custom_yara_signature: {
+                entry_name: resolvedCustomYaraSignature.entry_name,
+                rule_identifier: resolvedCustomYaraSignature.rule_identifier,
+                entry_id: resolvedCustomYaraSignature.entry_id,
+              },
+            },
+          }
+        : {}),
       // disabling naming-convention to accommodate external field
       // eslint-disable-next-line @typescript-eslint/naming-convention
       Memory_protection: {
