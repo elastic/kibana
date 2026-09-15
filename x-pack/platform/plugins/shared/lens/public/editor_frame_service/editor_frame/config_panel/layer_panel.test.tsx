@@ -1306,6 +1306,104 @@ describe('LayerPanel', () => {
       ).rejects.toThrow('does not contain compatible fields');
       expect(updateDatasource).not.toHaveBeenCalled();
     });
+
+    // Regression test for duplicate-field columns: a previous reconcile can leave
+    // an orphan column (columnId === query column id) alongside a dimension-bound
+    // column with the same fieldName. Reconciliation must keep the dimension-bound
+    // column instead of letting the orphan shadow it, which surfaced as a
+    // persistent "does not contain compatible fields" error on every submit.
+    it('preserves dimensions bound to duplicate-field columns when the layer query changes', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      const bucketField = 'BUCKET(@timestamp, 50, ?_tstart, ?_tend)';
+      const updateDatasource = jest.fn();
+      const textBasedState = {
+        layers: {
+          first: { columns: [], query: { esql: 'FROM first-index | LIMIT 10' } },
+          second: {
+            columns: [
+              // orphan created by a previous reconcile, not referenced by any dimension
+              {
+                columnId: bucketField,
+                fieldName: bucketField,
+                label: bucketField,
+                meta: { type: 'date' as const },
+              },
+              // column created by the dimension editor for the same field,
+              // referenced by the horizontal axis accessor
+              {
+                columnId: 'col-bucket',
+                fieldName: bucketField,
+                label: bucketField,
+                meta: { type: 'date' as const },
+              },
+              {
+                columnId: 'col-metric',
+                fieldName: 'count',
+                label: 'count',
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: { esql: `FROM index | STATS count = COUNT() BY ${bucketField}` },
+          },
+        },
+        indexPatternRefs: [],
+      };
+
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'second',
+          isOnlyLayer: false,
+          dimensionGroups: [
+            {
+              groupId: 'x',
+              groupLabel: 'Horizontal axis',
+              accessors: [{ columnId: 'col-bucket' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'x',
+            },
+            {
+              groupId: 'metric',
+              groupLabel: 'Vertical axis',
+              accessors: [{ columnId: 'col-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
+          updateDatasource,
+          framePublicAPI: {
+            ...createMockFramePublicAPI(),
+            datasourceLayers: {
+              first: mockTextBasedDatasource.publicAPIMock,
+              second: mockTextBasedDatasource.publicAPIMock,
+            },
+          },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
+        },
+        preloadedState: {
+          query: { esql: 'FROM first-index | LIMIT 10' },
+          datasourceStates: {
+            textBased: { isLoading: false, state: textBasedState },
+          },
+        },
+      });
+
+      const editorProps = jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0];
+      const newQuery = { esql: `FROM index | STATS meow = AVG(bytes) BY ${bucketField}` };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'meow', name: 'meow', meta: { type: 'number' } },
+        { id: bucketField, name: bucketField, meta: { type: 'date' } },
+      ];
+
+      await act(async () => editorProps?.onLayerQuerySubmit?.(newQuery, queryColumns));
+
+      expect(updateDatasource).toHaveBeenCalledTimes(1);
+      const nextColumns = updateDatasource.mock.calls[0][1].layers.second.columns;
+      expect(nextColumns.map((c: { columnId: string }) => c.columnId)).toEqual(
+        expect.arrayContaining(['col-bucket', 'col-metric'])
+      );
+    });
   });
 
   describe('layer data view picker visibility', () => {

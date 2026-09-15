@@ -140,6 +140,34 @@ describe('Text based languages utils', () => {
         },
       ]);
     });
+
+    // Regression test: when two existing columns share the same fieldName (an
+    // orphan from a previous reconcile plus a dimension-bound column), the
+    // dimension-bound column must win the exact-match tie so configured
+    // dimensions survive the query edit.
+    it('prefers dimension-bound columns over orphan duplicates with the same fieldName', () => {
+      const bucketField = 'BUCKET(@timestamp, 50, ?_tstart, ?_tend)';
+      const existingColumns: TextBasedLayerColumn[] = [
+        // orphan: columnId === query column id, not referenced by any dimension
+        { columnId: bucketField, fieldName: bucketField, meta: { type: 'date' } },
+        // dimension-bound column for the same field
+        { columnId: 'col-bucket', fieldName: bucketField, meta: { type: 'date' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: bucketField, name: bucketField, meta: { type: 'date' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns, new Set(['col-bucket']))).toEqual(
+        [
+          {
+            columnId: 'col-bucket',
+            fieldName: bucketField,
+            label: bucketField,
+            meta: { type: 'date' },
+          },
+        ]
+      );
+    });
   });
 
   describe('getAllColumns', () => {
