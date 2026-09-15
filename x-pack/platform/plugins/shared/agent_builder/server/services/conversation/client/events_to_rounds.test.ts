@@ -19,7 +19,7 @@ import {
   TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
-import { eventsToRounds } from './events_to_rounds';
+import { applyFeedbackMap, eventsToRounds } from './events_to_rounds';
 
 const usage: RoundModelUsageStats = {
   connector_id: 'c1',
@@ -487,5 +487,79 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
       tool_call_id: 'call-1',
       results: [{ type: 'error', message: 'The user chose not to proceed.' }],
     });
+  });
+});
+
+/** Minimal event set for a single completed round. */
+const singleRoundEvents = (roundId: string): TimelineEvent[] => [
+  {
+    id: `${roundId}::user_message`,
+    type: TimelineEventType.userMessage,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: userActor,
+    data: { message: 'hello' },
+  },
+  ...executionEvents({
+    roundId,
+    executionId: `${roundId}::execution`,
+    triggerEventId: `${roundId}::user_message`,
+    triggerType: TimelineTriggerType.userMessage,
+    steps: [],
+    outcome: { type: 'responded', response: { message: 'hi' } },
+    createdAt: '2024-01-01T00:00:01.000Z',
+  }),
+];
+
+describe('applyFeedbackMap', () => {
+  it('attaches feedback to the matching round', () => {
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')), {
+      r1: {
+        vote: 'up',
+        chips: ['accurate'],
+        comment: 'great',
+        submitted_at: '2024-01-01T00:01:00.000Z',
+      },
+    });
+    expect(round.feedback).toEqual({
+      vote: 'up',
+      chips: ['accurate'],
+      comment: 'great',
+      submitted_at: '2024-01-01T00:01:00.000Z',
+    });
+  });
+
+  it('leaves rounds untouched when feedback map is undefined', () => {
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')));
+    expect(round.feedback).toBeUndefined();
+  });
+
+  it('leaves rounds untouched when their id is not in the map', () => {
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')), {
+      other: { vote: 'up', chips: [], comment: '', submitted_at: '2024-01-01T00:00:00.000Z' },
+    });
+    expect(round.feedback).toBeUndefined();
+  });
+
+  it('applies feedback to the correct round when multiple rounds exist', () => {
+    const events: TimelineEvent[] = [...singleRoundEvents('r1'), ...singleRoundEvents('r2')];
+    const [r1, r2] = applyFeedbackMap(eventsToRounds(events), {
+      r2: { vote: 'down', chips: [], comment: '', submitted_at: '2024-01-01T00:00:00.000Z' },
+    });
+    expect(r1.feedback).toBeUndefined();
+    expect(r2.feedback?.vote).toBe('down');
+  });
+
+  it('clears stale round.feedback when the map entry is removed (vote retraction)', () => {
+    const roundsWithFeedback = eventsToRounds(singleRoundEvents('r1')).map((r) => ({
+      ...r,
+      feedback: {
+        vote: 'up' as const,
+        chips: [],
+        comment: '',
+        submitted_at: '2024-01-01T00:00:00.000Z',
+      },
+    }));
+    const [round] = applyFeedbackMap(roundsWithFeedback, {});
+    expect(round.feedback).toBeUndefined();
   });
 });
