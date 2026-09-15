@@ -8,6 +8,7 @@
 import assert from 'assert';
 
 import type { EntityType, ExtractionMode } from './entity_schema';
+import { EXTRACTION_MODE } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
 import { hostEntityDefinition } from './host';
 import {
@@ -79,8 +80,8 @@ export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
 ): Extract<ExtractionMode, 'priority' | 'single'> => {
-  if (isDualProcessEnabled && hasPriorityVariant(entityType)) return 'priority';
-  return 'single';
+  if (isDualProcessEnabled && hasPriorityVariant(entityType)) return EXTRACTION_MODE.priority;
+  return EXTRACTION_MODE.single;
 };
 
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
@@ -89,7 +90,7 @@ export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
 export function getEntityDefinition(
   type: EntityType,
   namespace: string,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): ManagedEntityDefinition {
   const definition = getEntityDefinitionWithoutId(type, extractionMode);
 
@@ -106,7 +107,7 @@ export function getEntityDefinition(
  */
 export function getEntityDefinitionWithoutId(
   type: EntityType,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): EntityDefinitionWithoutId {
   const definition = getEntityDefinitionVariants(type)[extractionMode];
   assert(

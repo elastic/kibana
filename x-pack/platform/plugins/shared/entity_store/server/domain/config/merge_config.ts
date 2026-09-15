@@ -6,6 +6,7 @@
  */
 
 import type { EntityType, ExtractionMode } from '../../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import type { LogExtractionConfig, LogExtractionTypeOverride } from '../saved_objects';
 import {
   LATEST_LOG_EXTRACTION_DEFAULTS,
@@ -60,7 +61,7 @@ export const getMergedConfig = (
   type: EntityType,
   globalOverrides: Partial<LogExtractionConfig>,
   typeOverride: LogExtractionTypeOverride | undefined,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): LogExtractionConfig =>
   LogExtractionConfigSchema.parse({
     ...LATEST_LOG_EXTRACTION_DEFAULTS,

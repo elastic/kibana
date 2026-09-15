@@ -16,6 +16,8 @@ import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import { ENGINE_METADATA_UNTYPED_ID_FIELD, TIMESTAMP_FIELD } from './query_builder_commons';
 import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import type { ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 
 const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: TIMESTAMP_FIELD, type: 'date' },
@@ -2047,7 +2049,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
     { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
   ];
 
-  function createContextWithMode(mode: 'single' | 'priority' | 'nonPriority') {
+  function createContextWithMode(mode: ExtractionMode) {
     jest.clearAllMocks();
     mockExecuteEsqlQuery.mockReset();
     mockIngestEntities.mockReset();
@@ -2091,7 +2093,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('nonPriority mode writes nonPriorityLogExtractionState on mid-run and end-of-run persists', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user') as Awaited<
         ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -2117,7 +2121,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('single mode writes logExtractionState — regression guard for the default path', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('single');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.single);
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user') as Awaited<
         ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -2137,9 +2141,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
    * stopped both, since extraction refuses to run when its status is not 'started'.
    */
   it.each([
-    ['single', 'status'],
-    ['priority', 'status'],
-    ['nonPriority', 'nonPriorityStatus'],
+    [EXTRACTION_MODE.single, 'status'],
+    [EXTRACTION_MODE.priority, 'status'],
+    [EXTRACTION_MODE.nonPriority, 'nonPriorityStatus'],
   ] as const)('%s mode is gated on %s alone', async (mode, ownStatusField) => {
     const { client, mockEngineDescriptorClient } = createContextWithMode(mode);
     // Stop the *other* process; this one must still run.
@@ -2160,7 +2164,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('nonPriority mode does not run when only its own status is stopped', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user', {
         nonPriorityStatus: ENGINE_STATUS.STOPPED,
@@ -2174,7 +2180,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('nonPriority failures write nonPriorityError and leave the priority error untouched', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user') as Awaited<
         ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -2190,7 +2198,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('nonPriority success clears nonPriorityError without clearing the priority error', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user') as Awaited<
         ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -2207,7 +2217,7 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   });
 
   it('priority mode writes logExtractionState and resumes from the existing checkpoint', async () => {
-    const { client, mockEngineDescriptorClient } = createContextWithMode('priority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(EXTRACTION_MODE.priority);
     const existingCheckpoint = '2025-01-15T11:30:00.000Z';
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user', {
@@ -2232,7 +2242,9 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
   it('nonPriority with a live logExtractionState checkpoint starts from lookbackPeriod, not from the priority cursor', async () => {
     // The priority process has a live checkpoint; the non-priority cursor is absent (null).
     // The non-priority client must not read the priority cursor — it starts fresh.
-    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
     const priorityCheckpoint = '2025-01-14T00:00:00.000Z'; // 36 hours ago — outside lookback
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user', {

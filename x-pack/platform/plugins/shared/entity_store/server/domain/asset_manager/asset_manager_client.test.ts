@@ -31,6 +31,7 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
 jest.mock('./install_assets');
 jest.mock('../../tasks/extract_entity_task');
@@ -481,6 +482,87 @@ describe('AssetManagerClient', () => {
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
         expect.objectContaining({ logsExtraction: { delay: '2m' } })
       );
+    });
+  });
+
+  /**
+   * Dual-process types run two tasks. The pair must be scheduled and removed together: one
+   * scheduled without the other would silently extract only half the logs.
+   */
+  describe('dual-process lifecycle', () => {
+    const createDualProcessClient = () =>
+      new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: mockUserEsClient,
+        internalEsClient: mockInternalEsClient,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {} as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {
+          delete: jest.fn().mockResolvedValue({}),
+        } as unknown as SavedObjectsClientContract,
+        isDualProcessEnabled: async () => true,
+      });
+
+    const scheduledModes = () =>
+      mockScheduleExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+
+    it('start schedules both tasks for a dual-capable type', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'user');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single, EXTRACTION_MODE.nonPriority]);
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: 'started' })
+      );
+    });
+
+    it('start schedules only the shared task for a type with no priority variant', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'host');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+    });
+
+    it('start rolls the shared task back when the non-priority schedule fails', async () => {
+      mockScheduleExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('schedule failed'));
+
+      await expect(createDualProcessClient().start({} as KibanaRequest, 'user')).rejects.toThrow(
+        'schedule failed'
+      );
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'user' })
+      );
+    });
+
+    it('stop removes both tasks even when the flag is off', async () => {
+      await client.stop('user');
+
+      // Asserted as "the shared task plus non-priority" rather than a specific label, because
+      // single and priority resolve to the same task id.
+      const removedModes = mockStopExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+      expect(removedModes).toHaveLength(2);
+      expect(removedModes).toContain(EXTRACTION_MODE.nonPriority);
+      expect(
+        removedModes.some(
+          (mode) => mode === EXTRACTION_MODE.single || mode === EXTRACTION_MODE.priority
+        )
+      ).toBe(true);
     });
   });
 });

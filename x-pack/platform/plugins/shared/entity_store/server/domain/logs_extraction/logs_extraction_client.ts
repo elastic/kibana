@@ -16,6 +16,7 @@ import type {
   ManagedEntityDefinition,
   ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
@@ -154,7 +155,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.extractionMode = extractionMode ?? 'single';
+    this.extractionMode = extractionMode ?? EXTRACTION_MODE.single;
   }
 
   private extractionStatePatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
@@ -174,7 +175,7 @@ export class LogsExtractionClient {
     }
     const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
     const engineState =
-      this.extractionMode === 'nonPriority'
+      this.extractionMode === EXTRACTION_MODE.nonPriority
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
         : engineDescriptor.logExtractionState;
     return {

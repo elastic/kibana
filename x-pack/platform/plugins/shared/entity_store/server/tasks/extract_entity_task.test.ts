@@ -24,6 +24,7 @@ import {
   registerExtractEntityTasks,
 } from './extract_entity_task';
 import type * as types from '../types';
+import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -52,11 +53,11 @@ describe('getNewSchedule', () => {
 
 describe('extract entity task identity', () => {
   it('single and priority share one task; nonPriority has its own', () => {
-    expect(getExtractEntityTaskId('user', 'default', 'priority')).toBe(
-      getExtractEntityTaskId('user', 'default', 'single')
+    expect(getExtractEntityTaskId('user', 'default', EXTRACTION_MODE.priority)).toBe(
+      getExtractEntityTaskId('user', 'default', EXTRACTION_MODE.single)
     );
-    expect(getExtractEntityTaskId('user', 'default', 'nonPriority')).not.toBe(
-      getExtractEntityTaskId('user', 'default', 'single')
+    expect(getExtractEntityTaskId('user', 'default', EXTRACTION_MODE.nonPriority)).not.toBe(
+      getExtractEntityTaskId('user', 'default', EXTRACTION_MODE.single)
     );
   });
 
@@ -67,8 +68,8 @@ describe('extract entity task identity', () => {
   });
 
   it('each process resolves its own timeout and interval', () => {
-    const priority = getExtractEntityTaskConfig('priority');
-    const nonPriority = getExtractEntityTaskConfig('nonPriority');
+    const priority = getExtractEntityTaskConfig(EXTRACTION_MODE.priority);
+    const nonPriority = getExtractEntityTaskConfig(EXTRACTION_MODE.nonPriority);
 
     expect(nonPriority.type).not.toBe(priority.type);
     expect(nonPriority.timeout).toBeDefined();
@@ -162,7 +163,7 @@ describe('feature flag gates non-priority execution', () => {
     await runTaskFor('extract_entity_non_priority_task', true);
 
     expect(mockCreateClient).toHaveBeenCalledWith(
-      expect.objectContaining({ extractionMode: 'nonPriority' })
+      expect.objectContaining({ extractionMode: EXTRACTION_MODE.nonPriority })
     );
   });
 
@@ -170,7 +171,7 @@ describe('feature flag gates non-priority execution', () => {
     await runTaskFor('extract_entity_task', false);
 
     expect(mockCreateClient).toHaveBeenCalledWith(
-      expect.objectContaining({ extractionMode: 'single' })
+      expect.objectContaining({ extractionMode: EXTRACTION_MODE.single })
     );
   });
 
@@ -178,7 +179,7 @@ describe('feature flag gates non-priority execution', () => {
     await runTaskFor('extract_entity_task', true);
 
     expect(mockCreateClient).toHaveBeenCalledWith(
-      expect.objectContaining({ extractionMode: 'priority' })
+      expect.objectContaining({ extractionMode: EXTRACTION_MODE.priority })
     );
   });
 });

@@ -22,6 +22,7 @@ import { TasksConfig, type EntityStoreTaskConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType, ExtractionMode } from '../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { isDualProcessEnabled } from '../infra/feature_flags';
 import {
@@ -317,6 +318,7 @@ export async function scheduleExtractEntityTask({
   namespace,
   frequency,
   request,
+  extractionMode = EXTRACTION_MODE.single,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -324,11 +326,12 @@ export async function scheduleExtractEntityTask({
   frequency: string;
   namespace: string;
   request: KibanaRequest;
+  extractionMode?: ExtractionMode;
 }): Promise<void> {
   try {
-    const taskType = getTaskType(type);
-    const taskId = getExtractEntityTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.enum.extractEntity].interval;
+    const taskType = getTaskType(type, extractionMode);
+    const taskId = getExtractEntityTaskId(type, namespace, extractionMode);
+    const interval = frequency ?? getExtractEntityTaskConfig(extractionMode).interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
@@ -350,13 +353,15 @@ export async function stopExtractEntityTask({
   logger,
   type,
   namespace,
+  extractionMode = EXTRACTION_MODE.single,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   type: EntityType;
   namespace: string;
+  extractionMode?: ExtractionMode;
 }): Promise<void> {
-  const taskId = getExtractEntityTaskId(type, namespace);
+  const taskId = getExtractEntityTaskId(type, namespace, extractionMode);
   await taskManager.removeIfExists(taskId);
   logger.debug(`removed extract entity task: ${taskId}`);
 }

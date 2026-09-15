@@ -6,7 +6,7 @@
  */
 
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
+import { ALL_ENTITY_TYPES, entitySchema, EXTRACTION_MODE } from './entity_schema';
 import {
   getEntityDefinitionWithoutId,
   hasPriorityVariant,
@@ -38,29 +38,31 @@ describe('hasPriorityVariant', () => {
 
 describe('resolveExtractionMode', () => {
   it.each(ALL_ENTITY_TYPES)('%s: returns single when flag is off', (type) => {
-    expect(resolveExtractionMode(false, type)).toBe('single');
+    expect(resolveExtractionMode(false, type)).toBe(EXTRACTION_MODE.single);
   });
 
   it('user: returns priority when flag is on', () => {
-    expect(resolveExtractionMode(true, 'user')).toBe('priority');
+    expect(resolveExtractionMode(true, 'user')).toBe(EXTRACTION_MODE.priority);
   });
 
   it.each(TYPES_WITHOUT_PRIORITY_VARIANT)(
     '%s: returns single when flag is on and no priority variant is registered',
     (type) => {
-      expect(resolveExtractionMode(true, type)).toBe('single');
+      expect(resolveExtractionMode(true, type)).toBe(EXTRACTION_MODE.single);
     }
   );
 });
 
 describe('getEntityDefinitionWithoutId', () => {
   it.each(ALL_ENTITY_TYPES)('%s: defaults to the single variant, which carries no gate', (type) => {
-    expect(getEntityDefinitionWithoutId(type)).toBe(getEntityDefinitionWithoutId(type, 'single'));
+    expect(getEntityDefinitionWithoutId(type)).toBe(
+      getEntityDefinitionWithoutId(type, EXTRACTION_MODE.single)
+    );
     expect(getEntityDefinitionWithoutId(type).extractionGate).toBeUndefined();
   });
 
   it('throws when a variant is not registered, rather than falling back to single', () => {
-    expect(() => getEntityDefinitionWithoutId('host', 'priority')).toThrow(
+    expect(() => getEntityDefinitionWithoutId('host', EXTRACTION_MODE.priority)).toThrow(
       /No 'priority' extraction variant registered/
     );
   });
@@ -73,8 +75,8 @@ describe('getEntityDefinitionWithoutId', () => {
  */
 describe('user extraction variants share identity logic', () => {
   const single = getEntityDefinitionWithoutId('user');
-  const priority = getEntityDefinitionWithoutId('user', 'priority');
-  const nonPriority = getEntityDefinitionWithoutId('user', 'nonPriority');
+  const priority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.priority);
+  const nonPriority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.nonPriority);
 
   const asRecord = (definition: EntityDefinitionWithoutId) =>
     definition as unknown as Record<string, unknown>;
@@ -86,15 +88,15 @@ describe('user extraction variants share identity logic', () => {
   };
 
   it.each([
-    ['priority', priority],
-    ['nonPriority', nonPriority],
+    [EXTRACTION_MODE.priority, priority],
+    [EXTRACTION_MODE.nonPriority, nonPriority],
   ])('%s is the single definition with only extractionGate replaced', (_name, variant) => {
     expect(keysDifferingFromSingle(variant)).toEqual(['extractionGate']);
   });
 
   it.each([
-    ['priority', priority],
-    ['nonPriority', nonPriority],
+    [EXTRACTION_MODE.priority, priority],
+    [EXTRACTION_MODE.nonPriority, nonPriority],
   ])('%s reuses the very same identityField object', (_name, variant) => {
     expect(variant.identityField).toBe(single.identityField);
   });
