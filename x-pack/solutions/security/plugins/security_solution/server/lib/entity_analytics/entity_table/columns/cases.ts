@@ -7,37 +7,33 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { CASE_COUNT_FIELD, ENTITY_ID_FIELD } from './common';
-import type { Row } from './common';
+import type {
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
+} from '@elastic/elasticsearch/lib/api/types';
+import { ENTITY_ID_FIELD } from '../common';
+import type { Row } from '../common';
 
-// ── case_count enrichment ─────────────────────────────────────────────────────
-
-// cases-attachments SO type has `attachmentId: keyword` mapping. The scoped SO client
-// handles namespace isolation automatically, so one aggregation replaces N individual lookups.
-
-interface CaseTermsBucket {
-  key: string;
-  doc_count: number;
-}
+const CASE_COUNT_FIELD = 'case_count';
 
 interface CaseAggs {
-  by_entity: { buckets: CaseTermsBucket[] };
+  by_entity: AggregationsStringTermsAggregate;
 }
 
-/** Returns case counts keyed by entity ID for the given page of entity IDs (one SO query). */
-export const batchCaseCounts = async (
+/** Returns case counts keyed by entity ID for the given page of entity IDs */
+const batchCaseCounts = async (
+  logger: Logger,
   soClient: ISavedObjectsRepository,
-  entityIds: readonly string[],
-  logger: Logger
+  entityIds: readonly string[]
 ): Promise<Map<string, number>> => {
   if (entityIds.length === 0) return new Map();
+
   try {
-    // KQL: attribute path uses `.attributes.` prefix; ES aggregation uses the raw field path.
-    // Filter to `security.entity` type only — alert attachments also use `attachmentId` (as arrays).
     const idFilter = entityIds
       .map((id) => `cases-attachments.attributes.attachmentId: "${id.replace(/"/g, '\\"')}"`)
       .join(' OR ');
     const filter = `cases-attachments.attributes.type: "security.entity" AND (${idFilter})`;
+
     const result = await soClient.find<unknown, CaseAggs>({
       type: 'cases-attachments',
       perPage: 1,
@@ -48,10 +44,15 @@ export const batchCaseCounts = async (
         },
       },
     });
+
     const counts = new Map<string, number>();
-    for (const b of result.aggregations?.by_entity?.buckets ?? []) {
-      counts.set(b.key, b.doc_count);
+    const buckets = (result.aggregations?.by_entity?.buckets ??
+      []) as AggregationsStringTermsBucket[];
+
+    for (const b of buckets) {
+      counts.set(b.key as string, b.doc_count);
     }
+
     return counts;
   } catch (e) {
     logger.error(`batchCaseCounts: ${e}`);
@@ -63,15 +64,16 @@ export const batchCaseCounts = async (
 
 /** Populates case_count for a page of entity rows. */
 export const enrichCaseCounts = async (
+  logger: Logger,
   pageRows: Row[],
-  soClient: ISavedObjectsRepository,
-  logger: Logger
+  soClient: ISavedObjectsRepository
 ): Promise<void> => {
   const counts = await batchCaseCounts(
+    logger,
     soClient,
-    pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean),
-    logger
+    pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean)
   );
+
   for (const row of pageRows) {
     row[CASE_COUNT_FIELD] = counts.get(row[ENTITY_ID_FIELD] as string) ?? 0;
   }

@@ -17,7 +17,7 @@ import { registerWatchlistRoutes } from './watchlists/register_watchlist_routes'
 import { registerEntityResolutionRoutes } from './entity_resolution/routes/register_entity_resolution_routes';
 import { registerAnomalySummaryRoutes } from './anomaly_summary';
 import { registerRiskScoreHistoryRoute } from './risk_score/routes/register_risk_score_history_route';
-import { registerEntityGridRoute } from './entity_grid';
+import { registerEntityGridRoute } from './entity_table';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);

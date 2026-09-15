@@ -7,76 +7,74 @@
 
 import type { Logger } from '@kbn/logging';
 import {
-  ALLOWED_ENTITY_TYPES,
   ENTITY_ID_FIELD,
-  ENTITY_JOIN_FILTER,
-  ENTITY_TYPE_FIELD,
+  ENTITY_TYPE_FILTER,
   GROUP_SIZE_FIELD,
   RESOLVED_TO_FIELD,
-  indent,
+  entityAliasOf,
   keepClause,
   toList,
   sortSuffix,
   cursorClause,
-} from './common';
-import type { PageCursor, QueryDeps, RawQuery, Row, SortDir } from './common';
+} from '../common';
+import type { QueryArgs, EsqlRunner, Row } from '../common';
 
 // ── query builders: group_size sort ──────────────────────────────────────────
 
 // Computes group sizes via STATS, then LOOKUP JOINs to fetch entity fields.
 // Returns one row per resolution TARGET (aliases merge into their target's count).
-export const groupSizeSortDataQuery = (
-  { entityAlias }: QueryDeps,
-  cursor: PageCursor | null,
-  pageSize: number,
-  dir: SortDir
-): string => {
+export const groupSizeSortDataQuery = ({
+  namespace,
+  sort: { direction: dir },
+  cursor,
+  pageSize,
+}: QueryArgs): string => {
+  const entityAlias = entityAliasOf(namespace);
   const inner = [
     `FROM ${entityAlias}`,
-    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
     `| RENAME group_key AS \`entity.id\``,
   ].join('\n');
+
   return [
-    `FROM (\n${indent(inner)}\n)`,
+    `FROM (\n${inner}\n)`,
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
-    `| WHERE ${ENTITY_JOIN_FILTER}`,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
     keepClause(GROUP_SIZE_FIELD),
     ...(cursor ? [cursorClause(cursor)] : []),
     sortSuffix(GROUP_SIZE_FIELD, dir, pageSize),
   ].join('\n');
 };
 
-export const groupSizeSortCountQuery = ({ entityAlias }: QueryDeps): string =>
+export const groupSizeSortCountQuery = ({ namespace }: QueryArgs): string =>
   [
-    `FROM ${entityAlias}`,
-    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `FROM ${entityAliasOf(namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| STATS _c = COUNT(*) BY group_key`,
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
-// ── query builders: group_size enrichment ────────────────────────────────────
+// ── enrichment ────────────────────────────────────────────────────────────────
 
-export const groupSizeEnrichQuery = (entityAlias: string, groupKeys: readonly string[]): string =>
+const groupSizeEnrichQuery = (namespace: string, groupKeys: readonly string[]): string =>
   [
-    `FROM ${entityAlias}`,
-    `| WHERE ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`,
+    `FROM ${entityAliasOf(namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| WHERE group_key IN (${toList(groupKeys)})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
   ].join('\n');
 
-// ── enrichment ────────────────────────────────────────────────────────────────
-
 /** Populates group_size for a page of entity rows. */
 export const enrichGroupSize = async (
+  logger: Logger,
   pageRows: Row[],
-  { entityAlias }: QueryDeps,
+  { namespace }: QueryArgs,
   skip: Set<string>,
-  enrichPageQuery: RawQuery,
-  logger: Logger
+  enrichPageQuery: EsqlRunner
 ): Promise<void> => {
   if (skip.has(GROUP_SIZE_FIELD)) return;
 
@@ -85,13 +83,12 @@ export const enrichGroupSize = async (
   ].filter(Boolean);
   if (!groupKeys.length) return;
 
-  const rows = await enrichPageQuery(
-    groupSizeEnrichQuery(entityAlias, groupKeys),
-    'group size enrich'
-  ).catch((e: unknown) => {
-    logger.warn(`group size enrich: ${e}`);
-    return null;
-  });
+  const rows = await enrichPageQuery(groupSizeEnrichQuery(namespace, groupKeys)).catch(
+    (e: unknown) => {
+      logger.warn(`group size enrich: ${e}`);
+      return null;
+    }
+  );
   if (!rows) return;
 
   const byGroupKey = new Map(
