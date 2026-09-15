@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -37,8 +37,15 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
     useCreateKnowledgeBaseUserInstruction();
   const { mutate: deleteEntry } = useDeleteKnowledgeBaseEntry();
 
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    const userInstruction = userInstructions?.find((entry) => !entry.public);
+    // Seed the editor from server data only once, so a background refetch cannot overwrite in-progress user input.
+    if (hasInitialized.current || !userInstructions) {
+      return;
+    }
+    hasInitialized.current = true;
+    const userInstruction = userInstructions.find((entry) => !entry.public);
     setNewEntryText(userInstruction?.text ?? '');
     setNewEntryId(userInstruction?.id);
   }, [userInstructions]);
