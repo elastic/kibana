@@ -51,7 +51,7 @@ export const ChartsGrid: FC<{
   const loadCounter = useRef<Record<number, boolean>>(
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
   );
-  console.log('??????');
+
   /**
    * Callback to track render of each chart component
    * to report when all charts are ready.
@@ -158,7 +158,7 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({
   parentApi,
 }) => {
   const timefilter = useTimefilter();
-  console.log('HERE');
+
   const initialRefreshSetting = useRef<RefreshInterval>();
 
   const { bucketInterval } = useChangePointDetectionContext();

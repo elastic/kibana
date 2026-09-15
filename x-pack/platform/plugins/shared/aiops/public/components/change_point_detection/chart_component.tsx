@@ -20,6 +20,7 @@ export interface ChartComponentProps {
 
   onLoading?: (isLoading: boolean) => void;
   onRenderComplete?: () => void;
+
   parentApi: unknown;
 }
 
@@ -34,11 +35,10 @@ export interface ChartComponentPropsAll {
 }
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(
-  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }) => {
+  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete, parentApi }) => {
     const {
       lens: { EmbeddableComponent },
     } = useAiopsAppContext();
-
     const chartWrapperRef = useRef<HTMLDivElement>(null);
 
     const renderCompleteListener = useCallback(
@@ -62,12 +62,12 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(
       };
     }, [renderCompleteListener]);
 
-    const { filters, timeRange, query, attributes, parentApi } = useCommonChartProps({
+    const { filters, timeRange, query, attributes } = useCommonChartProps({
       fieldConfig,
       annotation,
       bucketInterval: interval,
     });
-    console.log({ parentApi, attributes });
+
     return (
       <div ref={chartWrapperRef}>
         <EmbeddableComponent
