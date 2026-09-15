@@ -11,11 +11,8 @@ import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 export type WorkerSettingsPatch = WorkerSettingsWrite;
 
 export interface WorkerSettingsRegistration {
+  /** Template values for a fresh per-space install. */
   createDefaultValues(): ManagedWorkflowTemplateValues;
-  migrate(values: Record<string, unknown>): {
-    values: ManagedWorkflowTemplateValues;
-    migrated: boolean;
-  };
   /**
    * Composes the patched settings and validates them against the Worker's complete schema.
    * `invalid` carries the issues, each naming its field.
@@ -24,6 +21,9 @@ export interface WorkerSettingsRegistration {
     values: ManagedWorkflowTemplateValues,
     patch: WorkerSettingsPatch
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
-  /** Return the raw projection; the registry test guards against API schema stripping. */
+  /**
+   * Parses persisted template values into complete settings. Throws when they do not match the
+   * current shape; there is no repair or migration of older development state.
+   */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

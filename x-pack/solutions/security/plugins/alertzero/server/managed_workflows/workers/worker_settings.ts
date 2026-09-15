@@ -15,7 +15,6 @@ import {
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
-  getWorkerSettingsDeclaration,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
@@ -52,36 +51,36 @@ const toTemplateValues = (
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 /**
- * Reads stored template values back into complete settings. A field the install predates takes
- * its declared default; stored extras are laid over the default extras so a Watch team can add a
- * field without breaking already-installed spaces.
+ * Reads persisted template values back into complete settings, exactly as stored: nothing is
+ * defaulted or merged in, and a document from an older development shape fails here so the
+ * Worker projects as unavailable until that state is reset.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
 ): WorkerSettings => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras } = raw;
+  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
     );
   }
+  const unsupportedKeys = Object.keys(unsupported);
+  if (unsupportedKeys.length > 0) {
+    throw new Error(
+      `AlertZero worker "${workerId}" settings contain unsupported fields: ${unsupportedKeys.join(
+        ', '
+      )}`
+    );
+  }
 
-  const declaration = getWorkerSettingsDeclaration(workerId);
   const candidate = {
     workerId,
     autonomy: autonomyLevel,
-    ...(declaration.scheduleInterval
-      ? { scheduleInterval: scheduleInterval ?? declaration.scheduleInterval.defaultValue }
-      : {}),
-    ...(declaration.extras
-      ? { extras: { ...declaration.extras.defaultValue, ...(isRecord(extras) ? extras : {}) } }
-      : {}),
+    ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+    ...(extras === undefined ? {} : { extras }),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);
   if (!parsed.success) {
@@ -98,15 +97,6 @@ export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
-  migrate: (raw: Record<string, unknown>) => {
-    const values = toTemplateValues(workerId, parseWorkerValues(workerId, raw));
-    return {
-      values,
-      migrated:
-        raw.settingsVersion !== WORKER_SETTINGS_VERSIONS[workerId] ||
-        Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
-    };
-  },
   applyPatch: (raw, patch) => {
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);

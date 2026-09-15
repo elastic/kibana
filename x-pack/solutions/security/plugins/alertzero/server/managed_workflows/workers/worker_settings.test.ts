@@ -79,44 +79,52 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('defaults the interval for an install that predates the setting', () => {
-      // scheduleInterval is additive, so an existing install simply has no such key.
-      const { values } = registration.migrate({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-      });
-
-      expect(values).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        scheduleInterval: '24h',
-      });
+    it('rejects stored values missing the declared schedule interval', () => {
+      // No defaulting of older development state: the document has to be reset.
+      expect(() =>
+        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
+      ).toThrow(/scheduleInterval/);
     });
 
-    it('preserves a persisted interval', () => {
+    it('reads a persisted interval back as stored', () => {
       expect(
-        registration.migrate({
+        registration.toSettings({
           settingsVersion: 1,
           autonomyLevel: 'manual',
           scheduleInterval: '30m',
-        }).values
-      ).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        scheduleInterval: '30m',
-      });
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '30m' });
     });
 
     it('throws on an unrecognised settings version', () => {
-      expect(() => registration.migrate({ settingsVersion: 3, autonomyLevel: 'manual' })).toThrow(
-        /Unsupported settings version/
-      );
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 3,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/Unsupported settings version/);
     });
 
     it('throws on a stored autonomy level outside the shared scale', () => {
-      expect(() => registration.migrate({ settingsVersion: 1, autonomyLevel: 'yolo' })).toThrow(
-        /settings are invalid: autonomy/
-      );
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'yolo',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/settings are invalid: autonomy/);
+    });
+
+    it('rejects unsupported stored fields by name', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+          candidateLimit: 5,
+        })
+      ).toThrow(/unsupported fields: candidateLimit/);
     });
 
     it.each(['1m', '2h', '7d'])('applies a %s interval patch', (scheduleInterval) => {
@@ -171,20 +179,20 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('fills missing extras from the declared defaults for an older install', () => {
-      expect(
-        registration.migrate({
+    it('rejects stored values missing extras', () => {
+      expect(() =>
+        registration.toSettings({
           settingsVersion: 1,
           autonomyLevel: 'assisted',
           scheduleInterval: '2h',
-        }).values
-      ).toEqual({ ...storedDefaults, autonomyLevel: 'assisted' });
+        })
+      ).toThrow(/extras/);
     });
 
-    it('lays stored extras over the defaults so a newly declared field gets its default', () => {
-      // A Watch team adding a field must not break spaces installed before the field existed.
-      expect(registration.migrate({ ...storedDefaults, extras: {} }).values).toEqual(
-        storedDefaults
+    it('rejects stored extras missing a required field, naming it', () => {
+      // No default repair: a document written before the field existed has to be reset.
+      expect(() => registration.toSettings({ ...storedDefaults, extras: {} })).toThrow(
+        /extras\.analysisWindowDays/
       );
     });
 
@@ -227,7 +235,7 @@ describe('createWorkerSettingsRegistration', () => {
 
     it.each([7.5, 0, 31])('rejects a stored analysis window of %s', (analysisWindowDays) => {
       expect(() =>
-        registration.migrate({ ...storedDefaults, extras: { analysisWindowDays } })
+        registration.toSettings({ ...storedDefaults, extras: { analysisWindowDays } })
       ).toThrow(/extras\.analysisWindowDays/);
     });
   });
@@ -263,6 +271,16 @@ describe('createWorkerSettingsRegistration', () => {
 
       expect(projected).not.toHaveProperty('scheduleInterval');
       expect(projected).not.toHaveProperty('extras');
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects a stored schedule interval by name', (workerId) => {
+      expect(() =>
+        createWorkerSettingsRegistration(workerId).toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '30m',
+        })
+      ).toThrow(/scheduleInterval/);
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an interval patch, naming it', (workerId) => {

@@ -387,6 +387,37 @@ describe('WorkersService', () => {
     expect(worker?.settingsRevision).toBeNull();
   });
 
+  it('lists a Worker whose stored settings no longer match the current shape as unavailable', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+    // A document from an older development shape: no interval, no extras. It stays in the
+    // persistent store, so every read (list and get) sees it.
+    const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+    if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+    document.values = { settingsVersion: 1, autonomyLevel: 'manual' };
+
+    const { workers } = await service.list(request, SPACE);
+    const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
+
+    expect(workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    expect(ruleTuning).toMatchObject({
+      state: 'unavailable',
+      stateReason: 'Worker settings could not be read from durable storage',
+      settingsRevision: null,
+      enabled: true,
+      settings: {
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 14 },
+      },
+    });
+    expect(
+      workers.filter(({ id }) => id !== RULE_TUNING).every(({ state }) => state !== 'unavailable')
+    ).toBe(true);
+  });
+
   it('installs on enable and leaves the per-space document in place on disable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();

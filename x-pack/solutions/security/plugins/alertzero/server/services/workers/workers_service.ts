@@ -166,9 +166,7 @@ export class WorkersService {
       if (patch.settingsRevision !== (state?.documentVersion ?? null)) {
         return { outcome: 'conflict' };
       }
-      const currentValues = state?.templateValues
-        ? registration.settings.migrate(state.templateValues).values
-        : registration.settings.createDefaultValues();
+      const currentValues = state?.templateValues ?? registration.settings.createDefaultValues();
       const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
       if ('invalid' in applied) {
         return { outcome: 'invalid', message: applied.invalid };
@@ -248,7 +246,8 @@ export class WorkersService {
     let enabled = false;
     let lastRun: string | null = null;
     let settingsRevision: number | null = null;
-    let values = registration.settings.createDefaultValues();
+    // Defaults stand in for an uninstalled Worker and for one whose stored settings cannot be read.
+    let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
 
@@ -259,8 +258,9 @@ export class WorkersService {
         if (!state?.templateValues) {
           settingsUnavailable = true;
         } else {
+          // Parse before taking the revision so an unreadable document reports revision null.
+          settings = registration.settings.toSettings(state.templateValues);
           settingsRevision = state.documentVersion ?? null;
-          values = registration.settings.migrate(state.templateValues).values;
         }
       } catch (error) {
         settingsUnavailable = true;
@@ -303,7 +303,7 @@ export class WorkersService {
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
-      settings: registration.settings.toSettings(values),
+      settings,
       settingsRevision,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
