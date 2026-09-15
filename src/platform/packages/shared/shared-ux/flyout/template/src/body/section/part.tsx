@@ -31,6 +31,7 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
     tooltip,
     action,
     hasBorder: authored,
+    showSeparator,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -46,6 +47,7 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
           tooltip={tooltip}
           action={action}
           hasBorder={authored}
+          showSeparator={showSeparator}
           data-test-subj={dataTestSubj}
         >
           {children}
@@ -66,6 +68,7 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
         action={action}
         hasBorder={isBordered}
         borderOnChildren={isBordered}
+        showSeparator={showSeparator}
         data-test-subj={dataTestSubj}
       >
         {items.map((item, index) => {

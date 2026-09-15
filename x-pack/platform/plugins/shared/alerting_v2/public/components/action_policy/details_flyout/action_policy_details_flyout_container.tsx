@@ -130,7 +130,6 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
           isSnoozeLoading={isSnoozing || isUnsnoozing}
           session={'start'}
           ownFocus={false}
-          hasAnimation={false}
         />
       )}
       {policyToDelete && (

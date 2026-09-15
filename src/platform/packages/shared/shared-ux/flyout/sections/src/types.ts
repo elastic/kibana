@@ -47,6 +47,8 @@ export interface FlyoutSectionProps {
    * wrapping them in a second panel. Requires `hasBorder`.
    */
   borderOnChildren?: boolean;
+  /** When false, suppresses the horizontal rule drawn above this section when it follows another section. Defaults to true. */
+  showSeparator?: boolean;
   'data-test-subj'?: string;
   children?: ReactNode;
 }
