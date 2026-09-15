@@ -43,8 +43,14 @@ export async function untarBuffer(
 
   deflatedStream.pipe(inflateStream);
 
-  await finished(inflateStream);
-  await Promise.all(entryPromises);
+  try {
+    await finished(inflateStream);
+    await Promise.all(entryPromises);
+  } finally {
+    // If the stream errors, entry sub-streams may still be pending. Settle them
+    // silently so they never produce unhandled rejections; the stream error propagates.
+    await Promise.allSettled(entryPromises);
+  }
 }
 
 export async function unzipBuffer(
