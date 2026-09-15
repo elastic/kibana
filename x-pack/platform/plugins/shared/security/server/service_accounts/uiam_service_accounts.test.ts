@@ -120,7 +120,7 @@ describe('UiamServiceAccounts', () => {
             },
           ],
         },
-        { includeClientAuthentication: true }
+        undefined
       );
     });
 
@@ -138,7 +138,7 @@ describe('UiamServiceAccounts', () => {
         expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
           new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
           expect.objectContaining({ organization_id: 'organization-id' }),
-          { includeClientAuthentication: internal }
+          internal ? undefined : { sharedSecret: undefined }
         );
       }
     );
@@ -149,7 +149,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
         new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
         expect.anything(),
-        { includeClientAuthentication: true }
+        undefined
       );
     });
 

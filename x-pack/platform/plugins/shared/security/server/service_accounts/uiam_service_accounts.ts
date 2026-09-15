@@ -151,7 +151,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
-        { includeClientAuthentication: !isExternalApiKey(this.getCurrentUser(request)) }
+        // External API keys must not carry client authentication; everything else is vouched for
+        // with Kibana's own shared secret.
+        isExternalApiKey(this.getCurrentUser(request)) ? { sharedSecret: undefined } : undefined
       );
 
       const parsed = serviceAccountSchema.safeParse(result);
