@@ -103,9 +103,7 @@ const assertEpisodesInboxHappyPath = async (
   await test.step('histogram chart renders successfully', async () => {
     await expect(observabilityAlerting.episodesHistogramPanel).toBeVisible();
     await expect(observabilityAlerting.episodesHistogramChart).toBeVisible({ timeout: 30_000 });
-    await expect(
-      observabilityAlerting.episodesHistogramPanel.locator('.euiCallOut--danger')
-    ).toHaveCount(0);
+    await expect(observabilityAlerting.episodesHistogramError).toHaveCount(0);
   });
 
   await test.step('episodes list resolves', async () => {

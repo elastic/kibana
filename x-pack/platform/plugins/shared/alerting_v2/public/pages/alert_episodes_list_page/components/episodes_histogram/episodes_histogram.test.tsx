@@ -126,6 +126,7 @@ describe('EpisodesHistogram', () => {
       sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
+    expect(screen.getByTestId('episodesHistogramError')).toBeInTheDocument();
     expect(screen.getByText(/Failed to load histogram data/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
   });

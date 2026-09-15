@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { AlertingPageObjects } from '../fixtures';
 import {
@@ -19,37 +17,6 @@ import {
 const SEEDED_TAG = 'scout-alerts-mgmt-priv-v2';
 const SEEDED_RULE_ID = 'scout-alerts-mgmt-priv-rule';
 const SEEDED_GROUP_HASH = 'scout-alerts-mgmt-priv-group';
-
-const GLOBAL_SETTINGS_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
-  ALERTING_V2_ENABLED_SETTING_ID
-)}`;
-
-/**
- * Enables the runtime UI setting on the default Scout server. 400 is ignored
- * because `--uiSettings.globalOverrides` on the `alerting_v2` config set pins
- * the same key.
- */
-const setAlertingV2EnabledSetting = async (
-  kbnClient: KbnClient,
-  enabled: boolean
-): Promise<void> => {
-  await kbnClient.request({
-    description: `set ${ALERTING_V2_ENABLED_SETTING_ID}`,
-    path: GLOBAL_SETTINGS_PATH,
-    method: 'POST',
-    body: { value: enabled },
-    ignoreErrors: [400],
-  });
-};
-
-const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promise<void> => {
-  await kbnClient.request({
-    description: `unset ${ALERTING_V2_ENABLED_SETTING_ID}`,
-    path: GLOBAL_SETTINGS_PATH,
-    method: 'DELETE',
-    ignoreErrors: [400],
-  });
-};
 
 const assertEpisodesManagementHappyPath = async ({
   alertEpisodesList,
@@ -100,8 +67,8 @@ const assertEpisodesManagementHappyPath = async ({
  * chart, episodes table item count, and tags filter all render.
  *
  * A recent active episode plus a tag action are seeded so the table toolbar
- * and tags filter mount. `alerting:v2:enabled` is turned on for the default
- * Scout server (unpinned) and restored in afterAll.
+ * and tags filter mount. The `alerting_v2` Scout config set already pins
+ * `alerting:v2:enabled`.
  *
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
@@ -111,9 +78,8 @@ test.describe(
   'Alerts management page - privilege-based access',
   { tag: '@local-stateful-classic' },
   () => {
-    test.beforeAll(async ({ apiServices, kbnClient }) => {
+    test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);
-      await setAlertingV2EnabledSetting(kbnClient, true);
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       const now = new Date().toISOString();
@@ -140,10 +106,9 @@ test.describe(
       ]);
     });
 
-    test.afterAll(async ({ apiServices, kbnClient }) => {
+    test.afterAll(async ({ apiServices }) => {
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
