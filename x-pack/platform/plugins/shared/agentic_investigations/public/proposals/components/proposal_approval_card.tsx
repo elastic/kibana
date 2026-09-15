@@ -13,7 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/agentic-investigations-common';
 import type { ApprovalAction } from '@kbn/agentic-investigations-common';
-import { PROPOSAL_WITHOUT_ACTION, isDecided } from '../../../common';
+import { isDecided } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import type { DismissReason } from '../../../common';
 import { toBlastRadiusItems } from '../attachments/to_blast_radius_items';
 import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
@@ -144,7 +145,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   }
 
   const actionName =
-    liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION;
+    liveProposal.action?.name ?? liveProposal.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL;
 
   const isPending = liveProposal.status === 'pending';
   const isExpired = liveProposal.expired;

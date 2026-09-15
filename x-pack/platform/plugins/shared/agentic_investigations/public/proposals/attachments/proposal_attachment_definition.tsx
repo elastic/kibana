@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { PROPOSAL_WITHOUT_ACTION, isDecided } from '../../../common';
+import { isDecided } from '../../../common';
+import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
 import type {
   ProposalWithMetadata,
   PROPOSAL_ATTACHMENT_TYPE,
@@ -69,7 +70,7 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
 export const createProposalAttachmentDefinition =
   (): AttachmentUIDefinition<ProposalAttachment> => ({
     getLabel: (attachment) =>
-      attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION,
+      attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL,
 
     getIcon: () => 'lock',
 
