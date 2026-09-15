@@ -255,6 +255,7 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
     setLegacyKey: jest.fn(),
     updateFieldDefinition: jest.fn(),
     deleteFieldDefinition: jest.fn(),
+    assertFieldDefinitionIsValid: jest.fn(),
   });
 
   return service as unknown as FieldDefinitionsServiceMock;

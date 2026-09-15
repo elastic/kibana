@@ -271,6 +271,9 @@ export const createFieldDefinitionsSubClient = (
       if (identity) {
         assertNameMatchesYamlDefinition(input.name, identity.name);
       }
+
+      // Run the same YAML + strict-schema + metadata size checks the real write applies.
+      fieldDefinitionsService.assertFieldDefinitionIsValid(input.definition, /* strict= */ true);
     },
 
     // Field definitions are library-level objects, not case-level objects. They are
@@ -397,6 +400,9 @@ export const createFieldDefinitionsSubClient = (
           );
         }
       }
+
+      // Run the same YAML + schema + metadata size checks the real write applies.
+      fieldDefinitionsService.assertFieldDefinitionIsValid(input.definition);
     },
 
     deleteFieldDefinition: withUsageCounter(
