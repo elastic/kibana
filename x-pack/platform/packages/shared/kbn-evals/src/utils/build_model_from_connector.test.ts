@@ -79,7 +79,11 @@ describe('buildModelFromConnector', () => {
           inferenceId: '.openai-gpt-4o-chat_completion',
         },
       };
-      expect(buildModelFromConnector(withoutModel).id).toBe('EIS gpt-4o');
+      expect(buildModelFromConnector(withoutModel)).toEqual({
+        family: ModelFamily.Unknown,
+        provider: ModelProvider.Elastic,
+        id: 'EIS gpt-4o',
+      });
     });
   });
 
@@ -117,7 +121,11 @@ describe('buildModelFromConnector', () => {
 
     it('falls back to the endpoint name when providerConfig has no model_id', () => {
       const { providerConfig, ...withoutModel } = eisEndpoint;
-      expect(buildModelFromConnector(withoutModel).id).toBe('EIS gpt-4o');
+      expect(buildModelFromConnector(withoutModel)).toEqual({
+        family: ModelFamily.Unknown,
+        provider: ModelProvider.Elastic,
+        id: 'EIS gpt-4o',
+      });
     });
   });
 });

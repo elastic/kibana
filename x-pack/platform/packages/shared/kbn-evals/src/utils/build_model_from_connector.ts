@@ -34,7 +34,7 @@ function providerStringToModel(
           return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
         }
       }
-      return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
+      return { provider: ModelProvider.Elastic, family: ModelFamily.Unknown };
     }
     case 'anthropic':
       return { provider: ModelProvider.Anthropic, family: ModelFamily.Claude };
