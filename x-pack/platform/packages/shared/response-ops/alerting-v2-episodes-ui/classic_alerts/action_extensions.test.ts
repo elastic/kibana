@@ -29,9 +29,7 @@ jest.mock('@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance');
 const mockedBulkUpdate = bulkUpdateAlertWorkflowStatus as jest.MockedFunction<
   typeof bulkUpdateAlertWorkflowStatus
 >;
-const mockedBulkUpdateTags = bulkUpdateAlertTags as jest.MockedFunction<
-  typeof bulkUpdateAlertTags
->;
+const mockedBulkUpdateTags = bulkUpdateAlertTags as jest.MockedFunction<typeof bulkUpdateAlertTags>;
 const mockedBulkUntrack = bulkUntrackAlerts as jest.MockedFunction<typeof bulkUntrackAlerts>;
 const mockedBulkMute = bulkMuteAlerts as jest.MockedFunction<typeof bulkMuteAlerts>;
 const mockedBulkUnmute = bulkUnmuteAlerts as jest.MockedFunction<typeof bulkUnmuteAlerts>;
@@ -41,7 +39,12 @@ const mockedUnsnooze = unsnoozeAlertInstance as jest.MockedFunction<typeof unsno
 const makeClassicEpisode = (
   id: string,
   workflowStatus: string,
-  overrides: Partial<AlertEpisode> & { index?: string; instanceId?: string; ruleId?: string; workflowTags?: string[] } = {}
+  overrides: Partial<AlertEpisode> & {
+    index?: string;
+    instanceId?: string;
+    ruleId?: string;
+    workflowTags?: string[];
+  } = {}
 ): AlertEpisode => {
   const {
     index = '.alerts-test',
@@ -316,7 +319,12 @@ describe('classicActionExtensions', () => {
   describe('unsnooze extension', () => {
     const makeSnoozedEpisode = (
       id: string,
-      opts: { is_muted?: boolean; snooze_expiry?: string | null; instanceId?: string; ruleId?: string } = {}
+      opts: {
+        is_muted?: boolean;
+        snooze_expiry?: string | null;
+        instanceId?: string;
+        ruleId?: string;
+      } = {}
     ) =>
       makeClassicEpisode(id, 'open', {
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
@@ -416,9 +424,7 @@ describe('classicActionExtensions', () => {
     });
 
     it('execute computes add/remove diff from current workflowTags', async () => {
-      const episodes = [
-        makeClassicEpisode('c1', 'open', { workflowTags: ['existing', 'old'] }),
-      ];
+      const episodes = [makeClassicEpisode('c1', 'open', { workflowTags: ['existing', 'old'] })];
       const result = await editTagsExtension.execute(episodes, http, {
         tags: ['existing', 'new'],
       });
