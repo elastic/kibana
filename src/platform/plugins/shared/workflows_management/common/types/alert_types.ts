@@ -7,32 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
-
-export interface AlertSelection {
-  _id: string;
-  _index: string;
-}
-
-/**
- * Query-based selection used to expand a trigger event on the server instead of
- * enumerating ids on the client. The server pages the query using a point in time and
- * `search_after`, capped by a maxDocs limit, to build the trigger event. This keeps the
- * request payload tiny even when the selection spans thousands of documents.
- */
-export interface EventQuerySelection {
-  /** Elasticsearch DSL query describing the selected documents/alerts. */
-  query: QueryDslQueryContainer;
-  /** Index (pattern) or indices to search. */
-  index: string | string[];
-}
+import type { DocumentSelection, EventQuerySelection } from './document_types';
 
 export interface AlertTriggerInput {
   event: {
     triggerType: 'alert';
     /** Explicit id selection, expanded server-side via mget. */
-    alertIds?: AlertSelection[];
+    alertIds?: DocumentSelection[];
     /** Query-based selection expanded server-side. Mutually exclusive with `alertIds`. */
     querySelection?: EventQuerySelection;
     /** Optional rule type ids, carried for context/telemetry. */

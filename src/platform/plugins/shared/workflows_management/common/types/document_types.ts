@@ -7,7 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AlertSelection, EventQuerySelection } from './alert_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
+/**
+ * Query-based selection used to expand a trigger event on the server instead of
+ * enumerating ids on the client. The server pages the query using a point in time and
+ * `search_after`, capped by a maxDocs limit, to build the trigger event. This keeps the
+ * request payload tiny even when the selection spans thousands of documents.
+ */
+export interface EventQuerySelection {
+  /** Elasticsearch DSL query describing the selected documents. */
+  query: QueryDslQueryContainer;
+  /** Index (pattern) or indices to search. */
+  index: string | string[];
+}
 
 /** A single document as exposed to a workflow via the `document` trigger event. */
 export interface DocumentEventEntry {
@@ -29,7 +47,7 @@ export interface DocumentTriggerInput {
     /** Pre-expanded documents. When present, server-side expansion is skipped. */
     documents?: DocumentEventEntry[];
     /** Explicit id selection, expanded server-side via mget. */
-    documentIds?: AlertSelection[];
+    documentIds?: DocumentSelection[];
     /** Query-based selection expanded server-side. */
     querySelection?: EventQuerySelection;
     /** Informational KQL/submitted query string, passed through to the workflow. */
