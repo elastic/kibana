@@ -43,12 +43,24 @@ export class KibanaCodeEditorWrapper {
   constructor(private readonly page: ScoutPage) {}
 
   /**
-   * Waits for the Monaco textarea inside the container (visible + enabled), like FTR
-   * `waitCodeEditorReady`.
+   * Waits until the editor inside the given container is ready to accept interactions.
+   * Safe to call before reading or writing editor content.
    */
   async waitCodeEditorReady(dataTestSubjId: string): Promise<void> {
-    const editor = this.page.getByTestId(dataTestSubjId).getByTestId('kibanaCodeEditor');
-    await expect(editor).toBeVisible();
+    await expect
+      .poll(
+        async () =>
+          this.page.evaluate((id) => {
+            const monacoEnv = (window as Window & { MonacoEnvironment?: any }).MonacoEnvironment;
+            const container = document.querySelector(`[data-test-subj="${id}"]`);
+            const editor = monacoEnv?.monaco?.editor
+              ?.getEditors?.()
+              ?.find((instance: any) => container?.contains(instance.getDomNode()));
+            return Boolean(editor);
+          }, dataTestSubjId),
+        { timeout: 10_000 }
+      )
+      .toBe(true);
   }
 
   getCodeEditorContent(dataTestSubjId: string = 'ESQLEditor'): Locator {
@@ -163,6 +175,12 @@ export class KibanaCodeEditorWrapper {
         }
 
         model.setValue(editorValue);
+
+        const editor = monacoEnv.monaco.editor
+          .getEditors?.()
+          ?.find((instance: any) => instance.getModel()?.uri?.toString() === modelUri);
+
+        editor?.focus();
       },
       { modelUri: uri, editorValue: value }
     );
@@ -285,6 +303,29 @@ export class KibanaCodeEditorWrapper {
         editorInstance.trigger('scout-test', 'editor.action.triggerSuggest', {});
       },
       { searchText: text, modelIndex: nthIndex }
+    );
+  }
+
+  /**
+   * Types text character-by-character via Monaco's 'type' command, firing per-character model
+   * change events. Use this when a test depends on incremental change listeners (e.g. live
+   * autocomplete filtering as you type). For bulk content, prefer setCodeEditorValueByTestSubj.
+   */
+  async simulateTyping(testSubjId: string, text: string): Promise<void> {
+    await this.waitCodeEditorReady(testSubjId);
+    await this.page.evaluate(
+      ({ id, textToType }: { id: string; textToType: string }) => {
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        const editor = (window as any).MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        if (!editor) throw new Error(`Monaco editor not found for test subject: "${id}"`);
+        editor.focus();
+        for (let i = 0; i < textToType.length; i++) {
+          editor.trigger('keyboard', 'type', { text: textToType[i] });
+        }
+      },
+      { id: testSubjId, textToType: text }
     );
   }
 

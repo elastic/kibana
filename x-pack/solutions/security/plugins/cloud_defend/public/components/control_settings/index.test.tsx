@@ -12,6 +12,9 @@ import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { ControlSettings } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useConfigModel } from '../control_yaml_view/hooks/use_config_model';
+
+jest.mock('../control_yaml_view/hooks/use_config_model');
 
 describe('<ControlSettings />', () => {
   const onChange = jest.fn();
@@ -29,6 +32,11 @@ describe('<ControlSettings />', () => {
 
   beforeEach(() => {
     onChange.mockClear();
+    // Set default mock for useConfigModel to return non null value
+    (useConfigModel as jest.Mock).mockReturnValue({
+      getValue: jest.fn(() => ''),
+      setValue: jest.fn(),
+    });
   });
 
   it('renders a toggle to switch between yaml and general views', () => {

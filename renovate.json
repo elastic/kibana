@@ -415,7 +415,11 @@
     },
     {
       "groupName": "monaco",
-      "matchDepNames": ["monaco-yaml", "monaco-editor", "monaco-promql"],
+      "matchDepNames": [
+        "monaco-yaml",
+        "monaco-editor",
+        "monaco-promql"
+      ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
