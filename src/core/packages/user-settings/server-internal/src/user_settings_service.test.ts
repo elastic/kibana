@@ -180,6 +180,29 @@ describe('#setup', () => {
     });
   });
 
+  it('fetches userSettings once when resolving all settings together', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ darkMode: 'dark', locale: 'fr-FR', rememberSelectedSpace: false })
+    );
+
+    const { getUserSettings } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const userSettings = await getUserSettings(kibanaRequest);
+
+    expect(userSettings).toEqual({
+      darkMode: true,
+      locale: 'fr-FR',
+      rememberSelectedSpace: false,
+    });
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
   it('does not fetch userSettings when client is not set, returns `undefined`, and logs a debug statement', async () => {
     const { getUserSettingDarkMode } = service.setup();
 

@@ -23,7 +23,17 @@ const userSettingsDataPath = 'userSettings';
 /**
  * @internal
  */
+export interface UserSettings {
+  darkMode: DarkModeValue | undefined;
+  locale: string | undefined;
+  rememberSelectedSpace: boolean;
+}
+
+/**
+ * @internal
+ */
 export interface InternalUserSettingsServiceSetup {
+  getUserSettings: (request: KibanaRequest) => Promise<UserSettings>;
   getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
   getUserSettingLocale: (request: KibanaRequest) => Promise<string | undefined>;
   getUserSettingRememberSelectedSpace: (request: KibanaRequest) => Promise<boolean>;
@@ -41,19 +51,23 @@ export class UserSettingsService {
   }
 
   public setup(): InternalUserSettingsServiceSetup {
+    const getUserSettings = async (request: KibanaRequest): Promise<UserSettings> => {
+      const userSettings = await this.getSettings(request);
+      return {
+        darkMode: getUserSettingDarkMode(userSettings),
+        locale: getUserSettingLocale(userSettings),
+        rememberSelectedSpace: getUserSettingRememberSelectedSpace(userSettings),
+      };
+    };
+
     return {
-      getUserSettingDarkMode: async (request: KibanaRequest) => {
-        const userSettings = await this.getSettings(request);
-        return getUserSettingDarkMode(userSettings);
-      },
-      getUserSettingLocale: async (request: KibanaRequest) => {
-        const userSettings = await this.getSettings(request);
-        return getUserSettingLocale(userSettings);
-      },
-      getUserSettingRememberSelectedSpace: async (request: KibanaRequest) => {
-        const userSettings = await this.getSettings(request);
-        return getUserSettingRememberSelectedSpace(userSettings);
-      },
+      getUserSettings,
+      getUserSettingDarkMode: async (request: KibanaRequest) =>
+        (await getUserSettings(request)).darkMode,
+      getUserSettingLocale: async (request: KibanaRequest) =>
+        (await getUserSettings(request)).locale,
+      getUserSettingRememberSelectedSpace: async (request: KibanaRequest) =>
+        (await getUserSettings(request)).rememberSelectedSpace,
     };
   }
 
