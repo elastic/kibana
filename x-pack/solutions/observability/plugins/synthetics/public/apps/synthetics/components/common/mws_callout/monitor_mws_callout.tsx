@@ -24,7 +24,7 @@ export const MonitorMWsCallout = () => {
     monitor && !isExternalSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []
       : [];
-  const { activeMWs, hasPendingChanges } = useHasPendingMwChanges(monitorMWIds);
+  const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
 
   if (!monitor || isExternalSyntheticsMonitor(monitor)) {
     return null;
@@ -42,7 +42,9 @@ export const MonitorMWsCallout = () => {
   }
 
   if (hasPendingChanges) {
-    return <MwsPendingSyncCallout hasOutdatedAgent={hasOutdatedAgent} />;
+    return (
+      <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
+    );
   }
 
   if (hasOutdatedAgent) {

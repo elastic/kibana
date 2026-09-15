@@ -6,10 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { useSyncInterval } from './use_sync_interval';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
-
-/** How long after an MW write we still show the pending callout while Fleet/agents catch up. */
-const MW_PENDING_SYNC_WINDOW_MS = 5 * 60 * 1000;
 
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const { data } = useFetchMaintenanceWindows();
@@ -25,12 +23,15 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
 
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
 
+  const syncInterval = useSyncInterval();
+
   const hasPendingChanges = (() => {
     // Only skip the pending check while the data has not loaded yet; an empty (but loaded)
     // list is a valid state where every referenced MW would be treated as missing/pending.
     if (!needsPendingCheck || data == null) return false;
 
     const allMWsById = new Map(allMWs.map((mw) => [mw.id, mw]));
+    const syncWindowMs = syncInterval * 60 * 1000;
     const now = Date.now();
 
     return monitorMWIds.some((id) => {
@@ -39,12 +40,12 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
 
       if (mw.updatedAt) {
         const updatedAt = new Date(mw.updatedAt).getTime();
-        return now - updatedAt < MW_PENDING_SYNC_WINDOW_MS;
+        return now - updatedAt < syncWindowMs;
       }
 
       return false;
     });
   })();
 
-  return { activeMWs, hasPendingChanges };
+  return { activeMWs, hasPendingChanges, syncInterval };
 };

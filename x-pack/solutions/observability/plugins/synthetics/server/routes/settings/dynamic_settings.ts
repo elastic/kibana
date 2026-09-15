@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
+import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
@@ -14,12 +15,24 @@ import {
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  SYNTHETICS_API_URLS,
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+} from '../../../common/constants';
+import {
+  DEFAULT_TASK_SCHEDULE,
+  PRIVATE_LOCATIONS_SYNC_TASK_ID,
+  runSynPrivateLocationMonitorsTaskSoon,
+} from '../../tasks/sync_private_locations_monitors_task';
 import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 import {
   getRebalancePrivateLocationShardsEnabled,
   setRebalancePrivateLocationShardsEnabled,
 } from '../../tasks/rebalance_shards_enabled';
+
+const parseIntervalMinutes = (interval: string): number =>
+  parseInt(interval, 10) || MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -32,12 +45,24 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       savedObjectsClient
     );
 
+    let privateLocationsSyncInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+    try {
+      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
+      if (taskInterval) {
+        privateLocationsSyncInterval = parseIntervalMinutes(taskInterval);
+      }
+    } catch (_err) {
+      // not yet created
+    }
+
     const rebalancePrivateLocationShardsEnabled = await getRebalancePrivateLocationShardsEnabled(
       server.pluginsStart.taskManager
     );
 
     return {
       ...fromSettingsAttribute(dynamicSettingsAttributes),
+      privateLocationsSyncInterval,
       rebalancePrivateLocationShardsEnabled,
     };
   },
@@ -54,7 +79,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: true,
   handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
     const {
-      privateLocationsSyncInterval: _ignoredSyncInterval,
+      privateLocationsSyncInterval,
       rebalancePrivateLocationShardsEnabled,
       ...otherSettings
     } = request.body;
@@ -66,6 +91,16 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       ...prevWithoutRebalance,
       ...otherSettings,
     } as DynamicSettingsAttributes);
+
+    if (privateLocationsSyncInterval != null) {
+      await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
+        interval: `${privateLocationsSyncInterval}m`,
+      });
+      // Fire-and-forget: the new interval is already persisted, so a failure to
+      // kick the task early only means it starts on its next cycle. Swallow it
+      // here (it is already logged) rather than failing the settings write.
+      void runSynPrivateLocationMonitorsTaskSoon({ server }).catch(() => {});
+    }
 
     let persistedRebalance = true;
     if (rebalancePrivateLocationShardsEnabled != null) {
@@ -80,6 +115,31 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       persistedRebalance = await getRebalancePrivateLocationShardsEnabled(
         server.pluginsStart.taskManager
       );
+    }
+
+    let persistedInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+    try {
+      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
+      if (taskInterval) {
+        persistedInterval = parseIntervalMinutes(taskInterval);
+      }
+    } catch (_err) {
+      persistedInterval = parseIntervalMinutes(DEFAULT_TASK_SCHEDULE);
+    }
+
+    if (
+      privateLocationsSyncInterval != null &&
+      persistedInterval !== privateLocationsSyncInterval
+    ) {
+      return response.conflict({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.syncInterval.taskRunning', {
+            defaultMessage:
+              'The sync task is currently running. Please try saving the interval again in a moment.',
+          }),
+        },
+      }) as never;
     }
 
     if (
@@ -98,6 +158,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
 
     return {
       ...fromSettingsAttribute(attr as DynamicSettingsAttributes),
+      privateLocationsSyncInterval: persistedInterval,
       rebalancePrivateLocationShardsEnabled: persistedRebalance,
     };
   },
@@ -143,6 +204,11 @@ export const DynamicSettingsSchema = schema.object({
       bcc: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
-  // Ignored: MW changes now wake the sync task via runSoon. Kept so older clients don't 400.
-  privateLocationsSyncInterval: schema.maybe(schema.number({ max: 1440 })),
+  privateLocationsSyncInterval: schema.maybe(
+    schema.number({
+      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      validate: validateInteger,
+    })
+  ),
 });
