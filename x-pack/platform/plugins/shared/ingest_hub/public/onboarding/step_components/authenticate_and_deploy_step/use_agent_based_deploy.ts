@@ -81,19 +81,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
-  // Deploy is "already done" when the agent policy id is persisted (created in a previous session
-  // or a previous deploy attempt in this session) AND every instance has a status that passed the
-  // deploy gate (detecting/receiving/timeout = success, error = failed).
+  // Deploy is "already done" when every target instance has a persisted package policy id.
+  // This covers both paths durably:
+  //   - New policy: agentPolicyId is set in session storage AND policyIdsByInstance is populated.
+  //   - Existing policy: agentPolicyId is never set, but policyIdsByInstance is populated after
+  //     a successful deploy — this prevents re-deploying on Back+Next in existing mode.
   const isAlreadyDeployed = useMemo(() => {
-    if (!agentBasedDeployment.agentPolicyId) return false;
     if (targets.length === 0) return false;
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
     return targets.every((group) =>
-      group.instanceIds.every((instanceId) => {
-        const status = detectAndReviewStep.serviceStatuses[instanceId];
-        return status === 'receiving' || status === 'detecting' || status === 'timeout';
-      })
+      group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
-  }, [agentBasedDeployment.agentPolicyId, targets, detectAndReviewStep.serviceStatuses]);
+  }, [targets, detectAndReviewStep.policyIdsByInstance]);
 
   const handleDeploy = useCallback(
     async (instanceIds?: string[]): Promise<{ failed: boolean }> => {

@@ -384,14 +384,25 @@ describe('AuthenticateAndDeployStep', () => {
         setNamespace: jest.fn(),
       });
       MockAgentBasedSection.mockImplementation(
-        ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
-          <div>
-            <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
-              Add agent
-            </button>
-            {hasFailed && <span data-test-subj="mock-agent-failed">Failed</span>}
-          </div>
-        )
+        ({
+          onDeploy,
+          hasFailed,
+          onNextReadyChange,
+        }: {
+          onDeploy: () => void;
+          hasFailed: boolean;
+          onNextReadyChange?: (ready: boolean) => void;
+        }) => {
+          onNextReadyChange?.(true);
+          return (
+            <div>
+              <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
+                Add agent
+              </button>
+              {hasFailed && <span data-test-subj="mock-agent-failed">Failed</span>}
+            </div>
+          );
+        }
       );
       renderStep();
       expect(screen.queryByTestId('mock-agent-failed')).not.toBeInTheDocument();
@@ -411,14 +422,25 @@ describe('AuthenticateAndDeployStep', () => {
       ];
 
       beforeEach(() => {
-        // Render a Next button that is enabled (no gating conditions active).
-        MockAgentBasedSection.mockImplementation(({ onDeploy }: { onDeploy: () => void }) => (
-          <div>
-            <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
-              Add agent
-            </button>
-          </div>
-        ));
+        // Render a section that is ready (signals Next readiness immediately).
+        MockAgentBasedSection.mockImplementation(
+          ({
+            onDeploy,
+            onNextReadyChange,
+          }: {
+            onDeploy: () => void;
+            onNextReadyChange?: (ready: boolean) => void;
+          }) => {
+            onNextReadyChange?.(true);
+            return (
+              <div>
+                <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
+                  Add agent
+                </button>
+              </div>
+            );
+          }
+        );
       });
 
       it('calls onContinue when agent deploy succeeds', async () => {

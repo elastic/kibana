@@ -5,30 +5,20 @@
  * 2.0.
  */
 
-import { sendGetAgentPolicies } from '@kbn/fleet-plugin/public';
-
-export const POLICY_NAME_PREFIX = 'AWS Agent Policy';
+import { sendGetAgentPolicies, incrementPolicyName } from '@kbn/fleet-plugin/public';
 
 /**
- * Returns the next available agent policy name using Fleet's numbering pattern:
- * "AWS Agent Policy 1", "AWS Agent Policy 2", …
+ * Returns the next available agent policy name, e.g. "Agent policy 1", "Agent policy 2", …
+ * Reuses Fleet's own `incrementPolicyName` so the naming is consistent with Fleet's UI.
  *
- * Fetches existing policies matching the prefix and picks max(existing numbers) + 1.
- * Falls back to "AWS Agent Policy 1" if the fetch fails or no matches exist.
+ * Falls back to "Agent policy 1" if the fetch fails.
  */
 export async function buildAgentPolicyName(): Promise<string> {
   try {
     const resp = await sendGetAgentPolicies({ perPage: 1000 });
     const existing = resp.data?.items ?? [];
-    const numbers = existing
-      .map((p) => {
-        const match = p.name.match(/^AWS Agent Policy (\d+)$/);
-        return match ? parseInt(match[1], 10) : 0;
-      })
-      .filter((n) => n > 0);
-    const next = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
-    return `${POLICY_NAME_PREFIX} ${next}`;
+    return incrementPolicyName(existing);
   } catch {
-    return `${POLICY_NAME_PREFIX} 1`;
+    return incrementPolicyName([]);
   }
 }

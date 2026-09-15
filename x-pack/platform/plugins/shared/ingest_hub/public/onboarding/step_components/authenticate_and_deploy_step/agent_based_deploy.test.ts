@@ -13,6 +13,8 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreatePackagePolicy: jest.fn(),
   sendGetPackageInfoByKeyForRq: jest.fn(),
   sendGetAgentPolicies: jest.fn(),
+  // Use the real implementation so buildAgentPolicyName gets consistent naming.
+  incrementPolicyName: jest.requireActual('@kbn/fleet-plugin/public').incrementPolicyName,
 }));
 
 import {
@@ -207,44 +209,26 @@ describe('buildAgentBasedTargets', () => {
 });
 
 describe('buildAgentPolicyName', () => {
-  it('returns "AWS Agent Policy 1" when no existing policies match', async () => {
+  it('returns "Agent policy 1" when no existing policies exist', async () => {
     mockSendGetAgentPolicies.mockResolvedValue({ data: { items: [] } });
     const name = await buildAgentPolicyName();
-    expect(name).toBe('AWS Agent Policy 1');
+    expect(name).toBe('Agent policy 1');
   });
 
-  it('increments past the highest existing "AWS Agent Policy N" policy', async () => {
+  it('increments past the highest existing "Agent policy N" policy', async () => {
     mockSendGetAgentPolicies.mockResolvedValue({
       data: {
-        items: [
-          { name: 'AWS Agent Policy 1' },
-          { name: 'AWS Agent Policy 3' },
-          { name: 'AWS Agent Policy 2' },
-        ],
+        items: [{ name: 'Agent policy 1' }, { name: 'Agent policy 3' }, { name: 'Agent policy 2' }],
       },
     });
     const name = await buildAgentPolicyName();
-    expect(name).toBe('AWS Agent Policy 4');
+    expect(name).toBe('Agent policy 4');
   });
 
-  it('falls back to "AWS Agent Policy 1" when the fetch fails', async () => {
+  it('falls back to "Agent policy 1" when the fetch fails', async () => {
     mockSendGetAgentPolicies.mockRejectedValue(new Error('Network error'));
     const name = await buildAgentPolicyName();
-    expect(name).toBe('AWS Agent Policy 1');
-  });
-
-  it('does not match policies with a different prefix', async () => {
-    mockSendGetAgentPolicies.mockResolvedValue({
-      data: {
-        items: [
-          { name: 'AWS Onboarding 5' }, // old name — must not be matched
-          { name: 'AWS Agent Policy 1' },
-        ],
-      },
-    });
-    const name = await buildAgentPolicyName();
-    // Only "AWS Agent Policy 1" matches → next is 2
-    expect(name).toBe('AWS Agent Policy 2');
+    expect(name).toBe('Agent policy 1');
   });
 });
 
@@ -311,6 +295,34 @@ describe('deployNewAgentPolicy', () => {
     const body = mockSendCreateAgentPolicy.mock.calls[0][0];
     expect(body.namespace).toBe('custom-ns');
     expect(body.package_policies[0].namespace).toBeUndefined();
+  });
+
+  it('passes sys_monitoring: true when withSysMonitoring is true', async () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      agentPolicyName: 'AWS Agent Policy 1',
+      withSysMonitoring: true,
+    });
+
+    expect(mockSendCreateAgentPolicy).toHaveBeenCalledWith(expect.any(Object), {
+      sys_monitoring: true,
+    });
+  });
+
+  it('omits sys_monitoring when withSysMonitoring is false', async () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      agentPolicyName: 'AWS Agent Policy 1',
+      withSysMonitoring: false,
+    });
+
+    expect(mockSendCreateAgentPolicy).toHaveBeenCalledWith(expect.any(Object), undefined);
   });
 
   it('never sends cloud_connector — that is an agentless-only auth mechanism', async () => {

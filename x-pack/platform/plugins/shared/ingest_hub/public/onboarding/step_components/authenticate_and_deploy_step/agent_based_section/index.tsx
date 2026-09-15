@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
@@ -43,6 +43,8 @@ interface AgentBasedSectionProps {
   onDeploy: (instanceIds?: string[]) => void;
   /** Called whenever the credential form values change — keeps secrets in memory, never persisted. */
   onCredentialsChange?: (creds: AgentCredentialVars | undefined) => void;
+  /** Called whenever the section's Next-readiness changes, so the parent can gate the Next button. */
+  onNextReadyChange?: (ready: boolean) => void;
   isDeploying: boolean;
   isDone: boolean;
   hasFailed: boolean;
@@ -55,6 +57,7 @@ export function AgentBasedSection({
   serviceCount,
   onDeploy,
   onCredentialsChange,
+  onNextReadyChange,
   isDeploying,
   isDone,
   hasFailed,
@@ -196,6 +199,20 @@ export function AgentBasedSection({
 
   const validation = agentPolicyFormValidation(newAgentPolicy);
   const isPolicyFormValid = Object.keys(validation).length === 0;
+
+  // ── Next-button readiness ─────────────────────────────────────────────────
+  // Tells the parent step whether its Next button should be enabled.
+  const isNextReady = isPolicyCreated
+    ? true // policy exists; Next will attach package policies to it
+    : agentHostsMode === 'existing'
+    ? selectedAgentPolicyIds.length > 0
+    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+
+  const onNextReadyChangeRef = useRef(onNextReadyChange);
+  onNextReadyChangeRef.current = onNextReadyChange;
+  useEffect(() => {
+    onNextReadyChangeRef.current?.(isNextReady);
+  }, [isNextReady]);
 
   // ── Accordion collapse ───────────────────────────────────────────────────
   const [accordionCollapsed, setAccordionCollapsed] = useState(false);

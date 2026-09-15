@@ -131,6 +131,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   } = useAgentBasedDeploy();
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
+  const [isAgentNextReady, setIsAgentNextReady] = useState(false);
   const isAgentDone =
     isAgentAlreadyDeployed ||
     (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0);
@@ -304,7 +305,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
-    (showAgentSection && isAgentDeploying);
+    (showAgentSection && isAgentDeploying) ||
+    (showAgentSection && !isAgentDone && !isAgentNextReady);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
@@ -330,6 +332,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
           onDeploy={handleAgentDeployClick}
           onCredentialsChange={setAgentCredentials}
+          onNextReadyChange={setIsAgentNextReady}
           isDeploying={isAgentDeploying}
           isDone={isAgentDone}
           hasFailed={agentHasFailed}

@@ -73,11 +73,14 @@ function setupMocks({
   withSysMonitoring = undefined,
   setAgentBasedDeployment = jest.fn(),
 }: OnboardingFlowOptions = {}) {
-  MockAgentEnrollmentFlyout.mockImplementation(({ onAgentPolicyCreated }: any) => (
+  MockAgentEnrollmentFlyout.mockImplementation((props: any) => (
     <div data-test-subj="agent-enrollment-flyout">
-      {onAgentPolicyCreated && (
+      {props.hideIncomingDataStep && <span data-test-subj="flyout-hideIncomingDataStep" />}
+      {props.onAgentPolicyCreated && (
         <button
-          onClick={() => onAgentPolicyCreated({ id: 'new-policy-id', name: 'AWS Agent Policy 1' })}
+          onClick={() =>
+            props.onAgentPolicyCreated({ id: 'new-policy-id', name: 'AWS Agent Policy 1' })
+          }
         >
           simulate-policy-created
         </button>
@@ -345,6 +348,70 @@ describe('AgentBasedSection', () => {
       renderSection({ hasFailed: true, onDeploy, failedInstances: ['instance-1', 'instance-2'] });
       fireEvent.click(screen.getByTestId('agentBasedSection-retryButton'));
       expect(onDeploy).toHaveBeenCalledWith(['instance-1', 'instance-2']);
+    });
+  });
+
+  describe('flyout — hideIncomingDataStep', () => {
+    it('passes hideIncomingDataStep to the flyout so "Confirm incoming data" is hidden', async () => {
+      setupMocks({ agentPolicyName: 'AWS Agent Policy 1' });
+      mockAgentPolicyFormValidation.mockReturnValue({});
+      renderSection();
+      act(() => {
+        fireEvent.click(screen.getByText('mark-credential-ready'));
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
+      });
+      fireEvent.click(screen.getByTestId('agentBasedSection-addAgentButton'));
+      expect(screen.getByTestId('flyout-hideIncomingDataStep')).toBeInTheDocument();
+    });
+  });
+
+  describe('flyout — onAgentPolicyCreated callback', () => {
+    it('persists id+name via setAgentBasedDeployment when policy is created in flyout', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({ agentPolicyName: 'AWS Agent Policy 1', setAgentBasedDeployment });
+      mockAgentPolicyFormValidation.mockReturnValue({});
+      renderSection();
+
+      // Open flyout
+      act(() => {
+        fireEvent.click(screen.getByText('mark-credential-ready'));
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
+      });
+      fireEvent.click(screen.getByTestId('agentBasedSection-addAgentButton'));
+
+      // Simulate Fleet creating the policy inside the flyout
+      act(() => {
+        fireEvent.click(screen.getByText('simulate-policy-created'));
+      });
+
+      // id and name must be persisted to context
+      expect(setAgentBasedDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentPolicyId: 'new-policy-id',
+          agentPolicyName: 'AWS Agent Policy 1',
+        })
+      );
+    });
+
+    it('post-create: summary visible, form gone, "Add another agent" shown, radios locked', () => {
+      // The post-create state is driven by agentPolicyId being set in context.
+      // Simulate the state after onAgentPolicyCreated has been called and persisted.
+      setupMocks({
+        agentHostsMode: 'new',
+        agentPolicyId: 'new-policy-id',
+        agentPolicyName: 'AWS Agent Policy 1',
+      });
+      renderSection();
+
+      expect(screen.getByText(/agent policy.*has been created/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('agent-policy-integration-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBasedSection-addAnotherAgentButton')).toBeInTheDocument();
+      const radios = screen.getAllByRole('radio');
+      radios.forEach((radio) => expect(radio).toBeDisabled());
     });
   });
 
