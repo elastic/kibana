@@ -8,7 +8,14 @@
 import { ModelFamily, ModelProvider } from '../model_provider';
 
 export interface ModelDefinition {
+  /** Canonical id, used to match the model against a full model name string. */
   id: string;
+  /**
+   * Additional id spellings this definition should match. Useful when a provider ships the same
+   * model under multiple naming conventions — e.g. Claude 4+ is `claude-sonnet-4-5` on Bedrock /
+   * Anthropic direct / Vertex but `claude-4.5-sonnet` on Elastic Inference Service.
+   */
+  aliases?: string[];
   provider: ModelProvider;
   family: ModelFamily;
   contextWindow: number;
@@ -17,29 +24,32 @@ export interface ModelDefinition {
 /**
  * Retrieve a model definition from the given full model name, if available.
  *
- * The match is a substring test against the raw id and against the id with dots replaced by
- * dashes — this covers the common id shapes across providers:
+ * The match is a substring test against the canonical id (and each alias), and against the
+ * dot-to-dash form of each — this covers the common id shapes across providers:
  * - EIS (`anthropic-claude-4.6-sonnet`, `openai-gpt-5.6-terra`, …) uses version-first with dots.
  * - Anthropic direct / Bedrock / Vertex use family-first with dashes since Claude 4
  *   (`claude-sonnet-4-6`, `claude-opus-4-1-20250805`, …).
  * - Older Claude generations (3.x) use version-first with dashes and a date suffix
  *   (`claude-3-5-sonnet-20241022`), which the dash-replaced form of `claude-3.5-sonnet` catches.
  *
- * Because the id order matters (first match wins), more specific ids must appear before shorter
- * substrings — e.g. `claude-opus-4-1` before `claude-opus-4`, `gpt-5-mini` before `gpt-5`.
+ * Because the id order matters (first match wins), more specific canonical ids must appear before
+ * shorter substrings — e.g. `claude-opus-4-1` before `claude-opus-4`, `gpt-5-mini` before `gpt-5`.
  */
 export const getModelDefinition = (fullModelName: string): ModelDefinition | undefined => {
-  return knownModels.find(
-    (model) =>
-      fullModelName.includes(model.id) || fullModelName.includes(model.id.replaceAll('.', '-'))
+  return knownModels.find((model) =>
+    [model.id, ...(model.aliases ?? [])].some(
+      (candidate) =>
+        fullModelName.includes(candidate) || fullModelName.includes(candidate.replaceAll('.', '-'))
+    )
   );
 };
 
 /**
  * Manually maintained model definitions used as fallback for feature detection.
  *
- * When a provider ships a new model family or renames one, add both the version-first (EIS
- * spelling) and the family-first (native/Bedrock spelling) forms if the two conventions differ.
+ * When a provider ships the same model under multiple naming conventions (typically EIS
+ * version-first vs native/Bedrock family-first for Claude 4+), pick one canonical id and put
+ * the other one in `aliases` rather than adding a second entry.
  */
 export const knownModels: ModelDefinition[] = [
   // ---------------------------------------------------------------------------
@@ -276,18 +286,24 @@ export const knownModels: ModelDefinition[] = [
     contextWindow: 1000000,
   },
   // ---------------------------------------------------------------------------
-  // Anthropic — Claude (version-first with dot / dashed date form)
+  // Anthropic — Claude
   //
-  // Two spelling conventions live side by side:
-  // - Version-first with dots (EIS + older Anthropic API ids after dash-replace).
-  // - Family-first with dashes (Anthropic direct / Bedrock / Vertex since Claude 4).
+  // Claude 4+ ships under two conventions:
+  // - EIS (Elastic Inference Service) uses version-first with dots
+  //   (`anthropic-claude-4.6-sonnet`).
+  // - Anthropic direct / Bedrock / Vertex use family-first with dashes since Claude 4
+  //   (`claude-sonnet-4-6`, `claude-opus-4-1-20250805`, …).
   //
-  // Both forms are included below, most-specific first per pattern. Windows use the default
-  // context (no beta headers): Sonnet/Opus 4-4.5 are 200k default (1M available only with the
-  // `context-1m-2025-08-07` beta header, which Kibana does not send). Sonnet 4.6+, Opus 4.6+
-  // and Claude 5 ship 1M natively.
+  // Canonical id is the family-first form; the EIS spelling is listed as an alias so that both
+  // provider shapes resolve without needing two entries. Order is specific-first per canonical
+  // id (e.g. `claude-opus-4-1` before `claude-opus-4`).
+  //
+  // Windows use the default context (no beta headers): Sonnet/Opus 4-4.5 are 200k default (1M
+  // available only with the `context-1m-2025-08-07` beta header, which Kibana does not send).
+  // Sonnet 4.6+, Opus 4.6+ and Claude 5 ship 1M natively.
   // ---------------------------------------------------------------------------
-  // Claude 3.x (version-first)
+  // Claude 3.x — a single spelling. Version-first with dashes matches the dated Anthropic /
+  // Bedrock ids via the dot-to-dash form of the entry id.
   {
     id: 'claude-3-sonnet',
     provider: ModelProvider.Anthropic,
@@ -324,174 +340,104 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
-  // Claude 4.x — version-first (EIS spelling: `anthropic-claude-4.5-sonnet`, …).
-  {
-    id: 'claude-4.5-sonnet',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  {
-    id: 'claude-4.5-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  {
-    id: 'claude-4.5-haiku',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  {
-    id: 'claude-4.6-sonnet',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-4.6-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-4.7-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-4.8-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-4.1-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  {
-    id: 'claude-4-sonnet',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  {
-    id: 'claude-4-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 200000,
-  },
-  // Claude 5.x — version-first (EIS spelling).
-  {
-    id: 'claude-5.1-fable',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-5-fable',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-5-sonnet',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  {
-    id: 'claude-5-opus',
-    provider: ModelProvider.Anthropic,
-    family: ModelFamily.Claude,
-    contextWindow: 1000000,
-  },
-  // Claude 4.x — family-first (Anthropic direct / Bedrock / Vertex spelling).
+  // Claude 4.x — Sonnet
   {
     id: 'claude-sonnet-4-6',
+    aliases: ['claude-4.6-sonnet'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-sonnet-4-5',
+    aliases: ['claude-4.5-sonnet'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
     id: 'claude-sonnet-4',
+    aliases: ['claude-4-sonnet'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
+  // Claude 4.x — Opus
   {
     id: 'claude-opus-4-8',
+    aliases: ['claude-4.8-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-opus-4-7',
+    aliases: ['claude-4.7-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-opus-4-6',
+    aliases: ['claude-4.6-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-opus-4-5',
+    aliases: ['claude-4.5-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
     id: 'claude-opus-4-1',
+    aliases: ['claude-4.1-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
     id: 'claude-opus-4',
+    aliases: ['claude-4-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
+  // Claude 4.x — Haiku
   {
     id: 'claude-haiku-4-5',
+    aliases: ['claude-4.5-haiku'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
-  // Claude 5.x — family-first (Anthropic direct / Bedrock / Vertex spelling).
+  // Claude 5.x
   {
     id: 'claude-fable-5-1',
+    aliases: ['claude-5.1-fable'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-fable-5',
+    aliases: ['claude-5-fable'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-sonnet-5',
+    aliases: ['claude-5-sonnet'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
   {
     id: 'claude-opus-5',
+    aliases: ['claude-5-opus'],
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 1000000,

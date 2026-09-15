@@ -36,16 +36,18 @@ describe('getModelDefinition', () => {
   });
 
   describe('Anthropic — version-first (EIS / older API)', () => {
-    it('resolves EIS-prefixed Claude ids', () => {
-      expect(getModelDefinition('anthropic-claude-5-sonnet')!.id).toBe('claude-5-sonnet');
-      expect(getModelDefinition('anthropic-claude-5-opus')!.id).toBe('claude-5-opus');
-      expect(getModelDefinition('anthropic-claude-4.6-sonnet')!.id).toBe('claude-4.6-sonnet');
-      expect(getModelDefinition('anthropic-claude-4.6-opus')!.id).toBe('claude-4.6-opus');
-      expect(getModelDefinition('anthropic-claude-4.5-haiku')!.id).toBe('claude-4.5-haiku');
-      expect(getModelDefinition('anthropic-claude-4.5-sonnet')!.id).toBe('claude-4.5-sonnet');
-      expect(getModelDefinition('anthropic-claude-4.7-opus')!.id).toBe('claude-4.7-opus');
-      expect(getModelDefinition('anthropic-claude-4.8-opus')!.id).toBe('claude-4.8-opus');
-      expect(getModelDefinition('anthropic-claude-5.1-fable')!.id).toBe('claude-5.1-fable');
+    it('resolves EIS-prefixed Claude ids to the canonical family-first id via aliases', () => {
+      // EIS uses version-first (`anthropic-claude-4.6-sonnet`); those resolve through the
+      // `aliases` array to the family-first canonical id (Bedrock / Anthropic direct / Vertex).
+      expect(getModelDefinition('anthropic-claude-5-sonnet')!.id).toBe('claude-sonnet-5');
+      expect(getModelDefinition('anthropic-claude-5-opus')!.id).toBe('claude-opus-5');
+      expect(getModelDefinition('anthropic-claude-4.6-sonnet')!.id).toBe('claude-sonnet-4-6');
+      expect(getModelDefinition('anthropic-claude-4.6-opus')!.id).toBe('claude-opus-4-6');
+      expect(getModelDefinition('anthropic-claude-4.5-haiku')!.id).toBe('claude-haiku-4-5');
+      expect(getModelDefinition('anthropic-claude-4.5-sonnet')!.id).toBe('claude-sonnet-4-5');
+      expect(getModelDefinition('anthropic-claude-4.7-opus')!.id).toBe('claude-opus-4-7');
+      expect(getModelDefinition('anthropic-claude-4.8-opus')!.id).toBe('claude-opus-4-8');
+      expect(getModelDefinition('anthropic-claude-5.1-fable')!.id).toBe('claude-fable-5-1');
     });
 
     it('resolves older Claude-3 API ids via dash-replacement', () => {
