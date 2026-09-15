@@ -449,6 +449,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const result = await makeClient().start({
       subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
       message: 'Why did payment timeouts increase?',
     });
 
@@ -479,7 +480,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
-    await makeClient().start({ subject: { type: 'significant_event', id: 'event-1' } });
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'event-1' },
+      trigger_type: 'manual',
+    });
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
   });
