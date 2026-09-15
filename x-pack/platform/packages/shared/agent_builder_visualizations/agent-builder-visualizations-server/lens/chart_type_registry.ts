@@ -121,9 +121,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         noPanelTitleRule('the primary metric label already names the panel'),
         {
           design:
-            'A single number is fine. When the query results support it and the value benefits from context, add a trend background or a secondary metric instead of leaving a lone number on white.',
+            'Default to a trend background so the number carries its recent history instead of sitting alone on white. Add a secondary metric when the query returns a useful companion value. Leave a lone number only when the user asked for one or a progress bar is used instead.',
           config:
-            'A single number is fine. When the value benefits from context, add a trend background (`background_chart: { type: "trend" }`) or a secondary metric (a second `metrics[]` entry with `type: "secondary"`) bound to columns the same ES|QL query returns; never invent another index or field.',
+            'Default to `background_chart: { type: "trend" }` on the primary metric, including during enhancement; Lens derives the trendline from the same ES|QL query, so no extra columns are needed. Add a secondary metric (a second `metrics[]` entry with `type: "secondary"`) only when the query returns a useful companion column; never invent another index or field. Omit the trend only when the user asked for a plain number or a progress bar (`type: "bar"`) is used instead, since a metric has one background chart.',
         },
         {
           design: 'Show a progress bar only when the value has a meaningful maximum.',

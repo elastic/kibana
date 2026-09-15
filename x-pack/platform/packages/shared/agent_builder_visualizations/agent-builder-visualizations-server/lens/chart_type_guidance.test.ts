@@ -36,6 +36,17 @@ describe('chart type guidance', () => {
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
+  it('defaults metric panels to a trend background', () => {
+    const design = getChartDesignPromptContent();
+    const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
+
+    expect(design).toContain('Default to a trend background');
+    expect(design).not.toContain('A single number is fine');
+    expect(metricConfig).toContain('Default to `background_chart: { type: "trend" }`');
+    expect(metricConfig).toContain('including during enhancement');
+    expect(metricConfig).not.toContain('A single number is fine');
+  });
+
   it('warns both authors that percent formatting multiplies already-scaled columns', () => {
     const design = getChartDesignPromptContent();
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
