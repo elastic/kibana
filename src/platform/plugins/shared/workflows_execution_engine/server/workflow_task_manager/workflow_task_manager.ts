@@ -9,7 +9,11 @@
 
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  type TaskManagerStartContract,
+  TaskPriority,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
@@ -18,6 +22,9 @@ import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+
+export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
+  context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
 
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
@@ -154,6 +161,8 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
+    const priority = getTaskPriority(workflowExecution.context);
+
     const task = await this.taskManager.schedule(
       {
         id: taskId,
@@ -170,6 +179,7 @@ export class WorkflowTaskManager {
         runAt,
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
+        priority,
       },
       { request, cloneApiKey: true }
     );
@@ -236,12 +246,15 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    isUserInteractive,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
+    const priority = getTaskPriority({ isUserInteractive });
 
     await this.taskManager.removeIfExists(taskId);
 
@@ -255,6 +268,7 @@ export class WorkflowTaskManager {
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
+        priority,
       },
       fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
     );
@@ -274,12 +288,19 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    isUserInteractive,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<void> {
-    const { taskId } = await this.scheduleImmediateResume({ executionId, spaceId, fakeRequest });
+    const { taskId } = await this.scheduleImmediateResume({
+      executionId,
+      spaceId,
+      fakeRequest,
+      isUserInteractive,
+    });
     await this.taskManager.runSoon(taskId);
   }
 
