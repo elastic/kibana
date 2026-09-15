@@ -14,7 +14,7 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesDataLoading,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesWritableTimeRange,
 } from '@kbn/presentation-publishing';
 import {
@@ -88,7 +88,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
-  PublishesEsqlUsage &
+  PublishesEsql &
   PublishesWritableTimeRange;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -132,7 +132,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         if (isGenerating$.getValue()) isGenerating$.next(false);
       },
     };
-    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
@@ -199,7 +199,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...titleManager.api,
       ...timeRangeManager.api,
       serializeState,
-      usesEsql$,
+      esql$,
       approximationApplied$,
       dataViews$,
       dataLoading$,
@@ -329,8 +329,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     });
 
     const esqlUsageSubscription = esqlQuery$
-      .pipe(map(Boolean), distinctUntilChanged())
-      .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+      .pipe(
+        map((q) => (q ? [{ esql: q }] : [])),
+        distinctUntilChanged((a, b) => a.length === b.length && a[0]?.esql === b[0]?.esql)
+      )
+      .subscribe(esql$);
 
     // Important for unified search support — KQL bar and filter builder suggestions.
     const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
