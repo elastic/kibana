@@ -8,7 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_DETECTION_COVERAGE_WORKFLOW, ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID } from '.';
+import { ALERTZERO_COVERAGE_REVIEW_WORKFLOW, ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID } from '.';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
@@ -40,9 +40,10 @@ interface YamlStep {
   cases?: Array<{ match: string; steps: YamlStep[] }>;
   default?: YamlStep[];
   'on-failure'?: { continue?: boolean };
+  if?: string;
 }
 
-const workerDefinition = parse(ALERTZERO_DETECTION_COVERAGE_WORKFLOW.yaml) as {
+const reviewDefinition = parse(ALERTZERO_COVERAGE_REVIEW_WORKFLOW.yaml) as {
   steps: YamlStep[];
   outputs?: Array<{ name: string }>;
   triggers?: Array<{ type: string }>;
@@ -57,16 +58,16 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
     ...(step.cases ?? []).flatMap((c) => flatten(c.steps)),
   ]);
 
-const allWorkerSteps = flatten(workerDefinition.steps);
-const stepByName = (name: string) => allWorkerSteps.find((step) => step.name === name);
+const allReviewSteps = flatten(reviewDefinition.steps);
+const stepByName = (name: string) => allReviewSteps.find((step) => step.name === name);
 const verdictSwitch = stepByName('handle_verdict');
 
-describe('Detection Coverage worker', () => {
-  it('is registered as a worker, not a catalog watch', () => {
-    expect(ALERTZERO_DETECTION_COVERAGE_WORKFLOW.id).toBe(ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID);
-    // Workers carry no `watch` selector, so they stay out of the Watch catalog.
+describe('Detection Coverage review', () => {
+  it('is registered as a review workflow, not a catalog watch', () => {
+    expect(ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id).toBe(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
+    // The review has no `visibility.selectors`, so the Watch catalog does not list it.
     expect(
-      (ALERTZERO_DETECTION_COVERAGE_WORKFLOW as { visibility?: { selectors?: unknown } }).visibility
+      (ALERTZERO_COVERAGE_REVIEW_WORKFLOW as { visibility?: { selectors?: unknown } }).visibility
         ?.selectors
     ).toBeUndefined();
   });
@@ -88,12 +89,12 @@ describe('Detection Coverage worker', () => {
       expect(matches).toHaveLength(ACTIONABLE_VERDICTS.length);
     });
 
-    it('routes every remaining verdict to a report-only default arm', () => {
+    it('routes every remaining verdict to the report-only default branch', () => {
       const uncased = VERDICTS.filter(
         (verdict) => !(ACTIONABLE_VERDICTS as readonly string[]).includes(verdict)
       );
-      // All canonical verdicts now have dedicated cases; the default arm handles only
-      // unexpected verdicts (e.g. a model hallucinating outside the enum).
+      // Every canonical verdict has its own case. The default branch handles only
+      // unexpected verdicts, such as a model answer outside the enum.
       expect(uncased).toEqual([]);
       expect((verdictSwitch?.default ?? []).map((step) => step.name)).toEqual(['report_only']);
     });
@@ -107,6 +108,14 @@ describe('Detection Coverage worker', () => {
   });
 
   describe('failure containment', () => {
+    // The check runs only when the read found the indicator. A missing indicator must
+    // not cost a model call, and it must not open an approval.
+    it('runs the coverage check only when the indicator was found', () => {
+      expect(stepByName('coverage_check')?.if).toContain(
+        'steps.read_ki.output.hits.total.value > 0'
+      );
+    });
+
     // A step that dies takes the run with it, so the human never learns what happened.
     // Every step that calls out must let the run reach `emit_result` and report the truth.
     it.each([
@@ -123,8 +132,46 @@ describe('Detection Coverage worker', () => {
         ['enable_existing_rule', 'review_enable'],
         ['install_prebuilt_rule', 'review_install'],
       ] as const) {
-        const condition = (stepByName(action) as unknown as { if?: string })?.if ?? '';
+        const condition = stepByName(action)?.if ?? '';
         expect(condition).toContain(`steps.${gate}.output.response.approved == true`);
+      }
+    });
+
+    // An approval that times out must fail the run before `mark_processed`. Then an
+    // unanswered indicator stays pending, and the next sweep starts a new review.
+    it.each(['review_enable', 'review_install', 'confirm_coverage', 'report_only'])(
+      '%s does not continue on failure, so a timeout leaves the indicator pending',
+      (name) => {
+        expect(stepByName(name)?.['on-failure']?.continue).toBeUndefined();
+      }
+    );
+
+    // The indicator leaves the queue only after an applied decision. No verdict means no
+    // approval was asked. A failed rule-creation run, enable, or install did not apply a
+    // decision. Each case must leave the indicator pending.
+    it('marks the indicator processed only after an applied decision', () => {
+      const condition = stepByName('mark_processed')?.if ?? '';
+      expect(condition).toContain('structured_output.verdict != null');
+      expect(condition).toContain("structured_output.verdict != ''");
+      for (const action of [
+        'run_rule_creation',
+        'enable_existing_rule',
+        'install_prebuilt_rule',
+        'enable_installed_rule',
+      ]) {
+        expect(condition).toContain(`steps.${action}.error == null`);
+      }
+    });
+
+    // The review runs in the space of the sweep that started it. A link without the
+    // space prefix opens the default space.
+    it('links every approval message to the conversation in the current space', () => {
+      const approvals = allReviewSteps.filter((step) => step.type === 'waitForApproval');
+      expect(approvals).toHaveLength(4);
+      for (const approval of approvals) {
+        expect(String(approval.with?.message)).toContain(
+          '/s/{{ workflow.spaceId }}/app/agent_builder/conversations/'
+        );
       }
     });
   });
@@ -174,8 +221,15 @@ describe('Detection Coverage worker', () => {
       );
     });
 
-    it('separates "no decision made" from "no gap found"', () => {
+    it('reports when the check returned no verdict', () => {
       expect(emit?.check_error).toContain('produced no verdict');
+    });
+
+    // A failed rule-creation child leaves the indicator pending and the run completed; without
+    // this field nothing in the run says why the indicator came back.
+    it('reports a failed rule-creation child', () => {
+      expect(emit?.creation_error).toContain('steps.run_rule_creation.error != null');
+      expect(emit?.creation_error).toContain('rule creation failed');
     });
 
     it('propagates the creation worker outcome', () => {
@@ -184,10 +238,10 @@ describe('Detection Coverage worker', () => {
     });
   });
 
-  describe('preconditions and unsupported paths', () => {
-    it('caps every free-text input before it reaches the model', () => {
+  describe('inputs', () => {
+    it('limits the length of every string input', () => {
       const triggers = (
-        workerDefinition as unknown as {
+        reviewDefinition as unknown as {
           triggers?: Array<{
             inputs?: { properties?: Record<string, { type?: string; maxLength?: number }> };
           }>;
@@ -195,8 +249,7 @@ describe('Detection Coverage worker', () => {
       ).triggers;
       const props = triggers?.[0]?.inputs?.properties;
       expect(Object.keys(props ?? {}).length).toBeGreaterThan(0);
-      // Report every offender at once, and name it: an uncapped field is the one that
-      // reaches the model with an unbounded prompt.
+      // Report every offender at once, by name.
       const uncapped = Object.entries(props ?? {})
         .filter(([, schema]) => schema.type === 'string' && !schema.maxLength)
         .map(([name]) => name);
@@ -205,7 +258,7 @@ describe('Detection Coverage worker', () => {
   });
 
   it('reports an outcome flag for every action path', () => {
-    const outputs = (workerDefinition.outputs ?? []).map((output) => output.name);
+    const outputs = (reviewDefinition.outputs ?? []).map((output) => output.name);
     expect(outputs).toEqual(
       expect.arrayContaining([
         'verdict',
