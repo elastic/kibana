@@ -158,4 +158,39 @@ describe('ArtifactEnabledSwitch', () => {
     expect(renderResult.getByTestId('enabledSwitch-loading')).toBeInTheDocument();
     expect(renderResult.queryByTestId('enabledSwitch')).not.toBeInTheDocument();
   });
+
+  it('shows Enabled on hover when the artifact is enabled', async () => {
+    render();
+
+    fireEvent.mouseOver(renderResult.getByTestId('enabledSwitch').parentElement as HTMLElement);
+
+    expect(await renderResult.findByRole('tooltip')).toHaveTextContent('Enabled');
+  });
+
+  it('shows Disabled on hover when the artifact is disabled', async () => {
+    render({
+      item: generator.generate({
+        ...item,
+        tags: [GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG],
+      }),
+    });
+
+    fireEvent.mouseOver(renderResult.getByTestId('enabledSwitch').parentElement as HTMLElement);
+
+    expect(await renderResult.findByRole('tooltip')).toHaveTextContent('Disabled');
+  });
+
+  it('shows the current value on hover instead of a privilege hint when global artifact management is not allowed', async () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canManageGlobalArtifacts: false }),
+    });
+    render();
+
+    fireEvent.mouseOver(renderResult.getByTestId('enabledSwitch').parentElement as HTMLElement);
+
+    expect(await renderResult.findByRole('tooltip')).toHaveTextContent('Enabled');
+    expect(renderResult.getByRole('tooltip')).not.toHaveTextContent(
+      'Management of global artifacts requires additional privilege'
+    );
+  });
 });

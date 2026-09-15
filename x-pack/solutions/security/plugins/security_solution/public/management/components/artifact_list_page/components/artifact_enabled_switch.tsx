@@ -21,6 +21,8 @@ export interface ArtifactEnabledSwitchProps {
   apiClient: ExceptionsListApiClient;
   labels: {
     tableColumnEnabledLabel: string;
+    tableEnabledStatusLabel: string;
+    tableDisabledStatusLabel: string;
   } & typeof ARTIFACT_ENABLE_DISABLE_ACTION_LABELS;
   isReadOnly?: boolean;
   onSuccess?: () => void;
@@ -29,10 +31,13 @@ export interface ArtifactEnabledSwitchProps {
 
 export const ArtifactEnabledSwitch = memo<ArtifactEnabledSwitchProps>(
   ({ item, apiClient, labels, isReadOnly = false, onSuccess, 'data-test-subj': dataTestSubj }) => {
-    const { isDisabled: isActionDisabled, disabledTooltip } = useArtifactActionsDisabled(item);
+    const { isDisabled: isActionDisabled } = useArtifactActionsDisabled(item);
     const { setArtifactEnabled, isLoading } = useWithArtifactEnableDisable(apiClient, item, labels);
     const isEnabled = !isArtifactDisabled(item);
     const isSwitchDisabled = isReadOnly || isActionDisabled || isLoading;
+    const statusLabel = isEnabled
+      ? labels.tableEnabledStatusLabel
+      : labels.tableDisabledStatusLabel;
 
     const handleChange = useCallback(
       (event: EuiSwitchEvent) => {
@@ -48,22 +53,18 @@ export const ArtifactEnabledSwitch = memo<ArtifactEnabledSwitchProps>(
       return <EuiLoadingSpinner size="m" data-test-subj={`${dataTestSubj}-loading`} />;
     }
 
-    const switchControl = (
-      <EuiSwitch
-        label={labels.tableColumnEnabledLabel}
-        showLabel={false}
-        checked={isEnabled}
-        disabled={isSwitchDisabled}
-        onChange={handleChange}
-        data-test-subj={dataTestSubj}
-      />
+    return (
+      <EuiToolTip content={statusLabel}>
+        <EuiSwitch
+          label={labels.tableColumnEnabledLabel}
+          showLabel={false}
+          checked={isEnabled}
+          disabled={isSwitchDisabled}
+          onChange={handleChange}
+          data-test-subj={dataTestSubj}
+        />
+      </EuiToolTip>
     );
-
-    if (isActionDisabled && disabledTooltip) {
-      return <EuiToolTip content={disabledTooltip}>{switchControl}</EuiToolTip>;
-    }
-
-    return switchControl;
   }
 );
 ArtifactEnabledSwitch.displayName = 'ArtifactEnabledSwitch';

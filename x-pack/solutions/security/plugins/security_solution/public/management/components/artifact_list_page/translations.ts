@@ -251,6 +251,18 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Enabled',
     }
   ),
+  tableEnabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.enabledStatusLabel',
+    {
+      defaultMessage: 'Enabled',
+    }
+  ),
+  tableDisabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.disabledStatusLabel',
+    {
+      defaultMessage: 'Disabled',
+    }
+  ),
   tableColumnActionsLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
     {
