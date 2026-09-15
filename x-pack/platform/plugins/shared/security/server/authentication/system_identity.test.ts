@@ -70,6 +70,20 @@ describe('UiamSystemIdentity', () => {
     );
   });
 
+  it('forwards the caller abort signal to UIAM', async () => {
+    const controller = new AbortController();
+
+    await systemIdentity.createEphemeralToken(controller.signal);
+
+    expect(uiam.authenticateAsKibana).toHaveBeenCalledWith(controller.signal);
+  });
+
+  it('mints without a signal when the caller does not provide one', async () => {
+    await systemIdentity.createEphemeralToken();
+
+    expect(uiam.authenticateAsKibana).toHaveBeenCalledWith(undefined);
+  });
+
   it('propagates UIAM failures unchanged', async () => {
     const failure = Boom.unauthorized('client certificate could not be verified');
     uiam.authenticateAsKibana.mockRejectedValue(failure);

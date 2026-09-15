@@ -94,6 +94,22 @@ describe('RelayClient', () => {
       );
     });
 
+    it("mints the token under the caller's abort signal", async () => {
+      requestMock.mockResolvedValue({ status: 202, data: {} } as never);
+      const controller = new AbortController();
+
+      await createClient().postCallback(
+        'https://relay.test/v1/events',
+        { execution_id: 'exec-1' },
+        controller.signal
+      );
+
+      expect(systemIdentity.createEphemeralToken).toHaveBeenCalledWith(controller.signal);
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: controller.signal })
+      );
+    });
+
     it('resolves the system identity per request so a security plugin that starts after construction is picked up', async () => {
       requestMock.mockResolvedValue({ status: 200, data: {} } as never);
       const security: { systemIdentity?: SystemIdentity } = {};

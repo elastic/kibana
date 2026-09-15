@@ -1397,6 +1397,33 @@ describe('UiamService', () => {
       expect(headers).not.toHaveProperty('authorization');
     });
 
+    it('passes the caller abort signal to the request', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ type: 'project' }) });
+      const controller = new AbortController();
+
+      await uiamService.authenticateAsKibana(controller.signal);
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ signal: controller.signal })
+      );
+    });
+
+    it('logs an abort by the caller at debug level rather than as a failure', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const abortError = new Error('This operation was aborted');
+      abortError.name = 'AbortError';
+      fetchSpy.mockRejectedValue(abortError);
+
+      await expect(uiamService.authenticateAsKibana(controller.signal)).rejects.toBe(abortError);
+
+      expect(authenticateLogger.error).not.toHaveBeenCalled();
+      expect(authenticateLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('aborted by the caller')
+      );
+    });
+
     it('reproduces the UIAM status code and payload when authentication fails', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,

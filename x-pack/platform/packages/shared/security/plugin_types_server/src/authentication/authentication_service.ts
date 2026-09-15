@@ -22,8 +22,11 @@ export interface SystemIdentity {
    * identity or Kibana's shared secret, neither of which leaves this process.
    *
    * Every call mints a fresh token; nothing is cached. Callers must not persist the token.
+   *
+   * @param signal Aborts the in-flight request to UIAM. A caller whose own request is already
+   * cancelled should pass its signal so the mint does not outlive it.
    */
-  createEphemeralToken(): Promise<string>;
+  createEphemeralToken(signal?: AbortSignal): Promise<string>;
 }
 
 /**

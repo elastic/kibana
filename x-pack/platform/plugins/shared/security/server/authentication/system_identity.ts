@@ -40,9 +40,9 @@ export class UiamSystemIdentity implements SystemIdentity {
     this.uiam = uiam;
   }
 
-  async createEphemeralToken(): Promise<string> {
+  async createEphemeralToken(signal?: AbortSignal): Promise<string> {
     // UIAM call failures are logged (status only) by the UIAM service and propagate unchanged.
-    const response = await this.uiam.authenticateAsKibana();
+    const response = await this.uiam.authenticateAsKibana(signal);
 
     const parsed = kibanaAuthenticateResponseSchema.safeParse(response);
     if (!parsed.success) {

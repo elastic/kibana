@@ -252,14 +252,14 @@ export class RelayClient implements RelayClientContract {
    * alone is not enough: the Relay forwards this bearer token together with Kibana's certificate
    * SANs to UIAM. A fresh token is minted per request.
    */
-  private async createSystemIdentityToken(): Promise<string> {
+  private async createSystemIdentityToken(signal?: AbortSignal): Promise<string> {
     const systemIdentity = this.getSystemIdentity();
     if (!systemIdentity) {
       throw new Error(
         'Cannot authenticate the Relay request: `xpack.actions.relay.uiam.enabled` is set but UIAM is not configured for this Kibana.'
       );
     }
-    return await systemIdentity.createEphemeralToken();
+    return await systemIdentity.createEphemeralToken(signal);
   }
 
   private async sendRequest(
@@ -268,7 +268,7 @@ export class RelayClient implements RelayClientContract {
     method: 'get' | 'post' | 'put' | 'delete' = 'post',
     signal?: AbortSignal
   ): Promise<AxiosResponse> {
-    const token = this.useSystemIdentity ? await this.createSystemIdentityToken() : undefined;
+    const token = this.useSystemIdentity ? await this.createSystemIdentityToken(signal) : undefined;
 
     return request({
       axios: this.axios,
