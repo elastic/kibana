@@ -81,21 +81,20 @@ const trackedFilesUnder = (specDir: string): string[] => {
   return files;
 };
 
-const codeownersEntries = (): CodeownersEntry[] =>
-  readFileSync(CODEOWNERS, 'utf8')
+let entryCache: CodeownersEntry[] | undefined;
+
+/** Entries in file order, which is what decides precedence. */
+const codeownersEntries = (): CodeownersEntry[] => {
+  entryCache ??= readFileSync(CODEOWNERS, 'utf8')
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith('#'))
     .map((line) => line.split(/\s+/))
     .map(([pattern, ...owners]) => ({ path: pattern.replace(/^\/|\/$/g, ''), owners }));
 
-/**
- * Whether a wildcard pattern can reach files inside `specDir`.
- *
- * `*` does not cross `/` in CODEOWNERS, and a `dir/*` rule covers files directly
- * in that directory rather than cascading into subdirectories. So a pattern is
- * only in scope when it can match `specDir` itself or something beneath it.
- */
+  return entryCache;
+};
+
 const patternRegex = (pattern: string): RegExp =>
   new RegExp(
     `^${pattern
@@ -111,42 +110,43 @@ const patternRegex = (pattern: string): RegExp =>
   );
 
 /**
- * Whether a wildcard rule owns files that actually exist inside `specDir`.
+ * Whether a CODEOWNERS rule claims `file`.
  *
- * Matching tracked paths rather than hypothetical ones keeps this honest in both
- * directions: `*` not crossing `/` falls out for free, and a pattern is only
- * flagged when it really does claim a file in the suite.
+ * A pattern with no wildcard names a directory and covers everything beneath it.
+ * `dir/*` instead covers only files directly in `dir`, because `*` does not
+ * cross `/`; `**` does.
  */
-const wildcardReaches = (pattern: string, specDir: string): boolean => {
-  const regex = patternRegex(pattern);
-  return trackedFilesUnder(specDir).some((file) => regex.test(file));
+const matchesFile = (pattern: string, file: string): boolean =>
+  pattern.includes('*')
+    ? patternRegex(pattern).test(file)
+    : file === pattern || file.startsWith(`${pattern}/`);
+
+/** CODEOWNERS precedence is last match wins, not most specific match wins. */
+const effectiveOwnersFor = (file: string): string[] => {
+  let owners: string[] = [];
+
+  for (const entry of codeownersEntries()) {
+    if (matchesFile(entry.path, file)) {
+      owners = entry.owners;
+    }
+  }
+
+  return owners;
 };
 
 /**
- * CODEOWNERS entries at or below `specDir`, plus the nearest ancestor entry.
+ * Everyone GitHub would actually notify for a change anywhere in the suite.
  *
- * Only handles literal paths. Wildcard rules that could reach a suite are
- * rejected by their own test rather than silently skipped here, so this stays a
- * drift check instead of a partial reimplementation of GitHub's matcher.
+ * Resolved per tracked file so precedence and wildcards behave as they do on
+ * GitHub, then unioned. Path specificity is not a substitute for last-match
+ * ordering: `explore/cases` and `explore/hosts` are owned by different teams,
+ * and which rule wins depends on where it sits in the file.
  */
 const expectedOwnersFor = (specDir: string): string[] => {
-  const entries = codeownersEntries().filter((entry) => !entry.path.includes('*'));
-
-  const nested = entries.filter(
-    (entry) => entry.path === specDir || entry.path.startsWith(`${specDir}/`)
-  );
-
-  const ancestors = entries.filter((entry) => specDir.startsWith(`${entry.path}/`));
-  // Last match wins in CODEOWNERS; among ancestors the longest path is the most specific.
-  const longest = Math.max(0, ...ancestors.map((entry) => entry.path.length));
-  const nearestAncestor = ancestors.filter((entry) => entry.path.length === longest).pop();
-
   const owners = new Set<string>();
-  for (const entry of nested) {
-    entry.owners.forEach((owner) => owners.add(owner));
-  }
-  if (nested.length === 0 && nearestAncestor) {
-    nearestAncestor.owners.forEach((owner) => owners.add(owner));
+
+  for (const file of trackedFilesUnder(specDir)) {
+    effectiveOwnersFor(file).forEach((owner) => owners.add(owner));
   }
 
   return [...owners].sort();
@@ -299,25 +299,34 @@ describe('CODEOWNERS agreement', () => {
   });
 });
 
-describe('CODEOWNERS wildcard rules', () => {
-  it('has no wildcard rule reaching into a suite tree', () => {
-    // expectedOwnersFor only understands literal paths. Rather than let a
-    // wildcard rule be skipped and the drift check pass green, fail here so
-    // whoever adds it reconciles the mapping by hand.
-    const offenders = codeownersEntries()
-      .filter((entry) => entry.path.includes('*'))
-      .flatMap((entry) =>
-        getSuitesConfig()
-          .suites.filter((suite) => wildcardReaches(entry.path, suite.specDir))
-          .map((suite) => `${entry.path} -> ${suite.label}`)
-      );
+describe('CODEOWNERS matching', () => {
+  it('applies last match wins rather than most specific wins', () => {
+    const entries = [
+      { path: 'a/b', owners: ['@specific'] },
+      { path: 'a', owners: ['@broad-but-later'] },
+    ];
+    const lastMatch = entries.filter((entry) => matchesFile(entry.path, 'a/b/c.ts')).pop();
 
-    expect(offenders).toEqual([]);
+    expect(lastMatch?.owners).toEqual(['@broad-but-later']);
+  });
+
+  it('resolves the split ownership of the explore suite per file', () => {
+    const explore = 'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore';
+
+    // Different subtrees, different teams, decided by file order.
+    expect(effectiveOwnersFor(`${explore}/hosts/hosts_risk_column.cy.ts`)).toEqual([
+      '@elastic/security-entity-analytics',
+    ]);
+    expect(effectiveOwnersFor(`${explore}/cases/creation.cy.ts`)).toEqual([
+      '@elastic/security-threat-hunting',
+    ]);
   });
 
   it('scopes wildcards the way CODEOWNERS does', () => {
     const specDir = 'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore';
     const cypressRoot = 'x-pack/solutions/security/test/security_solution_cypress/cypress';
+    const wildcardReaches = (pattern: string, dir: string) =>
+      trackedFilesUnder(dir).some((file) => matchesFile(pattern, file));
 
     expect(trackedFilesUnder(specDir).length).toBeGreaterThan(0);
 
