@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PromptResponseEvent } from '@kbn/agent-builder-common';
+import type { PromptResponseEvent as PromptResponseEventData } from '@kbn/agent-builder-common';
 import {
   isConfirmationPromptResponse,
   isAuthorizationPromptResponse,
@@ -16,28 +16,28 @@ import {
 } from '@kbn/agent-builder-common/agents';
 
 const labels = {
-  approved: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.approved', {
+  approved: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.approved', {
     defaultMessage: 'Approved',
   }),
-  denied: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.denied', {
+  denied: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.denied', {
     defaultMessage: 'Denied',
   }),
-  authorized: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.authorized', {
+  authorized: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.authorized', {
     defaultMessage: 'Authorized',
   }),
-  declined: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.declined', {
+  declined: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.declined', {
     defaultMessage: 'Declined',
   }),
-  responded: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.responded', {
+  responded: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.responded', {
     defaultMessage: 'Responded',
   }),
-  skipped: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.skipped', {
+  skipped: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.skipped', {
     defaultMessage: 'Skipped',
   }),
 };
 
 /** Renders the human's read-only answer(s) to a HITL prompt. */
-export const PromptResponse: React.FC<{ event: PromptResponseEvent }> = ({ event }) => {
+export const PromptResponseEvent: React.FC<{ event: PromptResponseEventData }> = ({ event }) => {
   const responseEntries = Object.entries(event.data.responses);
 
   if (responseEntries.length === 0) {

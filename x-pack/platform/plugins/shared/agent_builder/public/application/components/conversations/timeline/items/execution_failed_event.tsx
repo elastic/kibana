@@ -8,19 +8,19 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ExecutionFailedEvent } from '@kbn/agent-builder-common';
+import type { ExecutionFailedEvent as ExecutionFailedEventData } from '@kbn/agent-builder-common';
 
-interface ExecutionFailedProps {
-  event: ExecutionFailedEvent;
+interface ExecutionFailedEventProps {
+  event: ExecutionFailedEventData;
 }
 
 /** Renders a danger callout for a run that ended in an error (`execution_failed`). */
-export const ExecutionFailed: React.FC<ExecutionFailedProps> = ({ event }) => {
+export const ExecutionFailedEvent: React.FC<ExecutionFailedEventProps> = ({ event }) => {
   const { error } = event.data;
 
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.agentBuilder.conversation.thread.executionFailed.title', {
+      title={i18n.translate('xpack.agentBuilder.conversation.timeline.executionFailed.title', {
         defaultMessage: 'The agent run failed',
       })}
       color="danger"

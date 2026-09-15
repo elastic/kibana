@@ -18,24 +18,24 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
-import { Thread } from './thread';
+import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
 import {
   activeExecutionReducer,
   type ActiveExecutionDraft,
 } from '../../../../services/events/active_execution_reducer';
-import { toThreadItems } from './to_thread_items';
-import { createUserMessageEvent } from './items/user_message.factory';
+import { toTimelineItems } from './to_timeline_items';
+import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
-import { createExecutionTerminatedEvent } from './items/execution_terminated.factory';
+import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import {
   createUserMessageItem,
   createCompletedTurnItem,
   createFailedTurnItem,
   createAbortedTurnItem,
   createStreamingTurnItem,
-} from './items/thread_item.factory';
+} from './items/timeline_item.factory';
 
 const storyReducer = (
   state: ActiveExecutionDraft | null,
@@ -82,9 +82,9 @@ const seedEvents: TimelineEvent[] = [
   }),
 ];
 
-const meta: Meta<typeof Thread> = {
-  title: 'Conversations/Thread/Thread',
-  component: Thread,
+const meta: Meta<typeof Timeline> = {
+  title: 'Conversations/Timeline/Timeline',
+  component: Timeline,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -97,7 +97,7 @@ const meta: Meta<typeof Thread> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof Thread>;
+type Story = StoryObj<typeof Timeline>;
 
 export const FullConversation: Story = {
   args: {
@@ -191,8 +191,8 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   const [activeExecution, dispatch] = useReducer(storyReducer, null);
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
-  const toThreadItemsInput = { events: seedEvents, activeExecution };
-  const items = toThreadItems(toThreadItemsInput);
+  const toTimelineItemsInput = { events: seedEvents, activeExecution };
+  const items = toTimelineItems(toTimelineItemsInput);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -201,14 +201,14 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
-          <Thread items={items} />
+          <Timeline items={items} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiAccordion id="debug-source" buttonContent="Source">
           <EuiSpacer size="s" />
           <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
-            {JSON.stringify(toThreadItemsInput, null, 2)}
+            {JSON.stringify(toTimelineItemsInput, null, 2)}
           </EuiCodeBlock>
         </EuiAccordion>
       </EuiFlexItem>

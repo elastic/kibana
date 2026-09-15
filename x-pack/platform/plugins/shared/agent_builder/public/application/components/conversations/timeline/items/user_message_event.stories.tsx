@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_builder_storybook_provider';
-import { UserMessage } from './user_message';
-import { createUserMessageEvent } from './user_message.factory';
+import { UserMessageEvent } from './user_message_event';
+import { createUserMessageEvent } from './user_message_event.factory';
 
-const meta: Meta<typeof UserMessage> = {
-  title: 'Conversations/Thread/User Message',
-  component: UserMessage,
+const meta: Meta<typeof UserMessageEvent> = {
+  title: 'Conversations/Timeline/User Message',
+  component: UserMessageEvent,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -26,7 +26,7 @@ const meta: Meta<typeof UserMessage> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof UserMessage>;
+type Story = StoryObj<typeof UserMessageEvent>;
 
 export const Default: Story = {
   args: {

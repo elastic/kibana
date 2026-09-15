@@ -8,18 +8,18 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
-import { UserMessage } from './items/user_message';
-import { PromptResponse } from './items/prompt_response';
+import { UserMessageEvent } from './items/user_message_event';
+import { PromptResponseEvent } from './items/prompt_response_event';
 import { AgentTurn } from './agent_turn';
-import type { ThreadItem } from './to_thread_items';
+import type { TimelineItem } from './to_timeline_items';
 
-interface ThreadProps {
-  items: ThreadItem[];
+interface TimelineProps {
+  items: TimelineItem[];
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
 }
 
-export const Thread: React.FC<ThreadProps> = ({ items, agent, conversationAttachments }) => {
+export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAttachments }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       {items.map((item) => {
@@ -27,7 +27,7 @@ export const Thread: React.FC<ThreadProps> = ({ items, agent, conversationAttach
         switch (item.kind) {
           case 'userMessage':
             content = (
-              <UserMessage
+              <UserMessageEvent
                 event={item.event}
                 isPending={item.isPending}
                 conversationAttachments={conversationAttachments}
@@ -35,7 +35,7 @@ export const Thread: React.FC<ThreadProps> = ({ items, agent, conversationAttach
             );
             break;
           case 'promptResponse':
-            content = <PromptResponse event={item.event} />;
+            content = <PromptResponseEvent event={item.event} />;
             break;
           case 'agentTurn':
             content = <AgentTurn item={item} agent={agent} />;

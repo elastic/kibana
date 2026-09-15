@@ -18,15 +18,15 @@ import {
   useStreamRecord,
   useConversationStreamService,
 } from '../../../context/streaming/streaming_context';
-import { toThreadItems } from './to_thread_items';
-import { Thread } from './thread';
+import { toTimelineItems } from './to_timeline_items';
+import { Timeline } from './timeline';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
 
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here
  */
-export const ThreadConnector: React.FC = () => {
+export const TimelineConnector: React.FC = () => {
   const { conversation } = useConversation();
   const conversationStreamService = useConversationStreamService();
   const conversationId = conversation?.id;
@@ -60,7 +60,7 @@ export const ThreadConnector: React.FC = () => {
 
   const items = useMemo(
     () =>
-      toThreadItems({
+      toTimelineItems({
         events: persistedEvents ?? [],
         pendingUserMessage,
         activeExecution,
@@ -68,5 +68,5 @@ export const ThreadConnector: React.FC = () => {
     [persistedEvents, pendingUserMessage, activeExecution]
   );
 
-  return <Thread items={items} agent={agent} conversationAttachments={conversationAttachments} />;
+  return <Timeline items={items} agent={agent} conversationAttachments={conversationAttachments} />;
 };

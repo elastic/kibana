@@ -13,13 +13,13 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { AgentResponse } from './agent_response';
-import { ExecutionTerminated } from './items/execution_terminated';
-import { ExecutionFailed } from './items/execution_failed';
-import { ExecutionAborted } from './items/execution_aborted';
-import type { AgentTurnItem } from './to_thread_items';
-import { isCompletedTurn, isFailedTurn, isAbortedTurn } from './to_thread_items';
+import { ExecutionTerminatedEvent } from './items/execution_terminated_event';
+import { ExecutionFailedEvent } from './items/execution_failed_event';
+import { ExecutionAbortedEvent } from './items/execution_aborted_event';
+import type { AgentTurnItem } from './to_timeline_items';
+import { isCompletedTurn, isFailedTurn, isAbortedTurn } from './to_timeline_items';
 
-const loadingLabel = i18n.translate('xpack.agentBuilder.thread.agentLoading', {
+const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',
 });
 
@@ -30,13 +30,13 @@ interface AgentTurnProps {
 
 const renderContent = (item: AgentTurnItem): React.ReactNode => {
   if (isCompletedTurn(item)) {
-    return <ExecutionTerminated event={item.terminal} steps={item.steps} />;
+    return <ExecutionTerminatedEvent event={item.terminal} steps={item.steps} />;
   }
   if (isFailedTurn(item)) {
-    return <ExecutionFailed event={item.terminal} />;
+    return <ExecutionFailedEvent event={item.terminal} />;
   }
   if (isAbortedTurn(item)) {
-    return <ExecutionAborted event={item.terminal} />;
+    return <ExecutionAbortedEvent event={item.terminal} />;
   }
   if (item.steps.length === 0 && !item.response && !item.transientReasoning) {
     return null;
@@ -64,7 +64,11 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({ item, agent }) => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-      <EuiFlexItem grow={false} css={avatarColumnStyles} data-test-subj="agentBuilderThreadAvatar">
+      <EuiFlexItem
+        grow={false}
+        css={avatarColumnStyles}
+        data-test-subj="agentBuilderTimelineAvatar"
+      >
         {isLoading ? (
           <EuiLoadingElastic size="l" aria-label={loadingLabel} />
         ) : (

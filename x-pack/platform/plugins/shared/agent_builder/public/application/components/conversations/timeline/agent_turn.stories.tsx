@@ -18,7 +18,7 @@ import {
   createAwaitingPromptTurnItem,
   createFailedTurnItem,
   createAbortedTurnItem,
-} from './items/thread_item.factory';
+} from './items/timeline_item.factory';
 
 const storyAgent: AgentDefinition = {
   id: agentBuilderDefaultAgentId,
@@ -32,7 +32,7 @@ const storyAgent: AgentDefinition = {
 };
 
 const meta: Meta<typeof AgentTurn> = {
-  title: 'Conversations/Thread/Agent Turn',
+  title: 'Conversations/Timeline/Agent Turn',
   component: AgentTurn,
   decorators: [
     (Story) => (

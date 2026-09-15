@@ -35,7 +35,7 @@ export interface AgentTurnItem {
   timeToFirstToken?: number;
 }
 
-export type ThreadItem =
+export type TimelineItem =
   | { kind: 'userMessage'; key: string; event: UserMessageEvent; isPending?: boolean }
   | { kind: 'promptResponse'; key: string; event: PromptResponseEvent }
   | AgentTurnItem;
@@ -114,13 +114,13 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
 };
 
 type UserEntry =
-  | Extract<ThreadItem, { kind: 'userMessage' }>
-  | Extract<ThreadItem, { kind: 'promptResponse' }>;
+  | Extract<TimelineItem, { kind: 'userMessage' }>
+  | Extract<TimelineItem, { kind: 'promptResponse' }>;
 
-export const groupThreadEvents = (
+export const groupTimelineEvents = (
   events: TimelineEvent[],
   eventsById: Map<string, TimelineEvent>
-): ThreadItem[] => {
+): TimelineItem[] => {
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
 
@@ -174,7 +174,7 @@ export const groupThreadEvents = (
     }
   }
 
-  return ordered.map((entry): ThreadItem => {
+  return ordered.map((entry): TimelineItem => {
     if ('executionId' in entry) {
       return accumulatorToItem(entry, eventsById);
     }
@@ -197,13 +197,13 @@ export const isAbortedTurn = (
 ): item is AgentTurnItem & { status: 'aborted'; terminal: ExecutionAbortedEvent } =>
   item.status === 'aborted';
 
-interface ToThreadItemsParams {
+interface ToTimelineItemsParams {
   events: TimelineEvent[];
   pendingUserMessage?: UserMessageEvent | null;
   activeExecution?: ActiveExecutionDraft | null;
 }
 
-const appendDraftItem = (items: ThreadItem[], activeExecution: ActiveExecutionDraft): void => {
+const appendDraftItem = (items: TimelineItem[], activeExecution: ActiveExecutionDraft): void => {
   const draftItem = activeExecutionToItem(activeExecution);
   const alreadyPersisted =
     draftItem.key !== ACTIVE_EXECUTION_ITEM_KEY && items.some((it) => it.key === draftItem.key);
@@ -212,13 +212,13 @@ const appendDraftItem = (items: ThreadItem[], activeExecution: ActiveExecutionDr
   }
 };
 
-export const toThreadItems = ({
+export const toTimelineItems = ({
   events,
   pendingUserMessage,
   activeExecution,
-}: ToThreadItemsParams): ThreadItem[] => {
+}: ToTimelineItemsParams): TimelineItem[] => {
   const eventsById = new Map(events.map((event) => [event.id, event]));
-  const items: ThreadItem[] = groupThreadEvents(events, eventsById);
+  const items: TimelineItem[] = groupTimelineEvents(events, eventsById);
 
   if (pendingUserMessage) {
     items.push({

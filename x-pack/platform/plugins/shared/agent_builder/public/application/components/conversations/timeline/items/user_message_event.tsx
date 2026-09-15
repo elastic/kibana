@@ -7,25 +7,25 @@
 
 import React from 'react';
 import type {
-  UserMessageEvent,
+  UserMessageEvent as UserMessageEventData,
   ConversationRoundAuthor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import { RoundInput } from '../../conversation_rounds/round_input';
 
-interface UserMessageProps {
-  event: UserMessageEvent;
+interface UserMessageEventProps {
+  event: UserMessageEventData;
   isPending?: boolean;
   conversationAttachments?: VersionedAttachment[];
 }
 
-const toRoundAuthor = (actor: UserMessageEvent['actor']): ConversationRoundAuthor => ({
+const toRoundAuthor = (actor: UserMessageEventData['actor']): ConversationRoundAuthor => ({
   id: actor.id,
   username: actor.username,
   full_name: actor.full_name,
 });
 
-export const UserMessage: React.FC<UserMessageProps> = ({
+export const UserMessageEvent: React.FC<UserMessageEventProps> = ({
   event,
   isPending = false,
   conversationAttachments,

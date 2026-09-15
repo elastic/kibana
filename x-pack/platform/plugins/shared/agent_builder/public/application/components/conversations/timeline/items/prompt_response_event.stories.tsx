@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_builder_storybook_provider';
-import { PromptResponse } from './prompt_response';
-import { createPromptResponseEvent } from './prompt_response.factory';
+import { PromptResponseEvent } from './prompt_response_event';
+import { createPromptResponseEvent } from './prompt_response_event.factory';
 
-const meta: Meta<typeof PromptResponse> = {
-  title: 'Conversations/Thread/Prompt Response',
-  component: PromptResponse,
+const meta: Meta<typeof PromptResponseEvent> = {
+  title: 'Conversations/Timeline/Prompt Response',
+  component: PromptResponseEvent,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -26,7 +26,7 @@ const meta: Meta<typeof PromptResponse> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof PromptResponse>;
+type Story = StoryObj<typeof PromptResponseEvent>;
 
 export const Default: Story = {
   args: {

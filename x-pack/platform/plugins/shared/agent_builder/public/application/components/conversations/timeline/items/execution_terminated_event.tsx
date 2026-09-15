@@ -7,15 +7,15 @@
 
 import React from 'react';
 import type {
-  ExecutionTerminatedEvent,
+  ExecutionTerminatedEvent as ExecutionTerminatedEventData,
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { AgentResponse } from '../agent_response';
 
-interface ExecutionTerminatedProps {
-  event: ExecutionTerminatedEvent;
+interface ExecutionTerminatedEventProps {
+  event: ExecutionTerminatedEventData;
   /**
    * Steps from separate `execution_step` events, passed by the caller.
    * Server-derived terminated events omit `steps` entirely because the steps ship as separate
@@ -25,7 +25,7 @@ interface ExecutionTerminatedProps {
 }
 
 const toSyntheticRound = (
-  event: ExecutionTerminatedEvent,
+  event: ExecutionTerminatedEventData,
   steps: ConversationRound['steps']
 ): ConversationRound => ({
   id: event.execution_id ?? event.id,
@@ -42,7 +42,7 @@ const toSyntheticRound = (
 });
 
 /** Adapts a finished run (`execution_terminated`) to the shared `AgentResponse` bubble. */
-export const ExecutionTerminated: React.FC<ExecutionTerminatedProps> = ({
+export const ExecutionTerminatedEvent: React.FC<ExecutionTerminatedEventProps> = ({
   event,
   steps: stepsProp,
 }) => {

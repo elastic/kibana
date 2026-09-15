@@ -7,15 +7,15 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import type { AgentTurnItem, ThreadItem } from '../to_thread_items';
-import { createUserMessageEvent } from './user_message.factory';
-import { createPromptResponseEvent } from './prompt_response.factory';
-import { createExecutionTerminatedEvent } from './execution_terminated.factory';
-import { createExecutionFailedEvent } from './execution_failed.factory';
-import { createExecutionAbortedEvent } from './execution_aborted.factory';
+import type { AgentTurnItem, TimelineItem } from '../to_timeline_items';
+import { createUserMessageEvent } from './user_message_event.factory';
+import { createPromptResponseEvent } from './prompt_response_event.factory';
+import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';
+import { createExecutionFailedEvent } from './execution_failed_event.factory';
+import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
 
-type UserMessageItem = Extract<ThreadItem, { kind: 'userMessage' }>;
-type PromptResponseItem = Extract<ThreadItem, { kind: 'promptResponse' }>;
+type UserMessageItem = Extract<TimelineItem, { kind: 'userMessage' }>;
+type PromptResponseItem = Extract<TimelineItem, { kind: 'promptResponse' }>;
 
 export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): UserMessageItem => ({
   kind: 'userMessage',

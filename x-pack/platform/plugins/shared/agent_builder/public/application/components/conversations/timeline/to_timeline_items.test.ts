@@ -11,26 +11,26 @@ import {
   EventActorType,
 } from '@kbn/agent-builder-common';
 import {
-  groupThreadEvents,
-  toThreadItems,
+  groupTimelineEvents,
+  toTimelineItems,
   activeExecutionToItem,
   ACTIVE_EXECUTION_ITEM_KEY,
-} from './to_thread_items';
-import { createUserMessageEvent } from './items/user_message.factory';
+} from './to_timeline_items';
+import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
-import { createExecutionTerminatedEvent } from './items/execution_terminated.factory';
-import { createExecutionFailedEvent } from './items/execution_failed.factory';
-import { createExecutionAbortedEvent } from './items/execution_aborted.factory';
+import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
+import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
-import { createPromptResponseEvent } from './items/prompt_response.factory';
+import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
 import type { TimelineEvent } from '@kbn/agent-builder-common';
 
 const makeEventsById = (events: TimelineEvent[]) => new Map(events.map((e) => [e.id, e]));
 
-describe('groupThreadEvents', () => {
+describe('groupTimelineEvents', () => {
   it('returns empty array for empty input', () => {
-    expect(groupThreadEvents([], new Map())).toEqual([]);
+    expect(groupTimelineEvents([], new Map())).toEqual([]);
   });
 
   it('groups a full round into 2 items — one agentTurn with status completed', () => {
@@ -63,7 +63,7 @@ describe('groupThreadEvents', () => {
     });
 
     const events = [userMsg, started, step0, step1, terminated];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(2);
 
@@ -93,7 +93,7 @@ describe('groupThreadEvents', () => {
     const term2 = createExecutionTerminatedEvent({ execution_id: 'exec-2', id: 'et-2' });
 
     const events = [user1, started1, step1, term1, user2, started2, step2, term2];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(4);
 
@@ -122,7 +122,7 @@ describe('groupThreadEvents', () => {
     const step = createExecutionStepEvent({ execution_id: 'exec-1' });
 
     const events = [user1, started, step];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
@@ -141,7 +141,7 @@ describe('groupThreadEvents', () => {
     });
 
     const events = [step, terminal];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -161,7 +161,7 @@ describe('groupThreadEvents', () => {
     });
 
     const events = [terminal];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -177,7 +177,7 @@ describe('groupThreadEvents', () => {
     const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
 
     const events = [promptResponse];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
@@ -188,7 +188,7 @@ describe('groupThreadEvents', () => {
     const aborted = createExecutionAbortedEvent({ execution_id: 'exec-abort' });
 
     const events = [started, aborted];
-    const items = groupThreadEvents(events, makeEventsById(events));
+    const items = groupTimelineEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -200,7 +200,7 @@ describe('groupThreadEvents', () => {
   });
 });
 
-describe('toThreadItems', () => {
+describe('toTimelineItems', () => {
   it('resolves origin from the trigger event for execution items', () => {
     const origin = { type: ConversationOriginType.Slack };
     const userMsg = createUserMessageEvent({
@@ -212,7 +212,7 @@ describe('toThreadItems', () => {
       trigger_event_id: 'user-origin-1',
     });
 
-    const items = toThreadItems({ events: [userMsg, terminated] });
+    const items = toTimelineItems({ events: [userMsg, terminated] });
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
@@ -226,7 +226,7 @@ describe('toThreadItems', () => {
   it('leaves origin undefined when trigger event is absent', () => {
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-no-trigger' });
 
-    const items = toThreadItems({ events: [terminated] });
+    const items = toTimelineItems({ events: [terminated] });
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -240,7 +240,7 @@ describe('toThreadItems', () => {
     const inFlight = createExecutionStartedEvent({ execution_id: 'exec-in-flight' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-done' });
 
-    const items = toThreadItems({ events: [inFlight, terminated] });
+    const items = toTimelineItems({ events: [inFlight, terminated] });
 
     expect(items).toHaveLength(2);
     const [inFlightItem, doneItem] = items;
@@ -255,7 +255,7 @@ describe('toThreadItems', () => {
   it('appends a pending user message item with isPending=true', () => {
     const pending = createUserMessageEvent({ id: 'pending::user_message' });
 
-    const items = toThreadItems({ events: [], pendingUserMessage: pending });
+    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
 
     expect(items).toHaveLength(2);
     const [userItem] = items;
@@ -269,7 +269,7 @@ describe('toThreadItems', () => {
   it('appends an agentTurn running placeholder with empty steps when pendingUserMessage is set but activeExecution is absent', () => {
     const pending = createUserMessageEvent({ id: 'pending::user_message' });
 
-    const items = toThreadItems({ events: [], pendingUserMessage: pending });
+    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
@@ -289,7 +289,7 @@ describe('toThreadItems', () => {
       message: 'hello',
     };
 
-    const items = toThreadItems({
+    const items = toTimelineItems({
       events: [],
       pendingUserMessage: pending,
       activeExecution: draft,
@@ -312,7 +312,7 @@ describe('toThreadItems', () => {
       message: '',
     };
 
-    const items = toThreadItems({ events: [], activeExecution: draft });
+    const items = toTimelineItems({ events: [], activeExecution: draft });
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -327,7 +327,7 @@ describe('toThreadItems', () => {
     const userMsg = createUserMessageEvent({ id: 'u1' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'e1' });
 
-    const items = toThreadItems({ events: [userMsg, terminated] });
+    const items = toTimelineItems({ events: [userMsg, terminated] });
 
     expect(items).toHaveLength(2);
     expect(items[0].kind).toBe('userMessage');
@@ -439,7 +439,7 @@ describe('activeExecutionToItem', () => {
   });
 });
 
-describe('toThreadItems - dedupe', () => {
+describe('toTimelineItems - dedupe', () => {
   it('drops the draft when a persisted item with the same executionId already exists', () => {
     const terminated = createExecutionTerminatedEvent({
       id: 'term-1',
@@ -453,7 +453,7 @@ describe('toThreadItems - dedupe', () => {
       terminalEvent: terminated,
     };
 
-    const items = toThreadItems({ events: [terminated], activeExecution: draft });
+    const items = toTimelineItems({ events: [terminated], activeExecution: draft });
 
     // Only one agentTurn - the persisted one wins, the draft is deduped away
     const agentTurns = items.filter((it) => it.kind === 'agentTurn');
@@ -475,7 +475,7 @@ describe('toThreadItems - dedupe', () => {
       executionId: 'exec-new',
     };
 
-    const items = toThreadItems({ events: [terminated], activeExecution: draft });
+    const items = toTimelineItems({ events: [terminated], activeExecution: draft });
 
     const agentTurns = items.filter((it) => it.kind === 'agentTurn');
     expect(agentTurns).toHaveLength(2);
@@ -486,7 +486,7 @@ describe('toThreadItems - dedupe', () => {
 
   it('draft with no executionId always appends (uses ACTIVE_EXECUTION_ITEM_KEY)', () => {
     const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: '' };
-    const items = toThreadItems({ events: [], activeExecution: draft });
+    const items = toTimelineItems({ events: [], activeExecution: draft });
     expect(items).toHaveLength(1);
     if (items[0].kind === 'agentTurn') {
       expect(items[0].key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
