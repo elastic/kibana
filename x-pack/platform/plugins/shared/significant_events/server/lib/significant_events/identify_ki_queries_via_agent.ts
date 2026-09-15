@@ -130,10 +130,8 @@ export async function executeKIQueryGenerationAgent({
 export function buildKIQueryGenerationUserMessage(target: AnalysisTarget): string {
   const parts: string[] = [];
   parts.push(`\`target_id\`: ${target.id}`);
-  parts.push(`\`target_name\`: ${target.name}`);
   if (target.description) {
     parts.push(`\`target_description\`: ${target.description}`);
   }
-  parts.push(`\`sources\`: ${target.sources.join(', ')}`);
   return parts.join('\n\n');
 }
