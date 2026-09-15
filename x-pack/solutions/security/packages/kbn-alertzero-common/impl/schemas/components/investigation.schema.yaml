@@ -21,7 +21,7 @@ components:
 
     WatchTier:
       type: string
-      enum: [floor, officer, dark, deep, detection]
+      enum: [floor, officer, hunt, deep, detection]
 
     EvidenceRef:
       type: object

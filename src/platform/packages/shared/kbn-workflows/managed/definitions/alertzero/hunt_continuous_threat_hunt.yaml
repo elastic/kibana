@@ -1,10 +1,10 @@
 version: "1"
 name: Continuous Threat Hunt
-description: Dark Watch continuous threat hunt worker stub.
+description: Hunt Watch continuous threat hunt worker stub.
 enabled: false
 tags:
   - watch
-  - watch-dark
+  - watch-hunt
 triggers:
   - type: manual
 consts:
