@@ -105,6 +105,10 @@ describe('fetch_event_documents', () => {
       expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
         expect.objectContaining({ index: 'idx' })
       );
+      expect(mockEsClient.search.mock.calls[0][0].sort).toEqual([
+        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+        { _shard_doc: 'asc' },
+      ]);
       // First call has no search_after, subsequent calls do.
       expect(mockEsClient.search.mock.calls[0][0].search_after).toBeUndefined();
       expect(mockEsClient.search.mock.calls[1][0].search_after).toEqual(['b']);

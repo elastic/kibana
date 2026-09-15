@@ -126,7 +126,7 @@ export async function fetchDocumentsByQuery(
         track_total_hits: true,
         // Newest first, so a capped selection keeps the most recent docs. `_shard_doc` is a
         // stable tiebreaker only available with a point in time.
-        sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'asc' }],
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _shard_doc: 'asc' }],
         pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
