@@ -30,6 +30,11 @@ import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
 import type { DataStreamPhase } from '../../../common';
 
+export interface IntegrationName {
+  integrationId: string;
+  title: string;
+}
+
 export interface FieldMappingEntry {
   name: string;
   type: string;
@@ -183,23 +188,11 @@ export class AutomaticImportSavedObjectService {
   public async getAllIntegrations(): Promise<IntegrationAttributes[]> {
     try {
       this.logger.debug('Getting all integrations');
-      const integrations: IntegrationAttributes[] = [];
-      const finder = this.savedObjectsClient.createPointInTimeFinder<IntegrationAttributes>({
-        type: INTEGRATION_SAVED_OBJECT_TYPE,
-        perPage: 1000,
-      });
-
-      try {
-        for await (const { saved_objects: savedObjects } of finder.find()) {
-          for (const { attributes } of savedObjects) {
-            integrations.push(attributes);
-          }
-        }
-      } finally {
-        await finder.close();
-      }
-
-      return integrations;
+      const integrationsResponse: SavedObjectsFindResponse<IntegrationAttributes> =
+        await this.savedObjectsClient.find<IntegrationAttributes>({
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
+        });
+      return integrationsResponse.saved_objects.map((integration) => integration.attributes);
     } catch (error) {
       // Return empty array if index doesn't exist yet
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -207,6 +200,45 @@ export class AutomaticImportSavedObjectService {
         return [];
       }
       this.logger.error(`Failed to get all integrations: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch only the ID and title of every integration, for name-collision checks.
+   * Projects away `metadata.logo`, which holds a base64 SVG, and never loads data
+   * streams, so this stays cheap regardless of how many integrations exist.
+   */
+  public async getAllIntegrationNames(): Promise<IntegrationName[]> {
+    try {
+      this.logger.debug('Getting all integration names');
+      const names: IntegrationName[] = [];
+      const finder = this.savedObjectsClient.createPointInTimeFinder<IntegrationAttributes>({
+        type: INTEGRATION_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+        fields: ['integration_id', 'metadata.title'],
+      });
+
+      try {
+        for await (const { saved_objects: savedObjects } of finder.find()) {
+          for (const { attributes } of savedObjects) {
+            names.push({
+              integrationId: attributes.integration_id,
+              title: attributes.metadata.title,
+            });
+          }
+        }
+      } finally {
+        await finder.close();
+      }
+
+      return names;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        this.logger.debug('No integrations index found, returning empty array');
+        return [];
+      }
+      this.logger.error(`Failed to get all integration names: ${error}`);
       throw error;
     }
   }
@@ -468,40 +500,6 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to get all data streams: ${error}`);
       throw error;
     }
-  }
-
-  /**
-   * Fetch every data stream in a single point-in-time sweep, grouped by integration ID.
-   * Callers listing many integrations should prefer this over one `getAllDataStreams` call
-   * per integration, which fans out into an unbounded number of concurrent searches.
-   */
-  public async getAllDataStreamsGroupedByIntegrationId(): Promise<
-    Map<string, DataStreamAttributes[]>
-  > {
-    const grouped = new Map<string, DataStreamAttributes[]>();
-    const finder = this.savedObjectsClient.createPointInTimeFinder<DataStreamAttributes>({
-      type: DATA_STREAM_SAVED_OBJECT_TYPE,
-      perPage: 1000,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
-
-    try {
-      for await (const { saved_objects: savedObjects } of finder.find()) {
-        for (const { attributes } of savedObjects) {
-          const existing = grouped.get(attributes.integration_id);
-          if (existing) {
-            existing.push(attributes);
-          } else {
-            grouped.set(attributes.integration_id, [attributes]);
-          }
-        }
-      }
-    } finally {
-      await finder.close();
-    }
-
-    return grouped;
   }
 
   /**
