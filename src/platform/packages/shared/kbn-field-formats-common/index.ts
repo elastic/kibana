@@ -12,5 +12,5 @@ export {
   NULL_LABEL,
   NAN_LABEL,
   MISSING_TOKEN,
-  getMissingValueLabel,
+  getEmptyOrMissingLabel,
 } from './constants';

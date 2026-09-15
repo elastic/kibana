@@ -12,7 +12,7 @@ import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import {
   EMPTY_LABEL,
-  getMissingValueLabel,
+  getEmptyOrMissingLabel,
   MISSING_TOKEN,
   NULL_LABEL,
 } from '@kbn/field-formats-common';
@@ -230,7 +230,7 @@ export abstract class FieldFormat {
   }
 
   protected checkForMissingValueText(val: unknown): string | void {
-    return getMissingValueLabel(val);
+    return getEmptyOrMissingLabel(val);
   }
 
   protected checkForMissingValueReact(val: unknown): ReactNode | undefined {
