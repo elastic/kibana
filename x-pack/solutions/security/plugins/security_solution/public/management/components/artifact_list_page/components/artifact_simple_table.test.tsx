@@ -18,6 +18,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { artifactListPageLabels } from '../translations';
 import { ArtifactSimpleTable, type ArtifactSimpleTableProps } from './artifact_simple_table';
+import { TrustedAppsApiClient } from '../../../pages/trusted_apps/service/api_client';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import {
   DISABLED_ARTIFACT_TAG,
@@ -76,6 +77,7 @@ describe('ArtifactSimpleTable', () => {
       onChange,
       onAction,
       labels: artifactListPageLabels,
+      apiClient: new TrustedAppsApiClient(mockedContext.coreStart.http),
       sortableFields: ['name', 'updated_by', 'updated_at'],
       'data-test-subj': 'testTable',
     };
@@ -171,6 +173,15 @@ describe('ArtifactSimpleTable', () => {
     });
 
     expect(renderResult.getByTestId('testTable-columnEnabled')).not.toBeChecked();
+  });
+
+  it('disables the enabled switch when edit is not allowed', () => {
+    render({
+      allowEnableDisableArtifacts: true,
+      allowCardEditAction: false,
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).toBeDisabled();
   });
 
   it('shows a loading state', () => {

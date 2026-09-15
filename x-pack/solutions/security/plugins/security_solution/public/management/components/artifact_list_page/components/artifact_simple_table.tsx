@@ -19,7 +19,6 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -33,9 +32,10 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { artifactListPageLabels } from '../translations';
-import { DISABLED_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 import { PolicyAssignmentCell } from './policy_assignment_cell';
+import { ArtifactEnabledSwitch } from './artifact_enabled_switch';
 
 const EMPTY_OS_TYPES: OsType[] = [];
 const EMPTY_SORTABLE_FIELDS: readonly string[] = [];
@@ -63,6 +63,8 @@ export interface ArtifactSimpleTableProps {
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
   allowEnableDisableArtifacts?: boolean;
+  apiClient: ExceptionsListApiClient;
+  onEnabledChangeSuccess?: () => void;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   sortableFields?: readonly string[];
@@ -100,6 +102,8 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     allowCardEditAction = true,
     allowCardDeleteAction = true,
     allowEnableDisableArtifacts = false,
+    apiClient,
+    onEnabledChangeSuccess,
     sortField,
     sortOrder,
     sortableFields = EMPTY_SORTABLE_FIELDS,
@@ -229,11 +233,12 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           name: labels.tableColumnEnabledLabel,
           width: '90px',
           render: (item: ExceptionListItemSchema) => (
-            <EuiSwitch
-              label={labels.tableColumnEnabledLabel}
-              showLabel={false}
-              checked={!item.tags.includes(DISABLED_ARTIFACT_TAG)}
-              onChange={() => {}}
+            <ArtifactEnabledSwitch
+              item={item}
+              apiClient={apiClient}
+              labels={labels}
+              isReadOnly={!allowCardEditAction}
+              onSuccess={onEnabledChangeSuccess}
               data-test-subj={getTestId('columnEnabled')}
             />
           ),
@@ -296,10 +301,12 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       allowCardDeleteAction,
       allowCardEditAction,
       allowEnableDisableArtifacts,
+      apiClient,
       getTestId,
       labels,
       loadingPoliciesList,
       onAction,
+      onEnabledChangeSuccess,
       policies,
       sortableFields,
     ]);
