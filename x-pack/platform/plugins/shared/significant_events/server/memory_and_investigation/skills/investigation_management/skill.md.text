@@ -35,7 +35,7 @@ waitForCompletion: true
 
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
-- `title` (string, required) — a short human-readable headline (under ~80 characters) naming the affected entity and the problem, e.g. the significant event title or the alert rule name. It becomes the title of both the investigation and its conversation, so never use an id or UUID.
+- `title` (string, required) — a short human-readable headline (under ~80 characters) naming the affected entity and the problem, e.g. the significant event title or the alert rule name. It is the investigation's title, so never use an id or UUID.
 - `stream_names` (string array, optional) — data stream names to scope observability queries. Leave empty to let the investigation agent discover relevant streams.
 - `context` (object, optional) — structured context such as significant event metadata, alert payload, or environment info. Passed verbatim to the investigation agent.
 - `concurrency_key` (string, optional) — a stable key (e.g. a significant event's event id or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.

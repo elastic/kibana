@@ -94,24 +94,6 @@ steps:
     on-failure:
       continue: true
 
-  # Creates the agent conversation up front, keyed by the execution id and titled with the
-  # investigation title, so the investigation record, the workflow execution, and the
-  # conversation share one id and one headline. The agent runner reuses an existing conversation
-  # and never re-titles one that already has a non-default title, so this is what stops it from
-  # generating its own unrelated title. Best-effort: if this fails (including a 409 when a
-  # retried execution already created it), `investigate` still auto-creates the conversation
-  # with that id and an LLM-generated title, and the investigation itself is unaffected.
-  - name: create_investigation_conversation
-    type: ai.conversation.create
-    with:
-      agent_id: significant-events.investigation
-      conversation_id: '{{ execution.id }}'
-      title: '{{ inputs.title }}'
-      access_control:
-        access_mode: public
-    on-failure:
-      continue: true
-
   - name: investigate
     type: ai.agent
     agent-id: significant-events.investigation
@@ -125,10 +107,6 @@ steps:
     public-conversation: true
     timeout: 1800s
     with:
-      # Same id as the investigation record and the conversation created above. With
-      # `create-conversation: true` the runner reuses that conversation when it exists and
-      # creates it with this id when the step above failed.
-      conversation_id: '{{ execution.id }}'
       # Tag the agent execution with the workflow execution id so callers that already know
       # it (e.g. the UI, or the significant event this investigation is attached to) can look
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
@@ -800,22 +778,6 @@ steps:
         max-attempts: 3
         delay: 5s
         strategy: exponential
-
-  # Keeps the conversation title in step with the refined investigation title, so the Agent
-  # Builder conversation list and the investigations list show the same headline. Best-effort:
-  # the investigation record already holds the title, so a failed rename must not fail the run.
-  - name: rename_investigation_conversation
-    type: kibana.request
-    if: "${{ steps.investigate.error == null and steps.investigate.output.structured_output.title != null and steps.investigate.output.structured_output.title != '' }}"
-    with:
-      method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ execution.id }}/_rename'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        title: "${{ steps.investigate.output.structured_output.title }}"
-    on-failure:
-      continue: true
 
   # Persists failure status when the investigate step errored. Retries transient failures,
   # then fails the run: an investigation whose record cannot be written must not be lost silently.
