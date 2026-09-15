@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './foo';
+// Fixture: exercises re-export following (`export *` and `export { x } from`).
+
+export * from './config_keys';
+export { secretKeys as renamedSecretKeys } from './config_keys';
