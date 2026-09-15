@@ -91,19 +91,21 @@ jest.mock('./components/node_details_page', () => ({
   NodeDetailsPage: () => <div data-test-subj="metricDetailNodePage" />,
 }));
 
-let lastInfraPageTemplateProps: { onboardingFlow?: string } = {};
+let lastInfraPageTemplateProps: { onboardingFlow?: string; hasDataOverride?: boolean } = {};
 
 jest.mock('../../../components/shared/templates/infra_page_template', () => ({
   InfraPageTemplate: ({
     children,
     header,
     onboardingFlow,
+    hasDataOverride,
   }: {
     children: React.ReactNode;
     header?: React.ReactNode;
     onboardingFlow?: string;
+    hasDataOverride?: boolean;
   }) => {
-    lastInfraPageTemplateProps = { onboardingFlow };
+    lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride };
     return (
       <div data-test-subj="infraPageTemplate">
         {header}
@@ -142,6 +144,7 @@ describe('MetricDetailPage', () => {
     expect(screen.getByTestId('metricDetailLoadingPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('infraAssetDetailsReturnButton')).not.toBeInTheDocument();
     expect(lastInfraPageTemplateProps.onboardingFlow).toBeUndefined();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
   it('renders the node body under AppHeader after metadata loads', async () => {
@@ -155,5 +158,6 @@ describe('MetricDetailPage', () => {
     expect(screen.getByTestId('metricDetailNodePage')).toBeInTheDocument();
     expect(screen.queryByTestId('metricDetailLoadingPanel')).not.toBeInTheDocument();
     expect(lastInfraPageTemplateProps.onboardingFlow).toBeUndefined();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 });

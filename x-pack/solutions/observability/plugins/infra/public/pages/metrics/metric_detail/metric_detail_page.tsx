@@ -83,7 +83,7 @@ export const MetricDetailPage = () => {
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <InfraPageTemplate header={header}>
+      <InfraPageTemplate header={header} hasDataOverride={true}>
         <InfraLoadingPanel
           height="100vh"
           width="100%"
@@ -96,7 +96,7 @@ export const MetricDetailPage = () => {
   }
 
   return (
-    <InfraPageTemplate header={header}>
+    <InfraPageTemplate header={header} hasDataOverride={true}>
       {metadata ? (
         <NodeDetailsPage
           name={name}

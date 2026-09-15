@@ -113,6 +113,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
 
   return (
     <InfraPageTemplate
+      hasDataOverride={true}
       header={
         <MetricsDetailAppHeader
           title={entity.name}

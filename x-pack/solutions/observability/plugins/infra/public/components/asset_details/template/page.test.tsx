@@ -111,19 +111,25 @@ jest.mock('../header/host_header_title', () => ({
   ],
 }));
 
-let lastInfraPageTemplateProps: { onboardingFlow?: string; header?: React.ReactNode } = {};
+let lastInfraPageTemplateProps: {
+  onboardingFlow?: string;
+  hasDataOverride?: boolean;
+  header?: React.ReactNode;
+} = {};
 
 jest.mock('../../shared/templates/infra_page_template', () => ({
   InfraPageTemplate: ({
     children,
     header,
     onboardingFlow,
+    hasDataOverride,
   }: {
     children: React.ReactNode;
     header?: React.ReactNode;
     onboardingFlow?: string;
+    hasDataOverride?: boolean;
   }) => {
-    lastInfraPageTemplateProps = { onboardingFlow, header };
+    lastInfraPageTemplateProps = { onboardingFlow, hasDataOverride, header };
     return (
       <div data-test-subj="infraPageTemplate">
         {header}
@@ -171,6 +177,7 @@ describe('Asset details Page', () => {
     expect(screen.getByTestId('assetDetailsDatePicker')).toBeInTheDocument();
     expect(screen.queryByTestId('infraAssetDetailsReturnButton')).not.toBeInTheDocument();
     expect(lastInfraPageTemplateProps.onboardingFlow).toBeUndefined();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
   it('keeps host extras out of the AppHeader title string', async () => {
