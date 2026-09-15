@@ -35,7 +35,7 @@ entries:
     name: 277103.yaml
     checksum: 1a52d91a19a1c3d64d030452b267249e51af569d
   type: feature
-  title: Add undo redo system
+  title: Add support for undo and redo in {{kib}} dashboards
   products:
   - product: cloud-serverless
   - product: kibana
@@ -389,7 +389,7 @@ entries:
     name: 286231.yaml
     checksum: b1a847444d34264acc900dff6ece57480e679d84
   type: enhancement
-  title: Remove pagination from the Table tab
+  title: Replace pagination with a single, scrollable list in the Table tab in {{kib}} 
   products:
   - product: cloud-serverless
   - product: kibana
