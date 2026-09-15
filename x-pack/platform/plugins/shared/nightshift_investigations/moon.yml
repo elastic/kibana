@@ -17,6 +17,7 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/plugins/shared/nightshift_investigations
 dependsOn:
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
