@@ -30,14 +30,17 @@ import type { CasesColumnSelection } from '../types';
 import { getEmptyCellValue } from '../../empty_value';
 import { CaseDetailsLink } from '../../links';
 import * as i18n from '../translations';
-import { useActions } from '../use_actions';
-import { useCasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import { useActions } from './use_actions';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useApplicationCapabilities, useCasesConfig, useKibana } from '../../../common/lib/kibana';
-import { getExtendedFieldColumnKey, getExtendedFieldTableColumn } from '../extended_field_columns';
+import {
+  getExtendedFieldColumnKey,
+  getExtendedFieldTableColumn,
+} from '../components/extended_field_columns';
 import { useGlobalInlineFields } from './use_global_inline_fields';
 import { TruncatedText } from '../../truncated_text';
 import { getConnectorIcon } from '../../utils';
-import { AssigneesColumn } from '../assignees_column';
+import { AssigneesColumn } from '../components/assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../incremental_id';

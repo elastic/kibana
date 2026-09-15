@@ -28,7 +28,7 @@ import { CaseUserAvatar } from '../../../user_profiles/user_avatar';
 import { useAssignees } from '../../../../containers/user_profiles/use_assignees';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { useCaseViewNavigation } from '../../../../common/navigation/hooks';
-import { ActionColumnComponent as ActionColumn } from '../../use_actions';
+import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
 import * as i18n from '../../translations';

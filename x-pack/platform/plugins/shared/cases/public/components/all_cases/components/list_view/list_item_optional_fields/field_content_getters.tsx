@@ -19,8 +19,8 @@ import {
   getExtendedFieldColumnKey,
   getExtendedFieldDisplayValue,
   parseUserPickerAssignees,
-} from '../../../extended_field_columns';
-import { AssigneesColumn } from '../../../assignees_column';
+} from '../../extended_field_columns';
+import { AssigneesColumn } from '../../assignees_column';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
