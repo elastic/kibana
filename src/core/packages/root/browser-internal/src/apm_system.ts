@@ -11,6 +11,7 @@ import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum'
 import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { abortedRequestErrorFilter } from './filters/aborted_request_error_filter';
 import { ebtSpanFilter } from './filters/ebt_span_filter';
 import { CachedResourceObserver } from './apm_resource_counter';
 import { getPageLoadTransactionName, isAppPath } from './get_page_load_transaction_name';
@@ -64,6 +65,7 @@ export class ApmSystem {
     });
 
     apm.addFilter(ebtSpanFilter);
+    apm.addFilter(abortedRequestErrorFilter);
 
     // Remove the query params from the URLs (page's URL and refererer)
     apm.addFilter((payload) => {
