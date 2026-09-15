@@ -330,7 +330,7 @@ describe('extractAndAddObservables', () => {
       });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
       expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
