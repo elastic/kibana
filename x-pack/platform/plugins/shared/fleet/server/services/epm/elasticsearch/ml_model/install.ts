@@ -15,6 +15,8 @@ import {
 } from '../../../../../common/types/models';
 import type { EsAssetReference } from '../../../../../common/types/models';
 
+import { FleetError } from '../../../../errors';
+
 import { retryTransientEsErrors } from '../retry';
 
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -52,21 +54,33 @@ export const installMlModel = async (
   );
 
   const wantedPaths = new Set(mlModelPaths);
+  let installError: unknown;
   await packageInstallContext.archiveIterator.traverseEntries(
     async (entry) => {
+      if (installError) return;
+      if (!wantedPaths.has(entry.path)) return;
       if (!entry.buffer) {
+        installError = new FleetError(`No buffer for ML model archive entry at path: ${entry.path}`);
         return;
       }
       const pathParts = entry.path.split('/');
       const modelId = pathParts[pathParts.length - 1].replace('.json', '');
-      await handleMlModelInstall({
-        esClient,
-        logger,
-        mlModel: { installationName: modelId, content: entry.buffer.toString('utf-8') },
-      });
+      try {
+        await handleMlModelInstall({
+          esClient,
+          logger,
+          mlModel: { installationName: modelId, content: entry.buffer.toString('utf-8') },
+        });
+      } catch (err) {
+        installError = err;
+      }
     },
     (path) => wantedPaths.has(path)
   );
+
+  if (installError !== undefined) {
+    throw installError;
+  }
 
   return esReferences;
 };
