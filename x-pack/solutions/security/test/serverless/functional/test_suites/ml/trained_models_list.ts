@@ -35,7 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should display the stats bar and the analytics table with one trained model'
         );
-        await ml.trainedModels.assertStats(3);
+        // The set of built-in models varies per environment (e.g. EIS vs local ELSER), so
+        // compare against what ES reports rather than a hardcoded count.
+        const { trained_model_configs: models } = await ml.api.getTrainedModelsES();
+        await ml.trainedModels.assertStats(models.length);
         await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
