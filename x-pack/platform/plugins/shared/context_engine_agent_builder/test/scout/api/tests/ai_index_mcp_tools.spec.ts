@@ -11,6 +11,7 @@ import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   apiTest,
   testData,
@@ -23,7 +24,7 @@ import {
   type EsqlResponse,
 } from '../fixtures';
 
-const { AI_INDEX_COLLECTION_PATH, MCP_PATH, CONTEXT_ENGINE_ENABLED_SETTING_ID } = testData;
+const { AI_INDEX_COLLECTION_PATH, MCP_PATH } = testData;
 // Unique per run, so a retried beforeAll does not collide with ids from the last attempt.
 const RUN_ID = randomUUID().slice(0, 8);
 const OTHER_SPACE_ID = `ce-mcp-other-${RUN_ID}`;
