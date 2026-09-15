@@ -317,9 +317,11 @@ export class DashboardApp {
       await expect(titleButton).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
       await titleButton.click();
 
-      await expect(
-        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`)
-      ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
+      // Strip whitespace only: the panel header builds this subject with
+      // `replace(/\s/g, '')`, so titles keep their hyphens.
+      await this.page.testSubj
+        .locator(`embeddablePanelHeading-${names[i].replace(/\s/g, '')}`)
+        .waitFor({ state: 'visible', timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
     await this.closeLibraryFlyout();
   }
