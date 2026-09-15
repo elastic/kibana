@@ -116,11 +116,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskScoreAssistantToolDisabled: false,
   /**
-   * Enables the new Entity Analytics home page experience.
-   */
-  entityAnalyticsNewHomePageEnabled: true,
-
-  /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.

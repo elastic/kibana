@@ -24,9 +24,6 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },

@@ -37,7 +37,6 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'disable:entityAnalyticsEntityStoreV2',
             'disable:entityAnalyticsWatchlistEnabled',
-            'disable:entityAnalyticsNewHomePageEnabled',
           ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
         ],
