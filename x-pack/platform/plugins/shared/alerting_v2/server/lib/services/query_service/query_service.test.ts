@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
 import { JSON_STREAM_BATCH_SIZE } from './formats';
+import { RuleExecutionCancellationError } from '../../execution_context';
 import { createQueryService } from './query_service.mock';
 import {
   createMockArrowReader,
@@ -448,7 +449,6 @@ describe('QueryService', () => {
     });
 
     it('logs debug instead of error when cancelled', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockHelpersEsqlToArrowReader(
         mockEsClient,
         jest.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
@@ -667,7 +667,6 @@ describe('QueryService', () => {
     });
 
     it('logs debug instead of error when cancelled', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockEsClient.esql.query.mockRejectedValue(
         new RuleExecutionCancellationError('Streaming query aborted')
       );
@@ -786,7 +785,6 @@ describe('QueryService', () => {
     });
 
     it('stops iterating and reports cancellation when the signal fires between batches', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       const abortController = new AbortController();
 
       mockHelpersEsqlArrowBatches(mockEsClient, [
@@ -818,7 +816,6 @@ describe('QueryService', () => {
     });
 
     it('reports a bare mid-stream abort (as Task Manager issues) as a cancellation', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       const abortController = new AbortController();
 
       mockHelpersEsqlArrowBatches(mockEsClient, [
