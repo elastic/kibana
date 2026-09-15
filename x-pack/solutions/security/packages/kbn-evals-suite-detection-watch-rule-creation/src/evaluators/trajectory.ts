@@ -28,26 +28,42 @@ export interface TrajectoryFetchOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
+interface ToolCalls {
+  toolNames: string[];
+  /** Trace the agent's spans live in — not the workflow's trace id, which the eval client owns. */
+  agentTraceId: string | undefined;
+}
+
 type Trajectory =
-  | { available: true; toolNames: string[]; joinedOn: string; settled: boolean }
+  | ({ available: true; joinedOn: string; settled: boolean } & ToolCalls)
   | { available: false; explanation: string };
 
-const fetchToolNames = async (
+const fetchToolCalls = async (
   traceEsClient: EsClient,
   where: string
-): Promise<string[] | undefined> => {
+): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
     // tool.call.id is set only on calls the LLM issued; helper spans tools open internally
     // (e.g. search's natural_language_search) have none and are not part of the trajectory.
-    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP ${TOOL_NAME_COLUMN}`,
+    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, ${TOOL_NAME_COLUMN}`,
   })) as unknown as EsqlResponse;
-  const nameIdx = response.columns.findIndex((c) => c.name === TOOL_NAME_COLUMN);
-  if (nameIdx === -1) return undefined;
-  const names = response.values
-    .map((row) => row[nameIdx])
-    .filter((n): n is string => typeof n === 'string' && n.length > 0);
+  const col = (name: string) => response.columns.findIndex((c) => c.name === name);
+  const [spanIdx, traceIdx, nameIdx] = [col('span_id'), col('trace_id'), col(TOOL_NAME_COLUMN)];
+  if (spanIdx === -1 || traceIdx === -1 || nameIdx === -1) return undefined;
+  // Spans are exported to two data streams (agent_builder.otel and generic.otel); the same
+  // span_id appearing twice is one call, not two.
+  const byNameOrder = new Map<string, string>();
+  let agentTraceId: string | undefined;
+  for (const row of response.values) {
+    const [spanId, traceId, name] = [row[spanIdx], row[traceIdx], row[nameIdx]];
+    if (typeof spanId === 'string' && typeof name === 'string' && name.length > 0) {
+      if (!byNameOrder.has(spanId)) byNameOrder.set(spanId, name);
+      if (agentTraceId === undefined && typeof traceId === 'string') agentTraceId = traceId;
+    }
+  }
+  const toolNames = [...byNameOrder.values()];
   // No rows means this join key reached no spans: unmeasured, not an empty trajectory.
-  return names.length > 0 ? names : undefined;
+  return toolNames.length > 0 ? { toolNames, agentTraceId } : undefined;
 };
 
 /**
@@ -74,14 +90,20 @@ export const createTrajectoryFetcher = ({
       };
     }
 
-    let last: { toolNames: string[]; joinedOn: string } | undefined;
+    type Read = ToolCalls & { joinedOn: string };
+    const describe = ({ toolNames, agentTraceId }: Read) =>
+      `agent trace ${agentTraceId ?? '?'} — ${toolNames.length} tool call(s): ${toolNames.join(
+        ' → '
+      )}`;
+
+    let last: Read | undefined;
     for (let poll = 1; poll <= maxPolls; poll++) {
-      let current: { toolNames: string[]; joinedOn: string } | undefined;
+      let current: Read | undefined;
       for (const clause of clauses) {
         try {
-          const toolNames = await fetchToolNames(traceEsClient, clause.where);
-          if (toolNames) {
-            current = { toolNames, joinedOn: clause.name };
+          const calls = await fetchToolCalls(traceEsClient, clause.where);
+          if (calls) {
+            current = { ...calls, joinedOn: clause.name };
             break;
           }
         } catch (error) {
@@ -93,6 +115,7 @@ export const createTrajectoryFetcher = ({
         }
       }
       if (current && last && current.toolNames.length === last.toolNames.length) {
+        log.info(`Trajectory: ${describe(current)}`);
         return { available: true, ...current, settled: true };
       }
       last = current ?? last;
@@ -101,7 +124,9 @@ export const createTrajectoryFetcher = ({
 
     if (last) {
       log.warning(
-        `Trajectory span set never settled after ${maxPolls} polls (${last.toolNames.length} calls) — scoring potentially incomplete`
+        `Trajectory span set never settled after ${maxPolls} polls — scoring potentially incomplete. ${describe(
+          last
+        )}`
       );
       return { available: true, ...last, settled: false };
     }
@@ -156,6 +181,7 @@ const trajectoryEvaluator = (
       metadata: {
         ...metadata,
         toolNames: trajectory.toolNames,
+        agentTraceId: trajectory.agentTraceId,
         ...(trajectory.settled ? {} : { incomplete: true }),
       },
     };

@@ -31,10 +31,16 @@ const INTERNAL = internalTools.loadSkill;
 // Stand-in for the ids GET /api/agent_builder/tools returns on the stack under test.
 const KNOWN = new Set([CREATE, PREVIEW, LABS]);
 
-const NAME_COL = [{ name: 'attributes.gen_ai.tool.name', type: 'keyword' }];
-const rows = (names: Array<string | null>) => ({
-  columns: NAME_COL,
-  values: names.map((n) => [n]),
+const AGENT_TRACE = 'agent-trace-1';
+const COLS = [
+  { name: 'span_id', type: 'keyword' },
+  { name: 'trace_id', type: 'keyword' },
+  { name: 'attributes.gen_ai.tool.name', type: 'keyword' },
+];
+/** One row per name, each its own span; `spanIds` overrides to simulate re-indexed copies. */
+const rows = (names: Array<string | null>, spanIds?: string[]) => ({
+  columns: COLS,
+  values: names.map((n, i) => [spanIds?.[i] ?? `span-${i}`, AGENT_TRACE, n]),
 });
 const esWith = (handler: (query: string, call: number) => unknown) => {
   let calls = 0;
@@ -78,6 +84,7 @@ const evaluateAll = async (client: EsClient, output: RuleCreationResult, maxPoll
 const settled = (toolNames: string[]) => ({
   available: true as const,
   toolNames,
+  agentTraceId: AGENT_TRACE,
   joinedOn: 'workflow trace id',
   settled: true,
 });
@@ -90,13 +97,30 @@ describe('createTrajectoryFetcher', () => {
     expect(q).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(q).toContain('attributes.gen_ai.tool.call.id IS NOT NULL');
     expect(q).toContain('SORT @timestamp ASC');
-    expect(q).toContain('KEEP attributes.gen_ai.tool.name');
+    expect(q).toContain('KEEP span_id, trace_id, attributes.gen_ai.tool.name');
   });
 
   it('drops rows with no tool name', async () => {
     const { client } = esReturning([null, CREATE, null]);
     const t = await fetcher(client)(result());
     expect(t).toMatchObject({ available: true, toolNames: [CREATE] });
+  });
+
+  it('counts a span once even when it is indexed into two data streams', async () => {
+    const twice = [CREATE, CREATE, PREVIEW, PREVIEW];
+    const { client } = esReturning(twice);
+    // Same span ids repeated = the agent_builder.otel and generic.otel copies of one call.
+    (client.esql.query as jest.Mock).mockImplementation(async () =>
+      rows(twice, ['a', 'a', 'b', 'b'])
+    );
+    const t = await fetcher(client)(result());
+    expect(t).toMatchObject({ available: true, toolNames: [CREATE, PREVIEW] });
+  });
+
+  it("reports the agent's own trace id, which is not the workflow's", async () => {
+    const { client } = esReturning([CREATE]);
+    const t = await fetcher(client)(result({ traceId: 'workflow-trace' }));
+    expect(t).toMatchObject({ available: true, agentTraceId: AGENT_TRACE });
   });
 
   it('falls back to the conversation id when the trace join reaches nothing', async () => {
@@ -141,14 +165,17 @@ describe('createTrajectoryFetcher', () => {
 });
 
 describe('createTrajectoryEvaluators', () => {
-  it('scores a skill-conformant run 1 on each named series', async () => {
+  it('scores a skill-conformant run 1 on each named series and names the agent trace', async () => {
     const { client } = esReturning([LABS, INTERNAL, CREATE, PREVIEW]);
     expect(evaluators(client).map((e) => e.name)).toEqual([
       'Trajectory: Call Count',
       'Trajectory: Known Tools',
     ]);
-    const scores = (await evaluateAll(client, result())).map((r) => r.score);
-    expect(scores).toEqual([1, 1]);
+    const results = await evaluateAll(client, result());
+    expect(results.map((r) => r.score)).toEqual([1, 1]);
+    for (const r of results) {
+      expect((r.metadata as Record<string, unknown>).agentTraceId).toBe(AGENT_TRACE);
+    }
   });
 
   it('scores null with label unavailable on every series when spans are unreachable', async () => {
