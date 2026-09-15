@@ -10,6 +10,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
   RoundInput,
@@ -20,6 +21,7 @@ import type {
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -139,6 +141,11 @@ const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
   return events;
 };
 
+const toAttachmentSummaries = (
+  attachments: ConversationProperties['attachments']
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
+
 export const fromEsWithoutRounds = (
   document: Document,
   user: CurrentUser
@@ -146,6 +153,8 @@ export const fromEsWithoutRounds = (
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
+
+  const attachmentSummaries = toAttachmentSummaries(document._source.attachments);
 
   return {
     id: document._id,
@@ -172,6 +181,7 @@ export const fromEsWithoutRounds = (
           },
         }
       : {}),
+    ...(attachmentSummaries.length > 0 ? { attachments: attachmentSummaries } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -284,7 +294,9 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 };
 
 export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
-  const base = fromEsWithoutRounds(document, user);
+  // The rounds-less base carries id/type summaries; a full conversation resolves the real
+  // attachments below, including the soft-deleted ones the summaries leave out.
+  const { attachments: _summaries, ...base } = fromEsWithoutRounds(document, user);
   const perUserFlags = {
     read_by: migrateReadBy(document._source),
     pinned_by: migratePinnedBy(document._source),

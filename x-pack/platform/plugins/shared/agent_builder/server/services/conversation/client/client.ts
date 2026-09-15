@@ -42,6 +42,7 @@ import {
 import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
 import type { ConversationSearchOptions } from '../../../../common/conversations';
@@ -74,6 +75,7 @@ import {
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
+import { compileConversationIds } from './compile_ids';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
@@ -143,6 +145,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -185,6 +188,9 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'template_id',
   'template_version',
   'metadata',
+  'attachments.id',
+  'attachments.type',
+  'attachments.active',
 ];
 
 /**
@@ -293,6 +299,35 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return this.mapListResponse(response);
+  }
+
+  async bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>> {
+    const idsFilter = compileConversationIds(ids);
+
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const agentIds = await this.resolveAccessibleAgentIds();
+    if (agentIds.length === 0) {
+      return new Map();
+    }
+
+    const response = await this.storage.getClient().search({
+      size: ids.length,
+      track_total_hits: false,
+      seq_no_primary_term: true,
+      _source: CONVERSATION_LIST_SOURCE_FIELDS,
+      query: {
+        bool: {
+          filter: [...this.buildBaseFilters(agentIds), idsFilter],
+        },
+      },
+    });
+
+    const { results } = this.mapListResponse(response);
+
+    return new Map(results.map((conversation) => [conversation.id, conversation]));
   }
 
   async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
