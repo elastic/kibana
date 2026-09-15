@@ -217,6 +217,23 @@ describe('evaluateUploadPackage', () => {
     });
   });
 
+  it('matches an Automatic Import integration whose stored id needs normalizing', () => {
+    // Isolates the stored-id branch: the raw id differs from the package name and the
+    // title is unrelated, so only normalizing `integrationId` can produce a match.
+    expect(
+      evaluateUploadPackage(
+        'my_id',
+        '1.0.0',
+        [],
+        [{ integrationId: 'My__ID', title: 'Totally Unrelated' }]
+      )
+    ).toEqual({
+      kind: 'error',
+      reason: 'automatic_import',
+      packageName: 'my_id',
+    });
+  });
+
   it('treats a custom install_source as a duplicate', () => {
     expect(
       evaluateUploadPackage('mako', '2.0.0', [uploadedPackage('mako', '1.0.0', 'custom')], [])
