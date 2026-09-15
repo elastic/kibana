@@ -10,6 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlService } from './types';
+import { getSmlOriginUri } from './sml_origin';
 
 export type SmlResolvedItemResult =
   | {
@@ -95,7 +96,7 @@ export const resolveSmlAttachItems = async ({
           attachment: {
             type: 'text',
             data: { title: smlDoc.title, content: smlDoc.content },
-            origin: smlDoc.attributes.origin.uri,
+            origin: getSmlOriginUri(smlDoc),
             description: `${smlDoc.type}/${smlDoc.title}`,
           },
         };
@@ -123,7 +124,7 @@ export const resolveSmlAttachItems = async ({
           attachment: {
             type: convertedAttachment.type,
             data: convertedAttachment.data,
-            origin: convertedAttachment.origin ?? smlDoc.attributes.origin.uri,
+            origin: convertedAttachment.origin ?? getSmlOriginUri(smlDoc),
             description: convertedAttachment.description ?? `${smlDoc.type}/${smlDoc.title}`,
           },
         };

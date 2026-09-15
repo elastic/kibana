@@ -22,7 +22,8 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { reconcileSmlIndex, smlIndexName } from './sml_storage';
+import { INGESTION_METHOD_FIELD, reconcileSmlIndex, smlIndexName } from './sml_storage';
+import { smlEntryIdFromOriginUri, smlOriginUriFromEntryId } from './sml_origin';
 
 export type { SmlCrawler };
 
@@ -441,27 +442,26 @@ export class SmlCrawlerImpl implements SmlCrawler {
     if (originUris.length === 0) return result;
 
     try {
-      const response = await esClient.search<{ attributes?: { origin?: { uri?: string } } }>({
+      const response = await esClient.search<{ id?: string }>({
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
         size: originUris.length,
         track_total_hits: false,
-        _source: ['attributes.origin.uri'],
+        _source: ['id'],
         query: {
           bool: {
             filter: [
-              { terms: { 'attributes.origin.uri': originUris } },
-              { term: { 'attributes.ingestion_method': 'manual' } },
+              { terms: { id: originUris.map(smlEntryIdFromOriginUri) } },
+              { term: { [INGESTION_METHOD_FIELD]: 'manual' } },
             ],
           },
         },
       });
 
       for (const hit of response.hits.hits) {
-        const originUri = hit._source?.attributes?.origin?.uri;
-        if (originUri) {
-          result.add(originUri);
+        if (hit._source?.id) {
+          result.add(smlOriginUriFromEntryId(hit._source.id));
         }
       }
     } catch (error) {

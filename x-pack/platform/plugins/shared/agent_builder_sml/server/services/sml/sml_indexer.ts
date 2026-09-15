@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -19,11 +18,12 @@ import type {
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
   SmlDocument,
-  SmlDocumentAttributes,
+  SmlWriter,
   SmlTypeDefinition,
 } from './types';
 
-import { smlIndexName } from './sml_storage';
+import { INGESTION_METHOD_FIELD, smlIndexName } from './sml_storage';
+import { smlEntryId, smlEntryIdFromOriginUri, smlOriginUri } from './sml_origin';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -250,7 +250,7 @@ class SmlIndexerImpl implements SmlIndexer {
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
-      entryId: uuidv4(),
+      entryId: smlEntryId(attachmentType, originId),
       entry: smlEntry,
       originId,
       spaces,
@@ -347,27 +347,25 @@ class SmlIndexerImpl implements SmlIndexer {
       .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
-
-    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
-    // which gate deletion and manual-entry protection.
-    const attributes: SmlDocumentAttributes = {
-      ...entry.attributes,
-      id: entryId,
-      origin: { uri: `${entry.type}://${originId}` },
-      created_at: createdAt || now,
-      updated_at: now,
-      ingestion_method: ingestionMethod,
+    const writer: SmlWriter = {
+      uri: entry.user_id !== undefined ? `user://${entry.user_id}` : 'crawler://sml',
+      metadata: { ingestion_method: ingestionMethod },
     };
-    if (entry.user_id !== undefined) {
-      attributes.user_id = entry.user_id;
-    }
 
+    // The origin reference is written first, ahead of the producer's own references.
     const document: SmlDocument = {
+      '@timestamp': createdAt || now,
+      id: entryId,
       type: entry.type,
       title: entry.title,
       content: entry.content,
+      updated_at: now,
+      references: [
+        { uri: smlOriginUri(entry.type, originId), relation: 'derived_from' },
+        ...(entry.references ?? []),
+      ],
+      governance: { provenance: { created_by: writer, updated_by: writer } },
       permissions: { kibana: { privileges } },
-      attributes,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
@@ -375,8 +373,8 @@ class SmlIndexerImpl implements SmlIndexer {
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
     }
-    if (entry.references !== undefined) {
-      document.references = entry.references;
+    if (entry.attributes !== undefined) {
+      document.attributes = entry.attributes;
     }
     return {
       index: {
@@ -444,8 +442,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'attributes.origin.uri': originUri } },
-              { term: { 'attributes.ingestion_method': 'manual' } },
+              { term: { id: smlEntryIdFromOriginUri(originUri) } },
+              { term: { [INGESTION_METHOD_FIELD]: 'manual' } },
             ],
           },
         },
@@ -488,10 +486,10 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [
-      { term: { 'attributes.origin.uri': originUri } },
+      { term: { id: smlEntryIdFromOriginUri(originUri) } },
     ];
     if (ingestionMethod) {
-      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
+      filter.push({ term: { [INGESTION_METHOD_FIELD]: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field
