@@ -74,7 +74,9 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  MANAGED_OTLP_EXPORTER_DEFAULTS,
 } from '../../common/constants';
+
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
@@ -111,6 +113,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { isManagedOtlpEndpoint } from './utils/managed_otlp';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -692,6 +695,7 @@ class OutputService {
       ...omit(output, ['ssl', 'secrets']),
       ...(options?.id ? { output_id: options.id } : {}),
     } as OutputSOAttributes;
+    this._validateCanBeDefault(data, isPreconfigured);
 
     if (outputTypeSupportPresets(output)) {
       if (
@@ -837,6 +841,21 @@ class OutputService {
       }
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
+    }
+
+    if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
+      if (
+        isManagedOtlpEndpoint(output.otlp_exporter.endpoint) &&
+        output.otlp_exporter.sending_queue !== null
+      ) {
+        data.otlp_exporter = {
+          ...data.otlp_exporter,
+          sending_queue: {
+            ...MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue,
+            ...output.otlp_exporter.sending_queue,
+          },
+        };
+      }
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1133,6 +1152,8 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const mergedIsDefaultMonitoring =
+      data.is_default_monitoring ?? originalOutput.is_default_monitoring;
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
@@ -1150,6 +1171,14 @@ class OutputService {
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
     };
+    this._validateCanBeDefault(
+      {
+        type: mergedType,
+        is_default: mergedIsDefault,
+        is_default_monitoring: mergedIsDefaultMonitoring,
+      },
+      isPreconfigured
+    );
 
     if (outputTypeSupportPresets(updateData)) {
       if (
@@ -1637,6 +1666,26 @@ class OutputService {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
+    } catch (e) {
+      if (isPreconfigured && e instanceof OutputInvalidError) {
+        appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  private _validateCanBeDefault(
+    output: { type: ValueOf<OutputType>; is_default: boolean; is_default_monitoring: boolean },
+    isPreconfigured: boolean
+  ): void {
+    try {
+      if (output.type === outputType.Otlp && output.is_default_monitoring) {
+        throw new OutputInvalidError('An OTLP output cannot be the default monitoring output.');
+      }
+      if (output.type === outputType.Otlp && output.is_default) {
+        throw new OutputInvalidError('An OTLP output cannot be the default data output.');
+      }
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
