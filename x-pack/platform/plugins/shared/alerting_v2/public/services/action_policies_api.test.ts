@@ -118,6 +118,4 @@ describe('ActionPoliciesApi', () => {
       expect(result).toEqual(['data.host.name', 'data.count']);
     });
   });
-
 });
-

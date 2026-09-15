@@ -131,7 +131,6 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
-
     });
 
     it('returns an error when creating a policy without a name', async () => {

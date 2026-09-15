@@ -245,5 +245,4 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       sortOrder,
     });
   }
-
 }

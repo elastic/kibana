@@ -80,9 +80,7 @@ export const createActionPolicySmlType = ({
       const groupingMode = attrs?.groupingMode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
-      const contentParts = [name, description, matcher, groupingMode, destinations].filter(
-        Boolean
-      );
+      const contentParts = [name, description, matcher, groupingMode, destinations].filter(Boolean);
 
       return {
         type: ACTION_POLICY_KI_TYPE,

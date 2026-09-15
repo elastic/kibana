@@ -57,7 +57,6 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
             })}
           </EuiText>
         </EuiFlexItem>
-
       </EuiFlexGroup>
     </EuiPanel>
   );

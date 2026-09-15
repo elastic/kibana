@@ -89,5 +89,4 @@ describe('action policy OAS example payloads', () => {
       true
     );
   });
-
 });
