@@ -7,7 +7,6 @@
 
 import { agentHasConnector, getEffectiveConnectorIds } from './connector_ids_utils';
 
-
 describe('agentHasConnector', () => {
   it('returns false when connector_ids is undefined (no connectors assigned)', () => {
     expect(agentHasConnector({ configuration: { connector_ids: undefined } }, 'c1')).toBe(false);
