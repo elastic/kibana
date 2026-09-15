@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -82,7 +82,7 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
-  const { episodesLocators } = useAlertingLocators();
+  const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -268,6 +268,14 @@ export function EpisodeDetailsPage() {
   );
 
   const episodesListHref = episodesLocators.useUrl({});
+  const getRuleDetailsHref = useCallback(
+    (id: string) => rulesLocators.getRedirectUrl({ ruleId: id }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (id: string) => episodesLocators.getRedirectUrl({ episodeId: id }),
+    [episodesLocators]
+  );
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
@@ -354,6 +362,7 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
+              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         )}
@@ -499,7 +508,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                    <AlertEpisodesRelatedSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                      getEpisodeDetailsHref={getEpisodeDetailsHref}
+                    />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}
