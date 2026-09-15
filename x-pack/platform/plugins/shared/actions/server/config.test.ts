@@ -686,6 +686,44 @@ describe('config validation', () => {
     });
   });
 
+  describe('relay.uiam', () => {
+    test('defaults to disabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: false });
+    });
+
+    test('can be enabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('is rejected outside serverless', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: false }
+        )
+      ).toThrow(/\[relay\.uiam\]/);
+    });
+
+    test('is absent outside serverless when not specified', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: false }
+      );
+
+      expect(result.relay?.uiam).toBeUndefined();
+    });
+  });
+
   describe('relay.ssl', () => {
     test('accepts the Relay URL and complete SSL configuration', () => {
       const result = configSchema.validate({

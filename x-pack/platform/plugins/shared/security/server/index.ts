@@ -35,6 +35,7 @@ export type {
   AuditServiceSetup,
   NativeAPIKeysType,
   AuthenticationServiceStart,
+  SystemIdentity,
   InvalidateAPIKeyResult,
   GrantAPIKeyOptions,
   GrantAPIKeyResult,

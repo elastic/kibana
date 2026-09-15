@@ -37,6 +37,7 @@ import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
 import { UiamOAuth } from './oauth';
+import { UiamSystemIdentity } from './system_identity';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
@@ -438,6 +439,10 @@ export class AuthenticationService {
         })
       : null;
 
+    const systemIdentity = uiam
+      ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
+      : undefined;
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -508,6 +513,8 @@ export class AuthenticationService {
             resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
+
+      systemIdentity,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =

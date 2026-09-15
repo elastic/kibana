@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
@@ -161,6 +161,13 @@ export const configSchema = schema.object({
         schema.uri({ scheme: ['https'] })
       ),
       ssl: schema.maybe(relaySSLConfigSchema),
+      // Serverless only: authenticate Relay requests with a per-request ephemeral UIAM token for
+      // Kibana's own identity, on top of mTLS. Requires `xpack.security.uiam` to be configured.
+      uiam: schema.maybe(
+        offeringBasedSchema({
+          serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+        })
+      ),
     })
   ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
