@@ -31,6 +31,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
+import { deleteKiView, putKiView } from './ki_view';
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
@@ -81,10 +82,12 @@ const assertAiIndexAcceptsAutomation = (
  */
 export class AiIndexService {
   private readonly esClient: ElasticsearchClient;
+  private readonly logger: Logger;
   private readonly storageClient: AiIndexStorageClient;
 
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     this.esClient = esClient;
+    this.logger = logger;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
   }
 
@@ -108,6 +111,7 @@ export class AiIndexService {
       }
       throw error;
     }
+    await this.putView(aiIndexId, properties.dest);
   }
 
   /**
@@ -124,7 +128,9 @@ export class AiIndexService {
       throw new AiIndexManagedError(aiIndexId);
     }
 
-    return this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
+    const result = await this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
+    await this.putView(aiIndexId, properties.dest);
+    return result;
   }
 
   /**
@@ -147,7 +153,9 @@ export class AiIndexService {
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
-    return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+    const result = await this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+    await this.putView(aiIndexId, properties.dest);
+    return result;
   }
 
   private async writeDocument(
@@ -312,6 +320,11 @@ export class AiIndexService {
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
     }
+    await deleteKiView({ esClient: this.esClient, logger: this.logger, aiIndexId });
+  }
+
+  private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {
+    return putKiView({ esClient: this.esClient, logger: this.logger, aiIndexId, dest });
   }
 
   private async findDocument(aiIndexId: string): Promise<

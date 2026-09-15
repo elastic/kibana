@@ -72,6 +72,7 @@ describe('AiIndexService', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let storageClient: jest.Mocked<Pick<AiIndexStorageClient, 'get' | 'index' | 'search' | 'delete'>>;
   let service: AiIndexService;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -96,10 +97,8 @@ describe('AiIndexService', () => {
     };
     createAiIndexStorageClientMock.mockReturnValue(storageClient);
 
-    service = new AiIndexService({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
-    });
+    logger = loggingSystemMock.createLogger();
+    service = new AiIndexService({ esClient, logger });
   });
 
   const properties = {
@@ -130,6 +129,58 @@ describe('AiIndexService', () => {
 
       await expect(service.create('customer_support', properties)).rejects.toBeInstanceOf(
         AiIndexAlreadyExistsError
+      );
+      expect(esClient.esql.putView).not.toHaveBeenCalled();
+    });
+
+    it('creates the retrieval view for the dest', async () => {
+      await service.create('customer_support', properties);
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'ai-view-customer_support',
+        query: [
+          'FROM ai-index-ds-customer_support* METADATA _id',
+          'EVAL id = COALESCE(id, _id)',
+          'INLINE STATS latest = MAX(@timestamp) BY id',
+          'WHERE @timestamp == latest',
+          'DROP latest',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('creates a view without the revision collapse for an index dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await service.create('logs_app', {
+        ...properties,
+        dest: { type: 'index', value: 'ai-index-idx-logs-app' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'ai-view-logs_app',
+        query: [
+          'FROM ai-index-idx-logs-app',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('logs a warning and still succeeds when the view cannot be created', async () => {
+      esClient.esql.putView.mockRejectedValue(new Error('views are disabled'));
+
+      await expect(service.create('customer_support', properties)).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to create ES|QL view 'ai-view-customer_support'")
       );
     });
 
@@ -746,6 +797,23 @@ describe('AiIndexService', () => {
   });
 
   describe('delete', () => {
+    it('deletes the retrieval view with the AI index', async () => {
+      storageClient.get.mockResolvedValue({
+        found: true,
+        _source: aiIndexDocument,
+      } as Awaited<ReturnType<AiIndexStorageClient['get']>>);
+      storageClient.delete.mockResolvedValue({ result: 'deleted' } as Awaited<
+        ReturnType<AiIndexStorageClient['delete']>
+      >);
+
+      await service.delete('customer_support');
+
+      expect(esClient.esql.deleteView).toHaveBeenCalledWith(
+        { name: 'ai-view-customer_support' },
+        { ignore: [404] }
+      );
+    });
+
     it('resolves when the AI index is deleted', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
