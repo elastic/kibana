@@ -7,7 +7,14 @@
 
 import type { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
 import type { Role, User, UserInfo } from './types';
-import { obsOnly, secOnly, secOnlyNoDelete, secOnlyRead, users } from './users';
+import {
+  obsOnly,
+  secOnly,
+  secOnlyNoDelete,
+  secOnlyRead,
+  secOnlyReadCreateComment,
+  users,
+} from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';
 import { loginUsers } from '../api';
@@ -98,6 +105,6 @@ export const activateUserProfiles = async (getService: CommonFtrProviderContext[
 
   await loginUsers({
     supertest: supertestWithoutAuth,
-    users: [secOnly, secOnlyNoDelete, secOnlyRead, obsOnly],
+    users: [secOnly, secOnlyNoDelete, secOnlyRead, secOnlyReadCreateComment, obsOnly],
   });
 };
