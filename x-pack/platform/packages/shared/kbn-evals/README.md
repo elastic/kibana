@@ -473,7 +473,7 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ### Connector definitions and inference endpoints
 
-Model definitions come from `KIBANA_TESTING_AI_CONNECTORS` (base64-encoded JSON, set by CI or exported by `node scripts/evals init`) or, locally, from `xpack.actions.preconfigured` in `config/kibana.dev.yml`.
+Model definitions come from `KIBANA_TESTING_INFERENCE_ENDPOINTS ` (base64-encoded JSON, set by CI or exported by `node scripts/evals init`) or, locally, from `xpack.actions.preconfigured` in `config/kibana.dev.yml`.
 
 #### Inference endpoints vs. stack connectors
 

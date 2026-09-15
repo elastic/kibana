@@ -177,7 +177,7 @@ describe('createConnectorFixture', () => {
       expect(mockUse).not.toHaveBeenCalled();
     });
 
-    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields an AvailableConnectorWithId)', async () => {
+    it('uses the predefined connector as-is (skips provisioning))', async () => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
 
       await createConnectorFixture({
