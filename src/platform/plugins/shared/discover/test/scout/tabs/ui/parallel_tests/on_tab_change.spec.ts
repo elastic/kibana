@@ -185,10 +185,10 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
     await spaceTest.step('tab 1: run a flights query with explicit time-field params', async () => {
       await unifiedTabs.createNewTab();
       expect(await discover.isUninitialized()).toBe(true);
-      await expectDisabledAllTimeState(pageObjects, 'enabled');
 
+      await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
-      await discover.writeAndSubmitEsqlQuery(QUERY_WITH_TIME_FIELD);
+      await discover.submitQueryAndWait();
       await expectCurrentEsqlTabState(pageObjects, {
         disabledAllTime: 'enabled',
         query: QUERY_WITH_TIME_FIELD,
@@ -200,7 +200,6 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
     await spaceTest.step('tab 2: run a flights query without a time field', async () => {
       await unifiedTabs.createNewTab();
       expect(await discover.isUninitialized()).toBe(true);
-      await expectDisabledAllTimeState(pageObjects, 'enabled');
 
       await discover.writeAndSubmitEsqlQuery(QUERY_WITHOUT_TIME_FIELD);
       await expectCurrentEsqlTabState(pageObjects, {

@@ -17,7 +17,13 @@ import {
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
-import { type Query, type TimeRange, type AggregateQuery, isEmptyEsqlQuery } from '@kbn/es-query';
+import {
+  type Query,
+  type TimeRange,
+  type AggregateQuery,
+  isEmptyEsqlQuery,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -320,11 +326,14 @@ export const DiscoverTopNav = ({
   const mainDataState = useDataState(dataStateContainer.data$.main$);
   const isUninitializedEsqlTab =
     isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED;
-  const [isLiveEsqlEmpty, setIsLiveEsqlEmpty] = useState(() => isEmptyEsqlQuery(query));
+  // Unsubmitted ES|QL lives in the search draft; app state stays empty until Search.
+  const draftQuery = searchDraftUiState?.query;
+  const liveEsqlQuery = isOfAggregateQueryType(draftQuery) ? draftQuery : query;
+  const [isLiveEsqlEmpty, setIsLiveEsqlEmpty] = useState(() => isEmptyEsqlQuery(liveEsqlQuery));
 
   useEffect(() => {
-    setIsLiveEsqlEmpty(isEmptyEsqlQuery(query));
-  }, [currentTabId, query]);
+    setIsLiveEsqlEmpty(isEmptyEsqlQuery(liveEsqlQuery));
+  }, [currentTabId, liveEsqlQuery]);
 
   const onQueryChange = useCallback(({ query: nextQuery }: { query?: Query | AggregateQuery }) => {
     setIsLiveEsqlEmpty(isEmptyEsqlQuery(nextQuery));

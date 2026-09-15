@@ -35,13 +35,19 @@ type AggregateQueryTopNavMenuProps = ComponentProps<
 >;
 
 const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
-  const { dataViewPickerComponentProps, dataViewPickerOverride, onQuerySubmit } = props;
+  const {
+    dataViewPickerComponentProps,
+    dataViewPickerOverride,
+    onQuerySubmit,
+    disableSubmitAction,
+  } = props;
 
   return (
     <div
       data-test-subj="aggregate-query-top-nav-menu"
       data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
       data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
+      data-disable-submit-action={String(Boolean(disableSubmitAction))}
     >
       {dataViewPickerOverride}
       <button
@@ -239,6 +245,54 @@ describe('Discover topnav component', () => {
     await user.click(screen.getByTestId('mock-query-submit'));
 
     expect(toolkit.getCurrentTab().uiState.esqlEditor?.isHistoryOpen).toBe(expectedIsHistoryOpen);
+  });
+
+  test('disables submit on an uninitialized ES|QL tab with an empty query', async () => {
+    const { toolkit, props } = await setup();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql: '' } } })
+    );
+    toolkit.getCurrentTabDataStateContainer().data$.main$.next({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    });
+
+    renderTestComponent({ toolkit, props });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+        'data-disable-submit-action',
+        'true'
+      );
+    });
+  });
+
+  test('keeps submit enabled when an uninitialized ES|QL tab has a search draft', async () => {
+    const { toolkit, props } = await setup();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql: '' } } })
+    );
+    toolkit.internalState.dispatch(
+      internalStateActions.setSearchDraftUiState({
+        tabId,
+        searchDraftUiState: { query: { esql: 'FROM test' } },
+      })
+    );
+    toolkit.getCurrentTabDataStateContainer().data$.main$.next({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    });
+
+    renderTestComponent({ toolkit, props });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+        'data-disable-submit-action',
+        'false'
+      );
+    });
   });
 
   describe('search bar customization', () => {

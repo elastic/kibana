@@ -72,6 +72,7 @@ spaceTest.describe(
         // A third tab, then back to the one holding the slow query.
         await pageObjects.unifiedTabs.createNewTab();
         await pageObjects.unifiedTabs.selectTab(1);
+        await expect(pageObjects.discover.getQuerySubmitButton()).toBeEnabled();
 
         await pageObjects.backgroundSearch.sendToBackground();
 

@@ -185,12 +185,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
 
     await this.unifiedTabs.createNewTab();
 
-    if (previousMode === 'esql') {
-      await this.selectTextBaseLang();
-      const currentQuery = (await this.getEsqlQueryValue()).trim();
-      if (!currentQuery && previousEsqlQuery) {
-        await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
-      }
+    if (previousEsqlQuery) {
+      await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
     }
 
     await this.submitQueryAndWait();
