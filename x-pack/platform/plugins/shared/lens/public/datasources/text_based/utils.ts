@@ -103,10 +103,21 @@ export const reconcileQueryColumns = (
         (column.fieldName === queryColumn.id || column.fieldName === queryColumn.name)
     );
     const positionalMatch = existingColumns[index];
+    // A positional match must not shadow an unused dimension-bound column of the
+    // same type (e.g. on a duplicated layer, an orphan duplicate at the query
+    // column's index would otherwise win over the bound column and the bound
+    // dimension would be reported as missing).
+    const unusedPreferredTypeMatchExists = existingColumns.some(
+      (column) =>
+        preferredColumnIds.has(column.columnId) &&
+        !usedColumnIds.has(column.columnId) &&
+        column.meta?.type === queryColumn.meta?.type
+    );
     const compatiblePositionalMatch =
       positionalMatch &&
       !usedColumnIds.has(positionalMatch.columnId) &&
-      positionalMatch.meta?.type === queryColumn.meta?.type
+      positionalMatch.meta?.type === queryColumn.meta?.type &&
+      (preferredColumnIds.has(positionalMatch.columnId) || !unusedPreferredTypeMatchExists)
         ? positionalMatch
         : undefined;
     const compatibleMatch = findPreferredFirst(

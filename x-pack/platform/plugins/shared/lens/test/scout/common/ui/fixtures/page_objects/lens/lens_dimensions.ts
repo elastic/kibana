@@ -80,9 +80,13 @@ export class LensDimensions {
 
   /**
    * Locator for dimension-trigger buttons inside a panel/group.
+   * Text-based (ES|QL) dimensions render `lns-dimensionTrigger-textBased` instead of
+   * `lns-dimensionTrigger`, so match both via a prefix selector.
    */
   getDimensionTriggersLocator(dimension: string) {
-    return this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
+    return this.page.testSubj
+      .locator(dimension)
+      .locator('[data-test-subj^="lns-dimensionTrigger"]');
   }
 
   /** Returns all dimension-trigger button locators currently rendered in the editor. */

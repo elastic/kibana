@@ -109,6 +109,54 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
   });
 
   spaceTest(
+    'duplicates and deletes ES|QL layers via the tab actions',
+    async ({ page, pageObjects }) => {
+      const { dashboard, lens } = pageObjects;
+
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      await addDataLayer(page);
+      await lens.workspace.submitEsqlQuery(MAX_QUERY);
+      await dashboard.waitForRenderComplete();
+      await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, '@timestamp', 1);
+      await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'MAX(bytes)', 1);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      // Duplicate the second (MAX) layer: the clone carries the layer query and dimensions.
+      await lens.layers.duplicateLayer(1);
+      expect(await lens.layers.getLayerCount()).toBe(3);
+      await lens.layers.ensureLayerTabIsActive(2);
+      expect(await lens.workspace.getEsqlQuery()).toBe(MAX_QUERY);
+      // clone keeps the Y dimension; duplicated columns may get a dedupe label suffix (e.g. "MAX(bytes) [3]")
+      await expect(lens.dimensions.getDimensionTriggersLocator(Y_DIMENSION)).toHaveText(
+        /^MAX\(bytes\)/
+      );
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      // The clone is independent: changing its query (dimensions rebind via column
+      // reconciliation) leaves the original layer untouched.
+      await lens.workspace.submitEsqlQuery(COUNT_QUERY);
+      await expect(lens.dimensions.getDimensionTriggersLocator(Y_DIMENSION)).toHaveText(
+        /^COUNT\(\*\)/
+      );
+      await lens.layers.activateLayerTab(1);
+      expect(await lens.workspace.getEsqlQuery()).toBe(MAX_QUERY);
+
+      // Delete the cloned layer via the tab actions.
+      await lens.layers.removeLayer(2);
+      expect(await lens.layers.getLayerCount()).toBe(2);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      // The surviving layers keep their queries after apply + reopen.
+      await applyLensInlineEditorAndWaitClosed({ lens });
+      await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      expect(await lens.layers.getLayerCount()).toBe(2);
+      await lens.layers.activateLayerTab(1);
+      expect(await lens.workspace.getEsqlQuery()).toBe(MAX_QUERY);
+      await cancelLensInlineEditorAndWaitClosed({ lens });
+    }
+  );
+
+  spaceTest(
     'keeps text-based and form-based data layers independent',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;

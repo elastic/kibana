@@ -438,7 +438,6 @@ export function LayerPanel(props: LayerPanelProps) {
       execute: onCloneLayer,
       layerIndex,
       activeVisualization,
-      isTextBasedLanguage,
     });
 
     return { removeLayerAction, cloneLayerAction };
@@ -451,7 +450,6 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onRemoveLayer,
     onCloneLayer,
-    isTextBasedLanguage,
   ]);
 
   const supportsMultipleLayers = useMemo(

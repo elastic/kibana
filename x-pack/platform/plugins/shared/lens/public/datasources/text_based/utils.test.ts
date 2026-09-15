@@ -168,6 +168,29 @@ describe('Text based languages utils', () => {
         ]
       );
     });
+
+    it('does not let a positional orphan shadow a dimension-bound column of the same type', () => {
+      // shape of a duplicated ES|QL layer: orphan copies of the query columns come
+      // first, dimension-bound columns last; the query is then changed to COUNT
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'MAX(bytes)', fieldName: 'MAX(bytes)', meta: { type: 'number' } },
+        { columnId: '@timestamp', fieldName: '@timestamp', meta: { type: 'date' } },
+        { columnId: 'gen-x', fieldName: '@timestamp', meta: { type: 'date' } },
+        { columnId: 'gen-y', fieldName: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'COUNT(*)', name: 'COUNT(*)', meta: { type: 'number' } },
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+      ];
+
+      const result = reconcileQueryColumns(
+        existingColumns,
+        queryColumns,
+        new Set(['gen-x', 'gen-y'])
+      );
+
+      expect(result.map(({ columnId }) => columnId)).toEqual(['gen-y', 'gen-x']);
+    });
   });
 
   describe('getAllColumns', () => {
