@@ -1,5 +1,5 @@
 {
-  "sha1": "9b593f482bde0ac49637d3475db8e8a5ecfc83ce",
+  "sha1": "c68fd0d1a73a89971be10d90a1ce5f3de1050962",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -227,7 +227,7 @@
     {
       "id": "ab141bdc9191bd5-5cb9a65537172d2",
       "title": "Data streams index mode allows to downgrade data stream from logsdb to time series index mode",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 158,
-        "column": 5
+        "line": 156,
+        "column": 9
       }
     },
     {
