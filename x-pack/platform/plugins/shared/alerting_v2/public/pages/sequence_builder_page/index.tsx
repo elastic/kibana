@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { useParams, useLocation } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -30,6 +31,7 @@ import {
   resolveRecoveryIndices,
 } from './recovery_condition_canvas';
 import type { RecoveryConfig } from './recovery_condition_canvas';
+import { SequenceBuilderDetailsSidebar } from './sequence_builder_details_sidebar';
 
 const useRuleFormServicesBag = (): RuleFormServices => {
   const http = useService(CoreStart('http'));
@@ -79,14 +81,53 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 
 export const SequenceBuilderPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { ruleId } = useParams<{ ruleId?: string }>();
+  const location = useLocation();
+  const cloneFromId = useMemo(
+    () => new URLSearchParams(location.search).get('cloneFrom') ?? undefined,
+    [location.search]
+  );
+  const sourceRuleId = ruleId ?? cloneFromId;
   const ruleFormServices = useRuleFormServicesBag();
   const { rulesLocators } = useAlertingLocators();
 
-  const { methods } = useSequenceBuilderForm();
-  const uiState = useSequenceBuilderState();
-  const [isRuleListOpen, setIsRuleListOpen] = useState(true);
-  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
+  const { methods, isLoading, parsedSeqValues, savedRecoveryStepIndices, savedStepsCount } =
+    useSequenceBuilderForm(sourceRuleId, { isClone: Boolean(cloneFromId) });
+  const uiState = useSequenceBuilderState(parsedSeqValues);
+  const { setSeqValues: setCanvasSeqValues } = uiState;
+
   const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(DEFAULT_RECOVERY_CONFIG);
+
+  const hasSyncedRecoveryConfigRef = useRef(false);
+  useEffect(() => {
+    if (
+      savedRecoveryStepIndices === undefined ||
+      savedStepsCount === undefined ||
+      hasSyncedRecoveryConfigRef.current
+    )
+      return;
+    hasSyncedRecoveryConfigRef.current = true;
+
+    if (savedRecoveryStepIndices.length >= 1) {
+      const isAll = savedRecoveryStepIndices.length === savedStepsCount;
+      const isLast =
+        savedRecoveryStepIndices.length === 1 &&
+        savedRecoveryStepIndices[0] === savedStepsCount - 1;
+
+      if (isAll) {
+        setRecoveryConfig({ mode: 'all' });
+      } else if (!isLast) {
+        setRecoveryConfig({ mode: 'custom' });
+        setCanvasSeqValues((prev) => ({
+          ...prev,
+          recoveryStepIndices: savedRecoveryStepIndices,
+        }));
+      }
+    }
+  }, [savedRecoveryStepIndices, savedStepsCount, setCanvasSeqValues]);
+
+  const [isRuleListOpen, setIsRuleListOpen] = useState(true);
+  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((v) => !v), []);
 
   const handleStepChange = useCallback(
     (nextStep: 'alert' | 'recovery') => {
@@ -101,6 +142,7 @@ export const SequenceBuilderPage: React.FC = () => {
         }));
       }
       uiState.setStep(nextStep);
+      uiState.setSidebarOpen(false);
     },
     [uiState, recoveryConfig.mode]
   );
@@ -111,7 +153,15 @@ export const SequenceBuilderPage: React.FC = () => {
 
   const rulesListHref = rulesLocators.useUrl({});
 
-  const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
+  const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues, ruleId));
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexGroup>
+    );
+  }
 
   const canvasContent =
     uiState.step === 'alert' ? (
@@ -120,6 +170,7 @@ export const SequenceBuilderPage: React.FC = () => {
         setSeqValues={uiState.setSeqValues}
         isRuleListOpen={isRuleListOpen}
         onToggleRuleList={handleToggleRuleList}
+        excludeRuleId={sourceRuleId}
       />
     ) : (
       <RecoveryConditionCanvas
@@ -149,10 +200,12 @@ export const SequenceBuilderPage: React.FC = () => {
           <EuiFlexItem grow={false}>
             <SequenceBuilderHeader
               step={uiState.step}
+              sidebarOpen={uiState.sidebarOpen}
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
               rulesListHref={rulesListHref}
               onStepChange={handleStepChange}
+              onToggleDetails={() => uiState.setSidebarOpen((open) => !open)}
               onSave={handleSave}
               onCancel={handleCancel}
             />
@@ -165,7 +218,15 @@ export const SequenceBuilderPage: React.FC = () => {
               flex-direction: column;
             `}
           >
-            {canvasContent}
+            <SequenceBuilderDetailsSidebar
+              canvas={canvasContent}
+              sidebarOpen={uiState.sidebarOpen}
+              ruleId={ruleId}
+              seqValues={uiState.seqValues}
+              isSaving={uiState.isSaving}
+              onCloseSidebar={() => uiState.setSidebarOpen(false)}
+              onSave={handleSave}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </FormProvider>

@@ -76,6 +76,10 @@ export const paths = {
   ruleLibraryCreateFromTemplate: (templateId: string) =>
     `${ALERTING_V2_RULE_LIBRARY_BASE_PATH}?templateId=${encodeURIComponent(templateId)}`,
   sequenceRuleCreate: `${ALERTING_V2_RULES_BASE_PATH}/sequence/create`,
+  sequenceRuleEdit: (id: string) =>
+    `${ALERTING_V2_RULES_BASE_PATH}/sequence/${encodeURIComponent(id)}/edit`,
+  sequenceRuleClone: (id: string) =>
+    `${ALERTING_V2_RULES_BASE_PATH}/sequence/create?cloneFrom=${encodeURIComponent(id)}`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,

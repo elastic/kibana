@@ -47,6 +47,11 @@ export const RulesApp = () => {
             <Redirect to={base} />
           )}
         </Route>
+        <Route exact path={`${base}/sequence/:ruleId/edit`}>
+          <Suspense fallback={<SequenceBuilderFallback />}>
+            <SequenceBuilderPage />
+          </Suspense>
+        </Route>
 
         <Route exact path={`${base}/:ruleId`}>
           <RuleDetailsRoute />
