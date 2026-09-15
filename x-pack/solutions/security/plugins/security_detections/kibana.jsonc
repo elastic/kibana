@@ -15,8 +15,7 @@
       "securityDetections"
     ],
     "requiredPlugins": [
-      "alertingVTwo",
-      "management"
+      "alertingVTwo"
     ]
   }
 }

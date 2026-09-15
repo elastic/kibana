@@ -12,17 +12,17 @@
  *  - Table renders the expected columns from the API response.
  *  - Filter controls compose the correct query parameters.
  *  - Enable/disable toggle and delete button call the right API endpoints.
- *  - The management section is not registered when the feature flag is off.
+ *  - The app is not registered when the feature flag is off.
  */
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { DETECTIONS_V2_APP_ID } from '../../../common';
 import type { DetectionRuleResponse } from '../../../common/api';
 import type { DetectionRulesApi, ListRulesParams } from '../../services/detection_rules_api';
 import { DetectionRulesContext } from './detection_rules_context';
 import { DetectionRulesPage, COLUMN_WIDTHS } from './detection_rules_page';
-import type { SecurityDetectionsPluginSetupDeps } from '../../plugin';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -428,67 +428,43 @@ describe('DetectionRulesPage — row actions', () => {
 // Feature flag off — page absent
 // ---------------------------------------------------------------------------
 
-describe('Feature flag off — management app not registered', () => {
-  it('does not register any management section when detectionsEnabled is false', () => {
-    // When the flag is off, plugin.setup() returns early without registering
-    // the management section or the app. Simulate this by verifying
-    // management.sections.register is never called when the flag is false.
-    const managementMock = {
-      sections: {
-        register: jest.fn().mockReturnValue({ registerApp: jest.fn() }),
-        section: { ai: { registerApp: jest.fn() } },
-      },
-    } as unknown as SecurityDetectionsPluginSetupDeps['management'];
-
-    // Import the plugin class and construct with flag=false.
+describe('Feature flag gating of the app registration', () => {
+  const setupPlugin = (enableDetectionsOnV2: boolean) => {
     const { SecurityDetectionsPublicPlugin } = jest.requireActual('../../plugin');
 
     const initContext = {
-      config: {
-        get: () => ({ enableDetectionsOnV2: false }),
-      },
+      config: { get: () => ({ enableDetectionsOnV2 }) },
     } as any;
 
-    const plugin = new SecurityDetectionsPublicPlugin(initContext);
+    const register = jest.fn();
     const coreSetup = {
+      application: { register },
       getStartServices: jest.fn().mockResolvedValue([{}]),
     } as any;
 
-    plugin.setup(coreSetup, { management: managementMock });
+    new SecurityDetectionsPublicPlugin(initContext).setup(coreSetup);
 
-    expect(managementMock.sections.register).not.toHaveBeenCalled();
+    return register;
+  };
+
+  it('does not register the app when detectionsEnabled is false', () => {
+    // With the flag off, setup() returns early. No app means no deep link, and
+    // the Security nav node that links to it is dropped by the framework.
+    expect(setupPlugin(false)).not.toHaveBeenCalled();
   });
 
-  it('registers the management section when detectionsEnabled is true', () => {
-    const registerApp = jest.fn();
-    const managementMock = {
-      sections: {
-        register: jest.fn().mockReturnValue({ registerApp }),
-        section: { ai: { registerApp: jest.fn() } },
-      },
-    } as unknown as SecurityDetectionsPluginSetupDeps['management'];
+  it('registers the app when detectionsEnabled is true', () => {
+    const register = setupPlugin(true);
 
-    const { SecurityDetectionsPublicPlugin } = jest.requireActual('../../plugin');
-
-    const initContext = {
-      config: {
-        get: () => ({ enableDetectionsOnV2: true }),
-      },
-    } as any;
-
-    const plugin = new SecurityDetectionsPublicPlugin(initContext);
-    const coreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([{}]),
-    } as any;
-
-    plugin.setup(coreSetup, { management: managementMock });
-
-    expect(managementMock.sections.register).toHaveBeenCalledTimes(1);
-    // order: 2 places Security Detections immediately after Alerting V2 Preview
-    // (order: 1) so the section is visible above the fold at 1920 x 1080.
-    expect(managementMock.sections.register).toHaveBeenCalledWith(
-      expect.objectContaining({ order: 2 })
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: DETECTIONS_V2_APP_ID,
+        appRoute: '/app/security_detections_v2',
+        // The Security solution side nav drops a node whose deep link is not
+        // visible in 'projectSideNav', so this surface is load-bearing.
+        visibleIn: expect.arrayContaining(['projectSideNav']),
+      })
     );
-    expect(registerApp).toHaveBeenCalledTimes(1);
   });
 });

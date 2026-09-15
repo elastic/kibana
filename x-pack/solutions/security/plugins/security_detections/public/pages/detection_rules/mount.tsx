@@ -6,18 +6,16 @@
  */
 
 /**
- * Mounts the detection rules management app into the given DOM element.
+ * Mounts the detection rules app into the given DOM element.
  *
- * Called by the management section's `registerApp` mount hook. Constructs the
- * API service from the live `CoreStart.http`, wraps the page in a
- * `QueryClientProvider` so hooks can issue queries, and returns an unmount
- * function that React uses to clean up.
+ * Called by the app's `mount` hook. Constructs the API service from the live
+ * `CoreStart.http`, wraps the page in a `QueryClientProvider` so hooks can
+ * issue queries, and returns an unmount function that React uses to clean up.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart } from '@kbn/core/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DetectionRulesApi } from '../../services/detection_rules_api';
@@ -25,7 +23,7 @@ import { DetectionRulesContext } from './detection_rules_context';
 import { DetectionRulesPage } from './detection_rules_page';
 
 export const mountDetectionRulesApp = (
-  params: ManagementAppMountParams,
+  params: AppMountParameters,
   coreStart: CoreStart
 ): (() => void) => {
   const api = new DetectionRulesApi(coreStart.http);
