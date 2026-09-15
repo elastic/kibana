@@ -52,6 +52,19 @@ describe('useAwsOverviewDashboardUrl', () => {
     expect(result.current).toBeUndefined();
   });
 
+  it('returns undefined on first render when spaces service is present (prevents broken-link window)', () => {
+    // spaces is defined (setupKibana('default') in beforeEach), so currentSpaceId starts
+    // undefined. The hook must not emit a href until getActiveSpace() resolves — a broken
+    // link is worse than a button without an href.
+    const info: InstallationSnapshot = {
+      installed_kibana: [primaryRef],
+      installed_kibana_space_id: 'default',
+    };
+    const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+    // Do NOT await — check synchronous first-render value before the effect runs.
+    expect(result.current).toBeUndefined();
+  });
+
   describe('primary space (installed_kibana_space_id === currentSpaceId)', () => {
     it('returns the basePath-prefixed URL when the overview ref is in installed_kibana', async () => {
       const info: InstallationSnapshot = {
