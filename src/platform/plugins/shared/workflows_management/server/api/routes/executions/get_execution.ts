@@ -56,8 +56,7 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
               omitStepExecutions: schema.boolean({
                 defaultValue: false,
                 meta: {
-                  description:
-                    `When \`true\`, omit the embedded \`stepExecutions\` array. Defaults to \`false\`. When this is \`false\`, the embed is capped at ${WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT} steps.`,
+                  description: `When \`true\`, omit the embedded \`stepExecutions\` array. Defaults to \`false\`. When this is \`false\`, the embed is capped at ${WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT} steps.`,
                 },
               }),
             }),
