@@ -52,9 +52,7 @@ export abstract class SaveMixin extends NavigationMixin {
         await switchControl.click();
       }
     }
-    const savedSearchRoute = this.page.waitForURL(/#\/view\/[^?]+/);
     await this.confirmSaveModal();
-    await savedSearchRoute;
   }
 
   async saveSearchAsNew(name: string) {
