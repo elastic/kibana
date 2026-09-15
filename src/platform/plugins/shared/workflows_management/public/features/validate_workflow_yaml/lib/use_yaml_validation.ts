@@ -16,14 +16,7 @@ import {
   getWorkflowYamlValidationContextError,
   useWorkflowYamlValidationContext,
 } from './use_workflow_yaml_validation_context';
-import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
-import {
-  selectEditorWorkflowLookup,
-  selectGraphBuildError,
-  selectIsWorkflowTab,
-  selectWorkflowDefinition,
-  selectYamlLineCounter,
-} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { selectIsWorkflowTab, selectYamlComputed } from '../../../entities/workflows/store';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
   validationResultsFingerprint,
@@ -52,12 +45,15 @@ export function useYamlValidation(
     }
   }, []);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const yamlDocument = useSelector(selectYamlDocument);
-  const workflowLookup = useSelector(selectEditorWorkflowLookup);
-  const workflowGraph = useSelector(selectWorkflowGraph);
-  const workflowDefinition = useSelector(selectWorkflowDefinition);
-  const graphBuildError = useSelector(selectGraphBuildError);
-  const lineCounter = useSelector(selectYamlLineCounter);
+  const {
+    yamlString,
+    yamlDocument,
+    workflowLookup,
+    workflowGraph,
+    workflowDefinition,
+    graphBuildError,
+    yamlLineCounter: lineCounter,
+  } = useSelector(selectYamlComputed) ?? {};
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const validationContext = useWorkflowYamlValidationContext();
 
@@ -85,7 +81,7 @@ export function useYamlValidation(
         return;
       }
 
-      if (!yamlDocument || !lineCounter) {
+      if (yamlString === undefined || !yamlDocument || !lineCounter) {
         setStableValidationResults([]);
         setIsLoading(false);
         setError(yamlDocument ? null : new Error('Error validating: Yaml document is not loaded'));
@@ -110,7 +106,6 @@ export function useYamlValidation(
       const validationContextError = getWorkflowYamlValidationContextError(validationContext);
 
       try {
-        const yamlString = model.getValue();
         const results = await collectFullWorkflowYamlValidationResults({
           yamlString,
           model,
@@ -166,6 +161,7 @@ export function useYamlValidation(
   }, [
     editor,
     lineCounter,
+    yamlString,
     workflowDefinition,
     workflowGraph,
     graphBuildError,

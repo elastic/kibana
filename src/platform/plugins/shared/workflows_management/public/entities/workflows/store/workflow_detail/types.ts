@@ -88,6 +88,8 @@ export interface WorkflowDetailState {
 export type ActiveTab = 'workflow' | 'executions';
 
 export interface ComputedData {
+  /** YAML source used to derive the rest of this snapshot. */
+  yamlString?: string;
   yamlDocument?: YAML.Document; // This will be handled specially for serialization
   yamlLineCounter?: LineCounter;
   workflowLookup?: WorkflowLookup;

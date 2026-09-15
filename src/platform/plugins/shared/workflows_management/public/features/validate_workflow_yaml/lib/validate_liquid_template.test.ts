@@ -11,6 +11,15 @@ import { LineCounter, parseDocument } from 'yaml';
 import { validateLiquidTemplate } from './validate_liquid_template';
 
 describe('validateLiquidTemplate', () => {
+  it('throws when the line counter was not initialized by the parser', () => {
+    const yaml = 'message: plain text';
+    const doc = parseDocument(yaml);
+
+    expect(() => validateLiquidTemplate(yaml, doc, new LineCounter())).toThrow(
+      'LineCounter must be initialized by parsing the YAML source'
+    );
+  });
+
   describe('valid templates', () => {
     it('returns empty array for valid liquid in a scalar', () => {
       const yaml = 'message: "Hello {{ name }} world"';
