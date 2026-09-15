@@ -62,9 +62,10 @@ export const RunStepInputSchema = z.object({
  * from both modes for security.
  *
  * `status` distinguishes a terminal run (`completed`) from one that is still
- * executing in the background (`pending`). Sync mode awaits completion and
- * always returns `completed`; only async mode returns `pending` (just the
- * `execution_uuid`) while the pipeline runs in the background.
+ * executing in the background (`pending`). Only async mode returns `pending`,
+ * so consumers of that mode poll `security.attack-discovery.get_status` instead
+ * of reading the absent counts as "0 discoveries". Sync mode awaits the pipeline
+ * to completion and always returns `completed`, bounded by the step's `timeout`.
  */
 export const RunStepOutputSchema = z.object({
   alerts_context_count: z.number().int().optional(),

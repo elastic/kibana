@@ -21,6 +21,7 @@ import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
+
 /**
  * Server-side implementation of the Attack Discovery run step.
  *
