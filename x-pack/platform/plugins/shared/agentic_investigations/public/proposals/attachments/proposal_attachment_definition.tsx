@@ -35,10 +35,9 @@ const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.approved',
     { defaultMessage: 'Approved' }
   ),
-  pending: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.pending',
-    { defaultMessage: 'Pending' }
-  ),
+  pending: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.pending', {
+    defaultMessage: 'Pending',
+  }),
   executing: i18n.translate(
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.executing',
     { defaultMessage: 'Executing' }
@@ -47,10 +46,9 @@ const STATUS_BADGE_LABELS: Record<ProposalStatus, string> = {
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.succeeded',
     { defaultMessage: 'Succeeded' }
   ),
-  failed: i18n.translate(
-    'xpack.agenticInvestigations.proposals.attachments.statusBadge.failed',
-    { defaultMessage: 'Failed' }
-  ),
+  failed: i18n.translate('xpack.agenticInvestigations.proposals.attachments.statusBadge.failed', {
+    defaultMessage: 'Failed',
+  }),
   dismissed: i18n.translate(
     'xpack.agenticInvestigations.proposals.attachments.statusBadge.dismissed',
     { defaultMessage: 'Dismissed' }
@@ -96,10 +94,10 @@ export const createProposalAttachmentDefinition = (): AttachmentUIDefinition<Pro
 
     // Impact badge
     badges.push({
-      label: i18n.translate(
-        'xpack.agenticInvestigations.proposals.attachments.impactBadgeLabel',
-        { defaultMessage: '{impact} impact', values: { impact: data.impact } }
-      ),
+      label: i18n.translate('xpack.agenticInvestigations.proposals.attachments.impactBadgeLabel', {
+        defaultMessage: '{impact} impact',
+        values: { impact: data.impact },
+      }),
       color: IMPACT_BADGE_COLORS[data.impact] ?? 'default',
     });
 
