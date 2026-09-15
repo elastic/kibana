@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Locator } from 'playwright/test';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 const FOOTER_PANEL_IDS = ['admin_and_settings', 'stack_management'] as const;
 
