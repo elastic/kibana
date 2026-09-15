@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
@@ -35,7 +34,6 @@ export function ProfilingAppPageTemplate({
   children,
   tabs = [],
   hideSearchBar = false,
-  noDataConfig,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
     defaultMessage: 'Profiling',
@@ -46,7 +44,6 @@ export function ProfilingAppPageTemplate({
   children: React.ReactElement;
   tabs?: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
-  noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
   pageTitle?: React.ReactNode;
   showBetaBadge?: boolean;
@@ -72,7 +69,6 @@ export function ProfilingAppPageTemplate({
 
   return (
     <ObservabilityPageTemplate
-      noDataConfig={noDataConfig}
       pageHeader={{
         'data-test-subj': 'profilingPageTemplate',
         pageTitle: (

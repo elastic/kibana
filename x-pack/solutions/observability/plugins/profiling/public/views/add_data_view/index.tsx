@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiCodeBlock,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -32,6 +33,13 @@ import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { useProfilingSetupStatus } from '../../components/contexts/profiling_setup_status/use_profiling_setup_status';
+import { UniversalProfilingSetup } from './universal_profiling_setup';
+
+export enum AddDataSection {
+  UniversalProfiling = 'universal_profiling',
+  OpenTelemetry = 'opentelemetry',
+}
 
 export enum AddDataTabs {
   Kubernetes = 'kubernetes',
@@ -59,10 +67,12 @@ const supportedCPUArchitectures = ['x86_64', 'arm64'];
 
 export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');
-  const { selectedTab } = query;
+  const { section, selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
+  const { profilingSetupStatus } = useProfilingSetupStatus();
+  const hasUniversalProfilingSetup = profilingSetupStatus?.has_setup === true;
 
   const {
     services: { setupDataCollectionInstructions },
@@ -71,10 +81,9 @@ export function AddDataView() {
   const { docLinks } = core;
 
   const { data, status } = useAsync(
-    ({ http }) => {
-      return setupDataCollectionInstructions({ http });
-    },
-    [setupDataCollectionInstructions]
+    ({ http }) =>
+      hasUniversalProfilingSetup ? setupDataCollectionInstructions({ http }) : undefined,
+    [setupDataCollectionInstructions, hasUniversalProfilingSetup]
   );
 
   const secretToken = data?.collector?.secretToken;
@@ -509,32 +518,99 @@ EOF`}
 
   const isLoading = status === AsyncStatus.Loading;
 
-  return (
-    <ProfilingAppPageTemplate
-      restrictWidth
-      hideSearchBar
-      pageTitle={
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.profiling.noDataPage.pageTitle', {
-              defaultMessage: 'Add profiling data',
+  const pageTitle = (
+    <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {i18n.translate('xpack.profiling.noDataPage.pageTitle', {
+          defaultMessage: 'Add profiling data',
+        })}
+      </EuiFlexItem>
+      {isLoading ? (
+        <EuiFlexItem>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+
+  const sections = [
+    {
+      key: AddDataSection.UniversalProfiling,
+      title: i18n.translate('xpack.profiling.addData.section.universalProfiling', {
+        defaultMessage: 'Universal Profiling',
+      }),
+    },
+    {
+      key: AddDataSection.OpenTelemetry,
+      title: i18n.translate('xpack.profiling.addData.section.openTelemetry', {
+        defaultMessage: 'OpenTelemetry Profiles',
+      }),
+    },
+  ];
+
+  const sectionTabs = (
+    <EuiTabs>
+      {sections.map((item) => (
+        <EuiTab
+          key={item.key}
+          data-test-subj={`profilingAddDataSection-${item.key}`}
+          isSelected={item.key === section}
+          onClick={() => {
+            profilingRouter.push(routePath, { path: {}, query: { ...query, section: item.key } });
+          }}
+        >
+          {item.title}
+        </EuiTab>
+      ))}
+    </EuiTabs>
+  );
+
+  if (section === AddDataSection.OpenTelemetry) {
+    return (
+      <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
+        <>
+          {sectionTabs}
+          <EuiSpacer />
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.profiling.addData.openTelemetry.title', {
+                  defaultMessage: 'OpenTelemetry Profiles',
+                })}
+              </h2>
+            }
+            body={i18n.translate('xpack.profiling.addData.openTelemetry.todo', {
+              defaultMessage: 'Instructions for ingesting OpenTelemetry profiles are coming soon.',
             })}
-          </EuiFlexItem>
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      }
-    >
+          />
+        </>
+      </ProfilingAppPageTemplate>
+    );
+  }
+
+  if (!hasUniversalProfilingSetup) {
+    return (
+      <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
+        <>
+          {sectionTabs}
+          <EuiSpacer />
+          <UniversalProfilingSetup />
+        </>
+      </ProfilingAppPageTemplate>
+    );
+  }
+
+  return (
+    <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
       {isLoading ? (
         <></>
       ) : (
         <>
+          {sectionTabs}
+          <EuiSpacer />
           <EuiCallOut
             announceOnMount
             color="warning"
@@ -624,7 +700,7 @@ EOF`}
                         onClick={() => {
                           profilingRouter.push(routePath, {
                             path: {},
-                            query: { selectedTab: tab.key },
+                            query: { ...query, selectedTab: tab.key },
                           });
                         }}
                         isSelected={tab.key === selectedTab}
