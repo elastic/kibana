@@ -81,6 +81,7 @@ import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
+import { diffAttachments } from './attachment_diff';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
@@ -97,7 +98,10 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+import type {
+  ConversationMetadataPatchedPayload,
+  ConversationAttachmentsChangedPayload,
+} from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -206,6 +210,7 @@ export const createClient = ({
   user,
   agentRegistry,
   onMetadataPatched,
+  onAttachmentsChanged,
 }: {
   space: string;
   logger: Logger;
@@ -213,6 +218,7 @@ export const createClient = ({
   user: CurrentUser;
   agentRegistry: AgentRegistry;
   onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  onAttachmentsChanged?: (payload: ConversationAttachmentsChangedPayload) => void;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -223,6 +229,7 @@ export const createClient = ({
     agentRegistry,
     logger,
     onMetadataPatched,
+    onAttachmentsChanged,
   });
 };
 
@@ -234,6 +241,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
   private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  private readonly onAttachmentsChanged?: (payload: ConversationAttachmentsChangedPayload) => void;
 
   constructor({
     storage,
@@ -243,6 +251,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry,
     logger,
     onMetadataPatched,
+    onAttachmentsChanged,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -251,6 +260,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry: AgentRegistry;
     logger: Logger;
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+    onAttachmentsChanged?: (payload: ConversationAttachmentsChangedPayload) => void;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -259,6 +269,7 @@ class ConversationClientImpl implements ConversationClient {
     this.agentRegistry = agentRegistry;
     this.logger = logger;
     this.onMetadataPatched = onMetadataPatched;
+    this.onAttachmentsChanged = onAttachmentsChanged;
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
@@ -555,7 +566,16 @@ class ConversationClientImpl implements ConversationClient {
       throw error;
     }
 
-    return this.get(id);
+    const created = await this.get(id);
+
+    if (this.onAttachmentsChanged && created.attachments && created.attachments.length > 0) {
+      const changes = diffAttachments({ before: [], after: created.attachments });
+      if (changes.length > 0) {
+        this.onAttachmentsChanged({ conversationId: id, changes });
+      }
+    }
+
+    return created;
   }
 
   async update(
@@ -1099,17 +1119,32 @@ class ConversationClientImpl implements ConversationClient {
   }): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries });
 
+    // Track the pre-write attachment snapshot from the last (winning) mutate invocation.
+    let beforeAttachments: NormalizedConversation['attachments'] | undefined;
+
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) =>
-          updateConversation({
+        mutate: (current) => {
+          beforeAttachments = current.attachments;
+          return updateConversation({
             conversation: current,
             update: { id: conversationId, ...fields(current) },
             updateDate: new Date(),
             space: this.space,
-          }),
+          });
+        },
       });
+
+      if (this.onAttachmentsChanged) {
+        const changes = diffAttachments({
+          before: beforeAttachments ?? [],
+          after: document.attachments ?? [],
+        });
+        if (changes.length > 0) {
+          this.onAttachmentsChanged({ conversationId, changes });
+        }
+      }
 
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {

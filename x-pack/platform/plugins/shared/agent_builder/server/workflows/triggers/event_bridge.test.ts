@@ -10,7 +10,12 @@ import {
   createWorkflowsClientMock,
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
+} from '../../../common/workflows/triggers';
 import { createConversationEventBus } from './conversation_event_bus';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
 
@@ -135,5 +140,129 @@ describe('registerConversationWorkflowEventBridge', () => {
         `Failed to emit workflow trigger "${ConversationMetadataUpdatedTriggerId}"`
       )
     );
+  });
+
+  describe('attachment triggers', () => {
+    it('forwards attachmentAdded event', async () => {
+      eventBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [{ kind: 'added', attachmentId: 'att-1', attachmentType: 'text' }],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentAddedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-1',
+        attachmentType: 'text',
+      });
+    });
+
+    it('forwards attachmentUpdated event', async () => {
+      eventBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [{ kind: 'updated', attachmentId: 'att-1', attachmentType: 'esql' }],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentUpdatedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-1',
+        attachmentType: 'esql',
+      });
+    });
+
+    it('forwards attachmentDeleted event', async () => {
+      eventBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [{ kind: 'deleted', attachmentId: 'att-1', attachmentType: 'visualization' }],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentDeletedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-1',
+        attachmentType: 'visualization',
+      });
+    });
+
+    it('fans out one emitEvent call per attachment change in a batch', async () => {
+      eventBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [
+          { kind: 'added', attachmentId: 'att-1', attachmentType: 'text' },
+          { kind: 'updated', attachmentId: 'att-2', attachmentType: 'esql' },
+          { kind: 'deleted', attachmentId: 'att-3', attachmentType: 'visualization' },
+        ],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledTimes(3);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentAddedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-1',
+        attachmentType: 'text',
+      });
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentUpdatedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-2',
+        attachmentType: 'esql',
+      });
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationAttachmentDeletedTriggerId, {
+        conversationId: 'conv-1',
+        attachmentId: 'att-3',
+        attachmentType: 'visualization',
+      });
+    });
+
+    it('does not emit attachment triggers when experimental features are disabled', async () => {
+      isExperimentalEnabled.mockResolvedValue(false);
+      const disabledBus = createConversationEventBus();
+      registerConversationWorkflowEventBridge(
+        disabledBus,
+        workflowsExtensions,
+        logger,
+        isExperimentalEnabled
+      );
+
+      disabledBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [{ kind: 'added', attachmentId: 'att-1', attachmentType: 'text' }],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when attachment emitEvent fails', async () => {
+      const failingClient = createWorkflowsClientMock({
+        emitEvent: jest.fn().mockRejectedValue(new Error('network error')),
+      });
+      workflowsExtensions.getClient.mockResolvedValue(failingClient);
+      const failBus = createConversationEventBus();
+      registerConversationWorkflowEventBridge(
+        failBus,
+        workflowsExtensions,
+        logger,
+        isExperimentalEnabled
+      );
+
+      failBus.emitAttachmentsChanged(request, {
+        conversationId: 'conv-1',
+        changes: [{ kind: 'added', attachmentId: 'att-1', attachmentType: 'text' }],
+      });
+
+      await flushMicrotasks();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Failed to emit workflow trigger "${ConversationAttachmentAddedTriggerId}"`
+        )
+      );
+    });
   });
 });

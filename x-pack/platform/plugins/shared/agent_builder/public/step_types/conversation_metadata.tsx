@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import {
   createPublicStepDefinition as createStepDefinition,
@@ -13,12 +12,7 @@ import {
 import { getConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/get_conversation_metadata';
 import { updateConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/update_conversation_metadata';
 import { createConversationStepCommonDefinition } from '../../common/workflows/steps/create_conversation';
-
-export const sharedIcon: React.ComponentType = React.lazy(() =>
-  import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
-    default: icon,
-  }))
-);
+import { sharedIcon } from './shared';
 
 function createPublicStepDefinition<
   Input extends z.ZodType = z.ZodType,

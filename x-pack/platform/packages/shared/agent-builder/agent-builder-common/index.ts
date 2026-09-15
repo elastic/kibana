@@ -10,6 +10,10 @@ export { apiTargets, type ApiTarget } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   type ConversationMetadataUpdatedEvent,
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
+  type ConversationAttachmentEvent,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,
