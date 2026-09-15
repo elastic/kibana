@@ -79,7 +79,7 @@ const hasAutoImportIntegration = (
     (integration) =>
       integration.integrationId === normalizedName ||
       normalizeTitleName(integration.integrationId) === normalizedName ||
-  );
+      normalizeTitleName(integration.title) === normalizedName
 };
 
 export const evaluateUploadPackage = (
