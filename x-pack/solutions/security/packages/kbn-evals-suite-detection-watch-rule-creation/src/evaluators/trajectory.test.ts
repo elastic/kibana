@@ -36,16 +36,13 @@ const rows = (names: Array<string | null>) => ({
   columns: NAME_COL,
   values: names.map((n) => [n]),
 });
-const probe = (n: number) => ({ columns: [{ name: 'tool_spans', type: 'long' }], values: [[n]] });
-
 const esWith = (handler: (query: string, call: number) => unknown) => {
   let calls = 0;
   const query = jest.fn(async ({ query: q }: { query: string }) => handler(q, ++calls));
   return { client: { esql: { query } } as unknown as EsClient, query };
 };
 
-const esReturning = (names: Array<string | null>, cluster = 0) =>
-  esWith((q) => (q.includes('STATS tool_spans') ? probe(cluster) : rows(names)));
+const esReturning = (names: Array<string | null>) => esWith(() => rows(names));
 
 const result = (over: Partial<RuleCreationResult> = {}): RuleCreationResult =>
   ({
@@ -115,14 +112,12 @@ describe('createTrajectoryFetcher', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
-  it('is unavailable — never zero — when no join key reaches spans, and says why', async () => {
-    const { client } = esReturning([], 57);
+  it('is unavailable — never zero — when no join key reaches spans', async () => {
+    const { client, query } = esReturning([]);
     const t = await fetcher(client)(result());
-    expect(t.available).toBe(false);
-    if (!t.available) {
-      expect(t.explanation).toContain('57');
-      expect(t.explanation).toContain('attribute drift');
-    }
+    expect(t).toMatchObject({ available: false });
+    // Both join keys tried on every poll, nothing else.
+    expect(query).toHaveBeenCalledTimes(2 * 4);
   });
 
   it('keeps polling until two consecutive reads agree, so a mid-flush export is not scored short', async () => {

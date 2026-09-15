@@ -11,18 +11,18 @@ import type { Evaluator } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
-import {
-  TOOL_KIND,
-  diagnoseUnreachableToolSpans,
-  extractConversationId,
-  toolSpanJoinClauses,
-  type EsqlResponse,
-} from './trace_spans';
+import { extractConversationId, toolSpanJoinClauses } from './tool_routing';
 
 // What AgentBuilderSpanProcessor writes for non-builtin tools when includeRealNames is off.
 const ANONYMIZED_TOOL_NAME = 'custom';
 
+const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
 const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
+
+interface EsqlResponse {
+  columns: Array<{ name: string }>;
+  values: Array<Array<string | null>>;
+}
 
 export interface TrajectoryFetchOptions {
   settleMs?: number;
@@ -105,11 +105,11 @@ export const createTrajectoryFetcher = ({
       );
       return { available: true, ...last, settled: false };
     }
-    const diagnosis = await diagnoseUnreachableToolSpans(traceEsClient);
-    log.warning(`Trajectory unavailable — ${diagnosis}`);
+    // Tool Routing scores the same run and logs the cluster-level diagnosis; not repeated here.
+    log.warning('Trajectory unavailable — no TOOL spans reachable via any join key');
     return {
       available: false,
-      explanation: `No TOOL spans reachable via the workflow trace id or the draft conversation_id. ${diagnosis}`,
+      explanation: 'No TOOL spans reachable via the workflow trace id or the draft conversation_id',
     };
   };
 

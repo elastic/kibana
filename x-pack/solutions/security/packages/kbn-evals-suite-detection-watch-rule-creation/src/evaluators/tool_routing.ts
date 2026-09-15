@@ -8,15 +8,15 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
-import { RULE_CREATION_TOOL_ID } from '../constants';
+import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
-import {
-  TOOL_KIND,
-  diagnoseUnreachableToolSpans,
-  extractConversationId,
-  toolSpanJoinClauses,
-  type EsqlResponse,
-} from './trace_spans';
+
+const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
+
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: Array<Array<number | string | null>>;
+}
 
 /**
  * Tool Routing (trace-based, direction: maximize).
@@ -27,13 +27,51 @@ import {
  * behind them. This evaluator scores 1 when at least one TOOL span invoking
  * that tool is found for the run.
  *
- * Span lookup is the two-stage join in ./trace_spans (#284725 not required).
+ * Span lookup is two-stage (#284725 not required):
+ *  1. workflow trace id — direct join when agent spans share the workflow root span;
+ *  2. the draft step's persisted `conversation_id` via `gen_ai.conversation.id`
+ *     — Agent Builder conversations can fork their own root trace, which leaves
+ *     stage 1 with zero TOOL spans (measured: every run of builds 455/457).
  *
  * Zero TOOL spans across BOTH stages is NOT a score: it means neither join
  * reached the agent's spans, so the run is scored N/A rather than a false 0
  * (STATS COUNT(*) always returns a row — an unmeasured trace otherwise reads
  * as a confident zero).
  */
+/**
+ * The draft step's Agent Builder conversation id, when the step persisted one. Exported so
+ * the suite's setup probe joins spans exactly the way the evaluator does — a probe that
+ * proves reachability on a different key would arm the evaluators dishonestly.
+ */
+export const extractConversationId = (
+  output: RuleCreationResult | undefined
+): string | undefined => {
+  const draft = (output?.stepExecutions ?? []).find(
+    (s) => s.stepId === DRAFT_STEP_ID && s.output != null
+  );
+  const id = (draft?.output as { conversation_id?: unknown } | null)?.conversation_id;
+  return typeof id === 'string' ? id : undefined;
+};
+
+/** Join clauses tried, in order, to reach a run's agent tool spans. */
+export const toolSpanJoinClauses = ({
+  traceId,
+  conversationId,
+}: {
+  traceId?: string;
+  conversationId?: string;
+}): Array<{ name: string; where: string }> => [
+  ...(traceId ? [{ name: 'workflow trace id', where: `trace.id == "${traceId}"` }] : []),
+  ...(conversationId
+    ? [
+        {
+          name: 'gen_ai.conversation.id',
+          where: `attributes.gen_ai.conversation.id == "${conversationId}"`,
+        },
+      ]
+    : []),
+];
+
 export function createToolRoutingEvaluator({
   traceEsClient,
   log,
@@ -95,7 +133,27 @@ export function createToolRoutingEvaluator({
         }
       }
 
-      const diagnosis = await diagnoseUnreachableToolSpans(traceEsClient);
+      // Neither key matched. Distinguish "this cluster holds no agent tool spans at all"
+      // (export/config problem) from "spans exist but carry different join keys" (attribute
+      // drift) — otherwise every future N/A costs another round of manual trace archaeology.
+      let diagnosis = 'probe did not run';
+      try {
+        const probe = (await traceEsClient.esql.query({
+          query: `FROM traces-*
+| WHERE attributes.elastic.inference.span.kind == "TOOL"
+| STATS tool_spans = COUNT(*)`,
+        })) as unknown as EsqlResponse;
+        const total = Number(probe.values?.[0]?.[0] ?? 0);
+        diagnosis =
+          total > 0
+            ? `the cluster holds ${total} TOOL span(s) but none match this run's join keys — ` +
+              'attribute drift, compare gen_ai.conversation.id / trace.id on a recent span'
+            : 'the cluster holds NO TOOL spans at all — agent spans are not exported to the ' +
+              'tracing ES this suite queries (check TRACING_ES_URL and EDOT export)';
+      } catch (error) {
+        diagnosis = `probe failed: ${error instanceof Error ? error.message : String(error)}`;
+      }
+
       log.warning(`Tool Routing unavailable — ${diagnosis}`);
       return {
         score: null,

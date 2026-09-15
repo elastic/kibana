@@ -9,8 +9,12 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
-import { assertToolSpansReachable, createToolRoutingEvaluator } from './tool_routing';
-import { extractConversationId, toolSpanJoinClauses } from './trace_spans';
+import {
+  assertToolSpansReachable,
+  createToolRoutingEvaluator,
+  extractConversationId,
+  toolSpanJoinClauses,
+} from './tool_routing';
 
 const log = {
   info: jest.fn(),
