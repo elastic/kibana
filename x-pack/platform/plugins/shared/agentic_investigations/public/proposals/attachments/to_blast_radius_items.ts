@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { BlastRadiusItemProps } from '@kbn/agentic-investigations-common';
 import type { ProposalWithMetadata } from '../../../common';
 
@@ -36,16 +37,31 @@ export const toBlastRadiusItems = (proposal: ProposalWithMetadata): BlastRadiusI
   items.push({
     id: 'impact',
     iconType: 'warning',
-    text: `${proposal.action?.impact ?? proposal.impact} impact`,
+    text: i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.impactText', {
+      defaultMessage: '{impact} impact',
+      values: { impact: proposal.action?.impact ?? proposal.impact },
+    }),
   });
 
   if (proposal.action?.reversible !== undefined) {
     items.push({
       id: 'reversible',
       iconType: 'editorUndo',
-      text: proposal.action.reversible ? 'Reversible' : 'Not reversible',
+      text: proposal.action.reversible
+        ? i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.reversibleText', {
+            defaultMessage: 'Reversible',
+          })
+        : i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.notReversibleText', {
+            defaultMessage: 'Not reversible',
+          }),
       status: {
-        label: proposal.action.reversible ? 'Yes' : 'No',
+        label: proposal.action.reversible
+          ? i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.reversibleYes', {
+              defaultMessage: 'Yes',
+            })
+          : i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.reversibleNo', {
+              defaultMessage: 'No',
+            }),
         iconType: proposal.action.reversible ? 'check' : 'cross',
         color: proposal.action.reversible ? 'success' : 'danger',
       },
@@ -55,12 +71,17 @@ export const toBlastRadiusItems = (proposal: ProposalWithMetadata): BlastRadiusI
   if (proposal.expiresAt) {
     const deadline = new Date(proposal.expiresAt);
     const label = proposal.expired
-      ? 'Expired'
+      ? i18n.translate('xpack.agenticInvestigations.proposals.blastRadius.expiredLabel', {
+          defaultMessage: 'Expired',
+        })
       : deadline.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
     items.push({
       id: 'expires',
       iconType: 'clock',
-      text: `Decision deadline: ${label}`,
+      text: i18n.translate(
+        'xpack.agenticInvestigations.proposals.blastRadius.decisionDeadlineText',
+        { defaultMessage: 'Decision deadline: {label}', values: { label } }
+      ),
     });
   }
 
