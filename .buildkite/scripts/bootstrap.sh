@@ -38,8 +38,13 @@ fi
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
-    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
-    mv ~/.cache/kibana/pnpm/node_modules ./
+    if [[ -d ./node_modules ]]; then
+      echo "node_modules already exists, skipping image cache restore"
+      rm -rf ~/.cache/kibana/pnpm/node_modules
+    else
+      echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+      mv ~/.cache/kibana/pnpm/node_modules ./
+    fi
   fi
   if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
     echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
