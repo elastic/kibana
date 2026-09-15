@@ -82,15 +82,19 @@ Load the sibling skills and follow their search instructions. Do it in this orde
 Call \`load_skill\` with \`find-security-rules\`. Follow that skill's instructions to search installed rules. Two constraints from this skill on top of its instructions:
 
 - Do not pass \`enabled\`. You need enabled and disabled rules in one result.
-- Up to three searches: one by technique id if you have one, one by the distinctive behavior words, and, when both return nothing, one with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl"). Free text searches rule names, index patterns, and MITRE tactic and technique fields. Extra intent words like "attackers" or "exfiltrating" can hide real matches, so use the single-word probe to broaden the search.
+- Up to three searches: one by technique id if you have one, one by the distinctive behavior words, and always a third with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl", "PowerShell"). Free text searches rule names, index patterns, and MITRE tactic and technique fields. Extra intent words like "attackers" or "exfiltrating" can hide real matches, so always run the single-word probe — even when an earlier search already returned results.
 
-Judge each returned rule with the Match Rubric. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
+Judge each returned rule with the Match Rubric. **When judging: the filter only matches names and MITRE fields, but each result includes its description and query — read both.** A rule whose distinctive behavior appears only in its query (e.g. \`process.args:*-enc*\` confirms encoded-command execution; \`network.protocol:smb\` confirms SMB lateral movement) is still an exact match once you read the query field. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
 
 ### Step 2: installable prebuilt rules
 
 Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\`. Follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name. One search, two at most. Unlike Step 1, the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions — use the most distinctive behavior words from the gap, not the full sentence.
 
-An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed rule always beats installing a copy of it. Only when that probe also finds nothing, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`, naming any close rule you noted in step 1.
+**Installed rules always beat prebuilt rules.** Before returning \`prebuilt_available\`:
+
+- If the single-word probe from step 1 never ran, run it now against installed rules first.
+- If step 1 found a close but non-exact match (right behavior, wrong scope or data source): **do not return \`prebuilt_available\`**. An installed rule the analyst can widen is better than installing a duplicate. Return \`no_coverage\` and name the close rule.
+- Only when step 1 found nothing at all (no exact, no close), return \`prebuilt_available\` for an exact prebuilt match. Stop.
 
 ### Precedence
 
@@ -107,6 +111,8 @@ A rule is an **exact** match when both hold:
 2. Its **data source** is the same. A Windows process rule does not cover a Linux behavior, and an Okta rule does not cover Azure AD.
 
 Everything else is **no match**, including a rule that covers the same behavior but is scoped too narrowly, or one that would cover the gap only after a query change. A shared MITRE technique on its own is never enough. Say "no match" rather than stretching a weak one: a false "already covered" leaves a real gap open. When such a close rule exists, name it in the explanation so the analyst can decide to widen it instead, but the verdict stays \`no_coverage\`.
+
+**Scope is part of behavior.** A rule whose query restricts by namespace (e.g. \`namespace:"staging"\`), by environment, by hostname, or by any other limiting field does not cover a request about a different or broader scope — even when the behavior and technique match exactly. For example: a rule scoped to the staging namespace is not coverage for a production namespace request.
 
 ## Verdicts and Routes
 
@@ -162,8 +168,9 @@ export const createDetectionCoverageSkill = (): SkillDefinition<
     basePath: 'skills/security/rules',
     description:
       'Make a behavior covered by detection. Use when the user wants coverage to exist ' +
-      '("I want a rule that covers X", "we need to detect X", a reported gap) and gives no ' +
-      'rule logic. Checks installed rules (enabled and disabled) and the installable prebuilt ' +
+      '("I need detection for X", "I want a rule that covers X", "we need to detect X", ' +
+      '"we have no coverage for X", a reported gap) and gives no rule logic. ' +
+      'Checks installed rules (enabled and disabled) and the installable prebuilt ' +
       'catalog, then routes to one action: nothing, enable, install, or create. ' +
       'NOT for questions about existing coverage ("do we have a rule for X?", "which ' +
       'tactics am I missing?") — those are reporting intents for find-security-rules or ' +
