@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type { CloudConnectorIacState } from '../../../common/types/models/cloud_connector';
+import {
+  CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
+  type CloudConnectorIacState,
+} from '../../../common/types/models/cloud_connector';
 
 import { sendUpdateCloudConnector } from './cloud_connector';
-
-const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
-  'iac_key',
-  'iac_blueprint_id',
-  'iac_blueprint_version',
-  'iac_deployment_id',
-];
 
 const pendingByPolicyName = new Map<string, CloudConnectorIacState>();
 
 export const hasPendingIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
-  Boolean(iac && IAC_CONFIRM_KEYS.some((key) => iac[key] !== undefined));
+  Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
 
 /**
  * Holds confirm-time IaC for a package policy until it is saved, then
@@ -57,13 +53,24 @@ export const persistPendingCloudConnectorIac = async ({
   policyName?: string;
   cloudConnectorId?: string | null;
 }): Promise<void> => {
-  if (!cloudConnectorId) {
+  if (!cloudConnectorId || !policyName) {
     return;
   }
-  const iac = takePendingCloudConnectorIac(policyName);
+  const iac = pendingByPolicyName.get(policyName);
   if (!iac || !hasPendingIacConfirm(iac)) {
     return;
   }
   // Policy save already succeeded; a failed IAC write must not fail the save.
-  await sendUpdateCloudConnector(cloudConnectorId, iac);
+  // Keep the pending payload so a later save can retry.
+  try {
+    const { error } = await sendUpdateCloudConnector(cloudConnectorId, iac);
+    if (error) {
+      return;
+    }
+  } catch {
+    return;
+  }
+  if (pendingByPolicyName.get(policyName) === iac) {
+    pendingByPolicyName.delete(policyName);
+  }
 };

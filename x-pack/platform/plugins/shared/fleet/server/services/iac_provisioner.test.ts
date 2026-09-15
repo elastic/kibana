@@ -13,8 +13,14 @@ import {
   IacProvisionerUnavailableError,
 } from '../errors';
 
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../common/types/rest_spec/iac_provisioner';
+
 import { appContextService } from './app_context';
-import { iacProvisionerService, parseIacProvisionerErrors } from './iac_provisioner';
+import {
+  iacProvisionerService,
+  parseIacProvisionerErrors,
+  type IacProvisionerRenderRequest,
+} from './iac_provisioner';
 
 jest.mock('undici', () => ({
   fetch: jest.fn(),
@@ -40,9 +46,9 @@ const mockedAgent = jest.mocked(Agent);
 
 const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
 
-const RENDER_REQUEST = {
-  provider: 'aws' as const,
-  workflow: 'federated_identity' as const,
+const RENDER_REQUEST: IacProvisionerRenderRequest = {
+  provider: 'aws',
+  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
   integrations: [
     {
       name: 'cloud_security_posture',

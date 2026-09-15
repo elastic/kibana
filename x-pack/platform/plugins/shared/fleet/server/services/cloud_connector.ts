@@ -8,15 +8,16 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
-import type {
-  CloudConnector,
-  CloudConnectorIacState,
-  CloudConnectorListOptions,
-  CloudConnectorSecretReference,
-  AwsCloudConnectorVars,
-  AzureCloudConnectorVars,
-  GcpCloudConnectorVars,
+import {
+  CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
+  isCloudConnectorSecretReference,
+  type CloudConnector,
+  type CloudConnectorIacState,
+  type CloudConnectorListOptions,
+  type CloudConnectorSecretReference,
+  type AwsCloudConnectorVars,
+  type AzureCloudConnectorVars,
+  type GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -53,20 +54,12 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
 
-const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
-  'iac_key',
-  'iac_blueprint_id',
-  'iac_blueprint_version',
-  'iac_deployment_id',
-];
-
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
-  Boolean(iac && IAC_CONFIRM_KEYS.some((key) => iac[key] !== undefined));
+  Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
 
 /**
- * Maps the confirm-time IaC fields of a create/update request onto connector SO attributes.
- * Only the fields the caller supplied are written; a static-template fallback sends
- * `iac_key: null`, which the upgrade check treats like absent.
+ * Maps confirm-time IaC fields onto connector SO attributes.
+ * A static-template fallback sends iac_key: null so no digest is stored.
  */
 export const iacAttributesFromConfirm = (
   iac: CloudConnectorIacState | undefined
@@ -464,8 +457,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
-      // IaC provenance is written only for the fields the caller supplied (the schema rejects
-      // empty strings; null records a static-template fallback).
       Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
       // Update the saved object

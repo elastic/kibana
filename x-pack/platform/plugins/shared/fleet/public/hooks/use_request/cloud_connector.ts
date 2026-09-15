@@ -11,7 +11,6 @@ import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/consta
 
 import { sendRequest } from './use_request';
 
-/** Writes IaC provenance onto a connector; the fields are flat on the update body. */
 export function sendUpdateCloudConnector(cloudConnectorId: string, iac: CloudConnectorIacState) {
   return sendRequest<UpdateCloudConnectorResponse>({
     method: 'put',

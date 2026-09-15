@@ -169,6 +169,9 @@ export const useCloudConnectorTemplate = ({
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
     setTemplateAlreadyCurrent(undefined);
+    // Drop any previous confirm so a failed later launch cannot persist
+    // a checksum from an earlier successful render.
+    setIacConfirm(undefined);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -177,8 +180,10 @@ export const useCloudConnectorTemplate = ({
       });
     };
 
+    // A package with no policy templates cannot contribute to the template, so it is
+    // dropped from a multi-package payload rather than sent to the provisioner.
     const renderIntegrations =
-      integrations ??
+      integrations?.filter((integration) => integration.policyTemplates.length > 0) ??
       (packageName && policyTemplates?.length ? [{ name: packageName, policyTemplates }] : []);
     // With a deployment id the update deep link needs no scaffold; otherwise the static URL
     // must carry templateURL= or String.replace would silently discard the render.
@@ -281,6 +286,7 @@ export const useCloudConnectorTemplate = ({
       navigateTo(launchUrl);
     } catch (e) {
       cloudFormationTab?.close();
+      setIacConfirm(undefined);
       setTemplateGenerationError(TEMPLATE_GENERATION_ERROR);
     } finally {
       setIsGeneratingTemplate(false);

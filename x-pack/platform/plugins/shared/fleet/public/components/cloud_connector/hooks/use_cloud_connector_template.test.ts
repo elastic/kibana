@@ -309,6 +309,24 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeDefined();
     });
 
+    it('does not persist a previous confirm when a later launch throws', async () => {
+      mockedSendRenderIacTemplate
+        .mockResolvedValueOnce(RENDERED as never)
+        .mockRejectedValueOnce(new Error('network down'));
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+      expect(result.current.iacConfirm).toEqual({
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: 'v1',
+      });
+
+      await launch(result);
+      expect(result.current.templateGenerationError).toBeDefined();
+      expect(result.current.iacConfirm).toBeUndefined();
+    });
+
     it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
 
@@ -466,6 +484,53 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(onTemplateRendered).toHaveBeenCalledWith(
           expect.objectContaining({ key: 'sha256:abc', integrations })
+        );
+      });
+
+      it('sends the integrations payload when the caller supplies several packages', async () => {
+        const integrations = [
+          {
+            name: 'aws',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+          },
+          {
+            name: 'aws_securityhub',
+            policyTemplates: [{ name: 'aws_securityhub', enabledInputs: ['aws-s3'] }],
+          },
+        ];
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            packageName: 'ignored',
+            policyTemplates: [{ name: 'unused', enabledInputs: ['input'] }],
+            integrations,
+          })
+        );
+        await launch(result);
+
+        expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
+          provider: 'aws',
+          workflow: 'federated_identity',
+          flow: 'cloud_connector',
+          integrations,
+        });
+      });
+
+      it('drops packages with no policy templates from the integrations payload', async () => {
+        const usable = {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+        };
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            integrations: [usable, { name: 'aws_securityhub', policyTemplates: [] }],
+          })
+        );
+        await launch(result);
+
+        expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({ integrations: [usable] })
         );
       });
 

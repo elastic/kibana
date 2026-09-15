@@ -19,18 +19,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
 import { useIacProvisioner } from '../../../hooks';
-import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
-import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
+import type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+} from '../../../../common/types/rest_spec/iac_provisioner';
+import { CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
+import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import {
-  useCloudConnectorTemplate,
-  type TemplateRendered,
-} from '../hooks/use_cloud_connector_template';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -50,6 +52,8 @@ export interface AwsIdentityFederationSetupProps {
   hasInvalidRequiredVars?: boolean;
   isEditPage?: boolean;
   initialConnectorId?: string;
+  /** Policy templates of `packageName` to render for; ignored when `integrations` is given. */
+  policyTemplates?: IacPolicyTemplateSelection[];
   /**
    * Integrations this identity must cover: one entry per package with the policy templates and
    * input types the user enabled. When given, the New Identity tab renders the template live and
@@ -74,6 +78,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   hasInvalidRequiredVars = false,
   isEditPage = false,
   initialConnectorId,
+  policyTemplates,
   integrations,
   iacCheckSurface,
   onReadyChange,
@@ -92,11 +97,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [selected, setSelected] = useState<{ id: string; name?: string } | undefined>(
     initialConnectorId ? { id: initialConnectorId } : undefined
   );
-  // Provenance of the last rendered template: the key IaCP returned plus the blueprint it came
-  // from. Create stores all of it on the connector.
-  const [renderedIac, setRenderedIac] = useState<
-    Pick<CloudConnectorIacState, 'iac_key' | 'iac_blueprint_id' | 'iac_blueprint_version'>
-  >({});
   const [stackArn, setStackArn] = useState('');
   // IacKeyCheck reports false while the selected identity's deployed template is out of date,
   // and while its first verdict is pending. Readiness therefore starts pessimistic exactly when
@@ -154,35 +154,28 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     onConnectorIdChange?.(selected?.id, selected?.name);
   }, [selected, isCheckValid, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
-  // Fires right before the console opens with the templateSha of the rendered template and its
-  // blueprint; Create stores them as iac_key / iac_blueprint_* so the upgrade check can later
-  // compare the deployed template against what the identity's integrations need
-  // (https://github.com/elastic/ingest-dev/issues/9415).
+  // `iacConfirm` is the provenance of the last launch (key + blueprint from the render, or nulls
+  // after a static-template fallback); Create stores it as iac_key / iac_blueprint_* so the
+  // upgrade check can later compare the deployed template against what the identity's
+  // integrations need (https://github.com/elastic/ingest-dev/issues/9415).
   // No stale-render guard here: see the `integrations` prop contract.
-  const onTemplateRendered = useCallback(
-    ({ key, blueprintId, blueprintVersion }: TemplateRendered) =>
-      setRenderedIac({
-        iac_key: key,
-        iac_blueprint_id: blueprintId,
-        iac_blueprint_version: blueprintVersion,
-      }),
-    []
-  );
-
   const {
     launchButtonProps,
     isDisabled: isLaunchDisabled,
     isGeneratingTemplate,
     templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
   } = useCloudConnectorTemplate({
     provider: 'aws',
     cloud,
     accountType,
     iacTemplateUrl,
+    packageName,
+    policyTemplates,
     // undefined → static template: a plain href with the provisioner off, the hook's
     // missing-context fallback (window.open + fallback telemetry) with it on.
     integrations,
-    onTemplateRendered,
   });
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
@@ -191,7 +184,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       setRoleArn('');
       setConnectorName('');
-      setRenderedIac({});
       setStackArn('');
     }
   );
@@ -204,7 +196,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       vars: {
         role_arn: { value: roleArn, type: 'text' },
       },
-      ...(renderedIac.iac_key ? renderedIac : {}),
+      ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
       ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
     });
   }, [
@@ -212,7 +204,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     connectorName,
     accountType,
     roleArn,
-    renderedIac,
+    iacConfirm,
     trimmedStackArn,
     stackArnInvalid,
   ]);
@@ -275,6 +267,17 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
           />
+          {templateAlreadyCurrent && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnSuccessCallout
+                announceOnMount
+                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
+                title={templateAlreadyCurrent}
+                size="s"
+              />
+            </>
+          )}
           {isIacProvisionerEnabled && (
             <>
               <EuiSpacer size="m" />

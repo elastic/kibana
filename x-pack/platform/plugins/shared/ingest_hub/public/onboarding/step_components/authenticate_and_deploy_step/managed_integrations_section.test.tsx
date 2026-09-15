@@ -88,6 +88,18 @@ function setupMocks({
     setConnectorId,
     setStaticKeys,
     authenticateAndDeployStep: { connectorId, authMethod },
+    awsServicesMap: new Map([
+      [
+        'guardduty',
+        {
+          id: 'guardduty',
+          packageName: 'aws',
+          dataStreams: ['guardduty'],
+          inputs: ['aws-s3', 'httpjson'],
+          identityFederationSupported: true,
+        },
+      ],
+    ]),
   });
 
   MockIdentityFederation.mockImplementation(

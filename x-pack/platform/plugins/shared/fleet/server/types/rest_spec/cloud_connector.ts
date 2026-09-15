@@ -11,16 +11,22 @@ import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants'
 
 import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
-// IaC provenance persisted on the connector after the user confirms the rendered template.
-// Upper bounds prevent unbounded-input DoS: the key is a prefixed sha256 digest, the deployment
-// id an ARN. `null` records a static-template fallback and is treated like absent.
+const IAC_FIELD_AVAILABILITY = {
+  stability: 'experimental' as const,
+  since: '9.6.0',
+};
+
 const IacRequestFieldsSchema = {
   iac_key: schema.maybe(
     schema.nullable(
       schema.string({
         minLength: 1,
         maxLength: 512,
-        meta: { description: 'Opaque IaC template key returned by the IaC Provisioner.' },
+        meta: {
+          description:
+            'Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
       })
     )
   ),
@@ -29,7 +35,11 @@ const IacRequestFieldsSchema = {
       schema.string({
         minLength: 1,
         maxLength: 255,
-        meta: { description: 'IaC Provisioner blueprint id the template was rendered from.' },
+        meta: {
+          description:
+            'Identifier of the template source last used for this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
       })
     )
   ),
@@ -38,7 +48,11 @@ const IacRequestFieldsSchema = {
       schema.string({
         minLength: 1,
         maxLength: 64,
-        meta: { description: 'IaC Provisioner blueprint version the template was rendered from.' },
+        meta: {
+          description:
+            'Version of the template source last used for this connector. Set to null to remove it.',
+          availability: IAC_FIELD_AVAILABILITY,
+        },
       })
     )
   ),
@@ -46,7 +60,30 @@ const IacRequestFieldsSchema = {
     schema.string({
       minLength: 1,
       maxLength: 2048,
-      meta: { description: 'Provider deployment identity (AWS: CloudFormation stack ARN).' },
+      meta: {
+        description: 'Identifier of the last CloudFormation stack deployed for this connector.',
+        availability: IAC_FIELD_AVAILABILITY,
+      },
+    })
+  ),
+};
+
+const IacStoredFieldsSchema = {
+  ...IacRequestFieldsSchema,
+  iac_upgrade_status: schema.maybe(
+    schema.oneOf([schema.literal('up_to_date'), schema.literal('upgrade_available')], {
+      meta: {
+        description: 'Whether a newer CloudFormation template is available for this connector.',
+        availability: IAC_FIELD_AVAILABILITY,
+      },
+    })
+  ),
+  iac_upgrade_checked_at: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'When this connector was last checked for a CloudFormation template upgrade.',
+        availability: IAC_FIELD_AVAILABILITY,
+      },
     })
   ),
 };
@@ -105,15 +142,6 @@ const VerificationFieldsSchema = {
   verification_failed_at: schema.maybe(schema.string()),
 };
 
-const IacResponseFieldsSchema = {
-  iac_key: schema.maybe(schema.nullable(schema.string())),
-  iac_blueprint_id: schema.maybe(schema.nullable(schema.string())),
-  iac_blueprint_version: schema.maybe(schema.nullable(schema.string())),
-  iac_deployment_id: schema.maybe(schema.string()),
-  iac_upgrade_status: schema.maybe(schema.string()),
-  iac_upgrade_checked_at: schema.maybe(schema.string()),
-};
-
 export const CreateCloudConnectorResponseSchema = schema.object({
   item: schema.object({
     id: schema.string(),
@@ -126,7 +154,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
-    ...IacResponseFieldsSchema,
+    ...IacStoredFieldsSchema,
   }),
 });
 
@@ -163,7 +191,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       created_at: schema.string(),
       updated_at: schema.string(),
       ...VerificationFieldsSchema,
-      ...IacResponseFieldsSchema,
+      ...IacStoredFieldsSchema,
     }),
     { maxSize: 10000 }
   ),
@@ -189,7 +217,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
-    ...IacResponseFieldsSchema,
+    ...IacStoredFieldsSchema,
   }),
 });
 
@@ -271,7 +299,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
-    ...IacResponseFieldsSchema,
+    ...IacStoredFieldsSchema,
   }),
 });
 

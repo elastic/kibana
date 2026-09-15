@@ -63,8 +63,8 @@ export interface RenderIacTemplateResponse {
   expiresAt?: string;
   /**
    * Digest of the canonical CloudFormation template. Persist on the
-   * connector at confirmation, then send back as `templateSha` on the
-   * next render.
+   * connector as `iac_key` at confirmation, then send back as `templateSha`
+   * on the next render.
    */
   templateSha: string;
   /**

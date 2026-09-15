@@ -207,7 +207,7 @@ describe('CloudConnectorService', () => {
       expect(result.accountType).toEqual(SINGLE_ACCOUNT);
     });
 
-    it('persists iac_key and blueprint provenance on confirm', async () => {
+    it('persists iac_key and blueprint on confirm', async () => {
       mockSoClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -241,7 +241,7 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('stores a null iac_key when confirm clears the digest', async () => {
+    it('stores no iac_key when confirm clears the digest', async () => {
       mockSoClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,

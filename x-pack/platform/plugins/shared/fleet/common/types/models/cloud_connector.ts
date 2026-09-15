@@ -85,34 +85,26 @@ export type VerificationStatus = 'pending' | 'success' | 'failed';
 
 export type IacUpgradeStatus = 'up_to_date' | 'upgrade_available';
 
+export const CLOUD_CONNECTOR_IAC_REQUEST_KEYS = [
+  'iac_key',
+  'iac_blueprint_id',
+  'iac_blueprint_version',
+  'iac_deployment_id',
+] as const;
+
 /**
- * IaC provenance written by clients on create/update after the user confirms the rendered
- * template. Never written on render. After a static-template fallback, `iac_key` is null,
- * which the upgrade check treats exactly like absent (see
- * https://github.com/elastic/ingest-dev/issues/9415).
+ * IaC provenance written on create/update, then stored on the cloud connector
+ * saved object. Never written on render. After a static-template fallback,
+ * `iac_key` is null.
  */
 export interface CloudConnectorIacState {
-  /** Opaque key from the IaC Provisioner: SHA of the canonicalised rendered template. */
   iac_key?: string | null;
   iac_blueprint_id?: string | null;
   iac_blueprint_version?: string | null;
-  /** Provider-interpreted deployment identity. AWS: the CloudFormation stack ARN. */
   iac_deployment_id?: string;
 }
 
-/**
- * IaC template tracking stored on the connector. All fields are unset on connectors that
- * deployed the static template — absence of `iac_key` is the "upgrade available" signal once
- * IaCP can render.
- */
-export interface CloudConnectorIacFields extends CloudConnectorIacState {
-  /** Set by the periodic IaC upgrade check; absent until it has run for this connector. */
-  iac_upgrade_status?: IacUpgradeStatus;
-  /** ISO timestamp of the last successful IaCP key comparison. */
-  iac_upgrade_checked_at?: string;
-}
-
-export interface CloudConnector extends CloudConnectorIacFields {
+export interface CloudConnector {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
@@ -125,6 +117,12 @@ export interface CloudConnector extends CloudConnectorIacFields {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+  iac_upgrade_status?: IacUpgradeStatus;
+  iac_upgrade_checked_at?: string;
 }
 
 export interface CloudConnectorListOptions {
