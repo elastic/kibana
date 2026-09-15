@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import type { LayerAction, Visualization } from '@kbn/lens-common';
-import { isTextBasedAttributes } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -55,7 +54,6 @@ export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerTabsP
 
 export function LayerTabs({
   activeVisualization,
-  attributes,
   coreStart,
   framePublicAPI,
   uiActions,
@@ -66,10 +64,6 @@ export function LayerTabs({
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
-
-  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() || isTextBasedAttributes(attributes) || false;
 
   const dispatchLens = useLensDispatch();
 
@@ -190,7 +184,6 @@ export function LayerTabs({
               layerConfig.layerId,
               layerIds.length
             ) === 'clear',
-          isTextBasedLanguage,
           onCloneLayer: () => {
             dispatchLens(
               cloneLayer({
@@ -223,7 +216,6 @@ export function LayerTabs({
     coreStart,
     dispatchLens,
     isSaveable,
-    isTextBasedLanguage,
     layerIds.length,
     getLayerTabsLabel,
     onRemoveLayer,

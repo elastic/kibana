@@ -322,6 +322,7 @@ export function generateEsqlQuery(
 
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
+  const usedBucketAliases = new Set<string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
       if (bucketEsAggsEntries.length !== 1) {
@@ -405,7 +406,20 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const esAggsId = rawResult.template;
+    // Use source field name as alias for bucket expressions containing named params
+    // to ensure stable column names in ES|QL results (params get resolved to literal values)
+    const needsAlias =
+      rawResult.template.includes('?_tstart') || rawResult.template.includes('?_tend');
+    let bucketAlias = needsAlias && 'sourceField' in col ? col.sourceField : undefined;
+    // Guard against alias collisions (two buckets on the same source field would
+    // otherwise silently shadow each other in the STATS output and esAggsIdMap)
+    if (bucketAlias && usedBucketAliases.has(bucketAlias)) {
+      bucketAlias = `${bucketAlias}_${colId}`;
+    }
+    if (bucketAlias) {
+      usedBucketAliases.add(bucketAlias);
+    }
+    const esAggsId = bucketAlias ?? rawResult.template;
     resolvedBucketExprs.set(index, esAggsId);
 
     const format =
@@ -455,7 +469,16 @@ export function generateEsqlQuery(
 
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
-      const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
+      // Alias bucket expressions that use named params so column names are stable.
+      // `esql.col()` escapes alias names that are not valid bare identifiers
+      // (e.g. `my-field` -> `` `my-field` ``), matching the raw column name in results.
+      const aliasedBuckets = bucketEsAggsEntries.map(([, col], index) => {
+        const expr = validBuckets[index];
+        const resolvedId = resolvedBucketExprs.get(index);
+        // If the esAggsId differs from the expression, it means we assigned an alias
+        return resolvedId && resolvedId !== expr ? `${esql.col(resolvedId)} = ${expr}` : expr;
+      });
+      const statsBody = `${validMetrics.join(', ')} BY ${aliasedBuckets.join(', ')}`;
       queryParts.push(`STATS ${statsBody}`);
     }
 

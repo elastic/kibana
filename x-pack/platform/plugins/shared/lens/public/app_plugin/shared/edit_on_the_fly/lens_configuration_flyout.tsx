@@ -46,6 +46,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { getVisibleLayerIds } from '../../../editor_frame_service/editor_frame/config_panel/get_visible_layer_ids';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
@@ -238,7 +239,6 @@ export function LensEditConfigurationFlyout({
 
   const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
     useCurrentAttributes({
-      textBasedMode,
       initialAttributes: attributes,
     });
 
@@ -393,6 +393,23 @@ export function LensEditConfigurationFlyout({
       ? activeVisualization.getLayerIds(visualization.state)
       : [];
   }, [activeVisualization, visualization.state]);
+
+  // Suggestions are single-layer: applying one would silently drop the other
+  // layers (e.g. annotations, reference lines), so hide the panel for
+  // multi-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
+  // metric trendline) do not render as tabs and must not count here.
+  const visibleLayerCount = useMemo(() => {
+    if (!activeVisualization || !visualization.state) {
+      return 0;
+    }
+    return getVisibleLayerIds({
+      activeVisualization,
+      visualizationState: visualization.state,
+      framePublicAPI,
+      layerIds,
+    }).length;
+  }, [activeVisualization, framePublicAPI, layerIds, visualization.state]);
+  const hideSuggestionsForMultiLayerEsql = textBasedMode && visibleLayerCount > 1;
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
@@ -656,38 +673,40 @@ export function LensEditConfigurationFlyout({
               </EuiAccordion>
             </EuiFlexItem>
 
-            <EuiFlexItem
-              grow={isSuggestionsAccordionOpen ? 1 : false}
-              data-test-subj="InlineEditingSuggestions"
-              css={css`
-                border-top: ${euiTheme.euiTheme.border.thin};
-                border-bottom: ${euiTheme.euiTheme.border.thin};
-                padding-left: ${euiTheme.euiTheme.size.base};
-                padding-right: ${euiTheme.euiTheme.size.base};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
-                }
-              `}
-            >
-              <SuggestionPanel
-                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-                frame={framePublicAPI}
-                core={coreStart}
-                nowProvider={startDependencies.data.nowProvider}
-                showOnlyIcons
-                wrapSuggestions
-                isAccordionOpen={isSuggestionsAccordionOpen}
-                toggleAccordionCb={(status) => {
-                  if (!status && isLayerAccordionOpen) {
-                    setIsLayerAccordionOpen(status);
+            {!hideSuggestionsForMultiLayerEsql && (
+              <EuiFlexItem
+                grow={isSuggestionsAccordionOpen ? 1 : false}
+                data-test-subj="InlineEditingSuggestions"
+                css={css`
+                  border-top: ${euiTheme.euiTheme.border.thin};
+                  border-bottom: ${euiTheme.euiTheme.border.thin};
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-right: ${euiTheme.euiTheme.size.base};
+                  .euiAccordion__childWrapper {
+                    flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
                   }
-                  if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
-                  }
-                  setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
-                }}
-              />
-            </EuiFlexItem>
+                `}
+              >
+                <SuggestionPanel
+                  ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                  frame={framePublicAPI}
+                  core={coreStart}
+                  nowProvider={startDependencies.data.nowProvider}
+                  showOnlyIcons
+                  wrapSuggestions
+                  isAccordionOpen={isSuggestionsAccordionOpen}
+                  toggleAccordionCb={(status) => {
+                    if (!status && isLayerAccordionOpen) {
+                      setIsLayerAccordionOpen(status);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(!status);
+                    }
+                    setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+                  }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal
