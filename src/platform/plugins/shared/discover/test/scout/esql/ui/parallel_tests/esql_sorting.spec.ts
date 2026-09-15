@@ -28,53 +28,60 @@ spaceTest.describe('Discover ES|QL sorting', { tag: tags.deploymentAgnostic }, (
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('sorts a column in both directions', async ({ page, pageObjects }) => {
+  spaceTest('sorts ES|QL results', async ({ page, pageObjects }) => {
     const { discover, dataGrid, unifiedFieldList } = pageObjects;
     const sortButton = page.testSubj.locator('dataGridColumnSortingButton');
 
-    await discover.writeAndSubmitEsqlQuery(SORT_QUERY);
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
-    await unifiedFieldList.clickFieldListItemAdd('bytes');
+    await spaceTest.step('sorts a column in both directions', async () => {
+      await discover.writeAndSubmitEsqlQuery(SORT_QUERY);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
 
-    await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('1,623');
-    await expect(sortButton).toHaveText('Sort fields');
+      await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('1,623');
+      await expect(sortButton).toHaveText('Sort fields');
 
-    await dataGrid.sortColumn('bytes', 'Sort High-Low');
-    await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('17,966');
-    await expect(sortButton).toHaveText('Sort fields1');
+      await dataGrid.sortColumn('bytes', 'Sort High-Low');
+      await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('17,966');
+      await expect(sortButton).toHaveText('Sort fields1');
 
-    await dataGrid.sortColumn('bytes', 'Sort Low-High');
-    await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('0');
-    await expect(sortButton).toHaveText('Sort fields1');
-  });
+      await dataGrid.sortColumn('bytes', 'Sort Low-High');
+      await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('0');
+      await expect(sortButton).toHaveText('Sort fields1');
+    });
 
-  spaceTest('sorts on a computed column', async ({ pageObjects }) => {
-    const { discover, dataGrid } = pageObjects;
+    await spaceTest.step('sorts on a computed column', async () => {
+      // Steps share one browser context, so start from a new search: the ascending
+      // `bytes` sort the previous step leaves behind survives the query change and puts
+      // `bytes: 0` first, making `var0` read 1 rather than the query order's 1,624.
+      await discover.clickNewSearch();
+      await discover.waitUntilTabIsLoaded();
 
-    await discover.writeAndSubmitEsqlQuery(COMPUTED_COLUMN_QUERY);
+      await discover.writeAndSubmitEsqlQuery(COMPUTED_COLUMN_QUERY);
 
-    await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('1,624');
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('1,624');
 
-    await dataGrid.sortColumn('var0', 'Sort High-Low');
-    await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('17,967');
+      await dataGrid.sortColumn('var0', 'Sort High-Low');
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('17,967');
 
-    await dataGrid.sortColumn('var0', 'Sort Low-High');
-    await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('1');
-  });
+      await dataGrid.sortColumn('var0', 'Sort Low-High');
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('1');
+    });
 
-  spaceTest('sorts on multiple columns', async ({ page, pageObjects }) => {
-    const { discover, dataGrid, unifiedFieldList } = pageObjects;
+    await spaceTest.step('sorts on multiple columns', async () => {
+      await discover.clickNewSearch();
+      await discover.waitUntilTabIsLoaded();
 
-    await discover.writeAndSubmitEsqlQuery(SORT_QUERY);
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
-    await unifiedFieldList.clickFieldListItemAdd('bytes');
-    await unifiedFieldList.clickFieldListItemAdd('extension');
+      await discover.writeAndSubmitEsqlQuery(SORT_QUERY);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
 
-    await dataGrid.sortColumn('bytes', 'Sort Low-High');
-    await dataGrid.sortColumn('extension', 'Sort A-Z');
+      await dataGrid.sortColumn('bytes', 'Sort Low-High');
+      await dataGrid.sortColumn('extension', 'Sort A-Z');
 
-    await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('0');
-    await expect(dataGrid.getCellValue(0, 'extension')).toHaveText('css');
-    await expect(page.testSubj.locator('dataGridColumnSortingButton')).toHaveText('Sort fields2');
+      await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('0');
+      await expect(dataGrid.getCellValue(0, 'extension')).toHaveText('css');
+      await expect(sortButton).toHaveText('Sort fields2');
+    });
   });
 });
