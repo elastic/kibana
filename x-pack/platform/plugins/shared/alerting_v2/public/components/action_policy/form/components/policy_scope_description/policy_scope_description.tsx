@@ -15,8 +15,8 @@ interface PolicyScopeDescriptionProps {
 }
 
 const getScopeCardText = (matcher: PolicyMatcher | null): string => {
-  const hasTags = !!(matcher?.tags?.length);
-  const hasExpression = !!(matcher?.expression?.trim());
+  const hasTags = !!matcher?.tags?.length;
+  const hasExpression = !!matcher?.expression?.trim();
 
   if (hasTags && hasExpression) {
     return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.card.tagsAndExpression', {

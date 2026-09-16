@@ -85,9 +85,7 @@ describe('RuleTagsSelector', () => {
 
   it('calls onChange with null tags when all tags are cleared', async () => {
     const onChange = jest.fn();
-    renderWithI18n(
-      <RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />
-    );
+    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     const clearButton = screen.getByLabelText('Clear input');
     await user.click(clearButton);
@@ -96,9 +94,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('shows pre-existing orphaned tags from matcher as selected pills', () => {
-    renderWithI18n(
-      <RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />
-    );
+    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />);
 
     const combobox = screen.getByTestId('ruleTagsSelector');
     expect(within(combobox).getByText('legacy-tag')).toBeInTheDocument();

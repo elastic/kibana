@@ -41,7 +41,7 @@ export const AdvancedMatchingAccordion = ({
           )}
         </strong>
       }
-      initialIsOpen={!!(matcher?.expression?.trim())}
+      initialIsOpen={!!matcher?.expression?.trim()}
       paddingSize="s"
     >
       <EuiFormRow

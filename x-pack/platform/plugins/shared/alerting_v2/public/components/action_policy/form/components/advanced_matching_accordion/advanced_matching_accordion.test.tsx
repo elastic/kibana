@@ -87,15 +87,11 @@ describe('AdvancedMatchingAccordion', () => {
   it('calls onChange with expression: null when input is cleared', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
-    renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: 'x' }} onChange={onChange} />
-    );
+    renderWithI18n(<AdvancedMatchingAccordion matcher={{ expression: 'x' }} onChange={onChange} />);
 
     await user.clear(screen.getByTestId('matcherInput'));
 
-    expect(onChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ expression: null })
-    );
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ expression: null }));
   });
 
   it('expands accordion when button is clicked', async () => {

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiComboBox,
-  type EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow, EuiText } from '@elastic/eui';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -104,25 +99,17 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
         />
         {!isLoading && apiTags.length === 0 && selectedTags.length === 0 && (
           <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
-            {i18n.translate(
-              'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState',
-              {
-                defaultMessage:
-                  'No rule tags in this space yet. Add a tag to scope this policy.',
-              }
-            )}
+            {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
+              defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',
+            })}
           </EuiText>
         )}
         {showCapGuidance && (
           <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorCapGuidance">
-            {i18n.translate(
-              'xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance',
-              {
-                defaultMessage:
-                  'Showing first {cap} most-used tags. Type to search for more.',
-                values: { cap: TAGS_RESPONSE_LIMIT },
-              }
-            )}
+            {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.capGuidance', {
+              defaultMessage: 'Showing first {cap} most-used tags. Type to search for more.',
+              values: { cap: TAGS_RESPONSE_LIMIT },
+            })}
           </EuiText>
         )}
       </>
