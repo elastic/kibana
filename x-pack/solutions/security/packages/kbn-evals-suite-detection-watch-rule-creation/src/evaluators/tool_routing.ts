@@ -15,8 +15,8 @@ const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
 /**
  * Only calls the LLM actually issued carry a tool.call.id; a tool's internal helper spans
  * (e.g. the inner search tools in agent-builder-genai-utils, which call withExecuteToolSpan
- * without a toolCallId) are TOOL-kind but carry none. The trace-based evaluators all filter
- * on this, so the setup reachability probe MUST filter on it too — asserting only the weaker
+ * without a toolCallId) are TOOL-kind but carry none. The trace-based evaluators filter on
+ * this, so the setup reachability probe MUST filter on it too — asserting only the weaker
  * TOOL-kind property lets a stack that exports nothing but inner-tool spans pass setup and
  * then score N/A on every example, which is the exact false pass the probe exists to stop.
  */

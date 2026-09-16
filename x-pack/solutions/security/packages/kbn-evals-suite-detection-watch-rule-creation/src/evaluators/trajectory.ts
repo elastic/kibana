@@ -41,7 +41,7 @@ const fetchToolCalls = async (
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
     // Only calls the LLM issued carry a tool.call.id; tools' internal helper spans do not.
-    // Shared with the setup reachability probe so the two cannot drift apart.
+    // Shared with the setup reachability probe so the two cannot drift apart again.
     query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
   })) as unknown as EsqlResponse;
 
@@ -62,7 +62,7 @@ const fetchToolCalls = async (
 };
 
 /**
- * Agent Builder exports spans in batches (5s delay by default), so a run's spans can still be
+ * Agent Builder exports spans in batches (1s in dev, 5s in prod), so a run's spans can still be
  * arriving when the workflow returns. Polls until two consecutive reads agree.
  */
 export const createTrajectoryFetcher = ({
@@ -159,30 +159,19 @@ const trajectoryEvaluator = (
         metadata: undefined,
       };
     }
-    const { score, explanation, metadata } = scoreFn(trajectory);
-    // An unsettled span set is a TRUNCATED trajectory, not a short one: the calls it is
-    // missing are the ones still in flight. Scoring it anyway corrupts the run mean in
-    // both directions — Call Count passes spuriously because the calls that would have
-    // breached the bound were never read, and Call Order fails "never drafted" against a
-    // run that did draft. Report it as unmeasured (it lands in naCount, where the run
-    // summary already states resolution limits) and keep the observed score in metadata
-    // for debugging rather than in the average.
     if (!trajectory.settled) {
       return {
         score: null,
         label: 'potentially_incomplete',
-        explanation:
-          `${explanation} (joined on ${trajectory.joinedOn}) — span set never settled, ` +
-          'so this trajectory is truncated and is NOT scored',
+        explanation: `Span set never settled (joined on ${trajectory.joinedOn})`,
         metadata: {
-          ...metadata,
+          incomplete: true,
           toolNames: trajectory.toolNames,
           agentTraceId: trajectory.agentTraceId,
-          incomplete: true,
-          unscoredObservedScore: score,
         },
       };
     }
+    const { score, explanation, metadata } = scoreFn(trajectory);
     return {
       score,
       label: undefined,
@@ -216,7 +205,9 @@ export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
   // After drafting, only previewing, redrafting, and Agent Builder's own tools (attachment
   // reads/renders) are expected; anything else is research the skill says comes before.
   const expectedAfterDraft = (name: string) =>
-    name === RULE_CREATION_TOOL_ID || name === RULE_PREVIEW_TOOL_ID || isInternalTool(name);
+    name === RULE_CREATION_TOOL_ID ||
+    name === RULE_PREVIEW_TOOL_ID ||
+    (isInternalTool(name) && name !== internalTools.loadSkill);
   const exploredAfterDraft =
     firstDraft === -1 ? [] : toolNames.slice(firstDraft + 1).filter((n) => !expectedAfterDraft(n));
 

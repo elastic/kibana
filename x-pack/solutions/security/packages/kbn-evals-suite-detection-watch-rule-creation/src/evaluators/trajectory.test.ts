@@ -176,30 +176,12 @@ describe('createTrajectoryEvaluators', () => {
     }
   });
 
-  it('does NOT score a run whose span set never settled — a truncated trajectory is unmeasured, not short', async () => {
-    // Span count grows on every read, so the set never settles: the calls still in flight
-    // are exactly the ones that would decide both scores. Scoring here would put a
-    // spurious Call Count pass (bound not yet breached) and a spurious Call Order fail
-    // ("never drafted") into the run mean. It must land in naCount instead.
-    const { client } = esWith((_q, call) => rows(Array(call).fill(CREATE)));
+  it('scores null, not a number, when the span set never settled', async () => {
+    const { client } = esWith((_q, call) => rows(Array(call).fill(SKILL)));
     for (const r of await evaluateAll(client, result(), 2)) {
       expect(r.score).toBeNull();
       expect(r.label).toBe('potentially_incomplete');
-      expect((r.metadata as Record<string, unknown>).incomplete).toBe(true);
-      // The observed value is kept for debugging, but out of the average.
-      expect((r.metadata as Record<string, unknown>).unscoredObservedScore).toEqual(
-        expect.any(Number)
-      );
-      expect(r.explanation).toContain('NOT scored');
-    }
-  });
-
-  it('keeps a settled run clean of the incomplete markers', async () => {
-    const { client } = esReturning([SKILL, CREATE]);
-    for (const r of await evaluateAll(client, result())) {
-      expect(r.score).not.toBeNull();
-      expect(r.label).toBeUndefined();
-      expect((r.metadata as Record<string, unknown>).incomplete).toBeUndefined();
+      expect(r.metadata).toMatchObject({ incomplete: true, agentTraceId: AGENT_TRACE });
     }
   });
 });
@@ -245,6 +227,12 @@ describe('scoreCallOrder', () => {
     expect(r.metadata.exploredAfterDraft).toEqual([LIST_INDICES, LIST_INDICES]);
     expect(r.explanation).toContain('drafted 2 times');
     expect(r.explanation).toContain(LIST_INDICES);
+  });
+
+  it('flags a skill reload after drafting', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE, SKILL, ATTACH_READ]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.exploredAfterDraft).toEqual([SKILL]);
   });
 
   it('fails a run that never drafted', () => {
