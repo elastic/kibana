@@ -13,6 +13,7 @@ import { EXAMPLE_NOTE_EVENT_TYPE } from '../../../common/constants';
 export const exampleNoteEventType: ConversationEventTypeDefinition = {
   type: EXAMPLE_NOTE_EVENT_TYPE,
   payloadSchema: z.object({
+    title: z.string().min(1).max(256).optional(),
     text: z.string().min(1).max(1000),
   }),
 };
