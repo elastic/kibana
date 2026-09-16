@@ -11,6 +11,7 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools'
 import {
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import instructions from './instructions/deductive_investigator.md.text';
@@ -71,11 +72,19 @@ export const getDeductiveInvestigationAgentType = ({
     ],
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    // Cortex hydrate runs as the beforeAgent hook and writes into /workspace, so it needs both
-    // the sandbox and Cortex; without the sandbox the step would throw on every round.
-    ...(sandboxEnabled && cortexEnabled
-      ? { workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] }
-      : {}),
+    // beforeAgent hooks write into /workspace, so each needs the sandbox: Cortex hydrate refreshes
+    // the wiki, and decision-tree hydrate drops the prior trees (and their monitors.md index) in so
+    // the investigator can read a matching tree at the start of the run. Without the sandbox either
+    // step would throw on every round, so both are gated on it.
+    ...(() => {
+      const beforeAgentWorkflowIds = [
+        ...(sandboxEnabled && cortexEnabled ? [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] : []),
+        ...(sandboxEnabled && decisionTreesEnabled
+          ? [NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]
+          : []),
+      ];
+      return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
+    })(),
     ...(cortexEnabled || decisionTreesEnabled
       ? {
           post_execution_workflow_ids: [

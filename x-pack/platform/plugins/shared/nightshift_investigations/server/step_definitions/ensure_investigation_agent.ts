@@ -12,13 +12,16 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import { installDecisionTreeReinforcementAgent } from '../lib/install_decision_tree_reinforcement_agent';
 
 /** Which agent a workflow wants installed. Defaults to the significant-events investigator. */
 const AGENT_INSTALLERS = {
   [SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID]: installInvestigationAgent,
   [NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID]: installDeductiveInvestigationAgent,
+  [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID]: installDecisionTreeReinforcementAgent,
 } as const;
 
 /**
@@ -44,6 +47,7 @@ export const ensureInvestigationAgentStepDefinition = (
         .enum([
           SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
           NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
+          NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         ])
         .optional()
         .describe(

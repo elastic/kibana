@@ -20,7 +20,10 @@ const tree = (overrides: Partial<DecisionTreeSummary> = {}): DecisionTreeSummary
   symptom: 'checkout-high-latency',
   title: 'Checkout High Latency',
   status: 'tentative',
-  corroborations: 0,
+  version: 1,
+  node_count: 5,
+  edge_count: 4,
+  learning_count: 0,
   updated_at: '2026-09-09T12:00:00.000Z',
   ...overrides,
 });
@@ -44,12 +47,12 @@ describe('deriveCausalConfirmed', () => {
 });
 
 describe('deriveTurnKind', () => {
-  it('treats a tree nobody has reinforced yet as an initial investigation', () => {
-    expect(deriveTurnKind([tree({ corroborations: 0 })])).toBe('initial_investigation');
+  it('treats a tree still on its first version as an initial investigation', () => {
+    expect(deriveTurnKind([tree({ version: 1 })])).toBe('initial_investigation');
   });
 
-  it('treats a visited tree as a follow-up', () => {
-    expect(deriveTurnKind([tree({ corroborations: 2 })])).toBe('feedback_reinforcement');
+  it('treats a revised tree as a follow-up', () => {
+    expect(deriveTurnKind([tree({ version: 2 })])).toBe('feedback_reinforcement');
   });
 
   it('treats no trees at all as an initial investigation', () => {
@@ -81,10 +84,10 @@ describe('buildReinforcementPrompt', () => {
     );
   });
 
-  it('asks for reinforcement once a visited tree has a confirmed root cause', () => {
+  it('asks for reinforcement once a revised tree has a confirmed root cause', () => {
     const message = buildReinforcementPrompt({
       ...base,
-      trees: [tree({ corroborations: 3 })],
+      trees: [tree({ version: 3 })],
       response: '{"hypotheses":[{"status":"confirmed"}]}',
     });
 
@@ -92,7 +95,7 @@ describe('buildReinforcementPrompt', () => {
   });
 
   it('asks for an extension on a follow-up with no confirmed root cause', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [tree({ corroborations: 3 })] });
+    const message = buildReinforcementPrompt({ ...base, trees: [tree({ version: 3 })] });
 
     expect(message).toContain(SCRIPT_FOLLOWUP_EXTEND);
   });

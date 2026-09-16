@@ -64,6 +64,39 @@ describe('deductive investigation agent type', () => {
     expect(base.instructions).not.toContain('platform_core_execute_esql');
   });
 
+  it('adds the decision-tree hydrate hook and documents the index when decision trees are enabled', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-cortex-hydrate',
+      'system-nightshift-decision-tree-hydrate',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-cortex-optimize',
+      'system-nightshift-decision-tree-reinforce',
+    ]);
+    // The investigator is told where to read prior trees from its workspace.
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('drops the decision-tree hydrate hook when the sandbox is not configured', () => {
+    const base = staticBase(
+      getDeductiveInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toBeUndefined();
+  });
+
   it('drops both cortex workflows when cortex is disabled', () => {
     const base = staticBase(
       getDeductiveInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })

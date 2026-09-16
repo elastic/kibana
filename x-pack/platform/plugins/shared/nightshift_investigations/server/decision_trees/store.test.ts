@@ -6,201 +6,302 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { CortexPage } from '../../common/cortex';
-import type { CortexPageStore } from '../cortex/page_store';
-import { createDecisionTreeStore, cortexSlugForSymptom, symptomFromCortexSlug } from './store';
+import { parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
+import type { LearningRecord } from '@kbn/nightshift-decision-trees';
+import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
+import { createDecisionTreeStore } from './store';
 
-const MARKDOWN = `# Checkout high latency
+const MERMAID = `flowchart TD
+    S1([Checkout latency]) --> E1[Query logs]
+    E1 --> D1{{Pool exhausted?}}
+    D1 -->|yes| X1((Connection leak))
+    D1 -->|no| X2((Slow query))`;
 
-\`\`\`mermaid
-flowchart TD
-    S1([Checkout latency]) -->|✅| E1[Query logs]
-    E1 --> X1((Pool exhausted))
-\`\`\`
-`;
+const MARKDOWN = `# Checkout high latency\n\n\`\`\`mermaid\n${MERMAID}\n\`\`\`\n`;
 
-const page = (overrides: Partial<CortexPage> = {}): CortexPage => ({
-  id: 'cortex_runbook_decision-tree-checkout-high-latency',
-  title: 'Checkout High Latency',
-  entity_type: 'runbook',
-  status: 'tentative',
-  corroborations: 1,
-  updated_at: '2026-09-09T12:00:00.000Z',
-  slug: 'decision-tree-checkout-high-latency',
-  content: MARKDOWN,
-  ...overrides,
+const TREE = parseMermaidDecisionTree(MERMAID, 'symptom:checkout-high-latency');
+
+const learning: LearningRecord = {
+  kind: 'remediation',
+  content: 'Raise the pool size.',
+  keywords: [],
+};
+
+const createEsClient = () => ({
+  indices: {
+    exists: jest.fn().mockResolvedValue(true),
+    create: jest.fn().mockResolvedValue({}),
+  },
+  get: jest.fn().mockResolvedValue({ found: false }),
+  search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+  index: jest.fn().mockResolvedValue({}),
 });
 
-const createPageStore = (overrides: Partial<CortexPageStore> = {}): jest.Mocked<CortexPageStore> =>
-  ({
-    list: jest.fn().mockResolvedValue({ pages: [], stats: { total: 0 } }),
-    get: jest.fn().mockResolvedValue(undefined),
-    upsert: jest.fn().mockImplementation(async (input) => page({ content: input.content })),
-    corroborate: jest.fn().mockResolvedValue(page()),
-    archive: jest.fn().mockResolvedValue(page()),
-    pruneDuplicates: jest.fn().mockResolvedValue(0),
-    ...overrides,
-  } as jest.Mocked<CortexPageStore>);
+const createStore = (esClient: ReturnType<typeof createEsClient>) =>
+  createDecisionTreeStore({ esClient: esClient as never, logger: loggerMock.create() });
 
-const createStore = (pageStore: CortexPageStore) =>
-  createDecisionTreeStore({ pageStore, logger: loggerMock.create() });
+describe('commit', () => {
+  it('creates version 1 and a head for a new tree', async () => {
+    const esClient = createEsClient();
 
-describe('slug mapping', () => {
-  it('round-trips a symptom through the cortex slug', () => {
-    expect(symptomFromCortexSlug(cortexSlugForSymptom('checkout-high-latency'))).toBe(
-      'checkout-high-latency'
-    );
+    const detail = await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: 'Initial tree.',
+      learnings: [learning],
+    });
+
+    expect(detail.version).toBe(1);
+    expect(detail.status).toBe('tentative');
+    expect(detail.node_count).toBe(TREE.nodes.length);
+    expect(detail.learnings).toEqual([learning]);
+
+    const [versionCall, headCall] = esClient.index.mock.calls;
+    expect(versionCall[0]).toMatchObject({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      id: 'dtree_checkout-high-latency_v1',
+      document: expect.objectContaining({
+        type: 'decision_tree_version',
+        version: 1,
+        author: 'jdoe',
+        summary: 'Initial tree.',
+        snapshot: MARKDOWN,
+        learnings: [learning],
+      }),
+    });
+    expect(headCall[0]).toMatchObject({
+      index: DECISION_TREE_AI_INDEX_DEST,
+      id: 'dtree_checkout-high-latency',
+      document: expect.objectContaining({ type: 'decision_tree', version: 1, content: MARKDOWN }),
+    });
   });
 
-  it('accepts a full tree id', () => {
-    expect(cortexSlugForSymptom('symptom:checkout-high-latency')).toBe(
-      'decision-tree-checkout-high-latency'
-    );
+  it('increments the version from the existing head', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue({
+      found: true,
+      _source: {
+        '@timestamp': '2026-09-09T12:00:00.000Z',
+        type: 'decision_tree',
+        title: 'Checkout High Latency',
+        content: MARKDOWN,
+        tags: ['nightshift', 'decision-tree'],
+        tree_id: 'symptom:checkout-high-latency',
+        symptom: 'checkout-high-latency',
+        version: 2,
+        status: 'tentative',
+        node_count: 5,
+        edge_count: 4,
+        learnings: [],
+      },
+    });
+
+    const detail = await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: true,
+      author: 'jdoe',
+      summary: 'Reinforced.',
+      learnings: [],
+    });
+
+    expect(detail.version).toBe(3);
+    // A confirmed causal path promotes the tree to established.
+    expect(detail.status).toBe('established');
+    expect(esClient.index.mock.calls[0][0].id).toBe('dtree_checkout-high-latency_v3');
   });
 
-  it('leaves a non-decision-tree slug alone', () => {
-    expect(symptomFromCortexSlug('checkout-service')).toBe('checkout-service');
+  it('merges learnings single-slot into the head', async () => {
+    const esClient = createEsClient();
+    const existingLearning: LearningRecord = {
+      kind: 'system',
+      category: 'dependency',
+      content: 'Old fact.',
+      keywords: [],
+    };
+    esClient.get.mockResolvedValue({
+      found: true,
+      _source: {
+        '@timestamp': '2026-09-09T12:00:00.000Z',
+        type: 'decision_tree',
+        title: 'Checkout High Latency',
+        content: MARKDOWN,
+        tags: ['nightshift', 'decision-tree'],
+        tree_id: 'symptom:checkout-high-latency',
+        symptom: 'checkout-high-latency',
+        version: 1,
+        status: 'tentative',
+        node_count: 5,
+        edge_count: 4,
+        learnings: [existingLearning],
+      },
+    });
+
+    const updatedSystem: LearningRecord = {
+      kind: 'system',
+      category: 'dependency',
+      content: 'New fact.',
+      keywords: [],
+    };
+
+    const detail = await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: '',
+      learnings: [updatedSystem, learning],
+    });
+
+    // The dependency slot is replaced, the remediation slot is added: two learnings, not three.
+    expect(detail.learnings).toEqual([updatedSystem, learning]);
   });
 });
 
 describe('list', () => {
-  it('returns only runbook pages carrying the decision-tree prefix', async () => {
-    const pageStore = createPageStore({
-      list: jest.fn().mockResolvedValue({
-        pages: [
-          page(),
-          page({
-            id: 'cortex_runbook_oncall-escalation',
-            slug: 'oncall-escalation',
-            title: 'Oncall Escalation',
-          }),
+  it('maps head hits to summaries', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              '@timestamp': '2026-09-09T12:00:00.000Z',
+              type: 'decision_tree',
+              title: 'Checkout High Latency',
+              content: MARKDOWN,
+              tags: ['nightshift', 'decision-tree'],
+              tree_id: 'symptom:checkout-high-latency',
+              symptom: 'checkout-high-latency',
+              version: 2,
+              status: 'established',
+              node_count: 5,
+              edge_count: 4,
+              learnings: [learning],
+            },
+          },
         ],
-        stats: { total: 2 },
-      }),
+      },
     });
 
-    const trees = await createStore(pageStore).list();
+    const trees = await createStore(esClient).list();
 
-    expect(pageStore.list).toHaveBeenCalledWith({ entityType: 'runbook' });
     expect(trees).toEqual([
       expect.objectContaining({
         tree_id: 'symptom:checkout-high-latency',
         symptom: 'checkout-high-latency',
-        title: 'Checkout High Latency',
-        status: 'tentative',
-        corroborations: 1,
+        version: 2,
+        status: 'established',
+        learning_count: 1,
       }),
     ]);
   });
 });
 
 describe('get', () => {
-  it('reads the page by its derived cortex id and extracts the mermaid', async () => {
-    const pageStore = createPageStore({ get: jest.fn().mockResolvedValue(page()) });
+  it('extracts the mermaid from the head content', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue({
+      found: true,
+      _source: {
+        '@timestamp': '2026-09-09T12:00:00.000Z',
+        type: 'decision_tree',
+        title: 'Checkout High Latency',
+        content: MARKDOWN,
+        tags: [],
+        tree_id: 'symptom:checkout-high-latency',
+        symptom: 'checkout-high-latency',
+        version: 1,
+        status: 'tentative',
+        node_count: 5,
+        edge_count: 4,
+        learnings: [],
+      },
+    });
 
-    const tree = await createStore(pageStore).get('symptom:checkout-high-latency');
+    const tree = await createStore(esClient).get('symptom:checkout-high-latency');
 
-    expect(pageStore.get).toHaveBeenCalledWith(
-      'cortex_runbook_decision-tree-checkout-high-latency'
+    expect(esClient.get).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dtree_checkout-high-latency' })
     );
     expect(tree?.markdown).toBe(MARKDOWN);
     expect(tree?.mermaid).toContain('flowchart TD');
   });
 
-  it('returns undefined when no page exists', async () => {
-    expect(await createStore(createPageStore()).get('symptom:missing-tree')).toBeUndefined();
-  });
-
-  it('returns an empty mermaid rather than throwing on a corrupt stored page', async () => {
-    const pageStore = createPageStore({
-      get: jest.fn().mockResolvedValue(page({ content: 'no diagram here' })),
-    });
-
-    const tree = await createStore(pageStore).get('symptom:checkout-high-latency');
-
-    expect(tree?.mermaid).toBe('');
-    expect(tree?.markdown).toBe('no diagram here');
+  it('returns undefined when the head is missing', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue({ found: false });
+    expect(await createStore(esClient).get('symptom:missing-tree')).toBeUndefined();
   });
 });
 
-describe('upsert', () => {
-  it('writes the markdown under the prefixed runbook slug', async () => {
-    const pageStore = createPageStore();
-
-    await createStore(pageStore).upsert({
-      treeId: 'symptom:checkout-high-latency',
-      markdown: MARKDOWN,
+describe('getVersion', () => {
+  it('reads a version snapshot by its derived id', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue({
+      found: true,
+      _source: {
+        '@timestamp': '2026-09-09T12:00:00.000Z',
+        type: 'decision_tree_version',
+        title: 'Checkout High Latency v2',
+        tags: [],
+        tree_id: 'symptom:checkout-high-latency',
+        symptom: 'checkout-high-latency',
+        version: 2,
+        snapshot: MARKDOWN,
+        author: 'jdoe',
+        summary: 'Reinforced.',
+        reinforced: true,
+        node_count: 5,
+        edge_count: 4,
+        learnings: [],
+      },
     });
 
-    expect(pageStore.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'runbook',
-        slug: 'decision-tree-checkout-high-latency',
+    const version = await createStore(esClient).getVersion('symptom:checkout-high-latency', 2);
+
+    expect(esClient.get).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dtree_checkout-high-latency_v2' })
+    );
+    expect(version?.version).toBe(2);
+    expect(version?.markdown).toBe(MARKDOWN);
+    expect(version?.mermaid).toContain('flowchart TD');
+  });
+});
+
+describe('archive', () => {
+  it('flips the head status without adding a version', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue({
+      found: true,
+      _source: {
+        '@timestamp': '2026-09-09T12:00:00.000Z',
+        type: 'decision_tree',
         title: 'Checkout High Latency',
         content: MARKDOWN,
-        status: 'tentative',
+        tags: [],
+        tree_id: 'symptom:checkout-high-latency',
+        symptom: 'checkout-high-latency',
+        version: 2,
+        status: 'established',
+        node_count: 5,
+        edge_count: 4,
+        learnings: [],
+      },
+    });
+
+    await createStore(esClient).archive('symptom:checkout-high-latency');
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'dtree_checkout-high-latency',
+        document: expect.objectContaining({ status: 'archived', version: 2 }),
       })
-    );
-  });
-
-  it('promotes the tree to established once a root cause is confirmed', async () => {
-    const pageStore = createPageStore();
-
-    await createStore(pageStore).upsert({
-      treeId: 'symptom:checkout-high-latency',
-      markdown: MARKDOWN,
-      reinforced: true,
-    });
-
-    expect(pageStore.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'established' })
-    );
-  });
-
-  it('keeps an established tree established across an ordinary turn', async () => {
-    const pageStore = createPageStore({
-      get: jest.fn().mockResolvedValue(page({ status: 'established', corroborations: 4 })),
-    });
-
-    await createStore(pageStore).upsert({
-      treeId: 'symptom:checkout-high-latency',
-      markdown: MARKDOWN,
-    });
-
-    expect(pageStore.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'established', corroborations: 4 })
-    );
-  });
-
-  it('derives a readable title from the symptom slug', async () => {
-    const pageStore = createPageStore();
-
-    await createStore(pageStore).upsert({ treeId: 'symptom:redis-evictions', markdown: MARKDOWN });
-
-    expect(pageStore.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Redis Evictions' })
-    );
-  });
-});
-
-describe('markVisited and archive', () => {
-  it('corroborates the backing page', async () => {
-    const pageStore = createPageStore();
-
-    await createStore(pageStore).markVisited('symptom:checkout-high-latency');
-
-    expect(pageStore.corroborate).toHaveBeenCalledWith(
-      'cortex_runbook_decision-tree-checkout-high-latency'
-    );
-  });
-
-  it('archives the backing page', async () => {
-    const pageStore = createPageStore();
-
-    await createStore(pageStore).archive('symptom:checkout-high-latency');
-
-    expect(pageStore.archive).toHaveBeenCalledWith(
-      'cortex_runbook_decision-tree-checkout-high-latency'
     );
   });
 });

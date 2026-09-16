@@ -39,14 +39,23 @@ triggers:
       additionalProperties: false
 
 steps:
+  # Failures here are deliberately not swallowed: this workflow runs as a post-execution hook,
+  # which logs a failed execution and moves on rather than aborting the investigation. Letting a
+  # step fail loudly is what makes a broken reinforcement visible at all.
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
       prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
-    on-failure:
-      continue: true
+
+  # Nothing else installs this agent: the investigation workflow only ensures the investigator,
+  # and this workflow is the sole caller of the reinforcement agent.
+  - name: ensure_reinforcement_agent
+    type: nightshift.ensureInvestigationAgent
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      agent_id: significant-events.decision-tree-reinforcement
 
   # The agent runs in its own conversation, so its own beforeAgent hook hydrates the
   # trees into that conversation's sandbox rather than the investigator's.
@@ -61,5 +70,3 @@ steps:
     if: '${{ steps.prepare_turn.output.skipped == false }}'
     with:
       message: '{{ steps.prepare_turn.output.message }}'
-    on-failure:
-      continue: true

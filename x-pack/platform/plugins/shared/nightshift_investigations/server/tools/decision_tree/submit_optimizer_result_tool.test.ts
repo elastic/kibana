@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { DecisionTreeStore, StoredDecisionTree } from '../../decision_trees/store';
+import type { DecisionTreeStore, DecisionTreeDetail } from '../../decision_trees/store';
 import { createSubmitOptimizerResultTool } from './submit_optimizer_result_tool';
 
 const TREE_ID = 'symptom:checkout-high-latency';
@@ -25,23 +25,28 @@ const FULL_TREE = `flowchart TD
     E2 --> X1((Connection leak))
     E3 --> X2((Slow query))`;
 
-const stored = (mermaidBody: string): StoredDecisionTree => ({
+const stored = (mermaidBody: string): DecisionTreeDetail => ({
   tree_id: TREE_ID,
   symptom: 'checkout-high-latency',
   title: 'Checkout High Latency',
   status: 'tentative',
-  corroborations: 1,
+  version: 1,
+  node_count: 5,
+  edge_count: 4,
+  learning_count: 0,
   updated_at: '2026-09-09T12:00:00.000Z',
   markdown: markdownFor(mermaidBody),
   mermaid: `\`\`\`mermaid\n${mermaidBody}\n\`\`\``,
+  learnings: [],
 });
 
-const createStore = (existing?: StoredDecisionTree): jest.Mocked<DecisionTreeStore> =>
+const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeStore> =>
   ({
     list: jest.fn().mockResolvedValue([]),
     get: jest.fn().mockResolvedValue(existing),
-    upsert: jest.fn().mockResolvedValue(stored(FULL_TREE)),
-    markVisited: jest.fn(),
+    commit: jest.fn().mockResolvedValue(stored(FULL_TREE)),
+    listVersions: jest.fn().mockResolvedValue([]),
+    getVersion: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn(),
   } as jest.Mocked<DecisionTreeStore>);
 
@@ -111,10 +116,14 @@ describe('submit_optimizer_result', () => {
       [expect.objectContaining({ path: ABSOLUTE_PATH })],
       expect.anything()
     );
-    expect(store.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ treeId: TREE_ID, markdown: markdownFor(FULL_TREE) })
+    expect(store.commit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        treeId: TREE_ID,
+        markdown: markdownFor(FULL_TREE),
+        author: 'system',
+        summary: 'Merged this run.',
+      })
     );
-    expect(store.markVisited).toHaveBeenCalledWith(TREE_ID);
     expect('results' in result && result.results[0].type).toBe(ToolResultType.other);
   });
 
@@ -126,7 +135,7 @@ describe('submit_optimizer_result', () => {
       markdown: markdownFor(FULL_TREE.replace('-->|yes|', '-->|✅ yes|')),
     });
 
-    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ reinforced: true }));
+    expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: true }));
   });
 
   it('reports no changes when nothing was submitted', async () => {
@@ -143,7 +152,7 @@ describe('submit_optimizer_result', () => {
       createContext() as never
     );
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.commit).not.toHaveBeenCalled();
     expect('results' in result && result.results[0].data).toEqual(
       expect.objectContaining({ text: expect.stringContaining('No decision-tree changes') })
     );
@@ -167,7 +176,7 @@ describe('submit_optimizer_result', () => {
       });
 
       expectRejected(result, /must be formatted symptom:<slug>/);
-      expect(store.upsert).not.toHaveBeenCalled();
+      expect(store.commit).not.toHaveBeenCalled();
     });
 
     it('rejects a symptom slug outside the 2-5 word budget', async () => {
@@ -195,7 +204,7 @@ describe('submit_optimizer_result', () => {
       });
 
       expectRejected(result, /file_path for symptom:checkout-high-latency must be/);
-      expect(store.upsert).not.toHaveBeenCalled();
+      expect(store.commit).not.toHaveBeenCalled();
     });
 
     it('rejects a submission that dropped most of the original nodes', async () => {
@@ -209,7 +218,7 @@ describe('submit_optimizer_result', () => {
       });
 
       expectRejected(result, /drops more than 30% of original nodes/);
-      expect(store.upsert).not.toHaveBeenCalled();
+      expect(store.commit).not.toHaveBeenCalled();
     });
 
     it('rejects a submission that shrank below half the original', async () => {

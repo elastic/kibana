@@ -19,6 +19,7 @@ export type SignificantEventsAppTab =
   | 'detections'
   | 'significant_events'
   | 'cortex'
+  | 'decision_trees'
   | 'settings';
 
 /**

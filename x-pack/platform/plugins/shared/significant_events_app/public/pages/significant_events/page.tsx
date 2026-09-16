@@ -34,6 +34,8 @@ import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
+import { DecisionTreesTab } from './components/decision_trees/tab';
+import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -45,6 +47,7 @@ const significantEventsTabs = [
   'detections',
   'significant_events',
   'cortex',
+  'decision_trees',
   'settings',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
@@ -74,6 +77,7 @@ export function SignificantEventsPage() {
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const isCortexEnabled = useCortexEnabled();
+  const isDecisionTreesEnabled = useDecisionTreesEnabled();
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -179,6 +183,18 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
+      ...(isDecisionTreesEnabled
+        ? [
+            {
+              id: 'decision_trees',
+              label: i18n.translate('xpack.significantEventsApp.decisionTreesTab', {
+                defaultMessage: 'Decision Trees',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'decision_trees' } }),
+              isSelected: tab === 'decision_trees',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
@@ -188,7 +204,7 @@ export function SignificantEventsPage() {
         isSelected: tab === 'settings',
       },
     ],
-    [tab, router, isCortexEnabled]
+    [tab, router, isCortexEnabled, isDecisionTreesEnabled]
   );
   const tabs = useMemo(
     () => allTabs.filter((item) => item.id !== 'settings' || canConfigure),
@@ -333,6 +349,7 @@ export function SignificantEventsPage() {
           {tab === 'detections' && <DetectionsTab />}
           {tab === 'significant_events' && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
+          {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
           {tab === 'settings' && canConfigure && <SettingsTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>

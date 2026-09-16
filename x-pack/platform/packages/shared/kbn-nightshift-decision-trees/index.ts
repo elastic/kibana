@@ -27,6 +27,14 @@ export type {
 
 export { applyEvidenceMetadata, extractMermaid, parseMermaidDecisionTree } from './src/mermaid';
 
+export { diffDecisionTrees } from './src/diff';
+export type {
+  DecisionEdgeChange,
+  DecisionNodeChange,
+  DecisionNodeField,
+  DecisionTreeDiff,
+} from './src/diff';
+
 export {
   DecisionTreeValidationError,
   MAX_DROPPED_NODE_RATIO,
