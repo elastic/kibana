@@ -34,12 +34,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
-      notifications: {
-        toasts: {},
-      },
-      rendering: {
-        addContext: jest.fn(),
-      },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
@@ -49,7 +43,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         getAgentBuilderAccess: jest.fn(),
       },
       dashboard: {},
-      files: {},
       share: {
         url: {
           locators: {
