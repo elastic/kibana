@@ -32,7 +32,7 @@ overrides:
   '@types/react': 18.2.79
   '@types/react-dom': 18.2.25
   '@typescript-eslint/utils': 8.60.0
-  adm-zip: 0.6.0
+  adm-zip: 0.6.1
   apache-arrow: 20.x - 21.x
   baseline-browser-mapping: 2.9.14
   cheerio: 1.0.0-rc.12
@@ -4080,8 +4080,8 @@ importers:
         specifier: 12.11.1
         version: 12.11.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.6.1
+        version: 0.6.1
       ai:
         specifier: 5.0.190
         version: 5.0.190(zod@4.4.3)
@@ -15765,8 +15765,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  adm-zip@0.6.0:
-    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+  adm-zip@0.6.1:
+    resolution: {integrity: sha512-Xwrja8nx9e5o2N1my4DsKCeKpdrnACyr1wtbPxBDgGzKzKyE9kRtBFA8mWldI+RVlD7CBZNWY/wQ2+ydwOR6kQ==}
     engines: {node: '>=14.0'}
 
   after-all-results@2.0.0:
@@ -33391,7 +33391,7 @@ snapshots:
 
   acorn@8.18.0: {}
 
-  adm-zip@0.6.0: {}
+  adm-zip@0.6.1: {}
 
   after-all-results@2.0.0: {}
 
@@ -34506,7 +34506,7 @@ snapshots:
   chromedriver@152.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@testim/chrome-version': 1.1.4
-      adm-zip: 0.6.0
+      adm-zip: 0.6.1
       axios: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       compare-versions: 6.1.1
       proxy-agent: 8.0.2(supports-color@10.2.2)
