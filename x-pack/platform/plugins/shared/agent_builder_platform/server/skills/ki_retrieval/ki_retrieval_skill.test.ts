@@ -45,7 +45,7 @@ describe('kiRetrievalSkill', () => {
 
   it('documents memory exclusion and recall', () => {
     expect(kiRetrievalSkill.content).toContain(
-      'type != "memory.session" AND type != "memory.session_fact"'
+      'type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
     );
     expect(kiRetrievalSkill.content).toContain('Use `describe_ai_index`');
     expect(kiRetrievalSkill.content).toContain('expires_at IS NULL OR expires_at > NOW()');

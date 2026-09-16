@@ -128,7 +128,7 @@ to deduplicate across branches.
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type != "memory.session" AND type != "memory.session_fact"
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -156,7 +156,7 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM ai-index-* METADATA _id, _index, _score
-| WHERE type != "memory.session" AND type != "memory.session_fact"
+| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
