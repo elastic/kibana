@@ -197,7 +197,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="l">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} justifyContent="spaceBetween">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <span id={`${worker.id}-heading`}>{name}</span>
