@@ -489,7 +489,7 @@ describe('self client UIAM auth header augmenter', () => {
 
     const { setSelfClientAuthHeaderAugmenter } = mockHttpService.getStartContract();
     expect(setSelfClientAuthHeaderAugmenter).toHaveBeenCalledTimes(1);
-    return setSelfClientAuthHeaderAugmenter.mock.calls[0][0];
+    return jest.mocked(setSelfClientAuthHeaderAugmenter).mock.calls[0][0];
   };
 
   const getUiamMock = () => mockSecurityService.start().authc.apiKeys.uiam!;
@@ -567,12 +567,14 @@ describe('self client UIAM auth header augmenter', () => {
   it('mints an attestation the receiving UIAM service accepts', async () => {
     const sharedSecret = 'shared-secret';
     const uiam = getUiamMock();
-    uiam.getInternalCallerAttestationHeaders.mockImplementation((credential) => ({
-      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-        sharedSecret,
-        credential
-      ),
-    }));
+    uiam.getInternalCallerAttestationHeaders.mockImplementation(
+      (credential: HTTPAuthorizationHeader) => ({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          sharedSecret,
+          credential
+        ),
+      })
+    );
     const augmenter = await startServerAndGetAugmenter();
 
     const minted = augmenter(
