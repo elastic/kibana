@@ -17,6 +17,7 @@ import {
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV8,
+  ruleSavedObjectAttributesSchemaV9,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -257,6 +258,26 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
+  // ---------------------------------------------------------------------------
+  // Step 6.4: execution-time builder types (query optional)
+  //
+  // Makes `query` optional on the stored rule. Execution-time builder rules
+  // compile their query fresh on every run and persist nothing in the `query`
+  // field. Write-time builder rules and plain ES|QL rules keep their stored
+  // query unchanged.
+  //
+  // No backfill needed: existing rules already have a stored query; new
+  // execution-time rules simply omit the field.
+  //
+  // Ref: rule-execution-logic.md "A rule without a persisted query"
+  // ---------------------------------------------------------------------------
+  '10': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV9,
     },
   },
 };
