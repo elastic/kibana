@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '../..';
+import { AppMenu } from '../app_menu';
 import { DataGrid } from '../data_grid';
 import { SavedObjectSaveModal } from '../saved_object_save_modal';
 import { KibanaCodeEditorWrapper } from '../../ui_components';
@@ -47,11 +48,13 @@ export class DiscoverAppBase {
   protected readonly saveButtonSecondary;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
+  protected readonly appMenu: AppMenu;
 
   constructor(protected readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
     this.queryBar = new QueryBar(page);
+    this.appMenu = new AppMenu(page);
     this.interactiveSaveMenuItem = page.testSubj.locator('interactiveSaveMenuItem');
     this.saveButtonSecondary = page.testSubj.locator('discoverSaveButton-secondary-button');
     this.saveModal = new SavedObjectSaveModal(page);

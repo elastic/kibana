@@ -6,7 +6,6 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { RecommendedAction } from './impl/schemas';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -43,6 +42,12 @@ export const buildInvestigationUrl = (id: string) =>
 
 /** Proposals grouped by category — AlertZero landing page. */
 export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+
+/** Action catalog — category-scoped discovery of installed action workflows. */
+export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+
+/** Agent Builder builtin tool wrapping the action catalog API. */
+export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -219,13 +224,3 @@ export const API_VERSIONS = {
 } as const;
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
-
-export const CONVERSATION_CATEGORY_COLORS: Record<
-  RecommendedAction,
-  'danger' | 'warning' | 'accentSecondary' | 'accent'
-> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'accentSecondary',
-  tune: 'accent',
-};
