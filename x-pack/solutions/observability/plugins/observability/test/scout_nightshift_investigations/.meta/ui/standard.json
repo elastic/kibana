@@ -1,5 +1,5 @@
 {
-  "sha1": "a84e4311e2b7d22b9ce591520139162930d9dfed",
+  "sha1": "cd7a9c47bf15a03358d1aff8cfce0de92699a4d2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 79,
-        "column": 17
+        "line": 90,
+        "column": 18
       }
     }
   ]
