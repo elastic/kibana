@@ -66,6 +66,11 @@ export type LogDocument = Fields &
     'error.exception.type'?: string;
     'error.exception.message'?: string;
 
+    // Unprocessed OTel exception logs keep the semconv names, without an ECS prefix
+    event_name?: string;
+    'exception.type'?: string;
+    'exception.message'?: string;
+
     'error.log'?: unknown;
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
