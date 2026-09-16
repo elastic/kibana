@@ -8,6 +8,9 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
+/** Timeout for the MITRE ATT&CK entities API call to resolve. */
+const MITRE_LOAD_TIMEOUT_MS = 30_000;
+
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
  */
@@ -20,6 +23,11 @@ export class RuleCreateWizardPage {
   readonly scheduleContinue: Locator;
   readonly createWithoutEnabling: Locator;
   readonly queryInput: Locator;
+  readonly advancedSettingsToggle: Locator;
+  readonly mitreLoadingSpinner: Locator;
+  readonly addMitreTacticButton: Locator;
+  readonly addMitreTechniqueButton: Locator;
+  readonly createAndEnable: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -37,6 +45,13 @@ export class RuleCreateWizardPage {
       .locator('defineRuleFormStepQueryEditor')
       .locator('[data-test-subj="queryInput"]')
       .filter({ visible: true });
+    this.advancedSettingsToggle = this.page.locator(
+      '[data-test-subj="advancedSettings"] .euiAccordion__button'
+    );
+    this.mitreLoadingSpinner = this.page.testSubj.locator('mitreAttackLoading');
+    this.addMitreTacticButton = this.page.testSubj.locator('addMitreAttackTactic');
+    this.addMitreTechniqueButton = this.page.testSubj.locator('addMitreAttackTechnique');
+    this.createAndEnable = this.page.testSubj.locator('create-enable');
   }
 
   /**
@@ -81,5 +96,55 @@ export class RuleCreateWizardPage {
 
   async createWithoutEnablingRule(): Promise<void> {
     await this.createWithoutEnabling.click();
+  }
+
+  /** Expands the Advanced Settings accordion on the About step. */
+  async expandAdvancedSettings(): Promise<void> {
+    await this.advancedSettingsToggle.click();
+  }
+
+  /**
+   * Waits for the MITRE ATT&CK section to finish loading.
+   *
+   * A detached-check on the spinner alone is not sufficient: the section mounts
+   * only after the advanced settings accordion expands, so before React renders
+   * it neither the spinner nor the controls exist and the check passes against
+   * nothing. Wait for the "Add tactic" button — which the component renders only
+   * once the entities have resolved — then confirm the spinner is gone.
+   */
+  async waitForMitreLoaded(): Promise<void> {
+    await this.addMitreTacticButton.waitFor({
+      state: 'visible',
+      timeout: MITRE_LOAD_TIMEOUT_MS,
+    });
+    await this.mitreLoadingSpinner.waitFor({
+      state: 'detached',
+      timeout: MITRE_LOAD_TIMEOUT_MS,
+    });
+  }
+
+  /**
+   * Selects a tactic in the MITRE ATT&CK tactic super-select by the tactic's
+   * `id` value (e.g. `'TA9001'`). Using the value is preferred over label
+   * matching because EUI renders each option with `id={value}`, making it a
+   * stable hook independent of the display label format ("Name (ID)").
+   */
+  async selectMitreTacticById(tacticId: string): Promise<void> {
+    await this.page.components.superSelect('mitreAttackTactic').selectOptionByValue(tacticId);
+  }
+
+  /**
+   * Clicks "Add technique", then selects the technique in the newly-added
+   * technique super-select by the technique's `id` value (e.g. `'T9001'`).
+   */
+  async addAndSelectMitreTechniqueById(techniqueId: string): Promise<void> {
+    await this.addMitreTechniqueButton.click();
+    await this.page.components.superSelect('mitreAttackTechnique').selectOptionByValue(techniqueId);
+  }
+
+  /** Clicks "Create and enable rule" and waits for the button to be removed. */
+  async createAndEnableRule(): Promise<void> {
+    await this.createAndEnable.click();
+    await this.createAndEnable.waitFor({ state: 'detached' });
   }
 }

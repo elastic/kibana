@@ -52,9 +52,3 @@ export const COVERAGE_OVERVIEW_INVALID_MITRE_MODAL_CLOSE_BUTTON =
 
 export const COVERAGE_OVERVIEW_INVALID_MITRE_BADGE = (id: string) =>
   `[data-test-subj="coverageOverviewInvalidMitreBadge-${id}"]`;
-
-export const COVERAGE_OVERVIEW_LOADING_SPINNER =
-  '[data-test-subj="coverageOverviewLoadingSpinner"]';
-
-export const COVERAGE_OVERVIEW_MITRE_ERROR_CALLOUT =
-  '[data-test-subj="coverageOverviewMitreErrorCallout"]';

@@ -13,12 +13,17 @@ import type {
   MitreTechnique,
 } from '@kbn/security-mitre-attack-common';
 
-// The index where MITRE entity saved objects live.
-const SEEDED_MITRE_INDEX = '.kibana_security_solution';
+/** The index where MITRE entity saved objects live. */
+export const SEEDED_MITRE_INDEX = '.kibana_security_solution';
 
-// Synthetic version number that sorts above any real MITRE release.
-// Seeding entities at this version makes the managed API serve only the
-// seeded set (the route resolves the highest framework_version present).
+/**
+ * Synthetic version number that sorts above any real MITRE release.
+ * Seeding entities at this version makes the managed API serve only the seeded
+ * set — the entities route resolves the highest framework_version present
+ * (`mitre_attack/server/services/mitre_attack_data_client/resolve_latest_version.ts`),
+ * so 99.0 ensures only the fixture data is returned regardless of which real
+ * MITRE artifact version is bundled.
+ */
 export const SEEDED_MITRE_FRAMEWORK_VERSION = '99.0';
 
 const SEEDED_MITRE_FRAMEWORK = 'enterprise' as const;
@@ -26,13 +31,17 @@ const SEEDED_MITRE_FRAMEWORK = 'enterprise' as const;
 const SO_BASE_FIELDS = {
   references: [],
   coreMigrationVersion: '8.6.0',
+  // Matches model version 1 of the mitre-attack-entity type. Without this the
+  // docs look unmigrated, causing the first model-version transform to rewrite
+  // them on read.
+  typeMigrationVersion: '10.1.0',
   updated_at: '2024-01-01T00:00:00.000Z',
   created_at: '2024-01-01T00:00:00.000Z',
 };
 
 // ---------------------------------------------------------------------------
 // Fixture entities — names are clearly synthetic; positions are distinct so
-// ordering assertions can be made; technique_two belongs to both tactics.
+// ordering assertions can be made; SEEDED_TECHNIQUE_TWO belongs to both tactics.
 // ---------------------------------------------------------------------------
 
 export const SEEDED_TACTIC_ALPHA: MitreTactic = {
@@ -101,7 +110,7 @@ export const SEEDED_SUBTECHNIQUE_ONE: MitreSubtechnique = {
   technique_id: 'T9001',
 };
 
-const SEEDED_ENTITIES: MitreEntity[] = [
+export const SEEDED_ENTITIES: MitreEntity[] = [
   SEEDED_TACTIC_ALPHA,
   SEEDED_TACTIC_BETA,
   SEEDED_TECHNIQUE_ONE,
@@ -109,39 +118,25 @@ const SEEDED_ENTITIES: MitreEntity[] = [
   SEEDED_SUBTECHNIQUE_ONE,
 ];
 
-// Builds an NDJSON bulk-index body for the given MITRE entities.
-const buildBulkNdjson = (entities: MitreEntity[]): string =>
-  entities.reduce((body, entity) => {
-    const docId = `${MITRE_ATTACK_ENTITY_SO_TYPE}:${buildSoId({
+/**
+ * Builds the Elasticsearch bulk operations array for indexing the synthetic
+ * MITRE entities. Each entity becomes two entries in the array: an index
+ * action header and the document body.
+ */
+export const buildSeedBulkOperations = (): Array<Record<string, unknown>> =>
+  SEEDED_ENTITIES.flatMap((entity) => {
+    const soId = buildSoId({
       framework: entity.framework,
       frameworkVersion: entity.framework_version,
       id: entity.id,
-    })}`;
-    const action = JSON.stringify({ index: { _index: SEEDED_MITRE_INDEX, _id: docId } });
-    const doc = JSON.stringify({
-      type: MITRE_ATTACK_ENTITY_SO_TYPE,
-      [MITRE_ATTACK_ENTITY_SO_TYPE]: entity,
-      ...SO_BASE_FIELDS,
     });
-    return `${body}${action}\n${doc}\n`;
-  }, '');
-
-/**
- * Bulk-seeds the synthetic MITRE fixture set (version 99.0) directly into the
- * saved-objects index. Version 99.0 sorts above any real MITRE release, so the
- * managed API will resolve and return only the seeded entities.
- */
-export const seedMitreEntities = (): void => {
-  cy.log(`Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`);
-  cy.task('putMapping', SEEDED_MITRE_INDEX);
-  cy.task('bulkInsert', buildBulkNdjson(SEEDED_ENTITIES));
-};
-
-/**
- * Removes the synthetic MITRE fixture entities seeded by {@link seedMitreEntities}.
- * Only deletes documents at version 99.0 so the real populated data is untouched.
- */
-export const deleteSeededMitreEntities = (): void => {
-  cy.log(`Delete synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`);
-  cy.task('deleteMitreEntitiesByVersion', SEEDED_MITRE_FRAMEWORK_VERSION);
-};
+    const docId = `${MITRE_ATTACK_ENTITY_SO_TYPE}:${soId}`;
+    return [
+      { index: { _index: SEEDED_MITRE_INDEX, _id: docId } },
+      {
+        type: MITRE_ATTACK_ENTITY_SO_TYPE,
+        [MITRE_ATTACK_ENTITY_SO_TYPE]: entity,
+        ...SO_BASE_FIELDS,
+      },
+    ];
+  });
