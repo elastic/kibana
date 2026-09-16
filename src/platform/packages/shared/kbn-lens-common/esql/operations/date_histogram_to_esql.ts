@@ -13,6 +13,7 @@ import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
+import { convertToAbsoluteDateRange } from '../date_range';
 import {
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
@@ -48,7 +49,8 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
     }
   }
 
-  const rangeMs = new Date(dateRange.toDate).getTime() - new Date(dateRange.fromDate).getTime();
+  const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
+  const rangeMs = new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime();
   if (rangeMs > 24 * 60 * 60 * 1000 && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
     pattern = `YYYY-MM-DD ${pattern}`;
   }
