@@ -12,19 +12,18 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
-    await pageObjects.console.skipTourIfExists();
-    await pageObjects.console.clearEditorText();
-  });
-
-  spaceTest.afterEach(async ({ page }) => {
+    // Parallel workers reuse the browser context across specs and earlier specs leave
+    // history entries behind, so the counts below need a known-empty start.
     await page.evaluate(() => {
       Object.keys(localStorage)
         .filter((key) => key.startsWith('sense:hist_elem_'))
         .forEach((key) => localStorage.removeItem(key));
     });
+    await pageObjects.console.skipTourIfExists();
+    await pageObjects.console.clearEditorText();
   });
 
   spaceTest('lists executed requests and clears them', async ({ pageObjects }) => {

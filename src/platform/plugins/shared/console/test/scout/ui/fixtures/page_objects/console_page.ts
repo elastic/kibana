@@ -691,6 +691,34 @@ export class ConsolePage {
     await this.editorTextArea.press(normalized);
   }
 
+  /**
+   * Opens the detected link by putting the cursor on it and triggering Monaco's "Open
+   * Link" action. Clicking is unreliable here: Monaco re-renders the span mid-click, and
+   * Control+click is a context-menu click on macOS. Callers must wait for
+   * {@link detectedLinks} first, which guarantees the action finds the link.
+   */
+  async openDetectedLink() {
+    const linkText = await this.detectedLinks.innerText();
+    const triggered = await this.inputEditor.evaluate((editorNode, text) => {
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        .getEditors()
+        .find((e) => editorNode.contains(e.getContainerDomNode()));
+      const match = editor?.getModel()?.findMatches(text, false, false, true, null, false, 1)[0];
+      if (!editor || !match) {
+        return false;
+      }
+      editor.setPosition({
+        lineNumber: match.range.startLineNumber,
+        column: match.range.startColumn + 1,
+      });
+      editor.trigger('scoutTest', 'editor.action.openLink', null);
+      return true;
+    }, linkText);
+    if (!triggered) {
+      throw new Error(`Link "${linkText}" not found in the editor model`);
+    }
+  }
+
   private async getCursorLineNumber(): Promise<number> {
     return this.inputEditor.evaluate((editorNode) => {
       const monacoGlobal = window.MonacoEnvironment?.monaco;

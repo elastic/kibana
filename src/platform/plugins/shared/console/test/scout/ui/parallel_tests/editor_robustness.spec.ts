@@ -62,8 +62,7 @@ spaceTest.describe('Console editor robustness', { tag: tags.deploymentAgnostic }
     await expect(pageObjects.console.detectedLinks).not.toHaveCount(0);
 
     const linkTab = page.context().waitForEvent('page');
-    // Monaco's link opener also picks Ctrl vs Cmd from the user agent — see `pressShortcut`.
-    await pageObjects.console.detectedLinks.click({ modifiers: ['Control'] });
+    await pageObjects.console.openDetectedLink();
     const linkPage = await linkTab;
 
     // Polled because a popup can still be at `about:blank` when the `page` event fires.
