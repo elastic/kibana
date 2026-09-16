@@ -37,6 +37,7 @@ const findByEventId = jest.fn();
 const getDataStreams = jest.fn().mockResolvedValue({
   initializeClient: jest.fn().mockResolvedValue({}),
 });
+const isAvailable = jest.fn().mockResolvedValue(true);
 
 const createGetScopedClients = (
   events: SignificantEvent[]
@@ -54,6 +55,8 @@ describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
     findByEventId.mockReset();
+    getDataStreams.mockClear();
+    isAvailable.mockReset().mockResolvedValue(true);
     jest.mocked(EventService).mockImplementation(
       () =>
         ({
@@ -69,6 +72,7 @@ describe('createSignificantEventSmlType', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
       getDataStreams,
+      isAvailable,
     });
 
     expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
@@ -79,6 +83,7 @@ describe('createSignificantEventSmlType', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
       getDataStreams,
+      isAvailable,
     });
 
     const iterator = smlType.list({
@@ -100,11 +105,33 @@ describe('createSignificantEventSmlType', () => {
     expect(findLatestPaginated).toHaveBeenCalledWith({ page: 1, perPage: 100 });
   });
 
+  it('does not initialize the data stream when significant events are unavailable', async () => {
+    isAvailable.mockResolvedValue(false);
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+      getDataStreams,
+      isAvailable,
+    });
+
+    const iterator = smlType.list({
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    await expect(iterator[Symbol.asyncIterator]().next()).resolves.toEqual({
+      done: true,
+      value: undefined,
+    });
+    expect(getDataStreams).not.toHaveBeenCalled();
+  });
+
   it('indexes a significant event chunk', async () => {
     findByEventId.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
       getDataStreams,
+      isAvailable,
     });
 
     const result = await smlType.getSmlEntry('payment-outage', {
@@ -128,6 +155,7 @@ describe('createSignificantEventSmlType', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
       getDataStreams,
+      isAvailable,
     });
     const permissions = smlType.getPermissions!('payment-outage', {
       esClient: {} as never,
@@ -143,6 +171,7 @@ describe('createSignificantEventSmlType', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([event]),
       getDataStreams,
+      isAvailable,
     });
 
     await expect(

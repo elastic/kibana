@@ -14,15 +14,18 @@ export const registerAgentBuilderSmlTypes = ({
   agentBuilderSml,
   getScopedClients,
   getDataStreams,
+  isAvailable,
 }: {
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   getScopedClients: GetScopedClients;
   getDataStreams: () => Promise<DataStreamsStart>;
+  isAvailable: () => Promise<boolean>;
 }): void => {
   agentBuilderSml?.registerType(
     createSignificantEventSmlType({
       getScopedClients,
       getDataStreams,
+      isAvailable,
     })
   );
 };

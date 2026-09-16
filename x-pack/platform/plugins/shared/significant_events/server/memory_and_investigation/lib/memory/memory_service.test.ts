@@ -121,7 +121,7 @@ const createInMemoryEsClient = () => {
   > = {
     create: jest.fn(async ({ documents }) => {
       const items = documents.map((document) => {
-        memoryDocs.push({ ...document, _id: `doc-${docCounter++}` });
+        memoryDocs.push({ ...document, _id: `doc-${docCounter++}` } as MemoryDocument);
         return { create: { status: 201, _id: 'doc', _index: MEMORIES_DATA_STREAM } };
       });
       return { errors: false, took: 0, items };

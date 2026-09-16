@@ -318,6 +318,15 @@ export class SignificantEventsPlugin
         agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
         getDataStreams: async () => (await core.getStartServices())[0].dataStreams,
+        isAvailable: async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          return this.server
+            ? isSignificantEventsAvailable({
+                server: this.server,
+                licensing: pluginsStart.licensing,
+              })
+            : false;
+        },
       });
     }
 

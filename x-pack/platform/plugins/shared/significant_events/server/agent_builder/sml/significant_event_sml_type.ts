@@ -24,6 +24,7 @@ import type { GetScopedClients } from '../../routes/types';
 interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
   getDataStreams: () => Promise<DataStreamsStart>;
+  isAvailable: () => Promise<boolean>;
 }
 
 const PAGE_SIZE = 100;
@@ -45,9 +46,14 @@ const eventToSmlContent = (event: SignificantEvent): string => {
 export const createSignificantEventSmlType = ({
   getScopedClients,
   getDataStreams,
+  isAvailable,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const eventService = new EventService();
   const getSmlEventClient = async (esClient: ElasticsearchClient) => {
+    if (!(await isAvailable())) {
+      return;
+    }
+
     const dataStreams = await getDataStreams();
     const dataStreamClient = await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
       eventsDataStream.name
@@ -65,6 +71,9 @@ export const createSignificantEventSmlType = ({
 
       try {
         const eventClient = await getSmlEventClient(context.esClient);
+        if (!eventClient) {
+          return;
+        }
         while (true) {
           const { hits } = await eventClient.findLatestPaginated({ page, perPage: PAGE_SIZE });
 
@@ -94,6 +103,9 @@ export const createSignificantEventSmlType = ({
     getSmlEntry: async (originId, context): Promise<SmlEntry | undefined> => {
       try {
         const eventClient = await getSmlEventClient(context.esClient);
+        if (!eventClient) {
+          return undefined;
+        }
         const { hits } = await eventClient.findByEventId(originId);
         const event = hits.at(-1);
 
@@ -117,6 +129,10 @@ export const createSignificantEventSmlType = ({
     getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {
+      if (!(await isAvailable())) {
+        return undefined;
+      }
+
       const originId = getSmlOriginId(item);
       if (!originId) {
         return undefined;
