@@ -798,6 +798,7 @@ export abstract class LayoutMixin extends SaveMixin {
     await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
     await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
     await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
     await this.waitUntilSearchingHasFinished();
   }
 

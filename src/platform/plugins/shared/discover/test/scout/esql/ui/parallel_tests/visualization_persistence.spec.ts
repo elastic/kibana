@@ -56,7 +56,7 @@ spaceTest.describe(
 
     spaceTest(
       'persists a Line histogram and reverts a shape change',
-      async ({ page, pageObjects, scoutSpace }) => {
+      async ({ pageObjects, scoutSpace }) => {
         const { discover } = pageObjects;
         const sessionName = `ESQL Line histogram ${scoutSpace.id}`;
 
@@ -64,8 +64,8 @@ spaceTest.describe(
         await discover.changeVisualizationShape('Line');
         expect(await discover.getVisualizationTitle()).toBe('Line');
         await discover.saveSearch(sessionName);
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
+        await discover.clickNewSearch();
+        await discover.loadSavedSearch(sessionName);
         expect(await discover.getVisualizationTitle()).toBe('Line');
 
         await discover.changeVisualizationShape('Area');
