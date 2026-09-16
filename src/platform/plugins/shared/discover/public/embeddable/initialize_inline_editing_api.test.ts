@@ -9,6 +9,7 @@
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
@@ -84,6 +85,7 @@ const setupApi = (
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const searchEmbeddable = buildSearchEmbeddable();
 
   const api = initializeInlineEditingApi({
     uuid: 'panel-1',
@@ -92,15 +94,43 @@ const setupApi = (
     analytics,
     selectedTabId$,
     savedObjectId$,
-    searchEmbeddable: buildSearchEmbeddable(),
+    searchEmbeddable,
     blockingError$,
     dataLoading$,
   });
 
-  return { api, analytics, selectedTabId$, savedObjectId$ };
+  return { api, analytics, selectedTabId$, savedObjectId$, searchEmbeddable };
 };
 
 describe('initializeInlineEditingApi', () => {
+  it('restores the Metrics profile state snapshot when cancelling a tab preview', async () => {
+    const { api, searchEmbeddable, selectedTabId$ } = setupApi();
+    const { savedSearch$ } = searchEmbeddable.api;
+    const tabTypeState: SavedSearch['tabTypeState'] = {
+      type: DiscoverTabType.Metrics,
+      dimensions: ['host.name'],
+      searchTerm: 'cpu',
+      counterAggregation: 'max',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p99',
+    };
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState });
+
+    await api.startInlineEditing();
+    await api.previewInlineTabSelection('tab-2');
+    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(1, tab2);
+
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: undefined });
+    await api.cancelInlineTabSelection();
+
+    expect(searchEmbeddable.reinitializeState).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ tabTypeState })
+    );
+    expect(selectedTabId$.getValue()).toBe('tab-1');
+    expect(api.isInlineEditing$.getValue()).toBe(false);
+  });
+
   describe('applyInlineTabSelection telemetry', () => {
     it('reports a tabSwitched event with the dashboard id from the parent api', async () => {
       const parentApi = { savedObjectId$: new BehaviorSubject('dashboard-1') };

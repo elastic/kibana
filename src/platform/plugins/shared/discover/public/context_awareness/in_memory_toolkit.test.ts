@@ -60,6 +60,31 @@ describe('createInMemoryContextAwarenessToolkit', () => {
     });
   });
 
+  it('merges partial initial profile state over definition defaults', () => {
+    const stateAdapter = createInMemoryContextAwarenessToolkit({
+      initialProfileState: {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'initialUrl',
+          nestedValue: { count: 42 },
+        },
+      },
+      profileStateRegistry: createRegisteredRegistry(),
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+    const emittedValues: TestProfileState[] = [];
+    const subscription = stateAdapter.getState$().subscribe((state) => emittedValues.push(state));
+
+    const expectedState = {
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'initialUrl',
+      nestedValue: { count: 42 },
+    };
+
+    expect(stateAdapter.getState()).toEqual(expectedState);
+    expect(emittedValues).toEqual([expectedState]);
+
+    subscription.unsubscribe();
+  });
+
   it('emits profile state updates and skips deep equal duplicate values', () => {
     const stateAdapter = createInMemoryContextAwarenessToolkit({
       profileStateRegistry: createRegisteredRegistry(),

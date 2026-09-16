@@ -301,8 +301,10 @@ export const getSearchEmbeddableFactory = ({
         initialDocViewerTabId$.next(options?.initialTabId);
       };
 
+      const { profileStateRegistry } = discoverServices;
       const toolkit = createInMemoryContextAwarenessToolkit({
-        profileStateRegistry: discoverServices.profileStateRegistry,
+        profileStateRegistry,
+        initialProfileState: profileStateRegistry.fromSavedState(runtimeState.tabTypeState),
         actions: {
           addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
