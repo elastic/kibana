@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
   CORTEX_ENTITY_TYPE_BUCKETS,
   CORTEX_ENTITY_TYPES,
@@ -13,7 +14,6 @@ import {
   type CortexPage,
   type CortexPageSummary,
 } from '../../common/cortex';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { CortexPageStore } from './page_store';
 
 export const CORTEX_WORKSPACE_ROOT = '/workspace/cortex';

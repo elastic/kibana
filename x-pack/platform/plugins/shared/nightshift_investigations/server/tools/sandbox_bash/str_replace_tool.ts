@@ -73,9 +73,7 @@ export const createSandboxStrReplaceTool = ({
     const sandboxStart = getSandboxStart();
     if (!sandboxStart) {
       return {
-        results: [
-          { type: ToolResultType.error, data: { message: 'Sandbox is not available.' } },
-        ],
+        results: [{ type: ToolResultType.error, data: { message: 'Sandbox is not available.' } }],
       };
     }
 
