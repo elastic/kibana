@@ -185,6 +185,6 @@ export const fetchGraph = async ({
       regroupRelationships(relationshipsResult.records, enrichmentMap),
       enrichmentMap
     ),
-    entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),
+    entities: enrichEntityRecords(entitiesResult.records, enrichmentMap, logger),
   };
 };

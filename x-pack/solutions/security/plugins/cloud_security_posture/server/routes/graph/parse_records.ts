@@ -30,6 +30,8 @@ import {
   type RelationshipEdge,
   type RelationshipEsqlRow,
   type EntityRecord,
+  type RiskScoreRange,
+  type AssetCriticalityCount,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
@@ -40,8 +42,11 @@ import {
   addValuesToSet,
   filterDocDataToIds,
   rebuildDocData,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
 } from './utils';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 interface ConnectorEdges {
   source: string;
@@ -125,6 +130,14 @@ export const parseRecords = (
           entitySubType: entity.sub_type,
           entityName: entity.name,
           docData: entity.docData ? castArray(entity.docData) : [],
+          // A standalone entity node always represents exactly one entity, so the range
+          // collapses to a single value and the distribution to a single entry.
+          riskScore:
+            entity.riskScore != null ? { min: entity.riskScore, max: entity.riskScore } : undefined,
+          assetCriticality:
+            entity.assetCriticality != null && isKnownAssetCriticalityLevel(entity.assetCriticality)
+              ? [{ level: entity.assetCriticality, count: 1 }]
+              : undefined,
         },
         ctx.logger
       );
@@ -219,10 +232,22 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
+    riskScore?: RiskScoreRange;
+    assetCriticality?: AssetCriticalityCount[];
   },
   logger?: Logger
 ): void => {
-  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const {
+    nodeId,
+    idsCount,
+    entityType,
+    entitySubType,
+    entityName,
+    docData,
+    hostIps,
+    riskScore,
+    assetCriticality,
+  } = params;
   const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
@@ -256,6 +281,8 @@ const createEntityNode = (
     ...deriveEntityAttributesFromType(resolvedType),
     ...(idsCount > 1 ? { count: idsCount } : {}),
     ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+    ...(riskScore ? { riskScore } : {}),
+    ...(assetCriticality && assetCriticality.length > 0 ? { assetCriticality } : {}),
   };
 };
 
@@ -275,6 +302,8 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
+    actorRiskScore,
+    actorAssetCriticality,
     targetNodeId,
     targetIdsCount,
     targetsDocData,
@@ -282,6 +311,8 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
+    targetRiskScore,
+    targetAssetCriticality,
   } = record;
 
   // Create actor entity node
@@ -295,6 +326,8 @@ const createGroupedActorAndTargetNodes = (
       entityName: actorEntityName,
       docData: actorsDocData,
       hostIps: actorHostIps ? castArray(actorHostIps) : [],
+      riskScore: actorRiskScore,
+      assetCriticality: actorAssetCriticality,
     },
     logger
   );
@@ -313,6 +346,8 @@ const createGroupedActorAndTargetNodes = (
         entityName: targetEntityName,
         docData: targetsDocData,
         hostIps: targetHostIps ? castArray(targetHostIps) : [],
+        riskScore: targetRiskScore,
+        assetCriticality: targetAssetCriticality,
       },
       logger
     );
@@ -464,6 +499,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.actorEntityName,
       docData: record.actorsDocData,
       hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+      riskScore: record.actorRiskScore,
+      assetCriticality: record.actorAssetCriticality,
     },
     context.logger
   );
@@ -478,6 +515,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.targetEntityName,
       docData: record.targetsDocData,
       hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+      riskScore: record.targetRiskScore,
+      assetCriticality: record.targetAssetCriticality,
     },
     context.logger
   );
@@ -1107,6 +1146,8 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorEntityIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorEntityIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
@@ -1115,6 +1156,8 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetEntityIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetEntityIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
     };
   });
@@ -1336,6 +1379,8 @@ export const regroupRelationships = (
           ? actorNames[0]
           : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetIds.length,
@@ -1344,6 +1389,8 @@ export const regroupRelationships = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
       relationshipNodeId,
@@ -1370,11 +1417,43 @@ export const enrichRelationshipDocData = (
 };
 
 /**
+ * Injects risk score / asset criticality into an entities-query `docData` JSON string.
+ *
+ * The entities query builds `docData` inline in ES|QL (it does not pass through
+ * `rebuildDocData`), so these two fields have to be merged into the already-serialized
+ * `entity` object here. Absent values add no key at all. A `docData` that fails to parse is
+ * returned unchanged — it must already be schema-valid, same contract as `rebuildDocData`.
+ */
+const injectEntityDocDataEnrichment = (
+  docData: string,
+  enrichment: EntityEnrichmentFields,
+  logger?: Logger
+): string => {
+  if (enrichment.riskScore == null && enrichment.assetCriticality == null) return docData;
+
+  let doc: Record<string, unknown>;
+  try {
+    doc = JSON.parse(docData);
+  } catch (e) {
+    logger?.warn(`Failed to parse entity docData for enrichment injection: ${e}`);
+    return docData;
+  }
+
+  const entity = (doc.entity ?? {}) as Record<string, unknown>;
+  if (enrichment.riskScore != null) entity.riskScore = enrichment.riskScore;
+  if (enrichment.assetCriticality != null) entity.assetCriticality = enrichment.assetCriticality;
+  doc.entity = entity;
+
+  return JSON.stringify(doc);
+};
+
+/**
  * Applies enrichment to entity records from the entity store.
  */
 export const enrichEntityRecords = (
   records: EntityRecord[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>
+  enrichmentMap: Map<string, EntityEnrichmentFields>,
+  logger?: Logger
 ): EntityRecord[] => {
   return records.map((record) => {
     const enrichment = enrichmentMap.get(record.id);
@@ -1384,6 +1463,11 @@ export const enrichEntityRecords = (
       name: enrichment.name ?? record.name,
       type: enrichment.type ?? record.type,
       sub_type: enrichment.subType ?? record.sub_type,
+      riskScore: enrichment.riskScore,
+      assetCriticality: enrichment.assetCriticality,
+      docData: record.docData
+        ? injectEntityDocDataEnrichment(record.docData, enrichment, logger)
+        : record.docData,
     };
   });
 };
