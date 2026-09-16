@@ -346,8 +346,8 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
     .suggest-widget,
     .suggest-details-container {
-      border-radius: ${theme.euiTheme.border.radius.medium};
-      ${euiShadow(theme, 'l')}
+      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.medium};
+      --vscode-shadow-lg: ${euiShadow(theme, 'l').replace('box-shadow:', '')};
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
@@ -470,16 +470,7 @@ export const trackSuggestionPopupState = (
   editor: monaco.editor.IStandaloneCodeEditor,
   isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
 ): monaco.IDisposable => {
-  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
-    | (monaco.editor.IEditorContribution & {
-        widget?: {
-          value?: {
-            onDidShow?: (cb: () => void) => monaco.IDisposable;
-            onDidHide?: (cb: () => void) => monaco.IDisposable;
-          };
-        };
-      })
-    | undefined;
+  const suggestionController = editor.getContribution('editor.contrib.suggestController');
   const suggestionWidget = suggestionController?.widget?.value;
 
   const disposables: monaco.IDisposable[] = [];
