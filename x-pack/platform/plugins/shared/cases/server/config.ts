@@ -76,7 +76,7 @@ export const ConfigSchema = schema.object({
      * the gating contract retires alongside the v2 service if both are
      * ever sunset together.
      */
-    enableAdminRoutes: schema.boolean({ defaultValue: false }),
+    enableAdminRoutes: schema.boolean({ defaultValue: true }),
     /**
      * Wall-clock budget for the one-shot reset task scheduled by
      * `POST /internal/cases/_analyticsV2/reset`. The reset task does a
