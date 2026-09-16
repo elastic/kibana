@@ -7,6 +7,9 @@
 
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
 import { ruleMappings } from './rule_mappings';
+// Importing ruleModelVersions triggers fromBuilderManifest() side effects
+// (globalFoldedVersions population) needed by the cross-check below.
+import { ruleModelVersions } from './model_versions/rule_model_versions';
 
 describe('ruleMappings', () => {
   // ---------------------------------------------------------------------------
@@ -36,20 +39,66 @@ describe('ruleMappings', () => {
       expect(getBuilderFieldsMapping()?.ignore_above).toBe(BUILDER_FIELDS_IGNORE_ABOVE);
     });
 
-    it('has a properties key fed by assembleBuilderFieldsMappings', () => {
-      // The static mapping must carry a `properties` entry so that
-      // mappings_addition changes produced by fromBuilderManifest are
-      // verbatim present in the type's static mappings — as required by core.
+    it('every mappings_addition builder_fields property in ruleModelVersions is a subset of the static mapping', () => {
+      // Guard: the static mapping drives the schema for builder_fields.properties.
+      // Each manifest fold emits a mappings_addition; core's startup consistency
+      // check requires every added property to already exist in the static mapping.
+      // This test proves that statically, so the failure surface is a test run
+      // rather than a Kibana boot failure.
       //
-      // With an empty BUILDER_MANIFESTS list the result is an empty object,
-      // but the key itself must exist so step 3.5 can populate it by routing
-      // detection-type manifests in.
+      // Ref: rule-type-registration.md "The fold into the saved-object registration"
+      const staticBuilderFieldsProperties = (getBuilderFieldsMapping()?.properties ?? {}) as Record<
+        string,
+        unknown
+      >;
+
+      for (const [, versionDef] of Object.entries(ruleModelVersions)) {
+        const version = versionDef as {
+          changes?: Array<{ type: string; addedMappings?: unknown }>;
+        };
+        for (const change of version.changes ?? []) {
+          if (change.type !== 'mappings_addition') continue;
+          // Drill into addedMappings.metadata.properties.builder_fields.properties
+          const addedMappings = change.addedMappings as Record<string, unknown> | undefined;
+          const metadataProps = (addedMappings?.metadata as { properties?: unknown } | undefined)
+            ?.properties as Record<string, unknown> | undefined;
+          const addedBuilderFields = (
+            metadataProps?.builder_fields as { properties?: unknown } | undefined
+          )?.properties as Record<string, unknown> | undefined;
+          if (!addedBuilderFields) continue;
+
+          for (const key of Object.keys(addedBuilderFields)) {
+            // The static mapping must contain this key.
+            expect(Object.keys(staticBuilderFieldsProperties)).toContain(key);
+            // And the mapping for that key must match exactly.
+            expect(staticBuilderFieldsProperties[key]).toEqual(addedBuilderFields[key]);
+          }
+        }
+      }
+    });
+
+    it('carries the merged sub-field mappings from the two detection-type manifests', () => {
+      // Step 3.5 routes securityDetectionQueryManifest and
+      // securityDetectionThresholdManifest into BUILDER_MANIFESTS. Both declare
+      // the shared detection fragment's sub-fields (risk_score, max_signals,
+      // note, setup) plus `query` as text. Identical declarations across
+      // manifests merge silently; the merged result is the union.
+      //
+      // Core requires every mappings_addition declared in a model version to be
+      // verbatim present in the static mappings. This test confirms that the
+      // static mapping carries exactly those sub-fields so core's startup
+      // consistency check passes.
       //
       // Ref: rule-type-registration.md "The fold into the saved-object registration"
       const mapping = getBuilderFieldsMapping();
       expect(mapping).toHaveProperty('properties');
-      // No manifests registered yet — the assembled properties are empty.
-      expect(mapping?.properties).toEqual({});
+      expect(mapping?.properties).toEqual({
+        risk_score: { type: 'integer' },
+        max_signals: { type: 'integer' },
+        note: { type: 'text' },
+        setup: { type: 'text' },
+        query: { type: 'text' },
+      });
     });
   });
 });
