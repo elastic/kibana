@@ -13,6 +13,7 @@ import {
   getSettingValueMock,
   getCommonStylesheetPathsMock,
   getThemeStylesheetPathsMock,
+  getScriptPathsMock,
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
@@ -285,6 +286,25 @@ function renderTestCases(
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
         baseHref: '/mock-server-basepath',
+      });
+    });
+
+    it('calls `getScriptPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
+      expect(getScriptPathsMock).toHaveBeenCalledWith({
+        darkMode: true,
+        baseHref: '/mock-server-basepath',
+        themeName: 'borealis',
       });
     });
 
@@ -639,6 +659,7 @@ describe('RenderingService', () => {
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
     getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getScriptPathsMock.mockReturnValue(['/script-1.js']);
     getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
     getApmConfigMock.mockReset().mockReturnValue({ stubApmConfig: true });
   });
@@ -969,12 +990,11 @@ describe('RenderingService', () => {
       expect(asScoped).toHaveBeenCalledTimes(1);
       expect(getForInjection).toHaveBeenCalledTimes(1);
       expect(await renderAndReadUserStorage(content)).toEqual({
-        available: true,
         values: { 'navigation:layout': { hidden: ['discover'] } },
       });
     });
 
-    it('injects unavailable/empty values when asScoped() returns null (no profile_uid)', async () => {
+    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn().mockReturnValue(null);
@@ -983,10 +1003,10 @@ describe('RenderingService', () => {
       const content = await render(createKibanaRequest(), buildUiSettings());
 
       expect(asScoped).toHaveBeenCalledTimes(1);
-      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
-    it('injects unavailable/empty values for anonymous pages without consulting userStorage', async () => {
+    it('injects empty values for anonymous pages without consulting userStorage', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn();
@@ -997,7 +1017,7 @@ describe('RenderingService', () => {
       });
 
       expect(asScoped).not.toHaveBeenCalled();
-      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
     it('throws when getForInjection() rejects', async () => {
@@ -1010,7 +1030,7 @@ describe('RenderingService', () => {
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
     });
 
-    it('injects unavailable/empty values when getForInjection() rejects with a forbidden error', async () => {
+    it('injects empty values when getForInjection() rejects with a forbidden error', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const getForInjection = jest
@@ -1021,7 +1041,7 @@ describe('RenderingService', () => {
 
       const content = await render(createKibanaRequest(), buildUiSettings());
 
-      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
   });
 

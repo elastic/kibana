@@ -46,6 +46,7 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
+  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
 import { resolveLocale } from './resolve_locale';
@@ -76,7 +77,6 @@ export class RenderingService {
   private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -122,12 +122,6 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
-
-    this.exposeNavDependencies = await firstValueFrom(
-      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
-    )
-      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
-      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -198,7 +192,6 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
-      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -213,7 +206,7 @@ export class RenderingService {
       settingsUserValues = {},
       globalSettingsUserValues = {},
       { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
-      userStorageResult = { available: false, values: {} },
+      userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -229,7 +222,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<UserSettings> | undefined,
-            Promise<{ available: boolean; values: Record<string, unknown> }>
+            Promise<Record<string, unknown>>
           ])
     );
 
@@ -281,6 +274,12 @@ export class RenderingService {
       baseHref: staticAssetsHrefBase,
     });
     const themeName = this.themeName$.getValue();
+
+    const scriptPaths = getScriptPaths({
+      themeName,
+      darkMode,
+      baseHref: staticAssetsHrefBase,
+    });
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
@@ -348,6 +347,7 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
+      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {
@@ -413,7 +413,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: userStorageResult,
+        userStorage: { values: userStorageValues },
       },
     };
 
@@ -429,19 +429,15 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorage(
-    request: KibanaRequest
-  ): Promise<{ available: boolean; values: Record<string, unknown> }> {
+  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return { available: false, values: {} };
+    if (!userStorage) return {};
 
-    // A `null` scoped client means the current user has no `profile_uid` and user storage is not available.
     const client = userStorage.asScoped(request);
-    if (!client) return { available: false, values: {} };
+    if (!client) return {};
 
     try {
-      const values = await client.getForInjection();
-      return { available: true, values };
+      return await client.getForInjection();
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -451,7 +447,7 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return { available: false, values: {} };
+        return {};
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);
