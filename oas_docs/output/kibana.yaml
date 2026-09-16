@@ -3416,7 +3416,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
@@ -3897,7 +3898,8 @@ paths:
                     - access_mode
                   x-state: Technical Preview; added in 9.5.0
                 action:
-                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  deprecated: true
+                  description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
                   enum:
                     - regenerate
                   type: string
