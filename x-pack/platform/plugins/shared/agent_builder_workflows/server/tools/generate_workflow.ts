@@ -33,7 +33,7 @@ const generateWorkflowSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths. Do not pass conversation summaries.'
+      '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc.'
     ),
   instructions: z
     .string()
