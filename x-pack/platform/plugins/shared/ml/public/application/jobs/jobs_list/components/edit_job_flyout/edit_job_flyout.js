@@ -169,6 +169,13 @@ export class EditJobFlyoutUI extends Component {
     const bucketSpan = job.analysis_config ? job.analysis_config.bucket_span : '';
 
     const datafeedConfig = { ...job.datafeed_config };
+    const isEsqlDatafeed = typeof datafeedConfig.esql_query === 'string';
+    let datafeedQuery = '';
+    if (hasDatafeed) {
+      datafeedQuery = isEsqlDatafeed
+        ? datafeedConfig.esql_query
+        : JSON.stringify(datafeedConfig.query, null, 2);
+    }
     const frequency = datafeedConfig.frequency !== undefined ? datafeedConfig.frequency : '';
     const customUrls =
       job.custom_settings && job.custom_settings.custom_urls
@@ -185,10 +192,10 @@ export class EditJobFlyoutUI extends Component {
       jobDetectorDescriptions: detectors.map((d) => d.detector_description),
       jobBucketSpan: bucketSpan,
       jobCustomUrls: customUrls,
-      datafeedQuery: hasDatafeed ? JSON.stringify(datafeedConfig.query, null, 2) : '',
+      datafeedQuery,
       datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
       datafeedFrequency: hasDatafeed ? frequency : '',
-      datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
+      datafeedScrollSize: hasDatafeed && !isEsqlDatafeed ? +datafeedConfig.scroll_size : null,
       datafeedProjectRouting: hasDatafeed ? datafeedConfig.project_routing : undefined,
     });
   }
@@ -199,7 +206,12 @@ export class EditJobFlyoutUI extends Component {
     const jobClosed = job.state === JOB_STATE.CLOSED;
     const defaultProjectRouting = DEFAULT_ML_PROJECT_ROUTING;
 
-    if (jobClosed && job.datafeed_config && job.data_counts) {
+    if (
+      jobClosed &&
+      job.datafeed_config &&
+      job.data_counts &&
+      Array.isArray(job.datafeed_config.indices)
+    ) {
       this.estimateModelMemoryLimit({
         earliestMs: job.data_counts.earliest_record_timestamp,
         latestMs: job.data_counts.latest_record_timestamp,
@@ -421,6 +433,7 @@ export class EditJobFlyoutUI extends Component {
         hasDatafeed,
         saving,
       } = this.state;
+      const isEsqlDatafeed = typeof job.datafeed_config?.esql_query === 'string';
 
       const tabs = [
         {
@@ -477,6 +490,7 @@ export class EditJobFlyoutUI extends Component {
               setDatafeed={this.setDatafeed}
               datafeedRunning={datafeedRunning}
               datafeedProjectRouting={datafeedProjectRouting}
+              isEsqlDatafeed={isEsqlDatafeed}
             />
           ),
         },
