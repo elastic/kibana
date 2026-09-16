@@ -14,7 +14,6 @@ import type {
   ToolLearningCategory,
 } from '@kbn/nightshift-decision-trees';
 import { DECISION_TREE_AI_INDEX_DEST, DECISION_TREE_TAG } from '../../common/decision_trees';
-import { ensureDecisionTreeIndex } from './store';
 
 const MAX_LEARNINGS = 200;
 
@@ -102,8 +101,6 @@ export const createLearningStore = ({
       if (!validated) {
         throw new Error(`${label} must not be empty`);
       }
-
-      await ensureDecisionTreeIndex(esClient, logger);
 
       const keywords = [
         'nightshift-reinforcement',

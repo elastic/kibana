@@ -10,10 +10,6 @@ import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
 import { createLearningStore } from './learning_store';
 
 const createEsClient = () => ({
-  indices: {
-    exists: jest.fn().mockResolvedValue(true),
-    create: jest.fn().mockResolvedValue({}),
-  },
   index: jest.fn().mockResolvedValue({}),
   search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
 });

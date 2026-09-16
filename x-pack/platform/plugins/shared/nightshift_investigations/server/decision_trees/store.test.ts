@@ -28,10 +28,6 @@ const learning: LearningRecord = {
 };
 
 const createEsClient = () => ({
-  indices: {
-    exists: jest.fn().mockResolvedValue(true),
-    create: jest.fn().mockResolvedValue({}),
-  },
   get: jest.fn().mockResolvedValue({ found: false }),
   search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
   index: jest.fn().mockResolvedValue({}),
@@ -65,18 +61,44 @@ describe('commit', () => {
       id: 'dtree_checkout-high-latency_v1',
       document: expect.objectContaining({
         type: 'decision_tree_version',
-        version: 1,
-        author: 'jdoe',
-        summary: 'Initial tree.',
-        snapshot: MARKDOWN,
+        content: MARKDOWN,
+        attributes: expect.objectContaining({
+          version: 1,
+          author: 'jdoe',
+          summary: 'Initial tree.',
+        }),
         learnings: [learning],
       }),
     });
     expect(headCall[0]).toMatchObject({
       index: DECISION_TREE_AI_INDEX_DEST,
       id: 'dtree_checkout-high-latency',
-      document: expect.objectContaining({ type: 'decision_tree', version: 1, content: MARKDOWN }),
+      document: expect.objectContaining({
+        type: 'decision_tree',
+        content: MARKDOWN,
+        attributes: expect.objectContaining({ version: 1 }),
+      }),
     });
+  });
+
+  it('indexes without creating the backing index first', async () => {
+    const esClient = createEsClient();
+    const indices = { create: jest.fn(), exists: jest.fn() };
+    (esClient as typeof esClient & { indices: typeof indices }).indices = indices;
+
+    await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: 'Initial tree.',
+      learnings: [],
+    });
+
+    expect(indices.create).not.toHaveBeenCalled();
+    expect(indices.exists).not.toHaveBeenCalled();
+    expect(esClient.index).toHaveBeenCalled();
   });
 
   it('increments the version from the existing head', async () => {
@@ -89,12 +111,14 @@ describe('commit', () => {
         title: 'Checkout High Latency',
         content: MARKDOWN,
         tags: ['nightshift', 'decision-tree'],
-        tree_id: 'symptom:checkout-high-latency',
-        symptom: 'checkout-high-latency',
-        version: 2,
-        status: 'tentative',
-        node_count: 5,
-        edge_count: 4,
+        attributes: {
+          tree_id: 'symptom:checkout-high-latency',
+          symptom: 'checkout-high-latency',
+          version: 2,
+          status: 'tentative',
+          node_count: 5,
+          edge_count: 4,
+        },
         learnings: [],
       },
     });
@@ -131,12 +155,14 @@ describe('commit', () => {
         title: 'Checkout High Latency',
         content: MARKDOWN,
         tags: ['nightshift', 'decision-tree'],
-        tree_id: 'symptom:checkout-high-latency',
-        symptom: 'checkout-high-latency',
-        version: 1,
-        status: 'tentative',
-        node_count: 5,
-        edge_count: 4,
+        attributes: {
+          tree_id: 'symptom:checkout-high-latency',
+          symptom: 'checkout-high-latency',
+          version: 1,
+          status: 'tentative',
+          node_count: 5,
+          edge_count: 4,
+        },
         learnings: [existingLearning],
       },
     });
@@ -176,12 +202,14 @@ describe('list', () => {
               title: 'Checkout High Latency',
               content: MARKDOWN,
               tags: ['nightshift', 'decision-tree'],
-              tree_id: 'symptom:checkout-high-latency',
-              symptom: 'checkout-high-latency',
-              version: 2,
-              status: 'established',
-              node_count: 5,
-              edge_count: 4,
+              attributes: {
+                tree_id: 'symptom:checkout-high-latency',
+                symptom: 'checkout-high-latency',
+                version: 2,
+                status: 'established',
+                node_count: 5,
+                edge_count: 4,
+              },
               learnings: [learning],
             },
           },
@@ -203,6 +231,28 @@ describe('list', () => {
   });
 });
 
+describe('listVersions', () => {
+  it('filters versions by the flattened tree_id attribute', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await createStore(esClient).listVersions('symptom:checkout-high-latency');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'decision_tree_version' } },
+              { term: { 'attributes.tree_id': 'symptom:checkout-high-latency' } },
+            ],
+          },
+        },
+      })
+    );
+  });
+});
+
 describe('get', () => {
   it('extracts the mermaid from the head content', async () => {
     const esClient = createEsClient();
@@ -214,12 +264,14 @@ describe('get', () => {
         title: 'Checkout High Latency',
         content: MARKDOWN,
         tags: [],
-        tree_id: 'symptom:checkout-high-latency',
-        symptom: 'checkout-high-latency',
-        version: 1,
-        status: 'tentative',
-        node_count: 5,
-        edge_count: 4,
+        attributes: {
+          tree_id: 'symptom:checkout-high-latency',
+          symptom: 'checkout-high-latency',
+          version: 1,
+          status: 'tentative',
+          node_count: 5,
+          edge_count: 4,
+        },
         learnings: [],
       },
     });
@@ -250,15 +302,17 @@ describe('getVersion', () => {
         type: 'decision_tree_version',
         title: 'Checkout High Latency v2',
         tags: [],
-        tree_id: 'symptom:checkout-high-latency',
-        symptom: 'checkout-high-latency',
-        version: 2,
-        snapshot: MARKDOWN,
-        author: 'jdoe',
-        summary: 'Reinforced.',
-        reinforced: true,
-        node_count: 5,
-        edge_count: 4,
+        content: MARKDOWN,
+        attributes: {
+          tree_id: 'symptom:checkout-high-latency',
+          symptom: 'checkout-high-latency',
+          version: 2,
+          author: 'jdoe',
+          summary: 'Reinforced.',
+          reinforced: true,
+          node_count: 5,
+          edge_count: 4,
+        },
         learnings: [],
       },
     });
@@ -285,12 +339,14 @@ describe('archive', () => {
         title: 'Checkout High Latency',
         content: MARKDOWN,
         tags: [],
-        tree_id: 'symptom:checkout-high-latency',
-        symptom: 'checkout-high-latency',
-        version: 2,
-        status: 'established',
-        node_count: 5,
-        edge_count: 4,
+        attributes: {
+          tree_id: 'symptom:checkout-high-latency',
+          symptom: 'checkout-high-latency',
+          version: 2,
+          status: 'established',
+          node_count: 5,
+          edge_count: 4,
+        },
         learnings: [],
       },
     });
@@ -300,7 +356,9 @@ describe('archive', () => {
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'dtree_checkout-high-latency',
-        document: expect.objectContaining({ status: 'archived', version: 2 }),
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({ status: 'archived', version: 2 }),
+        }),
       })
     );
   });

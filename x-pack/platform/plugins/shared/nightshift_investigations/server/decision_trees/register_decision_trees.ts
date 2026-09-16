@@ -20,8 +20,8 @@ import { buildReinforcementPrompt } from './turn';
 
 /**
  * Registers the dedicated decision-tree AI index with the Context Engine so it is a managed,
- * discoverable index. The backing Elasticsearch index is created separately with explicit mappings
- * (see {@link import('./store').ensureDecisionTreeIndex}); this only records the metadata entry.
+ * discoverable index. The backing Elasticsearch index is auto-created from the `ai-index-idx`
+ * template on first write, the same path Cortex uses.
  */
 export const registerDecisionTreeAiIndex = (
   contextEngine: ContextEnginePluginSetup | undefined,
