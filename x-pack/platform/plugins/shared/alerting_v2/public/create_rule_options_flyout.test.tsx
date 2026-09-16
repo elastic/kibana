@@ -61,7 +61,10 @@ jest.mock('./components/rule_create_options/rule_create_options_flyout', () => (
       <div data-test-subj="mockRuleCreateOptionsFlyout">
         <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
         <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-        <button data-test-subj="thresholdBtn" onClick={(props.onCreateBuilderRule as Function).bind(null, 'threshold') as () => void} />
+        <button
+          data-test-subj="thresholdBtn"
+          onClick={(props.onCreateBuilderRule as Function).bind(null, 'threshold') as () => void}
+        />
       </div>
     );
   },
