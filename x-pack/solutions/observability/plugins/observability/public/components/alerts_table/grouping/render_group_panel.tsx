@@ -7,13 +7,22 @@
 
 import React from 'react';
 import { isArray } from 'lodash/fp';
-import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import { firstNonNullValue } from '@kbn/grouping/src';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AlertsByGroupingAgg } from '../types';
+import type { AlertsByGroupingAgg, BucketItem } from '../types';
 import { Tags } from '../../tags';
 import { ungrouped } from './constants';
+
+export const RULE_NAME_GROUP_TEST_ID = 'rule-name-group-renderer';
+export const RULE_NAME_GROUP_TAGS_TEST_ID = 'rule-name-group-renderer-tags';
+
+const panelWrapperCss = {
+  display: 'table',
+  tableLayout: 'fixed' as const,
+  width: '100%',
+};
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
   selectedGroup,
@@ -24,7 +33,7 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
       return isArray(bucket.key) ? (
         <RuleNameGroupContent
           ruleName={bucket.key[0]}
-          tags={bucket.ruleTags?.buckets.map((tag: any) => tag.key)}
+          tags={bucket.ruleTags?.buckets.map((tag: BucketItem) => tag.key)}
         />
       ) : undefined;
     case 'kibana.alert.instance.id':
@@ -36,21 +45,28 @@ const RuleNameGroupContent = React.memo<{
   ruleName: string;
   tags?: string[] | undefined;
 }>(({ ruleName, tags }) => {
+  const hasTags = !!tags && tags.length > 0;
+
   return (
-    <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
-      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false} style={{ display: 'contents' }}>
+    <div css={panelWrapperCss}>
+      <EuiFlexGroup
+        data-test-subj={RULE_NAME_GROUP_TEST_ID}
+        gutterSize="m"
+        alignItems="center"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem grow={false} css={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName}</h5>
           </EuiTitle>
         </EuiFlexItem>
+        {hasTags ? (
+          <EuiFlexItem grow={false} data-test-subj={RULE_NAME_GROUP_TAGS_TEST_ID}>
+            <Tags tags={tags} color="hollow" size={5} oneLine />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
-
-      {!!tags && tags.length > 0 && (
-        <EuiText size="s">
-          <Tags tags={tags} color="hollow" size={5} oneLine />
-        </EuiText>
-      )}
     </div>
   );
 });
@@ -61,9 +77,9 @@ const InstanceIdGroupContent = React.memo<{
 }>(({ instanceId }) => {
   const isUngrouped = instanceId === '*';
   return (
-    <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
-      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false} style={{ display: 'contents' }}>
+    <div css={panelWrapperCss}>
+      <EuiFlexGroup data-test-subj={RULE_NAME_GROUP_TEST_ID} gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false} css={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">
               {isUngrouped ? ungrouped : instanceId ?? '--'}
