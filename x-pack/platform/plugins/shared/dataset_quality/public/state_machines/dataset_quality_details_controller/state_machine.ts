@@ -112,7 +112,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     input: ({ context }) => context,
                     onDone: {
                       target: 'done',
-                      actions: ['storeDataStreamDetails'],
+                      actions: ['storeDataStreamDetails', 'normalizeQualityIssuesChart'],
                     },
                     onError: [
                       {
@@ -121,7 +121,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'done',
-                        actions: ['notifyFetchDataStreamDetailsFailed'],
+                        actions: [
+                          'resetQualityIssuesChart',
+                          'notifyFetchDataStreamDetailsFailed',
+                        ],
                       },
                     ],
                   },
@@ -175,7 +178,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'qualityIssues',
-                        actions: ['storeDataStreamSettings'],
+                        actions: ['storeDataStreamSettings', 'normalizeQualityIssuesChart'],
                       },
                     ],
                     onError: [
@@ -185,7 +188,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'errorFetchingDataStreamSettings',
-                        actions: ['notifyFetchDataStreamSettingsFailed'],
+                        actions: [
+                          'resetQualityIssuesChart',
+                          'notifyFetchDataStreamSettingsFailed',
+                        ],
                       },
                     ],
                   },
@@ -621,6 +627,29 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             ? { qualityIssuesChart: event.qualityIssuesChart }
             : {};
         }),
+        normalizeQualityIssuesChart: assign(({ context }) => {
+          if (
+            context.qualityIssuesChart !== 'failed' ||
+            !('dataStreamDetails' in context) ||
+            !('dataStreamSettings' in context)
+          ) {
+            return {};
+          }
+
+          const dataStreamDetails = context.dataStreamDetails as DataStreamDetails;
+          const dataStreamSettings = context.dataStreamSettings as DataStreamSettings;
+          const canReadFailureStore = Boolean(
+            dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[context.dataStream]
+              ?.canReadFailureStore
+          );
+
+          return dataStreamDetails.hasFailureStore && canReadFailureStore
+            ? {}
+            : { qualityIssuesChart: 'degraded' as const };
+        }),
+        resetQualityIssuesChart: assign(() => ({
+          qualityIssuesChart: 'degraded' as const,
+        })),
         storeBreakDownField: assign(({ event }) => {
           return 'breakdownField' in event ? { breakdownField: event.breakdownField } : {};
         }),
