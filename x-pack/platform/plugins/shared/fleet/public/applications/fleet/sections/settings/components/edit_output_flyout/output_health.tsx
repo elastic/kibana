@@ -17,6 +17,7 @@ import type { GetOutputHealthResponse } from '../../../../../../../common/types'
 
 import { sendGetOutputHealth, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
+import { isBeatsOutput, isOtlpOutput } from '../../../../../../../common/services/output_helpers';
 
 interface Props {
   output: Output;
@@ -44,6 +45,12 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
     setOutputHealth(outputHealthResponse?.data);
   }, [outputHealthResponse, notifications.toasts]);
 
+  const outputHost = isBeatsOutput(output)
+    ? output.hosts?.join(',') ?? ''
+    : isOtlpOutput(output)
+    ? output.otlp_exporter?.endpoint ?? ''
+    : '';
+
   const EditOutputStatus: { [status: string]: JSX.Element | null } = {
     DEGRADED: (
       <KbnDangerCallout
@@ -56,7 +63,7 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
                 defaultMessage: 'Unable to connect to "{name}" at {host}.',
                 values: {
                   name: output.name,
-                  host: output.hosts?.join(',') ?? '',
+                  host: outputHost,
                 },
               })}
             </p>

@@ -13,6 +13,7 @@ import {
   loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
+  validateOpenApiArtifactArchiveMock,
   fetchArtifactVersionsMock,
   fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
@@ -72,6 +73,7 @@ describe('PackageInstaller', () => {
     });
 
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
+    validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
@@ -82,6 +84,7 @@ describe('PackageInstaller', () => {
     loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
+    validateOpenApiArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
     fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
@@ -202,7 +205,7 @@ describe('PackageInstaller', () => {
             service_settings: {},
           },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
 
@@ -518,7 +521,7 @@ describe('PackageInstaller', () => {
 
       await expect(
         packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
         version: VERSION_NEW,
