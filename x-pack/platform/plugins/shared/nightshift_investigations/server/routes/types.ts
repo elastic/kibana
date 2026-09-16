@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { GetTriggerEmitter } from '../types';
 
@@ -25,7 +25,7 @@ export type GetAutomationsSoClient = (
   spaceId: string
 ) => SavedObjectsClientContract;
 
-export type GetWorkflowsManagement = () => WorkflowsManagementApi | undefined;
+export type GetWorkflowsManagement = () => WorkflowsServerPluginSetup | undefined;
 
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {

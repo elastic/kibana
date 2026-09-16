@@ -117,7 +117,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     let workflowId: string;
     try {
       const yaml = generateWorkflowYaml(created.id, attributes);
-      const workflow = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
+      const workflow = await workflowsManagement.management.createWorkflow({ yaml }, spaceId, request);
       workflowId = workflow.id;
     } catch (err) {
       await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, created.id);

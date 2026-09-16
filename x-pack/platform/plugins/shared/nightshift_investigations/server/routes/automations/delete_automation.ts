@@ -40,7 +40,7 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     if (workflowsManagement && existing.attributes.workflowId) {
       try {
-        await workflowsManagement.deleteWorkflows(
+        await workflowsManagement.management.deleteWorkflows(
           [existing.attributes.workflowId],
           spaceId,
           request

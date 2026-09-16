@@ -114,7 +114,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     if (existing.attributes.workflowId) {
       try {
         const yaml = generateWorkflowYaml(params.path.id, merged);
-        await workflowsManagement.updateWorkflow(
+        await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
           { yaml },
           spaceId,
