@@ -10,6 +10,7 @@
 import type { Download } from 'playwright-core';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { AppMenu } from './app_menu';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 
@@ -32,6 +33,7 @@ const DEFAULT_LIBRARY_TIMEOUT = 30_000;
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
+  private readonly appMenu: AppMenu;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -86,6 +88,7 @@ export class DashboardApp {
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
+    this.appMenu = new AppMenu(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
@@ -282,7 +285,7 @@ export class DashboardApp {
   }
 
   async saveDashboard(name: string, options?: TimeoutOptions) {
-    await this.clickAppMenuItem('dashboardInteractiveSaveMenuItem');
+    await this.appMenu.clickItem('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveModal(options);
   }
@@ -292,14 +295,6 @@ export class DashboardApp {
     await expect(this.saveModal).toBeHidden({
       timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
     });
-  }
-
-  private async clickAppMenuItem(testSubj: string) {
-    const item = this.page.testSubj.locator(testSubj);
-    if (!(await item.isVisible())) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-    }
-    await item.click();
   }
 
   async saveChangesToExistingDashboard() {
@@ -1271,7 +1266,7 @@ export class DashboardApp {
   // ============================================================
 
   async enterFullscreen() {
-    await this.clickAppMenuItem('dashboardFullScreenMode');
+    await this.appMenu.clickItem('dashboardFullScreenMode');
     await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
   }
 
