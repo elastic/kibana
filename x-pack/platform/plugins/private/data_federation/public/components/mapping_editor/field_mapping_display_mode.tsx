@@ -25,16 +25,22 @@ export const FieldMappingDisplayMode = ({
   onEdit,
   onRemove,
 }: FieldMappingDisplayModeProps) => {
+  const name = field.name.trim();
+  const path = field.path.trim();
+  const shouldShowSource = Boolean(path) && path !== name;
+
   return (
     <>
       <EuiFlexItem>
         <EuiText size="s">{field.name}</EuiText>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.dataFederation.mappingEditor.sourceLabel', {
-            defaultMessage: 'Source: {source}',
-            values: { source: field.path || field.name || '' },
-          })}
-        </EuiText>
+        {shouldShowSource ? (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.dataFederation.mappingEditor.sourceLabel', {
+              defaultMessage: 'Source: {source}',
+              values: { source: path },
+            })}
+          </EuiText>
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem>
         {field.type ? (
