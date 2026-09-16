@@ -294,12 +294,14 @@ describe('conversations utils', () => {
       });
     };
 
-    it('appends attachment_events after the rounds-path upsert', async () => {
+    it('folds attachment_events into the rounds-path upsert (single atomic write)', async () => {
+      // Previously updateConversation$ did two writes (upsertRound then appendEvents). If the
+      // second write failed the attachment mutation was committed without its timeline event or
+      // trigger. Both now go into the same OCC write via upsertRound({ events }).
       const conversationClient = createConversationClientMock();
       const conversation = createEmptyConversation({ id: 'conv-1', rounds: [] });
       const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
       const attachmentEvent = attachmentAddedEvent();
-      conversationClient.appendEvents.mockResolvedValue(conversation);
 
       await runUpdate({
         conversationClient,
@@ -310,17 +312,14 @@ describe('conversations utils', () => {
         },
       });
 
-      expect(conversationClient.appendEvents).toHaveBeenCalledWith(
-        { id: 'conv-1', events: [attachmentEvent] },
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.upsertRound).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1', events: [attachmentEvent] }),
         { access: 'converse' }
-      );
-      // ordering: the round is upserted before the events are appended
-      expect(conversationClient.upsertRound.mock.invocationCallOrder[0]).toBeLessThan(
-        conversationClient.appendEvents.mock.invocationCallOrder[0]
       );
     });
 
-    it('does not call appendEvents when the round produced no attachment events', async () => {
+    it('omits events from upsertRound when the round produced no attachment events', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = createEmptyConversation({ rounds: [] });
       await runUpdate({
@@ -332,6 +331,8 @@ describe('conversations utils', () => {
         },
       });
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      const [args] = conversationClient.upsertRound.mock.calls[0];
+      expect(args.events).toBeUndefined();
     });
 
     describe('action parameter', () => {

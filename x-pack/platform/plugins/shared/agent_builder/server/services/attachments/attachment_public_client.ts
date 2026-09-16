@@ -75,20 +75,18 @@ export const createAttachmentPublicClient = ({
     renderInline?: boolean;
   }) => {
     const changes = stateManager.drainChanges();
-    if (changes.length === 0) {
-      await conversationClient.update({ id: conversation.id, attachments: stateManager.getAll() });
-      return;
-    }
     // The caller's identity: the authenticated Kibana user behind the HTTP request, or the user
     // a workflow executes as (steps pass the workflow's fake request).
     const author = await conversationsService.getConversationRoundAuthor({ request });
-    const events = attachmentChangesToEvents(changes, {
-      source,
-      actor: userMessageActor(conversation, { author }),
-      render_inline: renderInline,
-    });
-    // `appendEvents` defaults to `converse` access; `owner` keeps the permission check identical
-    // to the `update` call it replaces.
+    const actor = userMessageActor(author ? conversation : undefined, { author });
+    const events =
+      changes.length > 0
+        ? attachmentChangesToEvents(changes, { source, actor, render_inline: renderInline })
+        : [];
+    // Route the write through `appendEvents` in both cases (with or without events): it's the only
+    // path that runs `reconcileAttachments` against the caller's snapshot, so a concurrent
+    // add/delete between `loadState` and this write can't be silently clobbered. `appendEvents`
+    // defaults to `converse` access; `owner` keeps the original permission check.
     await conversationClient.appendEvents(
       {
         id: conversation.id,

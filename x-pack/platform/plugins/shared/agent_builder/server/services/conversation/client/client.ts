@@ -643,30 +643,52 @@ class ConversationClientImpl implements ConversationClient {
     request: UpsertRoundRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
+    const {
+      id: conversationId,
+      round,
+      replacesRoundId,
+      state,
+      attachments,
+      workspaceId,
+      events: additiveEvents,
+    } = request;
     const { access } = options;
+
+    // `fields` may run more than once on OCC retry; capture the last-run's newly-appended events.
+    let writtenEvents: TimelineEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
       access,
-      fields: (current) => ({
-        rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
-        status: round.status,
-        ...(state ? { state } : {}),
-        ...(attachments
-          ? {
-              attachments: reconcileAttachments({
-                snapshot: attachments.snapshot,
-                stored: current.attachments ?? [],
-                produced: attachments.produced,
-              }),
-            }
-          : {}),
-        ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-        read_by: [],
-        read: false,
-      }),
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const existingIds = new Set(currentEvents.map((event) => event.id));
+        const newEvents = (additiveEvents ?? []).filter((event) => !existingIds.has(event.id));
+        writtenEvents = newEvents;
+        const eventsField =
+          newEvents.length > 0 ? { events: [...currentEvents, ...newEvents] } : {};
+        return {
+          rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
+          status: round.status,
+          ...eventsField,
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
     return result;
   }
 
@@ -733,13 +755,20 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
+    let writtenEvents: TimelineEvent[] = [];
+
     const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...events];
+        const existingIds = new Set(nonRoundEvents.map((event) => event.id));
+        // Round-derived events for this round were just wiped, so they always pass; additive ids
+        // collide only when a caller re-inserts an existing uuid, which we drop.
+        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = eventsToWrite;
+        const replaced = [...nonRoundEvents, ...eventsToWrite];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -762,7 +791,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    this.notifyAttachmentEvents(result.id, events);
+    this.notifyAttachmentEvents(result.id, writtenEvents);
     return result;
   }
 

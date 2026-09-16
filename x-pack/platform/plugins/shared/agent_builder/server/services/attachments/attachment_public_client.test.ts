@@ -186,7 +186,9 @@ describe('createAttachmentPublicClient', () => {
       ]);
     });
 
-    it('falls back to the conversation owner as actor when the caller has no profile id', async () => {
+    it('stamps id "unknown" (does NOT fall back to conversation owner) when the caller has no profile id', async () => {
+      // Audit-hostile guardrail: an API-key caller with no profile id must not be silently
+      // attributed to the conversation owner — the mutation was not performed by them.
       const deps = buildDeps();
       deps.conversationsService.getConversationRoundAuthor.mockResolvedValue(undefined);
       deps.conversationClient.get.mockResolvedValue({
@@ -205,7 +207,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(request.events[0].actor).toEqual({ type: 'user', id: 'owner-1', username: 'owner' });
+      expect(request.events[0].actor).toEqual({ type: 'user', id: 'unknown' });
     });
 
     it('defaults render_inline to false', async () => {
@@ -307,7 +309,10 @@ describe('createAttachmentPublicClient', () => {
       ]);
     });
 
-    it('persists a description-only change without any event', async () => {
+    it('persists a description-only change via appendEvents with an empty events array (race-safe reconcile)', async () => {
+      // Metadata-only changes still go through `appendEvents` — with `events: []` — so
+      // `reconcileAttachments` runs against the caller's snapshot and a concurrent write cannot
+      // silently clobber the change.
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -323,11 +328,12 @@ describe('createAttachmentPublicClient', () => {
         source: 'http_api',
       });
 
-      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
-      expect(deps.conversationClient.update).toHaveBeenCalledWith({
-        id: 'c1',
-        attachments: [expect.objectContaining({ id: 'a1', description: 'renamed' })],
-      });
+      expect(deps.conversationClient.update).not.toHaveBeenCalled();
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events).toEqual([]);
+      expect(request.attachments.produced).toEqual([
+        expect.objectContaining({ id: 'a1', description: 'renamed' }),
+      ]);
     });
 
     it('throws AttachmentNotFoundError when the attachment is missing', async () => {
@@ -460,7 +466,9 @@ describe('createAttachmentPublicClient', () => {
       });
     });
 
-    it('permanent delete of an already soft-deleted attachment persists without an event', async () => {
+    it('permanent delete of an already soft-deleted attachment persists via appendEvents with an empty events array', async () => {
+      // The permanentDelete of a tombstone records no change → no event, but the attachment write
+      // still needs `reconcileAttachments` (race-safe path).
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -476,8 +484,10 @@ describe('createAttachmentPublicClient', () => {
         source: 'http_api',
       });
 
-      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
-      expect(deps.conversationClient.update).toHaveBeenCalledWith({ id: 'c1', attachments: [] });
+      expect(deps.conversationClient.update).not.toHaveBeenCalled();
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events).toEqual([]);
+      expect(request.attachments.produced).toEqual([]);
     });
 
     it('permanent delete throws attachmentPermanentDeleteBlocked when attachment has client_id', async () => {

@@ -219,35 +219,26 @@ export const updateConversation$ = ({
           : undefined;
 
       const attachmentEvents = roundCompletedEvent.data.attachment_events ?? [];
-      const roundUpserted$ = conversationClient
-        .upsertRound(
-          {
-            id: conversation.id,
-            round,
-            replacesRoundId,
-            state: conversation_state,
-            ...(roundCompletedEvent.data.attachments
-              ? {
-                  attachments: {
-                    snapshot: conversation.attachments ?? [],
-                    produced: roundCompletedEvent.data.attachments,
-                  },
-                }
-              : {}),
-            workspaceId: roundCompletedEvent.data.workspace_id,
-          },
-          { access: 'converse' }
-        )
-        .then((upserted) =>
-          // Rounds-path writes carry no events; attachment events are additive so a follow-up
-          // append is safe (append-only timeline, ids are uuids and never round-derived).
-          attachmentEvents.length > 0
-            ? conversationClient.appendEvents(
-                { id: conversation.id, events: attachmentEvents },
-                { access: 'converse' }
-              )
-            : upserted
-        );
+
+      const roundUpserted$ = conversationClient.upsertRound(
+        {
+          id: conversation.id,
+          round,
+          replacesRoundId,
+          state: conversation_state,
+          ...(attachmentEvents.length > 0 ? { events: attachmentEvents } : {}),
+          ...(roundCompletedEvent.data.attachments
+            ? {
+                attachments: {
+                  snapshot: conversation.attachments ?? [],
+                  produced: roundCompletedEvent.data.attachments,
+                },
+              }
+            : {}),
+          workspaceId: roundCompletedEvent.data.workspace_id,
+        },
+        { access: 'converse' }
+      );
 
       const persisted$: Observable<Conversation> = title$
         ? forkJoin({ updated: from(roundUpserted$), title: title$ }).pipe(

@@ -92,6 +92,8 @@ export interface UpsertRoundRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
+  /** Additive timeline events to append in the same write as the round upsert. */
+  events?: TimelineEvent[];
 }
 
 /** Appends timeline events onto a conversation.*/
