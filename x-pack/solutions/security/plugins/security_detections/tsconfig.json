@@ -24,7 +24,10 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/logging-mocks",
-    "@kbn/scout-security"
+    "@kbn/scout-security",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
