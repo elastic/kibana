@@ -1,0 +1,271 @@
+{
+  "10.6.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test plain alert rule",
+        "description": "a plain alert-kind rule with no builder type",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "test signal rule",
+        "description": "a signal-kind rule without a builder type",
+        "tags": [
+          "test"
+        ],
+        "version": 1
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "5m",
+        "lookback": "10m"
+      },
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE event.category == \"process\" | LIMIT 100"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "test detection query rule",
+        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "tags": [
+          "security",
+          "detection"
+        ],
+        "version": 1,
+        "builder_type": "security.detection.query"
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "5m",
+        "lookback": "10m"
+      },
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE process.name == \"cmd.exe\" | LIMIT 100"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.7.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test plain alert rule",
+        "description": "a plain alert-kind rule with no builder type",
+        "tags": [
+          "test"
+        ],
+        "version": 1,
+        "signature_id": {
+          "$match": "uuid"
+        },
+        "source": {
+          "type": "internal",
+          "version": 1
+        },
+        "revision": 0,
+        "ownership": {
+          "managed": false
+        }
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "test signal rule",
+        "description": "a signal-kind rule without a builder type",
+        "tags": [
+          "test"
+        ],
+        "version": 1,
+        "signature_id": {
+          "$match": "uuid"
+        },
+        "source": {
+          "type": "internal",
+          "version": 1
+        },
+        "revision": 0,
+        "ownership": {
+          "managed": false
+        }
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "5m",
+        "lookback": "10m"
+      },
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE event.category == \"process\" | LIMIT 100"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "signal",
+      "metadata": {
+        "name": "test detection query rule",
+        "description": "a signal-kind rule managed by the security.detection.query builder type",
+        "tags": [
+          "security",
+          "detection"
+        ],
+        "version": 1,
+        "builder_type": "security.detection.query",
+        "signature_id": {
+          "$match": "uuid"
+        },
+        "source": {
+          "type": "internal",
+          "version": 1
+        },
+        "revision": 0,
+        "ownership": {
+          "managed": true,
+          "solution": "security",
+          "domain": "detection"
+        }
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "5m",
+        "lookback": "10m"
+      },
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | WHERE process.name == \"cmd.exe\" | LIMIT 100"
+        }
+      },
+      "grouping": {
+        "fields": [
+          "host.name"
+        ]
+      },
+      "enabled": true,
+      "createdBy": {
+        "profile_uid": "elastic"
+      },
+      "updatedBy": {
+        "profile_uid": "elastic"
+      },
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}
