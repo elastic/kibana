@@ -22,6 +22,7 @@ export interface SequenceBuilderHeaderProps {
   sidebarOpen: boolean;
   seqValues: SequenceFormValues;
   isSaving: boolean;
+  ruleFetchError?: boolean;
   rulesListHref: string;
   onStepChange: (step: SequenceBuilderStep) => void;
   onToggleDetails: () => void;
@@ -34,6 +35,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
   sidebarOpen,
   seqValues,
   isSaving,
+  ruleFetchError,
   rulesListHref,
   onStepChange,
   onToggleDetails,
@@ -62,6 +64,12 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
 
   const saveDisabledReason = useMemo(() => {
     if (isSaving) return undefined;
+    if (ruleFetchError) {
+      return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledRuleFetchTooltip', {
+        defaultMessage:
+          'One or more rules could not be found. Remove missing rules to enable saving.',
+      });
+    }
     if (!sequenceValid) {
       return i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveDisabledSequenceTooltip', {
         defaultMessage: 'Add at least two steps with rules to save',
@@ -73,7 +81,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
       });
     }
     return undefined;
-  }, [isSaving, sequenceValid, canSave]);
+  }, [isSaving, ruleFetchError, sequenceValid, canSave]);
 
   const menu = useMemo((): AppHeaderMenu => {
     const items: AppHeaderMenu['items'] = [
@@ -130,7 +138,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
         iconType: 'check',
         run: onSave,
         isLoading: isSaving,
-        disableButton: !canSave,
+        disableButton: !canSave || ruleFetchError,
         tooltipContent: saveDisabledReason,
         testId: 'sequenceBuilderSave',
       },
@@ -139,6 +147,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
     step,
     sidebarOpen,
     isSaving,
+    ruleFetchError,
     sequenceValid,
     canSave,
     saveDisabledReason,
