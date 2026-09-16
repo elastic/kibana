@@ -16,7 +16,9 @@ export type {
 export { isUserAnonymous, canUserHaveProfile } from './src/authentication';
 export type {
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
+  ServiceAccountWorkloadBinder,
+  ServiceAccountWorkloadBinding,
+  BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadCoordinates,
 } from './src/service_accounts';

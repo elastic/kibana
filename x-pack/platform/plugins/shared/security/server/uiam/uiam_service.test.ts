@@ -14,8 +14,8 @@ import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
-import type { ServiceAccount } from '@kbn/core-security-server';
 
+import type { UiamServiceAccount } from './service_account_types';
 import {
   type GrantUiamApiKeyRequestBody,
   type GrantUiamApiKeyResponse,
@@ -1075,7 +1075,7 @@ describe('UiamService', () => {
     };
 
     it('properly calls UIAM service to create a service account', async () => {
-      const mockResponse: ServiceAccount = {
+      const mockResponse: UiamServiceAccount = {
         id: 'service-account-id',
         type: 'project',
         name: 'nightshift-relay',

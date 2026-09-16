@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { AuthenticatedUser, KibanaRequest, ServiceAccount } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
@@ -24,7 +24,7 @@ import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../common/service_accounts';
-import type { UiamServicePublic } from '../uiam';
+import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
 describe('UiamServiceAccounts', () => {
@@ -52,7 +52,7 @@ describe('UiamServiceAccounts', () => {
       headers: authHeader ? { authorization: authHeader } : {},
     });
 
-  const validResponse: ServiceAccount = {
+  const validResponse: UiamServiceAccount = {
     id: 'service-account-id',
     type: 'project' as const,
     name: 'nightshift-relay',
@@ -102,7 +102,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual(validResponse);
+      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
 
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
       expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
@@ -122,6 +122,17 @@ describe('UiamServiceAccounts', () => {
         },
         { includeClientAuthentication: true }
       );
+    });
+
+    it('rejects `roles` with a 400, since UIAM cannot downscope yet', async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles: ['viewer'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
     it.each([true, false])(
@@ -200,11 +211,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Service account creation denied: missing `manage_security` cluster privilege'
+        'Refused to create a service account: missing `manage_security` cluster privilege'
       );
     });
 
-    it.each<{ assumableBy: ServiceAccount['assumable_by'] }>([
+    it.each<{ assumableBy: UiamServiceAccount['assumable_by'] }>([
       { assumableBy: validResponse.assumable_by },
       {
         assumableBy: [{ type: 'platform-service-account', service_account_id: 'nightshift-relay' }],
@@ -224,19 +235,22 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-        ).resolves.toEqual(result);
+        ).resolves.toEqual({ id: result.id, name: result.name });
         expect(logger.error).not.toHaveBeenCalled();
       }
     );
 
     it.each([
-      { id: 'service-account-id' } as ServiceAccount,
-      { ...validResponse, assumable_by: [{ type: 'project-service-account' }] } as ServiceAccount,
+      { id: 'service-account-id' } as UiamServiceAccount,
+      {
+        ...validResponse,
+        assumable_by: [{ type: 'project-service-account' }],
+      } as UiamServiceAccount,
       { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
       {
         ...validResponse,
         assumable_by: [{ type: 'platform-service-account' }],
-      } as ServiceAccount,
+      } as UiamServiceAccount,
       {
         ...validResponse,
         assumable_by: [{ type: 'platform-service-account', service_account_id: 123 }],
@@ -249,7 +263,7 @@ describe('UiamServiceAccounts', () => {
             service_account_id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1),
           },
         ],
-      } as ServiceAccount,
+      } as UiamServiceAccount,
       {
         ...validResponse,
         assumable_by: [{ type: 'unsupported-service-account', service_account_id: 'relay' }],
@@ -257,13 +271,13 @@ describe('UiamServiceAccounts', () => {
       {
         ...validResponse,
         assumable_by: [validResponse.assumable_by[0], { type: 'platform-service-account' }],
-      } as ServiceAccount,
-    ])('logs validation failures and returns the original response', async (result) => {
+      } as UiamServiceAccount,
+    ])('logs validation failures but still reports the created account', async (result) => {
       mockUiam.createServiceAccount.mockResolvedValue(result);
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toBe(result);
+      ).resolves.toEqual({ id: result.id, name: result.name });
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed validation'));
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
@@ -279,7 +293,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).resolves.toEqual(validResponse);
+      ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
     });
 
     it('logs and rethrows upstream failures', async () => {
@@ -549,6 +563,30 @@ describe('UiamServiceAccounts', () => {
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
         expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+    });
+
+    describe('#releaseFakeRequest', () => {
+      it('permanently disables credential replacement for the request', async () => {
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+
+        serviceAccounts.releaseFakeRequest(request);
+
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+
+        await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
+        expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+        // The request rides out its current token; nothing is replaced.
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('is a no-op for requests this backend did not mint', () => {
+        expect(() =>
+          serviceAccounts.releaseFakeRequest(httpServerMock.createFakeKibanaRequest({}))
+        ).not.toThrow();
       });
     });
   });

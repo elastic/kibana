@@ -15,6 +15,7 @@ import { z } from '@kbn/zod';
 import { buildAssumableBy } from './assumable_by';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { CloudProjectContext, ServiceAccountsBackend } from './types';
@@ -125,20 +126,24 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const authorization = getUiamAuthorizationHeaderFromRequest(request);
-
-    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
-      elasticsearch: { cluster: ['manage_security'], index: {} },
-    });
-
-    if (!hasAllRequested) {
-      this.logger.warn(
-        'Service account creation denied: missing `manage_security` cluster privilege'
-      );
-      throw Boom.forbidden(
-        'Cannot create a service account: missing `manage_security` cluster privilege'
+    // UIAM's first iteration grants the account its creator's privileges and offers no way to
+    // narrow them, so a caller-supplied role list cannot be honoured. Rejected rather than
+    // ignored, so the asymmetry with the Elasticsearch backend is discoverable.
+    if (params.roles) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `roles` is not supported on this deployment; the ' +
+          "service account is granted the creator's privileges"
       );
     }
+
+    const authorization = getUiamAuthorizationHeaderFromRequest(request);
+
+    await ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action: 'create a service account',
+    });
 
     this.logger.debug('Attempting to create a service account');
 
@@ -159,10 +164,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
         );
-        return result;
       }
 
-      return parsed.data;
+      // Only the backend-agnostic fields cross the contract boundary; the rest of UIAM's payload
+      // is validated above purely to catch an upstream shape change.
+      return { id: result.id, name: result.name };
     } catch (e) {
       this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
       throw e;
@@ -214,6 +220,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
     // The license gate is enforced by `exchangeToken`, which mints the initial credential.
     return await this.fakeRequests.create(params);
+  }
+
+  releaseFakeRequest(request: KibanaRequest): void {
+    this.fakeRequests.release(request);
   }
 
   async reauthenticateFakeRequest(

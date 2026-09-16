@@ -10,20 +10,43 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountsServiceStart } from './types';
 
 export const serviceAccountsServiceMock = {
-  createStart: (): jest.Mocked<ServiceAccountsServiceStart> => ({
-    create: jest.fn().mockResolvedValue({
-      id: 'mock-service-account-id',
-      type: 'project' as const,
-      name: 'mock-service-account-name',
-      organization_id: 'mock-organization-id',
-      role_assignments: {},
-      assumable_by: [],
-    }),
-    createFakeRequest: jest.fn().mockImplementation(async () =>
-      httpServerMock.createFakeKibanaRequest({
-        headers: { authorization: 'Bearer essu_mock-service-account-token' },
-      })
-    ),
-    reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+  createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
+    backend: {
+      create: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        name: 'mock-service-account-name',
+      }),
+      createFakeRequest: jest.fn().mockImplementation(async () =>
+        httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_mock-service-account-token' },
+        })
+      ),
+      reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+      releaseFakeRequest: jest.fn(),
+    },
+    workloads: {
+      bindWorkload: jest.fn().mockResolvedValue({
+        operationType: 'mock-operation-type',
+        workloadType: 'mock-workload-type',
+        workloadId: 'mock-workload-id',
+        serviceAccountId: 'mock-service-account-id',
+        spaceId: 'default',
+        boundBy: {
+          type: 'user' as const,
+          userProfileId: 'mock-user-profile-id',
+          username: 'mock-user',
+        },
+        boundAt: '2026-08-21T00:00:00.000Z',
+      }),
+      unbindWorkload: jest.fn().mockResolvedValue(undefined),
+      getBinding: jest.fn().mockResolvedValue(null),
+      withScopedRequest: jest.fn().mockImplementation(async (_operationType, _params, fn) =>
+        fn(
+          httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer essu_mock-service-account-token' },
+          })
+        )
+      ),
+    },
   }),
 };

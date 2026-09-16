@@ -18,9 +18,6 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
-  ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -34,6 +31,11 @@ import type {
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
+import type {
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  UiamServiceAccount,
+} from './service_account_types';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -282,7 +284,7 @@ export interface UiamServicePublic {
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
     options?: UiamClientAuthenticationOptions
-  ): Promise<ServiceAccount>;
+  ): Promise<UiamServiceAccount>;
 
   /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
@@ -724,7 +726,7 @@ export class UiamService implements UiamServicePublic {
     authorization: HTTPAuthorizationHeader,
     body: CreateServiceAccountRequestBody,
     { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
-  ): Promise<ServiceAccount> {
+  ): Promise<UiamServiceAccount> {
     try {
       this.#logger.debug('Attempting to create service account.');
 
