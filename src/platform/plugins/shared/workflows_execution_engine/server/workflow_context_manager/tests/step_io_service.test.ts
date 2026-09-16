@@ -2635,5 +2635,43 @@ describe('StepIoService', () => {
 
       expect(service.getStepOutput(id)).toEqual(aggregate);
     });
+
+    // The ordering the previous test cannot reach: it completes both fetches
+    // before the aggregate is written. Here the fetch is still in flight when
+    // the owner writes, so the response that lands afterwards carries the
+    // pre-write document. Applying it unconditionally would replace the correct
+    // aggregate with the older `null` -- a direct overwrite, independent of the
+    // transient bookkeeping.
+    it('discards a fetch that lands after the owner rewrote the output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // Hold the read open so the write below lands mid-flight.
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // The step settles and writes its real aggregate while the fetch is open.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, 10);
+
+      // Only now does Elasticsearch answer, with the document as it looked
+      // before that write.
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      expect(service.getStepOutput(id)).toEqual(aggregate);
+    });
   });
 });

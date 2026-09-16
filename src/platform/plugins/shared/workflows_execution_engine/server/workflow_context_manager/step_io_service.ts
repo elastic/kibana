@@ -1083,6 +1083,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         );
         return false;
       }
+      // Staleness check. `idsToRehydrate` is snapshotted from `evictedOutputIds`
+      // BEFORE the fetch, and the fetch is a real await: by the time it returns,
+      // the owning step may have written a newer output (`setStepOutput` clears
+      // the evicted flag), or a concurrent rehydrate may already have restored
+      // this id. In both cases what is in memory is at least as fresh as this
+      // document, and applying it would replace a correct value with an older
+      // one -- `null`, when the step had not yet written an output at fetch time.
+      // Still being evicted is what makes this document authoritative.
+      if (!this.evictedOutputIds.has(doc.id)) {
+        this.logger?.debug(
+          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten or restored while the fetch was in flight`
+        );
+        return false;
+      }
       return true;
     });
 
