@@ -36,7 +36,7 @@ const exportContentRoute = createServerRoute({
     access: 'public',
     summary: 'Export stream content',
     description:
-      'Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.',
+      'Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included.',
     availability: {
       since: '9.1.0',
       stability: 'experimental',

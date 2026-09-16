@@ -11,9 +11,13 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { BulkOperationError } from '@kbn/storage-adapter';
 import type { Improvement, ImprovementRevisionInput } from '../../common/http_api/improvements';
 import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
+import { createSpaceDslFilter } from '../utils/space_filter';
 import { ImprovementConflictError, ImprovementNotFoundError } from './errors';
 import { ImprovementsService } from './service';
 import { createImprovementsClient } from './storage';
+
+const SPACE = 'default';
+const SPACE_FILTER = createSpaceDslFilter(SPACE);
 
 jest.mock('./storage');
 
@@ -45,6 +49,7 @@ const makeInput = (
 
 const makeHead = (overrides: Partial<Improvement> = {}): Improvement => ({
   ...makeInput(),
+  space: SPACE,
   revision_id: 'rev-1',
   latest: true,
   '@timestamp': '2026-01-02T00:00:00.000Z',
@@ -82,10 +87,10 @@ describe('ImprovementsService', () => {
     createImprovementsClientMock.mockReturnValue(client);
     bulk.mockResolvedValue({ errors: false, items: [] });
     search.mockResolvedValue(searchResponse([]));
-    service = new ImprovementsService({ esClient, logger });
+    service = new ImprovementsService({ esClient, logger, space: SPACE });
   });
 
-  it("binds the store to the caller's client, with no space dimension", () => {
+  it("binds the store to the caller's client", () => {
     expect(createImprovementsClientMock).toHaveBeenCalledWith(esClient);
   });
 
@@ -105,9 +110,11 @@ describe('ImprovementsService', () => {
       expect(operations[0].index._id).toBe(written.revision_id);
       expect(operations[0].index.document).toMatchObject({
         improvement_id: 'imp-1',
+        space: SPACE,
         latest: true,
         status: 'suggested',
       });
+      expect(written.space).toBe(SPACE);
       expect(operations[0].index.document.previous_revision_id).toBeUndefined();
       expect(refresh).toBe('wait_for');
       expect(throwOnFail).toBe(true);
@@ -169,6 +176,7 @@ describe('ImprovementsService', () => {
       const [request] = search.mock.calls[0];
       expect(request.seq_no_primary_term).toBe(true);
       expect(request.query.bool.filter).toEqual([
+        SPACE_FILTER,
         { term: { latest: true } },
         { terms: { improvement_id: ['imp-1'] } },
       ]);
@@ -283,7 +291,7 @@ describe('ImprovementsService', () => {
 
       expect(result).toEqual({ items: [head], total: 3 });
       const [request] = search.mock.calls[0];
-      expect(request.query.bool.filter).toEqual([{ term: { latest: true } }]);
+      expect(request.query.bool.filter).toEqual([SPACE_FILTER, { term: { latest: true } }]);
       expect(request.sort).toEqual([
         { '@timestamp': { order: 'desc' } },
         { revision_id: { order: 'desc' } },
@@ -312,6 +320,7 @@ describe('ImprovementsService', () => {
       await service.list({ aiIndexId: 'sales', status: ['suggested', 'failed'] });
       const [request] = search.mock.calls[0];
       expect(request.query.bool.filter).toEqual([
+        SPACE_FILTER,
         { term: { latest: true } },
         { term: { ai_index_id: 'sales' } },
         { terms: { status: ['suggested', 'failed'] } },
@@ -331,6 +340,7 @@ describe('ImprovementsService', () => {
 
       await expect(service.get('imp-1')).resolves.toEqual(head);
       expect(search.mock.calls[0][0].query.bool.filter).toEqual([
+        SPACE_FILTER,
         { term: { latest: true } },
         { term: { improvement_id: 'imp-1' } },
       ]);
@@ -341,25 +351,56 @@ describe('ImprovementsService', () => {
     });
   });
 
-  describe('historyFor', () => {
-    it('returns every improvement for the AI index regardless of status, capped', async () => {
-      search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
+  describe('historySummaryFor', () => {
+    const summaryResponse = (
+      buckets: Array<{ key: string; doc_count: number }>,
+      total = buckets.reduce((sum, { doc_count: count }) => sum + count, 0)
+    ) => ({
+      hits: { hits: [], total: { value: total, relation: 'eq' } },
+      aggregations: { status: { buckets } },
+    });
 
-      await service.historyFor('sales');
+    it('counts the AI index heads by status without fetching any of them', async () => {
+      search.mockResolvedValue(
+        summaryResponse([
+          { key: 'rejected', doc_count: 4 },
+          { key: 'suggested', doc_count: 2 },
+        ])
+      );
+
+      const summary = await service.historySummaryFor('sales');
 
       const [request] = search.mock.calls[0];
+      expect(request.size).toBe(0);
       expect(request.query.bool.filter).toEqual([
+        SPACE_FILTER,
         { term: { latest: true } },
         { term: { ai_index_id: 'sales' } },
       ]);
+      expect(summary).toEqual({ total: 6, by_status: { rejected: 4, suggested: 2 } });
     });
 
-    it('is not clamped by the review UI page size, but is capped by the briefing budget', async () => {
-      await service.historyFor('sales');
-      expect(search.mock.calls[0][0].size).toBe(200);
+    it('reports a total the counted statuses do not have to add up to', async () => {
+      // `track_total_hits` is what the briefing quotes, so it is read from the hits rather than
+      // summed from buckets a `size`-capped terms agg could have truncated.
+      search.mockResolvedValue(summaryResponse([{ key: 'rejected', doc_count: 4 }], 9));
 
-      await service.historyFor('sales', { size: 10_000 });
-      expect(search.mock.calls[1][0].size).toBe(200);
+      expect(await service.historySummaryFor('sales')).toEqual({
+        total: 9,
+        by_status: { rejected: 4 },
+      });
+    });
+
+    it('ignores a bucket key that is not a status this store writes', async () => {
+      search.mockResolvedValue(summaryResponse([{ key: 'archived', doc_count: 3 }], 3));
+
+      expect((await service.historySummaryFor('sales')).by_status).toEqual({});
+    });
+
+    it('reports an index with no proposals as empty rather than failing', async () => {
+      search.mockResolvedValue({ hits: { hits: [], total: { value: 0, relation: 'eq' } } });
+
+      expect(await service.historySummaryFor('sales')).toEqual({ total: 0, by_status: {} });
     });
   });
 
@@ -489,7 +530,11 @@ describe('ImprovementsService', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({
         index: IMPROVEMENTS_INDEX,
-        query: { term: { ai_index_id: 'sales' } },
+        query: {
+          bool: {
+            filter: [SPACE_FILTER, { term: { ai_index_id: 'sales' } }],
+          },
+        },
         conflicts: 'proceed',
         refresh: true,
         ignore_unavailable: true,
