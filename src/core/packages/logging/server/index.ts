@@ -22,6 +22,7 @@ export type {
   RollingFileAppenderPluginConfig,
   RewriteAppenderConfig,
   AppenderConfigType,
+  PluginAppenderConfigType,
   RollingStrategyConfig,
   NumericRollingStrategyConfig,
   TimeIntervalTriggeringPolicyConfig,

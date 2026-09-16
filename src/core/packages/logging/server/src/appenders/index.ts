@@ -9,18 +9,13 @@
 
 import type { ConsoleAppenderConfig } from './console';
 import type { FileAppenderConfig, FileAppenderPluginConfig } from './file';
-import type { OtelAppenderConfig, OtelAppenderPluginConfig } from './otel';
+import type { OtelAppenderConfig } from './otel';
 import type { RewriteAppenderConfig } from './rewrite';
 import type { RollingFileAppenderConfig, RollingFileAppenderPluginConfig } from './rolling_file';
 
 export type { ConsoleAppenderConfig } from './console';
 export type { FileAppenderConfig, FileAppenderPluginConfig } from './file';
-export type {
-  OtelAppenderConfig,
-  OtelAppenderPluginConfig,
-  OtelAppenderTlsConfig,
-  OtelAttributesTransform,
-} from './otel';
+export type { OtelAppenderConfig, OtelAppenderTlsConfig } from './otel';
 export type {
   RewriteAppenderConfig,
   MetaRewritePolicyConfig,
@@ -55,5 +50,4 @@ export type AppenderConfigType =
 export type PluginAppenderConfigType =
   | AppenderConfigType
   | FileAppenderPluginConfig
-  | OtelAppenderPluginConfig
   | RollingFileAppenderPluginConfig;

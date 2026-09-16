@@ -37,7 +37,7 @@ export const appendersSchema = schema.oneOf([
 export const pluginAppendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.runtimeConfigSchema,
-  OtelAppender.runtimeConfigSchema,
+  OtelAppender.configSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.runtimeConfigSchema,
 ]);
