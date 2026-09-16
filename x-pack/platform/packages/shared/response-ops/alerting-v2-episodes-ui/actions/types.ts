@@ -32,4 +32,6 @@ export interface EpisodeAction {
    * the data table's bulk menu — fall back to `execute`.
    */
   renderMenuItem?: (ctx: EpisodeActionMenuItemContext) => ReactNode;
+  showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
+  disabledTooltip?: string;
 }

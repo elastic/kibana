@@ -39,7 +39,10 @@ import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
-import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
+import {
+  EpisodeDataSourceProvider,
+  useAdditionalEpisodesDataSource,
+} from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import {
@@ -175,6 +178,7 @@ const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
+  const additionalDataSource = useAdditionalEpisodesDataSource();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
@@ -392,6 +396,7 @@ const AlertEpisodesListPageContent = () => {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          additionalDataSource,
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
@@ -405,7 +410,7 @@ const AlertEpisodesListPageContent = () => {
         }),
         alertsCapability
       ),
-    [services, queryClient, rulesCache, alertsCapability]
+    [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
   );
 
   const getRuleDetailsHref = useCallback(

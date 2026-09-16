@@ -297,13 +297,15 @@ export const EpisodeRuleCell = ({
   );
 };
 
+const EXTERNAL_SOURCE_COLOR = '#6A717D';
+
 /** Maps raw `source` field values to display labels and badge colors. */
 const SOURCE_DISPLAY: Record<string, { label: string; color: string }> = {
   internal: { label: 'Elastic v2', color: '#0077CC' },
   'elastic-v1': { label: 'Elastic v1', color: '#006BB4' },
-  datadog: { label: 'Datadog', color: '#632CA6' },
-  newrelic: { label: 'New Relic', color: '#1CE783' },
-  dynatrace: { label: 'Dynatrace', color: '#1496FF' },
+  datadog: { label: 'Datadog', color: EXTERNAL_SOURCE_COLOR },
+  newrelic: { label: 'New Relic', color: EXTERNAL_SOURCE_COLOR },
+  dynatrace: { label: 'Dynatrace', color: EXTERNAL_SOURCE_COLOR },
 };
 
 /**
