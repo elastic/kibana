@@ -105,7 +105,7 @@ describe('PoliciesExecutionHistoryTable', () => {
     expect(screen.queryByRole('columnheader', { name: /Episodes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('columnheader', { name: /Action groups/i })).not.toBeInTheDocument();
     // Other columns remain
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Action policy/i })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Workflows/i })).toBeInTheDocument();
   });
 
@@ -114,7 +114,7 @@ describe('PoliciesExecutionHistoryTable', () => {
 
     expect(screen.queryByRole('columnheader', { name: /Rules/i })).not.toBeInTheDocument();
     expect(screen.queryByText('My Rule')).not.toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Policy/i })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /Action policy/i })).toBeInTheDocument();
   });
 
   it('calls onPolicyClick when the policy link is clicked', async () => {

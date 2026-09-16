@@ -33,6 +33,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Get rules in bulk',
     oasOperationObject: bulkGetRulesOasExamples,
   } as const;

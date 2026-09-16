@@ -56,6 +56,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.ml}.query_anomalies`,
 
   // Security Solution
+  `${internalNamespaces.security}.alertzero.actions.list`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -241,6 +242,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
+  'elastic-defend-policy-management',
   'investigate-rule',
   'siem-readiness',
   'automatic-migration-rules-start-migration',
@@ -271,6 +273,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-management',
   'connector-authoring',
+  'connector-discovery',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
