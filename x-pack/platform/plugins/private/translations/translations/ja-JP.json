@@ -51792,7 +51792,6 @@
     "xpack.slo.sloEdit.sliType.histogram.toTooltip": "\"to\"値は含まれません。",
     "xpack.slo.sloEdit.sliType.histogram.valueCountLabel": "値カウント",
     "xpack.slo.sloEdit.sliType.sourceTitle": "送信元",
-    "xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage": "Synthetics可用性インジケーターでは、予算設定方法を［オカレンス］に設定される必要があります。",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel": "メトリックを追加",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricLabel": "メトリックを追加",
     "xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder": "集約を選択してください",
