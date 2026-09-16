@@ -21,9 +21,9 @@ const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin
 const getWorkerEntry = (language) => {
   switch (language) {
     case 'editorWorkerService':
-      return 'monaco-editor/esm/vs/editor/editor.worker.js';
+      return 'monaco-editor/editor/editor.worker.js';
     case 'json':
-      return 'monaco-editor/esm/vs/language/json/json.worker.js';
+      return 'monaco-editor/language/json/json.worker.js';
     default:
       return path.resolve.apply(path, [
         __dirname,
@@ -84,11 +84,27 @@ const workerConfig = (languages) => ({
         },
       },
       {
+        test: /(monaco-worker-manager|monaco-yaml)\/.*m?(t|j)sx?$/,
+        resolve: {
+          alias: {
+            // monaco-editor 0.56 added an "exports" map that remaps all subpaths relative to
+            // esm/vs/, so pre-0.56 deep specifiers like monaco-editor/esm/vs/... no longer resolve.
+            // Third-party deps (e.g. monaco-worker-manager, pulled in by monaco-yaml's
+            // worker) still import those old specifiers, so we add this an alias resolver to point these packages at the real directory.
+            'monaco-editor/esm/vs': path.resolve(
+              require.resolve('monaco-editor/editor/editor.api.js'),
+              '..',
+              '..'
+            ),
+          },
+        },
+      },
+      {
         /**
          * further process the modules exported by monaco-editor and monaco-yaml
          * because their exports leverage some none-standard language APIs at this time.
          */
-        test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+        test: /(monaco-editor\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
         use: {
           loader: 'babel-loader',
           options: {

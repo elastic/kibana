@@ -418,7 +418,7 @@ importers:
         version: 2.0.2
       '@elastic/monaco-esql':
         specifier: 4.27.0
-        version: 4.27.0(monaco-editor@0.54.0)
+        version: 4.27.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -4617,14 +4617,14 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
       monaco-editor:
-        specifier: 0.54.0
-        version: 0.54.0
+        specifier: 0.56.0
+        version: 0.56.0
       monaco-promql:
         specifier: 1.8.0
         version: 1.8.0
       monaco-yaml:
         specifier: 5.5.1
-        version: 5.5.1(monaco-editor@0.54.0)
+        version: 5.5.1(monaco-editor@0.56.0)
       mongodb:
         specifier: 6.21.0
         version: 6.21.0(socks@2.8.10)
@@ -21688,8 +21688,8 @@ packages:
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
 
-  monaco-editor@0.54.0:
-    resolution: {integrity: sha512-hx45SEUoLatgWxHKCmlLJH81xBo0uXP4sRkESUpmDQevfi+e7K1VuiSprK6UpQ8u4zOcKNiH0pMvHvlMWA/4cw==}
+  monaco-editor@0.56.0:
+    resolution: {integrity: sha512-sXboRm3BeBeLm938eaiyLMe0OxzfXIlZvbv4ir/jVgQy1zDhWjgmny0WoN45fuDKhCCQsYMbBJrv/A6jd8aCUg==}
 
   monaco-languageserver-types@0.4.1:
     resolution: {integrity: sha512-uLiYM6K6jPqAa1ni9lRBoj8ZJAErOcegBrfEpurIUUO8cBhlhrGYjWbjhl4OPcxUNoj1JvqSETjwCTyhGgwymQ==}
@@ -28028,10 +28028,10 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.27.0(monaco-editor@0.54.0)':
+  '@elastic/monaco-esql@4.27.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.27.0
-      monaco-editor: 0.54.0
+      monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
 
@@ -40555,7 +40555,7 @@ snapshots:
 
   moment@2.31.0: {}
 
-  monaco-editor@0.54.0:
+  monaco-editor@0.56.0:
     dependencies:
       dompurify: 3.4.14
       marked: 14.0.0
@@ -40574,19 +40574,19 @@ snapshots:
 
   monaco-types@0.1.2: {}
 
-  monaco-worker-manager@2.0.1(monaco-editor@0.54.0):
+  monaco-worker-manager@2.0.1(monaco-editor@0.56.0):
     dependencies:
-      monaco-editor: 0.54.0
+      monaco-editor: 0.56.0
 
-  monaco-yaml@5.5.1(monaco-editor@0.54.0):
+  monaco-yaml@5.5.1(monaco-editor@0.56.0):
     dependencies:
       '@vscode/l10n': 0.0.18
       jsonc-parser: 3.3.1
-      monaco-editor: 0.54.0
+      monaco-editor: 0.56.0
       monaco-languageserver-types: 0.4.1
       monaco-marker-data-provider: 1.2.5
       monaco-types: 0.1.2
-      monaco-worker-manager: 2.0.1(monaco-editor@0.54.0)
+      monaco-worker-manager: 2.0.1(monaco-editor@0.56.0)
       path-browserify: 1.0.1
       prettier: 3.9.8
       proxy-disposable: 1.0.0

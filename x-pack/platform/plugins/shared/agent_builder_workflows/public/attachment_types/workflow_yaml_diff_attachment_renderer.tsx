@@ -163,7 +163,7 @@ const MonacoDiffViewer: React.FC<{
       lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
       quickSuggestions: false,
       suggestOnTriggerCharacters: false,
-      hover: { enabled: false },
+      hover: { enabled: 'off' },
       parameterHints: { enabled: false },
       renderIndicators: false,
       renderMarginRevertIcon: false,

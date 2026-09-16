@@ -15,27 +15,22 @@ import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <textarea
-      data-test-subj={props.dataTestSubj || 'code-editor'}
-      value={props.value}
-      onChange={(e) => props.onChange?.(e.target.value)}
-      readOnly={props.options?.readOnly}
-      aria-label={props['aria-label']}
-    />
-  ),
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
-        },
-      },
-    },
-    editor: {},
-  },
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: (props: any) => (
+      <textarea
+        data-test-subj={props.dataTestSubj || 'code-editor'}
+        value={props.value}
+        onChange={(e) => props.onChange?.(e.target.value)}
+        readOnly={props.options?.readOnly}
+        aria-label={props['aria-label']}
+      />
+    ),
+  };
+});
 
 // Mock input validation callout
 jest.mock('./input_validation_callout', () => ({

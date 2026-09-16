@@ -11,7 +11,7 @@
 /* eslint-disable @kbn/eslint/module_migration */
 
 import '@babel/runtime/regenerator';
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker.start';
+import * as worker from 'monaco-editor/editor/editor.worker.start.js';
 import { XJsonWorker } from './xjson_worker';
 
 self.onmessage = () => {

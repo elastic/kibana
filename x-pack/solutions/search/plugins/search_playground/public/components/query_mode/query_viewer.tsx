@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
-import { monaco as monacoEditor } from '@kbn/monaco';
+import { CodeEditor, jsonDefaults, type monaco as monacoEditor } from '@kbn/code-editor';
 
 import { useController, useFormContext } from 'react-hook-form';
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -62,7 +61,7 @@ export const ElasticsearchQueryViewer = ({
     onChangeUserQuery(null);
   }, [onChangeUserQuery]);
   const editorMounted = useCallback((editor: monacoEditor.editor.IStandaloneCodeEditor) => {
-    monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+    jsonDefaults.setDiagnosticsOptions({
       validate: true,
       schemas: [],
     });

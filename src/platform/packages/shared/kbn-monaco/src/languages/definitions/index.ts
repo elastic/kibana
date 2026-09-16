@@ -73,7 +73,7 @@ export type {
   ParsedRequest,
 } from './console';
 export * from './painless';
-export { configureMonacoYamlSchema } from './yaml';
+export { configureMonacoYamlSchema, type MonacoYaml, type MonacoYamlOptions } from './yaml';
 
 export const initializeSupportedLanguages = () => {
   [

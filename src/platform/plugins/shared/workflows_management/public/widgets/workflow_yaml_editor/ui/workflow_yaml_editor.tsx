@@ -135,7 +135,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   },
   wordBasedSuggestions: 'off',
   hover: {
-    enabled: true,
+    enabled: 'on',
     delay: 300,
     sticky: true,
     above: false, // Force hover below cursor to avoid clipping

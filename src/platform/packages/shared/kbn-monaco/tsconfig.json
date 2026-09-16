@@ -2,7 +2,8 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "allowJs": true
   },
   "include": [
     "src/**/*",

@@ -7,8 +7,13 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
+import {
+  CodeEditor,
+  type CodeEditorProps,
+  jsonDefaults,
+  type monaco,
+  XJsonLang,
+} from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { expandLiteralStrings } = XJson;
@@ -56,12 +61,12 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
       editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
         const editorModelUri: string = editor.getModel()?.uri.toString()!;
         if (schema) {
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             enableSchemaRequest: false,
             schemaValidation: 'error',
             schemas: [
-              ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas ?? []),
+              ...(jsonDefaults.diagnosticsOptions.schemas ?? []),
               {
                 uri: editorModelUri,
                 fileMatch: [editorModelUri],
