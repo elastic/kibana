@@ -34,7 +34,7 @@ export const createNavigationTree = (
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 

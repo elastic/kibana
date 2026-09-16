@@ -286,7 +286,7 @@ export const createNavigationTree = ({
         !showAiAssistant
       ),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...filterForFeatureAvailability(

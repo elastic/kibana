@@ -295,7 +295,7 @@ function createNavTree({
             },
           ]),
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine' as const,
       },
       {
