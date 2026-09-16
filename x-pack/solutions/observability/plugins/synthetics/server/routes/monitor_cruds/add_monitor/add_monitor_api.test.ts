@@ -192,6 +192,33 @@ describe('AddNewMonitorsPublicAPI', () => {
     expect(api.getMonitorNamespace('default')).toEqual('default');
   });
 
+  it('falls back to the Kibana space for internal calls left at the default namespace', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: { internal: true },
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('default')).toEqual('test');
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+  });
+
+  it('honors an explicit namespace for internal calls when preserve_namespace is set', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: { internal: true, preserve_namespace: true },
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('default')).toEqual('default');
+  });
+
   describe('normalizeMonitor defaults', () => {
     const api = new AddEditMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
