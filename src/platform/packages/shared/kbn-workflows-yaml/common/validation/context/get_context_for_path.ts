@@ -27,6 +27,7 @@ import {
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import type { WorkflowContextRegistry } from './registry';
 import { getValueAtYamlPath } from './get_value_at_yaml_path';
 import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
@@ -39,6 +40,7 @@ type WorkflowDefinitionForContext = WorkflowYaml;
  * template-local extension.
  */
 export function getContextSchemaForStep(
+  registry: WorkflowContextRegistry,
   baseSchema: typeof DynamicStepContextSchema,
   workflowGraph: WorkflowGraph,
   stepName: string
@@ -53,6 +55,7 @@ export function getContextSchemaForStep(
   const extension: Record<string, z.ZodType> = {};
 
   const stepsCollectionSchema = getStepsCollectionSchema(
+    registry,
     baseSchema,
     workflowGraph,
     stepName,
@@ -81,6 +84,7 @@ export function getContextSchemaForStep(
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
 export function getContextSchemaForPath(
+  registry: WorkflowContextRegistry,
   definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
@@ -89,7 +93,7 @@ export function getContextSchemaForPath(
   yamlSource?: string
 ): typeof DynamicStepContextSchema {
   const schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
-    getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
+    getWorkflowContextSchema(registry, definition as WorkflowYaml, yamlDocument)
   ) as typeof DynamicStepContextSchema;
 
   const nearestStepPath = getNearestStepPath(path);
@@ -103,7 +107,7 @@ export function getContextSchemaForPath(
 
   return maybeExtendWithTemplateLocals(
     extendWithPathSpecificContext(
-      getContextSchemaForStep(schema, workflowGraph, nearestStep.name),
+      getContextSchemaForStep(registry, schema, workflowGraph, nearestStep.name),
       nearestStep,
       path.slice(nearestStepPath.length)
     ),

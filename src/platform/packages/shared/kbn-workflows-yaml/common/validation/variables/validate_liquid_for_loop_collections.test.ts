@@ -35,6 +35,9 @@ import {
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('validateLiquidForLoopCollections', () => {
   const lineCounter = new LineCounter();
@@ -45,6 +48,7 @@ describe('validateLiquidForLoopCollections', () => {
 
   beforeEach(() => {
     results = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
       lineCounter,
@@ -87,6 +91,7 @@ steps:
 `;
     const plainLineCounter = new LineCounter();
     const plainResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       plainYaml,
       parseDocument(plainYaml, { lineCounter: plainLineCounter }),
       plainLineCounter,
@@ -105,6 +110,7 @@ steps:
     expect(yamlOffset).toBeGreaterThan(-1);
 
     const foldedResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_FOLDED_ONLY_YAML,
       foldedDoc,
       foldedLineCounter,
@@ -129,6 +135,7 @@ steps:
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
 
     const nestedResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_NESTED_YAML,
       nestedDoc,
       nestedLineCounter,
@@ -164,15 +171,21 @@ steps:
     });
     const runtimeGraph = WorkflowGraph.fromWorkflowDefinition(forLoopRuntimeJsonWorkflowDefinition);
     const baseSchema = DynamicStepContextSchema.merge(
-      getWorkflowContextSchema(forLoopRuntimeJsonWorkflowDefinition, runtimeDoc)
+      getWorkflowContextSchema(emptyRegistry, forLoopRuntimeJsonWorkflowDefinition, runtimeDoc)
     ) as typeof DynamicStepContextSchema;
-    const summarizeSchema = getContextSchemaForStep(baseSchema, runtimeGraph, 'summarize');
+    const summarizeSchema = getContextSchemaForStep(
+      emptyRegistry,
+      baseSchema,
+      runtimeGraph,
+      'summarize'
+    );
     const { schema: fetchOutputSchema } = getSchemaAtPath(summarizeSchema, 'steps.fetch.output');
     if (!(fetchOutputSchema instanceof z.ZodString)) {
       return;
     }
 
     const runtimeResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_RUNTIME_JSON_YAML,
       runtimeDoc,
       runtimeLineCounter,
@@ -192,6 +205,7 @@ steps:
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
 
     const esqlResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_ESQL_CELL_YAML,
       esqlDoc,
       esqlLineCounter,
@@ -217,6 +231,7 @@ steps:
     );
 
     const idiomResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
       idiomDoc,
       idiomLineCounter,

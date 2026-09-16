@@ -15,7 +15,7 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { LineParseResult } from '@kbn/workflows-yaml';
+import type { LineParseResult, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import { getContextSchemaForPath, parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
@@ -56,6 +56,7 @@ function buildCompletionInsertRange(
 }
 
 function resolveContextSchemaForAutocomplete(
+  registry: WorkflowContextRegistry,
   workflowDefinition: WorkflowYaml | null | undefined,
   workflowGraph: WorkflowGraph | null | undefined,
   path: (string | number)[],
@@ -69,6 +70,7 @@ function resolveContextSchemaForAutocomplete(
 
   if (workflowDefinition && workflowGraph) {
     contextSchema = getContextSchemaForPath(
+      registry,
       workflowDefinition,
       workflowGraph,
       path,
@@ -105,6 +107,7 @@ function resolveTriggerConditionAutocomplete(
 }
 
 export interface BuildAutocompleteContextParams {
+  registry: WorkflowContextRegistry;
   editorState: WorkflowDetailState;
   model: monaco.editor.ITextModel;
   position: monaco.Position;
@@ -112,6 +115,7 @@ export interface BuildAutocompleteContextParams {
 }
 
 export function buildAutocompleteContext({
+  registry,
   editorState,
   model,
   position,
@@ -152,6 +156,7 @@ export function buildAutocompleteContext({
 
   const yamlSource = model.getValue();
   const { contextSchema, contextScopedToPath } = resolveContextSchemaForAutocomplete(
+    registry,
     workflowDefinition,
     workflowGraph,
     path,

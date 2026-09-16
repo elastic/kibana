@@ -14,6 +14,9 @@ import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getContextSchemaForPath, getContextSchemaForStep } from './get_context_for_path';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 jest.mock('./get_output_schema_for_step_type');
 
@@ -81,7 +84,7 @@ describe('getContextSchemaForPath', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
   it('should return the root context for the first step', () => {
-    const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
+    const context = getContextSchemaForPath(emptyRegistry, definition, workflowGraph, ['steps', 0]);
 
     expectZodSchemaEqual(
       context,
@@ -96,7 +99,7 @@ describe('getContextSchemaForPath', () => {
   });
 
   it('should return the context for the second step', () => {
-    const context = getContextSchemaForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(emptyRegistry, definition, workflowGraph, [
       'steps',
       1,
       'with',
@@ -161,14 +164,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as WorkflowYaml;
     const workflowGraphWithForeach = WorkflowGraph.fromWorkflowDefinition(definitionWithForeach);
-    const context = getContextSchemaForPath(definitionWithForeach, workflowGraphWithForeach, [
-      'steps',
-      0,
-      'steps',
-      0,
-      'with',
-      'message',
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithForeach,
+      workflowGraphWithForeach,
+      ['steps', 0, 'steps', 0, 'with', 'message']
+    );
     const itemSchema = z.object({
       name: z.literal('Robert'),
       surname: z.literal('Carmack'),
@@ -184,7 +185,7 @@ describe('getContextSchemaForPath', () => {
   });
 
   it('should return the context for second step in true branch of if-split', () => {
-    const context = getContextSchemaForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(emptyRegistry, definition, workflowGraph, [
       'steps',
       2,
       'steps',
@@ -220,12 +221,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as WorkflowYaml;
     const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
-    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
-      'steps',
-      0,
-      'steps',
-      0,
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithWhile,
+      workflowGraphWithWhile,
+      ['steps', 0, 'steps', 0]
+    );
     expect((context.shape as any).while).toBeDefined();
     expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
   });
@@ -252,11 +253,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as WorkflowYaml;
     const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
-    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
-      'steps',
-      0,
-      'condition',
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithWhile,
+      workflowGraphWithWhile,
+      ['steps', 0, 'condition']
+    );
     expect((context.shape as any).while).toBeDefined();
     expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
   });
@@ -284,7 +286,7 @@ describe('getContextSchemaForPath', () => {
     } as unknown as WorkflowYaml;
 
     const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
-    const context = getContextSchemaForPath(definitionWithDataMap, graph, [
+    const context = getContextSchemaForPath(emptyRegistry, definitionWithDataMap, graph, [
       'steps',
       0,
       'with',
@@ -318,7 +320,11 @@ describe('getContextSchemaForPath', () => {
     } as unknown as WorkflowYaml;
 
     const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
-    const context = getContextSchemaForPath(definitionWithDataMap, graph, ['steps', 0, 'items']);
+    const context = getContextSchemaForPath(emptyRegistry, definitionWithDataMap, graph, [
+      'steps',
+      0,
+      'items',
+    ]);
 
     expect((context.shape as any).item).toBeDefined();
     expect((context.shape as any).index).toBeDefined();
@@ -353,7 +359,7 @@ describe('getContextSchemaForPath', () => {
     } as unknown as WorkflowYaml;
 
     const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
-    const context = getContextSchemaForPath(definitionWithDataMap, graph, [
+    const context = getContextSchemaForPath(emptyRegistry, definitionWithDataMap, graph, [
       'steps',
       0,
       'with',
@@ -366,7 +372,7 @@ describe('getContextSchemaForPath', () => {
   });
 
   it('should return the context for first step in false branch of if-split', () => {
-    const context = getContextSchemaForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(emptyRegistry, definition, workflowGraph, [
       'steps',
       2,
       'else',
@@ -410,11 +416,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as unknown as WorkflowYaml;
     const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitch);
-    const context = getContextSchemaForPath(definitionWithSwitch, workflowGraphWithSwitch, [
-      'steps',
-      1,
-      'expression',
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithSwitch,
+      workflowGraphWithSwitch,
+      ['steps', 1, 'expression']
+    );
 
     expect((context.shape as any).inputs).toBeDefined();
     expect((context.shape as any).steps).toBeDefined();
@@ -454,16 +461,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as unknown as WorkflowYaml;
     const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitch);
-    const context = getContextSchemaForPath(definitionWithSwitch, workflowGraphWithSwitch, [
-      'steps',
-      1,
-      'cases',
-      0,
-      'steps',
-      0,
-      'with',
-      'message',
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithSwitch,
+      workflowGraphWithSwitch,
+      ['steps', 1, 'cases', 0, 'steps', 0, 'with', 'message']
+    );
 
     expect((context.shape as any).steps).toBeDefined();
     expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
@@ -496,11 +499,12 @@ describe('getContextSchemaForPath', () => {
       ],
     } as unknown as WorkflowYaml;
     const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitchFirst);
-    const context = getContextSchemaForPath(definitionWithSwitchFirst, workflowGraphWithSwitch, [
-      'steps',
-      0,
-      'expression',
-    ]);
+    const context = getContextSchemaForPath(
+      emptyRegistry,
+      definitionWithSwitchFirst,
+      workflowGraphWithSwitch,
+      ['steps', 0, 'expression']
+    );
 
     expect((context.shape as any).inputs).toBeDefined();
     expect((context.shape as any).steps).toBeDefined();
@@ -526,7 +530,12 @@ describe('getContextSchemaForStep', () => {
       inputs: z.object({}),
     }) as typeof DynamicStepContextSchema;
 
-    const result = getContextSchemaForStep(baseSchema, workflowGraph, 'nonexistent-step');
+    const result = getContextSchemaForStep(
+      emptyRegistry,
+      baseSchema,
+      workflowGraph,
+      'nonexistent-step'
+    );
 
     expect(result).toBe(baseSchema);
   });
@@ -549,9 +558,9 @@ describe('getContextSchemaForStep', () => {
       .spyOn(workflowGraph, 'getAllPredecessors')
       .mockReturnValue([]);
 
-    expect(() => getContextSchemaForStep(baseSchema, workflowGraph, 'step-a')).toThrow(
-      'Step node not found for step id: step-a'
-    );
+    expect(() =>
+      getContextSchemaForStep(emptyRegistry, baseSchema, workflowGraph, 'step-a')
+    ).toThrow('Step node not found for step id: step-a');
 
     getStepNodeSpy.mockRestore();
     getAllPredecessorsSpy.mockRestore();

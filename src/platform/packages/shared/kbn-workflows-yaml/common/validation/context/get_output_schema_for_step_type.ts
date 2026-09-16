@@ -12,12 +12,15 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import { getWorkflowContextRegistry } from './registry';
+import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
 
-export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
+export const getOutputSchemaForStepType = (
+  registry: WorkflowContextRegistry,
+  node: GraphNodeUnion
+): z.ZodSchema => {
   // Handle internal actions with pattern matching first
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
 
@@ -56,8 +59,6 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
       return outputSchema as z.ZodSchema;
     }
   }
-
-  const registry = getWorkflowContextRegistry();
 
   if (isAtomic(node)) {
     const stepOutput = registry.getStepOutput(node.stepType);

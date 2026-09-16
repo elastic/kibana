@@ -11,7 +11,7 @@ import type { Document, LineCounter } from 'yaml';
 import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { YamlValidationResult } from '@kbn/workflows-yaml';
+import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   collectAllVariables,
   validateLiquidYamlScalars,
@@ -28,6 +28,7 @@ import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_ya
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 export interface RunWorkflowYamlValidationsParams {
+  registry: WorkflowContextRegistry;
   yamlString: string;
   model: monaco.editor.ITextModel;
   yamlDocument: Document;
@@ -45,6 +46,7 @@ export interface RunWorkflowYamlValidationsParams {
  * `collectFullWorkflowYamlValidationResults`.
  */
 export function runWorkflowYamlValidations({
+  registry,
   yamlString,
   model,
   yamlDocument,
@@ -57,8 +59,9 @@ export function runWorkflowYamlValidations({
     yamlString,
     yamlDocument,
     lineCounter,
-    workflowGraph,
-    workflowDefinition
+    workflowGraph && workflowDefinition
+      ? { registry, workflowGraph, workflowDefinition }
+      : undefined
   );
 
   const results: YamlValidationResult[] = [
@@ -81,6 +84,7 @@ export function runWorkflowYamlValidations({
     results.push(
       ...validateTriggerConditions(workflowDefinition, yamlDocument),
       ...validateVariablesInternal(
+        registry,
         variableItems,
         workflowGraph,
         workflowDefinition,

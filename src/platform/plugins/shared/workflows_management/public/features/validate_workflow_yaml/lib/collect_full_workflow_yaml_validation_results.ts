@@ -12,7 +12,7 @@ import type { monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { YamlValidationResult } from '@kbn/workflows-yaml';
+import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
@@ -32,6 +32,7 @@ export type ConnectorTypesValidationState =
   | { status: 'failed'; error: string };
 
 export interface WorkflowYamlValidationContext {
+  registry: WorkflowContextRegistry;
   connectorTypes: ConnectorTypesValidationState;
   connectorsManagementUrl: string;
   workflows: WorkflowsResponse | null;
@@ -67,6 +68,7 @@ export async function collectFullWorkflowYamlValidationResults({
   context,
 }: CollectFullWorkflowYamlValidationResultsParams): Promise<YamlValidationResult[]> {
   const {
+    registry,
     connectorTypes,
     connectorsManagementUrl,
     workflows,
@@ -82,6 +84,7 @@ export async function collectFullWorkflowYamlValidationResults({
       : [];
 
   const results: YamlValidationResult[] = runWorkflowYamlValidations({
+    registry,
     yamlString,
     model,
     yamlDocument,

@@ -14,7 +14,10 @@ import {
 } from '@kbn/workflows-yaml';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
   validateEsqlSteps: jest.fn(async () => []),
@@ -35,6 +38,7 @@ export const WORKFLOW_YAML_VALIDATION_PARITY_FIXTURE = [
 ].join('\n');
 
 const testValidationContext: WorkflowYamlValidationContext = {
+  registry: emptyRegistry,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

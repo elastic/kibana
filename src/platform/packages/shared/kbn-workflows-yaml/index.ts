@@ -159,12 +159,9 @@ export type {
 } from './common/validation/types';
 
 // Workflow context schema (variable/step/foreach context used by validation and autocomplete)
-export {
-  getWorkflowContextRegistry,
-  resetWorkflowContextRegistry,
-  setWorkflowContextRegistry,
-  type RegisteredStepOutput,
-  type WorkflowContextRegistry,
+export type {
+  RegisteredStepOutput,
+  WorkflowContextRegistry,
 } from './common/validation/context/registry';
 export {
   InvalidForeachParameterError,
