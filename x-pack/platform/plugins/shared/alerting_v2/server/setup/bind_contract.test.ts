@@ -16,6 +16,7 @@ import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { BuilderTypeRegistry } from '../lib/builder_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -127,5 +128,60 @@ describe('bindContract', () => {
     expect(client).toBe(mockAlertEventsClient);
     expect(fork).toHaveBeenCalledTimes(1);
     expect(scope.get(Request)).toBe(fakeRequest);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 5.1: caller identity is bound into the scope when onBehalfOf is given
+  //
+  // The design guarantees: the framework's own HTTP routes resolve a client
+  // with nothing bound, so the generic API surface is identity-less. In-process
+  // callers pass onBehalfOf and have it bound in the request scope.
+  //
+  // Ref: rule-ownership.md "Caller identity"
+  // ---------------------------------------------------------------------------
+
+  describe('caller identity (step 5.1)', () => {
+    it('binds onBehalfOf into the scope when getRulesClientWithRequest is called with options', async () => {
+      const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+      const start = container.get(AlertingStartToken);
+
+      const identity = { solution: 'security', app: 'detections' };
+      await start.getRulesClientWithRequest(fakeRequest, { onBehalfOf: identity });
+
+      expect(scope.get(CallerIdentityToken)).toEqual(identity);
+    });
+
+    it('does not bind CallerIdentityToken when getRulesClientWithRequest is called without options', async () => {
+      const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+      const start = container.get(AlertingStartToken);
+
+      // No options — simulates a framework HTTP route resolving its client.
+      await start.getRulesClientWithRequest(fakeRequest);
+
+      // CallerIdentityToken must not have been bound into the scope.
+      expect(() => scope.get(CallerIdentityToken)).toThrow();
+    });
+
+    it('binds onBehalfOf into the scope when getRulesClientWithRequestInSpace is called with options', async () => {
+      const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+      const start = container.get(AlertingStartToken);
+
+      const identity = { solution: 'security' };
+      await start.getRulesClientWithRequestInSpace(fakeRequest, asSpaceId('my-space'), {
+        onBehalfOf: identity,
+      });
+
+      expect(scope.get(CallerIdentityToken)).toEqual(identity);
+      expect(scope.get(RequestSpaceIdToken)).toBe('my-space');
+    });
+
+    it('does not bind CallerIdentityToken when getRulesClientWithRequestInSpace is called without options', async () => {
+      const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+      const start = container.get(AlertingStartToken);
+
+      await start.getRulesClientWithRequestInSpace(fakeRequest, asSpaceId('my-space'));
+
+      expect(() => scope.get(CallerIdentityToken)).toThrow();
+    });
   });
 });
