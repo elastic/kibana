@@ -53,7 +53,6 @@ import {
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 import { UninstallCommandFlyout } from '../../../../../../components';
-import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
@@ -98,7 +97,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   );
   const config = useConfig();
   const authz = useAuthz();
-  const { enableAgentPolicyMultipleDownloadSources } = ExperimentalFeaturesService.get();
   const maxAgentPoliciesWithInactivityTimeout =
     config.developer?.maxAgentPoliciesWithInactivityTimeout ??
     DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
@@ -827,54 +825,19 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           </h3>
         }
         description={
-          enableAgentPolicyMultipleDownloadSources ? (
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.downloadSourceDescriptionMultiple"
-              defaultMessage="When an upgrade action is issued, agents download the binary from these locations, in order."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
-              defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
-            />
-          )
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.downloadSourceDescriptionMultiple"
+            defaultMessage="When an upgrade action is issued, agents download the binary from these locations, in order."
+          />
         }
       >
-        {enableAgentPolicyMultipleDownloadSources ? (
-          <AgentBinaryDownloadSources
-            agentPolicy={agentPolicy}
-            updateAgentPolicy={updateAgentPolicy}
-            downloadSourceOptions={dataDownloadSourceOptions}
-            isLoading={isLoadingDownloadSources}
-            disabled={disabled || isManagedOrAgentlessPolicy}
-          />
-        ) : (
-          <EuiFormRow
-            fullWidth
-            error={
-              touchedFields.download_source_id && validation.download_source_id
-                ? validation.download_source_id
-                : null
-            }
-            isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
-            isDisabled={disabled || isManagedOrAgentlessPolicy}
-            aria-label="download source options for agent binaries"
-          >
-            <EuiSuperSelect
-              disabled={disabled || isManagedOrAgentlessPolicy}
-              valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
-              fullWidth
-              isLoading={isLoadingDownloadSources}
-              onChange={(e) => {
-                updateAgentPolicy({
-                  download_source_id: e !== DEFAULT_SELECT_VALUE ? e : null,
-                });
-              }}
-              options={dataDownloadSourceOptions}
-              data-test-subj="agentPolicyForm.downloadSource.select"
-            />
-          </EuiFormRow>
-        )}
+        <AgentBinaryDownloadSources
+          agentPolicy={agentPolicy}
+          updateAgentPolicy={updateAgentPolicy}
+          downloadSourceOptions={dataDownloadSourceOptions}
+          isLoading={isLoadingDownloadSources}
+          disabled={disabled || isManagedOrAgentlessPolicy}
+        />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         fullWidth

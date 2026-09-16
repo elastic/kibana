@@ -950,14 +950,11 @@ export function getBinarySourceSettings(
   redactProxySecrets = false
 ) {
   const primarySource = downloadSources[0];
-  const { enableAgentPolicyMultipleDownloadSources } = appContextService.getExperimentalFeatures();
 
-  // sourceURI kept for backwards compat with agents that do not yet read `sources`
+  // sourceURI kept for backwards compat with agents older than 9.6.0 that do not read `sources`
   const config: FullAgentPolicyDownload = {
     sourceURI: primarySource.host,
-    ...(enableAgentPolicyMultipleDownloadSources && {
-      sources: downloadSources.map((ds) => ds.host),
-    }),
+    sources: downloadSources.map((ds) => ds.host),
   };
 
   if (primarySource?.ssl) {
