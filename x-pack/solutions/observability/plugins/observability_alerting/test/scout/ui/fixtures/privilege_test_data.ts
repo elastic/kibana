@@ -64,30 +64,42 @@ export const deleteV1ThresholdSourceIndex = async (esClient: EsClient): Promise<
  * `[V1_EPISODE_TAG]` so the classic-source tag aggregation (which reads
  * workflow tags, not rule tags) includes it in the "Alert tags" filter.
  */
-export const waitForV1RuleAlert = async (esClient: EsClient, ruleId: string): Promise<void> => {
+export const waitForV1RuleAlert = async (
+  esClient: EsClient,
+  kbnClient: KbnClient,
+  ruleId: string
+): Promise<void> => {
   const timeoutMs = 90_000;
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const result = await esClient.search(
+    const result = await esClient.search<{ 'kibana.alert.uuid': string }>(
       {
         index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        _source: ['kibana.alert.uuid'],
       },
       { ignore: [404] }
     );
-    const hitCount = 'hits' in result ? result.hits?.hits?.length ?? 0 : 0;
-    if (hitCount > 0) {
-      await esClient.updateByQuery(
-        {
+    const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
+    if (hits.length > 0) {
+      const alertIds = hits
+        .map((h) => h._source?.['kibana.alert.uuid'])
+        .filter((id): id is string => typeof id === 'string');
+
+      await kbnClient.request({
+        description: 'seed workflow tags on v1 threshold alert',
+        method: 'POST',
+        path: '/internal/rac/alerts/tags',
+        headers: RULE_API_HEADERS,
+        body: {
           index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
-          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-          script: {
-            source: 'ctx._source["kibana.alert.workflow_tags"] = params.tags',
-            params: { tags: [V1_EPISODE_TAG] },
-          },
-          refresh: true,
-          conflicts: 'proceed',
+          alertIds,
+          add: [V1_EPISODE_TAG],
         },
+      });
+
+      await esClient.indices.refresh(
+        { index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN },
         { ignore: [404] }
       );
       return;

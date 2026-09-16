@@ -189,7 +189,7 @@ test.describe(
       const ruleId = created.data.id as string;
       v1RuleId = ruleId;
       await apiServices.alerting.rules.runSoon(ruleId);
-      await waitForV1RuleAlert(esClient, ruleId);
+      await waitForV1RuleAlert(esClient, kbnClient, ruleId);
       v2RuleId = await seedV2PrivilegeRule(esClient, kbnClient);
     });
 
