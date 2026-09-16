@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -64,6 +70,7 @@ import type {
 import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
+import type { AlertAnalysisWorkflowRuleAttachmentService } from '../common/workflows/alert_analysis_workflow';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingServerSetup;
@@ -134,8 +141,17 @@ export interface SecuritySolutionPluginSetup {
   experimentalFeatures: ExperimentalFeatures;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SecuritySolutionPluginStart {}
+export interface SecuritySolutionPluginStart {
+  /**
+   * Returns a request-scoped service that can attach/detach the Alert Analysis workflow
+   * to detection rules. The caller supplies the workflowId so the same service can be
+   * reused for both the standalone workflow and any Worker-installed instance.
+   */
+  getAlertAnalysisWorkflowRuleAttachmentService(
+    request: KibanaRequest,
+    workflowId: string
+  ): Promise<AlertAnalysisWorkflowRuleAttachmentService>;
+}
 
 export type SecuritySolutionPluginCoreSetupDependencies = CoreSetup<
   SecuritySolutionPluginStartDependencies,
