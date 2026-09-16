@@ -40,7 +40,7 @@ export type SeriesGroupingValuesByHash = Record<string, Record<string, string | 
  * keeps the label populated even for series whose only in-window events are
  * recoveries (which write `data: {}`).
  *
- * Mirrors the episodes-list mechanism (`addEpisodeAggregation` in
+ * Mirrors the episodes-list mechanism (`addEpisodeDataExtraction` in
  * `episodes_query.ts`): read the flattened `data` via `_source` + `JSON_EXTRACT`
  * and parse it client-side, rather than a `terms` agg on `data.<field>` which is
  * brittle against flattened sub-fields whose leaf key contains a dot.

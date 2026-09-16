@@ -110,17 +110,51 @@ const resolveSortField = (sortField: string): string => {
   return sanitizeSortField(sortField);
 };
 
-export const addEpisodeAggregation = (query: ComposerQuery) => {
-  /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery`.
+export interface EpisodeAggregationOptions {
+  /**
+   * Keep the last `breached` event of each episode instead of its last event,
+   * so `addEpisodeDataExtraction` can read the episode `data` from its
+   * `_source` (recovered events write `data: {}`). The row-level `@timestamp`
+   * and `episode.status` are replaced with the aggregated values, so the row
+   * still describes the latest state. Costs two extra aggregations (~10% on
+   * the KPI query), so leave it off when `episode_data` is never read.
    */
+  withEpisodeDataRow?: boolean;
+}
+
+export const addEpisodeAggregation = (
+  query: ComposerQuery,
+  { withEpisodeDataRow = false }: EpisodeAggregationOptions = {}
+) => {
+  /* This will be simplified when the `$.alerting-episodes` ES|QL view works. */
+
+  if (withEpisodeDataRow) {
+    // prettier-ignore
+    query
+      .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, data_timestamp = MAX(@timestamp) WHERE status == "breached", last_status = LAST(\`episode.status\`, @timestamp), severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
+      .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
+      .pipe`WHERE @timestamp == COALESCE(data_timestamp, last_timestamp)`
+      .pipe`EVAL @timestamp = last_timestamp, \`episode.status\` = last_status`;
+    return;
+  }
 
   // prettier-ignore
   query
-    .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
+};
+
+/**
+ * Reads the episode `data` JSON from the `_source` of the row kept by
+ * `addEpisodeAggregation` (which needs `withEpisodeDataRow`). Call it after
+ * `SORT ... | LIMIT`: ES|QL loads `_source` after the TopN operator, so only
+ * the returned rows pay for it. Extracting before the aggregation loaded
+ * `_source` for every scanned event and cost more than the rest of the query
+ * (3.3s vs 1.9s for a 24h range over 600k events / 27k episodes).
+ */
+export const addEpisodeDataExtraction = (query: ComposerQuery) => {
+  query.pipe`EVAL episode_data = JSON_EXTRACT(_source, "data")`;
 };
 
 const addGroupHashActionStats = (query: ComposerQuery) => {
@@ -237,7 +271,8 @@ export type EpisodesBaseFilterState = Pick<
  */
 export const buildEpisodesBaseQuery = (
   spaceId: string,
-  filterState?: EpisodesBaseFilterState
+  filterState?: EpisodesBaseFilterState,
+  aggregationOptions?: EpisodeAggregationOptions
 ): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`;
@@ -268,13 +303,19 @@ export const buildEpisodesBaseQuery = (
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
-  addEpisodeAggregation(query);
+  addEpisodeAggregation(query, aggregationOptions);
 
   return query;
 };
 
-export const DURATION_LOWER_BOUND_FIELD = 'duration_is_lower_bound';
+/**
+ * Whether the filters read the action state columns, so they can only be
+ * applied by the joined `buildEpisodesQuery`, not by `buildEpisodesListQuery`.
+ */
+export const episodesFilterNeedsActions = (filterState?: EpisodesFilterState): boolean =>
+  Boolean(filterState?.tags?.length || filterState?.assigneeUid);
 
+export const DURATION_LOWER_BOUND_FIELD = 'duration_is_lower_bound';
 /**
  * Flags the episodes whose first event was not part of the scanned rows, so
  * `first_timestamp` and `duration` only cover the selected time range. The
@@ -306,7 +347,7 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(spaceId, filterState);
+  const query = buildEpisodesBaseQuery(spaceId, filterState, { withEpisodeDataRow: true });
 
   if (filterState) {
     applyFilterState(query, filterState);
@@ -320,10 +361,110 @@ export const buildEpisodesQuery = (
 
   addDurationLowerBoundFlag(query);
 
+  query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`;
+  addEpisodeDataExtraction(query);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
-      ...ALERT_EPISODE_FIELDS,
-      DURATION_LOWER_BOUND_FIELD
-    )
+    query.keep(...ALERT_EPISODE_FIELDS, DURATION_LOWER_BOUND_FIELD)
+  );
+};
+
+/**
+ * Row of `buildEpisodesListQuery`: the columns needed to page, sort and
+ * filter. `first_timestamp`, `last_timestamp` and `duration` only cover the
+ * scanned range, the page lookups (`episodes_page_lookups_query.ts`) replace
+ * them with the exact values and fill in the rest.
+ */
+export type EpisodesListRow = Pick<
+  AlertEpisodeEsqlRow,
+  | '@timestamp'
+  | 'episode.id'
+  | 'episode.status'
+  | 'rule.id'
+  | 'group_hash'
+  | 'first_timestamp'
+  | 'last_timestamp'
+  | 'duration'
+> & {
+  severity?: AlertEpisodeEsqlRow['severity'];
+};
+
+export const ALERT_EPISODE_LIST_FIELDS = [
+  '@timestamp',
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+  'first_timestamp',
+  'last_timestamp',
+  'duration',
+] as const;
+
+/**
+ * Builds the ES|QL query that pages the episodes from `.rule-events` alone,
+ * with a plain `STATS` and as few aggregates as the sort and filters need.
+ * Measured on 620k events / 27k episodes: ~150ms against 1.75s for
+ * `buildEpisodesQuery`, whose `.alert-actions` join scans every action doc
+ * regardless of the time range and whose `INLINE STATS` keeps every event
+ * row. Each aggregate here costs 15-70ms and a row-level `EVAL` before the
+ * `STATS` ten times that, so the per-page columns (`triggered_at`,
+ * `severity`, `episode_data`, action state) come from the lookups in
+ * `episodes_page_lookups_query.ts` instead.
+ *
+ * Tag and assignee filters read the action state, so they still need
+ * `buildEpisodesQuery`: see `episodesFilterNeedsActions`.
+ */
+export const buildEpisodesListQuery = (
+  spaceId: string,
+  sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
+  filterState?: EpisodesFilterState
+): TypedEsqlQuery<EpisodesListRow> => {
+  if (episodesFilterNeedsActions(filterState)) {
+    throw new Error('Tag and assignee filters need the actions join, use buildEpisodesQuery');
+  }
+  const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
+  const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
+  const withSeverity = sortState.sortField === 'severity' || Boolean(filterState?.severity?.length);
+
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`space_id == ${spaceId}`
+    .where`type == "alert"`;
+  if (filterState?.ruleId) {
+    query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState?.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
+  }
+  const trimmedSearch = filterState?.queryString?.trim();
+  if (trimmedSearch) {
+    query.pipe(`WHERE QSTR(${escapeStringValue(trimmedSearch)})`);
+  }
+
+  // `rule.id` and `group_hash` are constant within an episode, MAX is cheaper
+  // than LAST for keywords.
+  const aggregates = [
+    'last_timestamp = MAX(@timestamp)',
+    'first_timestamp = MIN(@timestamp)',
+    '`episode.status` = LAST(`episode.status`, @timestamp)',
+    '`rule.id` = MAX(`rule.id`)',
+    'group_hash = MAX(group_hash)',
+    ...(withSeverity
+      ? [
+          'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL',
+        ]
+      : []),
+  ];
+  query.pipe(`STATS ${aggregates.join(', ')} BY \`episode.id\``);
+  query.pipe`EVAL @timestamp = last_timestamp, duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`;
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+  if (sortState.sortField === 'severity') {
+    query.pipe(buildSeveritySortEval());
+  }
+  query.sort([resolveSortField(sortState.sortField), sortDir]).pipe`LIMIT ${pageSizeParam}`;
+
+  return asTypedEsqlQuery<EpisodesListRow>(
+    query.keep(...ALERT_EPISODE_LIST_FIELDS, ...(withSeverity ? ['severity' as const] : []))
   );
 };
