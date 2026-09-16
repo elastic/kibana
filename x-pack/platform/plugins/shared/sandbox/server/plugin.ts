@@ -80,6 +80,16 @@ export interface SandboxPluginStart {
    *   (`xpack.sandbox.enabled: false`, or missing `api_key`/`ssl`).
    */
   getSession(request: KibanaRequest, sessionId: string): SandboxSession;
+
+  /**
+   * Returns a {@link SandboxSession} for an explicit space ID + session ID.
+   *
+   * Use this when no `KibanaRequest` is available (e.g. workflow step handlers).
+   * Sessions are cached by `(spaceId, sessionId)` exactly like {@link getSession}.
+   *
+   * @throws {Error} When the sandbox is not configured in this deployment.
+   */
+  getSessionForSpace(spaceId: string, sessionId: string): SandboxSession;
 }
 
 export class SandboxPlugin
@@ -114,10 +124,12 @@ export class SandboxPlugin
       const reason = !pluginConfig.enabled
         ? 'xpack.sandbox.enabled is false'
         : 'xpack.sandbox.api_key and xpack.sandbox.ssl are required when enabled';
+      const throwNotConfigured = (): never => {
+        throw new Error(`Sandbox is not configured in this deployment: ${reason}`);
+      };
       return {
-        getSession: () => {
-          throw new Error(`Sandbox is not configured in this deployment: ${reason}`);
-        },
+        getSession: throwNotConfigured,
+        getSessionForSpace: throwNotConfigured,
       };
     }
 
@@ -138,17 +150,22 @@ export class SandboxPlugin
     const sessions = this.sessions;
     const logger = this.logger;
 
+    const getOrCreateSession = (spaceId: string, sessionId: string): SandboxSession => {
+      const key = `${spaceId}:${sessionId}`;
+      let session = sessions.get(key);
+      if (!session) {
+        session = new SandboxSessionImpl(key, apiClient, logger.get('session'));
+        sessions.set(key, session);
+      }
+      return session;
+    };
+
     return {
       getSession: (request, sessionId) => {
         const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        const key = `${spaceId}:${sessionId}`;
-        let session = sessions.get(key);
-        if (!session) {
-          session = new SandboxSessionImpl(key, apiClient, logger.get('session'));
-          sessions.set(key, session);
-        }
-        return session;
+        return getOrCreateSession(spaceId, sessionId);
       },
+      getSessionForSpace: (spaceId, sessionId) => getOrCreateSession(spaceId, sessionId),
     };
   }
 
