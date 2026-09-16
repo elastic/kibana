@@ -375,6 +375,11 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'observability.service-map',
   'observability.service-map-context',
 
+  // ML
+  'ml.anomaly_swimlane',
+  'ml.anomaly_charts',
+  'ml.single_metric_viewer',
+
   // Platform – Custom Content
   'platform.custom_content.panel_context',
 ] as const;
