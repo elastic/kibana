@@ -55,6 +55,34 @@ describe('fileConsumesKey', () => {
   it('does not match a key name that only appears as a substring', () => {
     expect(fileConsumesKey('await pageObjects.dashboardWidget.goto();', 'dashboard')).toBe(false);
   });
+
+  it('does not match the key inside an unrelated string literal elsewhere in the file', () => {
+    // Regression: JS character classes match newlines, so a destructure
+    // pattern built from `[^{}]`/`[^=]` spans the whole file and treats this
+    // as a consumer because `pageObjects` appears further down. Real example
+    // from global_search's Scout suite.
+    const content = [
+      `await expect(results.filter({ hasText: 'type: dashboard' })).toBeVisible();`,
+      ``,
+      `await pageObjects.globalSearch.clickOnOption(0);`,
+    ].join('\n');
+
+    expect(fileConsumesKey(content, 'dashboard')).toBe(false);
+    expect(fileConsumesKey(content, 'globalSearch')).toBe(true);
+  });
+
+  it('does not treat a typed function parameter as a pageObjects destructure', () => {
+    const content = [
+      `export async function openInlineEditor({ dashboard, lens }: DashboardAndLens) {`,
+      `  await dashboard.clickPanelAction('editPanel');`,
+      `}`,
+      ``,
+      `// pageObjects referenced later in the file`,
+      `export const helper = (pageObjects: PageObjects) => pageObjects;`,
+    ].join('\n');
+
+    expect(fileConsumesKey(content, 'dashboard')).toBe(false);
+  });
 });
 
 describe('findScoutTestFiles', () => {
@@ -69,6 +97,14 @@ describe('findScoutTestFiles', () => {
         'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/spec_using_destructure.ts',
       ].sort()
     );
+  });
+
+  it("excludes this command's own __fixtures__ tree when walking from a repo root", () => {
+    // Regression: the fixture tree below lives under a real `test/scout*`
+    // path, so walking the actual repo root counted these synthetic specs as
+    // consumers of `dashboard` and `lens`.
+    const files = findScoutTestFiles(Path.join(__dirname, '..'));
+    expect(files.filter((f) => f.includes('__fixtures__'))).toEqual([]);
   });
 });
 

@@ -37,24 +37,38 @@ export function extractPageObjectKeys(indexTsSource: string): string[] {
 /**
  * A page object's fixture key is reached two ways in Scout specs/fixtures:
  * property access (`pageObjects.key`) and destructuring
- * (`const { key } = pageObjects` / `{ key }: { pageObjects }`, including other
- * keys alongside it and an optional rename via `key: alias`). Both count as a
- * consumer per the placement policy's "Consumer" definition. Type-only
- * references and forwarded-parameter access are not covered by this pass;
- * see the follow-up note on the audit tracking issue.
+ * (`const { key } = pageObjects`, including other keys alongside it). Both
+ * count as a consumer per the placement policy's "Consumer" definition.
+ *
+ * The destructure pattern is deliberately newline-free (`[^{}\n]` / `[^=\n]`
+ * rather than `[^{}]` / `[^=]`): JS character classes match newlines, so an
+ * unconstrained version spans the whole file and reports the word `dashboard`
+ * inside a string literal as a consumer because `pageObjects` appears a few
+ * hundred characters later. Counts feed promote/demote decisions, so
+ * over-counting is worse than the known limitation this creates: a
+ * destructure split across lines is missed. Forwarded-parameter access and
+ * type-only references are likewise not covered; both are follow-up work on
+ * the audit tracking issue.
  */
 export function fileConsumesKey(fileContent: string, key: string): boolean {
   const propertyAccess = new RegExp(`pageObjects\\.${key}\\b`);
-  const destructure = new RegExp(`\\{[^{}]*\\b${key}\\b[^{}]*\\}[^=]*=[^=]*[Pp]ageObjects\\b`);
+  const destructure = new RegExp(
+    `\\{[^{}\\n]*\\b${key}\\b[^{}\\n]*\\}[^=\\n]*=[^=\\n]*[Pp]ageObjects\\b`
+  );
   return propertyAccess.test(fileContent) || destructure.test(fileContent);
 }
 
 const SCOUT_TEST_DIR_PATTERN = /(^|\/)test\/scout[^/]*(\/|$)/;
-const IGNORED_DIR_NAMES = new Set(['node_modules', 'target']);
+// `__fixtures__` holds this command's own synthetic `test/scout*` tree, which
+// would otherwise be walked and counted as real consumers when the audit runs
+// on the repo root. `@kbn/repo-packages` skips `__fixtures__` when building the
+// package map for the same reason. `.git` is skipped purely to avoid the walk.
+const IGNORED_DIR_NAMES = new Set(['node_modules', 'target', '__fixtures__', '.git']);
 
 /**
  * Recursively lists every `.ts`/`.tsx` file under a `test/scout*` directory
- * anywhere below `rootDir`, skipping `node_modules` and `target`.
+ * anywhere below `rootDir`, skipping `node_modules`, `target`, `__fixtures__`
+ * and `.git`.
  */
 export function findScoutTestFiles(rootDir: string): string[] {
   const results: string[] = [];
@@ -179,6 +193,8 @@ export const auditCmd: Command<void> = {
 
     const census = runAudit(REPO_ROOT, pageObjectsIndexPath);
 
-    log.info(JSON.stringify(census, null, 2));
+    // `write` rather than `info`: the report is meant to be piped (the audit
+    // skill consumes it), and `info` prefixes the first line with ' info '.
+    log.write(JSON.stringify(census, null, 2));
   },
 };
