@@ -8,9 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
+import { createAlertingV2HostApp } from '../locators';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -80,11 +82,32 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const createMockContainer = () => ({
-  get: jest.fn().mockReturnValue({}),
-  getAsync: jest.fn().mockResolvedValue({}),
-  isBound: jest.fn().mockReturnValue(true),
+const createMockLocator = () => ({
+  useUrl: jest.fn().mockReturnValue(''),
+  getUrl: jest.fn().mockResolvedValue(''),
+  getRedirectUrl: jest.fn().mockReturnValue(''),
+  navigate: jest.fn().mockResolvedValue(undefined),
+  navigateSync: jest.fn(),
+  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
 });
+
+const createMockSharePlugin = () => ({
+  url: {
+    locators: {
+      get: jest.fn().mockReturnValue(createMockLocator()),
+    },
+  },
+});
+
+const createMockContainer = () => {
+  const sharePlugin = createMockSharePlugin();
+  const defaultMock = { ...sharePlugin };
+  return {
+    get: jest.fn().mockReturnValue(defaultMock),
+    getAsync: jest.fn().mockResolvedValue({}),
+    isBound: jest.fn().mockReturnValue(true),
+  };
+};
 
 const createMockCoreStart = () => {
   const container = createMockContainer();
@@ -178,6 +201,94 @@ describe('composable pages', () => {
       const props = defaultProps();
       renderInRouter(<AlertingV2EpisodesPage {...props} />);
       expect(props.container.get).toHaveBeenCalled();
+    });
+
+    it('accepts a solution hostApp', () => {
+      const hostApp = createAlertingV2HostApp('observability', {
+        rules: '/alerting',
+        ruleLibrary: '/alerting/library',
+        episodes: '/alerting/inbox',
+        actionPolicies: '/alerting/action-policies',
+        executionHistory: '/alerting/execution-history',
+      });
+
+      renderInRouter(<AlertingV2RulesPage {...defaultProps()} hostApp={hostApp} />);
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+    });
+  });
+
+  describe('useRouteMatch route matching', () => {
+    const renderAtRoute = (parentPath: string, location: string, ui: React.ReactElement) =>
+      render(
+        <MemoryRouter initialEntries={[location]}>
+          <Route path={parentPath}>{ui}</Route>
+        </MemoryRouter>
+      );
+
+    it('EpisodesPage renders list when parent route matches', () => {
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage renders episode detail at parent/:episodeId', () => {
+      renderAtRoute('/inbox', '/inbox/ep-1', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.getByTestId('episodeDetailsPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage at /inbox does not match /:episodeId with "inbox" as the id', () => {
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.queryByTestId('episodeDetailsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders list when parent route matches', () => {
+      renderAtRoute('/rules/v2', '/rules/v2', <AlertingV2RulesPage {...defaultProps()} />);
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders rule detail at parent/:ruleId', () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
+    });
+
+    it('ActionPoliciesPage renders list when parent route matches', () => {
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
+    });
+
+    it('ActionPoliciesPage renders create at parent/create', () => {
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies/create',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
+    });
+
+    it('RuleLibraryPage renders when parent route matches', () => {
+      renderAtRoute(
+        '/rule-library',
+        '/rule-library',
+        <AlertingV2RuleLibraryPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('ruleLibraryPage')).toBeInTheDocument();
+    });
+
+    it('ExecutionHistoryPage renders when parent route matches', () => {
+      renderAtRoute(
+        '/execution-history',
+        '/execution-history',
+        <AlertingV2ExecutionHistoryPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
     });
   });
 });

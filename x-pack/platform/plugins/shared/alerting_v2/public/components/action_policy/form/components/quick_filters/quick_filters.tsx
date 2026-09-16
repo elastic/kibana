@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFilterGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { QuickFiltersProps } from './constants';
 import { TagsFilter } from './tags_filter';
 
@@ -15,7 +15,10 @@ export const QuickFilters = ({ matcher, onChange }: QuickFiltersProps) => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.label', {
-        defaultMessage: 'Quick filters',
+        defaultMessage: 'Rule tags',
+      })}
+      helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.helpText', {
+        defaultMessage: 'Rule tags are combined with OR.',
       })}
     >
       <EuiFilterGroup data-test-subj="quickFilters">

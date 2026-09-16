@@ -99,9 +99,17 @@ export interface WorkflowSelectorProps {
    * Create simple workflow remains available in both modes.
    */
   allowNestedFlyouts?: boolean;
+  /**
+   * When false, hides "+ Create new connector" in the simple workflow builder
+   * (essential create-from-rule form).
+   */
+  allowCreateConnector?: boolean;
 }
 
-export const WorkflowSelector = ({ allowNestedFlyouts = true }: WorkflowSelectorProps) => {
+export const WorkflowSelector = ({
+  allowNestedFlyouts = true,
+  allowCreateConnector = true,
+}: WorkflowSelectorProps) => {
   const { control, getValues, setValue } = useFormContext<ActionPolicyFormState>();
   const destinations = useWatch({ control, name: 'destinations' });
   const inlineActions = useWatch({ control, name: 'inlineActions' });
@@ -308,7 +316,7 @@ export const WorkflowSelector = ({ allowNestedFlyouts = true }: WorkflowSelector
                     </EuiFlexItem>
                   );
                 })}
-                <SimpleWorkflowBuilder />
+                <SimpleWorkflowBuilder allowCreateConnector={allowCreateConnector} />
               </EuiFlexGroup>
             </>
           )}

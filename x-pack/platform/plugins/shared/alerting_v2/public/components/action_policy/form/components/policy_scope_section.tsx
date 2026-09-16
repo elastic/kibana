@@ -7,26 +7,46 @@
 
 import { EuiDescribedFormGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyFormState } from '../types';
 import type { ActionPolicyPrototypeView } from './rule_tags_prototype_toggle';
 import { PolicyScopeSummary } from './policy_scope_summary';
 import { RuleTagsScopeField } from './rule_tags_scope_field';
 
 interface PolicyScopeSectionProps {
-  selectedTags: string[];
-  onChangeTags: (tags: string[]) => void;
   prototypeView: ActionPolicyPrototypeView;
 }
 
-export const PolicyScopeSection = ({
-  selectedTags,
-  onChangeTags,
-  prototypeView,
-}: PolicyScopeSectionProps) => {
-  const { control } = useFormContext<ActionPolicyFormState>();
+export const PolicyScopeSection = ({ prototypeView }: PolicyScopeSectionProps) => {
+  const { control, setValue } = useFormContext<ActionPolicyFormState>();
   const matcher = useWatch({ control, name: 'matcher' });
+
+  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
+  const expression = matcher?.expression ?? '';
+
+  const onChangeTags = useCallback(
+    (tags: string[]) => {
+      const next: PolicyMatcher = {
+        ...(matcher ?? {}),
+        tags: tags.length > 0 ? tags : null,
+      };
+      setValue('matcher', next, { shouldDirty: true, shouldTouch: true });
+    },
+    [matcher, setValue]
+  );
+
+  const onChangeExpression = useCallback(
+    (nextExpression: string) => {
+      const next: PolicyMatcher = {
+        ...(matcher ?? {}),
+        expression: nextExpression || null,
+      };
+      setValue('matcher', next, { shouldDirty: true, shouldTouch: true });
+    },
+    [matcher, setValue]
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -45,16 +65,18 @@ export const PolicyScopeSection = ({
         <>
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-            defaultMessage="Define which alert episodes this policy applies to. Select rule tags (joined with OR) or add a KQL match expression in advanced matching."
+            defaultMessage="Define which alert episodes this policy applies to. Tags and expression conditions are combined with AND. Leave both empty to apply the policy to all episodes in the space."
           />
           <EuiSpacer size="m" />
-          <PolicyScopeSummary selectedTags={selectedTags} matcher={matcher} />
+          <PolicyScopeSummary selectedTags={selectedTags} matcher={expression} />
         </>
       }
     >
       <RuleTagsScopeField
         selectedTags={selectedTags}
         onChangeTags={onChangeTags}
+        expression={expression}
+        onChangeExpression={onChangeExpression}
         prototypeView={prototypeView}
       />
     </EuiDescribedFormGroup>

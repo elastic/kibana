@@ -51,7 +51,7 @@ export const createInitialState = ({
     })
   ),
   childOpen: forceYamlMode,
-  queryCommitted: mode === 'edit' || isQueryPrePopulated,
+  queryCommitted: mode === 'edit' || mode === 'clone' || isQueryPrePopulated,
   yamlMode: forceYamlMode,
   manualSplitEnabled: false,
 });

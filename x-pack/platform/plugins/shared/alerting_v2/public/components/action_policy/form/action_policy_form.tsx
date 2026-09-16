@@ -20,16 +20,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { ClassicNotificationControlsSection } from './components/classic_notification_controls_section';
 import { NotificationControlsSection } from './components/notification_controls_section';
 import { PolicyScopeSection } from './components/policy_scope_section';
 import { RuleTagsMatcherInput } from './components/rule_tags_matcher_input';
-import {
-  ActionPolicyPrototypeToggle,
-  type ActionPolicyPrototypeView,
-} from './components/rule_tags_prototype_toggle';
+import { useActionPolicyPrototypeView } from './components/rule_tags_prototype_toggle';
 import { WorkflowSelector } from './components/workflow_selector';
 import { optionalLabel } from './form_labels';
 import type { ActionPolicyFormState } from './types';
@@ -118,7 +115,7 @@ const EssentialActionPolicyForm = () => {
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <WorkflowSelector allowNestedFlyouts={false} />
+      <WorkflowSelector allowNestedFlyouts={false} allowCreateConnector={false} />
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
     </>
@@ -127,17 +124,8 @@ const EssentialActionPolicyForm = () => {
 
 const FullActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const [prototypeView, setPrototypeView] = useState<ActionPolicyPrototypeView>('with_tags');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const handlePrototypeViewChange = (view: ActionPolicyPrototypeView) => {
-    setPrototypeView(view);
-    if (view === 'empty') {
-      setSelectedTags([]);
-    }
-  };
-
-  const showEnhancedNotificationControls = prototypeView === 'notification_controls';
+  const prototypeView = useActionPolicyPrototypeView();
+  const showVisualChart = prototypeView === 'visual_chart';
 
   return (
     <EuiForm component="div" fullWidth data-test-subj="actionPolicyForm">
@@ -219,15 +207,11 @@ const FullActionPolicyForm = () => {
 
       <FormSectionDivider />
 
-      <PolicyScopeSection
-        selectedTags={selectedTags}
-        onChangeTags={setSelectedTags}
-        prototypeView={prototypeView}
-      />
+      <PolicyScopeSection prototypeView={prototypeView} />
 
       <FormSectionDivider />
 
-      {showEnhancedNotificationControls ? (
+      {showVisualChart ? (
         <NotificationControlsSection />
       ) : (
         <ClassicNotificationControlsSection />
@@ -259,11 +243,6 @@ const FullActionPolicyForm = () => {
 
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
-
-      <ActionPolicyPrototypeToggle
-        selectedView={prototypeView}
-        onChange={handlePrototypeViewChange}
-      />
     </EuiForm>
   );
 };

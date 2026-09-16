@@ -7,13 +7,14 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
 import { ActionPolicyForm } from './action_policy_form';
 import type { ActionPolicyFormState } from './types';
+import { setActionPolicyPrototypeView } from './components/rule_tags_prototype_toggle';
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
@@ -179,6 +180,7 @@ describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
     jest.clearAllMocks();
+    setActionPolicyPrototypeView('ap_improv');
   });
 
   it('renders the rule tags scope field and advanced matching accordion', async () => {
@@ -319,7 +321,7 @@ describe('ActionPolicyForm', () => {
     renderForm(
       {
         ...DEFAULT_FORM_STATE,
-        matcher: 'rule.tags : "production"',
+        matcher: { tags: ['production'] },
       },
       'essential'
     );
@@ -340,26 +342,30 @@ describe('ActionPolicyForm', () => {
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
   });
 
-  it('keeps classic notification controls for With tags and shows the chart for Notification controls', async () => {
-    const user = userEvent.setup();
+  it('hides the chart for AP improv and shows it for Visual chart', async () => {
     renderForm();
 
-    expect(screen.getByTestId('ruleTagsPrototypeSettings')).toBeInTheDocument();
     expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
     expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
       'Per alert. Best when you need visibility into each alert separately.'
     );
-    expect(screen.getByTestId('dispatchOptionDiagram')).toBeInTheDocument();
+    expect(screen.queryByTestId('dispatchOptionDiagram')).not.toBeInTheDocument();
 
-    await user.click(screen.getByTestId('ruleTagsPrototypeToggle-notification_controls'));
+    act(() => {
+      setActionPolicyPrototypeView('visual_chart');
+    });
 
-    expect(screen.getByTestId('dispatchOptionDiagram')).toBeInTheDocument();
+    expect(await screen.findByTestId('dispatchOptionDiagram')).toBeInTheDocument();
     expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
     expect(screen.getByTestId('dispatchConfigModeHelp')).toBeInTheDocument();
 
-    await user.click(screen.getByTestId('ruleTagsPrototypeToggle-with_tags'));
+    act(() => {
+      setActionPolicyPrototypeView('ap_improv');
+    });
 
-    expect(screen.getByTestId('dispatchOptionDiagram')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('dispatchOptionDiagram')).not.toBeInTheDocument();
+    });
     expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
   });
 });

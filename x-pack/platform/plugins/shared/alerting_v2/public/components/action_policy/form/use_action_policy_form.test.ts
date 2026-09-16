@@ -14,16 +14,12 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   isActionValid: (action: {
     source: 'existing' | 'inline';
     workflowId?: string | null;
-    steps?: Array<{ connectorId: string | null; params?: string; stepName?: string }>;
+    connectorId?: string | null;
+    params?: string;
   }) =>
     action.source === 'existing'
       ? Boolean(action.workflowId)
-      : Boolean(
-          action.steps?.length &&
-            action.steps.every(
-              (step) => step.connectorId != null && (step.params ?? '').trim() !== ''
-            )
-        ),
+      : action.connectorId != null && (action.params ?? '').trim() !== '',
 }));
 
 const EXISTING_POLICY: ActionPolicyResponse = {
@@ -32,7 +28,7 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
-  matcher: 'data.severity : "critical"',
+  matcher: { expression: 'data.severity : "critical"' },
   group_by: ['host.name', 'service.name'],
   tags: ['production'],
   grouping_mode: 'per_field',
@@ -96,52 +92,24 @@ describe('useActionPolicyForm', () => {
         name: 'My policy',
         description: 'A description',
         tags: [],
-        matcher: '',
+        matcher: null,
         groupingMode: 'per_episode',
         groupBy: [],
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
         destinations: [],
         inlineActions: [],
-        enabled: false,
       });
     });
   });
 
   describe('submit gating (isSubmitEnabled)', () => {
-    it('is disabled without a name', () => {
+    it('is disabled without a name or destination', () => {
       const { result } = renderHook(() =>
         useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
       );
 
       expect(result.current.isSubmitEnabled).toBe(false);
-    });
-
-    it('is disabled with a name and no destinations', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'No destination yet');
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(false);
-      expect(result.current.hasDestination).toBe(false);
-    });
-
-    it('is enabled with a name and an existing destination', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'With destination');
-        result.current.methods.setValue('destinations', [{ type: 'workflow', id: 'wf-1' }]);
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(true);
-      expect(result.current.hasDestination).toBe(true);
     });
 
     it('is enabled with only a valid inline action and no existing destinations', async () => {
@@ -155,16 +123,9 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            workflowName: 'Slack notification',
-            steps: [
-              {
-                id: 'step-1',
-                stepType: 'slack2.sendMessage',
-                stepName: 'notify',
-                connectorId: 'connector-1',
-                params: 'message: hi',
-              },
-            ],
+            stepType: 'slack2.sendMessage',
+            connectorId: 'connector-1',
+            params: 'message: hi',
           },
         ]);
       });
@@ -183,16 +144,9 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            workflowName: 'Slack notification',
-            steps: [
-              {
-                id: 'step-1',
-                stepType: 'slack2.sendMessage',
-                stepName: 'notify',
-                connectorId: null,
-                params: 'message: ""',
-              },
-            ],
+            stepType: 'slack2.sendMessage',
+            connectorId: null,
+            params: 'message: ""',
           },
         ]);
       });
@@ -227,14 +181,13 @@ describe('useActionPolicyForm', () => {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
         tags: ['production'],
-        matcher: 'data.severity : "critical"',
+        matcher: { expression: 'data.severity : "critical"' },
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
         throttleStrategy: 'time_interval',
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
-        enabled: true,
       });
     });
 
@@ -278,13 +231,12 @@ describe('useActionPolicyForm', () => {
           description: 'Routes critical alerts',
           groupingMode: 'per_field',
           tags: ['production'],
-          matcher: 'data.severity : "critical"',
+          matcher: { expression: 'data.severity : "critical"' },
           groupBy: ['host.name', 'service.name'],
           throttleStrategy: 'time_interval',
           throttleInterval: '5m',
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
           inlineActions: [],
-          enabled: true,
         },
         'WzEsMV0='
       );

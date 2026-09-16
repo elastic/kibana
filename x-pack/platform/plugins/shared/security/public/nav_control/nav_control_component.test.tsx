@@ -216,12 +216,14 @@ describe('SecurityNavControl', () => {
           <div
             aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
+            role="menu"
           >
             <a
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
               data-test-subj="profileLink"
               href="edit-profile-link"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -247,6 +249,7 @@ describe('SecurityNavControl', () => {
               data-test-subj="userMenuLink__link1"
               href="path-to-link-1"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -272,6 +275,7 @@ describe('SecurityNavControl', () => {
               data-test-subj="userMenuLink__link2"
               href="path-to-link-2"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -297,6 +301,7 @@ describe('SecurityNavControl', () => {
               data-test-subj="userMenuLink__link3"
               href="path-to-link-3"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -323,6 +328,7 @@ describe('SecurityNavControl', () => {
             <div
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
               data-test-subj="logoutLink"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -396,12 +402,14 @@ describe('SecurityNavControl', () => {
           <div
             aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
+            role="menu"
           >
             <a
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
               data-test-subj="userMenuLink__link1"
               href="path-to-link-1"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -427,6 +435,7 @@ describe('SecurityNavControl', () => {
               data-test-subj="userMenuLink__link2"
               href="path-to-link-2"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -452,6 +461,7 @@ describe('SecurityNavControl', () => {
               data-test-subj="userMenuLink__link3"
               href="path-to-link-3"
               rel="noreferrer"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -475,6 +485,7 @@ describe('SecurityNavControl', () => {
             <div
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
               data-test-subj="logoutLink"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"
@@ -543,10 +554,12 @@ describe('SecurityNavControl', () => {
           <div
             aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
+            role="menu"
           >
             <div
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
               data-test-subj="logoutLink"
+              role="menuitem"
             >
               <span
                 class="euiListItemLayout__content emotion-euiListItemLayout__content"

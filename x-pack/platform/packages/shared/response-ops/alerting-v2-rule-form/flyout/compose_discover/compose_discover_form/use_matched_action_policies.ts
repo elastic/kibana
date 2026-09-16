@@ -11,9 +11,11 @@ import type {
   MatchActionPoliciesForRuleResponse,
   MatchedActionPolicy,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
+  /** Kept for callers; match API currently keys off tags only. */
   ruleId?: string;
   name?: string;
   tags?: string[];
@@ -32,20 +34,15 @@ export const useMatchedActionPolicies = ({
   name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  // Always fetch on mount so catch-all policies appear before the rule has a name/tags.
-  const body = {
-    rule: {
-      ...(ruleId ? { id: ruleId } : {}),
-      ...(name ? { name } : {}),
-      ...(tags?.length ? { tags } : {}),
-    },
-  };
+  // Always fetch on mount so catch-all policies appear before the rule has tags.
+  // Request body follows the structured match-for-rule API (tags only).
+  const body = { rule: tags?.length ? { tags } : {} };
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
-        '/api/alerting/v2/action_policies/_match_for_rule',
+        `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,
         { method: 'POST', body: JSON.stringify(body) }
       ),
     keepPreviousData: true,

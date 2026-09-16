@@ -66,11 +66,11 @@ interface PrototypePolicy {
 /** Map API match results into the expandable card model. */
 const toMatchedPolicyCard = (matched: MatchedActionPolicy): PrototypePolicy => {
   const { actionPolicy, category } = matched;
-  const scopeTags = actionPolicy.tags ?? [];
-  const expression = actionPolicy.matcher ?? undefined;
+  const scopeTags = actionPolicy.matcher?.tags ?? [];
+  const expression = actionPolicy.matcher?.expression?.trim() || undefined;
 
   let matchKinds: MatchKind[];
-  if (category === 'global') {
+  if (category === 'catch-all') {
     matchKinds = ['catch-all'];
   } else {
     matchKinds = [];
@@ -81,7 +81,7 @@ const toMatchedPolicyCard = (matched: MatchedActionPolicy): PrototypePolicy => {
       matchKinds.push('expression');
     }
     if (matchKinds.length === 0) {
-      matchKinds = ['expression'];
+      matchKinds = ['tags'];
     }
   }
 

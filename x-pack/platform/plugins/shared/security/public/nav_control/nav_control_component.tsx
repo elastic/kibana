@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiContextMenu,
-  EuiContextMenuItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
-import React, { Fragment, useCallback, useState } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -24,43 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar } from '@kbn/user-profile-components';
-
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
-  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
-  onClick?: (event: MouseEvent<Element>) => void;
-};
-
-interface ContextMenuProps {
-  items: ContextMenuItem[];
-  closePopover: () => void;
-}
-
-const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
-  return (
-    <>
-      {items.map((item, i) => {
-        if (item.content) {
-          return (
-            <Fragment key={i}>
-              {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
-            </Fragment>
-          );
-        }
-        return (
-          <EuiContextMenuItem
-            key={i}
-            icon={item.icon}
-            href={item.href}
-            onClick={item.onClick}
-            data-test-subj={item['data-test-subj']}
-          >
-            {item.name}
-          </EuiContextMenuItem>
-        );
-      })}
-    </>
-  );
-};
 
 export interface SecurityNavControlRenderButtonProps {
   isOpen: boolean;
@@ -95,6 +60,8 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     [user]
   );
 
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
   const avatar = user ? (
     <UserAvatar
       user={{ username: user.username, email: user.email, full_name: user.fullName }}
@@ -123,60 +90,111 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const items: ContextMenuItem[] = [];
-  if (userMenuLinks.length) {
-    const userMenuLinkMenuItems = userMenuLinks
-      .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
-        name: label,
-        icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
-        href,
-        onClick,
-        'data-test-subj': `userMenuLink__${label}`,
-        content,
-      }));
-    items.push(...userMenuLinkMenuItems);
-  }
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+    const nestedPanels: EuiContextMenuPanelDescriptor[] = [];
+    let nextPanelId = 1;
 
-  const isAnonymous = user?.isAnonymous ?? false;
-  const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+    const sortedLinks = [...userMenuLinks].sort(
+      ({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB
+    );
 
-  if (!isAnonymous && !hasCustomProfileLinks) {
-    const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
-      name: (
+    const isAnonymous = user?.isAnonymous ?? false;
+    const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+
+    if (!isAnonymous && !hasCustomProfileLinks) {
+      rootItems.push({
+        name: (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkText"
+            defaultMessage="Edit profile"
+          />
+        ),
+        icon: <EuiIcon type="user" size="m" aria-hidden={true} />,
+        href: editProfileUrl,
+        onClick: closePopover,
+        'data-test-subj': 'profileLink',
+      });
+    }
+
+    for (const link of sortedLinks) {
+      if (link.content) {
+        rootItems.push({
+          key: `user-menu-content-${link.label || link.order}`,
+          renderItem: () =>
+            typeof link.content === 'function'
+              ? link.content({ closePopover })
+              : link.content,
+        });
+        continue;
+      }
+
+      if (link.panelItems?.length) {
+        const panelId = nextPanelId++;
+        rootItems.push({
+          name: link.label,
+          icon: link.iconType ? (
+            <EuiIcon type={link.iconType} size="m" aria-hidden={true} />
+          ) : undefined,
+          panel: panelId,
+          'data-test-subj': `userMenuLink__${link.label}`,
+        });
+        nestedPanels.push({
+          id: panelId,
+          title: link.label,
+          items: link.panelItems.map((panelItem, index) => ({
+            name: panelItem.name,
+            key: `panel-item-${panelId}-${index}`,
+            onClick: () => {
+              panelItem.onClick?.();
+              closePopover();
+            },
+            'data-test-subj': panelItem['data-test-subj'],
+          })),
+        });
+        continue;
+      }
+
+      rootItems.push({
+        name: link.label,
+        icon: link.iconType ? (
+          <EuiIcon type={link.iconType} size="m" aria-hidden={true} />
+        ) : undefined,
+        href: link.href || undefined,
+        onClick: (event) => {
+          link.onClick?.(event);
+          closePopover();
+        },
+        'data-test-subj': `userMenuLink__${link.label}`,
+      });
+    }
+
+    rootItems.push({
+      name: isAnonymous ? (
         <FormattedMessage
-          id="xpack.security.navControlComponent.editProfileLinkText"
-          defaultMessage="Edit profile"
+          id="xpack.security.navControlComponent.loginLinkText"
+          defaultMessage="Log in"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.logoutLinkText"
+          defaultMessage="Log out"
         />
       ),
-      icon: <EuiIcon type="user" size="m" aria-hidden={true} />,
-      href: editProfileUrl,
-      onClick: () => {
-        setIsPopoverOpen(false);
+      icon: <EuiIcon type="logOut" size="m" aria-hidden={true} />,
+      href: logoutUrl,
+      'data-test-subj': 'logoutLink',
+    });
+
+    return [
+      {
+        id: 0,
+        title: displayName,
+        items: rootItems,
       },
-      'data-test-subj': 'profileLink',
-    };
-
-    // Set this as the first link if there is no user-defined profile link
-    items.unshift(profileMenuItem);
-  }
-
-  items.push({
-    name: isAnonymous ? (
-      <FormattedMessage
-        id="xpack.security.navControlComponent.loginLinkText"
-        defaultMessage="Log in"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.security.navControlComponent.logoutLinkText"
-        defaultMessage="Log out"
-      />
-    ),
-    icon: <EuiIcon type="logOut" size="m" aria-hidden={true} />,
-    href: logoutUrl,
-    'data-test-subj': 'logoutLink',
-  });
+      ...nestedPanels,
+    ];
+  }, [closePopover, displayName, editProfileUrl, logoutUrl, user?.isAnonymous, userMenuLinks]);
 
   return (
     <EuiPopover
@@ -185,7 +203,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       isOpen={isPopoverOpen}
       anchorPosition="downRight"
       repositionOnScroll
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
       buffer={0}
       aria-label={i18n.translate('xpack.security.navControlComponent.popoverAriaLabel', {
@@ -195,15 +213,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       <EuiContextMenu
         className="chrNavControl__userMenu"
         initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            title: displayName,
-            content: (
-              <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
-            ),
-          },
-        ]}
+        panels={panels}
         data-test-subj="userMenu"
       />
     </EuiPopover>

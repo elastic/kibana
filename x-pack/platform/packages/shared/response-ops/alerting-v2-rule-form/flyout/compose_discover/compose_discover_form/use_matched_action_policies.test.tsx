@@ -21,18 +21,23 @@ const createWrapper = () => {
   );
 };
 
+const MATCH_PATH = '/internal/alerting/v2/action_policies/_match_for_rule';
+
 describe('useMatchedActionPolicies', () => {
   it('returns items from the API on success', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'tags' }],
       total: 42,
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, ruleId: 'rule-abc', tags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isLoading).toBe(true);
 
@@ -42,10 +47,10 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(result.current.total).toBe(42);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { id: 'rule-abc' } }),
+        body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
       })
     );
   });
@@ -54,9 +59,12 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     http.fetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, ruleId: 'rule-abc' }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, ruleId: 'rule-abc', tags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -66,33 +74,33 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.total).toBe(0);
   });
 
-  it('re-fetches when ruleId changes', async () => {
+  it('re-fetches when tags change', async () => {
     const http = httpServiceMock.createStartContract();
     http.fetch
       .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-1' }, category: 'global' }],
+        items: [{ actionPolicy: { id: 'ap-1' }, category: 'tags' }],
       } as any)
       .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-2' }, category: 'global-filtered' }],
+        items: [{ actionPolicy: { id: 'ap-2' }, category: 'catch-all' }],
       } as any);
 
     const { result, rerender } = renderHook(
-      ({ ruleId }: { ruleId: string }) => useMatchedActionPolicies({ http, ruleId }),
-      { wrapper: createWrapper(), initialProps: { ruleId: 'rule-1' } }
+      ({ tags }: { tags: string[] }) => useMatchedActionPolicies({ http, tags }),
+      { wrapper: createWrapper(), initialProps: { tags: ['env:prod'] } }
     );
 
     await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-1'));
 
-    rerender({ ruleId: 'rule-2' });
+    rerender({ tags: ['env:staging'] });
     await waitFor(() => expect(result.current.items[0].actionPolicy.id).toBe('ap-2'));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('sends name and tags when ruleId is not provided', async () => {
+  it('sends tags when provided without a ruleId', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch-all' }],
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
@@ -105,10 +113,10 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ rule: { name: 'My Rule', tags: ['env:prod'] } }),
+        body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
       })
     );
   });
@@ -124,7 +132,7 @@ describe('useMatchedActionPolicies', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: {} }),
@@ -132,10 +140,10 @@ describe('useMatchedActionPolicies', () => {
     );
   });
 
-  it('fetches when name is an empty string', async () => {
+  it('fetches when name is an empty string and no tags', async () => {
     const http = httpServiceMock.createStartContract();
     http.fetch.mockResolvedValueOnce({
-      items: [{ actionPolicy: { id: 'ap-global' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-global' }, category: 'catch-all' }],
       total: 1,
     } as any);
 
@@ -147,7 +155,7 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.items).toHaveLength(1);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/api/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: {} }),

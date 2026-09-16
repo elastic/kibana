@@ -7,23 +7,17 @@
 
 /**
  * Design prototype control — switches Action Policy form preview states.
+ * Exposed as a "Prototype settings" item in the account (user) menu,
+ * with options in a nested secondary panel.
  */
 
-import {
-  EuiButtonGroup,
-  type EuiButtonGroupOptionProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 
-export type ActionPolicyPrototypeView = 'empty' | 'with_tags' | 'notification_controls';
+export type ActionPolicyPrototypeView = 'empty' | 'ap_improv' | 'visual_chart';
 
 /** @deprecated Use ActionPolicyPrototypeView */
 export type RuleTagsPrototypeView = ActionPolicyPrototypeView;
@@ -36,209 +30,101 @@ export const RULE_TAGS_PROTOTYPE_MOCK_TAGS = [
   'slo',
 ];
 
-const PROTOTYPE_SETTINGS_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicy.form.prototypeSettingsTitle',
+const DEFAULT_VIEW: ActionPolicyPrototypeView = 'ap_improv';
+
+const prototypeView$ = new BehaviorSubject<ActionPolicyPrototypeView>(DEFAULT_VIEW);
+
+let hasRegisteredUserMenuLink = false;
+
+export const getActionPolicyPrototypeView = (): ActionPolicyPrototypeView => prototypeView$.value;
+
+export const setActionPolicyPrototypeView = (view: ActionPolicyPrototypeView): void => {
+  prototypeView$.next(view);
+};
+
+export const useActionPolicyPrototypeView = (): ActionPolicyPrototypeView =>
+  useObservable(prototypeView$, prototypeView$.value);
+
+const PROTOTYPE_SETTINGS_LABEL = i18n.translate(
+  'xpack.alertingV2.actionPolicy.form.prototypeSettingsLabel',
   {
     defaultMessage: 'Prototype settings',
   }
 );
 
-const PROTOTYPE_LEGEND = i18n.translate(
-  'xpack.alertingV2.actionPolicy.form.prototypeLegend',
+const PROTOTYPE_OPTIONS: Array<{
+  id: ActionPolicyPrototypeView;
+  label: string;
+  testSubj: string;
+}> = [
   {
-    defaultMessage: 'Action policy prototype view',
-  }
-);
-
-const DRAG_HANDLE_ARIA = i18n.translate(
-  'xpack.alertingV2.actionPolicy.form.prototypeDragHandle',
+    id: 'empty',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.prototypeEmpty', {
+      defaultMessage: 'Empty state',
+    }),
+    testSubj: 'ruleTagsPrototypeToggle-empty',
+  },
   {
-    defaultMessage: 'Drag to move prototype settings',
-  }
-);
+    id: 'ap_improv',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.prototypeApImprov', {
+      defaultMessage: 'AP improv',
+    }),
+    testSubj: 'ruleTagsPrototypeToggle-ap_improv',
+  },
+  {
+    id: 'visual_chart',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.prototypeVisualChart', {
+      defaultMessage: 'Visual chart',
+    }),
+    testSubj: 'ruleTagsPrototypeToggle-visual_chart',
+  },
+];
 
-interface ActionPolicyPrototypeToggleProps {
-  selectedView: ActionPolicyPrototypeView;
-  onChange: (view: ActionPolicyPrototypeView) => void;
-}
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-export const ActionPolicyPrototypeToggle = ({
-  selectedView,
-  onChange,
-}: ActionPolicyPrototypeToggleProps) => {
-  const { euiTheme } = useEuiTheme();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const [position, setPosition] = useState<Position | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const options = useMemo(
-    (): EuiButtonGroupOptionProps[] => [
-      {
-        id: 'empty',
-        label: i18n.translate('xpack.alertingV2.actionPolicy.form.prototypeEmpty', {
-          defaultMessage: 'Empty state',
-        }),
-        iconType: 'document',
-        'data-test-subj': 'ruleTagsPrototypeToggle-empty',
-      },
-      {
-        id: 'with_tags',
-        label: i18n.translate('xpack.alertingV2.actionPolicy.form.prototypeWithTags', {
-          defaultMessage: 'With tags',
-        }),
-        iconType: 'tag',
-        'data-test-subj': 'ruleTagsPrototypeToggle-with_tags',
-      },
-      {
-        id: 'notification_controls',
-        label: i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.prototypeNotificationControls',
-          {
-            defaultMessage: 'Notification controls',
-          }
-        ),
-        iconType: 'bell',
-        'data-test-subj': 'ruleTagsPrototypeToggle-notification_controls',
-      },
-    ],
-    []
-  );
-
-  const clampPosition = useCallback((next: Position): Position => {
-    const el = panelRef.current;
-    const width = el?.offsetWidth ?? 0;
-    const height = el?.offsetHeight ?? 0;
-    const maxX = Math.max(0, window.innerWidth - width);
-    const maxY = Math.max(0, window.innerHeight - height);
-    return {
-      x: Math.min(Math.max(0, next.x), maxX),
-      y: Math.min(Math.max(0, next.y), maxY),
-    };
-  }, []);
-
-  const onPointerMove = useCallback(
-    (event: PointerEvent) => {
-      setPosition(
-        clampPosition({
-          x: event.clientX - dragOffsetRef.current.x,
-          y: event.clientY - dragOffsetRef.current.y,
-        })
-      );
-    },
-    [clampPosition]
-  );
-
-  const onPointerUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (!isDragging) {
-      return;
-    }
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-  }, [isDragging, onPointerMove, onPointerUp]);
-
-  const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) {
-      return;
-    }
-    const el = panelRef.current;
-    if (!el) {
-      return;
-    }
-    const rect = el.getBoundingClientRect();
-    dragOffsetRef.current = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
-    setPosition({ x: rect.left, y: rect.top });
-    setIsDragging(true);
-    event.preventDefault();
-  };
-
-  const floatingBarCss = css`
-    position: fixed;
-    z-index: ${euiTheme.levels.flyout};
-    pointer-events: auto;
-    ${position
-      ? `
-      top: ${position.y}px;
-      left: ${position.x}px;
-    `
-      : `
-      bottom: ${euiTheme.size.l};
-      left: 50%;
-      transform: translateX(-50%);
-    `}
-  `;
-
-  const dragHandleCss = css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: ${euiTheme.size.xs};
-    cursor: ${isDragging ? 'grabbing' : 'grab'};
-    user-select: none;
-    touch-action: none;
-    width: 100%;
-  `;
-
-  const trackCss = css`
-    display: inline-flex;
-    padding: ${euiTheme.size.xxs};
-    background: ${euiTheme.colors.emptyShade};
-    border-radius: ${euiTheme.size.l};
-  `;
-
+const PrototypeOptionLabel = ({
+  optionId,
+  label,
+}: {
+  optionId: ActionPolicyPrototypeView;
+  label: string;
+}) => {
+  const selectedView = useActionPolicyPrototypeView();
   return (
-    <div ref={panelRef} css={floatingBarCss} data-test-subj="ruleTagsPrototypeSettings">
-      <EuiPanel hasShadow paddingSize="s" color="subdued">
-        <EuiFlexGroup direction="column" gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <div
-              css={dragHandleCss}
-              onPointerDown={startDrag}
-              role="button"
-              tabIndex={0}
-              aria-label={DRAG_HANDLE_ARIA}
-              data-test-subj="ruleTagsPrototypeSettingsDragHandle"
-            >
-              <EuiIcon type="dragVertical" size="s" color="subdued" />
-              <EuiText size="xs">
-                <strong>{PROTOTYPE_SETTINGS_TITLE}</strong>
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div css={trackCss} data-test-subj="ruleTagsPrototypeToggle">
-              <EuiButtonGroup
-                legend={PROTOTYPE_LEGEND}
-                options={options}
-                idSelected={selectedView}
-                onChange={(id) => onChange(id as ActionPolicyPrototypeView)}
-                type="single"
-                buttonSize="compressed"
-                color="text"
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </div>
+    <>
+      {label}
+      {selectedView === optionId ? ' ✓' : ''}
+    </>
   );
 };
+
+/**
+ * Registers the prototype settings entry in the account (user) menu once.
+ * Options open in a nested secondary context-menu panel.
+ */
+export const registerActionPolicyPrototypeUserMenuLink = (
+  security: SecurityPluginStart
+): void => {
+  if (hasRegisteredUserMenuLink) {
+    return;
+  }
+  hasRegisteredUserMenuLink = true;
+
+  security.navControlService.addUserMenuLinks([
+    {
+      label: PROTOTYPE_SETTINGS_LABEL,
+      iconType: 'controlsHorizontal',
+      href: '',
+      order: 50,
+      panelItems: PROTOTYPE_OPTIONS.map((option) => ({
+        name: <PrototypeOptionLabel optionId={option.id} label={option.label} />,
+        onClick: () => setActionPolicyPrototypeView(option.id),
+        'data-test-subj': option.testSubj,
+      })),
+    },
+  ]);
+};
+
+/** @deprecated Prefer user-menu registration; kept for type re-exports. */
+export const ActionPolicyPrototypeToggle = () => null;
 
 /** @deprecated Use ActionPolicyPrototypeToggle */
 export const RuleTagsPrototypeToggle = ActionPolicyPrototypeToggle;

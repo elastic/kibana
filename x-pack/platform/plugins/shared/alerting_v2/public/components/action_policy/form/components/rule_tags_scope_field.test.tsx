@@ -32,7 +32,7 @@ jest.mock('./matcher_input', () => ({
 }));
 
 const RuleTagsScopeFieldHarness = ({
-  prototypeView = 'with_tags',
+  prototypeView = 'ap_improv',
 }: {
   prototypeView?: ActionPolicyPrototypeView;
 }) => {
@@ -47,6 +47,8 @@ const RuleTagsScopeFieldHarness = ({
         <RuleTagsScopeField
           selectedTags={selectedTags}
           onChangeTags={setSelectedTags}
+          expression=""
+          onChangeExpression={() => undefined}
           prototypeView={prototypeView}
         />
       </FormProvider>
@@ -81,7 +83,7 @@ describe('RuleTagsScopeField', () => {
   });
 
   it('shows the selectable list when rule tags exist in the space', () => {
-    render(<RuleTagsScopeFieldHarness prototypeView="with_tags" />);
+    render(<RuleTagsScopeFieldHarness prototypeView="ap_improv" />);
 
     expect(screen.getByTestId('ruleTagsSelectable')).toBeInTheDocument();
     expect(screen.getByTestId('ruleTagsSearch')).toBeInTheDocument();
@@ -92,7 +94,7 @@ describe('RuleTagsScopeField', () => {
   });
 
   it('uses Search or add rule tags for the selectable search input', () => {
-    render(<RuleTagsScopeFieldHarness prototypeView="with_tags" />);
+    render(<RuleTagsScopeFieldHarness prototypeView="ap_improv" />);
 
     expect(screen.getByTestId('ruleTagsSearch')).toHaveAttribute(
       'placeholder',
@@ -102,7 +104,7 @@ describe('RuleTagsScopeField', () => {
 
   it('shows custom tags under Other when they are not on a rule', async () => {
     const user = userEvent.setup();
-    render(<RuleTagsScopeFieldHarness prototypeView="with_tags" />);
+    render(<RuleTagsScopeFieldHarness prototypeView="ap_improv" />);
 
     await user.type(screen.getByTestId('ruleTagsSearch'), 'custom-tag{enter}');
 
@@ -110,8 +112,8 @@ describe('RuleTagsScopeField', () => {
     expect(await screen.findByText('custom-tag')).toBeInTheDocument();
   });
 
-  it('shows mock tags for the notification controls prototype view', () => {
-    render(<RuleTagsScopeFieldHarness prototypeView="notification_controls" />);
+  it('shows mock tags for the visual chart prototype view', () => {
+    render(<RuleTagsScopeFieldHarness prototypeView="visual_chart" />);
 
     expect(screen.getByTestId('ruleTagsSelectable')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleTagsEmptyState')).not.toBeInTheDocument();

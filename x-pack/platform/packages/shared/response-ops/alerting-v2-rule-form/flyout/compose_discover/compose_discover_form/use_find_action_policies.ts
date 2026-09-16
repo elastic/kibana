@@ -24,8 +24,15 @@ export interface UseFindActionPoliciesResult {
 }
 
 /** True when the policy matches every rule (empty / null matcher). */
-export const isCatchAllActionPolicy = (policy: ActionPolicyResponse): boolean =>
-  !policy.matcher || policy.matcher.trim() === '';
+export const isCatchAllActionPolicy = (policy: ActionPolicyResponse): boolean => {
+  const matcher = policy.matcher;
+  if (!matcher) {
+    return true;
+  }
+  const hasTags = Boolean(matcher.tags?.length);
+  const hasExpression = Boolean(matcher.expression?.trim());
+  return !hasTags && !hasExpression;
+};
 
 export const useFindActionPolicies = ({
   http,

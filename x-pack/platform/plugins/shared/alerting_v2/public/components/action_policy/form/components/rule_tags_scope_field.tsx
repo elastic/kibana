@@ -6,8 +6,8 @@
  */
 
 /**
- * Policy-scope rule tag picker and advanced KQL matcher.
- * Rule tag selection is local/visual only; it does not write to the form matcher yet.
+ * Policy-scope rule tag picker and advanced KQL expression.
+ * Tags map to `matcher.tags`; the expression maps to `matcher.expression`.
  */
 
 import {
@@ -26,11 +26,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchRuleEventFields } from '../../../../hooks/use_fetch_rule_event_fields';
 import { useFetchRuleTags } from '../../../../hooks/use_fetch_rule_tags';
 import { optionalLabel } from '../form_labels';
-import type { ActionPolicyFormState } from '../types';
 import { formLabelWithOptionalTip } from './form_label_with_tip';
 import { MatcherInput } from './matcher_input';
 import {
@@ -305,18 +303,21 @@ const RuleTagsInlinePicker = ({
 interface RuleTagsScopeFieldProps {
   selectedTags: string[];
   onChangeTags: (tags: string[]) => void;
+  /** Advanced KQL expression (`matcher.expression`). */
+  expression: string;
+  onChangeExpression: (expression: string) => void;
   prototypeView: ActionPolicyPrototypeView;
 }
 
 export const RuleTagsScopeField = ({
   selectedTags,
   onChangeTags,
+  expression,
+  onChangeExpression,
   prototypeView,
 }: RuleTagsScopeFieldProps) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'ruleTagsAdvancedMatching' });
-  const { control } = useFormContext<ActionPolicyFormState>();
-  const matcher = useWatch({ control, name: 'matcher' });
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
+  const { data: dataFieldNames } = useFetchRuleEventFields(expression || undefined);
   const useMockTags = prototypeView !== 'empty';
 
   return (
@@ -342,39 +343,33 @@ export const RuleTagsScopeField = ({
         buttonContent={i18n.translate('xpack.alertingV2.actionPolicy.form.advancedMatching.title', {
           defaultMessage: 'Advanced matching',
         })}
-        initialIsOpen={Boolean(matcher)}
+        initialIsOpen={Boolean(expression)}
         data-test-subj="advancedMatchingAccordion"
       >
         <EuiSpacer size="m" />
-        <Controller
-          name="matcher"
-          control={control}
-          render={({ field }) => (
-            <EuiFormRow
-              label={formLabelWithOptionalTip(
-                MATCH_CONDITIONS_LABEL,
-                MATCH_CONDITIONS_TIP,
-                'matcherLabelTip'
-              )}
-              labelAppend={optionalLabel}
-              fullWidth
-            >
-              <MatcherInput
-                value={field.value}
-                onChange={field.onChange}
-                fullWidth
-                data-test-subj="matcherInput"
-                dataFieldNames={dataFieldNames}
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                  {
-                    defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
-                  }
-                )}
-              />
-            </EuiFormRow>
+        <EuiFormRow
+          label={formLabelWithOptionalTip(
+            MATCH_CONDITIONS_LABEL,
+            MATCH_CONDITIONS_TIP,
+            'matcherLabelTip'
           )}
-        />
+          labelAppend={optionalLabel}
+          fullWidth
+        >
+          <MatcherInput
+            value={expression}
+            onChange={onChangeExpression}
+            fullWidth
+            data-test-subj="matcherInput"
+            dataFieldNames={dataFieldNames}
+            placeholder={i18n.translate(
+              'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
+              {
+                defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
+              }
+            )}
+          />
+        </EuiFormRow>
       </EuiAccordion>
     </>
   );

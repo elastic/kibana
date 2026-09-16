@@ -22,6 +22,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
@@ -46,7 +47,14 @@ import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
-import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
+import {
+  AlertingV2RulesLocatorDefinition,
+  AlertingV2RuleLibraryLocatorDefinition,
+  AlertingV2EpisodesLocatorDefinition,
+  AlertingV2ActionPoliciesLocatorDefinition,
+  AlertingV2ExecutionHistoryLocatorDefinition,
+  createAlertingV2HostApp,
+} from './locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -91,7 +99,15 @@ export type {
   AlertingV2PageProps,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
+export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
+export { MANAGEMENT_HOST } from './locator_host';
+export type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from './locators';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -143,6 +159,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
             })),
           container
         ),
+        createAlertingV2HostApp,
       } satisfies AlertingV2PublicStart;
     })
     .inSingletonScope();
@@ -168,11 +185,11 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const share = container.get(PluginSetup('share')) as SharePluginSetup;
-    share.url.locators.create(
-      new AlertingV2RuleLibraryLocatorDefinition({
-        managementAppLocator: management.locator,
-      })
-    );
+    share.url.locators.create(AlertingV2RulesLocatorDefinition);
+    share.url.locators.create(AlertingV2RuleLibraryLocatorDefinition);
+    share.url.locators.create(AlertingV2EpisodesLocatorDefinition);
+    share.url.locators.create(AlertingV2ActionPoliciesLocatorDefinition);
+    share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'Alerting V2 Preview',
@@ -307,6 +324,16 @@ const pluginModule = new ContainerModule(({ bind }) => {
       if (!alertingEnabled) {
         disableAlertingManagementUi(alertingSection);
         return;
+      }
+
+      const securityToken = PluginStart('security');
+      if (diContainer.isBound(securityToken)) {
+        const security = diContainer.get(securityToken) as SecurityPluginStart;
+        void import('./components/action_policy/form/components/rule_tags_prototype_toggle').then(
+          ({ registerActionPolicyPrototypeUserMenuLink }) => {
+            registerActionPolicyPrototypeUserMenuLink(security);
+          }
+        );
       }
 
       const agentBuilderToken = PluginStart('agentBuilder');

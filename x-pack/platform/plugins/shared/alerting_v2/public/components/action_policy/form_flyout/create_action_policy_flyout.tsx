@@ -12,10 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 import type { ActionPolicyFormVariant } from '../form/action_policy_form';
 import { toCreatePayload } from '../form/form_utils';
-import {
-  mergeRuleTagsIntoMatcher,
-  parseRuleTagsFromMatcher,
-} from '../form/matcher_quick_filter_utils';
 import type { ActionPolicyFormState } from '../form/types';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../../hooks/use_create_inline_workflows';
@@ -25,7 +21,7 @@ export interface CreateActionPolicyFlyoutProps {
   onCreated: (policy: { id: string; name: string; tags: string[] }) => void;
   /** Compact create-from-rule layout. Defaults to `essential` for Compose Discover. */
   variant?: ActionPolicyFormVariant;
-  /** Prefills matcher `rule.tags` (and a suggested name) when opening from a rule. */
+  /** Prefills `matcher.tags` (and a suggested name) when opening from a rule. */
   ruleTags?: string[];
 }
 
@@ -47,11 +43,8 @@ export const CreateActionPolicyFlyout = ({
   const defaultValues = useMemo((): Partial<ActionPolicyFormState> => {
     const tags = ruleTags.filter(Boolean);
     return {
-      name:
-        tags.length > 0
-          ? `${tags.join(' · ')} — SRE on-call`
-          : '',
-      matcher: mergeRuleTagsIntoMatcher('', tags),
+      name: tags.length > 0 ? `${tags.join(' · ')} — SRE on-call` : '',
+      matcher: tags.length > 0 ? { tags } : null,
     };
   }, [ruleTags]);
 
@@ -79,7 +72,7 @@ export const CreateActionPolicyFlyout = ({
 
       try {
         const created = await createPolicy(toCreatePayload({ ...values, destinations }));
-        const linkTags = parseRuleTagsFromMatcher(values.matcher);
+        const linkTags = values.matcher?.tags ?? [];
         onCreated({
           id: created.id,
           name: created.name,

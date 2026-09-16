@@ -31,12 +31,14 @@ export interface InlineWorkflowEditorProps {
   onChange: (next: InlineWorkflowActionDraft) => void;
   /** Called when a step editor is opened or closed. */
   onEditingStepChange?: (isEditing: boolean) => void;
+  allowCreateConnector?: boolean;
 }
 
 export const InlineWorkflowEditor = ({
   value,
   onChange,
   onEditingStepChange,
+  allowCreateConnector = true,
 }: InlineWorkflowEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const [expandedStepId, setExpandedStepId] = useState<string | null>(
@@ -203,7 +205,11 @@ export const InlineWorkflowEditor = ({
                 {isExpanded && (
                   <>
                     <EuiSpacer size="m" />
-                    <InlineWorkflowStepEditor value={step} onChange={updateStep} />
+                    <InlineWorkflowStepEditor
+                      value={step}
+                      onChange={updateStep}
+                      allowCreateConnector={allowCreateConnector}
+                    />
                   </>
                 )}
               </EuiPanel>

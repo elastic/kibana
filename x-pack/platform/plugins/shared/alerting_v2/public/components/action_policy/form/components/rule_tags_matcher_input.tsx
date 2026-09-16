@@ -7,26 +7,23 @@
 
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import { useFetchRuleTags } from '../../../../hooks/use_fetch_rule_tags';
-import {
-  mergeRuleTagsIntoMatcher,
-  parseRuleTagsFromMatcher,
-} from '../matcher_quick_filter_utils';
 
 interface RuleTagsMatcherInputProps {
-  matcher: string;
-  onChange: (matcher: string) => void;
+  matcher: PolicyMatcher | null;
+  onChange: (matcher: PolicyMatcher | null) => void;
   /**
    * When true, groups unfiltered API tags under "Recommended" (most-used) and
-   * search hits under "Other tags". Tags are stored as OR'd `rule.tags` clauses.
+   * search hits under "Other tags".
    */
   showRecommendedGroups?: boolean;
 }
 
 /**
- * Combo box that edits `rule.tags` clauses in the policy matcher (OR semantics).
+ * Combo box that edits `matcher.tags` (OR semantics across selected tags).
  */
 export const RuleTagsMatcherInput = ({
   matcher,
@@ -40,7 +37,14 @@ export const RuleTagsMatcherInput = ({
     search: debouncedQuery || undefined,
   });
 
-  const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
+  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
+
+  const writeTags = (tags: string[]) => {
+    onChange({
+      ...(matcher ?? {}),
+      tags: tags.length > 0 ? tags : null,
+    });
+  };
 
   const tagOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
     const fromApi = existingTags ?? [];
@@ -108,14 +112,11 @@ export const RuleTagsMatcherInput = ({
           if (!normalized || selectedTags.includes(normalized)) {
             return;
           }
-          onChange(mergeRuleTagsIntoMatcher(matcher, [...selectedTags, normalized]));
+          writeTags([...selectedTags, normalized]);
         }}
         onChange={(options) => {
-          onChange(
-            mergeRuleTagsIntoMatcher(
-              matcher,
-              options.filter((option) => !option.isGroupLabelOption).map((option) => option.label)
-            )
+          writeTags(
+            options.filter((option) => !option.isGroupLabelOption).map((option) => option.label)
           );
         }}
       />

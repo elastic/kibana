@@ -28,7 +28,11 @@ import React, { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { ActionPolicyFormState } from '../types';
 
-export const SimpleWorkflowBuilder = () => {
+export const SimpleWorkflowBuilder = ({
+  allowCreateConnector = true,
+}: {
+  allowCreateConnector?: boolean;
+}) => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -271,6 +275,7 @@ export const SimpleWorkflowBuilder = () => {
                         <InlineWorkflowEditor
                           value={draft}
                           onChange={updateDraft}
+                          allowCreateConnector={allowCreateConnector}
                           onEditingStepChange={(isEditing) =>
                             setDraftEditingStep(draft.id, isEditing)
                           }

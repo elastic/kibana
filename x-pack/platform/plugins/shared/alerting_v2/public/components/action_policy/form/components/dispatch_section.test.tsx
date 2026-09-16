@@ -54,7 +54,7 @@ describe('DispatchSection', () => {
   });
 
   it('passes the form matcher value to useFetchRuleEventFields', () => {
-    renderSection({ ...DEFAULT_FORM_STATE, matcher: 'rule.id : "r1"' });
+    renderSection({ ...DEFAULT_FORM_STATE, matcher: { expression: 'rule.id : "r1"' } });
 
     expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('rule.id : "r1"');
   });

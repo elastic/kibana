@@ -26,8 +26,18 @@ jest.mock('./use_matched_action_policies', () => ({
 }));
 
 jest.mock('./use_find_action_policies', () => ({
-  isCatchAllActionPolicy: (policy: { matcher: string | null }) =>
-    !policy.matcher || policy.matcher.trim() === '',
+  isCatchAllActionPolicy: (policy: {
+    matcher: { tags?: string[] | null; expression?: string | null } | string | null;
+  }) => {
+    const matcher = policy.matcher;
+    if (!matcher) {
+      return true;
+    }
+    if (typeof matcher === 'string') {
+      return matcher.trim() === '';
+    }
+    return !matcher.tags?.length && !matcher.expression?.trim();
+  },
   useFindActionPolicies: (params: unknown) => mockUseFindActionPolicies(params),
 }));
 
@@ -92,7 +102,7 @@ const buildFindable = (
     description: '',
     enabled: true,
     destinations: [{ type: 'workflow', id: 'Security on-call' }],
-    matcher: '(rule.tags : "security" OR rule.tags : "escalation")',
+    matcher: { expression: '(rule.tags : "security" OR rule.tags : "escalation")' },
     group_by: null,
     tags: null,
     grouping_mode: 'per_episode',
@@ -155,15 +165,15 @@ describe('LinkedActionPoliciesMatchingSection', () => {
       isLoading: false,
       error: null,
       items: [
-        buildMatched('global', {
+        buildMatched('catch-all', {
           id: 'catch-all',
           name: 'Admin console http error notifications',
         }),
-        buildMatched('global-filtered', {
+        buildMatched('tags', {
           id: 'tags-and-expression',
           name: 'SRE notifications',
           tags: ['production', 'sre'],
-          matcher: 'episode_status: "active"',
+          matcher: { expression: 'episode_status: "active"' },
           destinations: [{ type: 'workflow', id: 'Team SRE notifications' }],
         }),
       ],
@@ -222,11 +232,11 @@ describe('LinkedActionPoliciesMatchingSection', () => {
       isLoading: false,
       error: null,
       items: [
-        buildMatched('global-filtered', {
+        buildMatched('tags', {
           id: 'tags-and-expression',
           name: 'SRE notifications',
           tags: ['production', 'sre'],
-          matcher: 'episode_status: "active"',
+          matcher: { expression: 'episode_status: "active"' },
           destinations: [{ type: 'workflow', id: 'Team SRE notifications' }],
         }),
       ],
@@ -252,7 +262,7 @@ describe('LinkedActionPoliciesMatchingSection', () => {
       isLoading: false,
       error: null,
       items: [
-        buildMatched('global-filtered', {
+        buildMatched('tags', {
           id: 'tags-only',
           name: 'SRE notifications',
           tags: ['production'],
@@ -290,7 +300,7 @@ describe('LinkedActionPoliciesMatchingSection', () => {
           id: 'platform-paging',
           name: 'Platform paging (PagerDuty)',
           tags: null,
-          matcher: '(rule.tags : "platform" OR rule.tags : "paging")',
+          matcher: { expression: '(rule.tags : "platform" OR rule.tags : "paging")' },
         }),
       ],
       total: 3,
@@ -320,7 +330,7 @@ describe('LinkedActionPoliciesMatchingSection', () => {
         buildFindable({
           id: 'expression-only',
           name: 'Episode status only',
-          matcher: 'episode_status : "active"',
+          matcher: { expression: 'episode_status : "active"' },
           tags: ['ignored-metadata-tag'],
         }),
         buildFindable(),
@@ -383,11 +393,11 @@ describe('LinkedActionPoliciesMatchingSection', () => {
         const matches =
           ruleTags.includes('security') || ruleTags.includes('escalation')
             ? [
-                buildMatched('global-filtered', {
+                buildMatched('tags', {
                   id: 'security-escalation',
                   name: 'Security escalation policy',
                   tags: ['security', 'escalation'],
-                  matcher: 'rule.tags: "security"',
+                  matcher: { expression: 'rule.tags: "security"' },
                 }),
               ]
             : [];
@@ -422,7 +432,7 @@ describe('LinkedActionPoliciesMatchingSection', () => {
       isLoading: false,
       error: null,
       items: [
-        buildMatched('global-filtered', {
+        buildMatched('tags', {
           id: 'security-escalation',
           name: 'Security escalation policy',
           tags: ['security', 'escalation'],
@@ -446,7 +456,7 @@ describe('LinkedActionPoliciesMatchingSection', () => {
       isLoading: false,
       error: null,
       items: [
-        buildMatched('global', {
+        buildMatched('catch-all', {
           id: 'catch-all',
           name: 'Admin console http error notifications',
         }),

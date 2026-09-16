@@ -12,13 +12,12 @@ export {
 } from './helpers/build_inline_workflow_yaml';
 export { buildInlineWorkflowStepDraft } from './helpers/build_inline_workflow_step_draft';
 export { inlineDraftFromWorkflowDetail } from './helpers/inline_draft_from_workflow_detail';
-export { buildRuleScopedMatcher } from './helpers/rule_scoped_action_policies';
 export {
-  isExplicitlyLinkedToRule,
-  isRuleScopedCatchAllMatcher,
-  summarizeExplicitlyLinkedActionPolicies,
-} from './helpers/explicitly_linked_action_policies';
-export type { LinkedActionPolicySummary } from './helpers/explicitly_linked_action_policies';
+  buildRuleScopedMatcher,
+  buildRuleNotificationTag,
+  resolveRuleNotificationTag,
+  ruleHasNotificationTag,
+} from './helpers/rule_scoped_action_policies';
 export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,

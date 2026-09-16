@@ -23,6 +23,7 @@ import { ParamsEditor } from './params_editor';
 export interface InlineWorkflowStepEditorProps {
   value: InlineWorkflowStepDraft;
   onChange: (next: InlineWorkflowStepDraft) => void;
+  allowCreateConnector?: boolean;
 }
 
 const ACTION_TYPE_OPTIONS: Array<EuiComboBoxOptionOption<string>> =
@@ -32,7 +33,11 @@ const ACTION_TYPE_OPTIONS: Array<EuiComboBoxOptionOption<string>> =
     prepend: <EuiIcon type={stepDefinition.iconType ?? 'plugs'} size="s" />,
   }));
 
-export const InlineWorkflowStepEditor = ({ value, onChange }: InlineWorkflowStepEditorProps) => {
+export const InlineWorkflowStepEditor = ({
+  value,
+  onChange,
+  allowCreateConnector = true,
+}: InlineWorkflowStepEditorProps) => {
   const application = useService(CoreStart('application'));
   const createWorkflowUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path: '/create' });
   const definition = getInlineActionStepDefinition(value.stepType);
@@ -143,6 +148,7 @@ export const InlineWorkflowStepEditor = ({ value, onChange }: InlineWorkflowStep
       <ConnectorSelector
         connectorTypeId={definition.connectorTypeId}
         value={value.connectorId}
+        allowCreateConnector={allowCreateConnector}
         onChange={(connectorId) => {
           if (connectorId === value.connectorId) return;
           onChange({ ...value, connectorId });

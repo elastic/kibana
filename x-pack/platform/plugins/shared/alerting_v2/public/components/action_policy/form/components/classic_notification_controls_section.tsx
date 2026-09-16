@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { ActionPolicyFormState } from '../types';
 import { DispatchConfigSummary } from './dispatch_config_summary';
-import { DispatchOptionDiagram } from './dispatch_option_diagram';
 import { DispatchSection } from './dispatch_section';
 
 /**
- * Notification controls with summary + chart on the left (With tags / Empty prototype views).
+ * Notification controls without the dispatch diagram (Empty / AP improv prototypes).
  */
 export const ClassicNotificationControlsSection = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
@@ -38,21 +37,12 @@ export const ClassicNotificationControlsSection = () => {
         </EuiTitle>
       }
       description={
-        <>
-          <DispatchConfigSummary
-            groupingMode={groupingMode}
-            groupBy={groupBy}
-            throttleStrategy={throttleStrategy}
-            throttleInterval={throttleInterval}
-          />
-          <EuiSpacer size="m" />
-          <DispatchOptionDiagram
-            groupingMode={groupingMode}
-            groupBy={groupBy}
-            throttleStrategy={throttleStrategy}
-            throttleInterval={throttleInterval}
-          />
-        </>
+        <DispatchConfigSummary
+          groupingMode={groupingMode}
+          groupBy={groupBy}
+          throttleStrategy={throttleStrategy}
+          throttleInterval={throttleInterval}
+        />
       }
     >
       <DispatchSection />
