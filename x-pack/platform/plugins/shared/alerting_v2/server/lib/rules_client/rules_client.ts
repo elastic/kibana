@@ -100,6 +100,7 @@ import type {
   UpdateRuleParams,
 } from './types';
 import {
+  assertBuilderTypeTransitionNotManaged,
   resolveCreateRuleBuilder,
   resolveReplaceRuleBuilder,
   resolveUpdateRuleBuilder,
@@ -893,6 +894,22 @@ export class RulesClient {
       storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
       builderType: existingAttrs.metadata.builder_type,
     });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. This runs after the identity
+    // gate because the gate's flowchart puts the identity clause first: a
+    // caller with no identity writing a managed rule receives RULE_IS_MANAGED,
+    // not BUILDER_TYPE_IS_MANAGED. The identity clause reads the stored rule,
+    // so a rule that is not yet managed adopting a managed type sails past it
+    // and is rejected here instead. Caller identity does not bypass this clause.
+    // Ref: rule-ownership.md "The write gate" (second clause)
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     if (
       !isStateTransitionAllowed({
@@ -2176,6 +2193,17 @@ export class RulesClient {
       storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
       builderType: existingAttrs.metadata.builder_type,
     });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. Same ordering rationale as the
+    // updateRule path above — rule-ownership.md "The write gate" second clause.
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     assertImmutableUnchanged(parsed, existingAttrs);
     // Separate omitted-means-keep check for the nested signature_id — see the
