@@ -33,6 +33,9 @@ describe('Attachment Routes', () => {
     () => {
       conversations: {
         getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
+        getConversationRoundAuthor: jest.MockedFunction<
+          () => Promise<{ id: string; username?: string } | undefined>
+        >;
       };
       attachments: {
         getTypeDefinition: jest.MockedFunction<(type: string) => any>;
@@ -100,6 +103,9 @@ describe('Attachment Routes', () => {
     mockGetInternalServices = jest.fn().mockReturnValue({
       conversations: {
         getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
+        getConversationRoundAuthor: jest
+          .fn()
+          .mockResolvedValue({ id: 'user-1', username: 'test-user' }),
       },
       attachments: {
         getTypeDefinition: jest.fn().mockImplementation((type: string) => ({

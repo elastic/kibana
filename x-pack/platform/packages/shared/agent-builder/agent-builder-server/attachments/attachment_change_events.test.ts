@@ -7,7 +7,7 @@
 
 import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import type { AttachmentChange } from './attachment_state_manager';
-import { attachmentChangesToEvents, systemEventActor } from './attachment_change_events';
+import { attachmentChangesToEvents } from './attachment_change_events';
 
 describe('attachmentChangesToEvents', () => {
   const actor = { type: EventActorType.system, id: 'system' };
@@ -95,9 +95,5 @@ describe('attachmentChangesToEvents', () => {
 
   it('returns an empty array for no changes', () => {
     expect(attachmentChangesToEvents([], { source: 'http_api', actor })).toEqual([]);
-  });
-
-  it('exports the shared system actor used for external writers', () => {
-    expect(systemEventActor).toEqual({ type: EventActorType.system, id: 'system' });
   });
 });

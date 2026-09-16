@@ -47,6 +47,7 @@ const buildDeps = () => {
   };
   const conversationsService = {
     getScopedClient: jest.fn().mockResolvedValue(conversationClient),
+    getConversationRoundAuthor: jest.fn().mockResolvedValue({ id: 'profile-1', username: 'jane' }),
   };
   const attachmentsService = {
     getTypeDefinition: jest.fn().mockReturnValue({
@@ -167,10 +168,13 @@ describe('createAttachmentPublicClient', () => {
         snapshot: [],
         produced: [expect.objectContaining({ id: created.id })],
       });
+      expect(deps.conversationsService.getConversationRoundAuthor).toHaveBeenCalledWith({
+        request: deps.request,
+      });
       expect(request.events).toEqual([
         expect.objectContaining({
           type: 'attachment_added',
-          actor: { type: 'system', id: 'system' },
+          actor: { type: 'user', id: 'profile-1', username: 'jane' },
           data: {
             attachment_id: created.id,
             attachment_type: 'text',
@@ -180,6 +184,28 @@ describe('createAttachmentPublicClient', () => {
           },
         }),
       ]);
+    });
+
+    it('falls back to the conversation owner as actor when the caller has no profile id', async () => {
+      const deps = buildDeps();
+      deps.conversationsService.getConversationRoundAuthor.mockResolvedValue(undefined);
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        user: { id: 'owner-1', username: 'owner' },
+        attachments: [],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      await client.create({
+        conversationId: 'c1',
+        type: 'text',
+        data: { text: 'hello' },
+        source: 'http_api',
+      });
+
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events[0].actor).toEqual({ type: 'user', id: 'owner-1', username: 'owner' });
     });
 
     it('defaults render_inline to false', async () => {

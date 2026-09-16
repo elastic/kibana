@@ -26,9 +26,9 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import {
   attachmentChangesToEvents,
   createAttachmentStateManager,
-  systemEventActor,
 } from '@kbn/agent-builder-server/attachments';
 import type { ConversationClient, ConversationService } from '../conversation';
+import { userMessageActor } from '../conversation/client/rounds_to_events';
 import type { AttachmentServiceStart } from './types';
 import { hasClientId, isAttachmentReferencedInRounds } from './attachment_guards';
 
@@ -79,9 +79,12 @@ export const createAttachmentPublicClient = ({
       await conversationClient.update({ id: conversation.id, attachments: stateManager.getAll() });
       return;
     }
+    // The caller's identity: the authenticated Kibana user behind the HTTP request, or the user
+    // a workflow executes as (steps pass the workflow's fake request).
+    const author = await conversationsService.getConversationRoundAuthor({ request });
     const events = attachmentChangesToEvents(changes, {
       source,
-      actor: systemEventActor,
+      actor: userMessageActor(conversation, { author }),
       render_inline: renderInline,
     });
     // `appendEvents` defaults to `converse` access; `owner` keeps the permission check identical

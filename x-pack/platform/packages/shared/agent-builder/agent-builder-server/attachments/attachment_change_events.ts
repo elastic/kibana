@@ -6,16 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType } from '@kbn/agent-builder-common';
 import type {
   AttachmentEventSource,
   AttachmentTimelineEvent,
   EventActor,
 } from '@kbn/agent-builder-common';
 import type { AttachmentChange } from './attachment_state_manager';
-
-/** Actor recorded on events written on behalf of external callers (HTTP API, workflow steps). */
-export const systemEventActor: EventActor = { type: EventActorType.system, id: 'system' };
 
 export interface AttachmentChangesToEventsOptions {
   source: AttachmentEventSource;

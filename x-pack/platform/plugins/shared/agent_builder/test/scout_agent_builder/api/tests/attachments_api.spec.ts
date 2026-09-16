@@ -194,7 +194,7 @@ apiTest.describe(
       const events = await getAttachmentEvents(asAdmin, conversationId);
       expect(events).toHaveLength(1);
       expect(events[0].type).toBe('attachment_added');
-      expect(events[0].actor.type).toBe('system');
+      expect(events[0].actor.type).toBe('user');
       expect(events[0].data).toStrictEqual({
         attachment_id: attachment.id,
         attachment_type: 'text',

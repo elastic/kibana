@@ -32,7 +32,7 @@ export type {
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';
 export type { AttachmentChangesToEventsOptions } from './attachment_change_events';
-export { attachmentChangesToEvents, systemEventActor } from './attachment_change_events';
+export { attachmentChangesToEvents } from './attachment_change_events';
 export type {
   AttachmentPublicClient,
   AttachmentPublicClientSource,
