@@ -106,7 +106,7 @@ export class ESQLService extends FtrService {
     return row;
   }
 
-  public async clickStarredItem(rowIndex = 0) {
+  public async clickStarredItem(rowIndex: number = 0) {
     await this.retry.waitFor(`starred query row ${rowIndex} to load`, async () => {
       try {
         const row = await this.getStarredItem(rowIndex);
