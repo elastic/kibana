@@ -110,15 +110,12 @@ export const searchRuleTemplatesSo = async (
     filterClauses.push(toSavedObjectEsQuery(filter));
   }
 
-  const sort: Sort | undefined = sortField
-    ? [
-        {
-          [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.${sortField}`]: {
-            order: sortOrder ?? 'asc',
-          },
-        },
-      ]
-    : undefined;
+  const nameSort = {
+    [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.${sortField ?? 'name'}`]: { order: sortOrder ?? 'asc' },
+  };
+  const sort: Sort = searchQuery
+    ? [{ _score: { order: 'desc' } }, nameSort]
+    : [nameSort];
 
   const result = await savedObjectsClient.search({
     type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,

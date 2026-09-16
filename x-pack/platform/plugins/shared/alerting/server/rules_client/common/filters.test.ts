@@ -471,13 +471,13 @@ describe('filters', () => {
       expect(buildTemplateSearchQuery('""')).toBeUndefined();
     });
 
-    it('emits a wildcard on name.keyword and tags, keeping spaces', () => {
+    it('emits wildcard on name/tags and match on description, with boosts', () => {
       expect(buildTemplateSearchQuery('idle data')).toEqual({
         bool: {
           should: [
             {
               wildcard: {
-                'alerting_rule_template.name.keyword': { value: '*idle data*' },
+                'alerting_rule_template.name.keyword': { value: '*idle data*', boost: 3 },
               },
             },
             {
@@ -485,7 +485,13 @@ describe('filters', () => {
                 'alerting_rule_template.tags': {
                   value: '*idle data*',
                   case_insensitive: true,
+                  boost: 2,
                 },
+              },
+            },
+            {
+              match: {
+                'alerting_rule_template.description': { query: 'idle data', boost: 1 },
               },
             },
           ],

@@ -106,15 +106,16 @@ export const buildTemplateSearchWildcardValue = (search?: string): string | unde
 };
 
 /**
- * Literal-ish substring on name and tags via ES `wildcard`. Spaces stay
- * spaces. `*` stays a wildcard operator so `CPU threshold` and
- * `CPU*threshold` are different queries.
+ * Substring search on name (wildcard, boost 3), tags (wildcard, boost 2),
+ * and description (full-word match, boost 1). Name matches rank highest.
+ * Spaces stay spaces; `*` stays a wildcard operator.
  */
 export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContainer | undefined => {
   const value = buildTemplateSearchWildcardValue(search);
   if (!value) {
     return undefined;
   }
+  const rawValue = sanitizeTemplateSearchQuery(search)!;
 
   return {
     bool: {
@@ -122,7 +123,7 @@ export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContaine
         {
           wildcard: {
             // name.keyword is lowercase-normalized. Do not set case_insensitive.
-            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.name.keyword`]: { value },
+            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.name.keyword`]: { value, boost: 3 },
           },
         },
         {
@@ -130,7 +131,13 @@ export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContaine
             [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.tags`]: {
               value,
               case_insensitive: true,
+              boost: 2,
             },
+          },
+        },
+        {
+          match: {
+            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.description`]: { query: rawValue, boost: 1 },
           },
         },
       ],
