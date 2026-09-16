@@ -742,6 +742,7 @@ export const registerAiIndexRoutes = ({
               dest: aiIndex.dest,
               logger,
               aiIndexId,
+              spaceId,
             });
             if (err) errors.push(err);
           }

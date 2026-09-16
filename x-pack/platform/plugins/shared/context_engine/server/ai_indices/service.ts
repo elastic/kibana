@@ -33,6 +33,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
 const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
@@ -436,20 +437,7 @@ export class AiIndexService {
       size: 1,
       track_total_hits: false,
       seq_no_primary_term: true,
-      query: {
-        bool: {
-          filter: [
-            createSpaceDslFilter(spaceId),
-            {
-              bool: {
-                // The `ids` clause still finds a pre-upgrade document, whose logical id was its `_id`.
-                should: [{ term: { id: aiIndexId } }, { ids: { values: [aiIndexId] } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
+      query: createAiIndexIdentityDslFilter(aiIndexId, spaceId),
     });
 
     const [hit] = response.hits.hits;

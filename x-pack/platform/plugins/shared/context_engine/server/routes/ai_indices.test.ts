@@ -26,6 +26,7 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import { aiIndicesIndexName } from '../ai_indices/storage';
+import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -890,10 +891,38 @@ describe('ai indices routes', () => {
           index: aiIndicesIndexName,
           size: MAX_AI_INDICES,
           track_total_hits: false,
-          query: { term: { 'dest.value': aiIndexItem.dest.value } },
+          query: {
+            bool: {
+              filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
+              must_not: [createAiIndexIdentityDslFilter('customer_support', defaultSpaceId)],
+            },
+          },
         });
         expect(esDeleteDataStream).toHaveBeenCalledWith({ name: aiIndexItem.dest.value });
         expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('excludes the deleted entry from the request space, not always default', async () => {
+        const spaces = spacesMock.createStart();
+        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+        getSpaces.mockResolvedValue(spaces);
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esInternalSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
+                must_not: [createAiIndexIdentityDslFilter('customer_support', 'marketing')],
+              },
+            },
+          })
+        );
       });
 
       it('deletes the backing index when dest type is index', async () => {
@@ -1051,8 +1080,7 @@ describe('ai indices routes', () => {
           } as unknown as IRouter,
           logger,
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-          getImprovementsService: (_esClient, _spaceId) =>
-            improvementsService as unknown as ImprovementsServiceApi,
+          getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
           getActions: async () => actions,
           getWorkflowsManagementApi: async () => undefined,
