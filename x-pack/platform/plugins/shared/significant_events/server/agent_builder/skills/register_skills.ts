@@ -11,8 +11,10 @@ import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
+import { createKIQueryGenerationSkill } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
+import { createFeatureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 import {
@@ -22,6 +24,24 @@ import {
 import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
+
+/**
+ * Hides a skill's inline tools while significant events is unavailable. Registered tools declare
+ * `availability` and get filtered out of the catalog; inline tools have no such hook, and skills
+ * cannot be unregistered, so `getInlineTools` (re-invoked per skill load) is the only place left
+ * that still sees current availability.
+ */
+export const gateInlineTools = <TSkill extends SignificantEventsSkill>(
+  skill: TSkill,
+  isAvailable: () => Promise<boolean>
+): TSkill => {
+  const { getInlineTools } = skill;
+  if (!getInlineTools) {
+    return skill;
+  }
+
+  return { ...skill, getInlineTools: async () => ((await isAvailable()) ? getInlineTools() : []) };
+};
 
 interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -62,8 +82,10 @@ export const registerSignificantEventsSkills = async ({
 
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
+    createKIQueryGenerationSkill(memoryToolsOptions),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
+    createFeatureIdentificationSkill(memoryToolsOptions),
     ...(streamsKIsOnboardingClient && maintenanceService
       ? [
           createKiIdentificationManagementSkill({
@@ -91,7 +113,7 @@ export const registerSignificantEventsSkills = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map((skill) => agentBuilder.skills.register(skill))
+      pending.map((skill) => agentBuilder.skills.register(gateInlineTools(skill, isAvailable)))
     );
 
     const failed: string[] = [];
@@ -122,7 +144,7 @@ export const registerSignificantEventsSkills = async ({
 
   const doEnsureRegistered = async (): Promise<void> => {
     if (!(await isAvailable())) {
-      logger.debug('significant_events: availability flag disabled, skipping skills registration');
+      logger.debug('significantEvents: availability flag disabled, skipping skills registration');
       return;
     }
 

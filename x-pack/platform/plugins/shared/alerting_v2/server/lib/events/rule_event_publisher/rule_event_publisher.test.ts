@@ -17,6 +17,7 @@ import {
   RULE_DISABLED_EVENT_TYPE,
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
+  type RuleEventPayload,
 } from './events';
 
 describe('RuleEventPublisher', () => {
@@ -63,35 +64,62 @@ describe('RuleEventPublisher', () => {
   ];
 
   describe.each(cases)('$name', ({ type, emit }) => {
-    it('emits the matching event type with the { ruleId, spaceId } payload', () => {
-      emit(publisher, request, [{ id: 'rule-1', spaceId: 'space-1' }]);
+    it('emits the matching event type with a { ruleId, spaceId } envelope and no correlationId for a single rule', () => {
+      emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1' }]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
       expect(eventBus.publish).toHaveBeenCalledWith(
-        { type, payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } } },
+        {
+          type,
+          payload: {
+            ruleId: 'rule-1',
+            spaceId: 'space-1',
+          },
+        },
         { request }
+      );
+      const [singleEvent] = eventBus.publish.mock.calls[0];
+      expect((singleEvent.payload as RuleEventPayload).correlationId).toBeUndefined();
+    });
+
+    it('carries the full domain rule when provided', () => {
+      const rule = {
+        id: 'rule-1',
+        metadata: { name: 'rule-1', version: 3 },
+      } as EventRule['rule'];
+      emit(publisher, request, [{ ruleId: 'rule-1', spaceId: 'space-1', rule }]);
+
+      expect(eventBus.publish.mock.calls[0][0].payload).toEqual(
+        expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1', rule })
       );
     });
 
-    it('emits one event per rule for bulk operations', () => {
+    it('emits one event per rule and shares a single correlationId across the batch', () => {
       emit(publisher, request, [
-        { id: 'rule-1', spaceId: 'space-1' },
-        { id: 'rule-2', spaceId: 'space-1' },
+        { ruleId: 'rule-1', spaceId: 'space-1' },
+        { ruleId: 'rule-2', spaceId: 'space-1' },
       ]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(2);
-      expect(eventBus.publish.mock.calls[0][0]).toEqual(
+      const [firstEvent] = eventBus.publish.mock.calls[0];
+      const [secondEvent] = eventBus.publish.mock.calls[1];
+      const firstPayload = firstEvent.payload as RuleEventPayload;
+      const secondPayload = secondEvent.payload as RuleEventPayload;
+
+      expect(firstEvent).toEqual(
         expect.objectContaining({
           type,
-          payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } },
+          payload: expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1' }),
         })
       );
-      expect(eventBus.publish.mock.calls[1][0]).toEqual(
+      expect(secondEvent).toEqual(
         expect.objectContaining({
           type,
-          payload: { rule: { ruleId: 'rule-2', spaceId: 'space-1' } },
+          payload: expect.objectContaining({ ruleId: 'rule-2', spaceId: 'space-1' }),
         })
       );
+      expect(firstPayload.correlationId).toEqual(expect.any(String));
+      expect(firstPayload.correlationId).toBe(secondPayload.correlationId);
     });
 
     it('emits nothing for an empty array', () => {

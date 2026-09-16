@@ -13,9 +13,15 @@ import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/o
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 import { registerSignificantEventsSkills } from './register_skills';
+import { KI_QUERY_GENERATION_SKILL_ID } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
+import {
+  FEATURE_IDENTIFICATION_SKILL_ID,
+  FINALIZE_FEATURES_TOOL_ID,
+} from './feature_identification';
+import { platformStreamsMemoryTools } from '../../memory_and_investigation/tools/memory/tool_ids';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -24,8 +30,10 @@ const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 // `ki-identification-management` is only added when a KI onboarding client is present.
 const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
+  KI_QUERY_GENERATION_SKILL_ID,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
+  FEATURE_IDENTIFICATION_SKILL_ID,
   'significant-events-onboarding',
   'streams-gap-detection',
   INVESTIGATION_SKILL_ID,
@@ -75,6 +83,31 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toEqual(expect.arrayContaining(CORE_SKILL_IDS));
     expect(registeredIds).not.toContain(KI_IDENTIFICATION_SKILL_ID);
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
+  });
+
+  it('keeps feature-identification tools private and gates them by availability', async () => {
+    const isAvailable = jest.fn().mockResolvedValue(true);
+    const { agentBuilder, options } = createOptions({ isAvailable });
+
+    await registerSignificantEventsSkills(options);
+    const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
+      ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
+    )![0];
+    expect(featureIdentificationSkill.experimental).toBe(true);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: platformStreamsMemoryTools.memorySearch.replaceAll('.', '_'),
+        }),
+        expect.objectContaining({ id: platformStreamsMemoryTools.memoryRead.replaceAll('.', '_') }),
+        expect.objectContaining({ id: platformStreamsMemoryTools.memoryList.replaceAll('.', '_') }),
+        expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID }),
+      ])
+    );
+    expect(featureIdentificationSkill.getRegistryTools).toBeUndefined();
+
+    isAvailable.mockResolvedValue(false);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual([]);
   });
 
   it('registers the investigation skill as part of core skills when available', async () => {

@@ -9,18 +9,22 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import {
+  identifyKIQueries as identifyKIQueriesThroughAgent,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+} from '@kbn/nightshift-ai';
+import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
+import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
+import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
+import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 /**
  * Step budget for the query-generation reasoning agent when semantic code
@@ -30,11 +34,14 @@ import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/
  */
 const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
 
+type KiDiscoveryToolset = MemoryDiscoveryTools | KiExtractionContextTools | SemanticCodeSearchTools;
+
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
   systemPrompt: string;
   maxExistingQueriesForContext?: number;
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
 }
 
@@ -45,6 +52,7 @@ interface Dependencies {
   signal: AbortSignal;
   esClient: ElasticsearchClient;
   memoryTools?: MemoryDiscoveryTools;
+  kiExtractionContextTools?: KiExtractionContextTools;
   semanticCodeSearchTools?: SemanticCodeSearchTools;
 }
 
@@ -55,12 +63,14 @@ export async function identifyKIQueries(
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  reasoningDiagnostics: ReasoningPromptDiagnostics;
 }> {
   const {
     definition,
     connectorId,
     systemPrompt,
     maxExistingQueriesForContext,
+    maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
@@ -70,11 +80,12 @@ export async function identifyKIQueries(
     signal,
     esClient,
     memoryTools,
+    kiExtractionContextTools,
     semanticCodeSearchTools,
   } = dependencies;
 
-  const discoveryTools = [memoryTools, semanticCodeSearchTools].filter(
-    (toolset): toolset is MemoryDiscoveryTools | SemanticCodeSearchTools => toolset !== undefined
+  const discoveryTools = [memoryTools, kiExtractionContextTools, semanticCodeSearchTools].filter(
+    (toolset): toolset is KiDiscoveryToolset => toolset !== undefined
   );
 
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
@@ -115,33 +126,36 @@ export async function identifyKIQueries(
     },
   });
 
-  const { queries, tokensUsed, toolUsage } = await identifyKIQueriesThroughAgent({
-    stream: definition,
-    esClient,
-    inferenceClient: boundInferenceClient,
-    logger,
-    signal,
-    systemPrompt: combinedSystemPrompt,
-    getFeatures: async (filters) => {
-      const response = await kiClient.getFeatures(definition.name, filters);
-      return response.hits;
-    },
-    additionalTools: hasAdditionalTools ? additionalTools : undefined,
-    additionalToolCallbacks: hasAdditionalTools ? additionalToolCallbacks : undefined,
-    existingQueries,
-    maxExistingQueriesForContext,
-    maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
-    queryValidationTimeoutMs,
-  });
+  const { queries, tokensUsed, toolUsage, reasoningDiagnostics } =
+    await identifyKIQueriesThroughAgent({
+      target: streamToAnalysisTarget(definition),
+      esClient,
+      inferenceClient: boundInferenceClient,
+      logger,
+      signal,
+      systemPrompt: combinedSystemPrompt,
+      getFeatures: async (filters) => {
+        const response = await kiClient.getFeatures(definition.name, {
+          ...filters,
+          excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+        });
+        return response.hits;
+      },
+      additionalTools: hasAdditionalTools ? additionalTools : undefined,
+      additionalToolCallbacks: hasAdditionalTools ? additionalToolCallbacks : undefined,
+      existingQueries,
+      maxExistingQueriesForContext,
+      maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
+      maxDurationMs,
+      queryValidationTimeoutMs,
+    });
 
   return {
     queries: queries.map((query) => ({
       type: query.type,
       title: query.title,
       description: query.description,
-      esql: {
-        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
-      },
+      esql: { query: query.esql },
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,
@@ -149,5 +163,6 @@ export async function identifyKIQueries(
     })),
     tokensUsed,
     toolUsage,
+    reasoningDiagnostics,
   };
 }

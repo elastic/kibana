@@ -9,7 +9,11 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ExecutionHistorySearchBar, type RuleOption } from './execution_history_search_bar';
+import {
+  ExecutionHistorySearchBar,
+  type PolicyOutcomeFilter,
+  type RuleOption,
+} from './execution_history_search_bar';
 
 const mockUseFetchRules = jest.fn();
 
@@ -55,7 +59,7 @@ const setup = (
     ruleFilters: RuleOption[];
     onRuleFiltersChange: (rules: RuleOption[]) => void;
     onSearchChange: (value: string) => void;
-    onOutcomeChange: (value: 'all' | 'dispatched' | 'throttled') => void;
+    onOutcomeChange: (value: PolicyOutcomeFilter) => void;
   }> = {}
 ) => {
   const onRuleFiltersChange = overrides.onRuleFiltersChange ?? jest.fn();
@@ -197,6 +201,42 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
 
     it('disables the rules fetch to avoid an unauthorized request', () => {
       setup();
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+  });
+
+  describe('when showRuleFilter is false', () => {
+    it('hides the rule filter combobox but keeps search and outcome filter', () => {
+      render(
+        <I18nProvider>
+          <ExecutionHistorySearchBar
+            onSearchChange={jest.fn()}
+            outcome="all"
+            onOutcomeChange={jest.fn()}
+            showRuleFilter={false}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('executionHistoryRuleFilter')).not.toBeInTheDocument();
+      expect(screen.getByTestId('executionHistorySearchBar')).toBeInTheDocument();
+      expect(screen.getByTestId('executionHistoryOutcomeFilter')).toBeInTheDocument();
+    });
+
+    it('disables the rules fetch even when the user can read rules', () => {
+      render(
+        <I18nProvider>
+          <ExecutionHistorySearchBar
+            onSearchChange={jest.fn()}
+            outcome="all"
+            onOutcomeChange={jest.fn()}
+            showRuleFilter={false}
+          />
+        </I18nProvider>
+      );
+
       expect(mockUseFetchRules).toHaveBeenLastCalledWith(
         expect.objectContaining({ enabled: false })
       );

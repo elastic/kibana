@@ -60,7 +60,24 @@ describe('parseMoonJestOutput', () => {
     });
   });
 
-  it('parses non-@-scoped project ids (e.g. kibana-buildkite)', () => {
+  it('parses successful Jest JSON output with a non-scoped project prefix', () => {
+    const output = [
+      'pass RunTask(kibana-buildkite:jest) (1s 200ms, abc123)',
+      'kibana-buildkite:jest | {"success":true,"numTotalTests":5,"numPassedTests":5,"numFailedTests":0,"testResults":[]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.parseFailures).toEqual([]);
+    expect(result.tasks).toHaveLength(1);
+    expect(result.tasks[0]).toMatchObject({
+      project: 'kibana-buildkite',
+      passed: true,
+      testCount: 5,
+      failures: [],
+    });
+  });
+
+  it('extracts failure details from non-scoped project prefixes', () => {
     const output = [
       'fail RunTask(kibana-buildkite:jest) (2s, abc123)',
       'kibana-buildkite:jest | {"success":false,"numTotalTests":2,"numPassedTests":1,"numFailedTests":1,"testResults":[{"name":"/repo/.buildkite/foo.test.ts","assertionResults":[{"status":"failed","fullName":"foo fails","failureMessages":["Error: boom\\n    at /repo/.buildkite/foo.test.ts:3:1"]}]}]}',
@@ -88,6 +105,21 @@ describe('parseMoonJestOutput', () => {
     expect(result.tasks[0].passed).toBe(true);
   });
 
+  it('marks cached tasks with a non-scoped project prefix', () => {
+    const output = [
+      'pass RunTask(kibana-buildkite:jest) (cached, 100ms, abc123)',
+      'kibana-buildkite:jest | {"success":true,"numTotalTests":3,"numPassedTests":3,"numFailedTests":0,"testResults":[]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks).toHaveLength(1);
+    expect(result.tasks[0]).toMatchObject({
+      project: 'kibana-buildkite',
+      cached: true,
+      passed: true,
+    });
+  });
+
   it('creates placeholder for cached tasks without JSON output', () => {
     const output = 'pass RunTask(@kbn/bar:jest) (cached, 50ms, def456)';
 
@@ -95,6 +127,20 @@ describe('parseMoonJestOutput', () => {
     expect(result.tasks).toHaveLength(1);
     expect(result.tasks[0]).toMatchObject({
       project: '@kbn/bar',
+      cached: true,
+      passed: true,
+      testCount: 0,
+      failures: [],
+    });
+  });
+
+  it('creates placeholder for cached tasks with a non-scoped project prefix', () => {
+    const output = 'pass RunTask(kibana-buildkite:jest) (cached, 50ms, def456)';
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks).toHaveLength(1);
+    expect(result.tasks[0]).toMatchObject({
+      project: 'kibana-buildkite',
       cached: true,
       passed: true,
       testCount: 0,

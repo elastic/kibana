@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -15,7 +15,7 @@ import { resetSignificantEvents } from '../../../../lib/significant_events/reset
 
 // TODO: Remove with the time-boxed follow-up to nightshift-program#651 once supported
 // upgrade paths can no longer contain Significant Events v1 rules or alerts.
-export const resetKIsRoute = createServerRoute({
+const resetKIsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/_reset_kis',
   options: {
     access: 'internal',
@@ -32,7 +32,7 @@ export const resetKIsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   handler: async ({
@@ -59,7 +59,7 @@ export const resetKIsRoute = createServerRoute({
     return resetSignificantEvents({
       kiClient,
       esClient: scopedClusterClient.asCurrentUser,
-      logger: logger.get('significant_events'),
+      logger: logger.get('significantEvents'),
       request,
       streamsKIsOnboardingClient,
       deleteLegacyRules,

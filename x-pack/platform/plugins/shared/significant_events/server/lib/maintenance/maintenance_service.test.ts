@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -188,11 +188,14 @@ function makeService(params?: {
       : undefined
   );
 
+  const savedObjects = {
+    createInternalRepository: jest.fn(() => soClient),
+    getScopedClient: jest.fn(),
+  };
+
   const server = {
     core: {
-      savedObjects: {
-        getScopedClient: jest.fn(() => soClient),
-      },
+      savedObjects,
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
@@ -228,6 +231,7 @@ function makeService(params?: {
   return {
     service,
     soClient,
+    savedObjects,
     v2RulesClient,
     getRuleBackedQueryLinks,
     globalUiSettingsClient,
@@ -264,6 +268,15 @@ describe('SignificantEventsMaintenanceService', () => {
           scheduledDiscoveryEnabled: false,
         },
       });
+    });
+
+    it('reads state through the internal repository, not a scoped client', async () => {
+      const { service, savedObjects } = makeService();
+      await service.getStatus({ request: REQUEST });
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+      ]);
+      expect(savedObjects.getScopedClient).not.toHaveBeenCalled();
     });
   });
 
@@ -435,7 +448,7 @@ describe('SignificantEventsMaintenanceService', () => {
         disableErrors: [
           {
             id: 'rule-2',
-            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
           },
         ],
       });
@@ -457,7 +470,7 @@ describe('SignificantEventsMaintenanceService', () => {
         disableErrors: [
           {
             id: 'rule-2',
-            error: { code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
+            error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
           },
         ],
       });
@@ -885,7 +898,7 @@ describe('SignificantEventsMaintenanceService', () => {
         enableErrors: [
           {
             id: 'rule-1',
-            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
           },
         ],
       });

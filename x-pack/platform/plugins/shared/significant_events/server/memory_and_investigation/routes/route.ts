@@ -17,7 +17,7 @@ import {
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
 import { createServerRoute } from '../../routes/create_server_route';
 import type {
@@ -42,7 +42,7 @@ const createEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -83,7 +83,7 @@ const getEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -108,7 +108,7 @@ const getEntryByNameRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -137,7 +137,7 @@ const updateEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -179,7 +179,7 @@ const deleteEntryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -206,39 +206,6 @@ const deleteEntryRoute = createServerRoute({
   },
 });
 
-const renameEntryRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/entries/{id}/rename',
-  options: {
-    access: 'internal',
-    summary: 'Rename a memory page',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({ new_name: z.string().max(MAX_ID_LENGTH) }),
-  }),
-  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { licensing, scopedClusterClient } = await getScopedClients({
-      request,
-    });
-    await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
-
-    const authUser = server.core.security.authc.getCurrentUser(request);
-    const user = authUser?.username ?? 'unknown';
-
-    return memory.rename({
-      id: params.path.id,
-      newName: params.body.new_name,
-      user,
-    });
-  },
-});
-
 const searchRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/search',
   options: {
@@ -247,7 +214,7 @@ const searchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -291,7 +258,7 @@ const getCategoryTreeRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -322,7 +289,7 @@ const getHistoryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -363,7 +330,7 @@ const getVersionRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -400,7 +367,7 @@ const recentChangesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -439,7 +406,7 @@ const createWorkflowTriggerRoute = (
   createServerRoute({
     endpoint,
     options: { access: 'internal', summary },
-    security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+    security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
     params: z.object({ body: z.object({}).passthrough().optional() }),
     handler: async ({
       request,
@@ -501,7 +468,7 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
 const synthesizeMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/_synthesize',
   options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({ body: z.object({}).passthrough().optional() }),
   handler: async ({
     request,
@@ -541,7 +508,7 @@ const detectGapsRoute = createWorkflowTriggerRoute(
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.read] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
   handler: async ({
     request,
@@ -577,7 +544,7 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
 const setMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Enable or disable all memory workflows' },
-  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({ body: z.object({ enabled: z.boolean() }) }),
   handler: async ({
     params,
@@ -674,7 +641,6 @@ export const internalMemoryRoutes = {
   ...getEntryByNameRoute,
   ...updateEntryRoute,
   ...deleteEntryRoute,
-  ...renameEntryRoute,
   ...searchRoute,
   ...getCategoryTreeRoute,
   ...getHistoryRoute,

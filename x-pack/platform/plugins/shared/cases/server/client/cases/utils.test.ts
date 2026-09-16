@@ -55,6 +55,7 @@ import {
   CaseSeverity,
   ConnectorTypes,
 } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -2398,6 +2399,36 @@ describe('enrichCasesWithFieldLabels', () => {
     });
     expect(result[1].extended_fields_labels).toEqual({
       severity_as_keyword: 'Severity Label',
+    });
+  });
+
+  it('populates extended_fields_controls alongside extended_fields_labels', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+    });
+  });
+
+  it('merges global and template controls with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: FieldType.USER_PICKER,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: FieldType.USER_PICKER, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      // template wins over the global definition for the same key
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+      team_as_keyword: 'USER_PICKER',
     });
   });
 });

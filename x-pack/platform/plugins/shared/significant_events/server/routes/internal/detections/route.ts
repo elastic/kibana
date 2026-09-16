@@ -8,11 +8,10 @@
 import {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
-  detectionSchema,
   type Detection,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -26,7 +25,7 @@ const detectionsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -71,7 +70,7 @@ const detectionsHistoryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -93,32 +92,7 @@ const detectionsHistoryRoute = createServerRoute({
   },
 });
 
-const detectionsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create detections',
-    description: 'Create detection entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(detectionSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getDetectionClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getDetectionClient().bulkCreate(params.body);
-  },
-});
-
 export const internalDetectionsRoutes = {
   ...detectionsSearchRoute,
   ...detectionsHistoryRoute,
-  ...detectionsBulkCreateRoute,
 };

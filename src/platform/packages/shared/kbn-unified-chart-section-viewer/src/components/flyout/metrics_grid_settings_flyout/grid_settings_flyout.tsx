@@ -26,8 +26,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricsGridSettings } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { useTelemetry } from '../../../context/ebt_telemetry_context';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
+import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
 
 interface GridSettingsFlyoutProps {
@@ -41,6 +43,7 @@ export const GridSettingsFlyout = ({
   onGridSettingsChange,
   onClose,
 }: GridSettingsFlyoutProps) => {
+  const { trackAggregationConfigChanged } = useTelemetry();
   const titleId = useGeneratedHtmlId({ prefix: 'metricsGridSettingsFlyoutTitle' });
   const aggregationAccordionId = useGeneratedHtmlId({
     prefix: 'metricsGridSettingsAggregationAccordion',
@@ -70,9 +73,12 @@ export const GridSettingsFlyout = ({
   );
 
   const onApply = useCallback(() => {
+    getAggregationConfigChanges(gridSettings, pendingUpdate).forEach((event) =>
+      trackAggregationConfigChanged(event)
+    );
     onGridSettingsChange(pendingUpdate);
     onClose();
-  }, [onGridSettingsChange, onClose, pendingUpdate]);
+  }, [gridSettings, onGridSettingsChange, onClose, pendingUpdate, trackAggregationConfigChanged]);
 
   return (
     <EuiFlyout

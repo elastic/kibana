@@ -14,7 +14,9 @@ import { appContextService } from '../../services';
 import {
   getAgentStatusForAgentPolicy,
   getIncomingDataByAgentsId,
+  getIncomingDataByDataStreams,
 } from '../../services/agents/status';
+import { agentPolicyService } from '../../services/agent_policy';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getPackageInfo } from '../../services/epm/packages';
 
@@ -38,6 +40,7 @@ jest.mock('../../services/app_context', () => {
     appContextService: {
       getLogger: () => loggerMock.create(),
       getInternalUserESClient: jest.fn(),
+      getExperimentalFeatures: jest.fn(),
     },
   };
 });
@@ -49,6 +52,13 @@ jest.mock('../../services/spaces/helpers', () => ({
 jest.mock('../../services/agents/status', () => ({
   getAgentStatusForAgentPolicy: jest.fn(),
   getIncomingDataByAgentsId: jest.fn(),
+  getIncomingDataByDataStreams: jest.fn(),
+}));
+
+jest.mock('../../services/agent_policy', () => ({
+  agentPolicyService: {
+    getByIds: jest.fn(),
+  },
 }));
 
 jest.mock('../../services/agents/agent_metrics', () => ({
@@ -364,7 +374,7 @@ describe('Handlers', () => {
 
       await getAvailableVersionsHandler(ctx, httpServerMock.createKibanaRequest(), response);
 
-      expect(response.ok).toBeCalled();
+      expect(response.ok).toHaveBeenCalled();
       expect(response.ok.mock.calls[0][0]?.body).toEqual({
         items: ['8.1.0', '8.0.0', '7.17.0'],
       });
@@ -436,14 +446,23 @@ describe('Handlers', () => {
   describe('getAgentDataHandler', () => {
     let mockResponse: any;
     let mockContext: any;
+    let mockGetByIds: jest.Mock;
 
     beforeEach(() => {
       (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      (getIncomingDataByDataStreams as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      // Not found by default, so the identity-free gate falls back unless a test opts an agent in.
+      mockGetByIds = jest.fn().mockResolvedValue([]);
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
       mockResponse = httpServerMock.createResponseFactory();
       mockContext = {
         core: Promise.resolve({
           elasticsearch: { client: { asCurrentUser: {} } },
           savedObjects: { client: { getCurrentNamespace: jest.fn().mockReturnValue('default') } },
+        }),
+        fleet: Promise.resolve({
+          agentClient: { asCurrentUser: { getByIds: mockGetByIds } },
+          internalSoClient: {},
         }),
       };
     });
@@ -515,6 +534,632 @@ describe('Handlers', () => {
       const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
       expect(dataStreamPattern).toBeDefined();
       expect(dataStreamPattern).not.toBe('');
+    });
+
+    it('appends the .otel dataset suffix only for data streams on the OTel input', async () => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        enableOtelIntegrations: true,
+      });
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'supabase.metrics',
+            path: 'metrics',
+            streams: [{ input: 'otelcol' }],
+          },
+          {
+            type: 'logs',
+            dataset: 'supabase.logs',
+            path: 'logs',
+            streams: [{ input: 'logfile' }],
+          },
+        ],
+      });
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'supabase',
+            pkgVersion: '1.0.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
+      expect(dataStreamPattern).toBe('metrics-supabase.metrics.otel-*,logs-supabase.logs-*');
+    });
+
+    describe('identity-free gate for agentless OTel', () => {
+      const otelPackageInfo = {
+        policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'supabase.metrics',
+            path: 'metrics',
+            streams: [{ input: 'otelcol' }],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+          enableOtelIntegrations: true,
+        });
+      });
+
+      it('uses getIncomingDataByDataStreams with a namespace-scoped pattern for one agentless agent', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByAgentsId).not.toHaveBeenCalled();
+        expect(getIncomingDataByDataStreams).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentId: 'agent-1',
+            dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+          })
+        );
+      });
+
+      it('falls back to getIncomingDataByAgentsId for a non-agentless agent', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: 'policy-1', namespace: 'default', supports_agentless: false },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for a regular (non-OTel) package even with an agentless agent', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          data_streams: [{ type: 'logs', dataset: 'aws.cloudwatch', path: 'logs' }],
+        });
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: 'policy-1', namespace: 'default', supports_agentless: true },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'aws',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(mockGetByIds).not.toHaveBeenCalled();
+      });
+
+      it('falls back and skips agent/policy lookups when no pkgName or pkgVersion is given', async () => {
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for more than one requested id, even with an OTel package and agentless agents', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1', 'agent-2'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for an agent that is notFound', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for an agent whose policy cannot be resolved', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('scopes the pattern to the namespace of the agent whose policy is silent, so a healthy sibling does not mask it', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-2', policy_id: 'policy-2' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-2',
+            namespace: 'staging',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'staging' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-2'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        const [[{ dataStreamPattern }]] = (getIncomingDataByDataStreams as jest.Mock).mock.calls;
+        expect(dataStreamPattern).toBe('metrics-supabase.metrics.otel-staging');
+        expect(dataStreamPattern).not.toContain('*');
+      });
+
+      it('falls back for an agentless agent whose policy has no package policy matching pkgName', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [{ package: { name: 'other-package' }, namespace: 'production' }],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for an agentless agent whose attached package policy runs a different version', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '2.0.0' }, namespace: 'production' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for an agentless agent whose policy has more than one package policy matching pkgName and pkgVersion', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            // Same name+version attached under two namespaces; the match is ambiguous.
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'staging' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back and skips agent/policy lookups when enableOtelIntegrations is disabled, even for an otherwise-eligible agentless setup', async () => {
+        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+          enableOtelIntegrations: false,
+        });
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        // With the flag off, manifestOtelDataStreams stays empty, so the gate never looks up the agent.
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+          expect.objectContaining({ dataStreamPattern: 'metrics-supabase.metrics-*' })
+        );
+      });
+
+      it('passes ignoreMissing so a deleted agent policy falls back instead of throwing', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(agentPolicyService.getByIds).toHaveBeenCalledWith(
+          expect.anything(),
+          ['policy-1'],
+          expect.objectContaining({ ignoreMissing: true })
+        );
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('combines the identity-free OTel answer with the identity answer for a mixed package', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'supabase.metrics',
+              path: 'metrics',
+              streams: [{ input: 'otelcol' }],
+            },
+            {
+              type: 'logs',
+              dataset: 'supabase.logs',
+              path: 'logs',
+              streams: [{ input: 'logfile' }],
+            },
+          ],
+        });
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+            ],
+          },
+        ]);
+        (getIncomingDataByDataStreams as jest.Mock).mockResolvedValue({
+          items: [{ 'agent-1': { data: false } }],
+          dataPreview: [{ _index: 'otel-preview' }],
+        });
+        (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({
+          items: [{ 'agent-1': { data: true } }],
+          dataPreview: [{ _index: 'regular-preview' }],
+        });
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: true,
+            },
+          } as any,
+          mockResponse
+        );
+
+        // Only the non-OTel stream is queried through the identity path, not the OTel one.
+        expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+          expect.objectContaining({ dataStreamPattern: 'logs-supabase.logs-*' })
+        );
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: {
+            items: [{ 'agent-1': { data: true } }],
+            dataPreview: [{ _index: 'otel-preview' }, { _index: 'regular-preview' }],
+          },
+        });
+      });
+
+      it('allows an ordinary Fleet reader through the agent client, not the raw ES client', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'default' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        // The agent lookup went through fleetContext.agentClient, which runs its own authz
+        // preflight, rather than a direct query against the hidden .fleet-agents index.
+        expect(mockGetByIds).toHaveBeenCalledWith(['agent-1'], { ignoreMissing: true });
+      });
+    });
+
+    describe('identity-free gate for input-only OTel packages', () => {
+      const inputOtelPackageInfo = {
+        type: 'input',
+        name: 'aws_cloudwatch_input_otel',
+        version: '0.6.0',
+        policy_templates: [
+          {
+            name: 'aws.ec2',
+            title: 'AWS EC2 OpenTelemetry Metrics',
+            type: 'metrics',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+          },
+        ],
+      };
+
+      const agentlessPolicyWith = (packagePolicy: any) => [
+        {
+          id: 'policy-1',
+          namespace: 'default',
+          supports_agentless: true,
+          package_policies: [packagePolicy],
+        },
+      ];
+
+      const inputPackagePolicy = {
+        package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
+        namespace: 'production',
+        inputs: [
+          {
+            type: 'otelcol',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: {
+                  'data_stream.dataset': { value: 'aws_cloudwatch_input_otel.aws.ec2' },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+          enableOtelIntegrations: true,
+        });
+      });
+
+      it('derives the dataset from the package policy and queries the namespaced .otel pattern', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(inputOtelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue(
+          agentlessPolicyWith(inputPackagePolicy)
+        );
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'aws_cloudwatch_input_otel',
+              pkgVersion: '0.6.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByAgentsId).not.toHaveBeenCalled();
+        expect(getIncomingDataByDataStreams).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentId: 'agent-1',
+            dataStreamPattern: 'metrics-aws_cloudwatch_input_otel.aws.ec2.otel-production',
+          })
+        );
+      });
+
+      it('does not open the gate for a non-OTel input package (no agent/policy lookups)', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          type: 'input',
+          name: 'custom_logs',
+          version: '1.0.0',
+          policy_templates: [
+            {
+              name: 'logs',
+              title: 'Custom logs',
+              type: 'logs',
+              input: 'logfile',
+              template_path: 'input.yml.hbs',
+            },
+          ],
+        });
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'custom_logs',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
     });
   });
 });

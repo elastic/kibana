@@ -41,6 +41,7 @@ export class EntityAnalyticsManagementPage {
   // Asset Criticality tab
   public assetCriticalityInfoPanel: Locator;
   public assetCriticalityFileUploadSection: Locator;
+  public assetCriticalityFilePicker: Locator;
   public assetCriticalityDocLink: Locator;
   public assetCriticalityInsufficientPrivilegesCallout: Locator;
   public assetCriticalityIssueCallout: Locator;
@@ -83,6 +84,7 @@ export class EntityAnalyticsManagementPage {
     this.assetCriticalityFileUploadSection = this.page.testSubj.locator(
       'asset-criticality-file-upload-section'
     );
+    this.assetCriticalityFilePicker = this.page.testSubj.locator('asset-criticality-file-picker');
     this.assetCriticalityDocLink = this.page.testSubj.locator('asset-criticality-doc-link');
     this.assetCriticalityInsufficientPrivilegesCallout = this.page.testSubj.locator(
       'asset-criticality-insufficient-privileges'

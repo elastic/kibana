@@ -11,7 +11,7 @@ import { useApplicationConnectionsService } from './use_application_connections_
 import { queryKeys } from '../constants/query_keys';
 import type { OAuthConnection } from '../service/application_connections_api_client';
 
-export interface UpdateConnectionNameVariables {
+export interface UpdateConnectionNameParams {
   clientId: string;
   connectionId: string;
   name: string;
@@ -24,7 +24,7 @@ export const useUpdateConnectionName = () => {
   const { mutateAsync, isLoading } = useMutation<
     OAuthConnection,
     Error,
-    UpdateConnectionNameVariables
+    UpdateConnectionNameParams
   >({
     mutationFn: ({ clientId, connectionId, name }) =>
       apiClient.updateConnection(clientId, connectionId, { name }),

@@ -229,11 +229,14 @@ export const clearEqlInTimeline = () => {
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
+  cy.get(TIMELINE_FILTER_FIELD).should('not.be.disabled');
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+  cy.get(TIMELINE_FILTER_OPERATOR).should('not.be.disabled');
   cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
+  cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
   return cy.get(SAVE_FILTER_BTN).click();
 };
 
@@ -327,13 +330,12 @@ export const navigateToCaseFromSuccessToaster = () => {
   cy.get(VIEW_CASE_TOASTER_LINK).click();
 };
 
-export const closeTimeline = () => {
-  // Retry closing the timeline until the overlay mask gets the --hidden class.
-  // Each iteration first checks whether the overlay is already hidden to avoid
-  // clicking a button that is no longer in the visible portal. When the overlay is
-  // still open, .should('be.visible') retries until the close button is actionable,
-  // letting any concurrent React re-renders (e.g. from markAsFavorite's Redux
-  // dispatches) settle before the click is issued.
+/**
+ * Retry until the timeline overlay mask is hidden. When the overlay is still open,
+ * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
+ * timelines refresh) can settle before the next attempt.
+ */
+export const ensureTimelineOverlayHidden = () => {
   recurse(
     () => {
       return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
@@ -347,19 +349,21 @@ export const closeTimeline = () => {
   );
 };
 
+export const closeTimeline = () => {
+  ensureTimelineOverlayHidden();
+};
+
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
+  // menu item instead of re-clicking in a retry loop, which would re-toggle the
+  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
@@ -387,8 +391,9 @@ export const createTimelineTemplateFromBottomBar = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  const selector = `${SEARCH_OR_FILTER_CONTAINER} textarea`;
+  typeAndVerifyValue(selector, query);
+  cy.get(selector).type(' {enter}');
 };
 
 export const executeTimelineSearch = (query: string) => {

@@ -18,8 +18,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const solutionNavigation = getPageObject('solutionNavigation');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const common = getPageObject('common');
 
@@ -33,55 +35,46 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await esArchiver.unload(archiveEmptyIndex);
     });
 
-    it('navigate search sidenav & breadcrumbs', async () => {
+    it('navigate search sidenav', async () => {
       // Navigate to the home page to account for the getting started page redirect
       await svlSearchNavigation.navigateToElasticsearchHome();
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
-      await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Home' });
       await testSubjects.existOrFail(`search-homepage`);
 
       // Check Side Nav Links
       const sideNavCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
-        breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
           link: { deepLinkId: 'searchHomepage' },
-          breadcrumbs: ['Home'],
           pageTestSubject: 'search-homepage',
         },
         {
           link: { navId: 'agent_builder' },
-          breadcrumbs: [],
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
           link: { deepLinkId: 'discover' },
-          breadcrumbs: ['Discover'],
           pageTestSubject: 'queryInput',
         },
         {
           link: { deepLinkId: 'dashboards' },
-          breadcrumbs: ['Dashboards'],
           pageTestSubject: 'dashboardLandingPage',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
-          breadcrumbs: ['Getting started'],
           pageTestSubject: 'search-getting-started',
         },
         {
           link: { deepLinkId: 'dev_tools:console' },
-          breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
@@ -89,9 +82,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       for (const testCase of sideNavCases) {
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        for (const breadcrumb of testCase.breadcrumbs) {
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
         await testSubjects.existOrFail(testCase.pageTestSubject);
       }
 
@@ -100,7 +90,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
       await testSubjects.existOrFail(`search-homepage`);
 
       await expectNoPageReload();
@@ -117,39 +106,37 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Tags' });
+      await retry.try(async () => {
+        expect(await globalNav.getPageTitle()).contain('Tags');
+      });
 
       await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data views' });
+      await retry.try(async () => {
+        expect((await globalNav.getPageTitle()).toLowerCase()).contain('data views');
+      });
     });
 
-    it('navigate data management', async () => {
+    it('navigates to data management and query rules', async () => {
       await svlCommonNavigation.sidenav.openPanel('data_management');
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts(
-        ['Data management', 'Indices and data streams', 'Index Management', 'Indices'],
-        { removeProjectName: true }
-      );
+      await testSubjects.existOrFail('indexTable');
 
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'searchQueryRules',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts(
-        ['Data management', 'Relevance', 'Query rules'],
-        { removeProjectName: true }
-      );
+      await testSubjects.existOrFail('queryRulesBasePage');
     });
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
-      // TODO: test something search project specific instead of generic discover
-      await svlCommonNavigation.search.searchFor('discover');
+      await svlCommonNavigation.search.searchFor('type:application discover');
       await svlCommonNavigation.search.clickOnOption(0);
-      await svlCommonNavigation.search.hideSearch();
 
-      expect(await browser.getCurrentUrl()).contain('/app/discover');
+      await retry.try(async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/discover');
+      });
     });
 
     it('does not show cases in sidebar navigation', async () => {

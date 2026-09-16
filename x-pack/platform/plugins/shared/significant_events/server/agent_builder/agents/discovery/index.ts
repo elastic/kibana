@@ -7,7 +7,6 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { registerDiscoveryAgentType } from './discovery';
-import { registerJudgeAgentType } from './judge';
 
 export {
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -15,12 +14,6 @@ export {
   discoveryAgentType,
   registerDiscoveryAgentType,
 } from './discovery';
-export {
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
-  judgeAgentType,
-  registerJudgeAgentType,
-} from './judge';
 export { installDiscoveryAgents } from './install_discovery_agents';
 
 export const registerSignificantEventsDiscoveryAgentTypes = ({
@@ -29,5 +22,4 @@ export const registerSignificantEventsDiscoveryAgentTypes = ({
   agentBuilder: AgentBuilderPluginSetup;
 }): void => {
   registerDiscoveryAgentType(agentBuilder);
-  registerJudgeAgentType(agentBuilder);
 };

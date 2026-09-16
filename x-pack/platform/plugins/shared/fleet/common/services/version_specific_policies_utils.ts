@@ -134,3 +134,94 @@ export function buildPolicyIdsOrVariantsEsFilter(
     },
   };
 }
+
+// TODO: Remove these two fallback helpers once all fleet-server versions in use populate
+// policy_base_id on agent enrolment. Until then, agents enrolled via an older fleet-server
+// during a mixed-version rollout will lack the field and must be matched via the legacy
+// policy_id exact-term path. No prefix is used so that the query remains compatible with
+// search.allow_expensive_queries:false; versioned policy_id values (e.g. policy-id#9.3)
+// without a policy_base_id can only arise in the narrow window of a mixed-version rollout,
+// and the startup backfill covers all pre-existing documents.
+
+/**
+ * KQL equivalent of {@link buildPolicyBaseIdWithFallbackEsFilter}: matches migrated documents via
+ * `policy_base_id:"id"` and un-migrated documents via `policy_id:"id" and not policy_base_id:*`.
+ * Use this when building a KQL string (e.g. for URL kuery params) instead of an ES DSL filter.
+ */
+export function buildPolicyBaseIdWithFallbackKuery(
+  baseId: string,
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  const escapedId = escapeQuotes(baseId);
+  return `(${policyBaseIdField}:"${escapedId}" or (${policyIdField}:"${escapedId}" and not ${policyBaseIdField}:*))`;
+}
+
+/**
+ * Same as {@link buildPolicyBaseIdWithFallbackKuery}, for multiple base policy ids at once.
+ */
+export function buildPolicyBaseIdsWithFallbackKuery(
+  baseIds: string[],
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    return `${policyIdField}:""`;
+  }
+  const idList = uniqueIds.map((id) => escapeKuery(id)).join(' or ');
+  return `(${policyBaseIdField}:(${idList}) or (${policyIdField}:(${idList}) and not ${policyBaseIdField}:*))`;
+}
+
+/**
+ * ES query DSL filter preferring `policy_base_id` for migrated documents, with a legacy
+ * `policy_id` exact-term fallback for documents that pre-date the `policy_base_id` field.
+ */
+export function buildPolicyBaseIdWithFallbackEsFilter(
+  baseId: string,
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+) {
+  return {
+    bool: {
+      should: [
+        { term: { [policyBaseIdField]: baseId } },
+        {
+          bool: {
+            filter: [{ term: { [policyIdField]: baseId } }],
+            must_not: [{ exists: { field: policyBaseIdField } }],
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}
+
+/**
+ * Same as {@link buildPolicyBaseIdWithFallbackEsFilter}, for multiple base policy ids at once.
+ */
+export function buildPolicyBaseIdsWithFallbackEsFilter(
+  baseIds: string[],
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+) {
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    return { match_none: {} };
+  }
+  return {
+    bool: {
+      should: [
+        { terms: { [policyBaseIdField]: uniqueIds } },
+        {
+          bool: {
+            filter: [{ terms: { [policyIdField]: uniqueIds } }],
+            must_not: [{ exists: { field: policyBaseIdField } }],
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}

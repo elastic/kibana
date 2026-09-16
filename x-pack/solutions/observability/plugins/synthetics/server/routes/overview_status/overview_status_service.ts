@@ -15,7 +15,11 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { OverviewStatusQuery, OverviewStatusStaleBody } from '../common';
 import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
-import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
+import {
+  ConfigKey,
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_PAGINATION_DEFAULTS,
+} from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import type { RouteContext } from '../types';
 import type {
@@ -28,14 +32,25 @@ import {
   HEARTBEAT_UNMAPPED_LOCATION_ID,
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../common/runtime_types';
-import { isRunStale } from '../../../common/lib';
+import { getOverviewConfigKey, isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
-import { isCCSEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
+import { isRemoteIndexMetadataEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
+
+// Canonical rank for `sortField: 'status'`. Sorting by this rank (instead of a
+// fixed bucket concatenation) means `sortOrder: 'desc'` reverses the whole
+// order, not just the up/down pair.
+const STATUS_RANK: Record<string, number> = {
+  [MONITOR_STATUS_ENUM.DOWN]: 0,
+  [MONITOR_STATUS_ENUM.UP]: 1,
+  [MONITOR_STATUS_ENUM.DISABLED]: 2,
+  [MONITOR_STATUS_ENUM.PENDING]: 3,
+  [MONITOR_STATUS_ENUM.STALE]: 4,
+};
 
 interface LocationStatusEntry {
   status: string;
@@ -54,6 +69,14 @@ interface LocationStatusEntry {
   // terms sub-agg because the field is wildcard-typed and top_metrics cannot
   // collect it. Falls back to locationId when unavailable.
   locationLabel?: string;
+  // Whether the ping carries `meta.space_id`. Kibana stamps both `config_id`
+  // and `meta.space_id` onto every monitor it pushes (public + private, UI +
+  // project); standalone Heartbeat / Elastic Agent autodiscovery pings carry
+  // neither. Presence of either marker means the ping came from a Kibana-pushed
+  // monitor, so a no-saved-object ping with a marker is a *deleted* Kibana
+  // monitor and must not be surfaced as an autodiscovery (`origin: 'heartbeat'`)
+  // monitor. `config_id` presence is read directly from `configId`.
+  hasMetaSpaceId?: boolean;
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -143,6 +166,10 @@ export class OverviewStatusService {
     >,
     statusResult: Map<string, LocationStatus>
   ) {
+    const params = this.routeContext.request.query || {};
+    const { page, perPage } = params;
+    const isPaginated = page != null && perPage != null;
+
     const {
       up,
       down,
@@ -164,6 +191,43 @@ export class OverviewStatusService {
       projectMonitorsCount,
     } = processMonitors(allConfigs, this.filterData?.locationIds);
 
+    if (!isPaginated) {
+      return {
+        allIds,
+        allMonitorsCount: allConfigs.length,
+        disabledMonitorsCount,
+        projectMonitorsCount,
+        enabledMonitorQueryIds,
+        disabledMonitorQueryIds,
+        disabledCount,
+        up,
+        down,
+        pending,
+        stale,
+        upConfigs,
+        downConfigs,
+        pendingConfigs,
+        staleConfigs,
+        disabledConfigs,
+      };
+    }
+
+    const {
+      configs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageStaleConfigs,
+      pageDisabledConfigs,
+    } = this.paginateConfigs({
+      upConfigs,
+      downConfigs,
+      pendingConfigs,
+      staleConfigs,
+      disabledConfigs,
+    });
+
     return {
       allIds,
       allMonitorsCount: allConfigs.length,
@@ -176,11 +240,15 @@ export class OverviewStatusService {
       down,
       pending,
       stale,
-      upConfigs,
-      downConfigs,
-      pendingConfigs,
-      staleConfigs,
-      disabledConfigs,
+      upConfigs: pageUpConfigs,
+      downConfigs: pageDownConfigs,
+      pendingConfigs: pagePendingConfigs,
+      staleConfigs: pageStaleConfigs,
+      disabledConfigs: pageDisabledConfigs,
+      configs,
+      total,
+      page,
+      perPage,
     };
   }
 
@@ -258,6 +326,139 @@ export class OverviewStatusService {
     return { priorRuns };
   }
 
+  paginateConfigs({
+    upConfigs,
+    downConfigs,
+    pendingConfigs,
+    staleConfigs = {},
+    disabledConfigs,
+  }: {
+    upConfigs: Record<string, OverviewStatusMetaData>;
+    downConfigs: Record<string, OverviewStatusMetaData>;
+    pendingConfigs: Record<string, OverviewStatusMetaData>;
+    staleConfigs?: Record<string, OverviewStatusMetaData>;
+    disabledConfigs: Record<string, OverviewStatusMetaData>;
+  }) {
+    const queryParams = this.routeContext.request.query || {};
+    const {
+      page = OVERVIEW_PAGINATION_DEFAULTS.page,
+      perPage = OVERVIEW_PAGINATION_DEFAULTS.perPage,
+      sortField = OVERVIEW_PAGINATION_DEFAULTS.sortField,
+      sortOrder = OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
+      statusFilter,
+    } = queryParams;
+
+    const buckets = {
+      [MONITOR_STATUS_ENUM.UP]: upConfigs,
+      [MONITOR_STATUS_ENUM.DOWN]: downConfigs,
+      [MONITOR_STATUS_ENUM.PENDING]: pendingConfigs,
+      [MONITOR_STATUS_ENUM.STALE]: staleConfigs,
+      [MONITOR_STATUS_ENUM.DISABLED]: disabledConfigs,
+    };
+
+    // Base order is arbitrary — `sortConfigs` always re-sorts by `STATUS_RANK`
+    // for `sortField: 'status'` (the default), so `sortOrder` is honored as a
+    // true full reverse rather than a fixed bucket concatenation.
+    const pageSource = statusFilter
+      ? Object.values(buckets[statusFilter] ?? {})
+      : [
+          ...Object.values(downConfigs),
+          ...Object.values(upConfigs),
+          ...Object.values(disabledConfigs),
+          ...Object.values(pendingConfigs),
+          ...Object.values(staleConfigs),
+        ];
+
+    this.sortConfigs(pageSource, sortField, sortOrder);
+
+    const total = pageSource.length;
+    const start = (page - 1) * perPage;
+    const pageConfigs = pageSource.slice(start, start + perPage);
+
+    const pageUpConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDownConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pagePendingConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageStaleConfigs: Record<string, OverviewStatusMetaData> = {};
+    const pageDisabledConfigs: Record<string, OverviewStatusMetaData> = {};
+
+    for (const config of pageConfigs) {
+      const key = getOverviewConfigKey(config);
+      switch (config.overallStatus) {
+        case MONITOR_STATUS_ENUM.DOWN:
+          pageDownConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.UP:
+          pageUpConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.DISABLED:
+          pageDisabledConfigs[key] = config;
+          break;
+        case MONITOR_STATUS_ENUM.STALE:
+          pageStaleConfigs[key] = config;
+          break;
+        default:
+          pagePendingConfigs[key] = config;
+      }
+    }
+
+    return {
+      configs: pageConfigs,
+      total,
+      pageUpConfigs,
+      pageDownConfigs,
+      pagePendingConfigs,
+      pageStaleConfigs,
+      pageDisabledConfigs,
+    };
+  }
+
+  private sortConfigs(
+    configs: OverviewStatusMetaData[],
+    sortField: string | undefined,
+    sortOrder: string | undefined
+  ) {
+    const dir = sortOrder === 'desc' ? -1 : 1;
+
+    switch (sortField) {
+      case 'name.keyword':
+        configs.sort((a, b) => dir * a.name.localeCompare(b.name));
+        break;
+      case 'updated_at': {
+        // Monitors with no `updated_at` (Heartbeat / CCS remote — no local saved
+        // object) sort as "now", matching the legacy client-side sort's
+        // `moment(undefined)` fallback, so they surface as most-recently-updated
+        // rather than sinking to the end of a large fleet. Computed once so the
+        // comparator stays a stable, deterministic total order.
+        const now = Date.now();
+        configs.sort((a, b) => {
+          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : now;
+          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : now;
+          return dir * (aTime - bTime);
+        });
+        break;
+      }
+      case 'urls': {
+        const withUrl = configs.filter((m) => m.urls);
+        const withoutUrl = configs.filter((m) => !m.urls);
+        withUrl.sort((a, b) => dir * (a.urls ?? '').localeCompare(b.urls ?? ''));
+        configs.length = 0;
+        configs.push(...withUrl, ...withoutUrl);
+        break;
+      }
+      case 'type.keyword':
+        configs.sort((a, b) => dir * (a.type ?? '').localeCompare(b.type ?? ''));
+        break;
+      case 'status':
+      default:
+        configs.sort((a, b) => {
+          const aRank = STATUS_RANK[a.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          const bRank = STATUS_RANK[b.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          return dir * (aRank - bRank);
+        });
+        break;
+    }
+  }
+
   async getEsDataFilters() {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
@@ -271,7 +472,7 @@ export class OverviewStatusService {
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    const remoteIndexMetadataEnabled = isRemoteIndexMetadataEnabled(this.routeContext.server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -301,11 +502,10 @@ export class OverviewStatusService {
     ];
 
     // `remoteNames` filters pings to those originating from the selected
-    // remote clusters. Cluster alias is encoded in the `_index` metadata field
-    // as `<alias>:<index>` (CCS convention). `_index` does not support
-    // `terms`/`regexp`, so we use a `bool.should` of `wildcard` filters — one
-    // per selected alias.
-    if (ccsEnabled && remoteNames?.length) {
+    // remote clusters or CPS linked projects. The alias is encoded in `_index`
+    // as `<alias>:<index>`. `_index` does not support `terms`/`regexp`, so we
+    // use a `bool.should` of `wildcard` filters — one per selected alias.
+    if (remoteIndexMetadataEnabled && remoteNames?.length) {
       const aliases = Array.isArray(remoteNames) ? remoteNames : [remoteNames];
       filters.push({
         bool: {
@@ -383,11 +583,9 @@ export class OverviewStatusService {
       return [activeSpaceTerms];
     }
 
-    // "All permitted spaces" on a local-only cluster: there are no remote pings,
-    // and local pings are bounded by the SO join, so nothing to add. Checked
-    // before the privilege lookup below so non-CCS deployments short-circuit
-    // without an authz round-trip.
-    if (!isCCSEnabled(this.routeContext.server)) {
+    // "All permitted spaces" with no remote `_index` prefix possible: there are
+    // no CCS/CPS remotes, and local pings are bounded by the SO join.
+    if (!isRemoteIndexMetadataEnabled(this.routeContext.server)) {
       return [];
     }
 
@@ -499,7 +697,7 @@ export class OverviewStatusService {
     // lookup stays cheap (scoped to the pending monitors being probed).
     monitorIds?: string[];
   }) {
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    const remoteIndexMetadataEnabled = isRemoteIndexMetadataEnabled(this.routeContext.server);
 
     return withApmSpan('monitor_status_data', async () => {
       const range = this.getStatusQueryRange();
@@ -516,17 +714,19 @@ export class OverviewStatusService {
         // have no local saved object — both remote (CCS) monitors and local
         // Heartbeat / Elastic Agent managed monitors. Heartbeat detection is
         // always-on, so they are always retrieved.
-        // Note: _index is NOT included here because top_metrics does not support
-        // metadata fields. We use a separate terms sub-aggregation for _index instead.
-        // observer.geo.name is also excluded because it is a wildcard type field
+        // observer.geo.name is excluded because it is a wildcard type field
         // which top_metrics cannot collect. We use a separate terms sub-agg instead.
         { field: 'monitor.name' },
         { field: 'monitor.type' },
         { field: 'monitor.interval' },
         { field: 'config_id' },
         { field: 'tags' },
-        // kibanaUrl is only meaningful for remote deep-links, so it stays gated.
-        ...(ccsEnabled ? [{ field: 'kibanaUrl' }] : []),
+        // kibanaUrl / `_index` are only needed to detect and deep-link CCS / CPS
+        // remotes. `_index` is a virtual metadata field, but it still exposes
+        // keyword ordinals, so top_metrics can collect it from the same winning
+        // ping as the other metrics (rather than a sibling terms agg, which
+        // would return the most common index in the bucket, not the latest).
+        ...(remoteIndexMetadataEnabled ? [{ field: 'kibanaUrl' }, { field: '_index' }] : []),
       ];
 
       // The `timespan` filter is a "currently fresh" constraint anchored to
@@ -612,22 +812,18 @@ export class OverviewStatusService {
                       size: 1,
                     },
                   },
-                  // _index is a metadata field not supported by top_metrics,
-                  // so we use a separate terms agg to determine the source index.
-                  // For a given monitor+location bucket the latest ping typically
-                  // comes from a single index, so size:1 is sufficient. Only
-                  // needed to detect remote (CCS) monitors via their cluster
-                  // alias prefix, so it stays gated on CCS.
-                  ...(ccsEnabled
-                    ? {
-                        index_name: {
-                          terms: {
-                            field: '_index',
-                            size: 1,
-                          },
-                        },
-                      }
-                    : {}),
+                  // Presence of `meta.space_id` distinguishes a Kibana-pushed
+                  // monitor (always stamped, even for a deleted monitor's
+                  // leftover pings) from a standalone Heartbeat / Agent
+                  // autodiscovery monitor (never stamped). `terms` handles the
+                  // multi-space (array) case; a non-empty bucket list means the
+                  // field is present. Always run, since heartbeat detection is.
+                  space_id: {
+                    terms: {
+                      field: 'meta.space_id',
+                      size: 1,
+                    },
+                  },
                   // `error.message` is mapped as `text` so it can't be pulled
                   // via `top_metrics`; fetch the latest final summary doc and
                   // grab `error` + `state` from its source.
@@ -718,14 +914,16 @@ export class OverviewStatusService {
             monitorByIds.set(monitorId, []);
           }
 
-          // _index and observer.geo.name come from terms sub-aggs, not top_metrics
-          const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
-          const indexName = indexNameAgg?.buckets?.[0]?.key;
+          // observer.geo.name comes from a terms sub-agg (wildcard, not
+          // collectable by top_metrics). `_index` is on the winning ping.
+          const indexName = remoteIndexMetadataEnabled ? metrics?._index : undefined;
           const locationNameAgg = (rest as any).location_name;
           const locationLabel =
             locationNameAgg?.buckets?.[0]?.key ??
             (bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : undefined);
-          const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
+          const spaceIdAgg = (rest as any).space_id;
+          const hasMetaSpaceId = (spaceIdAgg?.buckets?.length ?? 0) > 0;
+          const kibanaUrl = remoteIndexMetadataEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = metrics?.['monitor.name'];
           const monitorType = metrics?.['monitor.type'];
           const monitorInterval = metrics?.['monitor.interval'];
@@ -745,6 +943,7 @@ export class OverviewStatusService {
             ...(monitorInterval != null ? { monitorIntervalSeconds: Number(monitorInterval) } : {}),
             ...(configId ? { configId: String(configId) } : {}),
             ...(tags ? { tags: Array.isArray(tags) ? tags.map(String) : [String(tags)] } : {}),
+            ...(hasMetaSpaceId ? { hasMetaSpaceId } : {}),
             error:
               errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
             downSince,
@@ -951,13 +1150,12 @@ export class OverviewStatusService {
 
     // Process monitors that have no local saved object, discovered purely from
     // ping data. Two flavors share the exact same shape (pings exist, no SO):
-    //   - remote (CCS) monitors: pings from a remote cluster, identified by a
-    //     `<alias>:` prefix on `_index`. Gated on CCS being enabled.
+    //   - remote (CCS / CPS) monitors: pings from a remote cluster or linked
+    //     project, identified by a `<alias>:` prefix on `_index`.
     //   - local Heartbeat / Elastic Agent monitors: local pings whose
     //     `monitor.id` has no matching saved object (most notably Kubernetes/
     //     Docker autodiscovery). Surfaced read-only via `origin: 'heartbeat'`,
     //     capped to protect the overview against autodiscovery churn.
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
     // Opt-out (persisted client-side) to hide read-only local Heartbeat / Agent
     // monitors. Only skips when explicitly `false`; remote (CCS) monitors are
     // synthesized regardless.
@@ -989,10 +1187,9 @@ export class OverviewStatusService {
           return;
         }
 
-        const remote =
-          ccsEnabled && locData.index
-            ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
-            : undefined;
+        const remote = locData.index
+          ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
+          : undefined;
 
         const configId = locData.configId || monitorId;
         const scheduleMinutes = locData.monitorIntervalSeconds
@@ -1039,16 +1236,23 @@ export class OverviewStatusService {
           // remote clusters that host the same monitor configId in the same
           // locationId (e.g. an imported project monitor synced to both)
           // don't collide and silently overwrite each other.
-          placeExternalConfig(
-            `${remote.remoteName}-${configId}-${locData.locationId}`,
-            { ...baseMeta, remote },
-            status
-          );
+          const remoteMeta = { ...baseMeta, remote };
+          placeExternalConfig(getOverviewConfigKey(remoteMeta), remoteMeta, status);
           return;
         }
 
         // Local Heartbeat / Elastic Agent managed monitor (no saved object).
         if (!includeHeartbeatMonitors) {
+          return;
+        }
+        // A genuine autodiscovery ping carries NEITHER of Kibana's provenance
+        // markers — `config_id` and `meta.space_id`, both stamped on every
+        // monitor Kibana pushes. If either is present the ping came from a
+        // Kibana-pushed monitor; with no saved object it's a *deleted* Kibana
+        // monitor whose pings haven't aged out yet, so it must not resurrect as
+        // `heartbeat`. Requiring both to be absent is also the safe stance for
+        // standalone Heartbeat pings that happen to set either field.
+        if (locData.configId || locData.hasMetaSpaceId) {
           return;
         }
         // Cap the number of distinct monitors we synthesize from ping data.
@@ -1058,11 +1262,8 @@ export class OverviewStatusService {
           }
           heartbeatMonitorIds.add(monitorId);
         }
-        placeExternalConfig(
-          `heartbeat-${configId}-${locData.locationId}`,
-          { ...baseMeta, origin: 'heartbeat' as const },
-          status
-        );
+        const heartbeatMeta = { ...baseMeta, origin: 'heartbeat' as const };
+        placeExternalConfig(getOverviewConfigKey(heartbeatMeta), heartbeatMeta, status);
       });
     });
 
@@ -1095,7 +1296,7 @@ export class OverviewStatusService {
     // Returning an empty list here also avoids dragging local monitors through
     // `processOverviewStatus`, where the filtered ping query has no rows for
     // them and they would otherwise surface as misleading "Pending" entries.
-    if (isCCSEnabled(server) && remoteNames?.length) {
+    if (isRemoteIndexMetadataEnabled(server) && remoteNames?.length) {
       return [];
     }
 

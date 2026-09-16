@@ -15,12 +15,12 @@ type TruncatedType = 'policies' | 'rules';
 interface Props {
   searchParam?: string;
   data?: {
-    searchMatches: SearchMatchCounts | null;
+    search_matches: SearchMatchCounts | null;
   };
 }
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
-  const searchMatches = data?.searchMatches ?? null;
+  const searchMatches = data?.search_matches ?? null;
   const truncatedTypes: TruncatedType[] =
     searchMatches !== null
       ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > searchMatches.cap)
@@ -45,7 +45,7 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
 const renderTruncatedPart = (matches: SearchMatchCounts, type: TruncatedType): string =>
   type === 'policies'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
-        defaultMessage: '{cap} of {total} matching policies',
+        defaultMessage: '{cap} of {total} matching action policies',
         values: { cap: matches.cap, total: matches.policies },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {

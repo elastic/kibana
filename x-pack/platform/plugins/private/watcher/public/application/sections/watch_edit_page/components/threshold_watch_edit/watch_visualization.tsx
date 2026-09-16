@@ -21,7 +21,8 @@ import {
 import dateMath from '@kbn/datemath';
 import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
@@ -267,7 +268,7 @@ export const WatchVisualization = () => {
             })}
           </Chart>
         ) : (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -275,13 +276,13 @@ export const WatchVisualization = () => {
                 defaultMessage="No data"
               />
             }
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Your index and condition did not return any data."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+                defaultMessage="Your index and condition did not return any data."
+              />
+            }
+          />
         )}
         <EuiSpacer size="l" />
       </div>

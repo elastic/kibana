@@ -106,7 +106,6 @@ const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
 interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   nodes: NodeType[];
   edges: EdgeType[];
-  /** Defaults to the shared registry; the mock canvas overrides with its own. */
   nodeTypes?: NodeTypes;
   edgeTypes?: EdgeTypes;
   onNodesChange?: OnNodesChange<NodeType>;
@@ -138,8 +137,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
 /**
  * Shared canvas shell owning the React Flow provider, container, common viewport
  * configuration (zoom bounds, trackpad panning, dotted grid), and the custom
- * zoom/fit controls. Both the classic and mock canvases render through this so
- * the control chrome and look-and-feel stay consistent.
+ * zoom/fit controls. Every canvas renders through this so the control chrome and
+ * look-and-feel stay consistent.
  */
 export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge = Edge>({
   nodes,
@@ -229,6 +228,9 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           defaultEdgeOptions={NON_SELECTABLE_EDGE_OPTIONS}
           fitView
           fitViewOptions={{ padding: FIT_VIEW_PADDING }}
+          onInit={(instance) => {
+            instance.fitView({ padding: FIT_VIEW_PADDING });
+          }}
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}
           translateExtent={translateExtent}

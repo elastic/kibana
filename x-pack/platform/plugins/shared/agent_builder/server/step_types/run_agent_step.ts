@@ -7,10 +7,12 @@
 
 import {
   agentBuilderDefaultAgentId,
+  createNonInteractiveConfig,
   ConversationAccessControlMode,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  toAutoApprovedApis,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -69,6 +71,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           conversation_id: conversationId,
           attachments,
           metadata,
+          configuration_overrides: configurationOverrides,
+          approvals,
         } = context.input;
 
         const {
@@ -81,6 +85,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
           'max-step-size': maxStepSize,
+          'reasoning-level': reasoningLevel,
         } = context.config;
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
@@ -134,6 +139,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           request,
           abortSignal: context.abortSignal,
           metadata,
+          interactive: createNonInteractiveConfig(
+            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+          ),
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
@@ -143,11 +151,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             accessControl,
             structuredOutput: !!schema,
             outputSchema: schema,
+            configurationOverrides,
             nextInput: {
               message,
               attachments,
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
             ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks

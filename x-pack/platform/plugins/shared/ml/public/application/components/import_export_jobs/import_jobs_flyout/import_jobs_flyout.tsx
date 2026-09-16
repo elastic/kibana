@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldText,
   EuiFilePicker,
   EuiFlexGroup,
@@ -32,6 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
@@ -538,7 +538,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                               jobId.datafeedInvalid === true &&
                               jobId.datafeedWarningMessage && (
                                 <EuiFormRow>
-                                  <EuiCallOut
+                                  <KbnWarningCallout
                                     data-test-subj="mlJobImportJobDatafeedWarning"
                                     title={i18n.translate(
                                       'xpack.ml.importExport.importFlyout.datafeedWarning.title',
@@ -546,14 +546,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                                         defaultMessage: 'Datafeed Warning',
                                       }
                                     )}
-                                    color="warning"
                                     size="s"
                                     announceOnMount
-                                  >
-                                    <EuiText size="xs" className="eui-textBreakWord">
-                                      {jobId.datafeedWarningMessage}
-                                    </EuiText>
-                                  </EuiCallOut>
+                                    text={jobId.datafeedWarningMessage}
+                                  />
                                 </EuiFormRow>
                               )}
                           </EuiFlexItem>

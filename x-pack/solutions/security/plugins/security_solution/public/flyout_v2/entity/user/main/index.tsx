@@ -279,7 +279,6 @@ export const User: FC<UserProps> = memo(function User({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]

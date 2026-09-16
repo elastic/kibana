@@ -31,6 +31,10 @@ import { HostIsolationFlyout } from '../../../../common/components/endpoint/host
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
+import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
+import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import type { FlyoutActionType } from '../../../../common/lib/telemetry';
 import { FLYOUT_ACTION } from '../../../../common/lib/telemetry';
@@ -56,6 +60,7 @@ const FOOTER_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
   'run-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
   'run-document-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
   'endpointResponseActions-action-item': FLYOUT_ACTION.RESPOND,
+  'osquery-action-item': FLYOUT_ACTION.RUN_OSQUERY,
   'add-note-action': FLYOUT_ACTION.ADD_NOTE,
   'investigate-in-timeline-action-item': FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
   'explore-in-alerts-or-timeline': FLYOUT_ACTION.EXPLORE,
@@ -225,6 +230,44 @@ export const TakeActionButton = memo(
       closePopoverHandler
     );
 
+    const [osqueryAgentId, setOsqueryAgentId] = useState<string | null>(null);
+
+    const agentId = useMemo(
+      () =>
+        getAlertDetailsFieldValue(
+          { category: 'agent', field: 'agent.id' },
+          dataFormattedForFieldBrowser
+        ),
+      [dataFormattedForFieldBrowser]
+    );
+
+    const handleOnCloseOsqueryFlyout = useCallback(() => {
+      setOsqueryAgentId(null);
+    }, []);
+
+    const osQueryFlyoutDefaultValues = useMemo(
+      () => (isAlert ? { alertIds: [documentId] } : undefined),
+      [isAlert, documentId]
+    );
+
+    const handleOnOsqueryClick = useCallback(() => {
+      setOsqueryAgentId(agentId);
+      closePopoverHandler();
+    }, [agentId, closePopoverHandler]);
+
+    const osqueryActionItem = useMemo(
+      () =>
+        getOsqueryActionItem({
+          handleClick: handleOnOsqueryClick,
+        }),
+      [handleOnOsqueryClick]
+    );
+
+    const { osquery } = useKibana().services;
+    const osqueryAvailable = osquery?.isOsqueryAvailable({
+      agentId,
+    });
+
     const [isExceptionFlyoutOpen, setIsExceptionFlyoutOpen] = useState(false);
     const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
       null
@@ -264,6 +307,7 @@ export const TakeActionButton = memo(
         ...(!isRemoteDocument && isAlert ? hostIsolationActionItems : []),
         ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
         ...(!isRemoteDocument ? endpointResponseActionsConsoleItems : []),
+        ...(!isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : []),
         ...(!isRemoteDocument && !isAlert ? noteItems : []),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
         ...(!isInSecurityApp ? exploreActionItems : []),
@@ -282,6 +326,8 @@ export const TakeActionButton = memo(
         isInSecurityApp,
         isRemoteDocument,
         noteItems,
+        osqueryActionItem,
+        osqueryAvailable,
         runWorkflowMenuItem,
         statusActionItems,
       ]
@@ -317,7 +363,7 @@ export const TakeActionButton = memo(
         data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
         fill
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isDisabled={items.length === 0}
         onClick={togglePopoverHandler}
       >
@@ -333,6 +379,14 @@ export const TakeActionButton = memo(
             detailsData={dataFormattedForFieldBrowser}
             isolateAction={isolateAction}
             onClose={() => setIsolateAction(null)}
+          />
+        )}
+        {osqueryAgentId && (
+          <OsqueryFlyout
+            agentId={osqueryAgentId}
+            defaultValues={osQueryFlyoutDefaultValues}
+            onClose={handleOnCloseOsqueryFlyout}
+            ecsData={ecsData}
           />
         )}
         <EuiPopover

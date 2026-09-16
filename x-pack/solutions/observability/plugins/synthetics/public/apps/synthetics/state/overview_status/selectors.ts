@@ -10,12 +10,15 @@ import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_man
 import type {
   OverviewStatusMetaData,
   OverviewStatusState,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
 
+export const selectOverviewStatusReducer = (state: SyntheticsAppState) => state.overviewStatus;
+
 export const getStatusByConfig = (
   configId: string,
-  status?: OverviewStatusState | null,
+  status?: PaginatedOverviewStatus | null,
   locId?: string
 ) => {
   if (!status) {
@@ -45,6 +48,28 @@ export const getStatusByConfig = (
   }
 };
 
+/**
+ * A read-only overview monitor that has no Synthetics saved object: a local
+ * Heartbeat / Elastic Agent autodiscover monitor (`origin: 'heartbeat'`) or a
+ * CCS remote monitor (`remote` set). These are absent from the monitor-list
+ * `absoluteTotal` (which counts saved objects only), so they must be checked
+ * separately when deciding whether the app has any monitors to show.
+ *
+ * Intentionally excludes stale saved-object entries (e.g. a just-deleted
+ * monitor still lingering in the overview status until the next refetch), so
+ * deleting the last saved-object monitor still lands on Getting Started.
+ */
+export const isExternalOverviewMonitor = (monitor: OverviewStatusMetaData): boolean =>
+  monitor.origin === 'heartbeat' || Boolean(monitor.remote);
+
+/**
+ * Whether the overview status request has completed at least once (success or
+ * failure). Persists across refreshes, unlike `loaded` (success-only) and the
+ * transient `error`, so consumers can distinguish "settled" from "still pending".
+ */
+export const selectOverviewStatusSettled = (state: SyntheticsAppState): boolean =>
+  state.overviewStatus.settled;
+
 export const selectOverviewStatus = createSelector(
   (state: SyntheticsAppState) => state.overviewStatus,
   (state: SyntheticsAppState) => state.overview.groupBy.field,
@@ -52,6 +77,30 @@ export const selectOverviewStatus = createSelector(
     if (!overviewStatus.status) {
       return overviewStatus;
     }
+
+    const isPaginated = overviewStatus.status.configs != null;
+
+    // When paginated, the server already sorted and sliced the data. The
+    // config maps contain only the current page's items so counts are global
+    // (from the server) rather than derived from the maps.
+    if (isPaginated) {
+      const status =
+        groupByField === 'monitor'
+          ? overviewStatus.status
+          : formatStatus(overviewStatus.status, groupByField);
+      return {
+        ...overviewStatus,
+        status: {
+          ...status,
+          up: overviewStatus.status.up,
+          down: overviewStatus.status.down,
+          pending: overviewStatus.status.pending,
+          stale: overviewStatus.status.stale,
+          disabledCount: overviewStatus.status.disabledCount,
+        },
+      };
+    }
+
     const status =
       groupByField === 'monitor'
         ? overviewStatus.status

@@ -24,13 +24,11 @@ describe('config validation', () => {
             "resetPageDelayMs": 0,
             "resetTaskTimeoutMinutes": 60,
           },
-          "attachments": Object {
+          "assigneeIdentity": Object {
             "enabled": true,
           },
-          "casesRedesign": Object {
-            "details": true,
-            "list": true,
-            "settings": true,
+          "attachments": Object {
+            "enabled": true,
           },
           "chat": Object {
             "enabled": true,
@@ -136,6 +134,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "runWorkflows": Object {
+            "enabled": false,
+          },
           "stack": Object {
             "enabled": true,
           },
@@ -194,6 +195,16 @@ describe('config validation', () => {
     it('allows templates.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ templates: { enabled: false } });
       expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets runWorkflows.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.runWorkflows.enabled).toBe(false);
+    });
+
+    it('allows runWorkflows.enabled to be set to true explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
+      expect(config.runWorkflows.enabled).toBe(true);
     });
   });
 });

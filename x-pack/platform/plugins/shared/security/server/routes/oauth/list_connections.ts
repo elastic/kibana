@@ -17,6 +17,7 @@ export function defineListOAuthConnectionsRoute({
   router,
   logger,
   getAuthenticationService,
+  serverlessProjectId,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -54,7 +55,8 @@ export function defineListOAuthConnectionsRoute({
         const result = await oauth.listConnections(
           request,
           request.query.client_id,
-          request.query.connection_id
+          request.query.connection_id,
+          serverlessProjectId
         );
         if (!result) {
           return response.notFound({

@@ -72,6 +72,6 @@ describe('TemplatesInfoPanel', () => {
   it('renders the start tour button when onStartTour is provided', async () => {
     renderWithTestingProviders(<TemplatesInfoPanel onStartTour={jest.fn()} />);
 
-    expect(await screen.findByTestId('templates-info-panel-start-tour')).toBeInTheDocument();
+    expect(await screen.findByTestId('templates-info-panel-primaryAction')).toBeInTheDocument();
   });
 });

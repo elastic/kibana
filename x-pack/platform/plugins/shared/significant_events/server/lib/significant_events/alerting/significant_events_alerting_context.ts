@@ -9,6 +9,7 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
+import { canCompileMatchMetric } from '../rules/can_compile_match_metric';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { ALERTS_READER_V2 } from './alerts_reader';
 
@@ -25,11 +26,25 @@ export interface SignificantEventsAlertingContext {
 
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
+  isServerless: boolean;
 }
 
-/** MATCH queries can be rule-backed; STATS cannot until rule-on-rule provisioning (#265778). */
-export function canQueryBeRuleBacked(queryType: QueryType): boolean {
-  return queryType !== QUERY_TYPE_STATS;
+export interface RuleBackedQueryCandidate {
+  type: QueryType;
+  esql: { query: string };
+}
+
+/**
+ * Whether a KI can be installed as a MATCH metric-series rule.
+ * STATS stay unbacked until rule-on-rule provisioning (#265778). MATCH must
+ * also be filter-only (`FROM` + optional `WHERE`) so the compiler can emit
+ * closed-minute counts — unsupported shapes stay stored but unbacked.
+ */
+export function canQueryBeRuleBacked(query: RuleBackedQueryCandidate): boolean {
+  if (query.type === QUERY_TYPE_STATS) {
+    return false;
+  }
+  return canCompileMatchMetric(query.esql.query);
 }
 
 /**
@@ -47,7 +62,10 @@ export function createSignificantEventsAlertingContextResolver(
       const alertingV2RulesClient = await params.getAlertingV2RulesClient();
       return {
         alertsReader: ALERTS_READER_V2,
-        rulesClient: new RulesAdapterV2(alertingV2RulesClient),
+        rulesClient: new RulesAdapterV2({
+          rulesClient: alertingV2RulesClient,
+          isServerless: params.isServerless,
+        }),
         alertingV2RulesClient,
       };
     })();

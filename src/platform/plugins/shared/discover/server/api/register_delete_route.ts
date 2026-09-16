@@ -9,11 +9,11 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { z } from '@kbn/zod';
 import { getRouteConfig } from './get_route_config';
 import { deleteDiscoverSession } from './session_delete';
 import { trackDiscoverSessionAction } from './user_activity';
@@ -38,13 +38,13 @@ export const registerDeleteRoute = (
         version: routeVersion,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string({
-                meta: {
+            params: z
+              .object({
+                id: z.string().meta({
                   description: 'The Discover session ID.',
-                },
-              }),
-            }),
+                }),
+              })
+              .strict(),
           },
           response: {
             204: { description: 'Deleted' },
@@ -55,7 +55,7 @@ export const registerDeleteRoute = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
+        telemetryHandler(request, { usageCounter }, async () => {
           try {
             const deletedSession = await deleteDiscoverSession(context, request.params.id);
             trackDiscoverSessionAction(userActivity, 'delete', deletedSession);

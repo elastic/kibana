@@ -29,6 +29,7 @@ interface UseSaveAiIndexFieldOptions<TValue> {
  */
 export const toProperties = ({
   id,
+  managed,
   date_created: _dateCreated,
   date_modified: _dateModified,
   ...properties

@@ -15,10 +15,19 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { createAppContextStartContractMock } from '../mocks';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
+import { reassignAgents } from '../services/agents/reassign';
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
-import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
+import {
+  deleteVersionSpecificFleetServerPolicies,
+  deleteVersionSpecificFleetServerPoliciesForVersions,
+  getAgentCountsForVariantPolicyIds,
+  getAgentVersionsForVersionSpecificPolicies,
+  hasAgentVersionConditionInInputTemplate,
+} from '../services/utils/version_specific_policies';
 import type { Agent, AgentPolicy, PackagePolicy } from '../types';
+
+import { AGENT_POLICY_INDEX } from '../../common/constants';
 
 import {
   VersionSpecificPolicyAssignmentTask,
@@ -28,6 +37,7 @@ import {
 
 jest.mock('../services');
 jest.mock('../services/agents');
+jest.mock('../services/agents/reassign');
 jest.mock('../services/epm/packages');
 jest.mock('../services/epm/packages/get');
 jest.mock('../services/utils/version_specific_policies');
@@ -59,6 +69,23 @@ const mockedGetAgentTemplateAssetsMap = getAgentTemplateAssetsMap as jest.Mocked
 const mockedHasAgentVersionConditionInInputTemplate =
   hasAgentVersionConditionInInputTemplate as jest.MockedFunction<
     typeof hasAgentVersionConditionInInputTemplate
+  >;
+const mockedReassignAgents = reassignAgents as jest.MockedFunction<typeof reassignAgents>;
+const mockedDeleteVersionSpecificFleetServerPolicies =
+  deleteVersionSpecificFleetServerPolicies as jest.MockedFunction<
+    typeof deleteVersionSpecificFleetServerPolicies
+  >;
+const mockedDeleteVersionSpecificFleetServerPoliciesForVersions =
+  deleteVersionSpecificFleetServerPoliciesForVersions as jest.MockedFunction<
+    typeof deleteVersionSpecificFleetServerPoliciesForVersions
+  >;
+const mockedGetAgentCountsForVariantPolicyIds =
+  getAgentCountsForVariantPolicyIds as jest.MockedFunction<
+    typeof getAgentCountsForVariantPolicyIds
+  >;
+const mockedGetAgentVersionsForVersionSpecificPolicies =
+  getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
+    typeof getAgentVersionsForVersionSpecificPolicies
   >;
 
 const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
@@ -126,6 +153,28 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     const mockTaskManagerStart = tmStartMock();
     await mockTask.start({ taskManager: mockTaskManagerStart });
     return mockTask.runTask(taskInstance, mockCore, new AbortController().signal);
+  };
+
+  // Configure the .fleet-policies terms aggregation the orphan sweep reads in its first pass.
+  // lastWrittenMs defaults to epoch (0) so mocked variants are always outside the 1-hour GRACE
+  // window and eligible for deletion. Pass lastWrittenMs: Date.now() to simulate a fresh write.
+  const mockVariantPoliciesInIndex = async (
+    variantPolicyIds: string[],
+    { lastWrittenMs = 0 }: { lastWrittenMs?: number } = {}
+  ) => {
+    const [coreStart] = await mockCore.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        variant_policies: {
+          buckets: variantPolicyIds.map((key) => ({
+            key,
+            last_written: { value: lastWrittenMs },
+          })),
+          sum_other_doc_count: 0,
+        },
+      },
+    });
   };
 
   describe('Task lifecycle', () => {
@@ -212,10 +261,13 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     it('Should do nothing if no agent policies have version conditions', async () => {
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([]);
+      // Orphan sweep runs afterwards; no version-specific policies exist in .fleet-policies.
+      await mockVariantPoliciesInIndex([]);
 
       await runTask();
 
-      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
     });
 
     it('Should process agent policies with version conditions', async () => {
@@ -579,6 +631,275 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         ['policy-1'],
         undefined,
         { agentVersions: ['8.18'] }
+      );
+    });
+  });
+
+  describe('Orphaned version-specific policy sweep', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+        .mockReturnValue({} as any);
+      // No agent policies with version conditions, so the main processing is a no-op and only the
+      // orphan sweep runs.
+      mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([]);
+      // Default bounded set for tests that exercise the active-parent stale-variant path. Individual
+      // tests override this when they need the variant to be in- or out-of-set.
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+      // Default: no agents on any variant — safe for tests that don't care about agent counts.
+      mockedGetAgentCountsForVariantPolicyIds.mockResolvedValue(new Map());
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reassigns orphaned agents and deletes stale variant docs when the parent no longer has version conditions', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4', 'policy-1#9.3']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      const variantAgents = [
+        { id: 'agent-1', policy_id: 'policy-1#9.4' },
+        { id: 'agent-2', policy_id: 'policy-1#9.3' },
+      ] as Agent[];
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(variantAgents));
+      // Post-reassignment count check: all agents moved successfully.
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+      await runTask();
+
+      expect(mockAgentPolicyService.getByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        [{ id: 'policy-1', spaceId: '*' }],
+        expect.objectContaining({ ignoreMissing: true })
+      );
+      // Inactive agents must be included, otherwise their variant doc is deleted below while they
+      // still reference it (https://github.com/elastic/kibana/pull/280250 review).
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ showInactive: true })
+      );
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        { agentIds: ['agent-1', 'agent-2'], showInactive: true },
+        'policy-1'
+      );
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        'policy-1'
+      );
+    });
+
+    it('skips variant doc deletion and retries on next run when bulk reassignment partially fails', async () => {
+      // Simulate: reassignAgents returns { actionId } without throwing even though one agent's
+      // _update failed (bulkUpdateAgents silently collects per-agent errors). The post-reassignment
+      // count check sees 1 remaining agent and must skip deleteVersionSpecificFleetServerPolicies
+      // so the next sweep run can retry rather than stranding the agent on a missing policy.
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+      // Post-reassignment count: 1 agent still on variant (bulk update failed silently).
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 1, agents: [], page: 1, perPage: 0 });
+
+      await runTask();
+
+      expect(mockedReassignAgents).toHaveBeenCalled();
+      // Must NOT delete variant docs — the stranded agent must be recoverable on the next run.
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+    });
+
+    it('does not reassign when the parent policy still has version conditions and the variant is in the bounded set', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      // 9.4 is in the bounded set → not a stale-variant candidate → no deletion.
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.4']);
+
+      await runTask();
+
+      // The whole-parent reassign path must NOT run (parent still has conditions).
+      expect(mockedFetchAllAgentsByKuery).not.toHaveBeenCalled();
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+      // The per-version stale-variant path must also NOT delete (variant is in-set).
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).not.toHaveBeenCalled();
+    });
+
+    it('does not reassign when the parent policy no longer exists', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      // getByIds with ignoreMissing filters out deleted policies.
+      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValue([]);
+
+      await runTask();
+
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when no version-specific policies exist', async () => {
+      await mockVariantPoliciesInIndex([]);
+      mockAgentPolicyService.getByIds = jest.fn();
+
+      await runTask();
+
+      expect(mockAgentPolicyService.getByIds).not.toHaveBeenCalled();
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+    });
+
+    it('ignores non-versioned policy ids when scanning .fleet-policies', async () => {
+      // The whole-index aggregation returns base ids too; only variant ids should be acted on.
+      await mockVariantPoliciesInIndex(['policy-1', 'policy-2']);
+      mockAgentPolicyService.getByIds = jest.fn();
+
+      await runTask();
+
+      expect(mockAgentPolicyService.getByIds).not.toHaveBeenCalled();
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+    });
+
+    it('queries .fleet-policies with the correct aggregation shape including last_written sub-agg', async () => {
+      const [coreStart] = await mockCore.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+      await mockVariantPoliciesInIndex([]);
+
+      await runTask();
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          size: 0,
+          aggs: expect.objectContaining({
+            variant_policies: expect.objectContaining({
+              terms: expect.objectContaining({ field: 'policy_id' }),
+              // last_written sub-agg is used to enforce the GRACE window atomically inside the
+              // deleteByQuery — any racing deploy stamps a fresh @timestamp that the range filter
+              // excludes without a TOCTOU window.
+              aggs: expect.objectContaining({
+                last_written: expect.objectContaining({ max: { field: '@timestamp' } }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('deletes variant docs even when the orphaned parent currently has no assigned agents', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      // No agents remain on the variant policies (e.g. already reassigned by the inline path).
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        'policy-1'
+      );
+    });
+
+    // Half-A tests: stale per-version variant cleanup for parents that still have conditions.
+
+    it('deletes an out-of-set variant with zero agents when the parent still has version conditions', async () => {
+      // Variant #9.2 is outside the bounded set [9.5, 9.4, 8.19] and has zero agents.
+      // It should be deleted via the per-version helper, NOT the whole-parent helper.
+      await mockVariantPoliciesInIndex(['policy-1#9.2']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      // Override bounded set to exclude 9.2 explicitly.
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+      // Zero agents on policy-1#9.2 (default from beforeEach).
+
+      await runTask();
+
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).toHaveBeenCalledWith(
+        expect.anything(),
+        ['policy-1#9.2'],
+        expect.objectContaining({ writtenBefore: expect.any(String) })
+      );
+      // Whole-parent helpers must NOT be invoked for an active-conditions parent.
+      expect(mockedReassignAgents).not.toHaveBeenCalled();
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+    });
+
+    it('keeps an in-set variant with zero agents even when the parent still has version conditions', async () => {
+      // Variant #9.4 IS in the bounded set → not a stale-variant candidate.
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.4']);
+
+      await runTask();
+
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).not.toHaveBeenCalled();
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+    });
+
+    it('keeps an out-of-set variant that still has enrolled agents', async () => {
+      // #9.2 is out-of-set, but 3 agents are still assigned to it. Must not delete.
+      await mockVariantPoliciesInIndex(['policy-1#9.2']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+      mockedGetAgentCountsForVariantPolicyIds.mockResolvedValue(new Map([['policy-1#9.2', 3]]));
+
+      await runTask();
+
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).not.toHaveBeenCalled();
+    });
+
+    it('keeps an out-of-set variant written within the GRACE window (racing deploy protection)', async () => {
+      // lastWrittenMs ≈ now → within the 1-hour GRACE → not a candidate for deletion.
+      await mockVariantPoliciesInIndex(['policy-1#9.2'], { lastWrittenMs: Date.now() });
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+
+      await runTask();
+
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).not.toHaveBeenCalled();
+    });
+
+    it('self-heals by redeploying a variant that gained agents after deletion (race recovery)', async () => {
+      // #9.2 has zero agents before deletion but gains one right after (deployment race).
+      // The post-delete re-check must trigger a redeploy to prevent the agent being stranded.
+      await mockVariantPoliciesInIndex(['policy-1#9.2']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+      // First call (pre-delete): zero agents → proceed to delete.
+      // Second call (post-delete self-heal): 1 agent appeared on the just-deleted variant.
+      mockedGetAgentCountsForVariantPolicyIds
+        .mockResolvedValueOnce(new Map())
+        .mockResolvedValueOnce(new Map([['policy-1#9.2', 1]]));
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+
+      await runTask();
+
+      expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).toHaveBeenCalled();
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        ['policy-1'],
+        undefined,
+        { agentVersions: ['9.2'] }
       );
     });
   });

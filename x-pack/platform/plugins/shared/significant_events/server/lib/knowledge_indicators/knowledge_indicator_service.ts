@@ -17,7 +17,7 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from '../../types';
-import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import {
   knowledgeIndicatorsDataStream,
   type StoredKnowledgeIndicator,
@@ -50,7 +50,9 @@ export class KnowledgeIndicatorService {
     >;
   }): Promise<KnowledgeIndicatorClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
-    const significantEventsAvailable = await isSignificantEventsAvailable(coreStart.featureFlags);
+    const significantEventsAvailable = await isSignificantEventsFeatureFlagEnabled(
+      coreStart.featureFlags
+    );
 
     const dataStreamClient: KnowledgeIndicatorDataStreamClient = DataStreamClient.fromDefinition<
       typeof knowledgeIndicatorsMappings,

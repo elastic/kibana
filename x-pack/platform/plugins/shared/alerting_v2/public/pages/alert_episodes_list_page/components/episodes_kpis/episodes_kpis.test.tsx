@@ -8,8 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TimeRange } from '@kbn/es-query';
-import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import { EpisodesKpis } from './episodes_kpis';
 
@@ -17,7 +16,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
 
 const mockUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
 
-const mockServices = {} as AlertEpisodesKibanaServices;
+const mockServices = {} as React.ComponentProps<typeof EpisodesKpis>['services'];
 const mockFilterState: EpisodesFilterState = {};
 const mockTimeRange: TimeRange = { from: 'now-24h', to: 'now' };
 

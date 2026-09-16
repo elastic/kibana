@@ -10,14 +10,12 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
-import {
-  STREAMS_API_PRIVILEGES,
-  MIN_EXTRACTION_INTERVAL_HOURS,
-} from '../../../../../common/constants';
+import { MIN_EXTRACTION_INTERVAL_HOURS } from '../../../../../common/constants';
 
 const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
@@ -26,7 +24,7 @@ const putContinuousKiExtractionSettingsBodySchema = z.object({
   }),
 });
 
-export const putContinuousKIExtractionSettingsRoute = createServerRoute({
+const putContinuousKIExtractionSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
   options: {
     access: 'internal',
@@ -36,7 +34,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({

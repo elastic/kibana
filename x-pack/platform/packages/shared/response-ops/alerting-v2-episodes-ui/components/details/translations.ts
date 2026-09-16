@@ -93,18 +93,18 @@ export const FLYOUT_VIEW_DETAILS = i18n.translate(
   }
 );
 
+export const FLYOUT_TAKE_ACTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.takeAction',
+  {
+    defaultMessage: 'Take action',
+  }
+);
+
 export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.close', {
   defaultMessage: 'Close',
 });
 
 /** --- Header --- */
-export const HEADER_LOADING_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.header.loadingTitle',
-  {
-    defaultMessage: 'Loading…',
-  }
-);
-
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
   {
@@ -169,14 +169,6 @@ export const LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL = i18n.translate(
   }
 );
 
-/** --- Lifecycle heatmap section --- */
-export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.lifecycleHeatmapSection.loadError',
-  {
-    defaultMessage: 'Could not load episode lifecycle.',
-  }
-);
-
 /** --- Severity heatmap --- */
 export const SEVERITY_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
@@ -235,6 +227,14 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
+/** --- Timeline heatmaps section --- */
+export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
+  {
+    defaultMessage: 'Could not load episode timeline.',
+  }
+);
+
 /** --- Metadata details list --- */
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
@@ -274,7 +274,21 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
 export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
   {
-    defaultMessage: 'Tags',
+    defaultMessage: 'Alert tags',
+  }
+);
+
+export const METADATA_LIST_SOURCE_URL_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const METADATA_LIST_SOURCE_URL_LINK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLink',
+  {
+    defaultMessage: 'View in source system',
   }
 );
 

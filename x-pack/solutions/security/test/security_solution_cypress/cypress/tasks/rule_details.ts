@@ -7,12 +7,13 @@
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
+  EXCEPTION_ITEM_DELETE_CONFIRM_MODAL,
+  EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN,
   EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
 } from '../screens/exceptions';
@@ -156,6 +157,10 @@ export const removeException = () => {
   cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
 
   cy.get(REMOVE_EXCEPTION_BTN).click();
+
+  // Confirm deletion in the confirmation modal
+  cy.get(EXCEPTION_ITEM_DELETE_CONFIRM_MODAL).should('be.visible');
+  cy.get(EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN).click();
 };
 
 /**
@@ -179,10 +184,6 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
-};
-
-export const goBackToRulesTable = () => {
-  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

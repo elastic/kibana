@@ -8,7 +8,8 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core-capabilities-common",
-    "@kbn/core-chrome-app-menu-components",
+    "@kbn/app-menu",
+    "@kbn/ui-app-header",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-context",
     "@kbn/core-chrome-browser-context-mocks",

@@ -108,7 +108,7 @@ describe('complete', () => {
     });
 
     it('the observable errors out', async () => {
-      await expect(async () => await lastValueFrom(callComplete())).rejects.toThrowError(
+      await expect(async () => await lastValueFrom(callComplete())).rejects.toThrow(
         'Conversation not found'
       );
 

@@ -42,3 +42,10 @@ export const ASSIGNEES_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Assignee',
   }
 );
+
+export const RULE_TAGS_FIELD_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleTagsFieldLabel',
+  {
+    defaultMessage: 'Rule tags',
+  }
+);

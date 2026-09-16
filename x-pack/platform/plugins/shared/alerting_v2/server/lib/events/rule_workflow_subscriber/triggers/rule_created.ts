@@ -11,14 +11,16 @@ import {
   ruleCreatedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../../rule_event_publisher/events';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 import type { RuleWorkflowTriggerBinding } from './types';
 
 export { RuleCreatedTriggerId } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `rule.created` event to the `alerting.ruleCreated`
- * workflow trigger. The publisher already shapes the payload, so the
- * subscriber forwards it unchanged.
+ * workflow trigger. The internal event payload also carries the full domain
+ * rule; `toPayload` projects identity plus tags so the snapshot never reaches
+ * workflows.
  */
 export const ruleCreatedTrigger: RuleWorkflowTriggerBinding<
   RuleCreatedEvent,
@@ -27,5 +29,5 @@ export const ruleCreatedTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_CREATED_EVENT_TYPE,
   triggerId: RuleCreatedTriggerId,
   definition: ruleCreatedTriggerCommonDefinition,
-  toPayload: (event) => event.payload,
+  toPayload: toLifecycleWorkflowPayload,
 };

@@ -11,13 +11,20 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
+  /** Analysis duration as ES date math (`now-40m`). */
   lookback: string;
+  /** Outer date_histogram interval (`1m`, `5m`, …). Must be ≥ 1m. */
   bucketInterval: string;
   spaceId: string;
   ruleIds?: string[];
 }
 
-export type ChangePointTypeMap = Record<string, { p_value: number }>;
+/**
+ * Single-entry map of the detector's verdict, keyed by change type. `stationary`
+ * carries `{}`; the rest carry `p_value` and `change_point`. Empty when the rule
+ * had no verdict or the reader dropped an `indeterminable` one.
+ */
+export type ChangePointTypeMap = Record<string, { p_value?: number; change_point?: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;
@@ -52,6 +59,13 @@ export interface OccurrencesEsqlParams {
   esqlUnit: string;
   limit: number;
   spaceId: string;
+  /**
+   * Inclusive chart window as UTC ISO-8601 strings. Applied to source `bucket`
+   * (match minute), not write-time `@timestamp`. Strings (not `Date`) keep this
+   * boundary free of `toISOString` crashes if a caller omits the range.
+   */
+  rangeFromIso: string;
+  rangeToIso: string;
 }
 
 export interface ISignificantEventsAlertsReader {

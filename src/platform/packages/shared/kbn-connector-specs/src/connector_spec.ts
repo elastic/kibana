@@ -26,6 +26,8 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ConnectorSpecEvents } from './connector_spec_events';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -75,6 +77,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -136,6 +139,14 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+  /**
+   * Specs using this auth type reach the third party through the Elastic-hosted Relay rather than
+   * authenticating the axios client. Defaults to false.
+   */
+  usesRelayTransport?: boolean;
+  /** Kibana manages these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isKibanaManaged?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -213,6 +224,18 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
+ *
+ * - `read`    The action only reads data; no external state is modified.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
+ */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -228,14 +251,58 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory scope hint for the LLM/orchestration layer. See {@link ActionScope}. */
+  scope: ActionScope;
+}
+
+/**
+ * The slice of the Actions plugin's Relay client that action handlers use. Declared structurally so
+ * this package does not depend on x-pack; the concrete `RelayClient` satisfies it by shape.
+ */
+export interface RelayActionClient {
+  trigger(input: {
+    tenantKey: string;
+    channel: string;
+    message: string;
+    threadTs?: string;
+  }): Promise<{ ref: string; tenantKey: string }>;
+  /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
+  listBindings(
+    tenantKey: string,
+    options?: { cursor?: string; limit?: number }
+  ): Promise<{
+    bindings: Array<{
+      scope_id?: string;
+      display_name?: string;
+      visibility?: 'public' | 'private';
+    }>;
+    nextCursor?: string;
+  }>;
 }
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
+   * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
+   * configured.
+   */
+  relay?: RelayActionClient;
 }
 
 // ============================================================================
@@ -265,16 +332,10 @@ export interface Transformations {
 export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
- * Success = return data; failure = throw (mapped to error by the executor).
- *
- * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
- * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
- * return the legacy `{ ok, message }` shape. Once every handler follows the
- * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
  */
-export type ConnectorTestHandlerResult =
-  | Record<string, unknown>
-  | { ok: boolean; message?: string };
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
 
 export interface ConnectorTest {
   /**
@@ -283,8 +344,8 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Flag to opt-in for testing */
-  enabled?: boolean;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
+  enabled: boolean;
 }
 
 // ============================================================================
@@ -327,7 +388,12 @@ export interface ConnectorSpec {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
+
+  // Optional inbound events (`handleEvents` + definitions).
+  // Omit when the connector has no inbound surface. A connector may declare both
+  // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
+  events?: ConnectorSpecEvents;
 
   transformations?: Transformations;
 

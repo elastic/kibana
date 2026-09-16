@@ -10,12 +10,14 @@
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
+import { AppMenu } from './app_menu';
+import { Chrome } from './chrome';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
-import { DiscoverApp } from './discover_app';
+import { DiscoverApp } from './discover';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
@@ -39,11 +41,13 @@ import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export {
+  AppMenu,
   ContentListWrapper,
   DiscoverApp,
   FilterBar,
   DataGrid,
   DataViewsManagementPage,
+  LensApp,
   QueryBar,
   UnifiedTabs,
   ListingTable,
@@ -71,6 +75,8 @@ export interface PageObjects {
   maps: MapsPage;
   queryBar: QueryBar;
   renderable: RenderablePage;
+  chrome: Chrome;
+  appMenu: AppMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   lens: LensApp;
@@ -100,6 +106,8 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    chrome: createLazyPageObject(Chrome, fixtures.page),
+    appMenu: createLazyPageObject(AppMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),

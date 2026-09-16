@@ -60,7 +60,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const eqlOptions = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
   const { dataView, status } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indexPatternsLoading = useMemo(() => status !== 'ready', [status]);
 
   const initialState = useMemo(

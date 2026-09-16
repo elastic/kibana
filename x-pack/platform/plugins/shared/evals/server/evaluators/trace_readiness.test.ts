@@ -6,13 +6,20 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { awaitTraceReady } from './trace_readiness';
+import { awaitTraceReady, type AwaitTraceReadyOptions } from './trace_readiness';
 import * as evidenceServiceModule from './evidence/evidence_service';
 import { getInstrumentationProfile } from './evidence/resolve_instrumentation';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import type { EvidenceRound } from './evidence/types';
 
 jest.mock('./evidence/evidence_service');
+
+const FAST_BUDGET: AwaitTraceReadyOptions = {
+  retries: 6,
+  minTimeout: 1,
+  maxTimeout: 5,
+  factor: 1,
+};
 
 describe('awaitTraceReady', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
@@ -25,47 +32,131 @@ describe('awaitTraceReady', () => {
     runSearch: jest.fn(),
   };
   const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
+  const hasRootSpanMock = evidenceServiceModule.hasRootSpan as jest.Mock;
   const normalizeEvidenceMock = evidenceServiceModule.normalizeEvidence as jest.Mock;
   const probeProfilesMock = evidenceServiceModule.probeProfiles as jest.Mock;
 
+  const run = (profile: Parameters<typeof getInstrumentationProfile>[0] = 'elastic-inference') =>
+    awaitTraceReady(
+      traceAccessor,
+      getInstrumentationProfile(profile),
+      profile,
+      logger,
+      FAST_BUDGET
+    );
+
   beforeEach(() => {
     jest.clearAllMocks();
+    hasTraceDocumentsMock.mockResolvedValue(true);
+    hasRootSpanMock.mockResolvedValue(true);
   });
 
-  it('retries when docs exist but response is missing while other evidence is present', async () => {
-    hasTraceDocumentsMock.mockResolvedValue(true);
-    const partialRound: EvidenceRound = {
+  it('returns evidence once the response is stable across polls and the root span is indexed', async () => {
+    const readyRound: EvidenceRound = {
       input: { message: 'hello' },
+      response: { message: 'world' },
+      steps: [],
+    };
+    normalizeEvidenceMock.mockResolvedValue(readyRound);
+
+    await expect(run()).resolves.toEqual(readyRound);
+    // First poll seeds the stability baseline; the second confirms it and gates on root.
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
+    expect(hasRootSpanMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('waits for the final answer instead of grading an earlier intermediate turn', async () => {
+    const intermediate: EvidenceRound = {
+      input: { message: 'What element is gold?' },
+      response: { message: 'Let me look that up…' },
+      steps: [],
+    };
+    const final: EvidenceRound = {
+      ...intermediate,
+      response: { message: 'Gold is the element Au.' },
+    };
+    // poll 1 -> intermediate (baseline), poll 2 -> final (changed), poll 3 -> final (stable).
+    normalizeEvidenceMock
+      .mockResolvedValueOnce(intermediate)
+      .mockResolvedValueOnce(final)
+      .mockResolvedValue(final);
+
+    await expect(run()).resolves.toEqual(final);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not grade a stable intermediate response while the root span is still missing', async () => {
+    const intermediate: EvidenceRound = {
+      input: { message: 'What element is gold?' },
+      response: { message: 'Working on it…' },
+      steps: [],
+    };
+    const final: EvidenceRound = {
+      ...intermediate,
+      response: { message: 'Gold is the element Au.' },
+    };
+    // Intermediate is stable across polls 1-2, but the task is still running (no root),
+    // so it must be rejected; only the later stable final answer is accepted.
+    normalizeEvidenceMock
+      .mockResolvedValueOnce(intermediate)
+      .mockResolvedValueOnce(intermediate)
+      .mockResolvedValueOnce(final)
+      .mockResolvedValue(final);
+    hasRootSpanMock.mockResolvedValueOnce(false).mockResolvedValue(true);
+
+    await expect(run()).resolves.toEqual(final);
+    // root checked on the stable-intermediate poll (false) and again on the stable-final poll (true).
+    expect(hasRootSpanMock).toHaveBeenCalledTimes(2);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('grades best-effort and logs loudly when a partial trace never gets a root span', async () => {
+    const stableRound: EvidenceRound = {
+      input: { message: 'hello' },
+      response: { message: 'world' },
+      steps: [],
+    };
+    normalizeEvidenceMock.mockResolvedValue(stableRound);
+    hasRootSpanMock.mockResolvedValue(false);
+
+    await expect(run()).resolves.toEqual(stableRound);
+    expect(hasRootSpanMock).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
+  });
+
+  it('waits out partial indexing (auxiliary spans only) and grades once content resolves', async () => {
+    const empty: EvidenceRound = {
+      input: { message: '' },
       response: { message: '' },
       steps: [],
     };
-    const readyRound: EvidenceRound = {
-      ...partialRound,
+    const resolved: EvidenceRound = {
+      input: { message: 'hello' },
       response: { message: 'world' },
+      steps: [],
     };
-    normalizeEvidenceMock.mockResolvedValueOnce(partialRound).mockResolvedValueOnce(readyRound);
+    // polls 1-2: only auxiliary spans indexed, so evidence is unresolvable; poll 3 seeds the
+    // content baseline; poll 4 confirms it is stable and gates on the root span.
+    normalizeEvidenceMock
+      .mockResolvedValueOnce(empty)
+      .mockResolvedValueOnce(empty)
+      .mockResolvedValue(resolved);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('elastic-inference'),
-        'elastic-inference',
-        logger
-      )
-    ).resolves.toEqual(readyRound);
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
+    await expect(run()).resolves.toEqual(resolved);
+    // The unresolvable branch retried instead of aborting, so no probe and no degradation.
     expect(probeProfilesMock).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('fails fast without retries when docs exist but requested mapping does not resolve evidence', async () => {
-    hasTraceDocumentsMock.mockResolvedValueOnce(true);
-    normalizeEvidenceMock.mockResolvedValueOnce({
+  it('concludes "unresolvable" (with a probe) only after exhausting the budget', async () => {
+    normalizeEvidenceMock.mockResolvedValue({
       input: { message: '' },
       response: { message: '' },
       steps: [],
     });
-    probeProfilesMock.mockResolvedValueOnce([
+    probeProfilesMock.mockResolvedValue([
       {
         profile: 'elastic-inference',
         evidence: {
@@ -76,14 +167,7 @@ describe('awaitTraceReady', () => {
       },
     ]);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('otel-genai-attributes'),
-        'otel-genai-attributes',
-        logger
-      )
-    ).rejects.toEqual(
+    await expect(run('otel-genai-attributes')).rejects.toEqual(
       expect.objectContaining({
         name: 'TraceReadinessError',
         kind: 'unresolvable',
@@ -92,21 +176,16 @@ describe('awaitTraceReady', () => {
         ),
       })
     );
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes((FAST_BUDGET.retries ?? 0) + 1);
+    expect(probeProfilesMock).toHaveBeenCalledTimes(1);
+    expect(hasRootSpanMock).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('throws TraceReadinessError after retries when documents never appear', async () => {
     hasTraceDocumentsMock.mockResolvedValue(false);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('elastic-inference'),
-        'elastic-inference',
-        logger
-      )
-    ).rejects.toEqual(
+    await expect(run()).rejects.toEqual(
       expect.objectContaining({
         name: 'TraceReadinessError',
         kind: 'not_ready',
@@ -114,54 +193,23 @@ describe('awaitTraceReady', () => {
       })
     );
     expect(normalizeEvidenceMock).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
-  }, 15000);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 
   it('retries only while trace documents are still absent', async () => {
-    hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValue(true);
     const readyRound: EvidenceRound = {
       input: { message: 'hello' },
       response: { message: 'world' },
       steps: [],
     };
-    normalizeEvidenceMock.mockResolvedValueOnce(readyRound);
+    normalizeEvidenceMock.mockResolvedValue(readyRound);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('elastic-inference'),
-        'elastic-inference',
-        logger
-      )
-    ).resolves.toEqual(readyRound);
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalled();
-  });
-
-  it('returns ready when requested profile resolves agent response from existing docs', async () => {
-    hasTraceDocumentsMock.mockResolvedValueOnce(true);
-    const readyRound: EvidenceRound = {
-      input: { message: '' },
-      response: { message: 'Found via otel-genai-attributes' },
-      steps: [],
-    };
-    normalizeEvidenceMock.mockResolvedValueOnce(readyRound);
-
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('otel-genai-attributes'),
-        'otel-genai-attributes',
-        logger
-      )
-    ).resolves.toEqual(readyRound);
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
-    expect(probeProfilesMock).not.toHaveBeenCalled();
+    await expect(run()).resolves.toEqual(readyRound);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns partial round after retry exhaustion when response stays missing', async () => {
-    hasTraceDocumentsMock.mockResolvedValue(true);
+  it('returns a partial round best-effort when the response never resolves', async () => {
     const partialRound: EvidenceRound = {
       input: { message: 'hello' },
       response: { message: '' },
@@ -169,43 +217,21 @@ describe('awaitTraceReady', () => {
     };
     normalizeEvidenceMock.mockResolvedValue(partialRound);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('elastic-inference'),
-        'elastic-inference',
-        logger
-      )
-    ).resolves.toEqual(partialRound);
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
-    expect(probeProfilesMock).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
-  }, 15000);
+    await expect(run()).resolves.toEqual(partialRound);
+    // Response is empty, so the root gate is never reached.
+    expect(hasRootSpanMock).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('best-effort'));
+  });
 
-  it('returns ready for claude-code profile when claude-shaped evidence resolves', async () => {
-    hasTraceDocumentsMock.mockResolvedValueOnce(true);
-    const claudeReadyRound: EvidenceRound = {
-      input: { message: 'Find failed checkout requests.' },
-      response: { message: 'I found 14 failed checkout requests.' },
-      steps: [
-        {
-          tool_id: 'search_logs',
-          arguments: { query: 'service:checkout status:500' },
-          result: { count: 14 },
-        },
-      ],
+  it('grades stable, resolvable evidence for non-default profiles', async () => {
+    const readyRound: EvidenceRound = {
+      input: { message: '' },
+      response: { message: 'Found via otel-genai-attributes' },
+      steps: [],
     };
-    normalizeEvidenceMock.mockResolvedValueOnce(claudeReadyRound);
+    normalizeEvidenceMock.mockResolvedValue(readyRound);
 
-    await expect(
-      awaitTraceReady(
-        traceAccessor,
-        getInstrumentationProfile('claude-code'),
-        'claude-code',
-        logger
-      )
-    ).resolves.toEqual(claudeReadyRound);
-    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    await expect(run('otel-genai-attributes')).resolves.toEqual(readyRound);
     expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });

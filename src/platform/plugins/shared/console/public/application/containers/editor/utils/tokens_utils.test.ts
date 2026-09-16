@@ -212,6 +212,14 @@ describe('tokens_utils', () => {
         tokens: ['{'],
       },
       {
+        value: '{"test":1e-7,',
+        tokens: ['{'],
+      },
+      {
+        value: '{"test":1e+21,',
+        tokens: ['{'],
+      },
+      {
         value: '{"test":{},',
         tokens: ['{'],
       },
