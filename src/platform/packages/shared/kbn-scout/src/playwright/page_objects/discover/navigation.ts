@@ -252,41 +252,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await this.page.mouse.up();
   }
 
-  async clickAppMenuItem(
-    testId: string,
-    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
-  ) {
-    const item = this.page.testSubj.locator(testId);
-    if (!isInOverflowMenu && (await item.isVisible())) {
-      await item.click();
-      return;
-    }
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    const popover = this.page.testSubj.locator('app-menu-popover');
-
-    // Dismiss any stale popovers
-    if (await popover.isVisible()) {
-      await overflowButton.click();
-      await expect(popover).toBeHidden();
-    }
-
-    await expect(overflowButton).toBeVisible();
-    await overflowButton.click();
-
-    // If the click was consumed by closing a stale overlay, the popover won't be open.
-    // Click the overflow button again if needed.
-    const popoverOpened = await popover
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
-      await overflowButton.click();
-    }
-
-    await expect(popover).toBeVisible();
-    const menuItem = this.page.testSubj.locator(testId);
-    await expect(menuItem).toBeVisible();
-    await menuItem.click();
+  async clickAppMenuItem(testId: string) {
+    await this.appMenu.clickItem(testId);
   }
 
   private async dismissHoverOverlays() {
@@ -304,8 +271,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await expect(this.page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+  async clickNewSearch() {
+    await this.clickAppMenuItem('discoverNewButton');
     await this.dismissHoverOverlays();
     await this.waitUntilTabIsLoaded();
   }

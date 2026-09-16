@@ -9,9 +9,12 @@
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from '../internal_contracts';
+import type { WorkloadTypeRegistry } from '../workload_type_registry';
+import { createPluginScopedServiceAccounts } from './plugin_scoped_service_accounts';
 
 export const convertSecurityApi = (
-  privateApi: CoreSecurityDelegateContract
+  privateApi: CoreSecurityDelegateContract,
+  workloadTypes: WorkloadTypeRegistry
 ): InternalSecurityServiceStart => {
   return {
     authc: {
@@ -20,6 +23,15 @@ export const convertSecurityApi = (
       apiKeys: privateApi.authc.apiKeys,
     },
     audit: privateApi.audit,
-    serviceAccounts: privateApi.serviceAccounts,
+    // The delegate's workload methods are keyed by plugin id, which only the plugin context knows.
+    // They are therefore not exposed directly: each plugin gets a contract scoped to itself.
+    serviceAccounts: {
+      asScopedToPlugin: (pluginId) =>
+        createPluginScopedServiceAccounts({
+          pluginId,
+          delegate: privateApi.serviceAccounts,
+          workloadTypes,
+        }),
+    },
   };
 };
