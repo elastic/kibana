@@ -756,14 +756,16 @@ export class SandboxConnectionManager {
     this.restoreCallback = cb;
   }
 
-  /** If the sandbox returns UNAVAILABLE (pod self-exited), clear initialized so the
-   *  next call triggers a fresh restore + manifest write before re-allocating via sandbox-api. */
+  /** On UNAVAILABLE (pod self-exited), clear init state so the next call re-runs restore + manifest write.
+   *  Only clears if the init generation this call ran under is still current, so a late failure
+   *  from a dead pod cannot evict the fresh init a later call already installed. */
   private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
+    const generation = this.initialized.get(conversationId);
     try {
       return await fn();
     } catch (err) {
       const code: number | undefined = err?.code;
-      if (code === 14 /* UNAVAILABLE */) {
+      if (code === 14 /* UNAVAILABLE */ && this.initialized.get(conversationId) === generation) {
         this.initialized.delete(conversationId);
         this.lastAllowedIds.delete(conversationId);
         this.logger.warn(
@@ -797,10 +799,14 @@ export class SandboxConnectionManager {
     const existing = this.initialized.get(conversationId);
     if (existing) return existing;
 
-    const promise = this.initializeConversation(conversationId, callContext).catch((err) => {
-      this.initialized.delete(conversationId);
-      throw err;
-    });
+    const promise: Promise<void> = this.initializeConversation(conversationId, callContext).catch(
+      (err) => {
+        if (this.initialized.get(conversationId) === promise) {
+          this.initialized.delete(conversationId);
+        }
+        throw err;
+      }
+    );
     this.initialized.set(conversationId, promise);
     return promise;
   }
