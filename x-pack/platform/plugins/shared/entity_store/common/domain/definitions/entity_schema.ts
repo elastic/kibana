@@ -208,11 +208,11 @@ export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
 
 /**
- * A definition resolved for an extraction mode, carrying the predicate that selects which logs that
- * mode handles. Derived from `priorityExtractionGate` on lookup rather than authored, so it is kept
- * out of `entitySchema`. Absent means every document passing `documentsFilter` is scanned.
+ * A definition resolved for an extraction mode. `priorityExtractionGate` here is the active gate
+ * for the resolved mode - it shadows the declared field with the computed value (complement for
+ * non-priority). Absent means every document passing `documentsFilter` is scanned.
  */
-export type GatedEntityDefinition<T = EntityDefinition> = T & { extractionGate?: Condition };
+export type GatedEntityDefinition<T = EntityDefinition> = T & { priorityExtractionGate?: Condition };
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;

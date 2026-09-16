@@ -79,9 +79,9 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  describe('single variant guard: the process split must not reach the single process', () => {
+  describe('single-mode guard: the process split must not reach the single process', () => {
     it.each(Object.values(EntityType.enum))(
-      '%s: the single variant renders no extraction gate',
+      '%s: single mode renders no extraction gate',
       (type) => {
         const query = buildLogsExtractionEsqlQuery({
           indexPatterns: ['test-index-*'],
@@ -91,7 +91,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
           fromDateISO: '2022-01-01T00:00:00.000Z',
           toDateISO: '2022-01-01T23:59:59.999Z',
         });
-        // The gate is the only clause the variants add to the source WHERE, so an unchanged
+        // The gate is the only clause the dual-process modes add to the source WHERE, so an unchanged
         // source clause is what keeps the single process byte-identical.
         const sourceClause = query.split('| EVAL')[0];
         expect(sourceClause).not.toContain('event.kind');
@@ -99,7 +99,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
     );
   });
 
-  describe('user extraction variants', () => {
+  describe('user extraction modes', () => {
     const buildForMode = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
       buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
@@ -132,7 +132,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
       );
     });
 
-    it('both variants differ from single only in the source WHERE clause', () => {
+    it('both modes differ from single only in the source WHERE clause', () => {
       const single = buildForMode('single');
       const afterSourceClause = (query: string) => query.slice(sourceClauseOf(query).length);
 
