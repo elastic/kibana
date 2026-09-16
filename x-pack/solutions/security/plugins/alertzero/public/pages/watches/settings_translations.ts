@@ -682,6 +682,23 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 };
 
 /* -------------------------------------------------------------------------- */
+/* Alert Triage Worker extras                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
+  { defaultMessage: 'Minimum confidence score' }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
+  {
+    defaultMessage:
+      'Alerts scored at or above this threshold are automatically closed. Lower values close more alerts; higher values are more conservative.',
+  }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */
 /* -------------------------------------------------------------------------- */
 

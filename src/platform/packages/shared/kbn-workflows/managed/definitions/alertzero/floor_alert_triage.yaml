@@ -18,10 +18,9 @@ steps:
   - name: triage_alerts
     type: ai.agent
     agent-id: alertzero-thin-agent
-    # INVARIANT: exactly one of these renders non-empty at execution time. connector_id is the
-    # standalone path (uiSettings); AlertZero Workers pass connector_id_by_feature instead and
-    # leave connector_id empty, so the model comes from Model Management. Populating BOTH is a
-    # validation error at execution time — do not set connector_id_by_feature on the standalone path.
+    # Model comes from Model Management (feature 'alertzero_alert_triage') rather than uiSettings.
+    # Do NOT add a connector-id key here — the three connector params are mutually exclusive and
+    # populating both is a runtime validation error.
     connector-id-by-feature: alertzero_alert_triage
     # LLM spend attribution — plugin-id is a free-form telemetry label (no registry validation).
     plugin-id: alertzero_alert_triage
