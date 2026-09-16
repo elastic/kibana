@@ -11,8 +11,6 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
-  getWorkerExtrasFields,
-  workerOwnsSchedule,
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
@@ -20,16 +18,21 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 
-/**
- * Capability membership is READ OFF THE SCHEMA rather than restated here
- * (worker-settings-page-decisions-3, item 14). A parallel list in the test would
- * re-introduce exactly the drift the contract consistency check exists to prevent.
- */
-const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter((id) => !workerOwnsSchedule(id));
+const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
 
-const NO_ANALYSIS_WINDOW_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
-  (id) => !getWorkerExtrasFields(id).includes('analysisWindowDays')
+/** Every other Worker is alert- or event-triggered and owns no schedule. */
+const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => !SCHEDULED_WORKER_IDS.includes(id)
 );
+
+const expectInvalid = (
+  applied: ReturnType<ReturnType<typeof createWorkerSettingsRegistration>['applyPatch']>
+): string => {
+  if (!('invalid' in applied)) {
+    throw new Error('Expected the patch to be rejected');
+  }
+  return applied.invalid;
+};
 
 describe('createWorkerSettingsRegistration', () => {
   it.each([...SYSTEM_SECURITY_WORKER_IDS])(
@@ -76,38 +79,52 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('defaults the interval for an install that predates the setting', () => {
-      // scheduleInterval is additive, so an existing install simply has no such key.
-      const { values } = registration.migrate({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-      });
-
-      expect(values).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        scheduleInterval: '24h',
-      });
+    it('rejects stored values missing the declared schedule interval', () => {
+      // No defaulting of older development state: the document has to be reset.
+      expect(() =>
+        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
+      ).toThrow(/scheduleInterval/);
     });
 
-    it('preserves a persisted interval', () => {
+    it('reads a persisted interval back as stored', () => {
       expect(
-        registration.migrate({
+        registration.toSettings({
           settingsVersion: 1,
           autonomyLevel: 'manual',
           scheduleInterval: '30m',
-        }).values
-      ).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        scheduleInterval: '30m',
-      });
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '30m' });
     });
 
     it('throws on an unrecognised settings version', () => {
-      expect(() => registration.migrate({ settingsVersion: 3, autonomyLevel: 'manual' })).toThrow(
-        /Unsupported settings version/
-      );
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 3,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/Unsupported settings version/);
+    });
+
+    it('throws on a stored autonomy level outside the shared scale', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'yolo',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/settings are invalid: autonomy/);
+    });
+
+    it('rejects unsupported stored fields by name', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+          candidateLimit: 5,
+        })
+      ).toThrow(/unsupported fields: candidateLimit/);
     });
 
     it.each(['1m', '2h', '7d'])('applies a %s interval patch', (scheduleInterval) => {
@@ -143,18 +160,17 @@ describe('createWorkerSettingsRegistration', () => {
     });
   });
 
-  describe('schedule interval — detection rule tuning (opted in)', () => {
+  describe('Worker-specific settings — detection rule tuning', () => {
     const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { analysisWindowDays: 14 },
+    };
 
-    it('defaults to 2h and projects it', () => {
-      expect(registration.createDefaultValues()).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        scheduleInterval: '2h',
-        analysisWindowDays: 14,
-      });
-      // The public projection nests worker-owned fields under settings.extras (item 5);
-      // internal template values stay flat because the workflow engine reads them that way.
+    it('stores extras nested and projects them under settings.extras', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
@@ -163,96 +179,90 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('applies an interval patch', () => {
-      const applied = registration.applyPatch(registration.createDefaultValues(), {
-        scheduleInterval: '6h',
-      });
-
-      expect(applied).toEqual({
-        values: {
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          scheduleInterval: '6h',
-          analysisWindowDays: 14,
-        },
-      });
-    });
-
-    it('defaults a missing analysis window and projects it', () => {
-      const { values } = registration.migrate({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        scheduleInterval: '2h',
-      });
-
-      expect(values).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        scheduleInterval: '2h',
-        analysisWindowDays: 14,
-      });
-    });
-
-    it('preserves omitted fields on a custom-only patch', () => {
-      const applied = registration.applyPatch(
-        {
-          settingsVersion: 1,
-          autonomyLevel: 'supervised',
-          scheduleInterval: '6h',
-          analysisWindowDays: 14,
-        },
-        { extras: { analysisWindowDays: 7 } }
-      );
-
-      expect(applied).toEqual({
-        values: {
-          settingsVersion: 1,
-          autonomyLevel: 'supervised',
-          scheduleInterval: '6h',
-          analysisWindowDays: 7,
-        },
-      });
-    });
-
-    it.each([7.5, 0, 31])('rejects analysis window %s', (analysisWindowDays) => {
+    it('rejects stored values missing extras', () => {
       expect(() =>
-        registration.migrate({
+        registration.toSettings({
           settingsVersion: 1,
-          autonomyLevel: 'manual',
+          autonomyLevel: 'assisted',
           scheduleInterval: '2h',
-          analysisWindowDays,
         })
-      ).toThrow(/invalid analysis window/);
+      ).toThrow(/extras/);
+    });
+
+    it('rejects stored extras missing a required field, naming it', () => {
+      // No default repair: a document written before the field existed has to be reset.
+      expect(() => registration.toSettings({ ...storedDefaults, extras: {} })).toThrow(
+        /extras\.analysisWindowDays/
+      );
+    });
+
+    it('keeps extras when a shared-field patch omits them', () => {
+      expect(registration.applyPatch(storedDefaults, { scheduleInterval: '6h' })).toEqual({
+        values: { ...storedDefaults, scheduleInterval: '6h' },
+      });
+    });
+
+    it('replaces extras whole when the patch supplies them', () => {
+      expect(
+        registration.applyPatch(
+          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { extras: { analysisWindowDays: 7 } }
+        )
+      ).toEqual({
+        values: {
+          ...storedDefaults,
+          autonomyLevel: 'supervised',
+          extras: { analysisWindowDays: 7 },
+        },
+      });
+    });
+
+    it('rejects an extras replacement missing a required field, naming it', () => {
+      expect(expectInvalid(registration.applyPatch(storedDefaults, { extras: {} }))).toContain(
+        'extras.analysisWindowDays'
+      );
+    });
+
+    it('rejects an unknown extras key, naming it', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(storedDefaults, {
+            extras: { analysisWindowDays: 14, previewDepth: 3 },
+          })
+        )
+      ).toMatch(/extras.*previewDepth/);
+    });
+
+    it.each([7.5, 0, 31])('rejects a stored analysis window of %s', (analysisWindowDays) => {
+      expect(() =>
+        registration.toSettings({ ...storedDefaults, extras: { analysisWindowDays } })
+      ).toThrow(/extras\.analysisWindowDays/);
     });
   });
 
-  describe('analysis window — Workers that do not own it', () => {
-    it.each(NO_ANALYSIS_WINDOW_WORKER_IDS)('%s rejects an analysis window patch', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
+  describe('Workers that declare no extras', () => {
+    it.each([...UNSCHEDULED_WORKER_IDS, AD_WORKER_ID])(
+      "%s rejects another Worker's extras field, naming it",
+      (workerId) => {
+        const registration = createWorkerSettingsRegistration(workerId);
 
-      expect(
-        registration.applyPatch(registration.createDefaultValues(), {
-          extras: { analysisWindowDays: 7 },
-        })
-      ).toEqual({ rejected: 'an analysis window' });
-    });
-
-    it('rejects an analysis window on Attack Discovery', () => {
-      const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
-
-      expect(
-        registration.applyPatch(registration.createDefaultValues(), {
-          extras: { analysisWindowDays: 7 },
-        })
-      ).toEqual({ rejected: 'an analysis window' });
-    });
+        expect(
+          expectInvalid(
+            registration.applyPatch(registration.createDefaultValues(), {
+              extras: { analysisWindowDays: 7 },
+            })
+          )
+        ).toMatch(/extras/);
+      }
+    );
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {
-    it.each(UNSCHEDULED_WORKER_IDS)('%s default values omit the interval', (workerId) => {
-      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).not.toHaveProperty(
-        'scheduleInterval'
-      );
+    it.each(UNSCHEDULED_WORKER_IDS)('%s default values are unchanged', (workerId) => {
+      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+      });
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s omits the interval from public settings', (workerId) => {
@@ -260,23 +270,35 @@ describe('createWorkerSettingsRegistration', () => {
       const projected = registration.toSettings(registration.createDefaultValues());
 
       expect(projected).not.toHaveProperty('scheduleInterval');
+      expect(projected).not.toHaveProperty('extras');
     });
 
-    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an interval patch', (workerId) => {
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects a stored schedule interval by name', (workerId) => {
+      expect(() =>
+        createWorkerSettingsRegistration(workerId).toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '30m',
+        })
+      ).toThrow(/scheduleInterval/);
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an interval patch, naming it', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
 
       expect(
-        registration.applyPatch(registration.createDefaultValues(), { scheduleInterval: '30m' })
-      ).toEqual({ rejected: 'a schedule interval' });
+        expectInvalid(
+          registration.applyPatch(registration.createDefaultValues(), { scheduleInterval: '30m' })
+        )
+      ).toContain('scheduleInterval');
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
-      const defaults = registration.createDefaultValues();
 
-      expect(registration.applyPatch(defaults, { autonomy: 'assisted' })).toEqual({
-        values: { ...defaults, autonomyLevel: 'assisted' },
-      });
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
+      ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'assisted' } });
     });
   });
 });

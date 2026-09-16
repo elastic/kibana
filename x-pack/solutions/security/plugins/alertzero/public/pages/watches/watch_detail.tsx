@@ -20,9 +20,9 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
-import { useWorkers, useUpdateWorker } from '../../hooks/use_workers_api';
-import { useWorkerSettingsDrafts } from '../../hooks/use_worker_settings_drafts';
+import { useWorkers } from '../../hooks/use_workers_api';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import {
@@ -34,6 +34,7 @@ import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
 const RAIL_NARROW_BREAKPOINT_PX = 1020;
+
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
@@ -45,52 +46,35 @@ export const WatchDetailPage: React.FC = () => {
     error: workersError,
     refetch: refetchWorkers,
   } = useWorkers();
-  const { mutateAsync: updateWorker } = useUpdateWorker();
+
+  const watch = data?.watch;
+  useAlertZeroDocTitle(watch?.name ?? i18n.PAGE_TITLE);
 
   const members = useMemo(
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
     [workersData?.workers, watchId]
   );
+  const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
+    useWatchSettingsDraft(members);
+  const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
 
-  const {
-    getDraft,
-    updateSettingsDraft,
-    updateEnabledDraft,
-    discardDraft,
-    isDirty,
-    buildSavePatch,
-    revisions,
-  } = useWorkerSettingsDrafts(members);
-
-  // Save dirty Workers one by one (doc item 10): a failed Worker keeps its draft and its
-  // error; already-saved Workers stay saved. Save-all iterates in listed order.
-  const [savingWorkerIds, setSavingWorkerIds] = useState<Set<string>>(() => new Set());
-
-  const handleSaveWorker = useCallback(
-    async (workerId: string) => {
-      const patch = buildSavePatch(workerId);
-      if (patch === undefined) return;
-      setSavingWorkerIds((current) => new Set(current).add(workerId));
-      try {
-        await updateWorker({
-          workerId,
-          patch: { ...patch, settingsRevision: revisions[workerId] ?? null },
-        });
-      } catch {
-        // The mutation error surfaces via the toast in use_workers_api; the draft stays dirty.
-      } finally {
-        setSavingWorkerIds((current) => {
-          const next = new Set(current);
-          next.delete(workerId);
-          return next;
-        });
+  const onSave = useCallback(async () => {
+    try {
+      await save();
+      setSaveBlockedByInvalidDraft(false);
+    } catch (saveError) {
+      if (saveError instanceof Error && saveError.message === 'invalid') {
+        setSaveBlockedByInvalidDraft(true);
+        return;
       }
-    },
-    [buildSavePatch, revisions, updateWorker]
-  );
+      throw saveError;
+    }
+  }, [save]);
 
-  const watch = data?.watch;
-  useAlertZeroDocTitle(watch?.name ?? i18n.PAGE_TITLE);
+  const onDiscard = useCallback(() => {
+    discard();
+    setSaveBlockedByInvalidDraft(false);
+  }, [discard]);
 
   const workerIds = useMemo(() => members.map((worker) => worker.id), [members]);
   const isMultiWorker = members.length > 1;
@@ -226,31 +210,32 @@ export const WatchDetailPage: React.FC = () => {
     return (
       <div css={layoutStyles.twoColumn}>
         <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-          {members.map((worker) => (
-            <EuiFlexItem key={worker.id} grow={false}>
-              <section
-                id={workerSectionDomId(worker.id)}
-                css={layoutStyles.workerSection}
-                data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-              >
-                <WorkerSettingsPanel
-                  worker={worker}
-                  isAccordion={isMultiWorker}
-                  isExpanded={!collapsedWorkerIds.has(worker.id)}
-                  onToggle={handleToggleWorker}
-                  draft={getDraft(worker.id)}
-                  isDirty={isDirty(worker.id)}
-                  isSaving={savingWorkerIds.has(worker.id)}
-                  onDraftSettingsChange={(patch) => updateSettingsDraft(worker.id, patch)}
-                  onDraftEnabledChange={(enabled) => updateEnabledDraft(worker.id, enabled)}
-                  onSave={() => {
-                    void handleSaveWorker(worker.id);
-                  }}
-                  onDiscard={() => discardDraft(worker.id)}
-                />
-              </section>
-            </EuiFlexItem>
-          ))}
+          {members.map((worker) => {
+            const draft = resolve(worker);
+            return (
+              <EuiFlexItem key={worker.id} grow={false}>
+                <section
+                  id={workerSectionDomId(worker.id)}
+                  css={layoutStyles.workerSection}
+                  data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
+                >
+                  <WorkerSettingsPanel
+                    worker={worker}
+                    isAccordion={isMultiWorker}
+                    isExpanded={!collapsedWorkerIds.has(worker.id)}
+                    onToggle={handleToggleWorker}
+                    enabled={draft.enabled}
+                    settings={draft.settings}
+                    error={draft.error}
+                    settingsLocked={worker.state === 'unavailable'}
+                    isSaving={isSaving}
+                    onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                    onSettingsChange={(patch) => updateSettings(worker, patch)}
+                  />
+                </section>
+              </EuiFlexItem>
+            );
+          })}
         </EuiFlexGroup>
         <div css={layoutStyles.railColumn}>
           <WatchWorkersSummaryRail workers={members} activeWorkerId={effectiveActiveWorkerId} />
@@ -262,6 +247,40 @@ export const WatchDetailPage: React.FC = () => {
   return (
     <WatchesSectionLayout active={watchId} title={watch.name}>
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            {saveBlockedByInvalidDraft ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+                  <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onDiscard}
+                disabled={!isDirty || isSaving}
+                data-test-subj="alertZeroWatchSettingsDiscard"
+              >
+                {settingsI18n.DISCARD_WATCH_SETTINGS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onSave}
+                // A failed reload leaves stale Workers in the cache; do not write against them
+                // until Retry in the load-error prompt has succeeded.
+                disabled={!isDirty || isSaving || Boolean(workersError)}
+                isLoading={isSaving}
+                data-test-subj="alertZeroWatchSettingsSave"
+              >
+                {settingsI18n.SAVE_WATCH_SETTINGS}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
         {intro ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">

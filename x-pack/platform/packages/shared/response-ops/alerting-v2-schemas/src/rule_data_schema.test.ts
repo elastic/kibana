@@ -6,6 +6,7 @@
  */
 
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { z } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -18,6 +19,8 @@ import {
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
 } from './rule_data_schema';
@@ -1587,6 +1590,27 @@ describe('updateRuleBodySchema', () => {
   it('rejects a version longer than 256 characters', () => {
     expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
   });
+
+  it('documents PATCH omission for time_field, recovery_strategy, and no_data_strategy', () => {
+    const json = z.toJSONSchema(updateRuleBodySchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as {
+      properties?: Record<string, { description?: string }>;
+    };
+
+    expect({
+      time_field: json.properties?.time_field?.description,
+      recovery_strategy: json.properties?.recovery_strategy?.description,
+      no_data_strategy: json.properties?.no_data_strategy?.description,
+    }).toMatchInlineSnapshot(`
+      Object {
+        "no_data_strategy": "How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to \`null\` to clear it (those runs are then ignored). If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
+        "recovery_strategy": "The condition that marks an alert recovered. If omitted, the existing value is kept. Set to \`null\` to clear it (recovery is then disabled). Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. With \`none\`, the alert stays \`active\`, even after the breach query stops returning matches. \`state_transition.recovering_count\` and \`recovering_timeframe\` require an explicit \`recovery_strategy\` other than \`none\`.",
+        "time_field": "Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.",
+      }
+    `);
+  });
 });
 
 /**
@@ -1710,6 +1734,117 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('bulkCreateRulesRequestSchema', () => {
+  const validItem = {
+    kind: 'alert',
+    metadata: { name: 'test rule' },
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  };
+
+  it('accepts a single item and defaults enabled to true', () => {
+    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0].enabled).toBe(true);
+    expect(result.rules[0].id).toBeUndefined();
+  });
+
+  it('accepts client-supplied id and enabled: false', () => {
+    const result = bulkCreateRulesRequestSchema.parse({
+      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+    });
+    expect(result.rules[0].id).toBe('rule-1');
+    expect(result.rules[0].enabled).toBe(false);
+  });
+
+  it('accepts up to MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+  });
+
+  it('rejects an empty rules array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS items', () => {
+    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+      ...validItem,
+      metadata: { name: `rule-${i}` },
+    }));
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+  });
+
+  it('rejects duplicate client-supplied ids', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [
+          { ...validItem, id: 'same-id' },
+          { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+  });
+
+  it('rejects an item that fails create-rule refinements', () => {
+    expect(() =>
+      bulkCreateRulesRequestSchema.parse({
+        rules: [{ ...validItem, kind: 'signal', recovery_strategy: 'no_breach' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('bulkCreateRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r', version: 1 },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts created rules and an empty errors array', () => {
+    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts per-item errors without created rules', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      rules: [],
+      errors: [
+        {
+          id: 'rule-1',
+          error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
+        },
+      ],
+    });
+    expect(result.rules).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
   });
 });
 

@@ -23,7 +23,8 @@ interface ExpectedWorkerSettings {
   settingsVersion: number;
   /** Present only for schedule-driven Workers. */
   scheduleInterval?: string;
-  analysisWindowDays?: number;
+  /** Present only for Workers with Watch-owned settings. */
+  extras?: Record<string, unknown>;
   triggerTypes: string[];
 }
 
@@ -39,12 +40,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     scheduleInterval: '24h',
     triggerTypes: ['scheduled'],
   },
-  'system-security-dark-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
-    analysisWindowDays: 14,
+    extras: { analysisWindowDays: 14 },
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
@@ -89,9 +90,7 @@ describe('workerRegistry', () => {
           ...(expected.scheduleInterval === undefined
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
-          ...(expected.analysisWindowDays === undefined
-            ? {}
-            : { analysisWindowDays: expected.analysisWindowDays }),
+          ...(expected.extras === undefined ? {} : { extras: expected.extras }),
         })
       );
 

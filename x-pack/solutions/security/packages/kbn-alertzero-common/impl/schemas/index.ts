@@ -37,17 +37,18 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
-  AnalysisWindowDays,
-  AlertTriageWorkerSettings,
-  RuleTuningWorkerSettings,
-  ScheduledWorkerSettings,
-  SharedOnlyWorkerSettings,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
   WorkerSettingsWrite,
 } from './components/watch_settings.gen';
+
+export {
+  AnalysisWindowDays,
+  RuleTuningWorkerExtras,
+} from './components/detection_watch_settings.gen';
 
 export {
   TemplateId,

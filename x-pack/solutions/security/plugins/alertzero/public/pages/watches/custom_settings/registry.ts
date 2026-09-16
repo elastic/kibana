@@ -5,53 +5,19 @@
  * 2.0.
  */
 
-import {
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WORKER_CATALOG,
-  getWorkerCustomSettingFields,
-} from '@kbn/alertzero-common';
-import { DetectionWatchSettings } from './detection_watch_settings';
-import type { WatchCustomSettingsComponent } from './types';
-
-export const WATCH_CUSTOM_SETTINGS_COMPONENTS: Partial<
-  Record<string, WatchCustomSettingsComponent>
-> = {
-  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: DetectionWatchSettings,
-};
-
-export const getWatchCustomSettingsComponent = (
-  watchId: string
-): WatchCustomSettingsComponent | undefined => WATCH_CUSTOM_SETTINGS_COMPONENTS[watchId];
+import { SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID } from '@kbn/alertzero-common';
+import { RuleTuningSettings } from './rule_tuning/rule_tuning_settings';
+import type { WorkerCustomSettingsComponent } from './types';
 
 /**
- * Fails AlertZero application loading when a Worker declares custom fields that no Watch-owned
- * component covers. Shared-only Workers need no component. This is a browser-load check, not a
- * Kibana server-startup failure.
+ * Watch-owned settings components by Worker id. A Worker without an entry renders only the shared
+ * controls. Whether a Worker's declared `extras` has a matching control here is the Watch team's
+ * responsibility, guarded by its component tests and review.
  */
-export const assertWatchCustomSettingsComplete = (): void => {
-  const missing: string[] = [];
-
-  for (const worker of SYSTEM_SECURITY_WORKER_CATALOG) {
-    const required = getWorkerCustomSettingFields(worker.id);
-    if (required.length === 0) {
-      continue;
-    }
-
-    const component = WATCH_CUSTOM_SETTINGS_COMPONENTS[worker.watchId];
-    const covered = component?.coveredFields[worker.id] ?? [];
-    const uncovered = required.filter((field) => !covered.includes(field));
-    if (!component || uncovered.length > 0) {
-      missing.push(
-        `${worker.id} (${uncovered.join(', ') || required.join(', ')}) on watch ${worker.watchId}`
-      );
-    }
-  }
-
-  if (missing.length > 0) {
-    throw new Error(
-      `AlertZero Watch settings are incomplete; declared custom fields have no control: ${missing.join(
-        '; '
-      )}`
-    );
-  }
+const WORKER_CUSTOM_SETTINGS_COMPONENTS: Partial<Record<string, WorkerCustomSettingsComponent>> = {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: RuleTuningSettings,
 };
+
+export const getWorkerCustomSettingsComponent = (
+  workerId: string
+): WorkerCustomSettingsComponent | undefined => WORKER_CUSTOM_SETTINGS_COMPONENTS[workerId];

@@ -15,7 +15,6 @@ import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
 import { AppChromeLayout } from './components/app_chrome';
 import type { AlertZeroClientConfig, AlertZeroStartDependencies } from './types';
 import { AlertZeroRoutes } from './routes';
-import { assertWatchCustomSettingsComplete } from './pages/watches/custom_settings/registry';
 
 interface RenderAppParams {
   coreStart: CoreStart;
@@ -32,7 +31,6 @@ const rootStyle: React.CSSProperties = {
 };
 
 export const renderApp = ({ coreStart, startDeps, params, config }: RenderAppParams) => {
-  assertWatchCustomSettingsComplete();
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
   const queryClient = new QueryClient({

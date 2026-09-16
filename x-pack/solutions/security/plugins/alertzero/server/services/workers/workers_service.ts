@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
-  getAllowedAutonomyLevels,
   touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
@@ -45,29 +45,18 @@ const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYa
   return null;
 };
 
-const templateValueEqual = (left: unknown, right: unknown): boolean => {
-  if (left === right) {
-    return true;
-  }
-  if (typeof left !== 'object' || typeof right !== 'object' || left === null || right === null) {
-    return false;
-  }
-  const leftRecord = left as Record<string, unknown>;
-  const rightRecord = right as Record<string, unknown>;
-  return Object.keys(rightRecord).every(
-    (key) => Object.hasOwn(leftRecord, key) && templateValueEqual(leftRecord[key], rightRecord[key])
-  );
-};
-
 const templateValuesEqual = (
   left: Record<string, unknown> | null,
   right: Record<string, unknown>
-): boolean => left != null && templateValueEqual(left, right);
+): boolean =>
+  left != null &&
+  Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
@@ -165,17 +154,7 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
-    // worker-settings-page-decisions-3, item 15: the revision guard covers ALL user-visible
-    // state that can race — settings AND the enabled toggle. An enabled-only patch on an already
-    // installed Worker must carry settingsRevision, because toggling enabled is a concurrent-write
-    // surface too. The exception is the FIRST enable of a Worker that has no document yet: there is
-    // no persisted revision to conflict with, so the guard is vacuous and would only force callers
-    // to send a meaningless `settingsRevision: null`. Settings writes always require the revision
-    // regardless of install state. This is the explicit decision the doc asks to record at the check.
-    const revisionGuardApplies =
-      touchesSettings || (patch.enabled !== undefined && status.installed);
-
-    if (revisionGuardApplies) {
+    if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
       }
@@ -187,12 +166,10 @@ export class WorkersService {
       if (patch.settingsRevision !== (state?.documentVersion ?? null)) {
         return { outcome: 'conflict' };
       }
-      const currentValues = state?.templateValues
-        ? registration.settings.migrate(state.templateValues).values
-        : registration.settings.createDefaultValues();
+      const currentValues = state?.templateValues ?? registration.settings.createDefaultValues();
       const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
-      if ('rejected' in applied) {
-        return { outcome: 'rejected', what: applied.rejected };
+      if ('invalid' in applied) {
+        return { outcome: 'invalid', message: applied.invalid };
       }
 
       await installRegisteredWorker(managedWorkflows, registration, {
@@ -269,7 +246,8 @@ export class WorkersService {
     let enabled = false;
     let lastRun: string | null = null;
     let settingsRevision: number | null = null;
-    let values = registration.settings.createDefaultValues();
+    // Defaults stand in for an uninstalled Worker and for one whose stored settings cannot be read.
+    let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
 
@@ -280,8 +258,9 @@ export class WorkersService {
         if (!state?.templateValues) {
           settingsUnavailable = true;
         } else {
+          // Parse before taking the revision so an unreadable document reports revision null.
+          settings = registration.settings.toSettings(state.templateValues);
           settingsRevision = state.documentVersion ?? null;
-          values = registration.settings.migrate(state.templateValues).values;
         }
       } catch (error) {
         settingsUnavailable = true;
@@ -324,8 +303,7 @@ export class WorkersService {
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
-      settings: registration.settings.toSettings(values),
-      allowedAutonomyLevels: [...getAllowedAutonomyLevels(registration.id)],
+      settings,
       settingsRevision,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };

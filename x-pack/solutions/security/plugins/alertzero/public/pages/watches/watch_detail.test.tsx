@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -23,6 +23,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
+import * as settingsI18n from './settings_translations';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
@@ -42,20 +43,6 @@ const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
 
-// jsdom ships neither IntersectionObserver nor scrollIntoView; the two-column layout's scroll-spy
-// and rail navigation depend on both.
-class IntersectionObserverMock {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-  takeRecords = jest.fn(() => []);
-  root = null;
-  rootMargin = '';
-  thresholds: number[] = [];
-}
-
-global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
-
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
 ): Worker => ({
@@ -63,7 +50,6 @@ const createWorker = (
   lastRun: null,
   state: 'paused',
   settingsRevision: null,
-  allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
@@ -76,10 +62,6 @@ const floorWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
     name: 'Alert Triage',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
-    settings: {
-      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-      autonomy: 'manual',
-    },
   }),
   createWorker({
     id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -94,10 +76,10 @@ const floorWorkers: Worker[] = [
   }),
 ];
 
-const darkWorker = createWorker({
-  id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+const huntWorker = createWorker({
+  id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
-  watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
+  watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
 });
 
 const detectionWorkers: Worker[] = [
@@ -150,13 +132,13 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    window.HTMLElement.prototype.scrollIntoView = jest.fn();
   });
 
-  it('shows Floor Workers with per-Worker enablement and autonomy, and the summary rail for multi-Worker Watches', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, darkWorker]);
+  it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, huntWorker]);
 
-    expect(screen.getByTestId('alertZeroWatchWorkersRail')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchEnabledSwitch')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
     expect(
       screen.getByTestId(
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
@@ -169,7 +151,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByTestId(
-        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).not.toBeInTheDocument();
 
@@ -194,53 +176,18 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
     );
 
+    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(24);
+    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
     expect(
-      within(attackDiscovery).getByTestId(
-        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-      )
-    ).toHaveValue(24);
-    expect(
-      within(attackDiscovery).getByTestId(
-        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-      )
-    ).toHaveTextContent(/hours/i);
-    expect(
-      within(alertTriage).queryByTestId(
-        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-      )
+      within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
     ).not.toBeInTheDocument();
   });
 
-  it('renders no detectionConfig controls for any Worker (decisions item 9)', () => {
-    // detectionConfig was removed rather than wired: the triage workflow it claimed to drive is a
-    // stub, so the UI carried settings no run consumed. Asserting ABSENCE keeps it from creeping back.
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
-
-    const alertTriage = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-    );
-    const attackDiscovery = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-    );
-
-    for (const [section, workerId] of [
-      [alertTriage, SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID],
-      [attackDiscovery, SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID],
-    ] as const) {
-      expect(
-        within(section).queryByTestId(`alertZeroAutoCloseRow-${workerId}`)
-      ).not.toBeInTheDocument();
-      expect(
-        within(section).queryByTestId(`alertZeroMinConfidence-${workerId}`)
-      ).not.toBeInTheDocument();
-    }
-  });
-
-  it('shows Dark Watch with one Worker that has enablement and autonomy', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_DARK_ID, [darkWorker, ...floorWorkers]);
+  it('shows Hunt Watch with one Worker that has enablement and autonomy', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [huntWorker, ...floorWorkers]);
 
     const section = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
     );
     expect(section).toBeInTheDocument();
     expect(
@@ -250,11 +197,69 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
     expect(
       within(section).getByTestId(
-        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
+  });
+
+  it('renders Worker settings in accordions for multi-Worker Watches and a static panel for a single-Worker Watch', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+    }
+
+    // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
+    renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [huntWorker]);
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('renders a summary rail card per member and marks the first as active', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    const [first, second] = floorWorkers;
+    expect(screen.getByTestId('alertZeroWatchWorkersRail')).toBeInTheDocument();
+    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${first.id}`)).toHaveAttribute(
+      'aria-current',
+      'true'
+    );
+    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${second.id}`)).not.toHaveAttribute(
+      'aria-current'
+    );
+  });
+
+  it('offers only the autonomy levels a Worker allows', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    // Attack Discovery has no assisted gate; Alert Triage carries the full dial.
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    expect(within(attackDiscovery).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(
+      within(attackDiscovery).getByTestId('alertZeroAutonomyCard-supervised')
+    ).toBeInTheDocument();
+    expect(
+      within(attackDiscovery).queryByTestId('alertZeroAutonomyCard-assisted')
+    ).not.toBeInTheDocument();
+
+    const alertTriage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+    );
+    for (const level of ['manual', 'assisted', 'supervised'] as const) {
+      expect(within(alertTriage).getByTestId(`alertZeroAutonomyCard-${level}`)).toBeInTheDocument();
+    }
   });
 
   it('shows a Worker-load error instead of an empty member list', () => {
@@ -291,20 +296,19 @@ describe('WatchDetailPage', () => {
   it('shows Officer as an empty grouping without a load error', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_OFFICER_ID, [
       ...floorWorkers,
-      darkWorker,
+      huntWorker,
       ...detectionWorkers,
     ]);
 
-    expect(screen.getByTestId('alertZeroWatchWorkersEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroWatchWorkersLoadError')).not.toBeInTheDocument();
     expect(screen.queryByTestId(/alertZeroWatchWorkerSection-/)).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchWorkersRail')).not.toBeInTheDocument();
   });
 
   it('shows Detection Workers with per-Worker enablement and autonomy', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, [
       ...floorWorkers,
-      darkWorker,
+      huntWorker,
       ...detectionWorkers,
     ]);
 
@@ -323,47 +327,11 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders Worker settings in accordions for multi-Worker Watches and a static panel for a single-Worker Watch', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
-
-    for (const worker of floorWorkers) {
-      expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
-    }
-    expect(
-      screen.getByTestId(
-        `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-      )
-    ).toBeInTheDocument();
-
-    // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
-    renderWatch(SYSTEM_SECURITY_WATCH_DARK_ID, [darkWorker]);
-    expect(
-      screen.queryByTestId(
-        `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
-      )
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId(
-        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID}`
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('renders a summary rail card per member and marks the first as active', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
-
-    const [first, second] = floorWorkers;
-    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${first.id}`)).toHaveAttribute(
-      'aria-current',
-      'true'
+  it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
+    const { mutate, mutateAsync } = renderWatch(
+      SYSTEM_SECURITY_WATCH_DETECTION_ID,
+      detectionWorkers
     );
-    expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${second.id}`)).not.toHaveAttribute(
-      'aria-current'
-    );
-  });
-
-  it('renders the analysis window control only on Rule Tuning', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const ruleTuning = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
     );
@@ -375,5 +343,197 @@ describe('WatchDetailPage', () => {
     expect(
       within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    );
+
+    expect(mutate).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    expect(screen.queryByTestId(/alertZeroWorkerRun-/)).not.toBeInTheDocument();
+  });
+
+  it('locks every control while a save is in flight and unlocks them when it completes', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    let resolveSave: ((value: { worker: Worker }) => void) | undefined;
+    mutateAsync.mockImplementation(
+      () =>
+        new Promise<{ worker: Worker }>((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const editableControls = () => [
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+      ),
+      within(ruleTuning).getByTestId('alertZeroAutonomyCard-manual'),
+      within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue'),
+      within(ruleTuning).getByTestId('alertZeroScheduleIntervalUnit'),
+      within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays'),
+    ];
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+    const discard = screen.getByTestId('alertZeroWatchSettingsDiscard');
+
+    fireEvent.click(editableControls()[0]);
+    fireEvent.click(save);
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+
+    for (const control of editableControls()) {
+      expect(control).toBeDisabled();
+    }
+    expect(save).toBeDisabled();
+    expect(discard).toBeDisabled();
+
+    await act(async () => {
+      resolveSave!({ worker: { ...detectionWorkers[0], enabled: true } });
+    });
+
+    for (const control of editableControls()) {
+      expect(control).toBeEnabled();
+    }
+    // Clean again, so Save and Discard stay disabled for the usual reason, not because of saving.
+    expect(save).toBeDisabled();
+    expect(discard).toBeDisabled();
+    expect(screen.queryByText(settingsI18n.WORKER_SETTINGS_UNAVAILABLE)).not.toBeInTheDocument();
+  });
+
+  it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
+    const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
+    const workersQuery = (error: Error | null) =>
+      ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue(workersQuery(null));
+    const mutateAsync = jest.fn().mockResolvedValue({ worker: installed[0] });
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+    // A fresh element each time, or React bails out of re-rendering an identical element.
+    const tree = () => (
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+    const { rerender } = render(tree());
+
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    fireEvent.change(field, { target: { value: '7' } });
+    fireEvent.blur(field);
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+
+    // The recovery read after a failed PATCH did not succeed: stale Workers stay cached.
+    mockUseWorkers.mockReturnValue(workersQuery(new Error('reload failed')));
+    rerender(tree());
+
+    expect(screen.getByTestId('alertZeroWatchWorkersLoadError')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    // Retry succeeded: the draft and its original revision are still there to retry with.
+    mockUseWorkers.mockReturnValue(workersQuery(null));
+    rerender(tree());
+
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+    });
+  });
+
+  it('enables Save while the analysis window is being typed and saves the latest value', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(field, { target: { value: '2' } });
+    expect(save).toBeEnabled();
+    fireEvent.change(field, { target: { value: '21' } });
+    expect(save).toBeEnabled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(save);
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: null },
+    });
+  });
+
+  it('enables Save while the interval is being typed and saves the latest value', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const value = within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(value, { target: { value: '1' } });
+    expect(save).toBeEnabled();
+    fireEvent.change(value, { target: { value: '12' } });
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(save);
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      patch: { settings: { scheduleInterval: '12h' }, settingsRevision: null },
+    });
+  });
+
+  it('resets typed numeric values on Discard without writing', () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const window = within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays');
+    const interval = within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue');
+
+    fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.change(interval, { target: { value: '6' } });
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+    expect(window).toHaveValue(14);
+    expect(interval).toHaveValue(2);
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('sends the whole extras object under settings when the analysis window is saved', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+
+    fireEvent.change(field, { target: { value: '7' } });
+    fireEvent.blur(field);
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    // Uninstalled Worker: the draft's revision is null and is sent as such.
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
+    });
   });
 });

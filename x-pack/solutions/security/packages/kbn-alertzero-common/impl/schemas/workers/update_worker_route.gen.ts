@@ -54,10 +54,10 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
           'Revision returned by list/GET. Required when settings is present; null asserts that the per-space managed Worker has not been installed yet.'
         ),
       /**
-       * Nested settings patch. Shared and custom fields share this object and the same revision/persistence path. Field names match the WorkerSettings read shape.
+       * Settings patch with the same names and nesting as the WorkerSettings read shape. Shared fields and `extras` share this object and the same revision/persistence path. The resulting complete settings are validated against the Worker's own declaration; an unknown key, another Worker's field, or an autonomy level the Worker does not allow is rejected with a 400 naming the field.
        */
       settings: WorkerSettingsWrite.optional().describe(
-        'Nested settings patch. Shared and custom fields share this object and the same revision/persistence path. Field names match the WorkerSettings read shape.'
+        "Settings patch with the same names and nesting as the WorkerSettings read shape. Shared fields and `extras` share this object and the same revision/persistence path. The resulting complete settings are validated against the Worker's own declaration; an unknown key, another Worker's field, or an autonomy level the Worker does not allow is rejected with a 400 naming the field."
       ),
     })
     .strict()
