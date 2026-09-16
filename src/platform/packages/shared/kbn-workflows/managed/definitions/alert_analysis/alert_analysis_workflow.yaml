@@ -237,12 +237,14 @@ steps:
           # the ai.agent step's superRefine never sees both non-empty (Z1 invariant).
           connector_id: ""
           connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
-          # Boolean inputs: ${{ }} preserves the type; | default: would swallow false
-          # because Liquid treats false as falsy.
-          auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
+          # Boolean: ternary fallback preserves the runtime-config value when the field
+          # is absent. `| default:` would not work here because Liquid treats false as
+          # falsy, so `false | default: x` returns x rather than false.
+          auto_close_enabled: "${{ inputs.autoCloseEnabled != null ? inputs.autoCloseEnabled : variables.auto_close_enabled }}"
           # When min threshold arrives as an input, collapse max to 1: the range
           # degenerates to a floor, so the Worker can close at any score >= min.
-          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold }}"
+          # Ternary fallback preserves the fetched runtime-config value when absent.
+          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold != null ? inputs.autoCloseConfidenceScoreMinThreshold : variables.auto_close_confidence_score_min_threshold }}"
           auto_close_confidence_score_max_threshold: 1
           agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
