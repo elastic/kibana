@@ -18,7 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -26,6 +28,8 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import {
+  DEFINITION_DESCRIPTION,
+  DEFINITION_TITLE,
   DESCRIPTION_LABEL,
   DETAILS_DESCRIPTION,
   FORM_TITLE,
@@ -35,7 +39,22 @@ import {
   OS_ERROR,
   OS_LABEL,
   OS_PLACEHOLDER,
+  SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
+
+interface CustomYaraSignatureEntry {
+  field: typeof CUSTOM_YARA_SIGNATURE_FIELD_TYPE;
+  operator: 'included';
+  type: 'match';
+  value: string;
+}
+
+const EMPTY_YARA_ENTRY: CustomYaraSignatureEntry = {
+  field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+  operator: 'included',
+  type: 'match',
+  value: '',
+};
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
   {
@@ -74,6 +93,10 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       [item.os_types]
     );
 
+    const yaraEntry = useMemo((): CustomYaraSignatureEntry => {
+      return (item.entries[0] || EMPTY_YARA_ENTRY) as CustomYaraSignatureEntry;
+    }, [item.entries]);
+
     const notifyOfChange = useCallback(
       (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
         const nextItem = updatedItem
@@ -105,6 +128,20 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         notifyOfChange({ description: event.target.value });
       },
       [notifyOfChange]
+    );
+
+    const handleOnSignatureChange = useCallback(
+      (value: string) => {
+        notifyOfChange({
+          entries: [
+            {
+              ...yaraEntry,
+              value,
+            },
+          ],
+        });
+      },
+      [notifyOfChange, yaraEntry]
     );
 
     const handleOnOsChange = useCallback(
@@ -239,6 +276,35 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       [disabled, getTestId, handleOnDescriptionChange, item.description]
     );
 
+    const signatureEditor = useMemo(
+      () => (
+        <EuiFormRow
+          fullWidth
+          isDisabled={disabled}
+          data-test-subj={getTestId('signature-input-formRow')}
+        >
+          <CodeEditor
+            languageId="plaintext"
+            value={yaraEntry.value}
+            onChange={handleOnSignatureChange}
+            width="100%"
+            height={200}
+            options={{
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              automaticLayout: true,
+              readOnly: disabled,
+            }}
+            aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
+            dataTestSubj={getTestId('signature-input')}
+            data-test-subj={getTestId('signature-input')}
+          />
+        </EuiFormRow>
+      ),
+      [disabled, getTestId, handleOnSignatureChange, yaraEntry.value]
+    );
+
     return (
       <EuiForm
         component="div"
@@ -259,6 +325,17 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         {nameInput}
         {osInput}
         {descriptionInput}
+        <EuiHorizontalRule />
+
+        <EuiTitle size="xs">
+          <h2>{DEFINITION_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" data-test-subj={getTestId('definitionAbout')}>
+          <p>{DEFINITION_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        {signatureEditor}
         <EuiHorizontalRule />
 
         <EuiFormRow

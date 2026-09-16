@@ -12,6 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import '@kbn/code-editor-mock/jest_helper';
 import { CustomYaraSignaturesForm } from './custom_yara_signatures_form';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -20,8 +21,11 @@ import type {
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
+import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { OS_TITLES } from '../../../../common/translations';
 import {
+  DEFINITION_DESCRIPTION,
+  DEFINITION_TITLE,
   DETAILS_DESCRIPTION,
   FORM_TITLE,
   NAME_ERROR,
@@ -52,6 +56,15 @@ describe('Custom YARA signatures form', () => {
     return {
       ...defaults,
       ...overrides,
+    };
+  }
+
+  function createYaraEntry(value: string) {
+    return {
+      field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+      operator: 'included' as const,
+      type: 'match' as const,
+      value,
     };
   }
 
@@ -112,6 +125,11 @@ describe('Custom YARA signatures form', () => {
     expect(screen.getByTestId('customYaraSignatures-form-os-input')).toBeInTheDocument();
     expect(screen.getByTestId('customYaraSignatures-form-description-input')).toHaveValue('');
     expect(screen.getByText(OPTIONAL_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(DEFINITION_TITLE)).toBeInTheDocument();
+    expect(screen.getByTestId('customYaraSignatures-form-definitionAbout')).toHaveTextContent(
+      DEFINITION_DESCRIPTION
+    );
+    expect(screen.getByTestId('customYaraSignatures-form-signature-input')).toHaveValue('');
   });
 
   it('should show name required message after name input blur', async () => {
@@ -285,6 +303,46 @@ describe('Custom YARA signatures form', () => {
 
       await user.click(screen.getByTestId(`${formPrefix}-description-input`));
       expect(screen.getByText(OS_ERROR)).toBeInTheDocument();
+    });
+  });
+
+  describe('signature editor', () => {
+    it('should sit after description and before policy assignment', () => {
+      const { container } = render();
+      const titles = Array.from(container.querySelectorAll('h2')).map((title) =>
+        (title.textContent || '').trim()
+      );
+
+      expect(titles).toEqual(['Details', 'Definition']);
+    });
+
+    it('should populate the editor from the existing entry value', () => {
+      const signature = 'rule Example { condition: true }';
+      render(
+        createProps({
+          item: createItem({
+            entries: [createYaraEntry(signature)],
+          }),
+        })
+      );
+
+      expect(screen.getByTestId('customYaraSignatures-form-signature-input')).toHaveValue(
+        signature
+      );
+    });
+
+    it('should store the editor value in a custom YARA signature entry', async () => {
+      render();
+      await user.type(screen.getByTestId('customYaraSignatures-form-signature-input'), 'z');
+
+      expect(onChangeSpy).toHaveBeenCalledWith(
+        createOnChangeArgs({
+          item: createItem({
+            entries: [createYaraEntry('z')],
+          }),
+          isValid: false,
+        })
+      );
     });
   });
 });

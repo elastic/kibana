@@ -67,3 +67,25 @@ export const OPTIONAL_LABEL = i18n.translate(
     defaultMessage: 'optional',
   }
 );
+
+export const DEFINITION_TITLE = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.definitionTitle',
+  {
+    defaultMessage: 'Definition',
+  }
+);
+
+export const DEFINITION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.definitionDescription',
+  {
+    defaultMessage:
+      'Enter your YARA signature code here. You can write or paste one or more YARA signatures, and the system will validate its syntax before saving.',
+  }
+);
+
+export const SIGNATURE_EDITOR_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.signatureEditorAriaLabel',
+  {
+    defaultMessage: 'YARA signature code',
+  }
+);
