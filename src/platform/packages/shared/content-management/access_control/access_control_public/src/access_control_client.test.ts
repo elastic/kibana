@@ -42,7 +42,9 @@ describe('AccessControlClient', () => {
 
     it('returns isGloballyAuthorized: false when the http call throws a 500 error', async () => {
       const http = createMockHttp();
-      const error = Object.assign(new Error('Internal Server Error'), { response: { status: 500 } });
+      const error = Object.assign(new Error('Internal Server Error'), {
+        response: { status: 500 },
+      });
       http.get.mockRejectedValue(error);
       const client = new AccessControlClient({ http: http as any });
 
@@ -66,7 +68,9 @@ describe('AccessControlClient', () => {
 
     it('returns false when the http call throws a 500 error', async () => {
       const http = createMockHttp();
-      const error = Object.assign(new Error('Internal Server Error'), { response: { status: 500 } });
+      const error = Object.assign(new Error('Internal Server Error'), {
+        response: { status: 500 },
+      });
       http.get.mockRejectedValue(error);
       const client = new AccessControlClient({ http: http as any });
 
