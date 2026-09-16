@@ -23,7 +23,6 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
-import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/server';
 import {
   installRegisteredWorker,
   workerRegistry,
@@ -80,7 +79,19 @@ export class WorkersService {
     } = {},
     private readonly alertTriageOpts: {
       alertTriageWorkerEnabled: boolean;
-      getAttachmentService?: SecuritySolutionPluginStart['getAlertAnalysisWorkflowRuleAttachmentService'];
+      getAttachmentService?: (
+        request: KibanaRequest,
+        workflowId: string
+      ) => Promise<{
+        getRuleAttachmentSelection(params: {
+          search: string;
+          attachmentFilter: 'all' | 'attached' | 'not_attached';
+        }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
+        updateRuleAttachments(params: {
+          attachRuleIds: string[];
+          detachRuleIds: string[];
+        }): Promise<unknown>;
+      }>;
     } = { alertTriageWorkerEnabled: false }
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
