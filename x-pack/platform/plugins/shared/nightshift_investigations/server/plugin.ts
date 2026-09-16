@@ -35,7 +35,7 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
-import { createDecisionTreeStore, ensureDecisionTreeIndex } from './decision_trees/store';
+import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -342,17 +342,6 @@ export class NightshiftInvestigationsPlugin
     this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
     this.security = coreStart.security;
-
-    // Create the backing index up front with explicit mappings, before any agent turn writes to
-    // it and lets Elasticsearch auto-create it from the generic template.
-    if (this.decisionTreesEnabled) {
-      void ensureDecisionTreeIndex(
-        coreStart.elasticsearch.client.asInternalUser,
-        this.logger.get('decision_trees')
-      ).catch((err) => {
-        this.logger.error(`Failed to ensure the decision-tree index: ${err.message}`);
-      });
-    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

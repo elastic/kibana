@@ -35,6 +35,23 @@ export type {
 const MAX_TREES = 500;
 const MAX_VERSIONS = 500;
 
+/**
+ * Structured fields live under `attributes` so they inherit the AI-index template's flattened
+ * mapping, the same way Cortex stores `status` / `slug` / `space_id`. The backing index is
+ * auto-created on first write from that template; we never call `indices.create`.
+ */
+interface DecisionTreeAttributes {
+  tree_id?: string;
+  symptom?: string;
+  version?: number | string;
+  status?: string;
+  author?: string;
+  summary?: string;
+  reinforced?: boolean | string;
+  node_count?: number | string;
+  edge_count?: number | string;
+}
+
 /** The head document, one per tree, holding the current markdown and merged learnings. */
 interface DecisionTreeHeadSource {
   '@timestamp': string;
@@ -42,12 +59,7 @@ interface DecisionTreeHeadSource {
   title: string;
   content: string;
   tags: string[];
-  tree_id: string;
-  symptom: string;
-  version: number;
-  status: DecisionTreeStatus;
-  node_count: number;
-  edge_count: number;
+  attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
 }
 
@@ -56,16 +68,9 @@ interface DecisionTreeVersionSource {
   '@timestamp': string;
   type: 'decision_tree_version';
   title: string;
+  content: string;
   tags: string[];
-  tree_id: string;
-  symptom: string;
-  version: number;
-  snapshot: string;
-  author: string;
-  summary: string;
-  reinforced: boolean;
-  node_count: number;
-  edge_count: number;
+  attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
 }
 
@@ -133,14 +138,32 @@ const mergeLearnings = (
   return [...bySlot.values()];
 };
 
+/** Flattened attributes may come back as strings; coerce the same way Cortex does. */
+const toCount = (value: number | string | undefined, fallback = 0): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? Math.max(0, parsed) : fallback;
+  }
+  return fallback;
+};
+
+const toStatus = (value: string | undefined): DecisionTreeStatus =>
+  value === 'established' || value === 'archived' || value === 'tentative' ? value : 'tentative';
+
+const toBool = (value: boolean | string | undefined): boolean =>
+  value === true || value === 'true';
+
 const headToSummary = (source: DecisionTreeHeadSource): DecisionTreeSummary => ({
-  tree_id: source.tree_id,
-  symptom: source.symptom,
+  tree_id: source.attributes?.tree_id ?? '',
+  symptom: source.attributes?.symptom ?? '',
   title: source.title,
-  status: source.status,
-  version: source.version,
-  node_count: source.node_count,
-  edge_count: source.edge_count,
+  status: toStatus(source.attributes?.status),
+  version: toCount(source.attributes?.version),
+  node_count: toCount(source.attributes?.node_count),
+  edge_count: toCount(source.attributes?.edge_count),
   learning_count: source.learnings.length,
   updated_at: source['@timestamp'],
 });
@@ -153,93 +176,23 @@ const headToDetail = (source: DecisionTreeHeadSource): DecisionTreeDetail => ({
 });
 
 const versionToSummary = (source: DecisionTreeVersionSource): DecisionTreeVersionSummary => ({
-  version: source.version,
-  author: source.author,
-  summary: source.summary,
-  reinforced: source.reinforced,
-  node_count: source.node_count,
-  edge_count: source.edge_count,
+  version: toCount(source.attributes?.version),
+  author: source.attributes?.author ?? '',
+  summary: source.attributes?.summary ?? '',
+  reinforced: toBool(source.attributes?.reinforced),
+  node_count: toCount(source.attributes?.node_count),
+  edge_count: toCount(source.attributes?.edge_count),
   learning_count: source.learnings.length,
   created_at: source['@timestamp'],
 });
 
 const versionToDetail = (source: DecisionTreeVersionSource): DecisionTreeVersionDetail => ({
   ...versionToSummary(source),
-  tree_id: source.tree_id,
-  markdown: source.snapshot,
-  mermaid: safeExtractMermaid(source.snapshot),
+  tree_id: source.attributes?.tree_id ?? '',
+  markdown: source.content,
+  mermaid: safeExtractMermaid(source.content),
   learnings: source.learnings,
 });
-
-/** Cache the ensure-index round trip per client so the store does not re-check on every write. */
-const ensured = new WeakMap<ElasticsearchClient, Promise<void>>();
-
-/**
- * Creates the backing index with explicit mappings when it does not yet exist.
- *
- * Elasticsearch would otherwise auto-create it from the `ai-index-idx` template on first write,
- * dynamically mapping `snapshot` with a `.keyword` sub-field that a large tree would overflow, and
- * failing to give `version` a numeric type to sort on. `dynamic: false` keeps any unexpected field
- * in `_source` without indexing it.
- */
-export const ensureDecisionTreeIndex = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<void> => {
-  const inFlight = ensured.get(esClient);
-  if (inFlight) {
-    return inFlight;
-  }
-
-  const create = (async () => {
-    try {
-      if (await esClient.indices.exists({ index: DECISION_TREE_AI_INDEX_DEST })) {
-        return;
-      }
-      await esClient.indices.create({
-        index: DECISION_TREE_AI_INDEX_DEST,
-        mappings: {
-          dynamic: false,
-          properties: {
-            tree_id: { type: 'keyword' },
-            symptom: { type: 'keyword' },
-            version: { type: 'long' },
-            status: { type: 'keyword' },
-            author: { type: 'keyword' },
-            summary: { type: 'text' },
-            reinforced: { type: 'boolean' },
-            node_count: { type: 'long' },
-            edge_count: { type: 'long' },
-            // Version snapshots are display-only: never embedded, never searched.
-            snapshot: { type: 'text', index: false },
-            learnings: {
-              type: 'object',
-              properties: {
-                kind: { type: 'keyword' },
-                category: { type: 'keyword' },
-                connector_name: { type: 'keyword' },
-                content: { type: 'text', index: false },
-                keywords: { type: 'keyword' },
-              },
-            },
-          },
-        },
-      });
-      logger.debug(`Created decision-tree index ${DECISION_TREE_AI_INDEX_DEST}`);
-    } catch (error) {
-      // A concurrent creator won the race; the index now exists, which is all we need.
-      if (isResponseError(error) && error.statusCode === 400) {
-        return;
-      }
-      // Do not cache a failure: a transient error must not permanently disable writes.
-      ensured.delete(esClient);
-      throw error;
-    }
-  })();
-
-  ensured.set(esClient, create);
-  return create;
-};
 
 export const createDecisionTreeStore = ({
   esClient,
@@ -288,16 +241,14 @@ export const createDecisionTreeStore = ({
     },
 
     commit: async ({ treeId, markdown, tree, reinforced, author, summary, learnings }) => {
-      await ensureDecisionTreeIndex(esClient, logger);
-
       const symptom = symptomSlugFromTreeId(treeId);
       const existing = await getHead(symptom);
-      const nextVersion = (existing?.version ?? 0) + 1;
+      const nextVersion = toCount(existing?.attributes?.version) + 1;
       // A human-confirmed root cause is what promotes a tree from tentative to established; an
       // ordinary turn leaves the status where it was.
       const status: DecisionTreeStatus = reinforced
         ? 'established'
-        : existing?.status ?? 'tentative';
+        : toStatus(existing?.attributes?.status);
       const title = existing?.title ?? titleFromSymptom(symptom);
       const nodeCount = tree.nodes.length;
       const edgeCount = tree.edges.length;
@@ -309,16 +260,18 @@ export const createDecisionTreeStore = ({
         '@timestamp': now,
         type: 'decision_tree_version',
         title: `${title} v${nextVersion}`,
+        content: markdown,
         tags,
-        tree_id: fullTreeId,
-        symptom,
-        version: nextVersion,
-        snapshot: markdown,
-        author,
-        summary,
-        reinforced,
-        node_count: nodeCount,
-        edge_count: edgeCount,
+        attributes: {
+          tree_id: fullTreeId,
+          symptom,
+          version: nextVersion,
+          author,
+          summary,
+          reinforced,
+          node_count: nodeCount,
+          edge_count: edgeCount,
+        },
         learnings,
       };
 
@@ -328,12 +281,14 @@ export const createDecisionTreeStore = ({
         title,
         content: markdown,
         tags,
-        tree_id: fullTreeId,
-        symptom,
-        version: nextVersion,
-        status,
-        node_count: nodeCount,
-        edge_count: edgeCount,
+        attributes: {
+          tree_id: fullTreeId,
+          symptom,
+          version: nextVersion,
+          status,
+          node_count: nodeCount,
+          edge_count: edgeCount,
+        },
         learnings: mergeLearnings(existing?.learnings ?? [], learnings),
       };
 
@@ -364,11 +319,11 @@ export const createDecisionTreeStore = ({
           bool: {
             filter: [
               { term: { type: 'decision_tree_version' } },
-              { term: { tree_id: symptomTreeId(symptomSlugFromTreeId(treeId)) } },
+              { term: { 'attributes.tree_id': symptomTreeId(symptomSlugFromTreeId(treeId)) } },
             ],
           },
         },
-        sort: [{ version: { order: 'desc', unmapped_type: 'long' } }],
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       });
 
       return response.hits.hits.flatMap((hit) =>
@@ -400,7 +355,11 @@ export const createDecisionTreeStore = ({
       await esClient.index({
         index: DECISION_TREE_AI_INDEX_DEST,
         id: headDocId(symptom),
-        document: { ...existing, status: 'archived', '@timestamp': new Date().toISOString() },
+        document: {
+          ...existing,
+          '@timestamp': new Date().toISOString(),
+          attributes: { ...existing.attributes, status: 'archived' },
+        },
         refresh: 'wait_for',
       });
     },
