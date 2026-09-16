@@ -37,6 +37,7 @@ const buildBaseSnapshot = ({
   enabled: true,
   metadata: {
     name,
+    signature_id: 'test-sig-id',
     version: 1,
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],

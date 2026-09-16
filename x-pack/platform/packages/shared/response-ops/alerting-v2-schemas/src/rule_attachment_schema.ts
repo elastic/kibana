@@ -28,7 +28,11 @@ export const ruleAttachmentDataSchema = ruleResponseSchema.extend({
   created_at: opt(shape.created_at),
   updated_by: opt(shape.updated_by),
   updated_at: opt(shape.updated_at),
-  metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }),
+  metadata: shape.metadata.extend({
+    version: opt(shape.metadata.shape.version),
+    // signature_id is server-generated, so it is absent on proposed (not-yet-saved) rules.
+    signature_id: opt(shape.metadata.shape.signature_id),
+  }),
 });
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;

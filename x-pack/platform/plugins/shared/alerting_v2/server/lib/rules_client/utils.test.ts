@@ -15,6 +15,7 @@ import {
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
   assertImmutableUnchanged,
+  assertSignatureIdUnchanged,
   validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
@@ -33,6 +34,7 @@ const serverFields = {
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
+  signatureId: 'test-sig-id',
 };
 
 const baseCreateData: ResolvedCreateRuleData = {
@@ -643,6 +645,137 @@ describe('utils', () => {
           },
         })
       );
+    });
+  });
+
+  describe('assertSignatureIdUnchanged (step 4.1)', () => {
+    const storedAttrs = createRuleSoAttributes({
+      metadata: { name: 'test', signature_id: 'stored-sig' },
+    });
+
+    it('does not throw when incomingSignatureId is undefined (omitted-means-keep)', () => {
+      expect(() => assertSignatureIdUnchanged(undefined, storedAttrs)).not.toThrow();
+    });
+
+    it('does not throw when incomingSignatureId is null (treated as omitted)', () => {
+      expect(() => assertSignatureIdUnchanged(null, storedAttrs)).not.toThrow();
+    });
+
+    it('does not throw when incomingSignatureId matches stored value (equal-passes)', () => {
+      expect(() => assertSignatureIdUnchanged('stored-sig', storedAttrs)).not.toThrow();
+    });
+
+    it('throws Boom.conflict (409) when incomingSignatureId differs from stored', () => {
+      expect(() =>
+        assertSignatureIdUnchanged('different-sig', storedAttrs)
+      ).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 409 }),
+          message: expect.stringContaining('metadata.signature_id'),
+        })
+      );
+    });
+
+    it('attaches IMMUTABLE_FIELDS_CHANGED code when differing', () => {
+      expect(() =>
+        assertSignatureIdUnchanged('different-sig', storedAttrs)
+      ).toThrow(
+        expect.objectContaining({
+          data: {
+            code: 'IMMUTABLE_FIELDS_CHANGED',
+            details: { fields: ['metadata.signature_id'] },
+          },
+        })
+      );
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — signature_id (step 4.1)', () => {
+    it('stores the caller-supplied signatureId in metadata.signature_id', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'my-sig-id',
+      });
+
+      expect(result.metadata.signature_id).toBe('my-sig-id');
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — signature_id (step 4.1)', () => {
+    it('includes signature_id from stored attributes in the response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', signature_id: 'response-sig' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.signature_id).toBe('response-sig');
+    });
+
+    it('round-trips signature_id through create → transform', () => {
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'round-trip-sig',
+      });
+
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt', soAttrs);
+
+      expect(response.metadata.signature_id).toBe('round-trip-sig');
+    });
+
+    it('passes ruleResponseSchema parse with signature_id set', () => {
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'schema-check-sig',
+      });
+
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-schema', soAttrs);
+
+      expect(() => ruleResponseSchema.parse(response)).not.toThrow();
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — signature_id immutability (step 4.1)', () => {
+    it('preserves stored signature_id when the update data omits the field', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
+    });
+
+    it('still preserves stored signature_id when the update data supplies the same value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { signature_id: 'stored-sig' } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
+    });
+
+    it('still preserves stored signature_id even when the update data supplies a different value (caller checked upstream)', () => {
+      // buildUpdateRuleAttributes always restores the stored value — the mismatch
+      // check is done by assertSignatureIdUnchanged in the rules client before
+      // this function is called. This test documents that contract.
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { signature_id: 'changed-sig' } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
     });
   });
 
