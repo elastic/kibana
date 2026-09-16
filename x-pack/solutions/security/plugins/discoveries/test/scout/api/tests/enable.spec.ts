@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
@@ -19,19 +19,19 @@ import {
 apiTest.describe('Workflow schedule API - enable', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
+    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders);
   });
 
-  apiTest('should enable a disabled schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should enable a disabled schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const createResult = await apis.createSchedule(getSimpleWorkflowSchedule({ enabled: false }));
     expect(createResult.statusCode).toBe(200);
@@ -48,8 +48,8 @@ apiTest.describe('Workflow schedule API - enable', { tag: SCHEDULE_TAGS }, () =>
     expect((getResult.body as Record<string, unknown>).enabled).toBe(true);
   });
 
-  apiTest('should return 404 for non-existent schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 404 for non-existent schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const response = await apis.enableSchedule('non-existent-id-12345');
     const body = response.body as { message?: string };

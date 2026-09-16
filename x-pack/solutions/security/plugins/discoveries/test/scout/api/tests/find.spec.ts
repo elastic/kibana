@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
@@ -19,19 +19,19 @@ import {
 apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
+    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders);
   });
 
-  apiTest('should return empty result when no schedules exist', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return empty result when no schedules exist', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     const { body, statusCode } = await apis.findSchedules();
 
@@ -42,8 +42,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(result.total).toBe(0);
   });
 
-  apiTest('should return all created schedules', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return all created schedules', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule A' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule B' }));
@@ -71,8 +71,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Schedule A', 'Schedule B', 'Schedule C']);
   });
 
-  apiTest('should sort by name ascending', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should sort by name ascending', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
@@ -99,8 +99,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Alpha', 'Bravo', 'Charlie']);
   });
 
-  apiTest('should sort by name descending', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should sort by name descending', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
@@ -127,8 +127,8 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     expect(names).toStrictEqual(['Charlie', 'Bravo', 'Alpha']);
   });
 
-  apiTest('should support pagination', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should support pagination', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
 
     for (let i = 1; i <= 5; i++) {
       await apis.createSchedule(getSimpleWorkflowSchedule({ name: `Schedule ${i}` }));

@@ -14,31 +14,6 @@ export const COMMON_HEADERS = {
 } as const;
 
 /**
- * Internal schedule API routes for discoveries.
- *
- * These mirror the 7 internal routes defined in the OpenAPI schemas
- * (bead kibana-9p4.2) and implemented in bead kibana-9p4.6.
- */
-export const SCHEDULE_ROUTES = {
-  CREATE: 'internal/attack_discovery/schedules',
-  DELETE: (id: string) => `internal/attack_discovery/schedules/${id}`,
-  DISABLE: (id: string) => `internal/attack_discovery/schedules/${id}/_disable`,
-  ENABLE: (id: string) => `internal/attack_discovery/schedules/${id}/_enable`,
-  FIND: 'internal/attack_discovery/schedules/_find',
-  GET: (id: string) => `internal/attack_discovery/schedules/${id}`,
-  UPDATE: (id: string) => `internal/attack_discovery/schedules/${id}`,
-} as const;
-
-/**
- * Internal ad-hoc generation route for AD 2.0.
- *
- * Requires workflows read + execute at the route-authz layer (least-privilege
- * matrix, bead kibana-5wd6.1), so an under-privileged caller is rejected with a
- * synchronous 403.
- */
-export const GENERATE_ROUTE = 'internal/attack_discovery/_generate';
-
-/**
  * Feature flag that gates the AD 2.0 internal API surface (`_generate`,
  * schedules, execution monitoring). All internal routes fall through to a
  * `404 Not Found` (via `assertWorkflowsEnabled`) when it is OFF, so the suite
@@ -78,4 +53,11 @@ export const SCHEDULE_TAGS = [...tags.stateful.classic, ...tags.serverless.secur
  * Tag used by the internal schedule API to isolate its alerting rules
  * from the public schedule API in elastic_assistant.
  */
+/**
+ * Per-space Advanced Setting that, together with the feature flag above, gates the AD 2.0 internal
+ * routes. Defined in `@kbn/security-solution-navigation`; inlined to avoid a cross-boundary import.
+ */
+export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
+  'securitySolution:enableAttackDiscoveryWorkflows';
+
 export const INTERNAL_SCHEDULE_TAG = 'attack-discovery-schedule';
