@@ -114,6 +114,7 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isInteractive,
   isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
@@ -142,6 +143,7 @@ function buildEuiGridColumn({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isInteractive: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
@@ -236,7 +238,9 @@ function buildEuiGridColumn({
     id: columnName,
     schema: columnSchema,
     isSortable:
-      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
+      isInteractive &&
+      isSortEnabled &&
+      isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
@@ -249,39 +253,41 @@ function buildEuiGridColumn({
         />
       ) : undefined,
     displayAsText: columnDisplayName,
-    actions: {
-      showHide:
-        isSummaryOnlyColumn || columnName === dataView.timeFieldName
-          ? false
-          : {
-              label: i18n.translate('unifiedDataTable.removeColumnLabel', {
-                defaultMessage: 'Remove column',
-              }),
-              iconType: 'cross',
-              'data-test-subj': 'unifiedDataTableRemoveColumn',
-            },
-      showMoveLeft: !isSummaryOnlyColumn,
-      showMoveRight: !isSummaryOnlyColumn,
-      additional: [
-        ...(resetWidthButton ? [resetWidthButton] : []),
-        ...(columnName === SOURCE_COLUMN
-          ? []
-          : [
-              buildCopyColumnNameButton({
-                columnDisplayName,
-                toastNotifications,
-              }),
-            ]),
-        buildCopyColumnValuesButton({
-          columnId: columnName,
-          columnDisplayName,
-          toastNotifications,
-          rowsCount,
-          valueToStringConverter,
-        }),
-        ...(editFieldButton ? [editFieldButton] : []),
-      ],
-    },
+    actions: isInteractive
+      ? {
+          showHide:
+            isSummaryOnlyColumn || columnName === dataView.timeFieldName
+              ? false
+              : {
+                  label: i18n.translate('unifiedDataTable.removeColumnLabel', {
+                    defaultMessage: 'Remove column',
+                  }),
+                  iconType: 'cross',
+                  'data-test-subj': 'unifiedDataTableRemoveColumn',
+                },
+          showMoveLeft: !isSummaryOnlyColumn,
+          showMoveRight: !isSummaryOnlyColumn,
+          additional: [
+            ...(resetWidthButton ? [resetWidthButton] : []),
+            ...(columnName === SOURCE_COLUMN
+              ? []
+              : [
+                  buildCopyColumnNameButton({
+                    columnDisplayName,
+                    toastNotifications,
+                  }),
+                ]),
+            buildCopyColumnValuesButton({
+              columnId: columnName,
+              columnDisplayName,
+              toastNotifications,
+              rowsCount,
+              valueToStringConverter,
+            }),
+            ...(editFieldButton ? [editFieldButton] : []),
+          ],
+        }
+      : false,
     cellActions,
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
@@ -366,6 +372,7 @@ export function getEuiGridColumns({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isInteractive,
   disableCellActions = false,
   isPlainRecord,
   services,
@@ -392,6 +399,7 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isInteractive: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
   services: {
@@ -427,6 +435,7 @@ export function getEuiGridColumns({
       dataView,
       isSummaryOnlyColumn,
       isSortEnabled,
+      isInteractive,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
       hasEditDataViewPermission,

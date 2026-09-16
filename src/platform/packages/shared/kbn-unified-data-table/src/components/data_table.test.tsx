@@ -771,6 +771,17 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
+    it('should hide sorting when interactive controls are disabled', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['message'],
+        sort: [['message', 'desc']],
+        isInteractive: false,
+      });
+
+      expect(getLastEuiDataGridProps().sorting).toBeUndefined();
+    });
+
     it(
       'sorting should preserve the selected documents when copying them to clipboard',
       async () => {
@@ -978,6 +989,23 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it('should hide toolbar controls when interactive controls are disabled', async () => {
+      await renderComponent({
+        ...getProps(),
+        isInteractive: false,
+        onUpdateRowHeight: jest.fn(),
+        onUpdateSampleSize: jest.fn(),
+      });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showColumnSelector: false,
+        showDisplaySelector: undefined,
+        showFullScreenSelector: false,
+        showKeyboardShortcuts: false,
+        showSortSelector: false,
+      });
+    });
   });
 
   describe('custom control columns', () => {
@@ -1780,6 +1808,21 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it('should hide column actions and resize when interactive controls are disabled', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['message'],
+        isInteractive: false,
+      });
+
+      expect(getLastEuiDataGridProps().onColumnResize).toBeUndefined();
+      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
+      expect(getLastEuiDataGridProps().columns[1].actions).toBe(false);
+      expect(
+        screen.queryByTestId('dataGridHeaderCellActionButton-message')
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('pagination', () => {
@@ -1861,6 +1904,19 @@ describe('UnifiedDataTable', () => {
       expect(screen.queryByTestId('pagination-button-previous')).toBeNull();
       expect(screen.queryByTestId('pagination-button-next')).toBeNull();
     });
+
+    it('disables pagination when interactive controls are disabled', async () => {
+      await renderComponent({
+        ...getProps(),
+        rowsPerPageOptions: [1, 5],
+        rowsPerPageState: 1,
+        isInteractive: false,
+      });
+
+      expect(getLastEuiDataGridProps().pagination).toBeUndefined();
+      expect(screen.queryByTestId('pagination-button-previous')).toBeNull();
+      expect(screen.queryByTestId('pagination-button-next')).toBeNull();
+    });
   });
 
   // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
@@ -1880,6 +1936,9 @@ describe('UnifiedDataTable', () => {
       rows,
       rowsPerPageOptions: [1, 5],
       rowsPerPageState: 1,
+      initialState: {
+        pageIndex: 0,
+      },
       onUpdatePageIndex: onChangePageMock,
       setExpandedDoc: jest.fn(),
       renderDocumentView: jest.fn(),

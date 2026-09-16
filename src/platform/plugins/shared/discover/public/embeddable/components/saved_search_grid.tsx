@@ -50,6 +50,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  isPrintMode?: boolean;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -143,6 +144,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGrid
         {...gridProps}
+        isInteractive={!props.isPrintMode}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
         setExpandedDoc={props.setExpandedDoc}
