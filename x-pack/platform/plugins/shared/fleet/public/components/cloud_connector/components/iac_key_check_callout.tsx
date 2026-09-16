@@ -16,8 +16,7 @@ import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/serv
 
 export interface IacKeyCheckCalloutProps {
   result: VerifyCloudConnectorIacKeyResponse;
-  integrationTitle?: string;
-  /** How many integrations the check covers; pluralises the copy when no title is given. */
+  /** How many integrations the check covers; pluralises the copy. */
   integrationCount?: number;
   onUpdateStack: () => void;
   isUpdating: boolean;
@@ -28,7 +27,6 @@ export interface IacKeyCheckCalloutProps {
 /** Renders null when the IAC key matches or there is no actionable reason. */
 export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   result,
-  integrationTitle,
   integrationCount = 1,
   onUpdateStack,
   isUpdating,
@@ -53,16 +51,16 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     />
   );
 
-  // Multi-package surfaces (onboarding) have no single title to name, so the copy falls back to
-  // a count-aware placeholder.
-  const fallbackIntegrationTitle = i18n.translate(
-    'xpack.fleet.cloudConnector.iacCheck.integrationFallback',
-    {
-      defaultMessage: '{count, plural, one {this integration} other {these integrations}}',
-      values: { count: integrationCount },
-    }
+  // The onboarding checks a whole package set, so there is no single title to name; the copy uses
+  // a count-aware placeholder instead.
+  const integration = (
+    <strong>
+      {i18n.translate('xpack.fleet.cloudConnector.iacCheck.integrationFallback', {
+        defaultMessage: '{count, plural, one {this integration} other {these integrations}}',
+        values: { count: integrationCount },
+      })}
+    </strong>
   );
-  const integration = <strong>{integrationTitle ?? fallbackIntegrationTitle}</strong>;
 
   const bodyText = isNoKey ? (
     <FormattedMessage

@@ -48,7 +48,7 @@ describe('cloud connector request schemas — IaC fields', () => {
 });
 
 describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
-  it('accepts an empty body (flyout), an empty array, and several integrations (wizard)', () => {
+  it('accepts an empty body (flyout), an empty array, and several integrations (onboarding)', () => {
     expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({})).not.toThrow();
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({ integrations: [] })
@@ -63,19 +63,9 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     ).not.toThrow();
   });
 
-  it.each(['wizard', 'onboarding'])('accepts the %s surface', (surface) => {
-    expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface })).not.toThrow();
-  });
-
-  it('rejects the flyout surface: the flyout never sends one, the server derives it', () => {
+  it('rejects a surface field: the server derives the telemetry surface from the integrations', () => {
     expect(() =>
-      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'flyout' })
-    ).toThrow();
-  });
-
-  it('rejects an unknown surface', () => {
-    expect(() =>
-      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'cli' })
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'onboarding' })
     ).toThrow();
   });
 

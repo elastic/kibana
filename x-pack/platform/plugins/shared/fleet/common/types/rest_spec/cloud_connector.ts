@@ -7,7 +7,6 @@
 
 import type {
   IacKeyCheckReason,
-  IacKeySurface,
   IacKeyVerificationOutcome,
 } from '../../telemetry/iac_provisioner_events';
 
@@ -79,10 +78,8 @@ export interface GetCloudConnectorUsageResponse {
 }
 
 export interface VerifyCloudConnectorIacKeyRequest {
-  /** Integrations being added (wizard/onboarding). Omit or send empty to check the connector's current set only (flyout). */
+  /** Integrations being added (onboarding). Omit or send empty to check the connector's current set only (flyout). */
   integrations?: RenderIacTemplateIntegration[];
-  /** Telemetry label for the UI asking. The flyout sends none; the server derives its surface. */
-  surface?: Extract<IacKeySurface, 'wizard' | 'onboarding'>;
 }
 
 export interface VerifyCloudConnectorIacKeyResponse {

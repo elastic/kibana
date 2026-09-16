@@ -543,20 +543,7 @@ describe('AwsIdentityFederationSetup', () => {
           iacTemplateUrl: 'https://example.com/template.yml',
         })
       );
-      expect(props?.integrationTitle).toBeUndefined();
-      expect(props?.surface).toBeUndefined();
       expect(props?.onValidityChange).toEqual(expect.any(Function));
-    });
-
-    it('forwards iacCheckSurface to IacKeyCheck as its telemetry surface', () => {
-      renderSetup({
-        cloud,
-        integrations,
-        initialConnectorId: 'connector-1',
-        iacCheckSurface: 'onboarding',
-      });
-
-      expect(lastIacKeyCheckProps()?.surface).toBe('onboarding');
     });
 
     it('starts not ready while the check is pending and follows the verdicts it reports', async () => {

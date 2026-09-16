@@ -3682,11 +3682,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Extract account type from package policy vars
         const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
-          const cloudConnectorName =
-            enrichedPackagePolicy.cloud_connector_name ||
-            `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`;
+          // Extract cloud connector name from package policy
+          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
+
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: cloudConnectorName,
+            name:
+              cloudConnectorName ||
+              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
             accountType,

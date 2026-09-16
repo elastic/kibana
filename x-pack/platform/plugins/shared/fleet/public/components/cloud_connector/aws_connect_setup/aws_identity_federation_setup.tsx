@@ -35,7 +35,7 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { IacKeyCheck, type IacKeyCheckProps } from '../components/iac_key_check';
+import { IacKeyCheck } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
 import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
@@ -59,11 +59,9 @@ export interface AwsIdentityFederationSetupProps {
    * the selected identity's deployed template against this set
    * (https://github.com/elastic/ingest-dev/issues/9415). Omit to keep the static-template flow.
    * Callers must remount this component when the set changes; it is not re-rendered against a
-   * new set (unlike the wizard form, which guards against edits after Launch).
+   * new set.
    */
   integrations?: RenderIacTemplateIntegration[];
-  /** Which surface the Existing Identity check reports telemetry as; defaults to the wizard. */
-  iacCheckSurface?: IacKeyCheckProps['surface'];
   onReadyChange?: (isReady: boolean) => void;
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
 }
@@ -78,7 +76,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   initialConnectorId,
   policyTemplates,
   integrations,
-  iacCheckSurface,
   onReadyChange,
   onConnectorIdChange,
 }) => {
@@ -356,7 +353,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 cloud={cloud}
                 accountType={accountType}
                 iacTemplateUrl={iacTemplateUrl}
-                surface={iacCheckSurface}
                 onValidityChange={setIsCheckValid}
               />
             </>

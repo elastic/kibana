@@ -60,7 +60,7 @@ describe('IacKeyCheckCallout', () => {
     expect(screen.getByText(/predates generated templates/i)).toBeInTheDocument();
   });
 
-  it('renders the mismatch title with the integration title in bold', () => {
+  it('renders the mismatch title', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -70,16 +70,12 @@ describe('IacKeyCheckCallout', () => {
           outcome: 'key_mismatch',
           integrations: [],
         }}
-        integrationTitle="Cloud Security Posture"
       />
     );
     expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
-    const bold = screen.getByText('Cloud Security Posture');
-    expect(bold.tagName).toBe('STRONG');
   });
 
-  it('falls back to "this integration" in bold when no title is given', () => {
-    // Multi-package surfaces (onboarding) omit the title; one integration by default.
+  it('names "this integration" in bold for a single integration by default', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -95,7 +91,7 @@ describe('IacKeyCheckCallout', () => {
     expect(bold.tagName).toBe('STRONG');
   });
 
-  it('falls back to "these integrations" when the check covers several and no title is given', () => {
+  it('names "these integrations" when the check covers several', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -113,19 +109,18 @@ describe('IacKeyCheckCallout', () => {
     expect(screen.queryByText('this integration')).not.toBeInTheDocument();
   });
 
-  it('names the integration in bold in the no_key body when a title is given', () => {
+  it('names "this integration" in bold in the no_key body for a single integration', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
-        integrationTitle="Cloud Security Posture"
         result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
       />
     );
-    const bold = screen.getByText('Cloud Security Posture');
+    const bold = screen.getByText('this integration');
     expect(bold.tagName).toBe('STRONG');
   });
 
-  it('pluralises the no_key body fallback from the integration count', () => {
+  it('pluralises the no_key body from the integration count', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}

@@ -126,16 +126,16 @@ export type IacKeyVerificationOutcome =
   | 'no_integrations'
   | 'key_unavailable';
 /**
- * Where the check was asked for. The browser names 'wizard' or 'onboarding' (both add
- * integrations, so the server cannot tell them apart); 'flyout' is derived server-side when no
- * new integrations are supplied and is never accepted from the browser.
+ * Where the check was asked for. Derived server-side from the request: 'onboarding' when new
+ * integrations are supplied (AWS onboarding, Existing Identity), 'flyout' when none are
+ * (connector details re-check). The browser never names it.
  */
-export type IacKeySurface = 'wizard' | 'flyout' | 'onboarding';
+export type IacKeySurface = 'onboarding' | 'flyout';
 export type IacKeyCheckAction = 'update_stack_clicked' | 'verify_clicked';
 export type IacKeyCheckReason = 'no_key' | 'key_mismatch';
 
 export interface IacKeyVerificationCompletedFields {
-  /** The surface the browser named, or 'wizard'/'flyout' derived from whether integrations were supplied. */
+  /** 'onboarding' or 'flyout', derived from whether new integrations were supplied. */
   surface: IacKeySurface;
   outcome: IacKeyVerificationOutcome;
   hasDeploymentId: boolean;
@@ -151,7 +151,7 @@ export const IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT: EventTypeOpts<Iac
         type: 'keyword',
         _meta: {
           description:
-            'UI surface that asked for the check: wizard (integration policy, Existing Identity tab), onboarding (AWS onboarding, Existing Identity tab) or flyout (connector details).',
+            'UI surface that asked for the check: onboarding (AWS onboarding, Existing Identity) or flyout (connector details).',
         },
       },
       outcome: {
@@ -221,7 +221,7 @@ export const IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT: EventTypeOpts<IacKeyCheckAc
       type: 'keyword',
       _meta: {
         description:
-          'UI surface that asked for the check: wizard (integration policy, Existing Identity tab), onboarding (AWS onboarding, Existing Identity tab) or flyout (connector details).',
+          'UI surface that asked for the check: onboarding (AWS onboarding, Existing Identity) or flyout (connector details).',
       },
     },
     action: {

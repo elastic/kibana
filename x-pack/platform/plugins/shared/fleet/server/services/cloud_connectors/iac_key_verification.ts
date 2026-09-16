@@ -259,17 +259,14 @@ const persistUpgradeStatus = async (
 export const verifyCloudConnectorIacKey = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
-  newIntegrations?: IacIntegrationSelection[],
-  /** Telemetry label named by the browser; derived from `newIntegrations` when absent. */
-  requestedSurface?: IacKeySurface
+  newIntegrations?: IacIntegrationSelection[]
 ): Promise<IacKeyVerification> => {
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
   // An empty array is the flyout asking about the connector as it stands, same as omitting it.
   const isAddingIntegrations = Boolean(newIntegrations?.length);
-  // The wizard and the AWS onboarding both add integrations, so the browser has to name which
-  // one it is; only the label is taken from it, the persistence rule below follows the set.
-  const surface: IacKeySurface = requestedSurface ?? (isAddingIntegrations ? 'wizard' : 'flyout');
+  // Only the AWS onboarding adds integrations, so the telemetry surface follows the set.
+  const surface: IacKeySurface = isAddingIntegrations ? 'onboarding' : 'flyout';
 
   // SO reads propagate (the route maps them to 404/500); only the render call fails open —
   // answering "up to date" during an SO outage would be the worse lie.
@@ -310,7 +307,7 @@ export const verifyCloudConnectorIacKey = async (
     flow: IAC_KEY_CHECK_FLOW,
     contextForLog: `connector ${cloudConnectorId}`,
   });
-  // Only a plain re-check describes the connector as it is stored; a wizard/onboarding check
+  // Only a plain re-check describes the connector as it is stored; an onboarding check
   // carries integrations the user has not saved yet, so its verdict must not be written down.
   if (!isAddingIntegrations) {
     await persistUpgradeStatus(

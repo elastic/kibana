@@ -97,7 +97,9 @@ export const useVarGroupCloudConnector = ({
 
   // Create an UpdatePolicy callback compatible with CloudConnectorSetup
   const handleCloudConnectorUpdate: UpdatePolicy = useCallback(
-    ({ updatedPolicy }) => updatePackagePolicy(updatedPolicy),
+    ({ updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+    },
     [updatePackagePolicy]
   );
 

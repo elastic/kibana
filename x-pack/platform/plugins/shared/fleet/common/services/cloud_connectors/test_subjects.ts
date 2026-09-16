@@ -15,8 +15,6 @@ export const CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ =
   'cloudConnectorTemplateGenerationErrorCallout';
 export const CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ =
   'cloudConnectorTemplateUpToDateCallout';
-export const CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ =
-  'cloudConnectorStaleTemplateCallout';
 export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
   `${CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ}-${connectorId}`;
 
@@ -45,8 +43,6 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   AUDIENCE: 'gcpCredentialsAudienceInput',
   CLOUD_CONNECTOR_ID: 'gcpCredentialsCloudConnectorIdInput',
 };
-
-export const CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ = 'cloudConnectorStackArnInput';
 
 export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
   CALLOUT: 'cloudConnectorIacCheckCallout',

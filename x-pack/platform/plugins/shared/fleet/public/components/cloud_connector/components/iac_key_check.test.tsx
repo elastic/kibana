@@ -128,17 +128,8 @@ describe('IacKeyCheck', () => {
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
         cloudConnectorId: 'connector-1',
         integrations,
-        surface: 'wizard',
         enabled: true,
       });
-    });
-
-    it('passes the given surface to the hook', () => {
-      renderWithIntl(<IacKeyCheck {...defaultProps} surface="onboarding" />);
-
-      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(
-        expect.objectContaining({ surface: 'onboarding' })
-      );
     });
 
     it('is disabled when there are no integrations, so no request is made', () => {
@@ -214,16 +205,8 @@ describe('IacKeyCheck', () => {
       expect(onValidityChange).toHaveBeenCalledWith(true);
     });
 
-    it('names the integration in the callout when a title is given', async () => {
-      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
-
-      renderWithIntl(<IacKeyCheck {...defaultProps} integrationTitle="AWS CloudTrail" />);
-
-      await waitFor(() => expect(screen.getByText('AWS CloudTrail')).toBeInTheDocument());
-    });
-
-    it('pluralises the fallback copy from the number of integrations the check covers', async () => {
-      // Multi-package surfaces (onboarding) omit the title: two integrations → "these integrations".
+    it('pluralises the callout copy from the number of integrations the check covers', async () => {
+      // The onboarding checks a package set, not one titled integration: two → "these integrations".
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
 
       renderWithIntl(<IacKeyCheck {...defaultProps} />);
@@ -333,8 +316,8 @@ describe('IacKeyCheck', () => {
     });
 
     it('reports only when the blocking state changes, not when the callback identity changes', async () => {
-      // The wizard re-creates updatePolicy (and therefore onValidityChange) after every policy
-      // update; re-firing on identity would loop: report → update → new callback → report …
+      // A host may re-create onValidityChange after every state update; re-firing on identity
+      // would loop: report → update → new callback → report …
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
 
       const first = jest.fn();
@@ -344,7 +327,7 @@ describe('IacKeyCheck', () => {
       await waitFor(() => expect(first).toHaveBeenCalledWith(false));
       expect(first).toHaveBeenCalledTimes(1);
 
-      // Same blocking state, new callback identity (what the wizard does after each update).
+      // Same blocking state, new callback identity (what a host does after each state update).
       const second = jest.fn();
       rerender(withProviders(<IacKeyCheck {...defaultProps} onValidityChange={second} />));
       expect(second).not.toHaveBeenCalled();
@@ -376,28 +359,13 @@ describe('IacKeyCheck', () => {
       expect(mockReportEvent).toHaveBeenCalledWith(
         'iac_provisioner_key_check_action',
         expect.objectContaining({
-          surface: 'wizard',
+          surface: 'onboarding',
           action: 'update_stack_clicked',
           reason: 'key_mismatch',
           hasDeploymentId: false,
         })
       );
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('reports the given surface in the action event', async () => {
-      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
-
-      renderWithIntl(<IacKeyCheck {...defaultProps} surface="onboarding" />);
-
-      await userEvent.click(
-        await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
-      );
-
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        'iac_provisioner_key_check_action',
-        expect.objectContaining({ surface: 'onboarding', action: 'update_stack_clicked' })
-      );
     });
 
     it('clicking Verify reports telemetry and refetches', async () => {

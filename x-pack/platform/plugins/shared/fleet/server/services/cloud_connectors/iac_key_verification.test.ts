@@ -262,11 +262,11 @@ describe('verifyCloudConnectorIacKey', () => {
       integrations: merged,
     });
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ surface: 'wizard', outcome: 'matches', integrationCount: 1 })
+      expect.objectContaining({ surface: 'onboarding', outcome: 'matches', integrationCount: 1 })
     );
   });
 
-  it('merges several new integrations from different packages into one wizard check', async () => {
+  it('merges several new integrations from different packages into one onboarding check', async () => {
     // The AWS onboarding selects across packages (aws, aws_logs, ...) in a single pass.
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
     mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
@@ -298,35 +298,10 @@ describe('verifyCloudConnectorIacKey', () => {
     expect(mockedResolve).toHaveBeenCalledWith(lenientBuild(merged));
     expect(result.integrations).toEqual(merged);
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ surface: 'wizard', outcome: 'matches', integrationCount: 2 })
+      expect.objectContaining({ surface: 'onboarding', outcome: 'matches', integrationCount: 2 })
     );
     expect(logger.info).toHaveBeenCalledWith(
-      'IaC key check for connector cc-1 (wizard, aws): matches — adding aws[guardduty], aws_logs[generic]'
-    );
-  });
-
-  it('reports the surface the caller named instead of deriving wizard from the integrations', async () => {
-    // The AWS onboarding and the wizard both add integrations; only the browser can tell them apart.
-    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
-    mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
-
-    await verifyCloudConnectorIacKey(
-      soClient,
-      'cc-1',
-      [
-        {
-          name: 'aws',
-          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
-        },
-      ],
-      'onboarding'
-    );
-
-    expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ surface: 'onboarding', outcome: 'matches' })
-    );
-    expect(logger.info).toHaveBeenCalledWith(
-      'IaC key check for connector cc-1 (onboarding, aws): matches — adding aws[guardduty]'
+      'IaC key check for connector cc-1 (onboarding, aws): matches — adding aws[guardduty], aws_logs[generic]'
     );
   });
 
@@ -413,7 +388,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
     expect(result.matches).toBe(true);
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ surface: 'wizard', outcome: 'key_unavailable' })
+      expect.objectContaining({ surface: 'onboarding', outcome: 'key_unavailable' })
     );
     expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ flow: 'iac_key_check', success: false, httpStatus: 503 })
@@ -615,7 +590,7 @@ describe('verifyCloudConnectorIacKey', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('does not persist a wizard check, whose integrations are not saved yet', async () => {
+    it('does not persist an onboarding check, whose integrations are not saved yet', async () => {
       soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
       mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
 
@@ -630,34 +605,15 @@ describe('verifyCloudConnectorIacKey', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('does not persist an onboarding check either: the rule follows the integrations, not the label', async () => {
+    it('logs the persisted status transition as a flyout verify', async () => {
       soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
       mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
 
-      await verifyCloudConnectorIacKey(
-        soClient,
-        'cc-1',
-        [
-          {
-            name: 'aws',
-            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
-          },
-        ],
-        'onboarding'
-      );
-
-      expect(soClient.update).not.toHaveBeenCalled();
-    });
-
-    it('persists a check with no new integrations whatever surface it names, logging that surface', async () => {
-      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
-      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
-
-      await verifyCloudConnectorIacKey(soClient, 'cc-1', [], 'onboarding');
+      await verifyCloudConnectorIacKey(soClient, 'cc-1', []);
 
       expectStatusWritten('upgrade_available');
       expect(logger.info).toHaveBeenCalledWith(
-        'IaC upgrade status for connector cc-1: <unset> → upgrade_available (onboarding verify)'
+        'IaC upgrade status for connector cc-1: <unset> → upgrade_available (flyout verify)'
       );
     });
 

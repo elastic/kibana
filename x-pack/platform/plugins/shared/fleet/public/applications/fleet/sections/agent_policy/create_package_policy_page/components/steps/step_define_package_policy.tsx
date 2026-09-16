@@ -96,8 +96,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packagePolicyId?: string;
   deploymentSelector?: React.ReactNode;
   hideInVarGroupOptions?: Record<string, string[]>;
-  /** Receives whether the cloud connector section blocks submission (IaC key mismatch). */
-  onCloudConnectorBlockingChange?: (isBlocked: boolean) => void;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -115,7 +113,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     packagePolicyId,
     deploymentSelector,
     hideInVarGroupOptions,
-    onCloudConnectorBlockingChange,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -984,7 +981,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                             templateName={packageInfo.name}
                             iacTemplateUrl={iacTemplateUrl}
                             accountType={accountType}
-                            onIacBlockingChange={onCloudConnectorBlockingChange}
                           />
                         </EuiFlexItem>
                       )}

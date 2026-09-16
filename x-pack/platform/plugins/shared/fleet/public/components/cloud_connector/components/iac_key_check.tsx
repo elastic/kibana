@@ -14,7 +14,6 @@ import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/serv
 import {
   IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT,
   type IacKeyCheckAction,
-  type IacKeySurface,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
@@ -34,28 +33,23 @@ export interface IacKeyCheckProps {
   cloudConnectorId: string | undefined;
   /** Integrations the connector will have to cover on top of its saved package policies. */
   integrations: RenderIacTemplateIntegration[];
-  /** Named in the callout copy; omit on multi-package surfaces. */
-  integrationTitle?: string;
   cloud?: CloudSetupForCloudConnector;
   accountType?: AccountType;
   iacTemplateUrl?: string;
-  /** Telemetry surface this check and its callout actions report as. */
-  surface?: Extract<IacKeySurface, 'wizard' | 'onboarding'>;
   onValidityChange?: (isValid: boolean) => void;
 }
 
 /**
  * Asks the server whether the connector's deployed template covers its saved policies plus
- * `integrations`, and offers the CloudFormation update when it does not.
+ * `integrations`, and offers the CloudFormation update when it does not. Only the AWS onboarding
+ * renders it, so its telemetry reports the 'onboarding' surface.
  */
 export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   cloudConnectorId,
   integrations,
-  integrationTitle,
   cloud,
   accountType,
   iacTemplateUrl,
-  surface = 'wizard',
   onValidityChange,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
@@ -66,7 +60,6 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   const { data, isFetching, isInitialLoading, refetch } = useVerifyIacKey({
     cloudConnectorId,
     integrations,
-    surface,
     enabled: isCheckEnabled,
   });
 
@@ -117,10 +110,10 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   // being pending.
   const isAwaitingFirstVerdict = isInitialLoading;
 
-  // Report validity only when the blocking state itself changes. Callers (e.g. the wizard's
-  // updatePolicy) re-create the callback on every update, so depending on its identity here
-  // would re-fire this effect after each update it causes — an infinite render loop (seen as a
-  // "page unresponsive" prompt during the 2026-09-09 walkthrough).
+  // Report validity only when the blocking state itself changes. Hosts may re-create the
+  // callback on every update, so depending on its identity here would re-fire this effect after
+  // each update it causes — an infinite render loop (seen as a "page unresponsive" prompt during
+  // the 2026-09-09 walkthrough).
   const onValidityChangeRef = useRef(onValidityChange);
   onValidityChangeRef.current = onValidityChange;
   const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
@@ -149,14 +142,14 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     (action: IacKeyCheckAction) => {
       if (data?.reason) {
         analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
-          surface,
+          surface: 'onboarding',
           action,
           reason: data.reason,
           hasDeploymentId: Boolean(data.deploymentId),
         });
       }
     },
-    [analytics, data, surface]
+    [analytics, data]
   );
 
   if (!data || data.matches) {
@@ -167,7 +160,6 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     <>
       <IacKeyCheckCallout
         result={data}
-        integrationTitle={integrationTitle}
         integrationCount={integrations.length}
         onUpdateStack={() => {
           reportAction('update_stack_clicked');

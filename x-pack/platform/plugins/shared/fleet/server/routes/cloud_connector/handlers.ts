@@ -350,7 +350,6 @@ export const verifyCloudConnectorIacKeyHandler: FleetRequestHandler<
 
   try {
     const newIntegrations = request.body?.integrations;
-    const surface = request.body?.surface;
     logger.info(
       `Verifying IaC key for cloud connector ${cloudConnectorId}${
         newIntegrations?.length
@@ -361,8 +360,7 @@ export const verifyCloudConnectorIacKeyHandler: FleetRequestHandler<
     const body: VerifyCloudConnectorIacKeyResponse = await verifyCloudConnectorIacKey(
       internalSoClient,
       cloudConnectorId,
-      newIntegrations,
-      surface
+      newIntegrations
     );
     logger.debug(`IaC key verification result for ${cloudConnectorId}: ${JSON.stringify(body)}`);
     return response.ok({ body });

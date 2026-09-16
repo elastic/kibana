@@ -54,7 +54,7 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
     // Forwarded as the array it arrived as, so the service merges every package at once.
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations, undefined);
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations);
     expect(response.ok).toHaveBeenCalledWith({
       body: { matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] },
     });
@@ -69,22 +69,7 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
 
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', undefined, undefined);
-  });
-
-  it('forwards the surface the browser named, so onboarding checks are not counted as wizard ones', async () => {
-    mockedVerify.mockResolvedValueOnce({ matches: true, outcome: 'matches', integrations: [] });
-    const integrations = [
-      { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
-    ];
-    const request = httpServerMock.createKibanaRequest({
-      params: { cloudConnectorId: 'cc-1' },
-      body: { integrations, surface: 'onboarding' },
-    });
-
-    await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
-
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations, 'onboarding');
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', undefined);
   });
 
   it('returns 404 when the connector does not exist', async () => {
