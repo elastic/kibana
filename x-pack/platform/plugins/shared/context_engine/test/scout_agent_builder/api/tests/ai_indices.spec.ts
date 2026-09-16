@@ -85,6 +85,58 @@ const emptyAiIndex = (destValue: string, traces: AiIndexTrace[] = []) => ({
   traces,
 });
 
+apiTest.describe('AI-index memory toggle', { tag: tags.stateful.classic }, () => {
+  apiTest('round-trips the toggle', async ({ apiClient, esClient, requestAuth }) => {
+    const id = 'scout_memory_toggle_ai_index';
+    const path = aiIndexPath(id);
+    const dest = 'ai-index-ds-scout-memory-toggle';
+    const credentials = await requestAuth.getApiKey('admin');
+    const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+    const body = {
+      description: 'Memory toggle integration test',
+      dest: dataStreamDest(dest),
+      automations: [],
+      sources: [],
+    };
+
+    await apiClient.delete(path, { headers, responseType: 'json' });
+    await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
+
+    try {
+      const createResponse = await apiClient.post(COLLECTION, {
+        headers,
+        responseType: 'json',
+        body: { id, ...body },
+      });
+      expect(createResponse).toHaveStatusCode(201);
+
+      const defaultResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(defaultResponse).toHaveStatusCode(200);
+      expect(defaultResponse.body.memory_enabled).toBe(false);
+
+      const updateResponse = await apiClient.put(path, {
+        headers,
+        responseType: 'json',
+        body: { ...body, memory_enabled: true },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+
+      const enabledResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(enabledResponse).toHaveStatusCode(200);
+      expect(enabledResponse.body.memory_enabled).toBe(true);
+    } finally {
+      await apiClient.delete(path, { headers, responseType: 'json' });
+      await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+    }
+  });
+});
+
 // Failing: See https://github.com/elastic/kibana/issues/291053
 apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
