@@ -8231,17 +8231,6 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Filter by tags. Accepts a single string or an array.
-          in: query
-          name: tags
-          required: false
-          schema:
-            items:
-              maxLength: 128
-              minLength: 1
-              type: string
-            maxItems: 10
-            type: array
         - description: Filter by enabled status. Accepts the strings true or false.
           in: query
           name: enabled
@@ -8296,8 +8285,6 @@ paths:
                           expression: 'rule.tags: "production"'
                         name: Notify on production alerts
                         snoozed_until: null
-                        tags:
-                          - production
                         throttle:
                           interval: null
                           strategy: on_status_change
@@ -8422,8 +8409,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -8453,8 +8438,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9451,8 +9434,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9619,8 +9600,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts (updated)
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9781,8 +9760,6 @@ paths:
                   matcher:
                     expression: 'rule.tags: "production"'
                   name: Notify on production alerts
-                  tags:
-                    - production
                   throttle:
                     strategy: on_status_change
             schema:
@@ -9812,8 +9789,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -9847,8 +9822,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10020,8 +9993,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10192,8 +10163,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10374,8 +10343,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -10546,8 +10513,6 @@ paths:
                       expression: 'rule.tags: "production"'
                     name: Notify on production alerts
                     snoozed_until: null
-                    tags:
-                      - production
                     throttle:
                       interval: null
                       strategy: on_status_change
@@ -90662,12 +90627,6 @@ components:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
-        tags:
-          description: Tags associated with the action policy.
-          items:
-            type: string
-          nullable: true
-          type: array
         throttle:
           additionalProperties: false
           description: The throttle configuration for notifications.
@@ -90717,7 +90676,6 @@ components:
         - destinations
         - matcher
         - group_by
-        - tags
         - grouping_mode
         - throttle
         - snoozed_until
@@ -91409,14 +91367,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
           description: The throttle configuration for notifications.
@@ -92235,15 +92185,6 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-        tags:
-          description: Tags for categorizing the action policy.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          nullable: true
-          type: array
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
