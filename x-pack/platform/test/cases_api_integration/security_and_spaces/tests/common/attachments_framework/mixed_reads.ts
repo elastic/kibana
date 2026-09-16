@@ -30,6 +30,8 @@ import {
   bulkCreateAttachments,
   bulkGetAttachments,
   getCase,
+  findUnifiedAttachments,
+  getUnifiedAttachment,
 } from '../../../../common/lib/api';
 
 const EVENTS_INDEX = 'test-events-index';
@@ -302,6 +304,120 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedCase.comments?.length).to.be(3);
+      });
+    });
+
+    describe('unified attachments collection and single-attachment GET', () => {
+      it('GET /attachments resolves attachments from both cases-comments and cases-attachments', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        const unifiedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 'unified for collection read' },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+        });
+        const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
+
+        const attachments = await findUnifiedAttachments({ supertest, caseId: postedCase.id });
+
+        expect(attachments.data.length).to.be(2);
+        const ids = attachments.data.map((a) => a.id);
+        expect(ids).to.contain(legacyId);
+        expect(ids).to.contain(unifiedId);
+      });
+
+      it('GET /attachments/{id} retrieves a single attachment regardless of storage model', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        const unifiedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: OSQUERY_ATTACHMENT_TYPE,
+            attachmentId: 'collection-osquery-1',
+            metadata: { agentIds: ['agent-collection'], queryId: 'collection-query' },
+            owner: 'securitySolutionFixture',
+          } as AttachmentRequestV2,
+        });
+        const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
+
+        const legacyAttachment = await getUnifiedAttachment({
+          supertest,
+          caseId: postedCase.id,
+          attachmentId: legacyId,
+        });
+        expect(legacyAttachment.type).to.be(COMMENT_ATTACHMENT_TYPE);
+
+        const unifiedAttachment = await getUnifiedAttachment({
+          supertest,
+          caseId: postedCase.id,
+          attachmentId: unifiedId,
+        });
+        expect(unifiedAttachment.type).to.be(OSQUERY_ATTACHMENT_TYPE);
+      });
+
+      it('GET /attachments?type=security.alert resolves legacy `alert` and unified `security.alert` together', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: 'collection-legacy-alert-1',
+            index: '.alerts-security.alerts-default',
+            rule: { id: 'rule-collection-1', name: 'Rule collection 1' },
+            type: AttachmentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+        const legacyAlertId = legacyCase.comments![0].id;
+
+        const unifiedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'security.alert' as const,
+              attachmentId: 'collection-unified-alert-1',
+              metadata: {
+                index: '.alerts-security.alerts-default',
+                rule: { id: 'rule-collection-2', name: 'Rule collection 2' },
+              },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+        });
+        const unifiedAlertId = unifiedCase.comments!.find((c) => c.id !== legacyAlertId)!.id;
+
+        const attachments = await findUnifiedAttachments({
+          supertest,
+          caseId: postedCase.id,
+          query: { type: 'security.alert' },
+        });
+
+        const ids = attachments.data.map((a) => a.id);
+        expect(ids).to.contain(legacyAlertId);
+        expect(ids).to.contain(unifiedAlertId);
       });
     });
 

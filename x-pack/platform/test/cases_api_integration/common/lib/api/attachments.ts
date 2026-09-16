@@ -20,6 +20,7 @@ import type {
   BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
+  UnifiedAttachmentsFindResponse,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
@@ -336,4 +337,51 @@ export const findAttachments = async ({
     .expect(expectedHttpCode);
 
   return body;
+};
+
+// v2 (unified-shape) version of `findAttachments`. Hits `GET /attachments`.
+export const findUnifiedAttachments = async ({
+  supertest,
+  caseId,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<UnifiedAttachmentsFindResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments`)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+// v2 (unified-shape) version of `getComment`. Hits `GET /attachments/{id}`.
+export const getUnifiedAttachment = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<Attachment> => {
+  const { body: attachment } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return attachment;
 };
