@@ -256,9 +256,9 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
+    // The deterministic id makes the bulk index an overwrite, so no delete precedes it.
     const entryId = smlEntryId(attachmentType, originId);
     const creation = await this.readCreation({ entryId, esClient });
-    await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
       entryId,

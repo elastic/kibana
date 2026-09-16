@@ -980,6 +980,7 @@ const searchSml = async ({
     const refUrisIdx = colIndex.get('ref_uris');
     if (refUrisIdx !== undefined) {
       // The origin is reported as `origin`; only the producer's references are returned here.
+      // Multi-values arrive sorted, so the origin is found by value rather than position.
       const refUris = toStringArray(row[refUrisIdx]).filter((uri) => uri !== result.origin.uri);
       if (refUris.length > 0) result.references = refUris.map((uri) => ({ uri }));
     }

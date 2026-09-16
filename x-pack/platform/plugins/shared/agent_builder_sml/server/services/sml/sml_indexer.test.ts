@@ -27,9 +27,6 @@ jest.mock('./sml_service', () => ({
   ),
 }));
 
-// Distinct mock id per call so tests can assert each bulk operation gets its
-// own _id. Reset in `beforeEach` so cross-test counts stay stable.
-
 // Shared so a test can arrange the response before `createMockEsClient()` is called.
 const bulkMock = jest.fn();
 
@@ -137,7 +134,7 @@ describe('createSmlIndexer', () => {
       expect(getSmlEntry).not.toHaveBeenCalled();
     });
 
-    it('create action: calls getSmlEntry, deletes existing entry, indexes the new one with permissions from getPermissions hook', async () => {
+    it('create action: calls getSmlEntry and overwrites the entry with permissions from getPermissions hook', async () => {
       const smlEntry = {
         type: 'lens',
         title: 'My Viz',
@@ -177,14 +174,7 @@ describe('createSmlIndexer', () => {
         savedObjectsClient: {},
         logger: contextLogger,
       });
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-        index: smlIndexName,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: { bool: { filter: [{ term: { id: 'lens:att-2' } }] } },
-        refresh: false,
-      });
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(bulkMock).toHaveBeenCalledTimes(1);
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.index).toBe(smlIndexName);
@@ -387,7 +377,7 @@ describe('createSmlIndexer', () => {
       expect(document.attributes.owner_team).toBe('sales-ops');
     });
 
-    it('update action: same as create (delete-then-write)', async () => {
+    it('update action: same as create (overwrite)', async () => {
       const smlEntry = { type: 'lens', title: 'Updated', content: 'new content' };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
@@ -405,7 +395,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(getSmlEntry).toHaveBeenCalledTimes(1);
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(bulkMock).toHaveBeenCalledTimes(1);
     });
 
