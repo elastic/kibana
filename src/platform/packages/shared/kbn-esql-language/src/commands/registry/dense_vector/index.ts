@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { ICommand, ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
 import { autocomplete } from './autocomplete';
+import { validate } from './validate';
 
 const denseVectorCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
+  validate,
 };
 
 export const denseVectorCommand: ICommand = {
