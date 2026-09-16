@@ -26,6 +26,9 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+mockedAppContextService.getLogger.mockReturnValue({
+  get: () => ({ warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() }),
+} as any);
 
 function getMockedSoClient() {
   const soClientMock = savedObjectsClientMock.create();
@@ -225,6 +228,55 @@ describe('helpers', () => {
 
       expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
         { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+      ]);
+    });
+
+    it('should skip unresolvable sources and keep valid ones', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: ['test-ds-1', 'stale-dangling-id'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+      ]);
+    });
+
+    it('should fall back to default when all sources are unresolvable', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: ['stale-dangling-id'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        {
+          host: 'http://default-registry.co',
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+        },
       ]);
     });
   });

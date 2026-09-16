@@ -7,6 +7,7 @@
 
 import { DEFAULT_DOWNLOAD_SOURCE_REFERENCE } from '../../constants';
 import { downloadSourceService } from '../../services';
+import { appContextService } from '../../services/app_context';
 import type { AgentPolicy, DownloadSource } from '../../types';
 import { FleetError, DownloadSourceNotFound } from '../../errors';
 
@@ -26,16 +27,30 @@ export const getDownloadSourcesForAgentPolicy = async (
       ? [agentPolicy.download_source_id]
       : [defaultDownloadSourceId];
 
-  const sources = await Promise.all(
+  const logger = appContextService.getLogger().get('getDownloadSourcesForAgentPolicy');
+  const resolved = await Promise.all(
     ids.map(async (id) => {
       const resolvedId = id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE ? defaultDownloadSourceId : id;
-      const source = await downloadSourceService.get(resolvedId);
-      if (!source) {
-        throw new DownloadSourceNotFound(`Download source host not found ${resolvedId}`);
+      try {
+        return await downloadSourceService.get(resolvedId);
+      } catch {
+        logger.warn(`Download source host not found ${resolvedId}, skipping`);
+        return null;
       }
-      return source;
     })
   );
+
+  const sources = resolved.filter((s): s is DownloadSource => s !== null);
+
+  if (sources.length === 0) {
+    let defaultSource: DownloadSource;
+    try {
+      defaultSource = await downloadSourceService.get(defaultDownloadSourceId);
+    } catch {
+      throw new DownloadSourceNotFound(`Download source host not found ${defaultDownloadSourceId}`);
+    }
+    return [defaultSource];
+  }
 
   return sources;
 };
