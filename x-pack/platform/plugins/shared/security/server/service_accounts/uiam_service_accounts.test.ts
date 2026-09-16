@@ -383,7 +383,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
-      ).rejects.toThrowError('Error occured during service account listing');
+      ).rejects.toThrowError('Error occurred during service account listing');
     });
 
     it('rejects when an account is missing creator', async () => {
@@ -391,7 +391,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
-      ).rejects.toThrowError('Error occured during service account listing');
+      ).rejects.toThrowError('Error occurred during service account listing');
     });
 
     it("propagates a 403 when UIAM refuses Kibana's assumable_by", async () => {
@@ -456,7 +456,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).rejects.toThrowError('Error occured during service account retrieval');
+      ).rejects.toThrowError('Error occurred during service account retrieval');
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
@@ -496,7 +496,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).rejects.toThrowError('Error occured during service account retrieval');
+      ).rejects.toThrowError('Error occurred during service account retrieval');
     });
 
     it('propagates a 404 when UIAM has no such account', async () => {

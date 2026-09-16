@@ -251,7 +251,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account list payload from UIAM failed validation: ${parsed.error.message}`
         );
-        throw new Error(`Error occured during service account listing.`);
+        throw new Error('Error occurred during service account listing.');
       }
 
       return parsed.data;
@@ -284,7 +284,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
         );
-        throw new Error(`Error occured during service account retrieval.`);
+        throw new Error('Error occurred during service account retrieval.');
       }
 
       return parsed.data;
