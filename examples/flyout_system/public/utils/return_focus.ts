@@ -16,6 +16,8 @@ const RETURN_FOCUS_DELAY = 100;
  * Returns focus to the trigger element when a flyout closes.
  * Defers execution to run after EUI's built-in focus restoration.
  * TODO: Remove when https://github.com/elastic/eui/issues/9365 is fixed.
+ * TODO(a11y-review): the timer is never cleared, so focus is pulled back to the trigger even if
+ * the user has already tabbed or clicked elsewhere within the delay.
  */
 export const returnFocusToTrigger = (trigger: RefObject<HTMLButtonElement>) => {
   setTimeout(() => {

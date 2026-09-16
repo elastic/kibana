@@ -48,6 +48,9 @@ const SCROLL_EDGE_EPSILON = 1;
 const isAtScrollEdge = (scroller: HTMLElement, delta: number): boolean => {
   if (delta === 0) return true;
   if (delta < 0) return scroller.scrollTop <= SCROLL_EDGE_EPSILON;
+  // TODO(a11y-review): when the body does not overflow, maxScrollTop is <= 0 and both branches
+  // report "at edge", so the wheel handler never calls preventDefault and a wheel over the header
+  // scrolls the page behind a short non-modal flyout. Gate the release on scrollHeight > clientHeight?
   const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
   return scroller.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
 };
@@ -162,6 +165,8 @@ export const useHeaderCollapse = ({
     // trap. Moving it has to happen here, before the state flips: once the attributes are on the
     // element there is no focused node left to find. The scroll container is the natural
     // destination, being both focusable and the thing the user was already scrolling.
+    // TODO(a11y-review): `contains` misses focus sitting in a portal owned by this region, such as
+    // the badge-overflow popover panel, so the anchor can be hidden while focus is still inside it.
     if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
       scroller.focus();
     }

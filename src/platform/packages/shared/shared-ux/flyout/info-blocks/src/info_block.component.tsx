@@ -38,6 +38,10 @@ const styles = ({ euiTheme }: UseEuiTheme) => ({
  * A single title/value pair; one grid cell of an `InfoBlocks` panel.
  *
  * Renders a `dt`/`dd` pair, so it belongs inside a `dl` — `InfoBlocks` supplies one.
+ *
+ * TODO(a11y-review): this is exported from the package index, but `dt`/`dd` are only valid inside a
+ * `dl`. Rendered standalone the markup is invalid and the term/definition roles do not map, since
+ * axe's `dlitem` check requires a `DL` ancestor. Keep it internal, or state the requirement here.
  */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
