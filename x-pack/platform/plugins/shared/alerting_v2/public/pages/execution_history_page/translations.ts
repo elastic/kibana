@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** --- Policies table columns --- */
+/** --- Action policies table columns --- */
 export const COLUMN_TIMESTAMP = i18n.translate(
   'xpack.alertingV2.executionHistory.columns.timestamp',
   {
@@ -16,7 +16,7 @@ export const COLUMN_TIMESTAMP = i18n.translate(
 );
 
 export const COLUMN_POLICY = i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
-  defaultMessage: 'Policy',
+  defaultMessage: 'Action policy',
 });
 
 export const COLUMN_OUTCOME = i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {

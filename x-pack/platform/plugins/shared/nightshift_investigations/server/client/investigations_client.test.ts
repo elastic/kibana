@@ -24,6 +24,7 @@ import {
   InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
+  InvestigationQuotaDeniedError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
@@ -59,6 +60,7 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockRequest = {} as KibanaRequest;
+const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
 
 let repository: jest.Mocked<InvestigationRepository>;
 
@@ -71,6 +73,7 @@ const makeClient = (
     logger: mockLogger,
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
+    investigationQuotaCallback,
     investigationRepository: repository,
     isAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
@@ -89,8 +92,8 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   summary: 'All clear.',
   conclusion: 'No issues found.',
   hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
-  recommendations: [{ title: 'Keep monitoring' }],
-  blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+  recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
+  blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
   trigger_feedback: [],
   ...overrides,
 });
@@ -116,11 +119,15 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   get: jest.fn().mockResolvedValue(undefined),
   update: jest.fn().mockResolvedValue(undefined),
   find: jest.fn().mockResolvedValue(findResult([])),
+  countBySeverity: jest
+    .fn()
+    .mockResolvedValue({ '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 }),
 });
 
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
+  investigationQuotaCallback.mockResolvedValue({ allowed: true });
   repository = createMockRepository();
 });
 
@@ -153,12 +160,26 @@ describe('NightshiftInvestigationsClient.get()', () => {
       conclusion: 'No issues found.',
       severity: undefined,
       hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
-      recommendations: [{ title: 'Keep monitoring' }],
-      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+      recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
+      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
       trigger_feedback: [],
       conversation_id: 'conv-1',
       impact: { entities: [{ name: 'checkout-service' }] },
     });
+  });
+
+  it('omits historical recommendation and blind-spot arrays without confidence', async () => {
+    repository.get.mockResolvedValue({
+      ...makeRecord(),
+      recommendations: [{ title: 'Keep monitoring' }],
+      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+    } as unknown as InvestigationRecord);
+
+    const result = await makeClient().get('inv-1');
+
+    expect(result.summary).toBe('All clear.');
+    expect(result.recommendations).toBeUndefined();
+    expect(result.blind_spots).toBeUndefined();
   });
 
   it('returns subject.summary from the stored subject_summary attribute', async () => {
@@ -286,6 +307,13 @@ describe('NightshiftInvestigationsClient.list()', () => {
     );
   });
 
+  it('maps concurrency_key onto the stored investigation filter', async () => {
+    await makeClient().list({ concurrency_key: 'alert-1' });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({ concurrencyKey: 'alert-1' })
+    );
+  });
+
   it('omits sortField when sort_field is not given so the store default applies', async () => {
     await makeClient().list({});
     expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ sortField: undefined }));
@@ -307,13 +335,16 @@ describe('NightshiftInvestigationsClient.list()', () => {
       concurrency_key: 'key-1',
       executed_by: 'test-user',
       subject: { type: 'alert', id: 'alert-42' },
+      // Rendered by the list row: the AI headline and the entity chips.
+      summary: 'All clear.',
+      impact: undefined,
     });
     expect(result.results[0]).not.toHaveProperty('trigger_type');
     expect(result.results[0]).not.toHaveProperty('error');
-    expect(result.results[0]).not.toHaveProperty('summary');
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
-    expect(result.results[0]).not.toHaveProperty('impact');
+    expect(result.results[0]).not.toHaveProperty('recommendations');
+    expect(result.results[0]).not.toHaveProperty('blind_spots');
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
@@ -371,6 +402,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const result = await makeClient().start({
       subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -388,6 +420,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {
@@ -409,7 +442,38 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(mockManagement.getWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationQuotaCallback.mock.invocationCallOrder[0]
+    );
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
+      installInvestigationAgentMock.mock.invocationCallOrder[0]
+    );
   });
+
+  it.each([
+    ['alert', { type: 'alert' as const, id: 'alert-1' }, alertContext],
+    ['significant event', { type: 'significant_event' as const, id: 'event-1' }, undefined],
+  ])(
+    'denies an automatic %s investigation before installation, launch, or persistence',
+    async (_label, subject, context) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+      await expect(
+        makeClient().start({
+          subject,
+          trigger_type: 'automatic',
+          context,
+        })
+      ).rejects.toThrow(InvestigationQuotaDeniedError);
+
+      expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+      expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
+    }
+  );
 
   it('persists the subject summary into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
@@ -417,6 +481,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await makeClient().start({
       subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -428,7 +493,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
+      context: alertContext,
+    });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.context).not.toHaveProperty('summary');
@@ -440,6 +509,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await makeClient().start({
       subject: { type: 'significant_event', id: 'se-99' },
+      trigger_type: 'manual',
       concurrency_key: 'key-abc',
     });
 
@@ -458,6 +528,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await makeClient().start({
       subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'manual',
       message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
       stream_names: ['logs.checkout'],
     });
@@ -473,7 +544,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
-    await makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } });
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'manual',
+    });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Investigation requested for significant_event se-1');
@@ -484,7 +558,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
+      context: alertContext,
+    });
 
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
@@ -495,12 +573,64 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
+  it('consumes quota for every automatic start attempt', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValueOnce('exec-123').mockResolvedValueOnce('exec-124');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'automatic',
+    });
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-2' },
+      trigger_type: 'automatic',
+    });
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not consume again when workflow launch fails after admission', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockRejectedValueOnce(new Error('Workflow launch failed'));
+
+    await expect(
+      makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
+      })
+    ).rejects.toThrow('Workflow launch failed');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('does not consume again when agent installation fails after admission', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    installInvestigationAgentMock.mockRejectedValueOnce(new Error('Agent installation failed'));
+
+    await expect(
+      makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
+      })
+    ).rejects.toThrow('Agent installation failed');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(
-      makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+      makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
+      })
     ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(installInvestigationAgentMock).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
@@ -513,17 +643,20 @@ describe('NightshiftInvestigationsClient.start()', () => {
       isAvailable: jest.fn().mockResolvedValue(true),
     });
 
-    await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      InvestigationUnavailableError
-    );
+    await expect(
+      client.start({ subject: { type: 'alert', id: 'alert-1' }, trigger_type: 'automatic' })
+    ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
     await expect(
       makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
         subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
       })
     ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -540,8 +673,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context })
+        makeClient().start({
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
+          context,
+        })
       ).rejects.toThrow(InvalidInvestigationContextError);
+      expect(investigationQuotaCallback).not.toHaveBeenCalled();
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
@@ -555,6 +693,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         await expect(
           makeClient().start({
             subject: { type: 'alert', id: 'alert-1' },
+            trigger_type: 'manual',
             context: { ...alertContext, [key]: 'whatever' },
           })
         ).rejects.toThrow(InvalidInvestigationContextError);
@@ -568,6 +707,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await expect(
         makeClient().start({
           subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
           context: { ...alertContext, event_uuid: 'se-1', severity: 'high' },
         })
       ).rejects.toThrow(/event_uuid[\s\S]*severity/);
@@ -579,6 +719,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await expect(
         makeClient().start({
           subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
           context: { alerts: [{ ...alertContext.alerts[0], flapping: 'nope' }] },
         })
       ).rejects.toThrow(/flapping/);
@@ -599,6 +740,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await expect(
         makeClient().start({
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: uuid },
         })
       ).rejects.toThrow(InvalidInvestigationContextError);
@@ -619,6 +761,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await expect(
         makeClient().start({
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
         })
       ).resolves.toEqual({ investigation_id: 'exec-791' });
@@ -631,6 +774,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await expect(
         makeClient().start({
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: 'se-1', severity: 'high' },
         })
       ).resolves.toEqual({ investigation_id: 'exec-790' });
@@ -641,7 +785,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
       await expect(
-        makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
+        })
       ).resolves.toEqual({ investigation_id: 'exec-789' });
     });
 
@@ -651,6 +798,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await makeClient().start({
         subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'manual',
         context: alertContext,
       });
 
@@ -667,6 +815,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       await makeClient().start({
         subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'manual',
         message: 'Checkout latency breach',
         context: { alerts: [alertContext.alerts[0]] },
       });

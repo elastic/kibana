@@ -1651,6 +1651,15 @@ describe('common utils', () => {
 
       expect(countUserAttachments(attachments)).toBe(0);
     });
+
+    it('counts a unified comment attachment', () => {
+      const attachments = [
+        createUserAttachment({ type: 'comment', comment: undefined, data: { content: 'hi' } }),
+        createAlertAttachment(),
+      ];
+
+      expect(countUserAttachments(attachments)).toBe(1);
+    });
   });
 
   describe('isPersistableStateOrExternalReference', () => {

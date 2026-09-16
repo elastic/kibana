@@ -51,9 +51,6 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
-    iacProvisioner: {
-      enabled: true,
-    },
     enableExperimental: true,
     experimentalFeatures: true,
     developer: {
@@ -281,7 +278,6 @@ export const config: PluginConfigDescriptor = {
       ),
       iacProvisioner: schema.maybe(
         schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),

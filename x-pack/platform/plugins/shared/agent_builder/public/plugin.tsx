@@ -346,12 +346,15 @@ export class AgentBuilderPlugin
         }));
       });
 
+    const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
+
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
-      attachments: createPublicAttachmentContract({ attachmentsService }),
+      attachments: publicAttachmentsService,
       conversationTemplates: createPublicConversationTemplatesContract({
         conversationTemplatesService,
         context: {
+          attachmentsService: publicAttachmentsService,
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
@@ -416,7 +419,7 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
-      core.chrome.next.aiButton.register({
+      core.chrome.controls.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
             coreStart={core}

@@ -125,6 +125,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/controls-plugin'
   - '@kbn/core-http-browser'
+  - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/object-utils'
@@ -163,6 +164,7 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/core-spaces-common'
@@ -170,7 +172,6 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
   - '@kbn/nightshift-investigations-plugin'
-  - '@kbn/zod'
   - '@kbn/ui-callout'
 tags:
   - plugin

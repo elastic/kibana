@@ -91,6 +91,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
 
   const hasItems = 'items' in badge && badge.items !== undefined;
   const isClickable = hasItems || badge.onClick !== undefined;
+  const isTooltipOnly = Boolean(tooltip) && !isClickable;
 
   const badgeOnClickAriaLabel =
     onClickAriaLabel ??
@@ -119,6 +120,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
       css={badgeStyle}
       iconType={hasItems ? 'chevronSingleDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}
+      tabIndex={isTooltipOnly ? 0 : undefined}
     >
       {label}
     </EuiBadge>
