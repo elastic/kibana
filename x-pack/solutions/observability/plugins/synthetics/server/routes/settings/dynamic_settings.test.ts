@@ -111,6 +111,26 @@ describe('dynamic settings routes', () => {
       expect(result).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
     });
 
+    it('ignores privateLocationsSyncInterval from older clients', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server,
+          request: { body: { privateLocationsSyncInterval: 10 } } as never,
+        })
+      );
+
+      expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
     it('does not clear pins when turning shard rebalance on', async () => {
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
@@ -176,41 +196,6 @@ describe('dynamic settings routes', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             message: expect.stringMatching(/could not be updated/i),
-          }),
-        })
-      );
-      expect(result).toMatchObject({ status: 409 });
-    });
-
-    it('returns 409 when the sync interval does not persist on the task', async () => {
-      jest
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
-        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
-        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
-      const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
-        schedule: { interval: '5m' },
-      });
-      const conflict = jest.fn((opts: { body: { message: string } }) => ({
-        status: 409,
-        ...opts,
-      }));
-
-      const route = createPostDynamicSettingsRoute();
-      const result = await route.handler(
-        buildRouteContext({
-          server,
-          response: { conflict } as never,
-          request: { body: { privateLocationsSyncInterval: 10 } } as never,
-        })
-      );
-
-      expect(conflict).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({
-            message: expect.stringMatching(/sync task is currently running/i),
           }),
         })
       );

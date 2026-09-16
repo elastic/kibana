@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useSyncInterval } from './use_sync_interval';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
@@ -23,29 +22,16 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
 
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
 
-  const syncInterval = useSyncInterval();
-
   const hasPendingChanges = (() => {
     // Only skip the pending check while the data has not loaded yet; an empty (but loaded)
     // list is a valid state where every referenced MW would be treated as missing/pending.
     if (!needsPendingCheck || data == null) return false;
 
-    const allMWsById = new Map(allMWs.map((mw) => [mw.id, mw]));
-    const syncWindowMs = syncInterval * 60 * 1000;
-    const now = Date.now();
-
-    return monitorMWIds.some((id) => {
-      const mw = allMWsById.get(id);
-      if (!mw) return true;
-
-      if (mw.updatedAt) {
-        const updatedAt = new Date(mw.updatedAt).getTime();
-        return now - updatedAt < syncWindowMs;
-      }
-
-      return false;
-    });
+    const knownIds = new Set(allMWs.map((mw) => mw.id));
+    // Edits runSoon the sync task; the callout is only for IDs the monitor still
+    // references after the MW was deleted.
+    return monitorMWIds.some((id) => !knownIds.has(id));
   })();
 
-  return { activeMWs, hasPendingChanges, syncInterval };
+  return { activeMWs, hasPendingChanges };
 };
