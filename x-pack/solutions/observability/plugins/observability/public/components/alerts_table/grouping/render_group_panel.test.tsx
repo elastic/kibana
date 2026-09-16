@@ -51,6 +51,7 @@ describe('renderGroupPanel', () => {
     expect(group).toHaveStyle({ gap: '8px' });
     expect(group).toHaveTextContent('APM Failed Transaction Rate');
     expect(countBadge).toHaveTextContent('3');
+    expect(countBadge).toHaveAttribute('aria-label', 'Show 3 tags');
     expect(queryByText('prod')).not.toBeInTheDocument();
   });
 

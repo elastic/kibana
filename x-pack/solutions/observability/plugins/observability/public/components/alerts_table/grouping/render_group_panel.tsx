@@ -83,7 +83,13 @@ const RuleTagsCountBadge = ({ tags }: { tags: string[] }) => {
           color="hollow"
           data-test-subj={`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`}
           onClick={onBadgeClick}
-          onClickAriaLabel={tagCount}
+          onClickAriaLabel={i18n.translate(
+            'xpack.observability.alert.grouping.tags.badgeAriaLabel',
+            {
+              defaultMessage: 'Show {count, plural, one {# tag} other {# tags}}',
+              values: { count: tags.length },
+            }
+          )}
         >
           {tagCount}
         </EuiBadge>
