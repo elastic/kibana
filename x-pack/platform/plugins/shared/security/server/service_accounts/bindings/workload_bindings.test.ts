@@ -20,12 +20,12 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
 import type { ServiceAccountsBackend } from '../types';
 
-const OPERATION_TYPE = 'alerting';
+const PLUGIN_ID = 'alerting';
 // What a mutation names: the space is taken from the request, not the caller.
 const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
 // What a read or an execution names: there is no request, so the space is explicit.
 const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
-const COORDINATES = { operationType: OPERATION_TYPE, ...WORKLOAD_IN_SPACE };
+const COORDINATES = { pluginId: PLUGIN_ID, ...WORKLOAD_IN_SPACE };
 
 const binding = (
   overrides: Partial<ServiceAccountWorkloadBinding> = {}
@@ -100,7 +100,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       const request = httpServerMock.createKibanaRequest();
       getSpaceId.mockReturnValue('marketing');
 
-      await bindings.bindWorkload(OPERATION_TYPE, request, {
+      await bindings.bindWorkload(PLUGIN_ID, request, {
         serviceAccountId: 'service-account-id',
         ...WORKLOAD,
         // A consumer forwarding an attacker-controlled space must not be able to reach it: the
@@ -117,7 +117,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     it('records the binding for the acting user', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      const result = await bindings.bindWorkload(OPERATION_TYPE, request, {
+      const result = await bindings.bindWorkload(PLUGIN_ID, request, {
         serviceAccountId: 'service-account-id',
         ...WORKLOAD,
       });
@@ -136,8 +136,8 @@ describe('ServiceAccountWorkloadBindings', () => {
       const request = httpServerMock.createKibanaRequest();
       const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
 
-      await bindings.bindWorkload(OPERATION_TYPE, request, params);
-      await bindings.bindWorkload(OPERATION_TYPE, request, params);
+      await bindings.bindWorkload(PLUGIN_ID, request, params);
+      await bindings.bindWorkload(PLUGIN_ID, request, params);
 
       const [[first], [second]] = store.set.mock.calls;
       expect(first.canary).not.toBe(second.canary);
@@ -147,7 +147,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       checkPrivileges.mockResolvedValue({ hasAllRequested: false });
 
       await expect(
-        bindings.bindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), {
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
           serviceAccountId: 'service-account-id',
           ...WORKLOAD,
         })
@@ -170,7 +170,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       getCurrentUser.mockReturnValue(null);
 
       await expect(
-        bindings.bindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), {
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
           serviceAccountId: 'service-account-id',
           ...WORKLOAD,
         })
@@ -181,7 +181,7 @@ describe('ServiceAccountWorkloadBindings', () => {
 
   describe('#unbindWorkload', () => {
     it('removes the binding behind the same privilege gate as bindWorkload', async () => {
-      await bindings.unbindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), WORKLOAD);
+      await bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD);
 
       expect(checkPrivileges).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['manage_security'], index: {} },
@@ -193,7 +193,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       const request = httpServerMock.createKibanaRequest();
       getSpaceId.mockReturnValue('marketing');
 
-      await bindings.unbindWorkload(OPERATION_TYPE, request, {
+      await bindings.unbindWorkload(PLUGIN_ID, request, {
         ...WORKLOAD,
         spaceId: 'another-space',
       } as never);
@@ -206,7 +206,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       checkPrivileges.mockResolvedValue({ hasAllRequested: false });
 
       await expect(
-        bindings.unbindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), WORKLOAD)
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
       expect(store.delete).not.toHaveBeenCalled();
     });
@@ -214,34 +214,32 @@ describe('ServiceAccountWorkloadBindings', () => {
     it('succeeds when there was no binding to remove', async () => {
       store.delete.mockResolvedValue(false);
       await expect(
-        bindings.unbindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), WORKLOAD)
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
       ).resolves.toBeUndefined();
     });
   });
 
   describe('#getBinding', () => {
-    it('scopes the lookup to the handle’s operation type', async () => {
-      await expect(bindings.getBinding(OPERATION_TYPE, WORKLOAD_IN_SPACE)).resolves.toEqual(
-        binding()
-      );
+    it('scopes the lookup to the plugin Core supplied', async () => {
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toEqual(binding());
       expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
     });
 
     it('keys the lookup by the space it was given', async () => {
-      await bindings.getBinding(OPERATION_TYPE, { ...WORKLOAD_IN_SPACE, spaceId: 'marketing' });
+      await bindings.getBinding(PLUGIN_ID, { ...WORKLOAD_IN_SPACE, spaceId: 'marketing' });
       expect(store.getVerified).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
     });
 
     it('reports an unbound workload as null rather than an error', async () => {
       store.getVerified.mockResolvedValue(null);
-      await expect(bindings.getBinding(OPERATION_TYPE, WORKLOAD_IN_SPACE)).resolves.toBeNull();
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toBeNull();
     });
   });
 
   describe('#withScopedRequest', () => {
     it('runs the callback with a request bound to the workload’s service account', async () => {
       const result = await bindings.withScopedRequest(
-        OPERATION_TYPE,
+        PLUGIN_ID,
         WORKLOAD_IN_SPACE,
         async (request) => {
           expect(request).toBe(mintedRequest);
@@ -256,7 +254,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     it('opts out of the time-based lease in favour of per-mint binding checks', async () => {
-      await bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined);
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
 
       const [[params]] = backend.createFakeRequest.mock.calls;
       expect(params.maxLifetimeMs).toBe(Number.POSITIVE_INFINITY);
@@ -264,13 +262,13 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     it('releases the request when the callback resolves, ending credential replacement', async () => {
-      await bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined);
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
       expect(backend.releaseFakeRequest).toHaveBeenCalledWith(mintedRequest);
     });
 
     it('releases the request when the callback throws', async () => {
       await expect(
-        bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => {
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
           throw new Error('execution failed');
         })
       ).rejects.toThrowError('execution failed');
@@ -282,7 +280,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       store.getVerified.mockResolvedValue(null);
 
       await expect(
-        bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined)
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
       expect(backend.createFakeRequest).not.toHaveBeenCalled();
     });
@@ -291,14 +289,14 @@ describe('ServiceAccountWorkloadBindings', () => {
       store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
 
       await expect(
-        bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined)
+        bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined)
       ).rejects.toThrowError('failed integrity verification');
       expect(backend.createFakeRequest).not.toHaveBeenCalled();
     });
 
     describe('the mint interceptor', () => {
       const captureInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
-        await bindings.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined);
+        await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
         const [[params]] = backend.createFakeRequest.mock.calls;
         return params.mintInterceptor!;
       };
@@ -339,7 +337,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(mint).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringMatching(
-            /^Refusing to re-mint a credential for workload \[rule\/rule-id\] of operation \[alerting\]: .*No service account is bound/
+            /^Refusing to re-mint a credential for workload \[rule\/rule-id\] of plugin \[alerting\]: .*No service account is bound/
           )
         );
       });
@@ -373,7 +371,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       [
         'bindWorkload',
         (api: ServiceAccountWorkloadBindings) =>
-          api.bindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), {
+          api.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
             serviceAccountId: 'sa',
             ...WORKLOAD,
           }),
@@ -381,16 +379,16 @@ describe('ServiceAccountWorkloadBindings', () => {
       [
         'unbindWorkload',
         (api: ServiceAccountWorkloadBindings) =>
-          api.unbindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), WORKLOAD),
+          api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
       ],
       [
         'getBinding',
-        (api: ServiceAccountWorkloadBindings) => api.getBinding(OPERATION_TYPE, WORKLOAD_IN_SPACE),
+        (api: ServiceAccountWorkloadBindings) => api.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE),
       ],
       [
         'withScopedRequest',
         (api: ServiceAccountWorkloadBindings) =>
-          api.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined),
+          api.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined),
       ],
     ])('fails %s closed when saved object encryption is unavailable', async (_name, invoke) => {
       const withoutEncryption = build({ canEncrypt: false });
@@ -408,7 +406,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     it('fails closed when security features are disabled in Elasticsearch', async () => {
       license.isEnabled.mockReturnValue(false);
 
-      await expect(bindings.getBinding(OPERATION_TYPE, WORKLOAD_IN_SPACE)).rejects.toMatchObject({
+      await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).rejects.toMatchObject({
         message:
           'Cannot use service account workload bindings: security features are disabled in Elasticsearch',
         output: { statusCode: 403 },
@@ -429,19 +427,19 @@ describe('createNotImplementedWorkloadBindings', () => {
     [
       'bindWorkload',
       () =>
-        api.bindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), {
+        api.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
           serviceAccountId: 'sa',
           ...WORKLOAD,
         }),
     ],
     [
       'unbindWorkload',
-      () => api.unbindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), WORKLOAD),
+      () => api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
     ],
-    ['getBinding', () => api.getBinding(OPERATION_TYPE, WORKLOAD_IN_SPACE)],
+    ['getBinding', () => api.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)],
     [
       'withScopedRequest',
-      () => api.withScopedRequest(OPERATION_TYPE, WORKLOAD_IN_SPACE, async () => undefined),
+      () => api.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined),
     ],
   ])('rejects %s with a 501', async (_name, invoke) => {
     await expect(invoke()).rejects.toMatchObject(expected);

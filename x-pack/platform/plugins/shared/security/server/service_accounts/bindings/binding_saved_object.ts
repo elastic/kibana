@@ -15,7 +15,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 export const SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE = 'service-account-workload-binding';
 
 export interface WorkloadBindingCoordinates {
-  operationType: string;
+  pluginId: string;
   workloadType: string;
   workloadId: string;
   spaceId: string;
@@ -31,17 +31,17 @@ export interface WorkloadBindingCoordinates {
  * separator into one of them.
  */
 export const getWorkloadBindingId = ({
-  operationType,
+  pluginId,
   workloadType,
   workloadId,
   spaceId,
 }: WorkloadBindingCoordinates): string =>
   createHash('sha256')
-    .update(JSON.stringify([operationType, workloadType, spaceId, workloadId]))
+    .update(JSON.stringify([pluginId, workloadType, spaceId, workloadId]))
     .digest('hex');
 
 export interface WorkloadBindingAttributes {
-  operationType: string;
+  pluginId: string;
   workloadType: string;
   workloadId: string;
   serviceAccountId: string;
@@ -86,7 +86,7 @@ const binderSchemaV1 = schema.oneOf([
 ]);
 
 const workloadBindingSchemaV1 = schema.object({
-  operationType: schema.string(),
+  pluginId: schema.string(),
   workloadType: schema.string(),
   workloadId: schema.string(),
   serviceAccountId: schema.string(),
@@ -116,10 +116,10 @@ export const registerWorkloadBindingSavedObjectType = (
         serviceAccountId: { type: 'keyword', ignore_above: 1024 },
         // Mapped so bindings can later be reported on by age without a migration.
         boundAt: { type: 'date' },
-        // The management UI groups a service account's workloads by operation and labels them by
+        // The management UI groups a service account's workloads by plugin and labels them by
         // workload type, so both have to be filterable and aggregatable. Mapped now because
         // adding a mapping once bindings exist costs a model version.
-        operationType: { type: 'keyword', ignore_above: 1024 },
+        pluginId: { type: 'keyword', ignore_above: 1024 },
         workloadType: { type: 'keyword', ignore_above: 1024 },
         boundBy: {
           // Explicit, so that adding a fourth variant is a deliberate mapping decision rather
@@ -159,7 +159,7 @@ export const registerWorkloadBindingSavedObjectType = (
     enforceRandomId: false,
     attributesToEncrypt: new Set(['canary']),
     attributesToIncludeInAAD: new Set([
-      'operationType',
+      'pluginId',
       'workloadType',
       'workloadId',
       'serviceAccountId',

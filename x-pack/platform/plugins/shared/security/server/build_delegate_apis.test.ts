@@ -251,14 +251,14 @@ describe('buildSecurityApi', () => {
     const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
     const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 
-    it('delegates bindWorkload, forwarding the operation type Core supplied', async () => {
+    it('delegates bindWorkload, forwarding the plugin id Core supplied', async () => {
       const request = httpServerMock.createKibanaRequest();
       const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
 
-      await api.serviceAccounts.bindWorkload('alerting_rule', request, params);
+      await api.serviceAccounts.bindWorkload('alerting', request, params);
 
       expect(serviceAccounts!.workloads.bindWorkload).toHaveBeenCalledWith(
-        'alerting_rule',
+        'alerting',
         request,
         params
       );
@@ -267,24 +267,24 @@ describe('buildSecurityApi', () => {
     it('delegates unbindWorkload', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      await api.serviceAccounts.unbindWorkload('alerting_rule', request, WORKLOAD);
+      await api.serviceAccounts.unbindWorkload('alerting', request, WORKLOAD);
 
       expect(serviceAccounts!.workloads.unbindWorkload).toHaveBeenCalledWith(
-        'alerting_rule',
+        'alerting',
         request,
         WORKLOAD
       );
     });
 
     it('delegates getBinding and returns its result', async () => {
-      const binding = { operationType: 'alerting_rule' } as never;
+      const binding = { pluginId: 'alerting' } as never;
       serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
 
       await expect(
-        api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD_IN_SPACE)
+        api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE)
       ).resolves.toBe(binding);
       expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith(
-        'alerting_rule',
+        'alerting',
         WORKLOAD_IN_SPACE
       );
     });
@@ -292,14 +292,10 @@ describe('buildSecurityApi', () => {
     it('delegates withScopedRequest, passing the callback through', async () => {
       const fn = jest.fn();
 
-      await api.serviceAccounts.withScopedRequestForWorkload(
-        'alerting_rule',
-        WORKLOAD_IN_SPACE,
-        fn
-      );
+      await api.serviceAccounts.withScopedRequestForWorkload('alerting', WORKLOAD_IN_SPACE, fn);
 
       expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
-        'alerting_rule',
+        'alerting',
         WORKLOAD_IN_SPACE,
         fn
       );
@@ -309,7 +305,7 @@ describe('buildSecurityApi', () => {
       [
         'bindWorkload',
         () =>
-          api.serviceAccounts.bindWorkload('alerting_rule', httpServerMock.createKibanaRequest(), {
+          api.serviceAccounts.bindWorkload('alerting', httpServerMock.createKibanaRequest(), {
             serviceAccountId: 'sa',
             ...WORKLOAD,
           }),
@@ -318,20 +314,20 @@ describe('buildSecurityApi', () => {
         'unbindWorkload',
         () =>
           api.serviceAccounts.unbindWorkload(
-            'alerting_rule',
+            'alerting',
             httpServerMock.createKibanaRequest(),
             WORKLOAD
           ),
       ],
       [
         'getWorkloadBinding',
-        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD_IN_SPACE),
+        () => api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE),
       ],
       [
         'withScopedRequestForWorkload',
         () =>
           api.serviceAccounts.withScopedRequestForWorkload(
-            'alerting_rule',
+            'alerting',
             WORKLOAD_IN_SPACE,
             jest.fn()
           ),

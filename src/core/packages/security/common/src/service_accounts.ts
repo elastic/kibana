@@ -70,12 +70,13 @@ export type ServiceAccountWorkloadBinder =
   | { type: 'service_account'; serviceAccountId: string };
 
 /**
- * A persisted binding of a service account to a workload of a registered operation type.
+ * A persisted binding of a service account to a workload. The workload belongs to a workload type
+ * registered by the plugin identified by `pluginId`.
  *
  * @public
  */
 export interface ServiceAccountWorkloadBinding {
-  operationType: string;
+  pluginId: string;
   workloadType: string;
   workloadId: string;
   serviceAccountId: string;
@@ -92,7 +93,7 @@ export interface ServiceAccountWorkloadBinding {
  * @public
  */
 export interface ServiceAccountWorkloadRef {
-  /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
+  /** Kind of workload within the plugin, e.g. `rule` or `workflow`. */
   workloadType: string;
   workloadId: string;
 }

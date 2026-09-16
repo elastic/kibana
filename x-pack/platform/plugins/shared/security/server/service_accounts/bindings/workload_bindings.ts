@@ -32,30 +32,30 @@ import type { ServiceAccountsBackend } from '../types';
 const CANARY_BYTE_LENGTH = 32;
 
 /**
- * Manages and executes workload bindings for a single operation type per call. Operation types are
- * claimed at setup and reach this API only through the capability handle Core hands back, so an
- * operation can never address another's bindings.
+ * Manages and executes workload bindings, one plugin per call. The plugin id is supplied by Core
+ * from the calling plugin's context, never by the plugin itself, so a plugin can never address
+ * another's bindings.
  */
 export interface ServiceAccountWorkloadBindingsApi {
   bindWorkload(
-    operationType: string,
+    pluginId: string,
     request: KibanaRequest,
     params: BindServiceAccountWorkloadParams
   ): Promise<ServiceAccountWorkloadBinding>;
 
   unbindWorkload(
-    operationType: string,
+    pluginId: string,
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
   ): Promise<void>;
 
   getBinding(
-    operationType: string,
+    pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
 
   withScopedRequest<T>(
-    operationType: string,
+    pluginId: string,
     params: ServiceAccountWorkloadCoordinates,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
@@ -115,7 +115,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   async bindWorkload(
-    operationType: string,
+    pluginId: string,
     request: KibanaRequest,
     { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
   ): Promise<ServiceAccountWorkloadBinding> {
@@ -131,7 +131,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     await this.ensureCanManage(request, 'bind a service account to a workload');
 
     const binding = await this.store.set({
-      operationType,
+      pluginId,
       workloadType,
       workloadId,
       serviceAccountId,
@@ -144,14 +144,14 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     });
 
     this.logger.debug(
-      `Bound a service account to workload [${workloadType}/${workloadId}] of operation [${operationType}]`
+      `Bound a service account to workload [${workloadType}/${workloadId}] of plugin [${pluginId}]`
     );
 
     return binding;
   }
 
   async unbindWorkload(
-    operationType: string,
+    pluginId: string,
     request: KibanaRequest,
     { workloadType, workloadId }: ServiceAccountWorkloadRef
   ): Promise<void> {
@@ -162,7 +162,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     await this.ensureCanManage(request, 'unbind a service account from a workload');
 
     const deleted = await this.store.delete({
-      operationType,
+      pluginId,
       workloadType,
       workloadId,
       spaceId: this.getSpaceId(request),
@@ -170,27 +170,27 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     if (deleted) {
       this.logger.debug(
-        `Unbound the service account from workload [${workloadType}/${workloadId}] of operation [${operationType}]`
+        `Unbound the service account from workload [${workloadType}/${workloadId}] of plugin [${pluginId}]`
       );
     }
   }
 
   async getBinding(
-    operationType: string,
+    pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null> {
     this.ensureAvailable();
-    return await this.store.getVerified(this.toCoordinates(operationType, params));
+    return await this.store.getVerified(this.toCoordinates(pluginId, params));
   }
 
   async withScopedRequest<T>(
-    operationType: string,
+    pluginId: string,
     params: ServiceAccountWorkloadCoordinates,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T> {
     this.ensureAvailable();
 
-    const coordinates = this.toCoordinates(operationType, params);
+    const coordinates = this.toCoordinates(pluginId, params);
     const binding = await this.requireBinding(coordinates);
     let minted = false;
 
@@ -226,7 +226,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
           this.logger.warn(
             `Refusing to re-mint a credential for workload [${coordinates.workloadType}/${
               coordinates.workloadId
-            }] of operation [${coordinates.operationType}]: ${getDetailedErrorMessage(e)}`
+            }] of plugin [${coordinates.pluginId}]: ${getDetailedErrorMessage(e)}`
           );
           throw e;
         }
@@ -268,7 +268,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     if (!binding) {
       throw Boom.notFound(
-        `No service account is bound to workload [${coordinates.workloadType}/${coordinates.workloadId}] of operation [${coordinates.operationType}].`
+        `No service account is bound to workload [${coordinates.workloadType}/${coordinates.workloadId}] of plugin [${coordinates.pluginId}].`
       );
     }
 
@@ -286,10 +286,10 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
   // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
   private toCoordinates(
-    operationType: string,
+    pluginId: string,
     { workloadType, workloadId, spaceId }: ServiceAccountWorkloadCoordinates
   ): WorkloadBindingCoordinates {
-    return { operationType, workloadType, workloadId, spaceId };
+    return { pluginId, workloadType, workloadId, spaceId };
   }
 
   private ensureAvailable(): void {

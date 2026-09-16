@@ -18,6 +18,8 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
+import { WorkloadTypeRegistry } from './workload_type_registry';
+import { convertSecurityApi as actualConvertSecurityApi } from './utils/convert_security_api';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
 
@@ -124,113 +126,76 @@ describe('SecurityService', function () {
       });
     });
 
-    describe('#serviceAccounts.registerOperation', () => {
-      const registerOperation = (type: string) =>
-        service.setup().serviceAccounts.registerOperation({ type });
-
-      it('returns a handle for the claimed operation type', () => {
-        expect(registerOperation('alerting_rule')).toEqual({
-          bindWorkload: expect.any(Function),
-          unbindWorkload: expect.any(Function),
-          getBinding: expect.any(Function),
-          withScopedRequest: expect.any(Function),
-        });
-      });
-
-      it('accepts lowercase alphanumerics and underscores', () => {
-        const setup = service.setup();
-
-        for (const type of ['alerting', 'alerting_rule', 'workflow2', '123', 'a_1_b']) {
-          expect(() => setup.serviceAccounts.registerOperation({ type })).not.toThrow();
-        }
-      });
-
-      it.each([
-        ['uppercase letters', 'AlertingRule'],
-        ['dashes', 'alerting-rule'],
-        ['dots', 'alerting.rule'],
-        ['spaces', 'alerting rule'],
-        ['colons', 'alerting:rule'],
-        ['slashes', 'alerting/rule'],
-        ['an empty string', ''],
-      ])('rejects %s', (_label, type) => {
-        expect(() => registerOperation(type)).toThrow(
-          /only lowercase letters, digits and underscores are allowed/
-        );
-      });
-
-      it('rejects a type longer than 256 characters', () => {
+    describe('#serviceAccounts.registerWorkloadType', () => {
+      it('records the workload type for the plugin', () => {
         const setup = service.setup();
 
         expect(() =>
-          setup.serviceAccounts.registerOperation({ type: 'a'.repeat(256) })
+          setup.serviceAccounts.registerWorkloadType('alerting', {
+            type: 'rule',
+            name: 'Alerting rule',
+          })
         ).not.toThrow();
-        expect(() => setup.serviceAccounts.registerOperation({ type: 'b'.repeat(257) })).toThrow(
-          /must be at most 256 characters, but got 257/
+      });
+
+      it('rejects an invalid type', () => {
+        expect(() =>
+          service.setup().serviceAccounts.registerWorkloadType('alerting', {
+            type: 'Alerting.Rule',
+            name: 'Alerting rule',
+          })
+        ).toThrow(/only lowercase letters, digits and underscores are allowed/);
+      });
+
+      it('rejects a duplicate type from the same plugin', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' })
+        ).toThrow(
+          /Service account workload type \[rule\] has already been registered by plugin \[alerting\]/
         );
       });
 
-      it('claims the type, so an operation has exactly one owner', () => {
+      it('lets different plugins register the same type', () => {
         const setup = service.setup();
-        setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
 
-        expect(() => setup.serviceAccounts.registerOperation({ type: 'alerting_rule' })).toThrow(
-          /Service account operation type \[alerting_rule\] has already been registered/
-        );
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('workflows', { type: 'rule', name: 'Rule' })
+        ).not.toThrow();
       });
 
-      it('does not claim a type it rejected', () => {
+      it('hands the registrations to the start contract', async () => {
+        convertSecurityApiMock.mockImplementation(actualConvertSecurityApi);
         const setup = service.setup();
-
-        expect(() => setup.serviceAccounts.registerOperation({ type: 'Nope' })).toThrow();
-        expect(() => setup.serviceAccounts.registerOperation({ type: 'nope' })).not.toThrow();
-      });
-
-      it('rejects handle calls made before the security delegate is registered', async () => {
-        const handle = registerOperation('alerting_rule');
-
-        await expect(
-          handle.getBinding({ workloadType: 'rule', workloadId: 'r', spaceId: 'default' })
-        ).rejects.toThrow(
-          /Cannot use service account operation \[alerting_rule\] before the security delegate has been registered/
-        );
-      });
-
-      it('passes its own operation type to the delegate, so a handle cannot reach another', async () => {
-        const setup = service.setup();
-        const handle = setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
 
         const serviceAccounts = {
+          isEnabled: jest.fn(),
+          create: jest.fn(),
           getWorkloadBinding: jest.fn().mockResolvedValue(null),
           bindWorkload: jest.fn(),
           unbindWorkload: jest.fn(),
           withScopedRequestForWorkload: jest.fn(),
         };
         setup.registerSecurityDelegate({
+          authc: { apiKeys: {} },
           serviceAccounts,
         } as unknown as CoreSecurityDelegateContract);
 
+        const start = service.start();
         const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
-        await handle.getBinding(params);
 
-        expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting_rule', params);
-      });
+        await start.serviceAccounts.asScopedToPlugin('alerting').getWorkloadBinding(params);
+        expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
 
-      it('resolves the delegate per call, not at registration time', async () => {
-        const setup = service.setup();
-        // Handle acquired first: a plugin's setup can run before the security plugin's.
-        const handle = setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
-
-        const bindWorkload = jest.fn().mockResolvedValue({});
-        setup.registerSecurityDelegate({
-          serviceAccounts: { bindWorkload },
-        } as unknown as CoreSecurityDelegateContract);
-
-        const request = {} as any;
-        const params = { serviceAccountId: 'sa', workloadType: 'rule', workloadId: 'rule-id' };
-        await handle.bindWorkload(request, params);
-
-        expect(bindWorkload).toHaveBeenCalledWith('alerting_rule', request, params);
+        await expect(
+          start.serviceAccounts.asScopedToPlugin('workflows').getWorkloadBinding(params)
+        ).rejects.toThrow(
+          /Plugin \[workflows\] has not registered service account workload type \[rule\]/
+        );
       });
     });
 
@@ -305,7 +270,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -316,7 +284,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

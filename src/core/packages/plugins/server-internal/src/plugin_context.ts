@@ -317,8 +317,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       fips: deps.security.fips,
       acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
       serviceAccounts: {
-        registerOperation: (registration) =>
-          deps.security.serviceAccounts.registerOperation(registration),
+        registerWorkloadType: (registration) =>
+          deps.security.serviceAccounts.registerWorkloadType(plugin.name, registration),
       },
     },
     userProfile: {
@@ -429,7 +429,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
-      serviceAccounts: deps.security.serviceAccounts,
+      serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
     },
     userProfile: deps.userProfile,
     injection: {

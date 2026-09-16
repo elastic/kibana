@@ -9,17 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type {
-  CoreSecurityDelegateContract,
-  FakeRequestEnricher,
-  ServiceAccountOperationHandle,
-  ServiceAccountOperationRegistration,
-  ServiceAccountsServiceContract,
-} from '@kbn/core-security-server';
-import {
-  SERVICE_ACCOUNT_OPERATION_TYPE_MAX_LENGTH,
-  SERVICE_ACCOUNT_OPERATION_TYPE_REGEX,
-} from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract, FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Observable, Subscription } from 'rxjs';
 import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
@@ -30,6 +20,7 @@ import type {
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
+import { WorkloadTypeRegistry } from './workload_type_registry';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -37,7 +28,7 @@ export class SecurityService
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;
-  private readonly claimedServiceAccountOperations = new Set<string>();
+  private readonly workloadTypes = new WorkloadTypeRegistry();
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -95,7 +86,8 @@ export class SecurityService
         isEnabled: () => isFipsEnabled(securityConfig),
       },
       serviceAccounts: {
-        registerOperation: (registration) => this.registerServiceAccountOperation(registration),
+        registerWorkloadType: (pluginId, registration) =>
+          this.workloadTypes.register(pluginId, registration),
       },
       uiam: securityConfig?.uiam?.enabled
         ? createCoreUiamService(securityConfig.uiam.sharedSecret)
@@ -108,7 +100,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract);
+    return convertSecurityApi(apiContract, this.workloadTypes);
   }
 
   public stop() {
@@ -116,45 +108,5 @@ export class SecurityService
       this.configSubscription.unsubscribe();
       this.configSubscription = undefined;
     }
-  }
-
-  private registerServiceAccountOperation({
-    type,
-  }: ServiceAccountOperationRegistration): ServiceAccountOperationHandle {
-    if (type.length > SERVICE_ACCOUNT_OPERATION_TYPE_MAX_LENGTH) {
-      throw new Error(
-        `Service account operation type is too long: it must be at most ${SERVICE_ACCOUNT_OPERATION_TYPE_MAX_LENGTH} characters, but got ${type.length}.`
-      );
-    }
-
-    if (!SERVICE_ACCOUNT_OPERATION_TYPE_REGEX.test(type)) {
-      throw new Error(
-        `Invalid service account operation type [${type}]: only lowercase letters, digits and underscores are allowed.`
-      );
-    }
-
-    if (this.claimedServiceAccountOperations.has(type)) {
-      throw new Error(`Service account operation type [${type}] has already been registered.`);
-    }
-    this.claimedServiceAccountOperations.add(type);
-
-    // Returned eagerly at setup, but every method resolves the delegate at call time: a plugin's
-    // setup can run before the security plugin has registered one.
-    const delegate = (): ServiceAccountsServiceContract => {
-      if (!this.securityApi) {
-        throw new Error(
-          `Cannot use service account operation [${type}] before the security delegate has been registered.`
-        );
-      }
-      return this.securityApi.serviceAccounts;
-    };
-
-    return {
-      bindWorkload: async (request, params) => delegate().bindWorkload(type, request, params),
-      unbindWorkload: async (request, params) => delegate().unbindWorkload(type, request, params),
-      getBinding: async (params) => delegate().getWorkloadBinding(type, params),
-      withScopedRequest: async (params, fn) =>
-        delegate().withScopedRequestForWorkload(type, params, fn),
-    };
   }
 }

@@ -17,13 +17,12 @@ export type { CoreAuditService } from './src/audit';
 export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
-  ServiceAccountOperationHandle,
-  ServiceAccountOperationRegistration,
-} from './src/service_account_operations';
+  ServiceAccountWorkloadTypeRegistration,
+} from './src/service_account_workloads';
 export {
-  SERVICE_ACCOUNT_OPERATION_TYPE_MAX_LENGTH,
-  SERVICE_ACCOUNT_OPERATION_TYPE_REGEX,
-} from './src/service_account_operations';
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
+} from './src/service_account_workloads';
 export type {
   ServiceAccount,
   ServiceAccountAssumableBy,

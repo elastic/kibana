@@ -63,9 +63,9 @@ export interface ServiceAccountsServiceStart {
 
   /**
    * Workload binding management and execution. Consumed exclusively by the Core security
-   * delegate, which reaches it through operation capability handles — it is deliberately absent
-   * from the security plugin's own public contract, so no plugin can address a workload binding
-   * without having claimed the operation type it belongs to.
+   * delegate, which scopes every call to the plugin Core identified as the caller — it is
+   * deliberately absent from the security plugin's own public contract, so no plugin can address
+   * a workload binding under another plugin's id.
    */
   workloads: ServiceAccountWorkloadBindingsApi;
 }

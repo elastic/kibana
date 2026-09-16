@@ -17,7 +17,7 @@ import {
 import { WorkloadBindingStore } from './workload_binding_store';
 
 const COORDINATES = {
-  operationType: 'alerting',
+  pluginId: 'alerting',
   workloadType: 'rule',
   workloadId: 'rule-id',
   spaceId: 'default',
@@ -59,7 +59,7 @@ describe('WorkloadBindingStore', () => {
       expect(getWorkloadBindingId({ ...COORDINATES })).toBe(id);
 
       // Every coordinate participates in the identity, so no two workloads can collide.
-      expect(getWorkloadBindingId({ ...COORDINATES, operationType: 'workflows' })).not.toBe(id);
+      expect(getWorkloadBindingId({ ...COORDINATES, pluginId: 'workflows' })).not.toBe(id);
       expect(getWorkloadBindingId({ ...COORDINATES, workloadType: 'backfill' })).not.toBe(id);
       expect(getWorkloadBindingId({ ...COORDINATES, workloadId: 'other-rule' })).not.toBe(id);
       expect(getWorkloadBindingId({ ...COORDINATES, spaceId: 'marketing' })).not.toBe(id);
@@ -71,9 +71,9 @@ describe('WorkloadBindingStore', () => {
 
     it('cannot be made to collide by smuggling the separator into a coordinate', () => {
       expect(
-        getWorkloadBindingId({ ...COORDINATES, operationType: 'alerting', workloadType: 'rule' })
+        getWorkloadBindingId({ ...COORDINATES, pluginId: 'alerting', workloadType: 'rule' })
       ).not.toBe(
-        getWorkloadBindingId({ ...COORDINATES, operationType: 'alerting:rule', workloadType: '' })
+        getWorkloadBindingId({ ...COORDINATES, pluginId: 'alerting:rule', workloadType: '' })
       );
     });
   });

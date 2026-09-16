@@ -11,11 +11,14 @@ import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { convertSecurityApi } from './convert_security_api';
 import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
+import { WorkloadTypeRegistry } from '../workload_type_registry';
 
 describe('convertSecurityApi', () => {
   let source: CoreSecurityDelegateContract;
+  let workloadTypes: WorkloadTypeRegistry;
 
   beforeEach(() => {
+    workloadTypes = new WorkloadTypeRegistry();
     source = {
       authc: {
         getCurrentUser: jest.fn(),
@@ -55,7 +58,7 @@ describe('convertSecurityApi', () => {
   });
 
   it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
-    const output = convertSecurityApi(source);
+    const output = convertSecurityApi(source, workloadTypes);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
@@ -63,26 +66,32 @@ describe('convertSecurityApi', () => {
   });
 
   describe('serviceAccounts', () => {
-    it('exposes the start-contract methods', () => {
-      const output = convertSecurityApi(source);
+    // The delegate's workload methods take a plugin id as an argument, so exposing them directly
+    // would let any plugin address any other plugin's bindings. Only the plugin-scoped view is
+    // handed out, and the plugin context is what names the plugin.
+    it('exposes only the plugin-scoped accessor', () => {
+      const output = convertSecurityApi(source, workloadTypes);
 
-      expect(output.serviceAccounts.isEnabled).toBe(source.serviceAccounts.isEnabled);
-      expect(output.serviceAccounts.create).toBe(source.serviceAccounts.create);
+      expect(Object.keys(output.serviceAccounts)).toEqual(['asScopedToPlugin']);
     });
 
-    // The workload methods take an operation type as an argument, so exposing them on the start
-    // contract would let any plugin address any operation's bindings. A capability handle from
-    // `registerOperation` is meant to be the only way to reach them.
-    it('does not leak the operation-keyed workload methods', () => {
-      const output = convertSecurityApi(source);
+    it('scopes the start contract to the given plugin', async () => {
+      workloadTypes.register('alerting', { type: 'rule', name: 'Alerting rule' });
+      const output = convertSecurityApi(source, workloadTypes);
 
-      expect(Object.keys(output.serviceAccounts).sort()).toEqual(['create', 'isEnabled']);
+      const scoped = output.serviceAccounts.asScopedToPlugin('alerting');
+      expect(scoped.isEnabled).toBe(source.serviceAccounts.isEnabled);
+      expect(scoped.create).toBe(source.serviceAccounts.create);
+
+      const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+      await scoped.getWorkloadBinding(params);
+      expect(source.serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
     });
   });
 
   describe('getCurrentUser', () => {
     it('delegates directly to the source for real requests', () => {
-      const output = convertSecurityApi(source);
+      const output = convertSecurityApi(source, workloadTypes);
       const request = httpServerMock.createKibanaRequest();
 
       output.authc.getCurrentUser(request);
@@ -92,7 +101,7 @@ describe('convertSecurityApi', () => {
     });
 
     it('delegates directly to the source for fake requests (delegate owns the enrichment override)', () => {
-      const output = convertSecurityApi(source);
+      const output = convertSecurityApi(source, workloadTypes);
       const request = httpServerMock.createFakeKibanaRequest({});
 
       output.authc.getCurrentUser(request);

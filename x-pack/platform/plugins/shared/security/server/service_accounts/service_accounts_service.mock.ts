@@ -30,7 +30,7 @@ export const serviceAccountsServiceMock = {
     },
     workloads: {
       bindWorkload: jest.fn().mockResolvedValue({
-        operationType: 'mock-operation-type',
+        pluginId: 'mock-plugin-id',
         workloadType: 'mock-workload-type',
         workloadId: 'mock-workload-id',
         serviceAccountId: 'mock-service-account-id',
@@ -44,7 +44,7 @@ export const serviceAccountsServiceMock = {
       }),
       unbindWorkload: jest.fn().mockResolvedValue(undefined),
       getBinding: jest.fn().mockResolvedValue(null),
-      withScopedRequest: jest.fn().mockImplementation(async (_operationType, _params, fn) =>
+      withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>
         fn(
           httpServerMock.createFakeKibanaRequest({
             headers: { authorization: 'Bearer essu_mock-service-account-token' },

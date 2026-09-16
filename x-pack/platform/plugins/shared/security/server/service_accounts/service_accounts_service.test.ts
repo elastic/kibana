@@ -113,7 +113,7 @@ describe('ServiceAccountsService', () => {
 
       // A real binding layer reports "no binding" rather than refusing outright.
       await expect(
-        start.workloads.getBinding('operation', {
+        start.workloads.getBinding('alerting', {
           workloadType: 'rule',
           workloadId: 'rule-id',
           spaceId: 'default',
@@ -127,7 +127,7 @@ describe('ServiceAccountsService', () => {
       )!;
 
       await expect(
-        start.workloads.getBinding('operation', {
+        start.workloads.getBinding('alerting', {
           workloadType: 'rule',
           workloadId: 'rule-id',
           spaceId: 'default',

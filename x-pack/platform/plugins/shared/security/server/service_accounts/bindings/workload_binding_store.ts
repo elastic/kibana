@@ -32,7 +32,7 @@ export interface WorkloadBindingStoreOptions {
 }
 
 const toBinding = (attributes: WorkloadBindingAttributes): ServiceAccountWorkloadBinding => ({
-  operationType: attributes.operationType,
+  pluginId: attributes.pluginId,
   workloadType: attributes.workloadType,
   workloadId: attributes.workloadId,
   serviceAccountId: attributes.serviceAccountId,
@@ -147,7 +147,7 @@ export class WorkloadBindingStore {
     // The coordinates are authenticated data, so a mismatch cannot come from tampering — it would
     // mean this ID was derived from different coordinates than the ones stored under it.
     if (
-      attributes.operationType !== coordinates.operationType ||
+      attributes.pluginId !== coordinates.pluginId ||
       attributes.workloadType !== coordinates.workloadType ||
       attributes.workloadId !== coordinates.workloadId ||
       attributes.spaceId !== coordinates.spaceId
