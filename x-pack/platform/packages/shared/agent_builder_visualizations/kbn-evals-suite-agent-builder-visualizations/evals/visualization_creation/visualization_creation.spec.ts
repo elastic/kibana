@@ -8,8 +8,9 @@
 import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
 import { cleanHostLoadMetrics, seedHostLoadMetrics } from '../../src/fixtures/host_load_metrics';
-import { GOLDEN_TOOL_PATH } from './constants';
 import { HOST_METRICS_EXAMPLE } from './host_metrics_example';
+
+const GOLDEN_TOOL_PATH = ['load_skill', 'platform.core.create_visualization'];
 
 evaluate.describe(
   'Agent Builder Visualizations - Standalone Visualization Creation',
