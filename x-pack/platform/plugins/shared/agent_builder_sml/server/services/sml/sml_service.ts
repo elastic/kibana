@@ -82,7 +82,10 @@ class SmlServiceImpl implements SmlServiceInstance {
         'SML service started without security authorization — permission checks are disabled (open access)'
       );
     }
-    this.indexer = createSmlIndexer({ registry: this.registry, logger: logger.get('indexer') });
+    this.indexer = createSmlIndexer({
+      registry: this.registry,
+      logger: logger.get('indexer'),
+    });
     this.crawler = new SmlCrawlerImpl({
       indexer: this.indexer,
       logger: logger.get('crawler'),

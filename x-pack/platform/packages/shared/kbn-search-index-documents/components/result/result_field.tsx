@@ -14,6 +14,7 @@ import {
   EuiTableRowCell,
   EuiText,
   EuiToken,
+  EuiToolTip,
   useEuiTheme,
   type IconType
 } from '@elastic/eui';
@@ -63,30 +64,24 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'question';
 
-const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: string }> = ({
+const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel: string }> = ({
   iconType,
   label,
   fieldTypeLabel,
-}) => {
-  return (
-    <EuiFlexGroup
-      direction="row"
-      alignItems="center"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiToken iconType={iconType} size="s" title={fieldTypeLabel} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="default">
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}) => (
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m" wrap={false}>
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={fieldTypeLabel} display="flex" disableScreenReaderOutput>
+        <EuiToken iconType={iconType} size="s" aria-label={fieldTypeLabel} tabIndex={0} />
+      </EuiToolTip>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText size="s" color="default">
+        {label}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
