@@ -37,9 +37,9 @@ fi
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
-    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
-    mv ~/.cache/kibana/pnpm/node_modules ./
+  if [[ -d ~/.cache/kibana/pnpm/node_modules ]] && [[ ! -d ./node_modules ]]; then
+      echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+      mv ~/.cache/kibana/pnpm/node_modules ./
   fi
   if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
     echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
