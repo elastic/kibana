@@ -13,6 +13,10 @@ export const configSchema = schema.object({
   ui: schema.object({
     useMockData: schema.boolean({ defaultValue: true }),
   }),
+  featureFlags: schema.object({
+    /** Alert Triage Worker (security-team#17954). Ships dark until the pipeline lands (PR 5). */
+    alertTriageWorkerEnabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type AlertZeroConfig = TypeOf<typeof configSchema>;
@@ -21,6 +25,7 @@ export const config: PluginConfigDescriptor<AlertZeroConfig> = {
   exposeToBrowser: {
     enabled: true,
     ui: true,
+    featureFlags: true,
   },
   schema: configSchema,
 };
