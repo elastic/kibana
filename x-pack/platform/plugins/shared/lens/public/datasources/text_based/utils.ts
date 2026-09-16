@@ -88,12 +88,13 @@ export function hasNumericColumn(
   columns: TextBasedLayerColumn[],
   activeColumns?: DatatableColumn[]
 ): boolean {
+  const activeColumnById = activeColumns
+    ? new Map(activeColumns.map((activeColumn) => [activeColumn.id, activeColumn]))
+    : undefined;
+
   return columns.some(
     (column) =>
-      resolveTextBasedColumnType(
-        column,
-        activeColumns?.find((activeColumn) => activeColumn.id === column.columnId)
-      ) === 'number'
+      resolveTextBasedColumnType(column, activeColumnById?.get(column.columnId)) === 'number'
   );
 }
 
