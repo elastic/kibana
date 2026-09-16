@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
@@ -46,13 +46,11 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
-  getSpaceId,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
-  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -83,25 +81,24 @@ export const createSandboxBashTool = ({
       };
     }
 
-    const spaceId = getSpaceId(context.request);
-    const session = getSandboxStart()?.getSession(spaceId, rawConversationId);
-    if (!session) {
+    let session: SandboxSession;
+    try {
+      session = getSandboxStart()!.getSession(context.request, rawConversationId);
+    } catch (err) {
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Sandbox is not configured in this deployment.' },
+            data: { message: err instanceof Error ? err.message : 'Sandbox is not available.' },
           },
         ],
       };
     }
 
-    const conversationId = `${spaceId}:${rawConversationId}`;
     const callContext = getSandboxCallContext(context);
 
     await sandboxWorkspaceManager.ensureWorkspaceReady({
       session,
-      conversationId,
       callContext,
     });
 
@@ -130,7 +127,7 @@ export const createSandboxBashTool = ({
       secretValues = resolved.secretValues;
     }
 
-    logger.debug(`Executing sandbox bash command for conversation ${conversationId}: ${command}`);
+    logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
       // Prepend the venv bin dir so `python` resolves without requiring a full path.

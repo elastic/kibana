@@ -74,7 +74,6 @@ describe('createSandboxWorkspaceManager', () => {
     const session = createSessionMock(true);
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv1',
       callContext: createCallContext(['connector-1']),
     });
 
@@ -85,7 +84,6 @@ describe('createSandboxWorkspaceManager', () => {
     const session = createSessionMock(false);
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv-new',
       callContext: createCallContext(['connector-1']),
     });
 
@@ -97,11 +95,11 @@ describe('createSandboxWorkspaceManager', () => {
     const callContext = createCallContext(['connector-1']);
 
     // First call records the connector set
-    await manager.ensureWorkspaceReady({ session, conversationId: 'space:conv2', callContext });
+    await manager.ensureWorkspaceReady({ session, callContext });
     mockWriteConnectorManifest.mockClear();
 
     // Second call — same session (not reset), same connectors → skip
-    await manager.ensureWorkspaceReady({ session, conversationId: 'space:conv2', callContext });
+    await manager.ensureWorkspaceReady({ session, callContext });
 
     expect(mockWriteConnectorManifest).not.toHaveBeenCalled();
   });
@@ -111,14 +109,12 @@ describe('createSandboxWorkspaceManager', () => {
 
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv3',
       callContext: createCallContext(['connector-1']),
     });
     mockWriteConnectorManifest.mockClear();
 
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv3',
       callContext: createCallContext(['connector-1', 'connector-2']),
     });
 
@@ -132,7 +128,6 @@ describe('createSandboxWorkspaceManager', () => {
     setIsReset(false);
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv4',
       callContext: createCallContext(['connector-1']),
     });
     mockWriteConnectorManifest.mockClear();
@@ -141,7 +136,6 @@ describe('createSandboxWorkspaceManager', () => {
     setIsReset(true);
     await manager.ensureWorkspaceReady({
       session,
-      conversationId: 'space:conv4',
       callContext: createCallContext(['connector-1']),
     });
 
@@ -155,7 +149,6 @@ describe('createSandboxWorkspaceManager', () => {
     await expect(
       manager.ensureWorkspaceReady({
         session,
-        conversationId: 'space:conv5',
         callContext: createCallContext(['connector-1']),
       })
     ).resolves.toBeUndefined();

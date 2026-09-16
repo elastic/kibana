@@ -9,6 +9,7 @@
     "id": "sandbox",
     "browser": false,
     "server": true,
-    "configPath": ["xpack", "sandbox"]
+    "configPath": ["xpack", "sandbox"],
+    "optionalPlugins": ["spaces"]
   }
 }

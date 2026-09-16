@@ -16,9 +16,9 @@ import type {
 } from './grpc_client';
 
 /**
- * A per-conversation handle to a gVisor sandbox pod.
+ * A per-session handle to a gVisor sandbox pod.
  *
- * Each session is scoped to a `(spaceId, conversationId)` pair and proxies RPCs
+ * Each session is scoped to a `(spaceId, sessionId)` pair and proxies RPCs
  * to a single pod via the sandbox-api gRPC service. Obtain a session from
  * {@link SandboxPluginStart.getSession} — the plugin manages session lifecycle
  * and pod allocation transparently.
@@ -73,7 +73,7 @@ export interface SandboxSession {
 }
 
 // ---------------------------------------------------------------------------
-// SandboxSessionImpl — per-conversation wrapper over SandboxApiClient.
+// SandboxSessionImpl — per-session wrapper over SandboxApiClient.
 //
 // Uses a generation counter to protect against a classic race: caller A and
 // caller B both start under generation N against a dead pod. A's UNAVAILABLE
@@ -88,7 +88,7 @@ export class SandboxSessionImpl implements SandboxSession {
   private _generation = 0;
 
   constructor(
-    private readonly conversationId: string,
+    private readonly sessionId: string,
     private readonly apiClient: SandboxApiClient,
     private readonly logger: Logger
   ) {}
@@ -98,25 +98,25 @@ export class SandboxSessionImpl implements SandboxSession {
   }
 
   async runCommand(params: RunCommandParams): Promise<RunCommandResult> {
-    return this.execute(() => this.apiClient.runCommand(this.conversationId, params));
+    return this.execute(() => this.apiClient.runCommand(this.sessionId, params));
   }
 
   async readFiles(
     requests: Array<{ path: string; maxReadBytes?: number }>
   ): Promise<ReadFileResult[]> {
-    return this.execute(() => this.apiClient.readFiles(this.conversationId, requests));
+    return this.execute(() => this.apiClient.readFiles(this.sessionId, requests));
   }
 
   async writeFiles(files: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]> {
-    return this.execute(() => this.apiClient.writeFiles(this.conversationId, files));
+    return this.execute(() => this.apiClient.writeFiles(this.sessionId, files));
   }
 
   async mkdirs(paths: string[]): Promise<boolean[]> {
-    return this.execute(() => this.apiClient.mkdirs(this.conversationId, paths));
+    return this.execute(() => this.apiClient.mkdirs(this.sessionId, paths));
   }
 
   async statFiles(paths: string[]): Promise<FileMetadata[]> {
-    return this.execute(() => this.apiClient.statFiles(this.conversationId, paths));
+    return this.execute(() => this.apiClient.statFiles(this.sessionId, paths));
   }
 
   private async execute<T>(fn: () => Promise<T>): Promise<T> {
@@ -132,7 +132,7 @@ export class SandboxSessionImpl implements SandboxSession {
         this._generation++;
         this._isReset = true;
         this.logger.warn(
-          `Sandbox pod evicted for conversation ${this.conversationId} — isReset set for next call`
+          `Sandbox pod evicted for session ${this.sessionId} — isReset set for next call`
         );
       }
       throw err;

@@ -24,24 +24,22 @@ export const createSandboxWorkspaceManager = ({
   getDeps: () => { actions?: ActionsPluginStart };
   logger: Logger;
 }) => {
-  const lastConnectorIds = new Map<string, string>();
+  const lastConnectorIds = new Map<SandboxSession, string>();
 
   return {
     async ensureWorkspaceReady({
       session,
-      conversationId,
       callContext,
     }: {
       session: SandboxSession;
-      conversationId: string;
       callContext: SandboxCallContext;
     }): Promise<void> {
       const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
-      const lastKey = lastConnectorIds.get(conversationId);
+      const lastKey = lastConnectorIds.get(session);
 
       if (!session.isReset && lastKey === currentKey) return;
 
-      lastConnectorIds.set(conversationId, currentKey);
+      lastConnectorIds.set(session, currentKey);
 
       const { actions } = getDeps();
       const getActionsClient = actions
@@ -50,7 +48,7 @@ export const createSandboxWorkspaceManager = ({
 
       await writeConnectorManifest({ session, callContext, getActionsClient, logger }).catch(
         (err: Error) => {
-          logger.warn(`Connector manifest write failed for ${conversationId}: ${err.message}`);
+          logger.warn(`Connector manifest write failed: ${err.message}`);
         }
       );
     },

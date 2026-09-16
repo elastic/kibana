@@ -8,14 +8,21 @@
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SandboxPluginConfig } from './config';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 import type { SandboxSession } from './sandbox_session';
+
+interface SandboxPluginStartDeps {
+  spaces?: SpacesPluginStart;
+}
 
 /**
  * Start contract for the Sandbox plugin.
@@ -31,33 +38,42 @@ import type { SandboxSession } from './sandbox_session';
  * import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
  * interface MyPluginStartDeps { sandbox?: SandboxPluginStart; }
  *
- * // server/plugin.ts
+ * // server/plugin.ts — typical usage inside a tool handler
  * start(_core, { sandbox }) {
- *   const session = sandbox?.getSession(spaceId, conversationId);
- *   if (session) { /* sandbox is configured and ready *\/ }
+ *   const getSandbox = () => sandbox;
+ *   // inside a tool handler:
+ *   try {
+ *     const session = getSandbox()?.getSession(request, sessionId);
+ *   } catch (err) {
+ *     // sandbox plugin present but not configured in this deployment
+ *   }
  * }
  * ```
  *
- * `getSession` returns `undefined` when the sandbox is not configured
- * (`xpack.sandbox.enabled: false`, or missing `api_key`/`ssl`). Always guard
- * against `undefined` — the sandbox is an optional, deployment-specific service.
+ * Note that `sandbox` itself is `undefined` when the plugin is not installed.
+ * When it is installed but not configured (missing `api_key`/`ssl`, or
+ * `xpack.sandbox.enabled: false`), `getSession` throws a descriptive error.
  */
 export interface SandboxPluginStart {
   /**
-   * Returns a {@link SandboxSession} for the given space + conversation, or
-   * `undefined` when the sandbox is not configured in this deployment.
+   * Returns a {@link SandboxSession} for the given request + session ID.
    *
-   * Sessions are created lazily and cached for the lifetime of the plugin: the
-   * same `(spaceId, conversationId)` pair always returns the same session
-   * object. Pod allocation happens transparently on the first RPC.
+   * The space is derived automatically from the request. Sessions are created
+   * lazily and cached for the lifetime of the plugin: the same
+   * `(spaceId, sessionId)` pair always returns the same session object.
+   * Pod allocation happens transparently on the first RPC.
+   *
+   * @throws {Error} When the sandbox is not configured in this deployment
+   *   (`xpack.sandbox.enabled: false`, or missing `api_key`/`ssl`).
    */
-  getSession(spaceId: string, conversationId: string): SandboxSession | undefined;
+  getSession(request: KibanaRequest, sessionId: string): SandboxSession;
 }
 
-export class SandboxPlugin implements Plugin<void, SandboxPluginStart> {
+export class SandboxPlugin implements Plugin<void, SandboxPluginStart, {}, SandboxPluginStartDeps> {
   private readonly logger: Logger;
   private apiClient?: SandboxApiClient;
   private readonly sessions = new Map<string, SandboxSession>();
+  private spaces?: SpacesPluginStart;
 
   constructor(private readonly ctx: PluginInitializerContext<SandboxPluginConfig>) {
     this.logger = ctx.logger.get();
@@ -65,7 +81,8 @@ export class SandboxPlugin implements Plugin<void, SandboxPluginStart> {
 
   setup(_core: CoreSetup): void {}
 
-  start(_core: CoreStart): SandboxPluginStart {
+  start(_core: CoreStart, { spaces }: SandboxPluginStartDeps): SandboxPluginStart {
+    this.spaces = spaces;
     const pluginConfig = this.ctx.config.get();
 
     if (!pluginConfig.enabled || !pluginConfig.api_key || !pluginConfig.ssl) {
@@ -74,7 +91,14 @@ export class SandboxPlugin implements Plugin<void, SandboxPluginStart> {
           'xpack.sandbox.enabled is true but api_key and ssl are not configured — sandbox is disabled'
         );
       }
-      return { getSession: () => undefined };
+      const reason = !pluginConfig.enabled
+        ? 'xpack.sandbox.enabled is false'
+        : 'xpack.sandbox.api_key and xpack.sandbox.ssl are required when enabled';
+      return {
+        getSession: () => {
+          throw new Error(`Sandbox is not configured in this deployment: ${reason}`);
+        },
+      };
     }
 
     const { host, port, api_key: apiKey, ssl } = pluginConfig;
@@ -95,8 +119,9 @@ export class SandboxPlugin implements Plugin<void, SandboxPluginStart> {
     const logger = this.logger;
 
     return {
-      getSession: (spaceId, conversationId) => {
-        const key = `${spaceId}:${conversationId}`;
+      getSession: (request, sessionId) => {
+        const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        const key = `${spaceId}__${sessionId}`;
         let session = sessions.get(key);
         if (!session) {
           session = new SandboxSessionImpl(key, apiClient, logger.get('session'));

@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
@@ -41,12 +41,10 @@ const strReplaceSchema = z.object({
 export const createSandboxStrReplaceTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
-  getSpaceId,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
-  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof strReplaceSchema> => ({
   id: SANDBOX_STR_REPLACE_TOOL_ID,
@@ -72,23 +70,22 @@ export const createSandboxStrReplaceTool = ({
       };
     }
 
-    const spaceId = getSpaceId(context.request);
-    const session = getSandboxStart()?.getSession(spaceId, rawConversationId);
-    if (!session) {
+    let session: SandboxSession;
+    try {
+      session = getSandboxStart()!.getSession(context.request, rawConversationId);
+    } catch (err) {
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Sandbox is not configured in this deployment.' },
+            data: { message: err instanceof Error ? err.message : 'Sandbox is not available.' },
           },
         ],
       };
     }
 
-    const conversationId = `${spaceId}:${rawConversationId}`;
     await sandboxWorkspaceManager.ensureWorkspaceReady({
       session,
-      conversationId,
       callContext: getSandboxCallContext(context),
     });
 

@@ -116,8 +116,6 @@ export class NightshiftInvestigationsPlugin
       );
 
       const sandboxLogger = this.logger.get('sandbox');
-      const getSpaceId = (req: KibanaRequest) =>
-        this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
 
       // Start deps are read lazily: tools are registered in setup() but only run after start().
       const getSandboxStart = () => this.sandboxStart;
@@ -135,7 +133,6 @@ export class NightshiftInvestigationsPlugin
           getSandboxStart,
           sandboxWorkspaceManager,
           resolveConnectorCredentials,
-          getSpaceId,
           logger: sandboxLogger,
         })
       );
@@ -143,7 +140,6 @@ export class NightshiftInvestigationsPlugin
         createSandboxViewFileTool({
           getSandboxStart,
           sandboxWorkspaceManager,
-          getSpaceId,
           logger: sandboxLogger,
         })
       );
@@ -151,7 +147,6 @@ export class NightshiftInvestigationsPlugin
         createSandboxStrReplaceTool({
           getSandboxStart,
           sandboxWorkspaceManager,
-          getSpaceId,
           logger: sandboxLogger,
         })
       );
@@ -159,7 +154,6 @@ export class NightshiftInvestigationsPlugin
         createSandboxWriteFileTool({
           getSandboxStart,
           sandboxWorkspaceManager,
-          getSpaceId,
           logger: sandboxLogger,
         })
       );
