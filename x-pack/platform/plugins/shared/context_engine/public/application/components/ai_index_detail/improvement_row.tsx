@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIntl } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { Improvement } from '../../../../common/http_api/improvements';
 import { isOpenImprovement } from '../../../../common/http_api/improvements';
@@ -110,6 +111,7 @@ export const ImprovementRow = ({
   canDecide,
   onViewProvenance,
 }: ImprovementRowProps) => {
+  const { formatDate } = useIntl();
   const [isExpanded, setIsExpanded] = useState(false);
   const { text: rationale, isTruncated } = truncate(improvement.rationale);
   const changeFields = getProposedChangeFields(improvement);
@@ -222,7 +224,11 @@ export const ImprovementRow = ({
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued" data-test-subj="contextImprovementProvenance">
-            <p>{getProvenanceSummary(improvement)}</p>
+            <p>
+            {getProvenanceSummary(improvement, (iso) =>
+              formatDate(iso, { dateStyle: 'medium' })
+            )}
+          </p>
           </EuiText>
         </EuiFlexItem>
         {onViewProvenance && improvement.provenance.tags?.length ? (

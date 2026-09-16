@@ -147,8 +147,10 @@ describe('getProposedChangeFields', () => {
 });
 
 describe('getProvenanceSummary', () => {
+  const passthrough = (iso: string) => iso;
+
   it('names the tags and the window the signals came from', () => {
-    expect(getProvenanceSummary(buildImprovement())).toBe(
+    expect(getProvenanceSummary(buildImprovement(), passthrough)).toBe(
       'From 3 signals (coverage_gap) between now-30d and now'
     );
   });
@@ -163,7 +165,8 @@ describe('getProvenanceSummary', () => {
           signal_window: { from: 'now-7d', to: 'now' },
           signal_count: 1,
         },
-      })
+      }),
+      passthrough
     );
 
     expect(summary).toBe('From 1 signal between now-7d and now');

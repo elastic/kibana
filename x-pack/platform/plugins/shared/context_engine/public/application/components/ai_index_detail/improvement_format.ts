@@ -273,18 +273,23 @@ export const getProposedChangeFields = (improvement: Improvement): ProposedChang
 };
 
 /** Where the improvement came from, as one sentence a reviewer can weigh. */
-export const getProvenanceSummary = ({ provenance }: Improvement): string => {
+export const getProvenanceSummary = (
+  { provenance }: Improvement,
+  formatDate: (iso: string) => string
+): string => {
   const { signal_count: signalCount, tags, signal_window: window } = provenance;
+  const from = formatDate(window.from);
+  const to = formatDate(window.to);
 
   return tags && tags.length > 0
     ? i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.provenanceWithTags', {
         defaultMessage:
           'From {signalCount, plural, one {# signal} other {# signals}} ({tags}) between {from} and {to}',
-        values: { signalCount, tags: tags.join(', '), from: window.from, to: window.to },
+        values: { signalCount, tags: tags.join(', '), from, to },
       })
     : i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.provenance', {
         defaultMessage:
           'From {signalCount, plural, one {# signal} other {# signals}} between {from} and {to}',
-        values: { signalCount, from: window.from, to: window.to },
+        values: { signalCount, from, to },
       });
 };
