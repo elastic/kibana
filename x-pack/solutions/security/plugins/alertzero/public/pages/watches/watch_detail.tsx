@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,75 +13,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { Worker } from '@kbn/alertzero-common';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
-import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
-import { AutonomySlider } from './components/autonomy_slider';
-import { ScheduleIntervalField } from './components/schedule_interval_field';
+import { useWorkers } from '../../hooks/use_workers_api';
+import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import { SettingsSection } from './components/settings_section';
-import { WorkerSkillsTable } from './components/worker_skills_table';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
-import { workerName } from './workers/translations';
-
-const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
-  const { mutate: updateWorker } = useUpdateWorker();
-  const settingsLocked = worker.state === 'unavailable';
-
-  return (
-    <SettingsSection
-      title={workerName(worker.id, worker.name)}
-      subtitle={
-        settingsLocked
-          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
-          : settingsI18n.WORKER_SECTION_SUBTITLE
-      }
-      data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-    >
-      <EuiSwitch
-        label={settingsI18n.ENABLED_SWITCH_LABEL}
-        checked={worker.enabled}
-        disabled={settingsLocked}
-        onChange={(event) =>
-          updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
-        }
-        data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
-      />
-      <EuiSpacer size="m" />
-      <AutonomySlider
-        current={worker.settings.autonomy}
-        isDisabled={settingsLocked}
-        onChange={(autonomyLevel) =>
-          updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
-        }
-      />
-      {/* Only schedule-driven Workers project an interval; the others are alert- or
-          event-triggered and own no schedule to configure. */}
-      {worker.settings.scheduleInterval != null ? (
-        <>
-          <EuiSpacer size="m" />
-          <ScheduleIntervalField
-            current={worker.settings.scheduleInterval}
-            isDisabled={settingsLocked}
-            onChange={(scheduleInterval) =>
-              updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
-            }
-          />
-        </>
-      ) : null}
-      <EuiSpacer size="m" />
-      <WorkerSkillsTable skills={worker.skills} />
-    </SettingsSection>
-  );
-};
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
@@ -101,6 +45,27 @@ export const WatchDetailPage: React.FC = () => {
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
     [workersData?.workers, watchId]
   );
+  const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
+    useWatchSettingsDraft(members);
+  const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
+
+  const onSave = useCallback(async () => {
+    try {
+      await save();
+      setSaveBlockedByInvalidDraft(false);
+    } catch (saveError) {
+      if (saveError instanceof Error && saveError.message === 'invalid') {
+        setSaveBlockedByInvalidDraft(true);
+        return;
+      }
+      throw saveError;
+    }
+  }, [save]);
+
+  const onDiscard = useCallback(() => {
+    discard();
+    setSaveBlockedByInvalidDraft(false);
+  }, [discard]);
 
   const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
@@ -150,6 +115,40 @@ export const WatchDetailPage: React.FC = () => {
   return (
     <WatchesSectionLayout active={watchId} title={watch.name}>
       <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            {saveBlockedByInvalidDraft ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+                  <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onDiscard}
+                disabled={!isDirty || isSaving}
+                data-test-subj="alertZeroWatchSettingsDiscard"
+              >
+                {settingsI18n.DISCARD_WATCH_SETTINGS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onSave}
+                // A failed reload leaves stale Workers in the cache; do not write against them
+                // until Retry in the load-error prompt has succeeded.
+                disabled={!isDirty || isSaving || Boolean(workersError)}
+                isLoading={isSaving}
+                data-test-subj="alertZeroWatchSettingsSave"
+              >
+                {settingsI18n.SAVE_WATCH_SETTINGS}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
         {intro ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">
@@ -178,11 +177,23 @@ export const WatchDetailPage: React.FC = () => {
               <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
             ) : (
               <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-                {members.map((worker) => (
-                  <EuiFlexItem key={worker.id} grow={false}>
-                    <WorkerSettingsCard worker={worker} />
-                  </EuiFlexItem>
-                ))}
+                {members.map((worker) => {
+                  const draft = resolve(worker);
+                  return (
+                    <EuiFlexItem key={worker.id} grow={false}>
+                      <WorkerSettingsPanel
+                        worker={worker}
+                        enabled={draft.enabled}
+                        settings={draft.settings}
+                        error={draft.error}
+                        settingsLocked={worker.state === 'unavailable'}
+                        isSaving={isSaving}
+                        onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                        onSettingsChange={(patch) => updateSettings(worker, patch)}
+                      />
+                    </EuiFlexItem>
+                  );
+                })}
               </EuiFlexGroup>
             )}
           </SettingsSection>
