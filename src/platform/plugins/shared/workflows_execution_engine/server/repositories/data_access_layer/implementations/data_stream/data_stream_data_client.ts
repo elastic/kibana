@@ -55,22 +55,11 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
+    return this.deps.esClient.search({
       index: this.indexesToQuery,
       ...request,
       ignore_unavailable: true,
     });
-
-    searchResponse.hits.hits.forEach((hit) => {
-      if (hit._id && hit?._source && hit._seq_no !== undefined && hit._primary_term !== undefined) {
-        this.deps.versionManager.setVersion(hit._id, {
-          index: hit._index,
-          seqNo: hit._seq_no,
-          primaryTerm: hit._primary_term,
-        });
-      }
-    });
-    return searchResponse;
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
@@ -132,13 +121,6 @@ export class DataStreamDataClient<TExecution extends { id: string }>
             seqNo: doc._seq_no,
             primaryTerm: doc._primary_term,
           });
-          if (doc._seq_no !== undefined && doc._primary_term !== undefined) {
-            this.deps.versionManager.setVersion(docId, {
-              index: doc._index,
-              seqNo: doc._seq_no,
-              primaryTerm: doc._primary_term,
-            });
-          }
         }
       }
     }
