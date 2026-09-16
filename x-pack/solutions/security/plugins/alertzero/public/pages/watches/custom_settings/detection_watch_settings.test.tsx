@@ -31,14 +31,18 @@ const ruleTuning: Worker = {
 };
 
 const renderSettings = (onExtrasChange = jest.fn()) => {
-  render(
+  const { rerender } = render(
     <RuleTuningSettings
       worker={ruleTuning}
       settings={ruleTuning.settings}
       onExtrasChange={onExtrasChange}
     />
   );
-  return { onExtrasChange, field: screen.getByTestId('alertZeroAnalysisWindowDays') };
+  return {
+    onExtrasChange,
+    rerender,
+    field: screen.getByTestId('alertZeroAnalysisWindowDays'),
+  };
 };
 
 describe('RuleTuningSettings', () => {
@@ -48,26 +52,52 @@ describe('RuleTuningSettings', () => {
     expect(field).toHaveValue(21);
   });
 
-  it('hands back the complete extras object on blur', () => {
+  it('hands back the complete extras object as soon as a valid value is typed', () => {
     const { onExtrasChange, field } = renderSettings();
 
     fireEvent.change(field, { target: { value: '7' } });
-    expect(onExtrasChange).not.toHaveBeenCalled();
-
-    fireEvent.blur(field);
 
     expect(onExtrasChange).toHaveBeenCalledTimes(1);
     expect(onExtrasChange).toHaveBeenCalledWith({ analysisWindowDays: 7 });
   });
 
-  it('reverts an out-of-range value instead of emitting it', () => {
+  it('reverts an out-of-range value on blur instead of emitting it', () => {
     const { onExtrasChange, field } = renderSettings();
 
     fireEvent.change(field, { target: { value: '31' } });
+    expect(onExtrasChange).not.toHaveBeenCalled();
+    expect(field).toHaveValue(31);
+
     fireEvent.blur(field);
 
     expect(onExtrasChange).not.toHaveBeenCalled();
     expect(field).toHaveValue(21);
+  });
+
+  it('holds incomplete input while typing and reverts it on blur', () => {
+    const { onExtrasChange, field } = renderSettings();
+
+    fireEvent.change(field, { target: { value: '' } });
+    expect(onExtrasChange).not.toHaveBeenCalled();
+
+    fireEvent.blur(field);
+
+    expect(field).toHaveValue(21);
+  });
+
+  it('re-syncs when the parent resets the value', () => {
+    const { rerender, field } = renderSettings();
+
+    fireEvent.change(field, { target: { value: '7' } });
+    rerender(
+      <RuleTuningSettings
+        worker={ruleTuning}
+        settings={{ ...ruleTuning.settings, extras: { analysisWindowDays: 14 } }}
+        onExtrasChange={jest.fn()}
+      />
+    );
+
+    expect(field).toHaveValue(14);
   });
 
   it('falls back to the default window when extras are missing', () => {
