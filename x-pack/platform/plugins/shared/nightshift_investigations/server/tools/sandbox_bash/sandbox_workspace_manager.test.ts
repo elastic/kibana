@@ -13,10 +13,15 @@ import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
 jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock('./elastic_manifest', () => ({
+  writeElasticManifest: jest.fn().mockResolvedValue(undefined),
+}));
 
 import { writeConnectorManifest } from './connector_manifest';
+import { writeElasticManifest } from './elastic_manifest';
 
 const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
+const mockWriteElasticManifest = writeElasticManifest as jest.Mock;
 
 const createSessionMock = (isReset: boolean): SandboxSession => {
   const session = {
@@ -168,5 +173,53 @@ describe('createSandboxWorkspaceManager', () => {
     // Second call — same connector set, but since first write failed, must retry
     await manager.ensureWorkspaceReady({ session, callContext });
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
+  });
+
+  describe('telemetryConnectorId', () => {
+    let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
+
+    beforeEach(() => {
+      managerWithTelemetry = createSandboxWorkspaceManager({
+        getDeps: () => ({}),
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        logger,
+      });
+    });
+
+    it('writes elastic manifest alongside connector manifest on reset', async () => {
+      const session = createSessionMock(true);
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['connector-1']),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'elasticsearch-telemetry', session })
+      );
+    });
+
+    it('does not write elastic manifest when telemetryConnectorId is not set', async () => {
+      const session = createSessionMock(true);
+      await manager.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['connector-1']),
+      });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+    });
+
+    it('swallows elastic manifest write failures (best-effort)', async () => {
+      mockWriteElasticManifest.mockRejectedValueOnce(new Error('gRPC timeout'));
+      const session = createSessionMock(true);
+
+      await expect(
+        managerWithTelemetry.ensureWorkspaceReady({
+          session,
+          callContext: createCallContext(['connector-1']),
+        })
+      ).resolves.toBeUndefined();
+
+      expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
+    });
   });
 });

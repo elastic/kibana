@@ -10,18 +10,23 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
+import { writeElasticManifest } from './elastic_manifest';
 
 /**
  * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest
- * to the sandbox whenever the session is reset or the allowed connector list changes.
+ * (and, when configured, the Elasticsearch telemetry manifest) to the sandbox whenever the
+ * session is reset or the allowed connector list changes.
  *
  * Create one instance per plugin lifecycle and share it across all sandbox tools.
  */
 export const createSandboxWorkspaceManager = ({
   getDeps,
+  telemetryConnectorId,
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
+  /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
+  telemetryConnectorId?: string;
   logger: Logger;
 }) => {
   const lastConnectorIds = new Map<SandboxSession, string>();
@@ -49,6 +54,14 @@ export const createSandboxWorkspaceManager = ({
         lastConnectorIds.set(session, currentKey);
       } catch (err) {
         logger.warn(`Connector manifest write failed: ${(err as Error).message}`);
+      }
+
+      if (telemetryConnectorId) {
+        try {
+          await writeElasticManifest({ session, connectorId: telemetryConnectorId, logger });
+        } catch (err) {
+          logger.warn(`Elastic manifest write failed: ${(err as Error).message}`);
+        }
       }
     },
   };
