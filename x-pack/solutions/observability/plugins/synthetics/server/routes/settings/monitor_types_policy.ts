@@ -22,7 +22,7 @@ const AllowedMonitorTypesSchema = schema.arrayOf(
   { maxSize: 10 }
 );
 
-const MAX_SHARED_SPACES = 100;
+const MAX_SHARED_SPACES = 500;
 
 export interface MonitorTypesPolicy {
   allowedMonitorTypes: string[];
