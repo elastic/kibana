@@ -12,6 +12,9 @@ import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 function unwrapStepSchema(schema: z.ZodTypeAny): z.ZodObject<any> {
   if (schema instanceof z.ZodLazy) {
@@ -44,6 +47,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'step-name'
@@ -87,6 +91,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'step-1-foreach-1'
@@ -142,6 +147,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'after-loop'
@@ -184,6 +190,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'after-check'
@@ -221,6 +228,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'poll'
@@ -260,6 +268,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'poll'
@@ -302,6 +311,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'poll'
@@ -341,6 +351,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'loop'
@@ -365,6 +376,7 @@ describe('getStepsCollectionSchema', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
     const withoutPrecomputed = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'step-3'
@@ -373,6 +385,7 @@ describe('getStepsCollectionSchema', () => {
     const stepNode = workflowGraph.getStepNode('step-3')!;
     const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
     const withPrecomputed = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'step-3',
@@ -429,6 +442,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
+      emptyRegistry,
       DynamicStepContextSchema,
       workflowGraph,
       'point-of-access'
@@ -440,13 +454,28 @@ describe('getStepsCollectionSchema', () => {
     expect((stepsCollectionSchema.shape as any)['$pecial*$ymb0l$']).toBeDefined();
 
     expect(() =>
-      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, 'Step with spaces')
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        'Step with spaces'
+      )
     ).not.toThrow();
     expect(() =>
-      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, 'CamelCaseStep')
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        'CamelCaseStep'
+      )
     ).not.toThrow();
     expect(() =>
-      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, '$pecial*$ymb0l$')
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        '$pecial*$ymb0l$'
+      )
     ).not.toThrow();
   });
 });

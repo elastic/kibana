@@ -14,6 +14,9 @@ import { matchAllVariables } from '../../regex';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
 import { positionAt } from './__fixtures__/text_position';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 interface ScenarioDefinition {
   readonly yaml: string;
@@ -27,6 +30,7 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   const graph = WorkflowGraph.fromWorkflowDefinition(scenario.definition);
 
   const collectionResults = validateLiquidForLoopCollections(
+    emptyRegistry,
     scenario.yaml,
     doc,
     lineCounter,
@@ -56,6 +60,7 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   });
 
   const variableResults = validateVariables(
+    emptyRegistry,
     variableItems,
     graph,
     scenario.definition,
@@ -154,6 +159,7 @@ steps:
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
 
     const collectionResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       yaml,
       doc,
       lineCounter,
@@ -169,6 +175,7 @@ steps:
     const end = positionAt(yaml, offset + match![0].length);
 
     const variableResults = validateVariables(
+      emptyRegistry,
       [
         {
           id: 'row.typo-var',

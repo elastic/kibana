@@ -11,6 +11,9 @@ import type { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('getWorkflowContextSchema - Legacy Array Format', () => {
   it('should handle legacy array format inputs for variable validation', () => {
@@ -49,6 +52,7 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     };
 
     const contextSchema: typeof DynamicWorkflowContextSchema = getWorkflowContextSchema(
+      emptyRegistry,
       workflow as any
     );
 
@@ -116,6 +120,7 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     };
 
     const contextSchema: typeof DynamicWorkflowContextSchema = getWorkflowContextSchema(
+      emptyRegistry,
       workflow as any
     );
 

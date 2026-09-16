@@ -28,6 +28,9 @@ import {
   getContextSchemaForStep,
 } from '../context/get_context_for_path';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
   typeof getScalarValueAtOffset
@@ -107,7 +110,12 @@ describe('validateVariables', () => {
 
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      emptyRegistry,
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition
+    );
 
     expect(result).toHaveLength(3);
     expect(mockValidateVariable).toHaveBeenCalledTimes(3);
@@ -160,7 +168,12 @@ describe('validateVariables', () => {
         ruleId: 'invalidVariableReference',
       });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      emptyRegistry,
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition
+    );
 
     expect(result).toHaveLength(3);
     expect(result[0].message).toBe(null);
@@ -194,6 +207,7 @@ describe('validateVariables', () => {
     mockValidateVariable.mockReturnValue(expectedError);
 
     const result = validateVariables(
+      emptyRegistry,
       [skippedVariable, validatedVariable],
       mockWorkflowGraph,
       mockWorkflowDefinition
@@ -211,9 +225,9 @@ describe('validateVariables', () => {
       throw new Error('Variable validator failed');
     });
 
-    expect(() => validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition)).toThrow(
-      'Variable validator failed'
-    );
+    expect(() =>
+      validateVariables(emptyRegistry, [variable], mockWorkflowGraph, mockWorkflowDefinition)
+    ).toThrow('Variable validator failed');
   });
 
   it('should process mixed valid and invalid variables', () => {
@@ -279,7 +293,12 @@ describe('validateVariables', () => {
         ruleId: 'invalidVariableReference',
       });
 
-    const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      emptyRegistry,
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition
+    );
 
     expect(result).toHaveLength(4);
     expect(result[0].message).toBe(null);
@@ -290,7 +309,7 @@ describe('validateVariables', () => {
   });
 
   it('should handle empty variable list', () => {
-    const result = validateVariables([], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(emptyRegistry, [], mockWorkflowGraph, mockWorkflowDefinition);
 
     expect(result).toEqual([]);
     expect(mockGetContextSchemaForStep).not.toHaveBeenCalled();
@@ -307,7 +326,13 @@ describe('validateVariables', () => {
 
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
-    validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition, {} as Document);
+    validateVariables(
+      emptyRegistry,
+      variables,
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      {} as Document
+    );
 
     expect(mockGetContextSchemaForStep).toHaveBeenCalledTimes(1);
     expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(1);
@@ -325,9 +350,10 @@ describe('validateVariables', () => {
     mockGetContextSchemaForStep.mockReturnValue(mockContext as any);
     mockValidateVariable.mockReturnValue({} as YamlValidationResult);
 
-    validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
+    validateVariables(emptyRegistry, [variable], mockWorkflowGraph, mockWorkflowDefinition);
 
     expect(mockGetContextSchemaForStep).toHaveBeenCalledWith(
+      emptyRegistry,
       expect.anything(),
       mockWorkflowGraph,
       'step-a'
@@ -356,7 +382,12 @@ describe('validateVariables', () => {
       ruleId: 'invalidVariableReference',
     });
 
-    const result = validateVariables([foreachVariable], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      emptyRegistry,
+      [foreachVariable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition
+    );
 
     expect(result).toHaveLength(1);
     expect(result[0].message).toContain('Foreach parameter');
@@ -414,6 +445,7 @@ describe('validateVariables', () => {
     });
 
     const result = validateVariables(
+      emptyRegistry,
       [variableItem],
       mockWorkflowGraph,
       mockWorkflowDefinition,
@@ -449,7 +481,12 @@ describe('validateVariables', () => {
       ruleId: 'invalidVariableReference',
     });
 
-    const result = validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
+    const result = validateVariables(
+      emptyRegistry,
+      [variable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition
+    );
 
     expect(result[0]).toEqual({
       id: 'test-error',

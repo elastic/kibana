@@ -35,10 +35,13 @@ import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const WARMUP_ITERATIONS = 5;
 
@@ -187,6 +190,7 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
     );
     timings[`validateVariables (${variableItems.length} vars)`] = benchmarkSync(() => {
       validateVariables(
+        emptyRegistry,
         variableItems,
         workflowGraph,
         workflowDefinition,
@@ -289,6 +293,7 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
       start = performance.now();
       validateVariables(
+        emptyRegistry,
         variableItems,
         workflowGraph,
         workflowDefinition,

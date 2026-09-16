@@ -25,32 +25,10 @@ export interface RegisteredStepOutput {
  * Registered step and trigger metadata the workflow context schema needs.
  *
  * The registries themselves are owned by the consuming plugin (they hold the
- * `workflows_extensions` start contract), so the plugin supplies this adapter
- * once at start on each surface. Unset means "nothing registered", which is
- * also the state before plugin start.
+ * `workflows_extensions` start contract), so the plugin builds this adapter.
  */
 export interface WorkflowContextRegistry {
   getStepOutput(stepTypeId: string): RegisteredStepOutput | undefined;
   getConnector(stepTypeId: string): ConnectorContractUnion | undefined;
   getTriggerDefinition(triggerType: string): CommonTriggerDefinition | undefined;
-}
-
-const EMPTY_REGISTRY: WorkflowContextRegistry = {
-  getStepOutput: () => undefined,
-  getConnector: () => undefined,
-  getTriggerDefinition: () => undefined,
-};
-
-let registry: WorkflowContextRegistry = EMPTY_REGISTRY;
-
-export function setWorkflowContextRegistry(next: WorkflowContextRegistry): void {
-  registry = next;
-}
-
-export function resetWorkflowContextRegistry(): void {
-  registry = EMPTY_REGISTRY;
-}
-
-export function getWorkflowContextRegistry(): WorkflowContextRegistry {
-  return registry;
 }

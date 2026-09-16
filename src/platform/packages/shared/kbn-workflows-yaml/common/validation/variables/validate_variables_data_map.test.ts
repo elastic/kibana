@@ -12,6 +12,9 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 import { validateVariables } from './validate_variables';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('validateVariables data.map nested $map bindings', () => {
   it('treats custom nested $map item bindings as valid variables', () => {
@@ -44,6 +47,7 @@ steps:
 
     const variableItems = collectAllVariables(yaml, yamlDocument, lineCounter, workflowGraph);
     const results = validateVariables(
+      emptyRegistry,
       variableItems,
       workflowGraph,
       workflowDefinition,

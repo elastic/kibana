@@ -35,6 +35,7 @@ import {
 } from '../context/get_foreach_state_schema';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import type { WorkflowContextRegistry } from '../context/registry';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
@@ -46,9 +47,17 @@ interface CollectionDiagnostic {
   severity: YamlValidationErrorSeverity;
 }
 
+/** Grouped because the Liquid syntax pass runs without them, on YAML that fails schema parse or graph build. */
+export interface LiquidContextDeps {
+  readonly registry: WorkflowContextRegistry;
+  readonly workflowGraph: WorkflowGraph;
+  readonly workflowDefinition: WorkflowYaml;
+}
+
 interface ForLoopValidationContext {
   readonly yamlString: string;
   readonly lineCounter: LineCounter;
+  readonly registry: WorkflowContextRegistry;
   readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
@@ -64,28 +73,29 @@ export function validateLiquidYamlScalars(
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  workflowGraph?: WorkflowGraph,
-  workflowDefinition?: WorkflowYaml
+  contextDeps?: LiquidContextDeps
 ): YamlValidationResult[] {
   if (lineCounter.lineStarts.length === 0) {
     throw new Error('LineCounter must be initialized by parsing the YAML source');
   }
 
   const results: YamlValidationResult[] = [];
-  const forLoopContext: ForLoopValidationContext | null =
-    workflowGraph != null && workflowDefinition != null
-      ? {
-          yamlString,
-          lineCounter,
-          workflowGraph,
-          workflowDefinition,
-          yamlDocument,
-          baseSchema: DynamicStepContextSchema.merge(
-            getWorkflowContextSchema(workflowDefinition, yamlDocument)
-          ) as typeof DynamicStepContextSchema,
-          stepSchemaCache: new Map(),
-        }
-      : null;
+  const forLoopContext: ForLoopValidationContext | null = contextDeps
+    ? {
+        yamlString,
+        lineCounter,
+        ...contextDeps,
+        yamlDocument,
+        baseSchema: DynamicStepContextSchema.merge(
+          getWorkflowContextSchema(
+            contextDeps.registry,
+            contextDeps.workflowDefinition,
+            yamlDocument
+          )
+        ) as typeof DynamicStepContextSchema,
+        stepSchemaCache: new Map(),
+      }
+    : null;
 
   visit(yamlDocument, {
     Scalar(key, node, ancestors) {
@@ -200,7 +210,12 @@ function collectForLoopCollectionResults(
 
   let stepSchema = ctx.stepSchemaCache.get(nearestStep.name);
   if (!stepSchema) {
-    stepSchema = getContextSchemaForStep(ctx.baseSchema, ctx.workflowGraph, nearestStep.name);
+    stepSchema = getContextSchemaForStep(
+      ctx.registry,
+      ctx.baseSchema,
+      ctx.workflowGraph,
+      nearestStep.name
+    );
     ctx.stepSchemaCache.set(nearestStep.name, stepSchema);
   }
 

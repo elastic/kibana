@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import type { WorkflowContextRegistry } from '../registry';
+import type { WorkflowContextRegistry } from './registry';
 
-export const getOutputSchemaForStepType = jest.fn(
-  (_registry: WorkflowContextRegistry, node: { stepType: string }) => {
-    if (node.stepType === 'console') {
-      return z.string();
-    }
-    return z.unknown();
-  }
-);
+/** Registry that resolves nothing, for tests that do not depend on registered step or trigger metadata. */
+export const createMockWorkflowContextRegistry = (
+  overrides: Partial<WorkflowContextRegistry> = {}
+): WorkflowContextRegistry => ({
+  getStepOutput: () => undefined,
+  getConnector: () => undefined,
+  getTriggerDefinition: () => undefined,
+  ...overrides,
+});

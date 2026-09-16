@@ -10,27 +10,23 @@
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
-import { resetWorkflowContextRegistry, setWorkflowContextRegistry } from './registry';
-import type { RegisteredStepOutput } from './registry';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+import type { RegisteredStepOutput, WorkflowContextRegistry } from './registry';
 
 describe('getOutputSchemaForStepType', () => {
   let mockConnectorsMap: Map<string, { type: string; outputSchema?: z.ZodSchema }>;
   let mockStepOutput: RegisteredStepOutput | undefined;
+  let registry: WorkflowContextRegistry;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockConnectorsMap = new Map();
     mockStepOutput = undefined;
-    setWorkflowContextRegistry({
+    registry = createMockWorkflowContextRegistry({
       getStepOutput: () => mockStepOutput,
       getConnector: (stepTypeId) =>
         mockConnectorsMap.get(stepTypeId) as ConnectorContractUnion | undefined,
-      getTriggerDefinition: () => undefined,
     });
-  });
-
-  afterEach(() => {
-    resetWorkflowContextRegistry();
   });
 
   describe('elasticsearch and kibana connectors', () => {
@@ -49,7 +45,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result).toBe(mockOutputSchema);
     });
@@ -69,7 +65,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result).toBe(mockOutputSchema);
     });
@@ -88,7 +84,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
     });
@@ -114,7 +110,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result).toBe(mockOutputSchema);
     });
@@ -136,7 +132,7 @@ describe('getOutputSchemaForStepType', () => {
           configuration: {},
         };
 
-        const result = getOutputSchemaForStepType(mockNode);
+        const result = getOutputSchemaForStepType(registry, mockNode);
 
         expect(result).toBe(mockOutputSchema);
       }
@@ -154,7 +150,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
       const parsed = result.safeParse({ conditionResult: true });
 
       expect(parsed.success).toBe(true);
@@ -170,7 +166,7 @@ describe('getOutputSchemaForStepType', () => {
         startNodeId: 'enter-id',
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
       const parsed = result.safeParse({ conditionResult: false });
 
       expect(parsed.success).toBe(true);
@@ -185,7 +181,7 @@ describe('getOutputSchemaForStepType', () => {
         type: 'exit-then-branch' as const,
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
       const parsed = result.safeParse({ conditionResult: true });
 
       expect(parsed.success).toBe(true);
@@ -199,7 +195,7 @@ describe('getOutputSchemaForStepType', () => {
         type: 'enter-retry' as const,
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
 
       expect(result.def.type).toBe('unknown');
     });
@@ -217,7 +213,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
       expect(result.safeParse(undefined)).toEqual({ success: true, data: undefined });
@@ -234,7 +230,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
       expect(result.safeParse({})).toEqual({ success: true, data: {} });
@@ -251,7 +247,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
     });
@@ -269,7 +265,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: {},
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result).toHaveProperty('def');
       expect(typeof result.parse).toBe('function');
@@ -289,7 +285,7 @@ describe('getOutputSchemaForStepType', () => {
         },
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
     });
@@ -305,7 +301,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: null,
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       expect(result.def.type).toBe('unknown');
     });
@@ -340,7 +336,7 @@ describe('getOutputSchemaForStepType', () => {
         },
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       // Should call getOutputSchema with configuration.with
       expect(mockStepOutput?.getDynamicOutputSchema).toHaveBeenCalledWith({
@@ -378,7 +374,7 @@ describe('getOutputSchemaForStepType', () => {
         },
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       // Should call getOutputSchema first
       expect(mockStepOutput?.getDynamicOutputSchema).toHaveBeenCalledWith({
@@ -414,7 +410,7 @@ describe('getOutputSchemaForStepType', () => {
         },
       };
 
-      const result = getOutputSchemaForStepType(mockNode);
+      const result = getOutputSchemaForStepType(registry, mockNode);
 
       // Should return the static schema directly
       expect(result).toBe(mockStaticSchema);
@@ -438,7 +434,7 @@ describe('getOutputSchemaForStepType', () => {
         },
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
 
       // Should produce a typed Zod schema, not the permissive record fallback.
       const valid = result.safeParse({
@@ -464,7 +460,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: { with: { message: 'Please approve' } },
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
 
       expect(
         result.safeParse({
@@ -485,7 +481,7 @@ describe('getOutputSchemaForStepType', () => {
         configuration: { with: { message: 'Approve?' } },
       };
 
-      const result = getOutputSchemaForStepType(mockNode as any);
+      const result = getOutputSchemaForStepType(registry, mockNode as any);
       const shape = (result as z.ZodObject<z.ZodRawShape>).shape;
 
       expect(shape.channel).toBeDefined();
