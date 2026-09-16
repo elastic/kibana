@@ -8,7 +8,11 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import type { AiIndexProperties, AiIndexType } from '../../../common/http_api/ai_indices';
+import type {
+  AiIndexProperties,
+  AiIndexTrace,
+  AiIndexType,
+} from '../../../common/http_api/ai_indices';
 import { createAiIndex as createAiIndexRequest } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { getAiIndexDest } from '../utils/ai_index_dest';
@@ -26,6 +30,7 @@ export interface CreateAiIndexArgs {
   description: string;
   storageType: AiIndexType;
   sources: SelectedSource[];
+  trace?: AiIndexTrace;
 }
 
 export const useCreateAiIndex = () => {
@@ -35,13 +40,13 @@ export const useCreateAiIndex = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
-    mutationFn: async ({ id, description, storageType, sources }) => {
+    mutationFn: async ({ id, description, storageType, sources, trace }) => {
       const properties: AiIndexProperties = {
         description: description.trim() || undefined,
         dest: getAiIndexDest(storageType, id),
         automations: [],
         sources: toAiIndexSources(sources),
-        traces: [],
+        traces: trace ? [trace] : [],
       };
 
       await createAiIndexRequest(http, { aiIndexId: id, properties });
