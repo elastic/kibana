@@ -10,10 +10,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
@@ -119,6 +120,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const submitMessage = useSubmitMessage();
+  const [isAgentExecutionEnabled, setIsAgentExecutionEnabled] = useState(true);
+  const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -134,6 +137,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
+    isSendingUserMessage ||
     !isAgentIdValid ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
@@ -215,6 +219,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (!isAgentExecutionEnabled) {
+      sendUserMessage(content)
+        .then(() => {
+          messageEditorController.clear();
+          onSubmit?.();
+        })
+        .catch((sendError: unknown) => {
+          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
+        });
+      return;
+    }
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
@@ -264,7 +279,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
               messageEditorController.setContent(pendingMessage);
             }
           }}
-          agentId={agentId}
+          showAgentToggle={!isNewConversation}
+          isAgentExecutionEnabled={isAgentExecutionEnabled}
+          onAgentExecutionEnabledChange={setIsAgentExecutionEnabled}
         />
       )}
     </InputContainer>

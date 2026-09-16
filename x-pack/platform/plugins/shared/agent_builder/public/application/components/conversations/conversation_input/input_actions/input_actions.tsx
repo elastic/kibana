@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
@@ -17,18 +18,26 @@ const connectorFlexItemStyles = css`
   overflow: hidden;
 `;
 
+const runAgentLabel = i18n.translate('xpack.agentBuilder.conversationInput.runAgentSwitch.label', {
+  defaultMessage: 'Run agent',
+});
+
 interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
-  agentId?: string;
+  showAgentToggle: boolean;
+  isAgentExecutionEnabled: boolean;
+  onAgentExecutionEnabledChange: (enabled: boolean) => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
-  agentId,
+  showAgentToggle,
+  isAgentExecutionEnabled,
+  onAgentExecutionEnabledChange,
 }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup
@@ -42,6 +51,17 @@ export const InputActions: React.FC<InputActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          {showAgentToggle && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={runAgentLabel}
+                checked={isAgentExecutionEnabled}
+                onChange={(event) => onAgentExecutionEnabledChange(event.target.checked)}
+                data-test-subj="agentBuilderConversationInputAgentToggle"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ConversationActionButton
               onSubmit={onSubmit}
