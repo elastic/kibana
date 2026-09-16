@@ -94,7 +94,7 @@ import type {
 } from './types';
 import { generateExecutionTaskScope } from './utils';
 import {
-  buildWorkflowContext,
+  buildWorkflowRenderContext,
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
@@ -1987,7 +1987,7 @@ export class WorkflowsExecutionEnginePlugin
     // Liquid-rendered input defaults or templated input values are not supported here.
     return this.concurrencyManager.evaluateConcurrencyKey(
       workflowSettings.concurrency,
-      buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies),
+      buildWorkflowRenderContext(normalizedWorkflowExecution, coreStart, dependencies),
       workflowSettings.liquid
     );
   }
