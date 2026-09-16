@@ -48,7 +48,11 @@ export const createSandboxWorkspaceManager = ({
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
 
-      await writeConnectorManifest({ session, callContext, getActionsClient, logger });
+      await writeConnectorManifest({ session, callContext, getActionsClient, logger }).catch(
+        (err: Error) => {
+          logger.warn(`Connector manifest write failed for ${conversationId}: ${err.message}`);
+        }
+      );
     },
   };
 };

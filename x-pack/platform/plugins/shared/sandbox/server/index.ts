@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export { config } from './config';
+export type { SandboxPluginConfig } from './config';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { SandboxPlugin } = await import('./plugin');
+  return new SandboxPlugin(initializerContext);
+}
+
 export type { SandboxSession } from './sandbox_session';
 export type { SandboxPluginStart } from './plugin';
 export type {
