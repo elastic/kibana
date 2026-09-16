@@ -507,7 +507,7 @@ describe('conversations utils', () => {
   });
 
   describe('createConversation$', () => {
-    it('writes attachment_events into the created conversation events', async () => {
+    it('composes the round-derived events with attachment_events and passes both to create', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = createEmptyConversation({ id: 'conv-1' });
       const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
@@ -527,7 +527,37 @@ describe('conversations utils', () => {
       );
 
       const [args] = conversationClient.create.mock.calls[0];
-      expect(args.events).toEqual([attachmentEvent]);
+      // The converter treats `events` as the full stored projection when both `events` and
+      // `rounds` are supplied; `createConversation$` is responsible for composing them so the
+      // stored timeline contains the round-derived events *and* the attachment events.
+      expect(args.events.map((e: { id: string }) => e.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        attachmentEvent.id,
+      ]);
+    });
+
+    it('omits events entirely when the round has no attachment_events (converter derives from rounds)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ id: 'conv-1' });
+      const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
+      conversationClient.create.mockResolvedValue(conversation);
+
+      await lastValueFrom(
+        createConversation$({
+          conversation,
+          conversationClient,
+          title$: of('t'),
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false },
+          }),
+        }).pipe(toArray())
+      );
+
+      const [args] = conversationClient.create.mock.calls[0];
+      expect(args.events).toBeUndefined();
     });
 
     it('emits execution_terminated before conversation_created (legacy fallback for a doc without schema_version)', async () => {

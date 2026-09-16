@@ -139,6 +139,16 @@ export const createConversation$ = ({
         Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
 
       const round = roundCompletedEvent.data.round;
+      const attachmentEvents = roundCompletedEvent.data.attachment_events ?? [];
+      // `conversationClient.create` treats `events` as the full stored projection when both
+      // `events` and `rounds` are supplied — the round is still serialized to `conversation_rounds`
+      // for read-through-rounds, but the events-native projection is whatever we pass here. So
+      // compose the round-derived events with the round's attachment events explicitly; the
+      // converter does not merge on our behalf.
+      const composedEvents =
+        attachmentEvents.length > 0
+          ? [...roundToEvents(round, conversation), ...attachmentEvents]
+          : undefined;
       const created = await conversationClient.create({
         id: conversation.id,
         title,
@@ -149,9 +159,7 @@ export const createConversation$ = ({
         state: roundCompletedEvent.data.conversation_state,
         status: round.status,
         rounds: [round],
-        ...(roundCompletedEvent.data.attachment_events?.length
-          ? { events: roundCompletedEvent.data.attachment_events }
-          : {}),
+        ...(composedEvents ? { events: composedEvents } : {}),
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
         ...(conversation.parent_conversation
           ? { parent_conversation: conversation.parent_conversation }

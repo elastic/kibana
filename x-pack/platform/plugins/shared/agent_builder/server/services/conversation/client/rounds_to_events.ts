@@ -68,7 +68,13 @@ export const roundStepEventId = (roundId: string, sequence: number): string =>
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
 
-export const userMessageEvent = (round: RoundStart, conversation: Conversation): TimelineEvent => ({
+
+type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
+
+export const userMessageEvent = (
+  round: RoundStart,
+  conversation: ConversationForRoundEvents
+): TimelineEvent => ({
   id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
   type: TimelineEventType.userMessage,
   created_at: round.started_at,
@@ -78,7 +84,7 @@ export const userMessageEvent = (round: RoundStart, conversation: Conversation):
 
 export const executionStartedEvent = (
   round: Pick<ConversationRound, 'id' | 'started_at'>,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent => {
   const ids = roundDerivedEventIds(round.id);
   return {
@@ -94,7 +100,7 @@ export const executionStartedEvent = (
 
 export const roundStartEvents = (
   round: RoundStart,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => [
   userMessageEvent(round, conversation),
   executionStartedEvent(round, conversation),
@@ -102,7 +108,7 @@ export const roundStartEvents = (
 
 export const roundStepEvents = (
   round: Pick<ConversationRound, 'id' | 'started_at' | 'steps'>,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const ids = roundDerivedEventIds(round.id);
   return (round.steps ?? []).map((step, index) => ({
@@ -118,7 +124,7 @@ export const roundStepEvents = (
 
 export const roundTerminatedEvent = (
   round: ConversationRound,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent | undefined => {
   const ids = roundDerivedEventIds(round.id);
   const endedAt = new Date(
@@ -153,7 +159,7 @@ const outcomeForRound = (round: ConversationRound): ExecutionOutcome | undefined
 
 export const roundToEvents = (
   round: ConversationRound,
-  conversation: Conversation
+  conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const terminated = roundTerminatedEvent(round, conversation);
   return [
