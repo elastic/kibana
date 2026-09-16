@@ -78,6 +78,7 @@ export function createRuleResponse(
       name: 'test-rule',
       signature_id: 'test-rule-id',
       source: { type: 'internal' as const, version: 1 },
+      ownership: { managed: false } as const,
       ...metadata,
       revision: metadata?.revision ?? 0,
     },
@@ -92,7 +93,7 @@ export function createRuleSoAttributes(
 ): RuleSavedObjectAttributes {
   return {
     kind: 'alert',
-    metadata: { name: 'test-rule', signature_id: 'test-signature-id' },
+    metadata: { name: 'test-rule', signature_id: 'test-signature-id', ownership: { managed: false } },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     query: { base: 'FROM logs-* | LIMIT 10' },
