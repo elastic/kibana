@@ -17,7 +17,6 @@ import { IacUpgradeCallout } from './iac_upgrade_callout';
 describe('IacUpgradeCallout', () => {
   const defaultProps = {
     checkedAt: undefined,
-    hasKey: true,
     canUpdate: true,
     isUpdating: false,
     onUpdateStack: jest.fn(),
@@ -34,18 +33,12 @@ describe('IacUpgradeCallout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the upgraded-template body when hasKey is true', () => {
-    renderComponent({ hasKey: true });
+  it('renders the one upgrade-available body and never mentions the static template', () => {
+    // Team decision: the same message whether the stored key is missing or mismatched.
+    renderComponent();
 
     expect(screen.getByText(/The IAM role template has been updated/)).toBeInTheDocument();
-    expect(screen.queryByText(/static CloudFormation template/)).not.toBeInTheDocument();
-  });
-
-  it('renders the static-template body when hasKey is false', () => {
-    renderComponent({ hasKey: false });
-
-    expect(screen.getByText(/static CloudFormation template/)).toBeInTheDocument();
-    expect(screen.queryByText(/The IAM role template has been updated/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/static/i)).not.toBeInTheDocument();
   });
 
   it('renders the deployment-id hint and disables the button when canUpdate is false', () => {

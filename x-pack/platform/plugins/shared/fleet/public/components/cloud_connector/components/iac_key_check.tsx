@@ -146,7 +146,10 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       onTemplateRendered,
     });
 
-  const isBlocking = data?.matches === false && data.reason === 'key_mismatch';
+  // A missing key blocks like a mismatched one: either way the deployed template is not known to
+  // cover the selection (https://github.com/elastic/ingest-dev/issues/9415).
+  const isBlocking =
+    data?.matches === false && (data.reason === 'key_mismatch' || data.reason === 'no_key');
   // The block lasts until the user has launched the update; Kibana cannot see them apply it.
   const isValid = !isBlocking || updateLaunched;
   // No verdict yet and one is on its way. Not the same as "no data": a failed check (fail open)

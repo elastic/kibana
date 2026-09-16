@@ -94,7 +94,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           'xpack.ingestHub.authenticateAndDeployStep.iacProvenanceWriteFailed.text',
           {
             defaultMessage:
-              'Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it will be reported as using the static template. Kibana will retry if you deploy again.',
+              'Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. Kibana will retry if you deploy again.',
           }
         ),
       });

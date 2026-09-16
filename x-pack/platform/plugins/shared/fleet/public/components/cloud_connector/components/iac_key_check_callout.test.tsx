@@ -46,17 +46,21 @@ describe('IacKeyCheckCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders the no_key title and body', () => {
+  it('renders no_key exactly like key_mismatch and never mentions the static template', () => {
+    // Team decision: one message per surface; a missing key blocks like a mismatched one.
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
         result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
       />
     );
+    expect(screen.getByText('CloudFormation stack update required')).toBeInTheDocument();
+    expect(screen.getByText(/generated without the permissions needed for/)).toBeInTheDocument();
+    expect(screen.queryByText(/static/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/continue without updating/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText('This identity uses the static CloudFormation template')
+      screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
     ).toBeInTheDocument();
-    expect(screen.getByText(/predates generated templates/i)).toBeInTheDocument();
   });
 
   it('renders the mismatch title', () => {
@@ -108,7 +112,7 @@ describe('IacKeyCheckCallout', () => {
     expect(screen.queryByText('this integration')).not.toBeInTheDocument();
   });
 
-  it('names "this integration" in bold in the no_key body for a single integration', () => {
+  it('names "this integration" in bold for no_key too', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -119,7 +123,7 @@ describe('IacKeyCheckCallout', () => {
     expect(bold.tagName).toBe('STRONG');
   });
 
-  it('pluralises the no_key body from the integration count', () => {
+  it('pluralises the body from the integration count for no_key too', () => {
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -246,7 +250,7 @@ describe('IacKeyCheckCallout', () => {
       expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
     });
 
-    it('does not apply to no_key: the static-template copy stays, since nothing was blocked', () => {
+    it('applies to no_key as well: a missing key blocks and is released by the launch too', () => {
       renderWithIntl(
         <IacKeyCheckCallout
           {...baseProps}
@@ -255,10 +259,8 @@ describe('IacKeyCheckCallout', () => {
         />
       );
 
-      expect(
-        screen.getByText('This identity uses the static CloudFormation template')
-      ).toBeInTheDocument();
-      expect(screen.queryByText('CloudFormation stack update opened')).not.toBeInTheDocument();
+      expect(screen.getByText('CloudFormation stack update opened')).toBeInTheDocument();
+      expect(screen.queryByText('CloudFormation stack update required')).not.toBeInTheDocument();
     });
   });
 });

@@ -504,7 +504,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                     {showUpgradeCallout ? (
                       <IacUpgradeCallout
                         checkedAt={iacUpgradeCheckedAt}
-                        hasKey={Boolean(iacKey)}
                         canUpdate={hasValidDeploymentId && hasRenderableIntegrations}
                         isUpdating={isGeneratingTemplate}
                         onUpdateStack={() => launchTemplate('update_stack_clicked')}

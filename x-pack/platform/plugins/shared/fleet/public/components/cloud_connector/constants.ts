@@ -82,6 +82,6 @@ export const IAC_PROVENANCE_WRITE_FAILED_TOAST = {
   }),
   text: i18n.translate('xpack.fleet.cloudConnector.iacProvenanceWriteFailed.text', {
     defaultMessage:
-      'The integration was saved, but Kibana could not record which CloudFormation template this identity uses, so it will be reported as using the static template. Kibana will retry if you edit and save this integration again.',
+      'The integration was saved, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. Kibana will retry if you edit and save this integration again.',
   }),
 };

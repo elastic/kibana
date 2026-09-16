@@ -15,7 +15,6 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../commo
 
 export interface IacUpgradeCalloutProps {
   checkedAt?: string;
-  hasKey: boolean;
   canUpdate: boolean;
   isUpdating: boolean;
   onUpdateStack: () => void;
@@ -23,12 +22,13 @@ export interface IacUpgradeCalloutProps {
 
 /**
  * Upgrade callout shown in the connector flyout when iac_upgrade_status is 'upgrade_available'.
- * Its only action is Update: the click stores the rendered key and the flyout re-checks on its
- * own, so the callout clears itself (https://github.com/elastic/ingest-dev/issues/9415).
+ * One message whether the stored key is missing or mismatched: users are never told an identity
+ * "uses the static template". Its only action is Update: the click stores the rendered key and
+ * the flyout re-checks on its own, so the callout clears itself
+ * (https://github.com/elastic/ingest-dev/issues/9415).
  */
 export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
   checkedAt,
-  hasKey,
   canUpdate,
   isUpdating,
   onUpdateStack,
@@ -36,21 +36,14 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
   const { IAC_UPGRADE_CALLOUT, IAC_UPDATE_STACK_BUTTON } =
     CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS;
 
-  const bodyText = hasKey ? (
-    <FormattedMessage
-      id="xpack.fleet.cloudConnector.policiesFlyout.upgradeBody"
-      defaultMessage="The IAM role template has been updated. Run the stack update to apply the latest permissions to this identity."
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.fleet.cloudConnector.policiesFlyout.upgradeStaticBody"
-      defaultMessage="This identity uses the static CloudFormation template, either because it predates generated templates or because template generation was unavailable when it was created. Run the stack update to switch to a template scoped to its integrations' permissions."
-    />
-  );
-
   const text = (
     <>
-      <p>{bodyText}</p>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.policiesFlyout.upgradeBody"
+          defaultMessage="The IAM role template has been updated. Run the stack update to apply the latest permissions to this identity."
+        />
+      </p>
       {!canUpdate && (
         <p>
           <EuiTextColor color="subdued">

@@ -191,7 +191,9 @@ describe('IacKeyCheck', () => {
       expect(onValidityChange).toHaveBeenCalledWith(false);
     });
 
-    it('renders the callout on no_key but does not block', async () => {
+    it('renders the callout on no_key and blocks, like a mismatch', async () => {
+      // A missing key means the deployed template is not known to cover the selection
+      // (https://github.com/elastic/ingest-dev/issues/9415).
       mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
       const onValidityChange = jest.fn();
 
@@ -202,7 +204,8 @@ describe('IacKeyCheck', () => {
           screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT)
         ).toBeInTheDocument();
       });
-      expect(onValidityChange).toHaveBeenCalledWith(true);
+      expect(onValidityChange).toHaveBeenCalledWith(false);
+      expect(onValidityChange).not.toHaveBeenCalledWith(true);
     });
 
     it('pluralises the callout copy from the number of integrations the check covers', async () => {

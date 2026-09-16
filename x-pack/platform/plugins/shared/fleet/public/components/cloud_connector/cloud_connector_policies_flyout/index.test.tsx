@@ -895,7 +895,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       );
     });
 
-    it('(e) shows upgrade callout with static-template body when upgrade_available and no iacKey', () => {
+    it('(e) shows the same upgrade callout body when upgrade_available and no iacKey (never "static template")', () => {
       renderFlyout({
         provider: 'aws',
         iacUpgradeStatus: 'upgrade_available',
@@ -904,7 +904,8 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
       ).toBeInTheDocument();
-      expect(screen.getByText(/static CloudFormation template/)).toBeInTheDocument();
+      expect(screen.getByText(/The IAM role template has been updated/)).toBeInTheDocument();
+      expect(screen.queryByText(/static/i)).not.toBeInTheDocument();
     });
 
     it('(f) editing deployment ID to a valid ARN enables Save; Save calls updateConnector with iac_deployment_id only', async () => {

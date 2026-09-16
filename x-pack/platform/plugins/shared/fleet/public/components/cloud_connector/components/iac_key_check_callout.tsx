@@ -21,9 +21,10 @@ export interface IacKeyCheckCalloutProps {
   onUpdateStack: () => void;
   isUpdating: boolean;
   /**
-   * The user has launched the stack update for this verdict. On a blocking `key_mismatch` the
-   * callout switches to a "launched" state that tells them to finish in the AWS console and
-   * continue; Update stays available to relaunch (https://github.com/elastic/ingest-dev/issues/9415).
+   * The user has launched the stack update for this verdict (`key_mismatch` or `no_key`, both
+   * blocking). The callout switches to a "launched" state that tells them to finish in the AWS
+   * console and continue; Update stays available to relaunch
+   * (https://github.com/elastic/ingest-dev/issues/9415).
    */
   updateLaunched?: boolean;
 }
@@ -40,18 +41,13 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     return null;
   }
 
-  const isNoKey = result.reason === 'no_key';
-  const isLaunched = updateLaunched && result.reason === 'key_mismatch';
-
-  const title = isLaunched ? (
+  // One message whether the stored key is missing (no_key) or mismatched: both mean the deployed
+  // template does not cover the selection, and users are never told an identity "uses the static
+  // template" (https://github.com/elastic/ingest-dev/issues/9415).
+  const title = updateLaunched ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.launchedTitle"
       defaultMessage="CloudFormation stack update opened"
-    />
-  ) : isNoKey ? (
-    <FormattedMessage
-      id="xpack.fleet.cloudConnector.iacCheck.noKeyTitle"
-      defaultMessage="This identity uses the static CloudFormation template"
     />
   ) : (
     <FormattedMessage
@@ -71,16 +67,10 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     </strong>
   );
 
-  const bodyText = isLaunched ? (
+  const bodyText = updateLaunched ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.launchedBody"
       defaultMessage="Apply the update in the AWS console, then continue. The new services report once the stack is updated."
-    />
-  ) : isNoKey ? (
-    <FormattedMessage
-      id="xpack.fleet.cloudConnector.iacCheck.noKeyBody"
-      defaultMessage="This identity was set up with the static template, either because it predates generated templates or because template generation was unavailable at the time. Update the stack to switch to a template scoped to the permissions required by {integration}. You can continue without updating."
-      values={{ integration }}
     />
   ) : (
     <FormattedMessage
