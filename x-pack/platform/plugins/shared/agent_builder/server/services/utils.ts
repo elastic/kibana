@@ -94,8 +94,10 @@ const resolveApiKeyOwnerProfileUid = async ({
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
   if (authorization && isUiamCredential(authorization)) {
     try {
+      // `profile_uid` is not in the ES `_security/_authenticate` response type, but UIAM may
+      // populate it at runtime; read it as an optional widened field.
       const authResponse = await esClient.security.authenticate();
-      return authResponse.profile_uid;
+      return (authResponse as typeof authResponse & { profile_uid?: string }).profile_uid;
     } catch {
       return undefined;
     }
