@@ -99,19 +99,32 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(true);
       flagSubject.next(false);
       await flushPromises();
 
       expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'user', namespace: 'default', extractionMode: EXTRACTION_MODE.nonPriority })
+        expect.objectContaining({
+          type: 'user',
+          namespace: 'default',
+          extractionMode: EXTRACTION_MODE.nonPriority,
+        })
       );
       expect(mockUpdate).toHaveBeenCalledWith(
         EngineDescriptorTypeName,
         expect.stringContaining('user'),
-        expect.objectContaining({ nonPriorityStatus: null, nonPriorityLogExtractionState: null, nonPriorityError: null }),
+        expect.objectContaining({
+          nonPriorityStatus: null,
+          nonPriorityLogExtractionState: null,
+          nonPriorityError: null,
+        }),
         expect.objectContaining({ namespace: 'default' })
       );
     });
@@ -122,7 +135,12 @@ describe('subscribeToDualProcessFlag', () => {
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(true);
       flagSubject.next(false);
@@ -142,7 +160,12 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(true);
       flagSubject.next(false);
@@ -162,7 +185,12 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -185,11 +213,18 @@ describe('subscribeToDualProcessFlag', () => {
 
     it('skips engines where nonPriorityStatus is already started', async () => {
       const flagSubject = new Subject<boolean>();
-      const soRow = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STARTED });
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STARTED,
+      });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -207,7 +242,12 @@ describe('subscribeToDualProcessFlag', () => {
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -224,7 +264,12 @@ describe('subscribeToDualProcessFlag', () => {
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       flagSubject.next(true);
       flagSubject.next(true);
@@ -240,7 +285,12 @@ describe('subscribeToDualProcessFlag', () => {
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       stop$.next();
       stop$.complete();
@@ -256,7 +306,9 @@ describe('subscribeToDualProcessFlag', () => {
   describe('rapid flip', () => {
     it('processes true -> false -> true sequentially without interleaving', async () => {
       const flagSubject = new Subject<boolean>();
-      const soRowStarted = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: ENGINE_STATUS.STARTED });
+      const soRowStarted = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STARTED,
+      });
       const soRowCleared = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: null });
 
       const mockFind = jest
@@ -278,7 +330,12 @@ describe('subscribeToDualProcessFlag', () => {
       } as unknown as CoreStart;
       const taskManager = buildTaskManager();
 
-      subscribeToDualProcessFlag({ coreStart, taskManager: taskManager as unknown as TaskManagerStartContract, logger, stop$ });
+      subscribeToDualProcessFlag({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        stop$,
+      });
 
       // Emit all three values synchronously — concatMap must serialise them.
       flagSubject.next(true);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { pairwise, concatMap, takeUntil } from 'rxjs/operators';
 import type { CoreStart, FeatureFlagsStart, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -205,7 +205,6 @@ export const subscribeToDualProcessFlag = ({
       })
     )
     .subscribe({
-      error: (err: Error) =>
-        logger.error(`Dual-process flag subscription error: ${err.message}`),
+      error: (err: Error) => logger.error(`Dual-process flag subscription error: ${err.message}`),
     });
 };

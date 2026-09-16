@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { Subject } from 'rxjs';
 import { registerRoutes } from './routes';
 import type {
   EntityStoreCoreSetup,
@@ -41,7 +42,6 @@ import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
-import { Subject } from 'rxjs';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 import { subscribeToDualProcessFlag } from './infra/feature_flags';
 

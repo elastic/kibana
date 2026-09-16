@@ -53,7 +53,8 @@ export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
 ): Extract<ExtractionMode, 'priority' | 'single'> => {
-  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType)) return EXTRACTION_MODE.priority;
+  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType))
+    return EXTRACTION_MODE.priority;
   return EXTRACTION_MODE.single;
 };
 

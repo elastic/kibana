@@ -47,7 +47,10 @@ export function getExtractEntityTaskConfig(
   return TASK_CONFIG_BY_MODE[extractionMode];
 }
 
-function getTaskType(entityType: EntityType, extractionMode: ExtractionMode = EXTRACTION_MODE.single): string {
+function getTaskType(
+  entityType: EntityType,
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
+): string {
   return `${getExtractEntityTaskConfig(extractionMode).type}:${entityType}`;
 }
 
