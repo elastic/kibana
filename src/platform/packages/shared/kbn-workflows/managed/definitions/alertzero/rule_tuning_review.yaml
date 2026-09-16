@@ -331,7 +331,7 @@ steps:
                 type: string
               confidence:
                 type: string
-            enum: [low, medium, high]  
+                enum: [low, medium, high]
               exception_entries:
                 type: array
                 minItems: 1
