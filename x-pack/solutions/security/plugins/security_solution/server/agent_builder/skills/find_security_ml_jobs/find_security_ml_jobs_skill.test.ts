@@ -47,11 +47,16 @@ describe('findSecurityMlJobsSkill', () => {
       expect(content).toContain(
         'Do not generate or execute ES|QL against any index other than .ml-anomalies-*'
       );
+      // Pins the sequencing precondition: generation/execution must wait for
+      // find.security.ml.jobs to return (machine review r4019242533).
+      expect(content).toContain(
+        "Never call 'platform.core.generate_esql' or 'platform.core.execute_esql' before 'find.security.ml.jobs' has returned"
+      );
     });
 
     it('bounds the ES|QL query loop to one pass', () => {
       expect(content).toContain('One query pass, bounded');
-      expect(content).toContain('At most one');
+      expect(content).toContain("At most two 'platform.core.execute_esql' calls per user question");
       expect(content).toContain('do not rephrase the query and retry');
     });
 
