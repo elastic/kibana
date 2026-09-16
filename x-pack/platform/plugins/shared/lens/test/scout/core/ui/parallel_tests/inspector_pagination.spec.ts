@@ -37,7 +37,7 @@ spaceTest.describe('Lens inspector pagination', { tag: '@local-stateful-classic'
   spaceTest(
     'should allow switching between inspector table pages',
     async ({ browserAuth, pageObjects }) => {
-      const { lens, inspector } = pageObjects;
+      const { appMenu, lens, inspector } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
       await lens.workspace.openFullEditor();
@@ -66,7 +66,8 @@ spaceTest.describe('Lens inspector pagination', { tag: '@local-stateful-classic'
         field: 'geo.dest',
       });
 
-      await inspector.open('lnsApp_inspectButton');
+      await appMenu.clickOverflowItem('lnsApp_inspectButton');
+      await inspector.panel.waitFor({ state: 'visible' });
       await inspector.setTablePageSize(INSPECTOR_PAGE_SIZE);
 
       // Wait for the resized page to land — getTableData snapshots the DOM immediately.

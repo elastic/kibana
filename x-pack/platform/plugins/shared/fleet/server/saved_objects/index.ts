@@ -57,6 +57,7 @@ import {
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
@@ -1964,6 +1965,10 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
+          iac_key: { type: 'keyword', ignore_above: 1024 },
+          iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_checked_at: { type: 'date' },
         },
       },
       modelVersions: {
@@ -2077,6 +2082,23 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
             create: CloudConnectorSchemaV4,
+          },
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                iac_key: { type: 'keyword', ignore_above: 1024 },
+                iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_checked_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV5,
           },
         },
       },
