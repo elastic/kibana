@@ -112,11 +112,14 @@ ${forkBranches}
           'engine_type',
           'entity.EngineMetadata.Type'
         )}), ""),
-      CASE(host.ip IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-        ${concatJsonObjectPropertyEsqlExprAsStringArray('ip', 'host.ip')},
-        ${JSON_OBJECT_END}), ""),
-      CASE(entity.source IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')}), ""),
+      CASE(
+        host.ip IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
+          ${JSON_OBJECT_END}),
+        ""
+      ),
+      ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
@@ -328,11 +331,14 @@ export const fetchEntities = async ({
             'engine_type',
             'entity.EngineMetadata.Type'
           )}), ""),
-        CASE(host.ip IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          ${concatJsonObjectPropertyEsqlExprAsStringArray('ip', 'host.ip')},
-          ${JSON_OBJECT_END}), ""),
-        CASE(entity.source IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-          ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')}), ""),
+        CASE(
+          host.ip IS NOT NULL,
+          CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+            "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
+            ${JSON_OBJECT_END}),
+          ""
+        ),
+        ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')},
         ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
