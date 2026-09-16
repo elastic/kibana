@@ -24,6 +24,19 @@ export type AnalysisLimits = estypes.MlAnalysisLimits;
 
 export type DataDescription = estypes.MlDataDescription;
 
+export interface EsqlJobConfig {
+  job_id: JobId;
+  analysis_config: {
+    bucket_span: BucketSpan;
+    detectors: Detector[];
+    influencers: string[];
+    summary_count_field_name?: string;
+  };
+  data_description: {
+    time_field: string;
+  };
+}
+
 export type ModelPlotConfig = estypes.MlModelPlotConfig;
 
 export type CustomRule = estypes.MlDetectionRule;
