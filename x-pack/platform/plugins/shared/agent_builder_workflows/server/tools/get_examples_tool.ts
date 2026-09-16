@@ -16,6 +16,13 @@ export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): 
   agentBuilder.tools.register({
     id: workflowTools.getExamples,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Workflow Examples',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Search and retrieve example workflow YAML files from the bundled library.
 
 **When to use:** Before generating workflow YAML, to learn correct syntax patterns for triggers, steps, inputs, on-failure handling, etc.
@@ -40,7 +47,6 @@ Supports keyword search across names, descriptions, and tags.`,
         .describe('Maximum number of examples to return (default: 3, max: 5)'),
     }),
     tags: ['workflows', 'yaml', 'examples'],
-    experimental: true,
     handler: async ({ category, search, limit }) => {
       const effectiveLimit = Math.min(limit ?? 3, 5);
       const entries = getWorkflowExamples({ category, search });

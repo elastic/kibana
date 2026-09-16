@@ -11,13 +11,14 @@ import { ChangeHistoryClient } from '@kbn/change-history';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import { WorkflowChangeHistoryService } from './workflow_change_history_service';
 import {
   WORKFLOW_CHANGE_HISTORY_DATASET,
   WORKFLOW_CHANGE_HISTORY_MODULE,
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
-} from './workflow_change_history_constants';
-import { WorkflowChangeHistoryService } from './workflow_change_history_service';
+  WorkflowChangeHistoryAction,
+} from '../../common/lib/workflow_change_history/constants';
 
 jest.mock('@kbn/change-history', () => {
   const actual = jest.requireActual('@kbn/change-history');
@@ -158,7 +159,7 @@ describe('WorkflowChangeHistoryService', () => {
           snapshot: { name: 'A' },
         },
       ],
-      { action: 'workflow_update', spaceId: 'default' }
+      { action: WorkflowChangeHistoryAction.workflowUpdate, spaceId: 'default' }
     );
 
     expect(clientMock.logBulk).toHaveBeenCalledWith(
@@ -170,7 +171,7 @@ describe('WorkflowChangeHistoryService', () => {
         },
       ],
       {
-        action: 'workflow_update',
+        action: WorkflowChangeHistoryAction.workflowUpdate,
         spaceId: 'default',
         username: 'alice',
         userProfileId: 'profile-1',
@@ -190,13 +191,13 @@ describe('WorkflowChangeHistoryService', () => {
           snapshot: { name: 'A' },
         },
       ],
-      { action: 'install', spaceId: 'default' }
+      { action: WorkflowChangeHistoryAction.workflowInstall, spaceId: 'default' }
     );
 
     expect(clientMock.logBulk).toHaveBeenCalledWith(
       expect.any(Array),
       expect.objectContaining({
-        action: 'install',
+        action: WorkflowChangeHistoryAction.workflowInstall,
         spaceId: 'default',
         username: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
       })

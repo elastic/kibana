@@ -9,23 +9,17 @@
 
 import { esql } from '@elastic/esql';
 import { sanitazeESQLInput, isSingleSource } from '@kbn/esql-utils';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
-
-/**
- * Formats a single-line ES|QL query into a multi-line format where each
- * pipe command is on its own line with `  | ` indentation.
- */
-function formatQuery(basicQuery: string): string {
-  return basicQuery.replace(/ \| /g, '\n  | ');
-}
 
 interface CreateESQLQueryParams {
   metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
   originalSource?: string;
+  gridSettings?: MetricsGridSettings;
 }
 
 /**
@@ -39,6 +33,7 @@ interface CreateESQLQueryParams {
  * @param originalSource - The source the user typed in their query. When it is a single
  *   concrete index (e.g., a backing index), it is used as the chart query source instead
  *   of `metricItem.indexName` so the chart's scope matches the scope METRICS_INFO scanned.
+ * @param gridSettings - Optional per-metric_type aggregation overrides.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
@@ -46,7 +41,8 @@ export function createESQLQuery({
   splitAccessors = [],
   whereStatements = [],
   originalSource,
-}: CreateESQLQueryParams) {
+  gridSettings,
+}: CreateESQLQueryParams): string {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
   const index = isSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);
@@ -60,13 +56,16 @@ export function createESQLQuery({
     instrument,
     metricName,
     placeholderName: 'metricName',
+    gridSettings,
   });
 
   if (!metricAggregation) {
     return '';
   }
 
+  // Metric-specific streams can omit fields referenced by filters inherited from the parent query.
   const query = esql.ts(index);
+  query.addSetCommand('unmapped_fields', 'NULLIFY');
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
@@ -84,5 +83,5 @@ export function createESQLQuery({
   // TODO rename instrument to match metrics_info response
   query.pipe(statsClause);
 
-  return formatQuery(query.print('basic'));
+  return query.print('pipe-multiline');
 }

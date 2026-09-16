@@ -10,23 +10,25 @@
 /**
  * Profile worker - runs RSPack build with profiling in a clean process.
  *
- * This script uses a minimal setup that avoids require-in-the-middle (from harden),
- * which conflicts with envinfo (used by RsDoctor).
+ * This script uses a minimal setup that avoids the prototype sealing performed by harden,
+ * which conflicts with envinfo (used by RsDoctor). envinfo redefines
+ * `Function.prototype.toString` at load time, which throws once `Object.seal(Function.prototype)`
+ * has been applied.
  *
  * Only loads:
  * - source-map-support for stack traces
- * - @kbn/babel-register for TypeScript transpilation
+ * - @kbn/swc-register for TypeScript transpilation
  *
  * Does NOT load:
- * - @kbn/setup-node-env (which includes harden with require-in-the-middle)
- * - @kbn/security-hardening
+ * - @kbn/setup-node-env (which includes harden's prototype sealing)
+ * - @kbn/security-hardening (which also seals prototypes)
  */
 
 /* eslint-disable no-var */
 
 // Minimal setup - just what we need for TypeScript support
 require('source-map-support').install();
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 // Now load the profiler
 var Path = require('path');
@@ -43,7 +45,7 @@ var statsOnly = process.env.RSPACK_PROFILE_STATS_ONLY === 'true';
 // Parse command line arguments (same as main CLI, minus --profile and --profile-stats-only)
 var args = getopts(process.argv.slice(2), {
   boolean: ['dist', 'examples', 'test-plugins', 'no-cache', 'verbose', 'quiet'],
-  string: ['themes', 'output-root', 'profile-focus', 'limits'],
+  string: ['themes', 'output-root', 'profile-focus', 'limits', 'plugin-groups'],
   default: {
     dist: false,
     examples: false,
@@ -142,6 +144,12 @@ async function main() {
       })
     : undefined;
   var limitsPath = args.limits ? Path.resolve(args.limits) : undefined;
+  // Already validated by the parent CLI before this worker is spawned.
+  var allowlistPluginGroups = args['plugin-groups']
+    ? args['plugin-groups'].split(',').map(function (s) {
+        return s.trim();
+      })
+    : undefined;
   var themes = parseThemes(args.themes);
   var bundlesDir = Path.join(outputRoot, 'target/public/bundles');
 
@@ -167,6 +175,7 @@ async function main() {
       cache: !args['no-cache'],
       examples: args.examples,
       testPlugins: args['test-plugins'],
+      allowlistPluginGroups: allowlistPluginGroups,
       themeTags: themes,
       log: log,
       profile: true,

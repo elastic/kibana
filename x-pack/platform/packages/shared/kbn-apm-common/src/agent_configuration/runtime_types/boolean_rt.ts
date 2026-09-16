@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const booleanRt = t.union([t.literal('true'), t.literal('false')]);
+export const booleanSchema = z.union([z.literal('true'), z.literal('false')]);

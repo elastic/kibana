@@ -18,6 +18,7 @@ import {
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodesRelatedSection } from './related_section';
+import { RuleStateStatus } from '../../types/rule_state';
 
 jest.mock('../../utils/run_esql_async_search');
 
@@ -33,6 +34,7 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+const mockGetEpisodeDetailsHref = (episodeId: string) => `/host-aware/inbox/${episodeId}`;
 
 const mockRule = {
   id: 'rule-1',
@@ -65,7 +67,11 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -76,8 +82,40 @@ describe('AlertEpisodesRelatedSection', () => {
       expect.objectContaining({
         currentEpisodeId: 'ep-1',
         groupHash: 'gh-1',
-        rule: mockRule,
-        getEpisodeDetailsHref: expect.any(Function),
+        ruleState: {
+          status: RuleStateStatus.loaded,
+          ruleId: 'rule-1',
+          rule: mockRule,
+        },
+        getEpisodeDetailsHref: mockGetEpisodeDetailsHref,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('renders related episodes when the rule was deleted', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue(mockEpisodeEventsResponse);
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 404 },
+      body: { code: 'RULE_NOT_FOUND', error: 'Not Found', message: 'Rule not found' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+
+    expect(AlertEpisodesRelated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
       }),
       expect.anything()
     );
@@ -88,21 +126,32 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodesRelatedSectionLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodesRelatedSectionLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
-  it('renders the error state when events or rule fail to load', async () => {
-    runEsqlAsyncSearchMock.mockResolvedValue(mockEpisodeEventsResponse);
-    mockHttp.get.mockRejectedValueOnce(new Error('boom'));
+  it('renders the error state when the episode fails to load', async () => {
+    runEsqlAsyncSearchMock.mockRejectedValueOnce(new Error('boom'));
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );

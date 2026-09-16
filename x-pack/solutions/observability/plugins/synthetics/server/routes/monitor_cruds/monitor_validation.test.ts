@@ -178,6 +178,7 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_MATCH]: 'false',
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+      [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
       [ConfigKey.THROTTLING_CONFIG]: {
         value: {
           download: '5',
@@ -280,6 +281,47 @@ describe('validateMonitor', () => {
       });
     });
 
+    it('when api monitor uses Elastic managed locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors cannot run on Elastic managed locations',
+        details:
+          'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when api monitor is created on Serverless', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default', true);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
+        payload: testMonitor,
+      });
+    });
+
     it('when browser timeout is less than 30 seconds with private locations', () => {
       const testMonitor = {
         ...testBrowserFields,
@@ -377,6 +419,30 @@ describe('validateMonitor', () => {
         reason: 'Monitor is not a valid monitor of type browser',
         details:
           'source.inline.script: Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when payload is a correct API monitor on a private location', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
         payload: testMonitor,
       });
     });
@@ -497,6 +563,46 @@ describe('validateMonitor', () => {
     });
   });
 
+  // Partial updates validate the *merged* monitor (previous + patch), not the patch alone.
+  describe('merged partial-update gate', () => {
+    const mergedWith = (patch: Record<string, unknown>) =>
+      ({ ...testHTTPFields, ...patch } as unknown as MonitorFields);
+
+    it('accepts a valid partial patch on a known field', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.ENABLED]: false }), 'default');
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects an out-of-range value on a known field (schedule)', () => {
+      const result = validateMonitor(
+        mergedWith({ [ConfigKey.SCHEDULE]: { number: '4', unit: ScheduleUnit.MINUTES } }),
+        'default'
+      );
+      expect(result).toMatchObject({ valid: false, reason: 'Monitor schedule is invalid' });
+    });
+
+    it('rejects a wrong-typed value on a known field (timeout)', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.TIMEOUT]: '3m' }), 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
+      });
+    });
+
+    it('strips unknown/foreign fields rather than rejecting (io-ts t.exact)', () => {
+      const result = validateMonitor(
+        mergedWith({ notAMonitorField: 'nope', anotherBogusKey: 123 }),
+        'default'
+      );
+      // foreign keys do not fail validation...
+      expect(result.valid).toBe(true);
+      // ...but they are dropped from what actually gets persisted.
+      expect(result.decodedMonitor).toBeDefined();
+      expect(result.decodedMonitor).not.toHaveProperty('notAMonitorField');
+      expect(result.decodedMonitor).not.toHaveProperty('anotherBogusKey');
+    });
+  });
+
   describe('should validate payload', () => {
     it('when parsed from serialized JSON', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
@@ -587,6 +693,92 @@ describe('validateMonitor', () => {
           'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
       });
     });
+
+    it('when api monitor uses public locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          locations: ['us_central'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [
+          {
+            id: 'us_central',
+            label: 'US Central',
+            isServiceManaged: true,
+            geo: { lat: 0, lon: 0 },
+            url: 'https://example.com',
+          },
+        ],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
+      });
+    });
+
+    it('when api monitor uses only private locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ]
+      );
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+      });
+    });
+
+    it('when api project monitor is created on Serverless', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ],
+        true
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
+      });
+    });
   });
 });
 
@@ -635,6 +827,19 @@ describe('normalizeAPIConfig', () => {
       errorMessage: 'Invalid monitor key(s) for browser type:  url',
       formattedConfig: {
         type: 'browser',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: '' } as any)).toEqual({
+      formattedConfig: {
+        type: 'api',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for api type:  urls',
+      formattedConfig: {
+        type: 'api',
       },
     });
   });

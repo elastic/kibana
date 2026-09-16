@@ -39,7 +39,7 @@ export const snapshot: Command = {
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
-      --use-cached      Skips cache verification and use cached ES snapshot.
+      --use-cached      Prefer locally cached ES snapshots instead of downloading promoted snapshots.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
@@ -209,12 +209,22 @@ export const snapshot: Command = {
           process.on('SIGTERM', shutdown);
         });
       } else {
-        await cluster.run(installPath, {
-          reportTime,
-          startTime: runStartTime,
-          ...options,
-          esStdoutLogLevel: options.esLogLevel || 'info',
-          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+        // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
+        await new Promise<void>((resolveShutdown) => {
+          const shutdown = () => {
+            cluster.stop().finally(resolveShutdown);
+          };
+          process.on('SIGINT', shutdown);
+          process.on('SIGTERM', shutdown);
+          cluster
+            .run(installPath, {
+              reportTime,
+              startTime: runStartTime,
+              ...options,
+              esStdoutLogLevel: options.esLogLevel || 'info',
+              readyTimeout: parseTimeoutToMs(options.readyTimeout),
+            })
+            .then(resolveShutdown);
         });
       }
     }

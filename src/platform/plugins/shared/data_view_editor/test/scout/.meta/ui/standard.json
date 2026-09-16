@@ -1,5 +1,8 @@
 {
-  "sha1": "f837afe9443012a45a6eb6ac3d5f4f0117c0aa1f",
+  "sha1": "3d835815fd0ba406241dd1ee757244f465821532",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a86ab1ab968d807-0bb82867e148f1f",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_editor/test/scout/ui/tests/create_data_view_wizard.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 38,
+        "column": 56
       }
     }
   ]

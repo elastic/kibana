@@ -15,7 +15,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
-import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../schedules/constants';
+import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '@kbn/attack-discovery-schedules-common';
 import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from './constants';
 import { attackDiscoveryDataGeneratorExecutor } from './executor';
 
@@ -48,7 +48,7 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: 'siem',
     solution: 'security',
-    priority: TaskPriority.Normal,
+    priority: TaskPriority.Standard,
     validate: {
       params: {
         validate: (object: unknown) => CreateAttackDiscoveryAlertsParamsSchema.parse(object),

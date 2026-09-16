@@ -18,6 +18,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '..';
@@ -41,6 +42,7 @@ const getApmCorrelationsSchema = z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       'KQL filter to scope transactions to a specific service, endpoint, environment, host, or trace. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'trace.id: "abc123"\'.'
@@ -61,7 +63,7 @@ const getApmCorrelationsSchema = z.object({
       'For metric="latency" and metric="infra_metrics": defines what "slow" means using a percentile of transaction duration. Example: 95 means "slow transactions are those at or above the p95 duration". Ignored for metric="failure_rate" and metric="throughput".'
     ),
   fieldCandidates: z
-    .array(z.string())
+    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
     .min(1)
     .max(MAX_FIELD_CANDIDATES)
     .optional()
@@ -92,6 +94,13 @@ export function createGetApmCorrelationsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getApmCorrelationsSchema> = {
     id: OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get APM Correlations',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Analyzes APM transaction correlations to identify which dimensions are most associated with slow, failed, or throughput-anomalous transactions, or which infrastructure entities host slow transactions.
 
 This is a "unified correlations" style tool intended to support investigations where you already have a scoped set of transactions and want to find what stands out within them.

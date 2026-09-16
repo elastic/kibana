@@ -45,10 +45,13 @@ import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
-import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
+import { isWorkflowsUiEnabled } from '../../../../utils/is_workflows_ui_enabled';
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
+import { AiIndicesSection } from './ai_indices_section';
+import { SubagentsSection } from './subagents_section';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -71,6 +74,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
   const { docLinksService } = useAgentBuilderServices();
+  const { isAdmin } = useUiPrivileges();
   const {
     services: { uiSettings },
   } = useKibana();
@@ -88,7 +92,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
 
   const showAgentWorkflowsSection = useMemo(() => {
-    return isPreExecutionWorkflowEnabled(uiSettings);
+    return isWorkflowsUiEnabled(uiSettings);
   }, [uiSettings]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
@@ -105,10 +109,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
   const accessControlModeOptions = [
     {
-      value: AgentAccessControlMode.Public,
+      value: AgentAccessControlMode.Private,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
       }),
     },
     {
@@ -119,10 +123,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       }),
     },
     {
-      value: AgentAccessControlMode.Private,
+      value: AgentAccessControlMode.Public,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
       }),
     },
   ];
@@ -340,6 +344,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <AiIndicesSection control={control} agentId={agentId} isFormDisabled={isFormDisabled} />
 
       <EuiHorizontalRule />
 
@@ -784,7 +790,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
                     defaultMessage:
-                      'Runs immediately when the agent is invoked, before the first LLM call.',
+                      'Runs once after each user message, before the agent makes any LLM calls in response.',
                   })}
                 </EuiText>
               </EuiFlexGroup>
@@ -800,19 +806,103 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.common.optional}
                   </EuiText>
                 }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.workflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure pre-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
                 isInvalid={!!formState.errors.configuration?.workflow_ids}
                 error={formState.errors.configuration?.workflow_ids?.message}
               >
                 <WorkflowPicker
                   name="configuration.workflow_ids"
                   singleSelection={false}
-                  isDisabled={isFormDisabled}
+                  isDisabled={isFormDisabled || !isAdmin}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiHorizontalRule />
+
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="xl"
+            alignItems="flexStart"
+            aria-labelledby="post-execution-workflow-section-title"
+          >
+            <EuiFlexItem grow={1}>
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                  <EuiIcon type="flag" aria-hidden={true} />
+                  <EuiTitle size="xs">
+                    <h2 id="post-execution-workflow-section-title">
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowTitle',
+                        {
+                          defaultMessage: 'Post-execution workflow',
+                        }
+                      )}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexGroup>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowDescription',
+                    {
+                      defaultMessage:
+                        'Runs once after the agent finishes responding. Cannot change the response.',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowLabel',
+                  {
+                    defaultMessage: 'Workflows',
+                  }
+                )}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {labels.common.optional}
+                  </EuiText>
+                }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure post-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
+                isInvalid={!!formState.errors.configuration?.post_execution_workflow_ids}
+                error={formState.errors.configuration?.post_execution_workflow_ids?.message}
+              >
+                <WorkflowPicker
+                  name="configuration.post_execution_workflow_ids"
+                  singleSelection={false}
+                  isDisabled={isFormDisabled || !isAdmin}
                 />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
       )}
+
+      <SubagentsSection agentId={agentId} />
     </>
   );
 };

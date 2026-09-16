@@ -6,15 +6,19 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-export const createNavigationTree = (): NavigationTreeDefinition => {
+export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition => {
   return {
     body: [
       {
         link: 'workplace_ai',
-        title: 'Workplace AI',
-        renderAs: 'home',
+        title: i18n.translate('xpack.serverlessWorkplaceAI.nav.home', {
+          defaultMessage: 'Home',
+        }),
+        icon: 'home',
         breadcrumbStatus: 'hidden',
       },
       {
@@ -22,8 +26,10 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         link: 'agent_builder',
       },
       {
-        link: 'workflows',
+        icon: 'sparkles',
+        link: 'context_engine',
       },
+      ...getWorkflowsNavPanel(core),
       {
         link: 'dashboards',
         icon: 'productDashboard',

@@ -238,6 +238,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
           </EuiText>
           <EuiBasicTable
             data-test-subj="value-lists-table"
+            tableCaption={i18n.VALUE_LISTS_TABLE_CAPTION}
             columns={columns}
             items={tableItems}
             loading={lists.loading}

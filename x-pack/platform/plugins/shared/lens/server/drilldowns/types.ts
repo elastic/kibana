@@ -6,7 +6,7 @@
  */
 
 import type { DrilldownState } from '@kbn/embeddable-plugin/server';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { discoverDrilldownSchema } from './register_discover_drilldown';
 
-export type DiscoverDrilldownState = DrilldownState & TypeOf<typeof discoverDrilldownSchema>;
+export type DiscoverDrilldownState = DrilldownState & z.output<typeof discoverDrilldownSchema>;

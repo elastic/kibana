@@ -9,7 +9,7 @@ kibana_paths:
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/events/siem_readiness/**
-last_updated: 2026-06-18
+last_updated: 2026-07-08
 source_prs:
   - https://github.com/elastic/kibana/pull/269284
   - https://github.com/elastic/kibana/pull/252902
@@ -77,6 +77,8 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 
 - **All `z.string()` fields in attachment schemas must have `.max()` constraints.** Every `z.string()` in `actionableFindingSchema`, `siemReadinessContinuityDataSchema`, and related schemas must include `.max(N)`. Use context-appropriate limits (IDs ≤ 100, labels ≤ 500, messages ≤ 5000, summaries ≤ 8000). This is enforced by CodeQL "Unbounded string in schema validation" and aligns with existing conventions in the file.
 
+- **Platform labels compose vendor + OS via generic title-casing — no lookup maps.** `classifyPlatform` labels endpoint data as `Vendor (OS)` (e.g. `Crowdstrike (Windows)`) so same-OS vendors are distinguishable, falling back to `OS Endpoints` when no vendor field is present. Vendor comes from `event.module` → `observer.vendor` → the data stream package name; both vendor and OS names are derived with a single generic `titleCase` helper. Do NOT introduce `VENDOR_DISPLAY_NAMES` / `OS_DISPLAY_NAMES` tables — the vendor/OS space is open-ended and hardcoded maps do not scale. Accepted cosmetic tradeoffs: `macos` → `Macos`, and Elastic Defend reads as `Endpoint (Windows)` since `event.module` is `endpoint`.
+
 - **Never duplicate the `toDataStreamName` conversion logic inline.** The regex that converts a backing index name to its parent data stream name (`.ds-{name}-YYYY.MM.DD-NNNNNN` → `{name}`) is defined once and exported. Import it; do not inline the regex at a call site. Two copies will diverge silently if the index naming convention changes.
 
 - **Use domain types (not primitives) for per-category maps and constants.** Per-category threshold maps (e.g., `SILENCE_THRESHOLD_MS`) must use `Record<MainCategories, T>` rather than `Record<string, T>`. A string key accepts any value and gives no compile-time error when a category is missing or misspelled.
@@ -122,6 +124,8 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 **PR #252902 — Double-counting indices across categories (caught by @JordanSh):** The initial retention tab counted items per category-group, so an index appearing in 3 categories was counted 3 times. The "Total non-compliant" count was inflated. A generic reviewer would have missed this because it requires knowing that indices can appear in multiple categories (a property of SIEM Readiness's multi-valued `event.category` model).
 
 **PR #272394 — `.find()` discards multi-stream health signals (caught by @JordanSh):** The initial `fetchPipelines` enrichment used `.find(h => h !== undefined)` to look up health data for a pipeline's backing indices. For pipelines attached to multiple data streams, all but the first match were silently discarded — so a pipeline that was silent on stream B (but healthy on stream A, which was found first) would appear healthy. A generic reviewer would have missed this because the code looks correct: it reads a health entry and uses it.
+
+**Endpoint platform labels collapsed by OS (caught during composite vendor+OS work):** The initial `classifyPlatform` implementation checked `host.os.family` before any vendor field (`event.module`, `observer.vendor`), so every Windows endpoint vendor (CrowdStrike, Elastic Defend, SentinelOne) collapsed into a single `windows Endpoints` label. The agent could not distinguish vendors on the same OS. Fix: compose `Vendor (OS)` when a vendor signal is present, using generic title-casing rather than hardcoded lookup maps.
 
 **PR #270871 — WeakMap cache permanently stores rejected Promises (caught by @JordanSh):** The per-request shared-context cache stored a Promise without a rejection handler. If the first fetch failed, the rejected Promise stayed in the cache — every subsequent tool call for the same request re-rejected immediately. A generic reviewer would have missed this because the pattern looks like standard lazy initialization; the failure mode only manifests when the first call errors.
 

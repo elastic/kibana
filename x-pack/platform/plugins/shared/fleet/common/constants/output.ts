@@ -9,11 +9,14 @@ import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
+export const MAX_HOSTS = 100;
+
 export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
   Kafka: 'kafka',
   RemoteElasticsearch: 'remote_elasticsearch',
+  Otlp: 'otlp',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
@@ -36,6 +39,20 @@ export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 //  - Both are uneditable by users due to having `is_preconfigured: true` set
 export const ECH_AGENTLESS_OUTPUT_ID = 'es-agentless-output';
 export const SERVERLESS_AGENTLESS_OUTPUT_ID = 'es-default-output-internal';
+
+// Output IDs for the agentless managed outputs that point to the managed bulk endpoint
+export const ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID = 'es-managed-bulk-agentless-output';
+export const SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID =
+  'es-managed-bulk-agentless-output-internal';
+
+export const AGENTLESS_MANAGED_BULK_OUTPUT_IDS: ReadonlySet<string> = new Set([
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+]);
+
+// Output ID for the private endpoint (PrivateLink) in serverless.
+// Injected by project-controller/kibana-controller when PrivateLink is enabled.
+export const SERVERLESS_PRIVATE_OUTPUT_ID = 'es-private-output';
 
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 export const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
@@ -98,6 +115,28 @@ export const kafkaVerificationModes = {
   Strict: 'strict',
   Certificate: 'certificate',
 } as const;
+
+export const otlpProtocol = {
+  Grpc: 'grpc',
+  HttpProtobuf: 'http/protobuf',
+} as const;
+
+export const otlpCompressionType = {
+  Gzip: 'gzip',
+  Snappy: 'snappy',
+  Zstd: 'zstd',
+  None: 'none',
+} as const;
+
+// snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
+export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
+  otlpCompressionType.Snappy,
+  otlpCompressionType.Zstd,
+];
+
+// Fleet Server gained OTLP output support in this version. Placeholder until the
+// supporting Fleet Server release is confirmed.
+export const OTLP_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
 
 export const kafkaSupportedVersions = [
   '0.8.2.0',
@@ -173,9 +212,24 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Beats-based output types available to standard (non-OTel) agent policies.
+// otlp is intentionally excluded — it is only valid for OTel-only policies.
+export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.Logstash,
+  outputType.Kafka,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+  outputType.Otlp,
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';

@@ -69,7 +69,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');

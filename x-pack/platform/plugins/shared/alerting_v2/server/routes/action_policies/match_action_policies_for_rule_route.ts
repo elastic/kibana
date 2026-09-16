@@ -17,22 +17,26 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { matchActionPoliciesForRuleOasExamples } from './match_action_policies_for_rule_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`;
+  static path = `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Match action policies for a rule',
     description:
-      'Returns action policies that match a given rule, categorised as direct, global, or global-filtered.',
+      "Returns the action policies that apply to a rule, based on the rule's tags. Each result includes a `category` with the reason it matched. This endpoint does not evaluate `matcher.expression`, because those queries need alert data that is only available once an alert exists. As a result, policies that match only by an expression are not returned, and a returned policy might not match every alert from the rule.",
+    oasOperationObject: matchActionPoliciesForRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -45,7 +49,7 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request body.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -65,8 +69,6 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
   protected async execute() {
     const { rule } = this.request.body ?? {};
     const result = await this.actionPolicyClient.matchActionPoliciesForRule({
-      ruleId: rule?.id,
-      ruleName: rule?.name,
       ruleTags: rule?.tags,
     });
     return this.ctx.response.ok({ body: result });

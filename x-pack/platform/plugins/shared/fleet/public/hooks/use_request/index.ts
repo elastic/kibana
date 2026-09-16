@@ -7,6 +7,8 @@
 
 export * from './use_request';
 export * from './agent_policy';
+export * from './cloud_onboarding_deployment';
+export * from './agentless_policy';
 export * from './package_policy';
 export * from './data_stream';
 export * from './agents';
@@ -24,3 +26,5 @@ export * from './fleet_server_hosts';
 export * from './fleet_proxies';
 export * from './health_check';
 export * from './spaces';
+export * from './iac_provisioner';
+export * from './cloud_connector';

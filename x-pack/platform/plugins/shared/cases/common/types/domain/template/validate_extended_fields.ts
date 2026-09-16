@@ -6,9 +6,30 @@
  */
 
 import type { InlineField, RefField } from './fields';
-import { FieldType, isInlineField } from './fields';
+import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
+import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
+
+// Lucene's keyword-term limit is measured in UTF-8 bytes, while string.length
+// counts UTF-16 code units and can undercount non-ASCII input.
+const textEncoder = new TextEncoder();
+
+export const validateExtendedFieldValueSizes = (
+  extendedFields: Record<string, string>
+): string[] => {
+  const errors: string[] = [];
+
+  for (const [key, value] of Object.entries(extendedFields)) {
+    if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+      errors.push(
+        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    }
+  }
+
+  return errors;
+};
 
 const validatePattern = (
   label: string,
@@ -89,6 +110,60 @@ const validateCheckboxGroupOptions = (
   }
 };
 
+const validateToggleValue = (label: string, value: string, errors: string[]): void => {
+  if (value !== 'true' && value !== 'false') {
+    errors.push(`Field "${label}" must be either true or false`);
+  }
+};
+
+const normalizeKeyPart = (value: string): string => value.toLowerCase().replace(/[\s-]+/g, '_');
+
+/**
+ * Maps a rejected key back to the field the caller most likely meant: the field's
+ * name or label sent as-is, or the right name with the wrong `_as_<type>` suffix.
+ */
+const findFieldForUnknownKey = (key: string, fields: InlineField[]): InlineField | undefined => {
+  const base = normalizeKeyPart(key).replace(/_as_[a-z0-9]+$/, '');
+  return fields.find(
+    (field) =>
+      normalizeKeyPart(field.name) === base ||
+      (field.label != null && normalizeKeyPart(field.label) === base)
+  );
+};
+
+const describeAvailableKeys = (fields: InlineField[]): string =>
+  fields
+    .map((field) => `"${getFieldSnakeKey(field.name, field.type)}" (${field.label ?? field.name})`)
+    .join(', ');
+
+const buildUnknownKeyError = (
+  key: string,
+  inlineFields: InlineField[],
+  displayOnlyFields: InlineField[]
+): string => {
+  const problem = `Unknown extended field key: "${key}"`;
+
+  const match = findFieldForUnknownKey(key, inlineFields);
+  if (match) {
+    return `${problem}. To set the "${
+      match.label ?? match.name
+    }" field, use its key "${getFieldSnakeKey(match.name, match.type)}"`;
+  }
+
+  const displayOnlyMatch = findFieldForUnknownKey(key, displayOnlyFields);
+  if (displayOnlyMatch) {
+    return `${problem}. The "${
+      displayOnlyMatch.label ?? displayOnlyMatch.name
+    }" field is display-only and cannot hold a value`;
+  }
+
+  if (inlineFields.length > 0) {
+    return `${problem}. Available keys: ${describeAvailableKeys(inlineFields)}`;
+  }
+
+  return `${problem}. No fields are available for this case`;
+};
+
 const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
@@ -112,40 +187,86 @@ const validateField = (field: InlineField, value: string, errors: string[]): voi
       (field.metadata as { options?: string[] })?.options ?? [],
       errors
     );
+  } else if (field.control === FieldType.TOGGLE) {
+    validateToggleValue(label, value, errors);
   }
 };
 
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
   fields: Array<RefField | InlineField>,
-  { partial = false }: { partial?: boolean } = {}
+  {
+    partial = false,
+    onClose = false,
+    requiredOnly = false,
+    hintFields,
+  }: {
+    partial?: boolean;
+    onClose?: boolean;
+    /**
+     * Only enforce required-ness (including `required_when` / `show_when` evaluation); skip
+     * unknown-key, size, and per-field value validation. Used when the map under validation is
+     * an *effective* view assembled from several sources (e.g. the create path's merge of
+     * `extended_fields` with the legacy `customFields` mirror), where keys mirrored from
+     * unlinked legacy fields are expected and their values are validated elsewhere.
+     */
+    requiredOnly?: boolean;
+    /**
+     * Extra fields included as suggestion candidates in unknown-key error messages but not
+     * validated against. Pass global fields here when validating a template-only subset so that
+     * a user who sends a global field name (e.g. `priority`) receives the correct storage key
+     * (`priority_as_keyword`) in the error rather than a list of template-only keys.
+     */
+    hintFields?: InlineField[];
+  } = {}
 ): string[] => {
-  const errors: string[] = [];
-  const inlineFields = fields.filter(isInlineField);
+  let errors: string[] = [];
+  // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
+  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
+  // ensures their snake key is treated as an unknown key if it is ever submitted.
+  const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
+  const displayOnlyFields = fields.filter(isInlineField).filter(isDisplayOnlyField);
 
   // 1. Build valid key set
   const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
-  // 2. Unknown keys
-  for (const key of Object.keys(extendedFields)) {
-    if (!validKeys.has(key)) {
-      errors.push(`Unknown extended field key: "${key}"`);
+  // 2. Unknown keys + value-size backstop (skipped in requiredOnly mode — see option docs above)
+  if (!requiredOnly) {
+    // Merge hint fields into the suggestion pool so that global field keys are suggested even when
+    // validating only the template-specific subset of the request.
+    const suggestionInlineFields = hintFields
+      ? [...inlineFields, ...hintFields.filter((f) => !isDisplayOnlyField(f))]
+      : inlineFields;
+    const suggestionDisplayOnlyFields = hintFields
+      ? [...displayOnlyFields, ...hintFields.filter(isDisplayOnlyField)]
+      : displayOnlyFields;
+
+    const unknownKeys = Object.keys(extendedFields).filter((key) => !validKeys.has(key));
+    const MAX_UNKNOWN_KEY_ERRORS = 10;
+    for (const key of unknownKeys.slice(0, MAX_UNKNOWN_KEY_ERRORS)) {
+      errors.push(buildUnknownKeyError(key, suggestionInlineFields, suggestionDisplayOnlyFields));
     }
+    if (unknownKeys.length > MAX_UNKNOWN_KEY_ERRORS) {
+      errors.push(`${unknownKeys.length - MAX_UNKNOWN_KEY_ERRORS} more unknown key(s) not shown`);
+    }
+    errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
   }
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
   for (const field of inlineFields) {
     fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
   }
 
   // 4. Per-field validation
   for (const field of inlineFields) {
     const isHidden =
       field.display?.show_when != null &&
-      !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+      !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
 
     // In partial-update mode, skip fields not present in the request — the server
     // merges them so an absent key retains its existing stored value.
@@ -159,17 +280,18 @@ export const validateExtendedFields = (
       const isRequired =
         field.validation?.required === true ||
         (field.validation?.required_when
-          ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
-          : false);
-
-      // `required_on_close` is intentionally NOT enforced here.
-      // Close-time enforcement will be added in a follow-up: when transitioning
-      // a case to `closed`, this validator should be called with a `{ onClose: true }`
-      // context flag and treat `required_on_close === true` as requiring a non-empty value.
+          ? evaluateCondition(
+              field.validation.required_when,
+              fieldValues,
+              fieldTypeMap,
+              fieldControlMap
+            )
+          : false) ||
+        (onClose && field.validation?.required_on_close === true);
 
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);
-      } else if (!isEmpty) {
+      } else if (!isEmpty && !requiredOnly) {
         validateField(field, value, errors);
       }
     }

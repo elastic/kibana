@@ -1,9 +1,15 @@
 steps:
   - name: 'Update pipeline resource definitions'
     key: update-pipeline-resource-definitions
-    command: .buildkite/scripts/steps/version_bump/update_pipeline_resource_definitions.sh
+    command: |
+      if [ "${DRY_RUN:-}" = "true" ]; then
+        export BRANCH="$(buildkite-agent meta-data get "version_bump:dry_run_branch")"
+        echo "DRY_RUN is enabled — updating pipeline resource definitions for temporary branch '$BRANCH'"
+      fi
+
+      .buildkite/scripts/steps/version_bump/update_pipeline_resource_definitions.sh
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4-standard-4
+      machineType: n2-standard-4

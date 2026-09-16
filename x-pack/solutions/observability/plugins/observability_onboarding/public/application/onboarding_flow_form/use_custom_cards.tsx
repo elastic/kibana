@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { useHistory } from 'react-router-dom';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { useHistory, useLocation } from 'react-router-dom';
 import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import {
   INGEST_HUB_ONBOARDING_ENABLED_FLAG,
@@ -22,6 +21,7 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
+import { buildKubernetesRoutePath } from '../shared/build_kubernetes_route';
 
 export const AWS_CLOUDWATCH_OTEL_CARD_ID = 'aws-cloudwatch-otel-virtual';
 
@@ -53,7 +53,10 @@ export function useCustomCards(
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
-  const { href: otelKubernetesUrl } = reactRouterNavigate(history, `/kubernetes${location.search}`);
+  const { href: otelKubernetesUrl } = reactRouterNavigate(
+    history,
+    buildKubernetesRoutePath(location.search)
+  );
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const { href: otelApmQuickstartUrl } = reactRouterNavigate(
     history,

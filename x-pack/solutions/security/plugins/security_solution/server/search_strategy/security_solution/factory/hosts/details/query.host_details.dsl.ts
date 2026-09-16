@@ -13,8 +13,6 @@ import type { HostDetailsRequestOptions } from '../../../../../../common/search_
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
-const EUID_RUNTIME_FIELD = 'entity_id';
-
 export const buildHostDetailsQuery = ({
   defaultIndex,
   hostName,
@@ -50,9 +48,6 @@ export const buildHostDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    ...(entityStoreV2
-      ? { runtime_mappings: { [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping('host') } }
-      : {}),
     aggregations: {
       ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
       endpoint_id: {

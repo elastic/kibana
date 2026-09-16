@@ -24,7 +24,7 @@ import type {
   ThrottledActions,
 } from '../../../common';
 import type { NormalizedRuleType } from '../../rule_type_registry';
-import type { CombinedSummarizedAlerts, RawRule } from '../../types';
+import type { CombinedSummarizedAlerts } from '../../types';
 import type { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
 import type {
   ActionOpts,
@@ -63,7 +63,34 @@ export interface ActionSchedulerOptions<
   taskInstance: RuleTaskInstance;
   ruleRunMetricsStore: RuleRunMetricsStore;
   apiKeyId?: string;
-  apiKey: RawRule['apiKey'];
+  /**
+   * Resolved credential to enqueue for scheduled connector actions. This is the
+   * value that the actions plugin will place after `ApiKey ` in the
+   * `Authorization` header when running each connector task.
+   *
+   * - For Elasticsearch API keys, this is the base64-encoded `id:secret` stored
+   *   on the rule SO as `apiKey`.
+   * - For UIAM API keys, this is the raw `essu_…` secret (decoded from the rule
+   *   SO's base64 `uiamApiKey` field) as expected by core security.
+   *
+   * Callers should obtain this from `getFakeKibanaRequest` in `rule_loader.ts`
+   * (`effectiveApiKey`) rather than passing the raw rule SO attributes directly.
+   */
+  apiKey: string | null;
+  /**
+   * Id of the UIAM API key in `apiKey`, so the enqueued connector tasks record it and the API key
+   * invalidation task's in-use guard can find them. Only ad hoc (backfill) runs supply it today,
+   * and only when `apiKey` resolved to the UIAM key rather than to an Elasticsearch fallback —
+   * see `credentialType` from `getFakeKibanaRequest`.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM credential. Read off the rule
+   * run's own fake request (marked by `getFakeKibanaRequest` from the rule's persisted
+   * `uiamApiKeyExternal` verdict), so the connector tasks authenticate exactly like the rule run
+   * itself: without the UIAM shared secret, which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
@@ -71,6 +98,7 @@ export interface ActionSchedulerOptions<
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
   priority?: TaskPriority;
+  activeSnoozedIds?: Set<string>;
 }
 
 export type Executable<

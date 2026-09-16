@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
+import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -294,7 +294,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const policyInfo: LogsEndpointAction['agent']['policy'] = [];
 
     // Get a list of Agent records so we can identify the Agent Policy ID
-    const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
+    const agents = await fleetServices.fetchAgentsById(agentIds).catch(catchAndWrapError);
 
     this.log.debug(
       () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`
@@ -333,6 +333,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     for (const agent of agents) {
       if (agent.policy_id) {
+        if (!agentPolicyToIntegrationPolicyMap[agent.policy_id]) {
+          throw new ResponseActionsClientError(
+            `Data inconsistency detected. Agent [${agent.id}][${agent.local_metadata?.host?.hostname}] has agent policy_id [${agent.policy_id}] but no integration policy was found associated with that agent policy id.`,
+            400
+          );
+        }
+
         policyInfo.push({
           agentId: agent.id,
           elasticAgentId: agent.id,
@@ -411,7 +418,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agentType: this.agentType,
     }));
 
-    const attachments: BulkCreateAttachmentsRequestV2 = [
+    const attachments: BulkCreateUnifiedAttachmentsRequest = [
       {
         type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,
@@ -521,6 +528,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
     });
@@ -584,6 +592,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     try {
       await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
     } catch (err) {
+      this.log.debug(`Error retrieving agent policy info: ${err.message}`, { error: err });
       return { isValid: false, error: err };
     }
 
@@ -861,6 +870,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);

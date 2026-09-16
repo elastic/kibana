@@ -11,6 +11,7 @@ import { ruleMetricsSchema } from './schemas/rule_metrics';
 import { ruleStatusMetricsSchema } from './schemas/detection_rule_status';
 import { ruleUpgradeStatusSchema } from './schemas/detection_rule_upgrade_status';
 import { ruleDeprecatedStatusSchema } from './schemas/detection_rule_deprecated_status';
+import { changesHistoryUsageSchema } from './schemas/changes_history_usage';
 import type { RuleAdoption } from './types';
 import { ruleCustomizedFieldsCounts } from './schemas/detection_rule_customization_status';
 
@@ -51,4 +52,5 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
       _meta: { description: 'Number of AI-created rules that are disabled' },
     },
   },
+  changes_history_usage: changesHistoryUsageSchema,
 };

@@ -12,6 +12,8 @@ import {
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiIcon,
   EuiToolTip,
@@ -30,14 +32,22 @@ import { CaseDetailsLink } from '../../../links';
 import * as i18n from '../translations';
 import { useActions } from '../../../all_cases/use_actions';
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
-import { useApplicationCapabilities, useKibana } from '../../../../common/lib/kibana';
+import {
+  useApplicationCapabilities,
+  useCasesConfig,
+  useKibana,
+} from '../../../../common/lib/kibana';
+import {
+  getExtendedFieldColumnKey,
+  getExtendedFieldTableColumn,
+} from '../../../all_cases/extended_field_columns';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 import { TruncatedText } from '../../../truncated_text';
 import { getConnectorIcon } from '../../../utils';
 import { AssigneesColumn } from '../../../all_cases/assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../../incremental_id';
-import { ExtendedFieldsColumnCell } from '../../../all_cases/extended_fields_column_cell';
 import { severities } from '../../../severity/config';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
@@ -82,11 +92,18 @@ export const useCasesColumns = ({
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
+  const { templatesEnabled } = useCasesConfig();
 
   const {
     data: { customFields },
-    isFetching: isLoadingColumns,
+    isFetching: isLoadingConfiguration,
   } = useGetCaseConfiguration({ keepPreviousData: true });
+
+  const { globalInlineFields, isLoading: isLoadingGlobalFields } = useGlobalInlineFields({
+    enabled: templatesEnabled,
+  });
+
+  const isLoadingColumns = isLoadingConfiguration || isLoadingGlobalFields;
 
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {
@@ -103,7 +120,7 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
         sortable: true,
-        minWidth: '16em',
+        minWidth: '12em',
         render: (_: string, theCase: CaseUI) => {
           if (theCase.id == null || theCase.title == null) {
             return getEmptyCellValue();
@@ -114,14 +131,18 @@ export const useCasesColumns = ({
           }
 
           return (
-            <div>
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false} wrap={false}>
               {typeof theCase.incrementalId === 'number' && (
-                <IncrementalIdText incrementalId={theCase.incrementalId} />
+                <EuiFlexItem grow={false}>
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                </EuiFlexItem>
               )}
-            </div>
+              <EuiFlexItem grow={false}>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
@@ -137,8 +158,8 @@ export const useCasesColumns = ({
       tags: {
         field: casesColumnsConfig.tags.field,
         name: casesColumnsConfig.tags.name,
-        width: '10em',
-        minWidth: '4em',
+        width: '14em',
+        minWidth: '8em',
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
@@ -284,17 +305,6 @@ export const useCasesColumns = ({
           return getEmptyCellValue();
         },
       },
-      extendedFields: {
-        minWidth: '10em',
-        width: '14em',
-        name: casesColumnsConfig.extendedFields.name,
-        render: (theCase: CaseUI) => (
-          <ExtendedFieldsColumnCell
-            extendedFields={theCase.extendedFields}
-            extendedFieldsLabels={theCase.extendedFieldsLabels}
-          />
-        ),
-      },
       severity: {
         width: '6em',
         minWidth: '6em',
@@ -348,6 +358,16 @@ export const useCasesColumns = ({
   const allColumnsDict = useMemo(() => {
     const dict = { ...columnsDict };
 
+    // With templates v2, columns come from global field definitions and read live values from
+    // `extendedFields`; otherwise they come from the legacy customFields config.
+    if (templatesEnabled) {
+      globalInlineFields.forEach((field) => {
+        dict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field, userProfiles);
+      });
+
+      return dict;
+    }
+
     customFields.forEach(({ key, type, label }) => {
       if (type in customFieldsBuilderMap) {
         const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
@@ -370,7 +390,7 @@ export const useCasesColumns = ({
     });
 
     return dict;
-  }, [columnsDict, customFields]);
+  }, [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]);
 
   const columns: CasesColumns[] = [];
 

@@ -77,9 +77,10 @@ export const useDataStreamStats = ({
         return undefined;
       }
 
+      const canReadFailureStore = definition.privileges?.read_failure_store ?? false;
       const [dsAggregations, fsAggregations] = await Promise.all([
         getAggregations({ definition, timeState, core, search, signal }),
-        isEnabledFailureStore(definition.effective_failure_store)
+        canReadFailureStore && isEnabledFailureStore(definition.effective_failure_store)
           ? getAggregations({ definition, timeState, core, search, signal, isFailureStore: true })
           : undefined,
       ]);

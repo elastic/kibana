@@ -6,19 +6,31 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { AlertEpisodesListPage } from '../pages/alert_episodes_list_page/alert_episodes_list_page';
 import { EpisodeDetailsPage } from '../pages/episode_details_page/episode_details_page';
+import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const EpisodesApp = () => {
+  const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
-    <Routes>
-      <Route exact path="/">
-        <AlertEpisodesListPage />
-      </Route>
-      <Route path="/:episodeId">
-        <EpisodeDetailsPage />
-      </Route>
-    </Routes>
+    <RequireAlertingPrivilege
+      features={['alerts']}
+      pageName={i18n.translate('xpack.alertingV2.episodesApp.pageName', {
+        defaultMessage: 'Alerts',
+      })}
+    >
+      <Routes>
+        <Route exact path={path}>
+          <AlertEpisodesListPage />
+        </Route>
+        <Route path={`${base}/:episodeId`}>
+          <EpisodeDetailsPage />
+        </Route>
+      </Routes>
+    </RequireAlertingPrivilege>
   );
 };

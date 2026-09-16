@@ -33,7 +33,7 @@ export const registerRoutes = ({ router, getClient }: RegisterRoutesParams) => {
     {
       path: '/internal/user_storage/{key}',
       validate: {
-        params: z.object({ key: z.string() }),
+        params: z.object({ key: z.string().max(1024) }),
       },
       security: {
         authz: AuthzDisabled.delegateToSOClient,
@@ -61,7 +61,7 @@ export const registerRoutes = ({ router, getClient }: RegisterRoutesParams) => {
     {
       path: '/internal/user_storage/{key}',
       validate: {
-        params: z.object({ key: z.string() }),
+        params: z.object({ key: z.string().max(1024) }),
         body: z.object({ value: z.unknown() }),
       },
       security: {
@@ -96,7 +96,7 @@ export const registerRoutes = ({ router, getClient }: RegisterRoutesParams) => {
     {
       path: '/internal/user_storage/{key}',
       validate: {
-        params: z.object({ key: z.string() }),
+        params: z.object({ key: z.string().max(1024) }),
       },
       security: {
         authz: AuthzDisabled.delegateToSOClient,

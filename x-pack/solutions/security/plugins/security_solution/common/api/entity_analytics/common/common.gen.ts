@@ -18,18 +18,25 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
+export const EntityAnalyticsPrivilegesDetail = lazySchema(() =>
+  z.object({
+    elasticsearch: z.object({
+      cluster: z.object({}).catchall(z.boolean()).optional(),
+      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+    }),
+    kibana: z.object({}).catchall(z.boolean()).optional(),
+  })
+);
+export type EntityAnalyticsPrivilegesDetail = z.infer<typeof EntityAnalyticsPrivilegesDetail>;
+
 export const EntityAnalyticsPrivileges = lazySchema(() =>
   z.object({
     has_all_required: z.boolean(),
     has_read_permissions: z.boolean().optional(),
     has_write_permissions: z.boolean().optional(),
-    privileges: z.object({
-      elasticsearch: z.object({
-        cluster: z.object({}).catchall(z.boolean()).optional(),
-        index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
-      }),
-      kibana: z.object({}).catchall(z.boolean()).optional(),
-    }),
+    has_install_permissions: z.boolean().optional(),
+    privileges: EntityAnalyticsPrivilegesDetail,
+    install_privileges: EntityAnalyticsPrivilegesDetail.optional(),
   })
 );
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
@@ -92,35 +99,57 @@ export const RiskScoreInput = lazySchema(() =>
     /**
      * The unique identifier (`_id`) of the original source document
      */
-    id: z.string(),
+    id: z.string().describe('The unique identifier (`_id`) of the original source document'),
     /**
      * The unique index (`_index`) of the original source document
      */
-    index: z.string(),
+    index: z.string().describe('The unique index (`_index`) of the original source document'),
     /**
      * The risk category of the risk input document.
      */
-    category: z.string(),
+    category: z.string().describe('The risk category of the risk input document.'),
     /**
      * A human-readable description of the risk input document.
      */
-    description: z.string(),
+    description: z.string().describe('A human-readable description of the risk input document.'),
     /**
      * The weighted risk score of the risk input document.
      */
-    risk_score: z.number().min(0).max(100).optional(),
+    risk_score: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe('The weighted risk score of the risk input document.'),
     /**
      * The @timestamp of the risk input document.
      */
-    timestamp: z.string().optional(),
+    timestamp: z.string().optional().describe('The @timestamp of the risk input document.'),
     contribution_score: z.number().optional(),
     /**
      * The EUID of the entity within the graph that generated this alert.
      */
-    entity_id: z.string().optional(),
+    entity_id: z
+      .string()
+      .optional()
+      .describe('The EUID of the entity within the graph that generated this alert.'),
   })
 );
 export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
+
+/**
+ * A modifier that was applied to the risk score calculation.
+ */
+export const RiskScoreModifier = lazySchema(() =>
+  z.object({
+    type: z.string().max(100),
+    subtype: z.string().max(100).optional(),
+    modifier_value: z.number().optional(),
+    contribution: z.number(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
+export type RiskScoreModifier = z.infer<typeof RiskScoreModifier>;
 
 export const RiskScoreCategories = lazySchema(() => z.literal('category_1'));
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
@@ -137,43 +166,78 @@ export const EntityRiskScoreRecord = lazySchema(() =>
     /**
      * The time at which the risk score was calculated.
      */
-    '@timestamp': z.string().datetime(),
+    '@timestamp': z
+      .string()
+      .datetime()
+      .describe('The time at which the risk score was calculated.'),
     /**
      * The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
      */
-    id_field: z.string(),
+    id_field: z
+      .string()
+      .describe(
+        'The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.'
+      ),
     /**
      * The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
      */
-    id_value: z.string(),
+    id_value: z
+      .string()
+      .describe(
+        'The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.'
+      ),
     /**
      * Unique identifier for the scoring run that produced this document.
      */
-    calculation_run_id: z.string().optional(),
+    calculation_run_id: z
+      .string()
+      .optional()
+      .describe('Unique identifier for the scoring run that produced this document.'),
     /**
      * Lexical description of the entity's risk.
      */
-    calculated_level: EntityRiskLevels,
+    calculated_level: EntityRiskLevels.describe("Lexical description of the entity's risk."),
     /**
      * The raw numeric value of the given entity's risk score.
      */
-    calculated_score: z.number(),
+    calculated_score: z
+      .number()
+      .describe("The raw numeric value of the given entity's risk score."),
     /**
      * The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
      */
-    calculated_score_norm: z.number().min(0).max(100),
+    calculated_score_norm: z
+      .number()
+      .min(0)
+      .max(100)
+      .describe(
+        "The normalized numeric value of the given entity's risk score. Useful for comparing with other entities."
+      ),
     /**
      * The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
      */
-    category_1_score: z.number(),
+    category_1_score: z
+      .number()
+      .describe(
+        'The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.'
+      ),
     /**
      * The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
      */
-    category_1_count: z.number().int(),
+    category_1_count: z
+      .number()
+      .int()
+      .describe(
+        'The number of risk input documents that contributed to the Category 1 score (`category_1_score`).'
+      ),
     /**
      * A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
      */
-    inputs: z.array(RiskScoreInput),
+    inputs: z
+      .array(RiskScoreInput)
+      .describe(
+        'A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.'
+      ),
     category_2_score: z.number().optional(),
     category_2_count: z.number().int().optional(),
     notes: z.array(z.string()),
@@ -183,20 +247,16 @@ export const EntityRiskScoreRecord = lazySchema(() =>
      * A list of modifiers that were applied to the risk score calculation.
      */
     modifiers: z
-      .array(
-        z.object({
-          type: z.string(),
-          subtype: z.string().optional(),
-          modifier_value: z.number().optional(),
-          contribution: z.number(),
-          metadata: z.object({}).catchall(z.unknown()).optional(),
-        })
-      )
-      .optional(),
+      .array(RiskScoreModifier)
+      .optional()
+      .describe('A list of modifiers that were applied to the risk score calculation.'),
     /**
      * Distinguishes base, propagated, and resolution scores.
      */
-    score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
+    score_type: z
+      .enum(['base', 'propagated', 'resolution'])
+      .optional()
+      .describe('Distinguishes base, propagated, and resolution scores.'),
     related_entities: z
       .array(
         z.object({

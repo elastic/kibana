@@ -39,19 +39,16 @@ interface ColorCellProps {
 }
 
 function ColorCell({ color, onChange }: ColorCellProps) {
+  const selectColorLabel = i18n.translate('xpack.infra.legendSteps.selectColorAriaLabel', {
+    defaultMessage: 'Select color',
+  });
   return (
     <EuiColorPicker
       onChange={onChange}
       color={color}
       compressed
-      button={
-        <EuiColorPickerSwatch
-          color={color}
-          aria-label={i18n.translate('xpack.infra.legendSteps.selectColorAriaLabel', {
-            defaultMessage: 'Select color',
-          })}
-        />
-      }
+      aria-label={selectColorLabel}
+      button={<EuiColorPickerSwatch color={color} aria-label={selectColorLabel} />}
     />
   );
 }

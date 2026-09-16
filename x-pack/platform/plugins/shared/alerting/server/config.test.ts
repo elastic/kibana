@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "alertsService": Object {
+          "coordinateInstallation": true,
           "totalFieldsLimit": 2800,
         },
         "cancelAlertsOnRuleTimeout": true,
@@ -25,7 +26,7 @@ describe('config validation', () => {
           "removalDelay": "1h",
         },
         "ruleChangeTracking": Object {
-          "enabled": false,
+          "enabled": true,
           "scope": Array [
             "security",
           ],

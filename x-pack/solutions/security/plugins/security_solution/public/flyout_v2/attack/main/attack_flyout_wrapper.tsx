@@ -10,6 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
 import { AttackFlyout } from '.';
@@ -28,34 +29,48 @@ export interface AttackFlyoutWrapperProps {
    */
   indexName: string;
   /**
-   * Callback invoked after attack mutations to refresh related views.
+   * Callback invoked after attack mutations to refresh related views (e.g. the
+   * surface that opened the flyout). The wrapper additionally refetches the
+   * attack document so the flyout itself reflects the mutation without the user
+   * having to close and re-open it.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in nested alert flyouts opened from attack tools.
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
- * Wrapper for AttackFlyout that fetches the attack document by ID and index,
- * managing loading and error states before passing the hit to AttackFlyout.
+ * Wrapper for AttackFlyout that owns the single fetch of the attack document
+ * for the v2 flyout. It builds the `hit` and resolves the `attack` from the
+ * same fetched search hit, and exposes a refreshing `onAttackUpdated` callback
+ * to children so that any in-flyout mutation (status, assignees, tags, ...)
+ * is reflected without re-opening the flyout.
  */
 export const AttackFlyoutWrapper = memo(
-  ({ attackId, indexName, onAttackUpdated }: AttackFlyoutWrapperProps) => {
-    const { loading, searchHit, refetch } = useAttackDetails({ attackId, indexName });
+  ({ attackId, indexName, onAttackUpdated, renderCellActions }: AttackFlyoutWrapperProps) => {
+    const { loading, searchHit, attack, refetch } = useAttackDetails({ attackId, indexName });
 
     const hit = useMemo(
       () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : null),
       [searchHit]
     );
 
-    const handleAttackUpdated = useCallback(async () => {
-      await refetch();
+    const handleAttackUpdated = useCallback(() => {
       onAttackUpdated();
-    }, [refetch, onAttackUpdated]);
+      refetch();
+    }, [onAttackUpdated, refetch]);
 
-    if (loading) {
+    // Only render the full-flyout loading state on the initial fetch (no hit yet).
+    // Subsequent refetches (e.g. after a mutation) keep the flyout visible so the
+    // header does not flicker; child components can render their own loading state
+    // if needed.
+    if (loading && !hit) {
       return <FlyoutLoading data-test-subj="attack-flyout-wrapper-loading" />;
     }
 
-    if (!hit) {
+    if (!hit || !attack) {
       return (
         <EuiCallOut
           announceOnMount
@@ -67,7 +82,14 @@ export const AttackFlyoutWrapper = memo(
       );
     }
 
-    return <AttackFlyout hit={hit} onAttackUpdated={handleAttackUpdated} />;
+    return (
+      <AttackFlyout
+        hit={hit}
+        attack={attack}
+        onAttackUpdated={handleAttackUpdated}
+        renderCellActions={renderCellActions}
+      />
+    );
   }
 );
 

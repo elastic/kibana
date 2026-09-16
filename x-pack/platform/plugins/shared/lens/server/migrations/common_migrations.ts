@@ -155,21 +155,21 @@ export const commonMakeReversePaletteAsCustom = (
   attributes: LensDocShape715<VisState716>
 ): LensDocShape715<VisState716> => {
   const newAttributes = cloneDeep(attributes);
-  const vizState = (newAttributes as LensDocShape715<VisState716>).state.visualization;
+  const visState = (newAttributes as LensDocShape715<VisState716>).state.visualization;
   if (
     attributes.visualizationType !== 'lnsDatatable' &&
     attributes.visualizationType !== 'lnsHeatmap'
   ) {
     return newAttributes;
   }
-  if ('columns' in vizState) {
-    for (const column of vizState.columns) {
+  if ('columns' in visState) {
+    for (const column of visState.columns) {
       if (column.colorMode && column.colorMode !== 'none') {
         moveDefaultPaletteToPercentCustomInPlace(column.palette);
       }
     }
   } else {
-    moveDefaultPaletteToPercentCustomInPlace(vizState.palette);
+    moveDefaultPaletteToPercentCustomInPlace(visState.palette);
   }
   return newAttributes;
 };
@@ -224,9 +224,9 @@ export const commonEnhanceTableRowHeight = (
   }
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
-  const vizState = newAttributes.state.visualization as VisState820;
-  vizState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.custom;
-  vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  const visState = newAttributes.state.visualization as VisState820;
+  visState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.custom;
+  visState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
   return newAttributes as LensDocShape810<VisState820>;
 };
 

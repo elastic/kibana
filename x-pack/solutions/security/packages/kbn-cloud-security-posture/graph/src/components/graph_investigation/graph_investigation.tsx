@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
@@ -52,7 +53,10 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
+  // the unnarrowed sourceFields (see getIdentityFilterFields).
+  const euidApi = useEntityStoreEuidApi()?.euid;
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
@@ -463,8 +467,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const isOrigin = originEntityIdsSet.has(node.id);
             return {
               ...node,
+              ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
@@ -535,7 +541,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
-          filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
+          filter.meta.controlledBy?.startsWith(CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER)
       ).length > 0
         ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
         : undefined;

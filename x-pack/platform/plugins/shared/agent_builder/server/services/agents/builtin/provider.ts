@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { AgentType, createAgentNotFoundError } from '@kbn/agent-builder-common';
+import { chatAgentTypeId, createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { BuiltInAgentDefinition, AgentConfigContext } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
 import type { AgentProviderFn, GetAgentOptions, ReadonlyAgentProvider } from '../agent_source';
@@ -74,14 +74,19 @@ export const toInternalDefinition = async ({
     typeof definition.configuration === 'function'
       ? await definition.configuration(configContext)
       : definition.configuration;
+  const type = definition.type ?? chatAgentTypeId;
 
   return {
     ...definition,
     configuration: {
       ...configuration,
-      enable_elastic_capabilities: configuration.enable_elastic_capabilities ?? true,
+      // Only chat agents get the legacy default: for typed agents the flag must stay
+      // unset when not explicitly declared, so the type's base can control it.
+      ...(type === chatAgentTypeId
+        ? { enable_elastic_capabilities: configuration.enable_elastic_capabilities ?? true }
+        : {}),
     },
-    type: AgentType.chat,
+    type,
     access_control: undefined,
     created_by: undefined,
     readonly: true,

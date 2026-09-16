@@ -54,12 +54,12 @@ describe('cloud_connector_helpers', () => {
       expect(isAwsCloudConnectorVars(partialVars)).toBe(false);
     });
 
-    it('should return false for partial AWS cloud connector vars (missing external_id)', () => {
-      const partialVars = {
+    it('should return true for AWS cloud connector vars without external_id (identity federation without external ID)', () => {
+      const varsWithoutExternalId = {
         role_arn: mockRoleArn,
       };
 
-      expect(isAwsCloudConnectorVars(partialVars)).toBe(false);
+      expect(isAwsCloudConnectorVars(varsWithoutExternalId)).toBe(true);
     });
 
     it('should return false for Azure cloud connector vars', () => {

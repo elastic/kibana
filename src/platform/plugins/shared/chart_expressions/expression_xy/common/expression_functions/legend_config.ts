@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendLayout, LegendSize } from '@kbn/chart-expressions-common';
+import {
+  LegendLayout,
+  LegendSize,
+  ChartPosition,
+  ChartHorizontalAlignment,
+  ChartVerticalAlignment,
+} from '@kbn/chart-expressions-common';
 import { LEGEND_CONFIG } from '../constants';
 import type { LegendConfigFn } from '../types';
 
@@ -31,7 +36,7 @@ export const legendConfigFunction: LegendConfigFn = {
     },
     position: {
       types: ['string'],
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      options: [ChartPosition.Top, ChartPosition.Right, ChartPosition.Bottom, ChartPosition.Left],
       help: i18n.translate('expressionXY.legendConfig.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
@@ -51,7 +56,7 @@ export const legendConfigFunction: LegendConfigFn = {
     },
     horizontalAlignment: {
       types: ['string'],
-      options: [HorizontalAlignment.Right, HorizontalAlignment.Left],
+      options: [ChartHorizontalAlignment.Right, ChartHorizontalAlignment.Left],
       help: i18n.translate('expressionXY.legendConfig.horizontalAlignment.help', {
         defaultMessage:
           'Specifies the horizontal alignment of the legend when it is displayed inside chart.',
@@ -60,7 +65,7 @@ export const legendConfigFunction: LegendConfigFn = {
     },
     verticalAlignment: {
       types: ['string'],
-      options: [VerticalAlignment.Top, VerticalAlignment.Bottom],
+      options: [ChartVerticalAlignment.Top, ChartVerticalAlignment.Bottom],
       help: i18n.translate('expressionXY.legendConfig.verticalAlignment.help', {
         defaultMessage:
           'Specifies the vertical alignment of the legend when it is displayed inside chart.',

@@ -10,7 +10,7 @@ import type { History } from 'history';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiText, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
@@ -45,6 +45,7 @@ export interface FollowerIndicesListProps extends RouteComponentProps {
 interface FollowerIndicesListState {
   lastFollowerIndexId: string | null;
   isDetailPanelOpen: boolean;
+  selectedItems: FollowerIndexWithPausedStatus[];
 }
 
 export class FollowerIndicesList extends PureComponent<
@@ -69,6 +70,15 @@ export class FollowerIndicesList extends PureComponent<
   state: FollowerIndicesListState = {
     lastFollowerIndexId: null,
     isDetailPanelOpen: false,
+    selectedItems: [],
+  };
+
+  onSelectionChange = (selectedItems: FollowerIndexWithPausedStatus[]) => {
+    this.setState({ selectedItems });
+  };
+
+  resetSelection = () => {
+    this.setState({ selectedItems: [] });
   };
 
   componentDidMount() {
@@ -120,12 +130,12 @@ export class FollowerIndicesList extends PureComponent<
         iconType="managementApp"
         data-test-subj="emptyPrompt"
         title={
-          <h1>
+          <h2>
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
               defaultMessage="Create your first follower index"
             />
-          </h1>
+          </h2>
         }
         body={
           <p>
@@ -166,24 +176,23 @@ export class FollowerIndicesList extends PureComponent<
   renderList() {
     const { selectFollowerIndex, followerIndices } = this.props;
 
-    const { isDetailPanelOpen } = this.state;
+    const { isDetailPanelOpen, selectedItems } = this.state;
 
     return (
       <>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-              defaultMessage="A follower index replicates a leader index on a remote cluster."
-            />
-          </p>
-        </EuiText>
+        <FollowerIndicesTable
+          followerIndices={followerIndices}
+          selectedItems={selectedItems}
+          onSelectionChange={this.onSelectionChange}
+          resetSelection={this.resetSelection}
+        />
 
-        <EuiSpacer size="l" />
-
-        <FollowerIndicesTable followerIndices={followerIndices} />
-
-        {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectFollowerIndex(null)} />}
+        {isDetailPanelOpen && (
+          <DetailPanel
+            closeDetailPanel={() => selectFollowerIndex(null)}
+            onActionComplete={this.resetSelection}
+          />
+        )}
       </>
     );
   }

@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -28,6 +29,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
@@ -67,35 +69,31 @@ function shouldCloseByPush(
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
-  alertsService: CasesClientArgs['services']['alertsService'],
-  isCasesAttachmentsEnabled: boolean
+  alertsService: CasesClientArgs['services']['alertsService']
 ) => {
   const legacyAlertFilter = nodeBuilder.is(
     `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
     AttachmentType.alert
   );
 
-  const alertFilter = isCasesAttachmentsEnabled
-    ? combineFilters(
-        [
-          legacyAlertFilter,
-          buildFilter({
-            filters: UNIFIED_ALERT_TYPES_ARRAY,
-            field: 'type',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
-        ],
-        NodeBuilderOperators.or
-      )
-    : legacyAlertFilter;
+  const alertFilter = combineFilters(
+    [
+      legacyAlertFilter,
+      buildFilter({
+        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+    ],
+    NodeBuilderOperators.or
+  );
 
   const alertAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
       filter: alertFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   });
 
   const alerts = alertAttachments.saved_objects
@@ -155,10 +153,7 @@ export const push = async (
     spaceId,
     publicBaseUrl,
     usageCounter,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     /* Start of push to external service */
@@ -232,7 +227,7 @@ export const push = async (
         id: caseId,
         options: {
           page: 1,
-          perPage: theCase?.totalComment ?? 0,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       }),
     ]);
@@ -316,12 +311,7 @@ export const push = async (
       });
 
       if (myCase.attributes.settings.syncAlerts) {
-        await changeAlertsStatusToClose(
-          myCase.id,
-          caseService,
-          alertsService,
-          isCasesAttachmentsEnabled
-        );
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
       }
     }
 
@@ -344,7 +334,9 @@ export const push = async (
         references: myCase.references,
       },
       comments: comments.saved_objects.map((origComment) => {
-        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const foundComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const updatedComment =
+          foundComment && !isSavedObjectErrorResult(foundComment) ? foundComment : undefined;
         return {
           ...origComment,
           ...updatedComment,

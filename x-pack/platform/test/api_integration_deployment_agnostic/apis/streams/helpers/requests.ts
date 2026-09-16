@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
-import type { BaseFeature, Feature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
@@ -308,21 +308,6 @@ export async function getFailureStoreStats(
     .then((response) => response.body);
 }
 
-export async function getQueries(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('GET /api/streams/{name}/queries 2023-10-31', {
-      params: {
-        path: { name },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
 export async function putQueryStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
@@ -544,82 +529,25 @@ export async function importContent(
     .then((response) => response.body);
 }
 
-export async function upsertFeature(
-  client: StreamsSupertestRepositoryClient,
-  streamName: string,
-  feature: BaseFeature,
-  expectedStatusCode = 200
-): Promise<{ id: string; uuid: string }> {
-  await client
-    .fetch('POST /internal/streams/{name}/features', {
-      params: {
-        path: { name: streamName },
-        body: feature,
-      },
-    })
-    .expect(expectedStatusCode);
-
-  const { features } = await listFeatures(client, streamName);
-  const created = features.find((f) => f.id === feature.id);
-
-  if (!created) {
-    throw new Error(`Feature with id "${feature.id}" not found after upsert`);
-  }
-
-  return { id: created.id, uuid: created.uuid };
-}
-
-export async function listFeatures(
-  client: StreamsSupertestRepositoryClient,
-  streamName: string,
-  opts?: { includeExcluded?: boolean },
-  expectedStatusCode = 200
+export async function previewContent(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: {
+    content: Readable;
+    filename: string;
+  },
+  expectStatusCode: number = 200
 ) {
-  return client
-    .fetch('GET /internal/streams/{name}/features', {
+  return await apiClient
+    .sendFile('POST /internal/streams/{name}/content/preview', {
       params: {
-        path: { name: streamName },
-        query: opts?.includeExcluded ? { include_excluded: true } : undefined,
+        path: { name },
+        body: {
+          content: body.content,
+        },
       },
+      file: { key: 'content', filename: body.filename },
     })
-    .expect(expectedStatusCode)
-    .then((response) => response.body as { features: Feature[] });
-}
-
-export async function bulkFeatures(
-  client: StreamsSupertestRepositoryClient,
-  streamName: string,
-  operations: Array<
-    | { index: { feature: Feature } }
-    | { delete: { id: string } }
-    | { exclude: { id: string } }
-    | { restore: { id: string } }
-  >,
-  expectedStatusCode = 200
-) {
-  return client
-    .fetch('POST /internal/streams/{name}/features/_bulk', {
-      params: {
-        path: { name: streamName },
-        body: { operations },
-      },
-    })
-    .expect(expectedStatusCode)
-    .then((response) => response.body as { acknowledged: boolean });
-}
-
-export async function deleteFeature(
-  client: StreamsSupertestRepositoryClient,
-  streamName: string,
-  id: string,
-  expectedStatusCode = 200
-) {
-  return client
-    .fetch('DELETE /internal/streams/{name}/features/{id}', {
-      params: {
-        path: { name: streamName, id },
-      },
-    })
-    .expect(expectedStatusCode)
-    .then((response) => response.body as { acknowledged: boolean });
+    .expect(expectStatusCode)
+    .then((response) => response.body);
 }

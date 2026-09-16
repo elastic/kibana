@@ -81,12 +81,35 @@ export function getWebpackConfig(
       },
     },
 
-    externals: {
-      'node:crypto': 'commonjs crypto',
-      ...UiSharedDepsSrc.externals,
-    },
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }, callback) => {
+        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+          return callback();
+        }
+        const sharedExternals: Record<string, string> = {
+          'node:crypto': 'commonjs crypto',
+          mysql2: 'commonjs mysql2',
+          'mysql2/promise': 'commonjs mysql2/promise',
+          ...UiSharedDepsSrc.externals,
+        };
+        if (request && request in sharedExternals) {
+          return callback(undefined, sharedExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     plugins: [
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new webpack.NormalModuleReplacementPlugin(/^react-redux$/, (resource) => {
+        if (resource.context && /node_modules[\\/]kea/.test(resource.context)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),

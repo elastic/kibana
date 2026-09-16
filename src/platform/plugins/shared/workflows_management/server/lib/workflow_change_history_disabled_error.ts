@@ -9,10 +9,13 @@
 
 /**
  * Thrown when workflow version history reads are requested while change-history
- * is disabled (`workflows:versioning:enabled = false`) or not initialized.
+ * is not initialized.
  */
+export const WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE =
+  'Workflow version history is not available.';
+
 export class WorkflowChangeHistoryDisabledError extends Error {
-  constructor(message = 'Workflow version history is disabled.') {
+  constructor(message = WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE) {
     super(message);
     this.name = 'WorkflowChangeHistoryDisabledError';
   }

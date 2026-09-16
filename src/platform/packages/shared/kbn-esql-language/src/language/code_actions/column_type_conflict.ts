@@ -10,6 +10,7 @@
 import { BasicPrettyPrinter, EsqlQuery, mutate, synth } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { i18n } from '@kbn/i18n';
+import { EsqlFunctionNames } from '../../commands/definitions/generated/function_names';
 import type { InlineCastingType } from '../../commands/definitions/types';
 import { getFunctionForInlineCast } from '../../commands/definitions/utils/functions';
 import type { QuickFix, QuickFixMessage } from './types';
@@ -80,11 +81,20 @@ const getTypeConversions = (types: string[]): TypeConversion[] => {
   return [...conversionsByFunctionName.values()];
 };
 
-/** Resolve the conversion function from the generated inline cast mapping. */
+/**
+ * Resolve the conversion function from the generated inline cast mapping.
+ *
+ * TODO: Remove the hardcoded TO_TEXT handling once Elasticsearch adds text -> to_text
+ * to the ES|QL inline_cast.json metadata.
+ */
 const getConversionFunctionNameForType = (type: string): string | undefined => {
-  const normalizedType = type.toLowerCase() as InlineCastingType;
+  const normalizedType = type.toLowerCase();
 
-  return getFunctionForInlineCast(normalizedType);
+  if (normalizedType === 'text') {
+    return EsqlFunctionNames.TO_TEXT;
+  }
+
+  return getFunctionForInlineCast(normalizedType as InlineCastingType);
 };
 
 const getCommandIndexContainingMessage = (

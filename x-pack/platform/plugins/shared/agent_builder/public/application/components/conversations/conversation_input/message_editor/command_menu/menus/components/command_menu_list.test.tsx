@@ -141,6 +141,47 @@ describe('CommandMenuList', () => {
       expect(onSelect).toHaveBeenCalledWith({ key: '2', label: 'Beta' });
     });
 
+    it('resets the highlight when options reorder, even at the same length', () => {
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      const { rerender } = renderWithProvider(
+        <CommandMenuList
+          ref={ref}
+          options={[
+            { key: 'bob', label: 'Bob' },
+            { key: 'alice', label: 'Alice' },
+          ]}
+          isLoading={false}
+          onSelect={onSelect}
+        />
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
+      });
+
+      // Same length (2), but Alice moved to the front.
+      rerender(
+        <EuiProvider>
+          <CommandMenuList
+            ref={ref}
+            options={[
+              { key: 'alice', label: 'Alice' },
+              { key: 'bob', label: 'Bob' },
+            ]}
+            isLoading={false}
+            onSelect={onSelect}
+          />
+        </EuiProvider>
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({ key: 'alice', label: 'Alice' });
+    });
+
     it('navigates up from second item', () => {
       const ref = createRef<CommandMenuHandle>();
       const onSelect = jest.fn();
@@ -237,6 +278,85 @@ describe('CommandMenuList', () => {
       );
 
       expect(ref.current!.isKeyDownEventHandled({ key: 'a' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    describe('spaceSelection', () => {
+      it('does not treat Space as handled by default', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        renderWithProvider(
+          <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={onSelect} />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+        expect(onSelect).not.toHaveBeenCalled();
+      });
+
+      it('selects the highlighted option on Space when enabled and options exist', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={mockOptions}
+            isLoading={false}
+            onSelect={onSelect}
+            spaceSelection
+          />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+        expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
+      });
+
+      it('selects the arrow-navigated option on Space, not just the first', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={mockOptions}
+            isLoading={false}
+            onSelect={onSelect}
+            spaceSelection
+          />
+        );
+
+        act(() => {
+          ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
+        });
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+        expect(onSelect).toHaveBeenCalledWith({ key: '2', label: 'Beta' });
+      });
+
+      it('still claims Space with zero options, so it never leaks through as a literal character', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={[]}
+            isLoading={false}
+            onSelect={onSelect}
+            spaceSelection
+          />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
+
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+        expect(onSelect).not.toHaveBeenCalled();
+      });
     });
   });
 });

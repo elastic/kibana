@@ -42,7 +42,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty(
@@ -55,10 +55,10 @@ describe('reassignAgent', () => {
       const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
 
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('cannot reassign from hosted agent policy', async () => {
@@ -66,15 +66,15 @@ describe('reassignAgent', () => {
         mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
 
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('update namespaces with reassign', async () => {
@@ -83,7 +83,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty('namespaces', [
@@ -368,5 +368,43 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
     expect(mockReassignBatch).toHaveBeenCalled();
     expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 25, page: 1, perPage: 0 });
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 25 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([
+        { id: 'agent-1' } as any,
+        { notFound: true, id: 'missing-1' },
+        { id: 'agent-2' } as any,
+      ] as any);
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1', 'missing-1', 'agent-2'], dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 2 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
   });
 });

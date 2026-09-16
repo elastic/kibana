@@ -14,7 +14,9 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
+import { createNewTermsFieldCardinalityTracker } from '../utils/telemetry/new_terms_field_cardinality_tracker';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { reportMissingAggregations } from '../utils/no_readable_shards';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -104,6 +106,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       const {
         ruleExecutionLogger,
         completeRule,
+        analytics,
         tuple,
         inputIndex,
         runtimeMappings,
@@ -159,6 +162,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       }
       let pageNumber = 0;
       let alertsCandidateCount: number | undefined;
+      // Telemetry: size how many distinct grouping-key combinations real New Terms rules produce, and
+      // how long the grouped values are, over the rule run window.
+      const newTermsTelemetry = createNewTermsFieldCardinalityTracker({
+        analytics,
+        logger,
+        ruleParams: params,
+      });
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -192,6 +202,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: firstPhaseLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest,
@@ -208,20 +219,33 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             : undefined,
         });
         loggedRequests.push(...firstPhaseLoggedRequests);
-        if (!searchResult.aggregations) {
-          throw new Error('Aggregations were missing on recent terms search result');
-        }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
+        result.warningMessages.push(...searchWarnings);
+
+        if (!searchResult.aggregations) {
+          reportMissingAggregations({
+            searchResult,
+            searchErrors,
+            searchWarnings,
+            result,
+            inputIndex,
+            cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+            unexpectedErrorMessage: 'Aggregations were missing on recent terms search result',
+          });
+          break;
+        }
 
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
         if (searchResult.aggregations.new_terms.after_key == null) {
+          newTermsTelemetry.markReachedEndOfStream();
           break;
         }
         const bucketsForField = searchResult.aggregations.new_terms.buckets;
+        newTermsTelemetry.accumulate(bucketsForField);
 
         const createAlertsHook: CreateAlertsHook = async (aggResult) => {
           const eventsAndTerms: EventsAndTerms[] = (
@@ -338,6 +362,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
             searchErrors: pageSearchErrors,
+            searchWarnings: pageSearchWarnings,
             loggedRequests: pageSearchLoggedRequests = [],
           } = await singleSearchAfter({
             searchRequest: pageSearchRequest,
@@ -353,12 +378,22 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
           result.searchAfterTimes.push(pageSearchDuration);
           result.errors.push(...pageSearchErrors);
+          result.warningMessages.push(...pageSearchWarnings);
           loggedRequests.push(...pageSearchLoggedRequests);
 
           logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
           if (!pageSearchResult.aggregations) {
-            throw new Error('Aggregations were missing on new terms search result');
+            reportMissingAggregations({
+              searchResult: pageSearchResult,
+              searchErrors: pageSearchErrors,
+              searchWarnings: pageSearchWarnings,
+              result,
+              inputIndex,
+              cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+              unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
+            });
+            break;
           }
 
           // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -391,6 +426,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               searchResult: docFetchSearchResult,
               searchDuration: docFetchSearchDuration,
               searchErrors: docFetchSearchErrors,
+              searchWarnings: docFetchSearchWarnings,
               loggedRequests: docFetchLoggedRequests = [],
             } = await singleSearchAfter({
               searchRequest: docFetchSearchRequest,
@@ -408,10 +444,20 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             });
             result.searchAfterTimes.push(docFetchSearchDuration);
             result.errors.push(...docFetchSearchErrors);
+            result.warningMessages.push(...docFetchSearchWarnings);
             loggedRequests.push(...docFetchLoggedRequests);
 
             if (!docFetchSearchResult.aggregations) {
-              throw new Error('Aggregations were missing on document fetch search result');
+              reportMissingAggregations({
+                searchResult: docFetchSearchResult,
+                searchErrors: docFetchSearchErrors,
+                searchWarnings: docFetchSearchWarnings,
+                result,
+                inputIndex,
+                cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+                unexpectedErrorMessage: 'Aggregations were missing on document fetch search result',
+              });
+              break;
             }
 
             // Collect rule execution metrics
@@ -435,6 +481,8 @@ export const createNewTermsAlertType = (): SecurityAlertType<
 
         afterKey = searchResult.aggregations.new_terms.after_key;
       }
+
+      newTermsTelemetry.send();
 
       scheduleNotificationResponseActionsService({
         signals: result.createdSignals,

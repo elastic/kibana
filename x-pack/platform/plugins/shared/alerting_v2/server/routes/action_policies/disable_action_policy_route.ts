@@ -17,11 +17,22 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { disableActionPolicyOasExamples } from './disable_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
 
 const disableActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
@@ -34,8 +45,10 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Disable an action policy',
     description: 'Disable an action policy by identifier.',
+    oasOperationObject: disableActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -48,11 +61,11 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates an action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the action policy was concurrently updated by another caller.',
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

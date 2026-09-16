@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DOC_VIEWER_TABS_EBT_ELEMENT } from '@kbn/unified-doc-viewer';
+
 export const TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS = {
   VIEW_TRANSACTION: 'viewTransaction',
   VIEW_DEPENDENCY: 'viewDependency',
@@ -18,12 +20,15 @@ export const TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS = {
 export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
   ERRORS: 'docViewerErrors',
   SPAN_LINKS: 'docViewerSpanLinks',
+  TABS: DOC_VIEWER_TABS_EBT_ELEMENT,
+  FLYOUT_TABS: 'docViewerFlyoutTabs',
   TRACE_SUMMARY: 'docViewerTraceSummary',
   TRACE_SUMMARY_EXPAND_BUTTON: 'docViewerTraceSummaryExpandButton',
   TRACE_SUMMARY_WATERFALL_AREA: 'docViewerTraceSummaryWaterfallArea',
   ABOUT: 'docViewerAbout',
   LOGS: 'docViewerLogs',
   SIMILAR_SPANS: 'docViewerSimilarSpans',
+  GENAI_TAB: 'docViewerGenAiTab',
   WATERFALL_ROW: 'docViewerWaterfallRow',
   WATERFALL_ERROR_BADGE: 'docViewerWaterfallErrorBadge',
   WATERFALL_SERVICE_BADGE: 'docViewerWaterfallServiceBadge',
@@ -32,4 +37,8 @@ export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
 export const TRACES_DOC_VIEWER_EBT_DETAILS = {
   SPAN_DOC: 'spanDoc',
   LOG_DOC: 'logDoc',
+} as const;
+
+export const TRACES_DOC_VIEWER_EBT_SOURCES = {
+  ABOUT: 'docViewerAbout',
 } as const;

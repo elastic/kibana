@@ -21,7 +21,7 @@
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import produce from 'immer';
+import produce from 'immer-v9';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
@@ -163,7 +163,7 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {
-        type: vars.action === 'regenerate' ? 'regenerate' : 'send',
+        type: 'send',
       });
       sendMutate(vars);
     },

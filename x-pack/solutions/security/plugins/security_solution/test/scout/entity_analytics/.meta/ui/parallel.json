@@ -1,0 +1,489 @@
+{
+  "sha1": "781a93d5a4bb8c1b4e4ee03e73ca19bf61023d7f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2bb84514b03b333-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "e381636e641674d-5b49c84001cf506",
+      "title": "Entity analytics management page - Asset Criticality tab should display info panel, file upload section and doc link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
+        "line": 38,
+        "column": 38
+      }
+    },
+    {
+      "id": "e381636e641674d-3dba5a2d13d0bec",
+      "title": "Entity analytics management page - Asset Criticality tab should show insufficient privileges callout for user without write permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
+        "line": 51,
+        "column": 47
+      }
+    },
+    {
+      "id": "ce3dfe1f158bf48-7bb8ab11fb6ca19",
+      "title": "Entity analytics management page - Engine Status tab Engine Status tab is hidden when entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
+        "line": 20,
+        "column": 15
+      }
+    },
+    {
+      "id": "ce3dfe1f158bf48-25a846b1aa8d23d",
+      "title": "Entity analytics management page - Engine Status tab Engine Status tab appears after enabling entity analytics and shows components table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
+        "line": 27,
+        "column": 32
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-cd814a171131ef1",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion adds a host entity to a new case and the Entities accordion shows the attached entity",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 78,
+        "column": 25
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-a37741bc64b3f83",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion Entities accordion renders when entity attachments were added via API",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 93,
+        "column": 26
+      }
+    },
+    {
+      "id": "2cb41e0daf4ee37-3cf8d4a6f282359",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion renders no Entities accordion when a case has no entity attachments",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
+        "line": 110,
+        "column": 31
+      }
+    },
+    {
+      "id": "27a03cda1136b49-270f2e5421375ae",
+      "title": "Entity flyout anomalies host right panel shows anomalies section when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 122,
+        "column": 22
+      }
+    },
+    {
+      "id": "27a03cda1136b49-c63ba58eadef6aa",
+      "title": "Entity flyout anomalies host right panel shows anomalies section with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 137,
+        "column": 6
+      }
+    },
+    {
+      "id": "27a03cda1136b49-fffe57646af677c",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab and tab content when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 150,
+        "column": 27
+      }
+    },
+    {
+      "id": "27a03cda1136b49-71eadf7c9f15422",
+      "title": "Entity flyout anomalies host right panel shows an error state in the anomalies section when the anomaly overview API returns an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 181,
+        "column": 27
+      }
+    },
+    {
+      "id": "27a03cda1136b49-c80864d1ff26932",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 208,
+        "column": 34
+      }
+    },
+    {
+      "id": "27a03cda1136b49-19bedfea7a40829",
+      "title": "Entity flyout anomalies host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 242,
+        "column": 28
+      }
+    },
+    {
+      "id": "27a03cda1136b49-d5e7903499b19c2",
+      "title": "Entity flyout anomalies clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 269,
+        "column": 26
+      }
+    },
+    {
+      "id": "27a03cda1136b49-2985f25d1c114a2",
+      "title": "Entity flyout anomalies Add to timeline row action opens timeline scoped to the anomaly influencers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 291,
+        "column": 40
+      }
+    },
+    {
+      "id": "27a03cda1136b49-5f89e68fa3275d4",
+      "title": "Entity flyout anomalies selecting and clearing a MITRE tactic on the Anomalies tab filters and restores anomaly results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 377,
+        "column": 27
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-038e32e98b717e5",
+      "title": "Entity analytics management page renders page title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-5e69e7ce603aa31",
+      "title": "Entity analytics management page displays Entity Risk Score and Asset Criticality tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 41,
+        "column": 46
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-b93bd625239b571",
+      "title": "Entity analytics management page should init and disable entity analytics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-5d8049ee208a0d2",
+      "title": "Entity analytics management page should redirect old entity store URL to the management page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 80,
+        "column": 13
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-f85f16e15c19a68",
+      "title": "Entity analytics management page should redirect old asset criticality URL to Asset Criticality tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 88,
+        "column": 22
+      }
+    },
+    {
+      "id": "3bb3aaf0bd60039-0414d0d0d29f147",
+      "title": "Entity analytics management page should show error panel when init fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
+        "line": 97,
+        "column": 32
+      }
+    },
+    {
+      "id": "6272ffb617c248c-2621ef1741d4543",
+      "title": "Entity analytics management page - Privileges should not show the privileges callout for superuser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
+        "line": 42,
+        "column": 27
+      }
+    },
+    {
+      "id": "6272ffb617c248c-e49b8ea770aa9e9",
+      "title": "Entity analytics management page - Privileges should show privileges callout and disable switch for user without risk engine privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
+        "line": 52,
+        "column": 29
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-4d3a81e2c9a2ebd",
+      "title": "Entity analytics management page - Risk Score tab Risk Score tab is selected by default",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-0d4aa171beff992",
+      "title": "Entity analytics management page - Risk Score tab should show preview error panel when API fails",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-ed4dbcbf851573b",
+      "title": "Entity analytics management page - Risk Score tab should show save bar when toggling retain checkbox",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 56,
+        "column": 24
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-f58e084bddd50df",
+      "title": "Entity analytics management page - Risk Score tab should show save bar when toggling closed alerts switch",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-ca0f8d19aa15832",
+      "title": "Entity analytics management page - Risk Score tab should discard changes when clicking discard button",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 85,
+        "column": 81
+      }
+    },
+    {
+      "id": "145fe3f007ebf4a-02f079bc2cd45e2",
+      "title": "Entity analytics management page - Risk Score tab should save changes and persist after page reload",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
+        "line": 105,
+        "column": 6
+      }
+    }
+  ]
+}

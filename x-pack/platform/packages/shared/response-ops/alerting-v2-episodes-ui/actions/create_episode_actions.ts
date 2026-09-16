@@ -15,6 +15,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -24,7 +25,17 @@ import { createResolveAction } from './resolve';
 import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
-import { createOpenInDiscoverAction } from './open_in_discover';
+import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+
+/**
+ * Ids of episode actions that are safe to expose to users without write
+ * privilege because they do not mutate any episode (e.g. navigation only).
+ * Anything not listed here is treated as a write action and hidden from
+ * read-only users, so new mutating actions are gated by default.
+ */
+export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
+  OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+]);
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -42,17 +53,41 @@ export interface EpisodeActionsDeps {
     episodeIsoTimestamp: string;
     ruleId: string;
   }) => string | undefined | Promise<string | undefined>;
+  additionalDataSource?: EpisodeDataSource;
 }
 
-export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] =>
-  [
-    createAckAction(deps),
-    createUnackAction(deps),
-    createSnoozeAction(deps),
-    createUnsnoozeAction(deps),
-    createResolveAction(deps),
+export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
+  const { additionalDataSource } = deps;
+  const ext = (id: string) =>
+    additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
+  const actionDeps = { http: deps.http, notifications: deps.notifications };
+
+  return [
+    createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),
+    createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
+    createSnoozeAction(
+      deps,
+      ext('ALERTING_V2_SNOOZE_EPISODE') as
+        | EpisodeActionExtension<{ expiry: string | null }>
+        | undefined
+    ),
+    createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
+    createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),
     createUnresolveAction(deps),
-    createEditTagsAction(deps),
+    createEditTagsAction(
+      {
+        ...deps,
+        fetchAdditionalTagSuggestions: additionalDataSource?.fetchTagOptions
+          ? () =>
+              additionalDataSource.fetchTagOptions!({
+                services: { http: deps.http },
+              })
+          : undefined,
+      },
+      ext('ALERTING_V2_EDIT_EPISODE_TAGS') as EpisodeActionExtension<{ tags: string[] }> | undefined
+    ),
     createEditAssigneeAction(deps),
     createOpenInDiscoverAction(deps),
+    ...(additionalDataSource?.createActions?.(deps) ?? []),
   ].sort((a, b) => a.order - b.order);
+};

@@ -12,10 +12,23 @@ import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
-import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import {
+  MonitorSortFieldSchema,
+  OverviewStatusSortFieldSchema,
+} from '../../common/runtime_types/monitor_management/sort_field';
+import {
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_STATUS_MAX_PER_PAGE,
+} from '../../common/constants/monitor_management';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+
+// A datemath expression or ISO-8601 timestamp is well under this; the cap only
+// exists to keep the date-range query params from being unbounded strings.
+const MAX_DATE_RANGE_PARAM_LENGTH = 256;
+const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
+const MAX_MONITOR_QUERY_ID_LENGTH = 256;
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -45,6 +58,14 @@ const CommonQuerySchema = {
   useLogicalAndFor: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
   ),
+  // Date-range window for the overview list (see runtime type docs). The
+  // overview page always sends these; their presence scopes each monitor's
+  // status to the window instead of the default "current status" look-back.
+  // Bounded length: these only ever carry a short datemath expression
+  // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
+  // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
+  dateRangeStart: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
+  dateRangeEnd: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
 };
 
 export const QuerySchema = schema.object({
@@ -67,9 +88,35 @@ export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
   groupByMonitor: schema.maybe(schema.boolean()),
+  // When explicitly `false`, read-only Heartbeat / Elastic Agent managed
+  // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
+  // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
+  includeHeartbeatMonitors: schema.maybe(schema.boolean()),
+  page: schema.maybe(schema.number({ min: 1 })),
+  perPage: schema.maybe(schema.number({ min: 1, max: OVERVIEW_STATUS_MAX_PER_PAGE })),
+  sortField: OverviewStatusSortFieldSchema,
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+  statusFilter: schema.maybe(
+    schema.oneOf([
+      schema.literal(MONITOR_STATUS_ENUM.UP),
+      schema.literal(MONITOR_STATUS_ENUM.DOWN),
+      schema.literal(MONITOR_STATUS_ENUM.PENDING),
+      schema.literal(MONITOR_STATUS_ENUM.STALE),
+      schema.literal(MONITOR_STATUS_ENUM.DISABLED),
+    ])
+  ),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
+
+export const OverviewStatusStaleBodySchema = schema.object({
+  monitorQueryIds: schema.arrayOf(schema.string({ maxLength: MAX_MONITOR_QUERY_ID_LENGTH }), {
+    minSize: 1,
+    maxSize: MAX_MONITOR_QUERY_IDS_IN_BODY,
+  }),
+});
+
+export type OverviewStatusStaleBody = TypeOf<typeof OverviewStatusStaleBodySchema>;
 
 export const MONITOR_SEARCH_FIELDS = [
   'name',
@@ -79,6 +126,30 @@ export const MONITOR_SEARCH_FIELDS = [
   'urls',
   'hosts',
   'project_id.text',
+];
+
+/**
+ * Ping-document equivalents of `MONITOR_SEARCH_FIELDS`, used to scope the
+ * overview status aggregation by the search box query.
+ *
+ * These MUST stay aligned with the saved-object search fields above: the
+ * overview lists monitors via the saved-object search but derives each
+ * monitor's status from ping data matched by these fields. A field that lists a
+ * monitor (e.g. by location or host) but is not matched here would strip that
+ * monitor's status data, misclassifying it — e.g. a `stale` monitor would read
+ * as `pending`.
+ */
+export const MONITOR_STATUS_PING_SEARCH_FIELDS = [
+  'monitor.name',
+  'monitor.name.text',
+  'tags',
+  'observer.name',
+  'observer.geo.name',
+  'urls',
+  'hosts',
+  'url.full',
+  'url.domain',
+  'monitor.project.id',
 ];
 
 interface Filters {

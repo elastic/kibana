@@ -12,6 +12,7 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type {
   ChatEvent,
   ExecutionStatus,
+  InteractivityConfig,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionParams } from '@kbn/agent-builder-server/execution';
@@ -24,9 +25,23 @@ const storageSettings = {
     properties: {
       execution_id: types.keyword({}),
       '@timestamp': types.date({}),
+      last_heartbeat: types.date({}),
       status: types.keyword({}),
       agent_id: types.keyword({}),
       execution_mode: types.keyword({}),
+      interactivity: types.object({
+        dynamic: false,
+        properties: {
+          enabled: types.boolean({}),
+          auto_approved_apis: types.object({
+            dynamic: false,
+            properties: {
+              target: types.keyword({}),
+              api: types.keyword({}),
+            },
+          }),
+        },
+      }),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
       agent_params: types.object({ dynamic: false, properties: {} }),
@@ -47,9 +62,11 @@ const storageSettings = {
 export interface AgentExecutionProperties {
   execution_id: string;
   '@timestamp': string;
+  last_heartbeat?: string;
   status: ExecutionStatus;
   agent_id: string;
   execution_mode?: string;
+  interactivity?: InteractivityConfig;
   parent_execution_id?: string;
   space_id: string;
   agent_params: AgentExecutionParams;

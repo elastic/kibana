@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 
     // load new security and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/management'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
     loadTestFile(require.resolve('../../apis/intercepts'));
   });
 }

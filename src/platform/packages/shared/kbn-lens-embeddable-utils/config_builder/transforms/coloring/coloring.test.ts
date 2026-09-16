@@ -8,6 +8,7 @@
  */
 
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { DEFAULT_COLOR_STEPS } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { ColorByValueType, ColorMappingType, StaticColorType } from '../../schema/color';
 import {
@@ -17,6 +18,8 @@ import {
   fromStaticColorAPIToLensState,
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
+  isColorByValueAbsolute,
+  isColorByValuePalette,
   LEGACY_PALETTE_PREFIX,
 } from './coloring';
 
@@ -161,6 +164,182 @@ describe('Color util transforms', () => {
 
       expect(result?.params?.rangeType).toBe('number');
     });
+
+    describe('named palette (distributed_palette)', () => {
+      it('should build a named palette with empty stops and default bands/range/continuity', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'distributed_palette',
+          palette: 'status',
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue);
+
+        expect(result).toEqual({
+          type: 'palette',
+          name: 'status',
+          params: {
+            name: 'status',
+            progression: 'fixed',
+            reverse: false,
+            rangeType: 'percent',
+            continuity: 'all',
+            steps: DEFAULT_COLOR_STEPS,
+            maxSteps: DEFAULT_COLOR_STEPS,
+          },
+        } satisfies PaletteOutput<CustomPaletteParams>);
+      });
+
+      it('should use the provided number of bands for the palette steps', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'distributed_palette',
+          palette: 'status',
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 3);
+
+        expect(result?.params?.steps).toBe(3);
+        // maxSteps never drops below the shared default
+        expect(result?.params?.maxSteps).toBe(DEFAULT_COLOR_STEPS);
+      });
+
+      it('should use numeric range type when useNumericRange is true', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'distributed_palette',
+          palette: 'status',
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 3, true);
+
+        expect(result?.params?.rangeType).toBe('number');
+      });
+    });
+
+    describe('legacy_dynamic palette', () => {
+      it('should rebuild a legacy palette as a named palette without stops', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'legacy_dynamic',
+          range: 'percentage',
+          palette: 'temperature',
+          shift: false,
+          steps: [
+            { color: 'red', gte: 0, lt: 50 },
+            { color: 'green', gte: 50, lt: 90 },
+            { color: 'blue', gte: 90 },
+          ],
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 3);
+
+        expect(result).toEqual({
+          type: 'palette',
+          name: 'temperature',
+          params: {
+            name: 'temperature',
+            progression: 'fixed',
+            reverse: false,
+            // default range type for distributed palettes
+            rangeType: 'percent',
+            // default continuity for distributed palettes
+            continuity: 'all',
+            steps: 3,
+            maxSteps: DEFAULT_COLOR_STEPS,
+          },
+        } satisfies PaletteOutput<CustomPaletteParams>);
+      });
+
+      it('should ignore the shift flag', () => {
+        const base = {
+          type: 'legacy_dynamic',
+          range: 'absolute',
+          palette: 'temperature',
+          steps: [
+            { color: 'red', gte: 0, lt: 50 },
+            { color: 'blue', gte: 50, lte: 100 },
+          ],
+        } satisfies Partial<ColorByValueType>;
+
+        const shifted = fromColorByValueAPIToLensState({
+          ...base,
+          shift: true,
+        });
+        const unshifted = fromColorByValueAPIToLensState({
+          ...base,
+          shift: false,
+        });
+
+        expect(shifted).toEqual(unshifted);
+      });
+
+      it('should ignore the rangeType/continuity and the number of steps and use the default per chart values passed as arguments', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'legacy_dynamic',
+          range: 'absolute',
+          palette: 'temperature',
+          shift: false,
+          steps: [
+            { color: 'red', gte: 0, lt: 50 },
+            { color: 'green', gte: 50, lt: 90 },
+            { color: 'blue', gte: 90 },
+          ],
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 4);
+
+        expect(result).toEqual({
+          type: 'palette',
+          name: 'temperature',
+          params: {
+            name: 'temperature',
+            progression: 'fixed',
+            reverse: false,
+            rangeType: 'percent', // default range type for distributed palettes
+            continuity: 'all', // default continuity for distributed palettes
+            steps: 4, // the number of bands defined as argument
+            maxSteps: DEFAULT_COLOR_STEPS,
+          },
+        } satisfies PaletteOutput<CustomPaletteParams>);
+      });
+    });
+
+    it('should merge the trailing same-color step of an open-ended single stop back into one stop', () => {
+      // The forward transform encodes an open-ended single-stop palette as two
+      // API steps (`lt` then open `gte`). The reverse transform must collapse
+      // them back into a single stop, preserving open bounds (continuity 'all').
+      const colorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
+      };
+
+      const result = fromColorByValueAPIToLensState(colorByValue);
+
+      expect(result?.params?.stops).toEqual([{ color: 'red', stop: 50 }]);
+      expect(result?.params?.colorStops).toEqual([{ color: 'red', stop: null }]);
+      expect(result?.params?.rangeMin).toBeNull();
+      expect(result?.params?.rangeMax).toBeNull();
+      expect(result?.params?.continuity).toBe('all');
+    });
+
+    it('should not merge a trailing step with a different color', () => {
+      const colorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'green', gte: 50 },
+        ],
+      };
+
+      const result = fromColorByValueAPIToLensState(colorByValue);
+
+      expect(result?.params?.stops).toEqual([
+        { color: 'red', stop: 50 },
+        { color: 'green', stop: null },
+      ]);
+    });
   });
 
   describe('fromColorByValueLensStateToAPI', () => {
@@ -220,6 +399,7 @@ describe('Color util transforms', () => {
           rangeType: 'percent',
           rangeMin: 5,
           rangeMax: 95,
+          continuity: 'none',
           stops: [
             { color: 'red', stop: 10 },
             { color: 'green', stop: 50 },
@@ -300,7 +480,10 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ color: 'red', lt: 50 }],
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
       } satisfies ColorByValueType);
     });
 
@@ -345,7 +528,10 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'dynamic',
         range: 'percentage',
-        steps: [{ lt: 50, color: 'red' }],
+        steps: [
+          { lt: 50, color: 'red' },
+          { gte: 50, color: 'red' },
+        ],
       } satisfies ColorByValueType);
     });
 
@@ -402,6 +588,50 @@ describe('Color util transforms', () => {
           { color: 'red', gte: 50 },
         ],
       } satisfies ColorByValueType);
+    });
+
+    describe('named palette (distributed_palette)', () => {
+      it('should convert a non-custom palette to a rangeless distributed_palette', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: {
+            name: 'status',
+            rangeType: 'percent',
+            continuity: 'above',
+            stops: [
+              { color: 'red', stop: 0 },
+              { color: 'green', stop: 50 },
+              { color: 'blue', stop: 100 },
+            ],
+          },
+        };
+
+        const result = fromColorByValueLensStateToAPI(palette);
+
+        expect(result).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+        } satisfies ColorByValueType);
+      });
+
+      it('should drop coloring for an invalid palette name', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'test',
+          params: {
+            name: 'test',
+            rangeType: 'percent',
+            continuity: 'above',
+            stops: [
+              { color: 'red', stop: 0 },
+              { color: 'green', stop: 50 },
+            ],
+          },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette)).toBeUndefined();
+      });
     });
   });
 
@@ -818,6 +1048,54 @@ describe('Color util transforms', () => {
       expect(backToAPI).toEqual(originalColorByValue);
     });
 
+    it('should maintain data integrity for an open-ended single stop (continuity all)', () => {
+      // The forward transform emits two API steps for a single stop and the
+      // reverse transform merges them back; this guards that both halves cancel.
+      const originalColorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 50 },
+          { color: 'red', gte: 50 },
+        ],
+      };
+
+      const lensState = fromColorByValueAPIToLensState(originalColorByValue);
+      const backToAPI = fromColorByValueLensStateToAPI(lensState);
+
+      expect(backToAPI).toEqual(originalColorByValue);
+    });
+
+    it('should round-trip a single-stop lens palette state to API and back', () => {
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          progression: 'fixed',
+          reverse: false,
+          rangeType: 'number',
+          // @ts-expect-error - open-ended single stop
+          rangeMin: null,
+          // @ts-expect-error - open-ended single stop
+          rangeMax: null,
+          continuity: 'all',
+          stops: [{ color: 'red', stop: 50 }],
+          colorStops: [
+            // @ts-expect-error - This can be null
+            { color: 'red', stop: null },
+          ],
+          steps: 1,
+          maxSteps: 5,
+        },
+      };
+
+      const apiColorByValue = fromColorByValueLensStateToAPI(palette);
+      const returnedPaletteState = fromColorByValueAPIToLensState(apiColorByValue);
+
+      expect(returnedPaletteState).toEqual(palette);
+    });
+
     it('should maintain data integrity for categorical color mapping with specific color codes', () => {
       const originalColorMapping: ColorMappingType = {
         palette: SEMANTIC_PALETTE,
@@ -972,6 +1250,47 @@ describe('Color util transforms', () => {
       );
 
       expect(backToAPI).toEqual(originalColorMapping);
+    });
+  });
+
+  describe('color type guards', () => {
+    const namedPalette: ColorByValueType = {
+      type: 'distributed_palette',
+      palette: 'status',
+    };
+    const absoluteColor: ColorByValueType = {
+      type: 'dynamic',
+      range: 'absolute',
+      steps: [{ color: 'red', lt: 50 }],
+    };
+    const percentageColor: ColorByValueType = {
+      type: 'dynamic',
+      range: 'percentage',
+      steps: [{ color: 'red', lt: 50 }],
+    };
+
+    describe('isColorByValuePalette', () => {
+      it('should be true only for a named palette', () => {
+        expect(isColorByValuePalette(namedPalette)).toBe(true);
+        expect(isColorByValuePalette(absoluteColor)).toBe(false);
+        expect(isColorByValuePalette(percentageColor)).toBe(false);
+        expect(isColorByValuePalette(undefined)).toBe(false);
+      });
+    });
+
+    describe('isColorByValueAbsolute', () => {
+      it('should be false for named palette', () => {
+        expect(isColorByValueAbsolute(namedPalette)).toBe(false);
+      });
+
+      it('should be true for absolute color by value and false for percentage', () => {
+        expect(isColorByValueAbsolute(absoluteColor)).toBe(true);
+        expect(isColorByValueAbsolute(percentageColor)).toBe(false);
+      });
+
+      it('should be false for undefined', () => {
+        expect(isColorByValueAbsolute(undefined)).toBe(false);
+      });
     });
   });
 });

@@ -38,7 +38,7 @@ const createPartitionSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Markdown text displayed in the user-facing confirmation dialog. Include parent hierarchy, existing children, the new child name, and the routing condition. This is NOT an instruction — it is only shown to the user for review.'
+      "Narrative summary of what will be created and why. Include parent hierarchy, existing children, the new child name, and the routing condition. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
     ),
 });
 
@@ -54,13 +54,20 @@ export const createCreatePartitionTool = ({
   description: dedent(`
     Creates a child stream (partition) under a parent wired stream with a routing condition. This tool MUTATES state — only call when the user explicitly asks to create a partition, route, or child stream.
 
-    **Cancellation:** If this tool returns "The user chose not to proceed with this action", stop immediately, acknowledge, and ask how to proceed. Do NOT retry.
+    **Cancellation:** If this tool returns a result indicating the operation was declined, stop immediately, acknowledge, and ask how to proceed. Do NOT retry.
 
     Child names MUST follow the parent.childname convention: for parent "logs.ecs", use "logs.ecs.nginx"; for parent "logs.otel", use "logs.otel.nginx".
 
     Only works on wired streams. When creating multiple children under the same parent, call this tool sequentially (they modify the parent's routing table). Children under different parents can be created in parallel.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Create Partition',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   schema: createPartitionSchema,
   confirmation: {
     askUser: 'always',

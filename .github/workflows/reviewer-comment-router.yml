@@ -28,7 +28,6 @@ jobs:
             )
             || (
               contains(github.event.comment.body, '@claude')
-              && contains(github.event.issue.labels.*.name, 'reviewer:claude')
             )
             || (
               contains(github.event.comment.body, '@scout')
@@ -46,7 +45,6 @@ jobs:
             )
             || (
               contains(github.event.comment.body, '@claude')
-              && contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
             )
             || (
               contains(github.event.comment.body, '@scout')
@@ -58,14 +56,14 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout workflow scripts
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           persist-credentials: false
 
       - name: Validate reviewer comment
         id: route
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { routeReviewerComment } = require('./.github/scripts/reviewer_comment');

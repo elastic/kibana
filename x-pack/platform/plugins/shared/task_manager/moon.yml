@@ -59,6 +59,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-security-common'
   - '@kbn/scout'
+  - '@kbn/std'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
@@ -71,7 +73,7 @@ fileGroups:
     - server/**/*.json
     - common/**/*
     - test/scout/**/*
-    - test/scout_task_manager_uiam/**/*
+    - test/scout_uiam_local/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

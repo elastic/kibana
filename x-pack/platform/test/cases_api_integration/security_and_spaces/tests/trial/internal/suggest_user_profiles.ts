@@ -19,7 +19,8 @@ import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('suggest_user_profiles', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/262485
+  describe.skip('suggest_user_profiles', () => {
     it('returns no suggestions when the owner is an empty array', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
@@ -195,7 +196,8 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
-    describe('user with both security and observability privileges', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/262485
+    describe.skip('user with both security and observability privileges', () => {
       const obsAndSecRole: Role = {
         name: 'obsAndSecRole',
         privileges: {

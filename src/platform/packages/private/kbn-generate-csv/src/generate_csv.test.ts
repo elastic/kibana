@@ -393,7 +393,7 @@ describe('CsvGenerator', () => {
       expect(content).toMatchSnapshot();
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-      expect(mockDataClient.search).toBeCalledWith(
+      expect(mockDataClient.search).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -514,6 +514,7 @@ describe('CsvGenerator', () => {
               "rows": 0,
             },
           },
+          "user_error": undefined,
           "warnings": Array [
             "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
           ],
@@ -653,6 +654,43 @@ describe('CsvGenerator', () => {
           })
         );
       });
+
+      it('uses PIT even when pagingStrategy is scroll', async () => {
+        const mockJobScrollStrategyInternalUser = createMockJob({
+          columns: ['date', 'ip', 'message'],
+          pagingStrategy: 'scroll',
+        });
+
+        const generateCsv = new CsvGenerator(
+          mockJobScrollStrategyInternalUser,
+          getMockConfig({ scroll: { size: 500, duration: '30s', strategy: 'scroll' } }),
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream,
+          false,
+          jobId,
+          true // useInternalUser
+        );
+
+        await generateCsv.generateData();
+
+        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalled();
+        expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+        expect(mockDataClient.search).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({ strategy: INTERNAL_ENHANCED_ES_SEARCH_STRATEGY })
+        );
+      });
     });
   });
 
@@ -758,7 +796,7 @@ describe('CsvGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -846,7 +884,7 @@ describe('CsvGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -958,7 +996,7 @@ describe('CsvGenerator', () => {
       expect(content).toMatchSnapshot();
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-      expect(mockDataClient.search).toBeCalledWith(
+      expect(mockDataClient.search).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
             index: 'logstash-*',
@@ -1551,7 +1589,7 @@ describe('CsvGenerator', () => {
       }
     );
 
-    expect(mockDataClient.search).toBeCalledWith(
+    expect(mockDataClient.search).toHaveBeenCalledWith(
       {
         params: {
           max_concurrent_shard_requests: 5,
@@ -1640,6 +1678,7 @@ describe('CsvGenerator', () => {
             "rows": 5,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Your export would have generated 100 total rows, but was limited to the maximum recommended row limit of 5. This limit can be configured in kibana.yml, but increasing it may impact performance.",
         ],
@@ -1725,6 +1764,7 @@ describe('CsvGenerator', () => {
             "rows": 5,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Your export would have generated 100 total rows, but was limited to the maximum recommended row limit of 5.",
         ],
@@ -1733,6 +1773,86 @@ describe('CsvGenerator', () => {
     expect(warnLogSpy).toHaveBeenCalledWith(
       'Your requested export includes 100 rows, which has exceeded the recommended row limit (5).'
     );
+  });
+
+  it('will return warning and user_error if search results does not match expected total', async () => {
+    const mockJobUsingPitPaging = createMockJob({
+      columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'pit',
+    });
+    mockDataClient.search = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, (HITS_TOTAL - 20) / 10).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from the initial search'],
+                  },
+                } as unknown as estypes.SearchHit)
+            ),
+            HITS_TOTAL
+          ),
+        })
+      )
+      .mockImplementation(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, HITS_TOTAL / 10).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from a subsequent scroll'],
+                  },
+                } as unknown as estypes.SearchHit)
+            )
+          ),
+        })
+      );
+
+    const generateCsv = new CsvGenerator(
+      mockJobUsingPitPaging,
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      false, // isServerless
+      jobId
+    );
+    const csvResult = await generateCsv.generateData();
+    expect(csvResult).toMatchInlineSnapshot(`
+      Object {
+        "content_type": "text/csv",
+        "csv_contains_formulas": false,
+        "error_code": undefined,
+        "max_size_reached": false,
+        "metrics": Object {
+          "csv": Object {
+            "rows": 108,
+          },
+        },
+        "user_error": true,
+        "warnings": Array [
+          "Encountered an error with the number of CSV rows generated from the search: expected 100, received 108.",
+        ],
+      }
+    `);
   });
 
   it('will return partial data if the scroll or search fails', async () => {
@@ -1774,6 +1894,7 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Received a 500 response from Elasticsearch: my error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
@@ -1830,6 +1951,7 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Encountered an unknown error: CSV export search error: An unknown error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",

@@ -8,11 +8,16 @@
 export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 export { RulesClient } from './rules_client';
 export type {
-  BulkOperationResponse,
-  BulkRulesParams,
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
+  BulkResponse,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesParams,
+  DryRunResponse,
+  FindRulesArgs,
   FindRulesResponse,
   RuleResponse,
   UpdateRuleData,

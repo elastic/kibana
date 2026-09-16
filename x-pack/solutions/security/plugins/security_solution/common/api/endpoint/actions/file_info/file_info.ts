@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 /** Schema that validates the file info API */
 export const EndpointActionFileInfoSchema = {
   params: schema.object({
-    action_id: schema.string({ minLength: 1 }),
-    file_id: schema.string({ minLength: 1 }),
+    action_id: schema.string({ minLength: 1, maxLength: 256 }),
+    file_id: schema.string({ minLength: 1, maxLength: 256 }),
   }),
 };
 

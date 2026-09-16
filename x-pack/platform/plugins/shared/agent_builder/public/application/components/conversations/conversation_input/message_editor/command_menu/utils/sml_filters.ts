@@ -6,8 +6,8 @@
  */
 
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents/definition';
-import type { SmlSearchConstraints } from '@kbn/agent-context-layer-plugin/public';
-import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
+import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 
 // Three states: undefined → no constraints (all connectors visible),
 // [] → no connectors allowed, ['id1', ...] → only those connectors.

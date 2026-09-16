@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { loggingLevelRt } from '@kbn/apm-common';
+export { loggingLevelSchema } from '@kbn/apm-common';

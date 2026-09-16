@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
+
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type {
   DataType,
@@ -17,7 +19,7 @@ import type {
   TypedLensSerializedState,
   ValueFormatConfig,
 } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import { getChartScopedFilterQuery } from '@kbn/lens-common';
 
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type {
@@ -115,7 +117,8 @@ function buildTextBasedState(
         column.customLabel = true; // set always to true so we can use the default label as a custom label
         if (hasCustomLabel) {
           column.label = sourceColumn.label;
-        } else {
+          // This is a sanity check to satisfy TS for the incoming form based column.
+        } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
           // use the generated default label
           column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
             layer.columns[sourceColumn.id],
@@ -156,7 +159,7 @@ function buildTextBasedState(
 
     newLayers[layerId] = {
       index: layer.indexPatternId,
-      query: { esql: conversionResult.esql },
+      query: { esql: esql(conversionResult.esql).print('wrapping') },
       columns: newColumns,
       timeField: framePublicAPI.dataViews.indexPatterns[layer.indexPatternId]?.timeFieldName,
     };
@@ -205,11 +208,9 @@ export function convertFormBasedToTextBasedLayer({
     return undefined;
   }
 
-  // Get the ES|QL query from the first converted layer
+  // Ensure the converted layer carries an ES|QL query
   const firstLayerId = layersToConvert[0].id;
-  const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
-
-  if (!esqlQuery) {
+  if (!newDatasourceState.layers[firstLayerId]?.query) {
     return undefined;
   }
 
@@ -219,12 +220,13 @@ export function convertFormBasedToTextBasedLayer({
     ...attributes,
     state: {
       ...attributes.state,
-      query: { esql: esql(esqlQuery.esql).print('wrapping') },
+      // ES|QL lives exclusively on the text-based layers; keep only a
+      // chart-scoped KQL/Lucene filter in the top-level slot (if any).
+      query: getChartScopedFilterQuery(attributes.state.query),
       datasourceStates: {
         textBased: newDatasourceState,
       },
       visualization: visualizationState,
-      needsRefresh: true,
     },
   };
 

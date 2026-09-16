@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
-  AlertEpisodeData,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+} from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { LOOKBACK_WINDOW_MINUTES } from '../constants';
-import { getDispatchableAlertEventsQuery } from '../queries';
+import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
+import { EpisodeScan } from '../state';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
-  rule_id: string;
+  rule_id: string | null;
+  source: string;
+  space_id: string;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
-  data_json: string | null;
+  episode_status: AlertEpisodeStatus;
   severity: AlertEventSeverity | null;
 }
 
@@ -39,23 +41,31 @@ export class FetchEpisodesStep implements DispatcherStep {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { previousStartedAt } = state.input;
-
-    const lookback = moment(previousStartedAt)
-      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-      .toISOString();
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { windowStart, windowEnd, signal } = state.input;
+    const gte = windowStart.toISOString();
+    const lte = windowEnd.toISOString();
 
     const result = await this.queryService.executeQueryRows<RawAlertEpisode>({
-      query: getDispatchableAlertEventsQuery().query,
+      query: getDispatchableAlertEventsQuery({ gte, lte }).query,
+      // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
+      // drop action docs stamped with `now` (after the settle buffer) and
+      // break `last_fired` dedup. Event rows are still capped at `lte` inside
+      // the ES|QL WHERE (type == "alert" AND @timestamp <= lte).
       filter: {
         range: {
-          '@timestamp': {
-            gte: lookback,
-          },
+          '@timestamp': { gte },
         },
       },
+      abortSignal: signal,
     });
+
+    // Event-row `lte` makes windowEnd a provable watermark advance target:
+    // the scan has a defined upper edge to advance to.
+    const truncated = result.length === EPISODE_QUERY_LIMIT;
 
     const episodes = parseAlertEpisodes(result);
 
@@ -63,30 +73,13 @@ export class FetchEpisodesStep implements DispatcherStep {
       return { type: 'halt', reason: 'no_episodes' };
     }
 
-    return { type: 'continue', data: { episodes } };
+    return { type: 'continue', data: { scan: EpisodeScan.of({ episodes, truncated }) } };
   }
 }
 
 export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
-  return raw.map(({ data_json, severity, ...rest }) => ({
+  return raw.map(({ severity, ...rest }) => ({
     ...rest,
     ...(severity ? { severity } : {}),
-    ...(data_json ? { data: parseDataJson(data_json) } : {}),
   }));
-}
-
-export function parseDataJson(json: string): AlertEpisodeData {
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: AlertEpisodeData = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        set(result, key.split('.'), value);
-      }
-    }
-    return result;
-  } catch {
-    return {};
-  }
 }

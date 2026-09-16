@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasSameFingerprint, type BaseFeature } from '@kbn/streams-schema';
+import { hasSameFingerprint, type BaseFeature } from '@kbn/significant-events-schema';
 import { chunk, uniqBy, uniqWith } from 'lodash';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
@@ -36,6 +36,7 @@ export const createSemanticUniquenessEvaluator = ({
 }) => ({
   name: 'llm_semantic_uniqueness',
   kind: 'LLM' as const,
+  direction: 'maximize' as const,
   evaluate: async ({
     input,
     output,
@@ -142,6 +143,7 @@ const compactFeature = (feature: BaseFeature) => ({
 export const createIdReuseEvaluator = () => ({
   name: 'id_reuse',
   kind: 'CODE' as const,
+  direction: 'maximize' as const,
   evaluate: async ({ output }: { output: DedupLoopOutput }) => {
     const { mergeEvents, fingerprintOnlyMergeEvents } = output;
     const totalDuplicates = mergeEvents.length + fingerprintOnlyMergeEvents.length;
@@ -188,6 +190,7 @@ export const createMergeCorrectnessEvaluator = ({
 }) => ({
   name: 'llm_merge_correctness',
   kind: 'LLM' as const,
+  direction: 'maximize' as const,
   evaluate: async ({
     input,
     output,

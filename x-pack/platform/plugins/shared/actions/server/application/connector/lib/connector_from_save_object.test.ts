@@ -54,6 +54,18 @@ describe('connectorFromSavedObject', () => {
     expect(result.authMode).toBe('shared');
   });
 
+  it('does not expose last-saver identity fields', () => {
+    const so = makeSavedObject('conn-identity', {
+      apiKey: 'should-not-leak',
+      uiamApiKey: 'should-not-leak-uiam',
+      uiamApiKeyExternal: false,
+    });
+    const result = connectorFromSavedObject(so, false, false);
+    expect(result).not.toHaveProperty('apiKey');
+    expect(result).not.toHaveProperty('uiamApiKey');
+    expect(result).not.toHaveProperty('uiamApiKeyExternal');
+  });
+
   it('propagates isDeprecated and isConnectorTypeDeprecated from arguments', () => {
     const so = makeSavedObject('conn-4');
     const result = connectorFromSavedObject(so, true, true);

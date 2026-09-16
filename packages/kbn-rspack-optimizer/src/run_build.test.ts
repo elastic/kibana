@@ -55,6 +55,11 @@ describe('IGNORED_WATCH_PATTERNS', () => {
 
       ['tsbuildinfo at package root', p('repo', 'pkg', 'tsconfig.tsbuildinfo')],
       ['type_check tsbuildinfo variant', p('repo', 'pkg', 'tsconfig.type_check.tsbuildinfo')],
+      ['generated type_check tsconfig', p('repo', 'pkg', 'tsconfig.type_check.json')],
+      [
+        'generated variant type_check tsconfig',
+        p('repo', 'pkg', 'tsconfig.browser.type_check.json'),
+      ],
 
       ['unit test file (.test.ts)', p('repo', 'pkg', 'src', 'foo.test.ts')],
       ['unit test file (.test.tsx)', p('repo', 'pkg', 'src', 'foo.test.tsx')],
@@ -73,6 +78,16 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       ['jest.config.js', p('repo', 'pkg', 'jest.config.js')],
       ['jest.config.ts', p('repo', 'pkg', 'jest.config.ts')],
       ['jest.integration.config.js', p('repo', 'pkg', 'jest.integration.config.js')],
+
+      [
+        'scout test artifacts',
+        p('repo', 'pkg', 'test', 'scout', 'ui', '.scout', 'test-artifacts', 'failed.png'),
+      ],
+      [
+        'scout playwright reports',
+        p('repo', 'pkg', 'test', 'scout', 'ui', '.scout', 'reports', 'index.html'),
+      ],
+      ['repo-root scout server config', p('repo', '.scout', 'servers', 'local.json')],
     ])('ignores %s', (_label, filePath) => {
       expect(matchesIgnored(filePath)).toBe(true);
     });
@@ -100,6 +115,9 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       // Storybook config is a real .ts file (not part of prod graph either, but
       // the watcher seeing it is harmless and we don't want a too-greedy regex).
       ['storybook main.ts', p('repo', 'pkg', '.storybook', 'main.ts')],
+
+      // "scout" in a path is fine when it is not the `.scout` output dir
+      ['scout test source dir', p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'index.ts')],
     ])('keeps %s', (_label, filePath) => {
       expect(matchesIgnored(filePath)).toBe(false);
     });

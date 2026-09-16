@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
@@ -15,9 +16,12 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
+  euiFullHeight,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -28,10 +32,20 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
-import { getBreachQuery } from '../../form/types';
+import type {
+  FormValues,
+  RecoveryStrategy,
+  RuleNotificationsValue,
+  RuleQuery,
+} from '../../form/types';
+import { getBreachQuery } from '../../form/utils/query_helpers';
+import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
-import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
+import {
+  isNonRepresentableRule,
+  isNonRepresentableFormState,
+} from '../../form/utils/is_non_representable';
+import { DEFAULT_NO_DATA_STRATEGY } from '../../form/fields/no_data_strategy_select';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -42,16 +56,35 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import { SandboxSettingsMenu } from './sandbox_settings_menu';
 import { isAlertTabDisabled } from './compose_discover_tabs';
-import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
-import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import {
+  RULE_BUILDER_REGISTRY,
+  BuilderStateProvider,
+  parseDiscoverQueryForBuilder,
+  type BuilderState,
+} from './rule_builder';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
+import { isBuilderConditionStepId } from './types';
+import { validateStep, evaluateStepValidation } from './validate_step';
+import {
+  getSandboxTabs,
+  getStepIds,
+  getBuilderStepIds,
+  getDefaultOpenTab,
+  useComposeDiscoverState,
+} from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
-import { guessRecoveryBlock, discoverQueryToComposed, splitQuery } from './use_heuristic_split';
-import { useSplitQueryCompletion } from './use_split_query_completion';
+import {
+  guessRecoveryBlock,
+  discoverQueryToComposed,
+  resolveUnifiedAlertApplyQuery,
+  splitResultToRuleQuery,
+} from './use_heuristic_split';
+import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
 import { useResolveTimeField } from './use_resolve_time_field';
+import { buildRuleNotificationTag } from '../../actions_form/helpers/rule_scoped_action_policies';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -71,21 +104,40 @@ const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.y
   defaultMessage: 'YAML MODE',
 });
 
+const QUERY_SANDBOX_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.yamlMode.querySandbox',
+  {
+    defaultMessage: 'Query sandbox',
+  }
+);
+
+const PREVIEW_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.previewButtonLabel',
+  { defaultMessage: 'Preview' }
+);
+
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
   defaultMessage: 'Edit mode selection',
 });
 
 const CLONE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cloneTitleLabel', {
-  defaultMessage: 'Clone alert rule',
+  defaultMessage: 'Clone rule',
 });
 
-const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.createTitleLabel', {
-  defaultMessage: 'Create alert rule',
-});
+const CREATE_ESQL_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createEsqlTitleLabel',
+  { defaultMessage: 'Create ES|QL rule' }
+);
 
-const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
-  defaultMessage: 'Edit alert rule',
-});
+const CREATE_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createTitleLabel',
+  { defaultMessage: 'Create rule' }
+);
+
+const EDIT_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.editTitleLabel',
+  { defaultMessage: 'Edit rule' }
+);
 
 const YAML_ONLY_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.editMode.yamlOnlyTooltip',
@@ -95,20 +147,76 @@ const YAML_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
-const EDIT_MODE_OPTIONS = [
-  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
-  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
+const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.editMode.sandboxOpenTooltip',
+  { defaultMessage: 'Close the query editor to switch views' }
+);
+
+const BUILDER_VIEW_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.builderView',
+  { defaultMessage: 'Builder view' }
+);
+
+const ESQL_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.esqlView', {
+  defaultMessage: 'ES|QL view',
+});
+
+const BUILDER_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.legend', {
+  defaultMessage: 'Edit mode selection',
+});
+
+const BUILDER_MODE_OPTIONS = [
+  { id: 'builder', label: BUILDER_VIEW_LABEL, iconType: 'table' },
+  { id: 'esql', label: ESQL_VIEW_LABEL, iconType: 'kqlFunction' },
 ];
 
-const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
-  if (mode === 'clone') return CLONE_TITLE;
-  if (mode === 'edit') return EDIT_TITLE;
-  return CREATE_TITLE;
+const EDIT_MODE_OPTIONS = [
+  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
+  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'code' },
+];
+
+const getQuerySandboxTitle = (isBuilderMode: boolean) =>
+  isBuilderMode
+    ? i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.builderContextualTitle', {
+        defaultMessage: 'Query sandbox: Preview results',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.editorContextualTitle', {
+        defaultMessage: 'Query sandbox: Edit queries',
+      });
+
+const getFlyoutTitle = ({
+  mode,
+  builderType,
+  ruleName,
+}: {
+  mode: ComposeDiscoverMode;
+  builderType?: string;
+  ruleName?: string;
+}): string => {
+  if (mode === 'clone') {
+    return CLONE_TITLE;
+  }
+  if (mode === 'edit') {
+    const trimmedName = ruleName?.trim();
+    if (!trimmedName) {
+      return EDIT_RULE_FALLBACK_TITLE;
+    }
+    return i18n.translate('xpack.alertingV2.composeDiscover.flyout.editNamedTitleLabel', {
+      defaultMessage: 'Edit {ruleName}',
+      values: { ruleName: trimmedName },
+    });
+  }
+  if (builderType) {
+    return RULE_BUILDER_REGISTRY[builderType]?.createFlyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
+  }
+  return CREATE_ESQL_TITLE;
 };
 
-// These hooks live in the plugin, not the package — imported via the plugin's hook layer
-// when this flyout is rendered in the rules list page.
-// For now they are passed as props to keep the package boundary clean.
+/*
+ * These hooks live in the plugin, not the package — imported via the plugin's hook layer
+ * when this flyout is rendered in the rules list page.
+ * For now they are passed as props to keep the package boundary clean.
+ */
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
@@ -127,8 +235,16 @@ export interface ComposeDiscoverFlyoutProps {
     payload: ReturnType<typeof composeFormToCreateRequest>,
     notifications?: RuleNotificationsValue
   ) => void;
-  /** Called with id + update payload when the user submits in edit mode. */
-  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
+  /**
+   * Called with id + update payload when the user submits in edit mode. When the user
+   * configures simple actions, `notifications` carries the captured action draft list so
+   * the caller can create linked action policies; otherwise it is `undefined`.
+   */
+  onUpdateRule?: (
+    id: string,
+    payload: ReturnType<typeof composeFormToUpdateRequest>,
+    notifications?: RuleNotificationsValue
+  ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -137,10 +253,38 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /** Callback to switch from builder mode to ES|QL mode. */
+  onSwitchToEsql?: () => void;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 const YAML_PARSE_DEBOUNCE_OPTIONS = { wait: 300 } as const;
+
+const composeDiscoverYamlFlyoutBodyCss = css`
+  ${euiFullHeight()}
+  .euiFlyoutBody__overflow {
+    ${euiFullHeight()}
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+`;
+
+const flyoutTitleCss = css`
+  min-width: 0;
+`;
+
+const flyoutTitleTextCss = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
   if (stepIndex < currentStep) return 'complete';
@@ -154,7 +298,9 @@ const EMPTY_FORM_VALUES: FormValues = {
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'composed', base: '', breach: { segment: '' } },
+  recoveryStrategy: 'no_breach',
   grouping: undefined,
+  noDataStrategy: DEFAULT_NO_DATA_STRATEGY,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -177,6 +323,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  onSwitchToEsql,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -188,11 +335,8 @@ export function ComposeDiscoverFlyout({
    */
   const baseServices = services;
 
-  const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
-  const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
 
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
@@ -209,23 +353,56 @@ export function ComposeDiscoverFlyout({
     [initialQuery, inlineResult.query]
   );
 
-  const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
+  const isDiscoverQueryPopulated = Boolean(
+    discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
+  );
+  const isRuleQueryPopulated = Boolean(
+    initialMapped?.query && getBreachQuery(initialMapped.query).trim()
+  );
 
-  const [uiState, dispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'edit' : mode,
+  const [uiState, rawDispatch] = useComposeDiscoverState({
+    mode,
     initialKind,
-    initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
-    isBuilderMode,
-    isQueryPrePopulated: isDiscoverQueryComplete,
+    isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
   });
+
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  /* Wraps rawDispatch to snapshot the focused trigger before the sandbox opens so focus can be restored when it closes. */
+  const dispatch = useCallback(
+    (action: ComposeDiscoverAction) => {
+      if (!uiState.childOpen) {
+        lastFocusedRef.current = document.activeElement as HTMLElement;
+      }
+      rawDispatch(action);
+    },
+    [rawDispatch, uiState.childOpen]
+  );
+
+  const wasChildOpenRef = useRef(uiState.childOpen);
+  useEffect(() => {
+    if (wasChildOpenRef.current && !uiState.childOpen) {
+      const raf = requestAnimationFrame(() => lastFocusedRef.current?.focus());
+      wasChildOpenRef.current = uiState.childOpen;
+      return () => cancelAnimationFrame(raf);
+    }
+    wasChildOpenRef.current = uiState.childOpen;
+  }, [uiState.childOpen]);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
+  const [initialParsedState] = useState<BuilderState | null>(() => {
+    if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
+    return parseDiscoverQueryForBuilder(inlineResult.query);
+  });
+
+  const builderParsedFromDiscover = initialParsedState !== null;
+
   const [builderState, setBuilderState] = useState<BuilderState>(() => {
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
+    if (initialParsedState) return initialParsedState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });
@@ -248,53 +425,66 @@ export function ComposeDiscoverFlyout({
       }
       return mapped;
     }
-    if (initialQuery !== undefined) {
+    const shouldSeedFromDiscover =
+      initialQuery !== undefined && (!builderType || builderParsedFromDiscover);
+    if (shouldSeedFromDiscover) {
       return {
         ...EMPTY_FORM_VALUES,
         query: discoverComposedQuery ?? discoverQueryToComposed(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery]);
+  }, [rule, mode, initialQuery, discoverComposedQuery, builderType, builderParsedFromDiscover]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
-  // EuiFlyout with session="start" uses EUI's managed flyout system, which
-  // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
-  // our onClose callback for EUI-managed close paths (X, ESC, outside click).
-  // By the time handleRequestClose runs, the flyout is already unregistered
-  // from the manager. Incrementing the key forces React to re-mount the
-  // EuiFlyout, re-registering it with the manager. The Cancel button doesn't
-  // go through closeAllFlyouts(), so no remount is needed for that path.
-  // Form state is preserved because FormProvider sits above the flyout.
+  /*
+   * EuiFlyout with session="start" uses EUI's managed flyout system, which
+   * calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
+   * our onClose callback for EUI-managed close paths (X, ESC, outside click).
+   * By the time handleRequestClose runs, the flyout is already unregistered
+   * from the manager. Incrementing the key forces React to re-mount the
+   * EuiFlyout, re-registering it with the manager. The Cancel button doesn't
+   * go through closeAllFlyouts(), so no remount is needed for that path.
+   * Form state is preserved because FormProvider sits above the flyout.
+   */
   const [flyoutKey, setFlyoutKey] = useState(0);
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
 
-  // methods.reset() (used by YAML sync and mode-toggle) clears isDirty because
-  // it establishes new default values. Two extra refs compensate:
-  // - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
-  // - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
-  //   editing still shows the confirmation dialog. Intentionally sticky for the
-  //   flyout's lifetime — resets only on unmount (close/discard).
+  /*
+   * methods.reset() (used by YAML sync and mode-toggle) clears isDirty because
+   * it establishes new default values. Two extra refs compensate:
+   * - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
+   * - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
+   *   editing still shows the confirmation dialog. Intentionally sticky for the
+   *   flyout's lifetime — resets only on unmount (close/discard).
+   */
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
 
-  // recoveryType lives in uiState (not RHF), so toggling it doesn't mark
-  // the form dirty. Track the initial value to detect user changes.
-  const initialRecoveryTypeRef = useRef(hasInitialCustomRecovery ? 'custom' : 'default');
-
-  // Tracks whether the close was triggered by the Cancel button ('button')
-  // or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
-  // EUI path calls closeAllFlyouts() which unregisters the flyout and
-  // requires a flyoutKey remount.
+  /*
+   * Tracks whether the close was triggered by the Cancel button ('button')
+   * or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
+   * EUI path calls closeAllFlyouts() which unregisters the flyout and
+   * requires a flyoutKey remount.
+   */
   const closeSourceRef = useRef<'button' | 'eui'>('eui');
 
-  // After "Continue editing" on the EUI-managed path, the flyoutKey remount
-  // cascade-closes the sandbox. This ref tells the subsequent effect whether
-  // to re-dispatch OPEN_CHILD to restore it.
+  /*
+   * After "Continue editing" on the EUI-managed path, the flyoutKey remount
+   * cascade-closes the sandbox. This ref tells the subsequent effect whether
+   * to re-dispatch OPEN_CHILD to restore it.
+   */
   const reopenChildRef = useRef(false);
+
+  /*
+   * True after ENABLE_MANUAL_SPLIT until the user Applies, merges back to unified,
+   * or closes the sandbox — used to revert manual split mode when a draft split
+   * is discarded on close without Apply.
+   */
+  const manualSplitUncommittedRef = useRef(false);
 
   const prevExternalQueryRef = useRef<
     { query: string | undefined; esqlVariables: ESQLControlVariable[] | undefined } | undefined
@@ -303,13 +493,12 @@ export function ComposeDiscoverFlyout({
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
       yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
-    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
       setIsConfirmCloseVisible(true);
     } else {
       onClose();
     }
-  }, [onClose, uiState.recoveryType]);
+  }, [onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
@@ -320,9 +509,11 @@ export function ComposeDiscoverFlyout({
   const handleCancelDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
     if (closeSourceRef.current === 'eui') {
-      // EUI-managed close already called closeAllFlyouts() — remount to
-      // re-register the flyout with the manager, and reopen the sandbox
-      // if it was cascade-closed.
+      /*
+       * EUI-managed close already called closeAllFlyouts() — remount to
+       * re-register the flyout with the manager, and reopen the sandbox
+       * if it was cascade-closed.
+       */
       reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
       setFlyoutKey((k) => k + 1);
     }
@@ -336,14 +527,30 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  const watchedRuleName = useWatch({ control: methods.control, name: 'metadata.name' });
+  /*
+   * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
+   * with it, the effect re-fires on its own output and reverts the user's in-progress
+   * sandbox selection back to the committed form value (#281806).
+   */
   useEffect(() => {
-    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+    if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);
     }
-  }, [watchedTimeField, sandboxTimeField]);
+  }, [watchedTimeField]);
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const hasCustomRecovery = watchedRecoveryStrategy === 'query';
+  const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
+
+  const isFormStateNonRepresentable = isNonRepresentableFormState({
+    kind: isAlert ? 'alert' : 'signal',
+    query: watchedQuery,
+    recoveryStrategy: watchedRecoveryStrategy,
+    noDataStrategy: watchedNoDataStrategy,
+  });
 
   const timeFieldResolutionQuery = useMemo(
     () =>
@@ -369,10 +576,13 @@ export function ComposeDiscoverFlyout({
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
+    search: baseServices.data.search.search,
   });
 
-  // Gate sandbox autoRun on the time field the sandbox actually executes with — not
-  // only the form value, which can lead autoRun by one render.
+  /*
+   * Gate sandbox autoRun on the time field the sandbox actually executes with — not
+   * only the form value, which can lead autoRun by one render.
+   */
   const sandboxIsTimeFieldResolved = useMemo(
     () =>
       isTimeFieldResolved && timeFieldOptions.some((option) => option.value === sandboxTimeField),
@@ -381,6 +591,10 @@ export function ComposeDiscoverFlyout({
 
   useEffect(() => {
     if (rule || initialQuery === undefined) {
+      return;
+    }
+
+    if (builderType && !builderParsedFromDiscover) {
       return;
     }
 
@@ -400,9 +614,18 @@ export function ComposeDiscoverFlyout({
     methods.reset({ ...methods.getValues(), query: composedQuery });
     setSandboxQuery(composedQuery);
     dispatch({
-      type: composedQuery.breach.segment.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
+      type: getBreachQuery(composedQuery).trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
     });
-  }, [initialQuery, esqlVariables, inlineResult.query, rule, methods, dispatch]);
+  }, [
+    initialQuery,
+    esqlVariables,
+    inlineResult.query,
+    rule,
+    methods,
+    dispatch,
+    builderType,
+    builderParsedFromDiscover,
+  ]);
 
   const syncSandbox = useCallback(() => {
     setSandboxQuery(methods.getValues('query'));
@@ -429,41 +652,48 @@ export function ComposeDiscoverFlyout({
    * are immune to React Strict Mode double-mount disposal.
    */
   const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
-  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
-  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
+  const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
+    useSandboxEditorMounts({ baseQuery: sandboxBase, services: baseServices });
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
 
-  // After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
-  // the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
-  // Read isAlert via ref so this effect only fires on flyoutKey changes,
-  // not on kind toggles (where reopenChildRef is always false anyway).
+  /*
+   * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
+   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening on the
+   * tab it would default to for the current step/recovery/manual-split state.
+   * isAlert is read via ref so this effect doesn't fire on kind toggles; the
+   * body is gated by reopenChildRef, so extra runs from other deps are no-ops.
+   */
   useEffect(() => {
     if (reopenChildRef.current) {
       reopenChildRef.current = false;
-      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+      dispatch({
+        type: 'OPEN_CHILD',
+        isAlert: isAlertRef.current,
+        focusedTab: getDefaultOpenTab(
+          isAlertRef.current,
+          uiState.step,
+          hasCustomRecovery,
+          uiState.manualSplitEnabled
+        ),
+      });
     }
-  }, [flyoutKey, dispatch]);
+  }, [flyoutKey, dispatch, hasCustomRecovery, uiState.step, uiState.manualSplitEnabled]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
-        const { base, alertBlock } = splitQuery(full);
-        const composed: RuleQuery = {
-          format: 'composed',
-          base,
-          breach: { segment: alertBlock },
-        };
-        setSandboxQuery(composed);
-        methods.setValue('query', composed, { shouldDirty: true });
+        /*
+         * A query with no alert condition stays composed with an empty breach
+         * segment (rejected at save); a real split yields base + segment.
+         */
+        const alertQuery = splitResultToRuleQuery(full).query;
+        setSandboxQuery(alertQuery);
+        methods.setValue('query', alertQuery, { shouldDirty: true });
+        methods.setValue('noDataStrategy', DEFAULT_NO_DATA_STRATEGY, { shouldDirty: true });
+        methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
@@ -473,6 +703,8 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
+        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
+        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
@@ -490,8 +722,9 @@ export function ComposeDiscoverFlyout({
   }, [isBuilderMode, methods]);
 
   const handleRecoveryTypeChange = useCallback(
-    (type: RecoveryType) => {
-      if (type === 'custom') {
+    (strategy: RecoveryStrategy) => {
+      methods.setValue('recoveryStrategy', strategy, { shouldDirty: true });
+      if (strategy === 'query') {
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.recovery?.segment ?? '';
@@ -511,9 +744,14 @@ export function ComposeDiscoverFlyout({
             },
           };
         });
+        if (!isBuilderMode) {
+          dispatch({ type: 'OPEN_CHILD', isAlert, focusedTab: 'recovery' });
+        }
       } else {
-        // (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
-        // query from surviving a type change even when the sandbox is still open.
+        /*
+         * (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
+         * query from surviving a type change even when the sandbox is still open.
+         */
         setSandboxQuery((q) => {
           if (q.format === 'composed') {
             const { recovery: _recovery, ...rest } = q;
@@ -537,19 +775,21 @@ export function ComposeDiscoverFlyout({
           const { recovery: _, ...rest } = builderState as Record<string, unknown>;
           setBuilderState(rest);
         }
-        // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
-        // overwriting the recovery type change by writing the stale sandboxQuery back.
-        // Skip syncSandbox here: (a) already set the clean state directly, and
-        // calling syncSandbox when !queryCommitted could re-introduce a stale recovery.
+        /*
+         * (b) Close sandbox in non-YAML mode — prevents a pending Apply from
+         * overwriting the recovery type change by writing the stale sandboxQuery back.
+         * Skip syncSandbox here: (a) already set the clean state directly, and
+         * calling syncSandbox when !queryCommitted could re-introduce a stale recovery.
+         */
         if (uiState.childOpen && !uiState.yamlMode) {
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
     [
       dispatch,
       methods,
+      isAlert,
       isBuilderMode,
       builderState,
       uiState.queryCommitted,
@@ -560,7 +800,9 @@ export function ComposeDiscoverFlyout({
 
   const isCreate = mode === 'create' || mode === 'clone';
   const isEditing = mode === 'edit';
-  const title = getFlyoutTitle(mode);
+  /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
+  const supportsUnifiedEditorToggle = isCreate || isEditing;
+  const title = getFlyoutTitle({ mode, builderType, ruleName: watchedRuleName });
 
   const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
@@ -580,8 +822,10 @@ export function ComposeDiscoverFlyout({
   // disable the Save button while the buffer is invalid.
   const [yamlHasErrors, setYamlHasErrors] = useState(false);
 
-  // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF
-  // and mirrors the composed query into the sandbox editing buffer.
+  /*
+   * Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF
+   * and mirrors the composed query into the sandbox editing buffer.
+   */
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
@@ -610,6 +854,10 @@ export function ComposeDiscoverFlyout({
       if (forceYamlMode) return;
 
       if (enabled) {
+        manualSplitUncommittedRef.current = false;
+        if (isDirtyRef.current) {
+          hasBeenEditedRef.current = true;
+        }
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
@@ -633,37 +881,89 @@ export function ComposeDiscoverFlyout({
             hasBeenEditedRef.current = true;
           }
         }
-        // No apply on parse-failure path: the debounced parse always calls
-        // applyYamlValuesToFormAndSandbox together, so RHF and sandbox state are already in
-        // sync at the last valid parse state. The current yamlText simply can't be applied.
+
+        const currentValues = methods.getValues();
+        if (isNonRepresentableFormState(currentValues)) {
+          /* Stay in YAML mode — the Form view has no editor for this shape. */
+          return;
+        }
+
+        /* Make sure step is realigned when switching back to the rule form from the yaml form */
+        const currentKindIsAlert = currentValues.kind === 'alert';
+        const stepCount = (
+          builderType ? getBuilderStepIds(currentKindIsAlert) : getStepIds(currentKindIsAlert)
+        ).length;
+        if (uiState.step > stepCount - 1) {
+          dispatch({ type: 'SET_STEP', step: stepCount - 1 });
+        }
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
+    [
+      cancelYamlParse,
+      methods,
+      yamlText,
+      applyYamlValuesToFormAndSandbox,
+      dispatch,
+      forceYamlMode,
+      builderType,
+      uiState.step,
+    ]
   );
 
   const handleSandboxApply = useCallback(() => {
-    methods.setValue('query', sandboxQuery, { shouldDirty: true });
+    /*
+     * Create/edit/clone default to a single unified editor on the Alert Condition
+     * step — no base/alert tabs. On Apply, derive the base query and alert condition
+     * from that unified text via the heuristic split.
+     * When the user has opted in to manual split, Apply commits the already-separated
+     * base/alert verbatim without running the heuristic.
+     */
+    const shouldRunHeuristicSplit =
+      currentStep?.id === 'alertCondition' &&
+      !uiState.yamlMode &&
+      isAlert &&
+      !uiState.manualSplitEnabled;
+
+    let queryToCommit: RuleQuery = sandboxQuery;
+    if (shouldRunHeuristicSplit) {
+      const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
+      queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
+    }
+    /*
+     * Manual split with an empty alert condition stays composed + empty segment —
+     * the request mapper omits the breach block at save; do not coerce to standalone.
+     */
+    setSandboxQuery(queryToCommit);
+
+    methods.setValue('query', queryToCommit, { shouldDirty: true });
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       cancelYamlParse();
-      const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
+      const current = { ...methods.getValues(), query: queryToCommit, timeField: sandboxTimeField };
       const serialized = serializeFormToYaml(current);
       setYamlText(serialized);
       yamlBaselineRef.current = serialized;
     }
     dispatch({ type: 'COMMIT_QUERY' });
+    manualSplitUncommittedRef.current = false;
     if (!uiState.yamlMode) {
       dispatch({ type: 'CLOSE_CHILD' });
     }
-  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch, cancelYamlParse]);
+  }, [
+    sandboxQuery,
+    sandboxTimeField,
+    currentStep?.id,
+    uiState.yamlMode,
+    uiState.manualSplitEnabled,
+    isAlert,
+    methods,
+    dispatch,
+    cancelYamlParse,
+  ]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
-      return;
-    }
-    const query = values.query;
-    if (values.kind === 'alert' && query.format === 'composed' && !query.breach.segment.trim()) {
       return;
     }
     if (builderType) {
@@ -672,15 +972,29 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
+
+    let submitted = values;
+    if (values.notifications?.workflows?.length && !values.metadata.tags?.length) {
+      const tags = [buildRuleNotificationTag(values.metadata.name)];
+      methods.setValue('metadata.tags', tags, { shouldDirty: true });
+      submitted = { ...values, metadata: { ...values.metadata, tags } };
+    }
+
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      onCreateRule(composeFormToCreateRequest(submitted, builderType), submitted.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
+      onUpdateRule(
+        ruleId,
+        composeFormToUpdateRequest(submitted, builderType),
+        submitted.notifications
+      );
     }
   });
 
-  // YAML "Save" — flush any pending debounce into RHF, then run the shared
-  // handleSubmit path so validation + submission use a single pipeline.
+  /*
+   * YAML "Save" — flush any pending debounce into RHF, then run the shared
+   * handleSubmit path so validation + submission use a single pipeline.
+   */
   const handleYamlSave = useCallback(() => {
     if (hasValidationErrors || yamlHasErrors) {
       return;
@@ -710,17 +1024,18 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
-    dispatch({ type: 'GO_NEXT', isAlert });
+    dispatch({ type: 'GO_NEXT', isAlert, isBuilderMode });
   }, [
     hasValidationErrors,
     currentStep,
     methods,
     uiState,
     isAlert,
+    isBuilderMode,
     dispatch,
     baseServices,
     builderState,
@@ -730,8 +1045,8 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     handleSubmit();
@@ -745,12 +1060,26 @@ export function ComposeDiscoverFlyout({
     hasValidationErrors,
   ]);
 
+  const isBuilderStepValid = useMemo(() => {
+    if (!currentStep || !isBuilderConditionStepId(currentStep.id)) {
+      return true;
+    }
+    const result = evaluateStepValidation(
+      currentStep,
+      methods,
+      uiState,
+      baseServices,
+      builderState
+    );
+    return typeof result === 'boolean' ? result : true;
+  }, [currentStep, methods, uiState, baseServices, builderState]);
+
   const validationCallout = hasValidationErrors ? (
     <>
       <EuiCallOut
         announceOnMount
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="ruleV2FlyoutValidationErrors"
         title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
           defaultMessage: 'Resolve issues before saving',
@@ -768,19 +1097,60 @@ export function ComposeDiscoverFlyout({
     </>
   ) : null;
 
-  // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-  // Follow schema decisions in #268984 — if recoveryType is superseded by a
-  // field on RuleQuery itself, gate this on query shape instead.
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
     if (!uiState.yamlMode) {
       return getSandboxTabs(isAlert, {
         step: uiState.step,
-        recoveryType: uiState.recoveryType,
+        hasCustomRecovery,
+        manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
+    /*
+     * In YAML mode the sandbox stays open (and is forced open for non-representable
+     * rules). A standalone query can't be represented as base/alert tabs, so it uses
+     * the single unified editor; composed queries keep the split tabs.
+     */
     if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
-  }, [uiState.yamlMode, uiState.recoveryType, uiState.step, sandboxQuery.format, isAlert]);
+    return hasCustomRecovery ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+  }, [
+    uiState.yamlMode,
+    hasCustomRecovery,
+    uiState.step,
+    uiState.manualSplitEnabled,
+    sandboxQuery.format,
+    isAlert,
+  ]);
+
+  const isAlertConditionStep = currentStep?.id === 'alertCondition';
+
+  /*
+   * Help text shown above the editor in the create/edit alert flow.
+   * - Unified (default): describes the automatic split on Apply.
+   * - Manual split: explains that automatic splitting is disabled and tabs are separate.
+   * Alert Condition step only — not shown on recovery or later steps.
+   */
+  const sandboxHelpText =
+    isAlert &&
+    !isBuilderMode &&
+    !uiState.yamlMode &&
+    supportsUnifiedEditorToggle &&
+    isAlertConditionStep ? (
+      uiState.manualSplitEnabled ? (
+        <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
+            defaultMessage="Define the base query and alert condition separately. Automatic query splitting is disabled in this mode."
+          />
+        </EuiText>
+      ) : (
+        <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
+            defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
+          />
+        </EuiText>
+      )
+    ) : undefined;
 
   const handleSandboxTabChange = useCallback(
     (tab: QueryTab) => {
@@ -795,10 +1165,90 @@ export function ComposeDiscoverFlyout({
     [dispatch, sandboxQuery, sandboxTabs]
   );
 
+  /*
+   * Opt in to manual split from the sandbox header button.
+   * Pre-populates base/alert when the heuristic can split; otherwise puts the
+   * entire unified query into the base tab with an empty alert segment (e.g.
+   * leading-WHERE-only pipelines where the heuristic cannot isolate a base).
+   */
+  const handleEnableManualSplit = useCallback(() => {
+    setSandboxQuery(enterManualSplitQuery(sandboxQuery));
+    manualSplitUncommittedRef.current = true;
+    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  /*
+   * Opt back in to unified editor from the sandbox header button.
+   * Recombines base+alert into one pipeline and re-enables auto-split on Apply.
+   */
+  const handleDisableManualSplit = useCallback(() => {
+    setSandboxQuery(exitManualSplitQuery(sandboxQuery));
+    manualSplitUncommittedRef.current = false;
+    dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  const handleSandboxClose = useCallback(() => {
+    if (manualSplitUncommittedRef.current) {
+      // Clear manual split before syncing so the next render sees manualSplitEnabled: false.
+      dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+      manualSplitUncommittedRef.current = false;
+    }
+    syncSandbox();
+    dispatch({ type: 'CLOSE_CHILD' });
+  }, [syncSandbox, dispatch]);
+
+  /*
+   * Settings (gear) menu rendered in the sandbox flyout header.
+   * Alert Condition step only — not on recovery editing.
+   */
+  const sandboxHeaderActions = useMemo(() => {
+    if (
+      isBuilderMode ||
+      uiState.yamlMode ||
+      !supportsUnifiedEditorToggle ||
+      !isAlert ||
+      currentStep?.id !== 'alertCondition'
+    ) {
+      return undefined;
+    }
+    return (
+      <SandboxSettingsMenu
+        manualSplitEnabled={uiState.manualSplitEnabled}
+        onEnableManualSplit={handleEnableManualSplit}
+        onDisableManualSplit={handleDisableManualSplit}
+      />
+    );
+  }, [
+    isBuilderMode,
+    uiState.yamlMode,
+    supportsUnifiedEditorToggle,
+    uiState.manualSplitEnabled,
+    isAlert,
+    currentStep?.id,
+    handleEnableManualSplit,
+    handleDisableManualSplit,
+  ]);
+
+  // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
+  // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
+  const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
+  /*
+   * Only traps the toggle while already in YAML mode — a non-representable
+   * form state reached from Form mode must still be able to open YAML to fix it.
+   */
+  const yamlLockedByFormState = uiState.yamlMode && isFormStateNonRepresentable;
+  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked || yamlLockedByFormState;
+
+  const getModeToggleTooltip = (): string | undefined => {
+    if (forceYamlMode || yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
+    if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
+    return undefined;
+  };
+
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+        <>
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
@@ -806,11 +1256,15 @@ export function ComposeDiscoverFlyout({
             historyKey={historyKey}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={480}
+            size={540}
+            minWidth={480}
+            resizable
           >
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-                <h2>{title}</h2>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID} css={flyoutTitleCss}>
+                <h2 title={title} css={flyoutTitleTextCss}>
+                  {title}
+                </h2>
               </EuiTitle>
 
               <EuiFlexGroup
@@ -837,51 +1291,133 @@ export function ComposeDiscoverFlyout({
                     />
                   </EuiFlexItem>
                 )}
+                {isBuilderMode && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="chevronLimitLeft"
+                          isDisabled={uiState.childOpen}
+                          onClick={() =>
+                            dispatch({
+                              type: 'OPEN_CHILD_FOR_STEP',
+                              step: uiState.step,
+                              isAlert,
+                              focusedTab: getDefaultOpenTab(
+                                isAlert,
+                                uiState.step,
+                                hasCustomRecovery,
+                                uiState.manualSplitEnabled
+                              ),
+                            })
+                          }
+                          data-test-subj="ruleBuilderOpenPreview"
+                        >
+                          {PREVIEW_BUTTON_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {isEditing && onSwitchToEsql ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={BUILDER_MODE_LEGEND}
+                            options={BUILDER_MODE_OPTIONS}
+                            idSelected="builder"
+                            onChange={(id) => {
+                              if (id === 'esql') onSwitchToEsql();
+                            }}
+                            isIconOnly
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverSwitchToEsql"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
                 {!isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
-                      <EuiButtonGroup
-                        legend={EDIT_MODE_LEGEND}
-                        options={EDIT_MODE_OPTIONS}
-                        idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                        onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                        isIconOnly
-                        isDisabled={forceYamlMode}
-                        buttonSize="compressed"
-                        data-test-subj="composeDiscoverEditModeToggle"
-                      />
-                    </EuiToolTip>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      {uiState.yamlMode && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            color="text"
+                            iconType="chevronLimitLeft"
+                            isDisabled={uiState.childOpen}
+                            onClick={() =>
+                              dispatch({
+                                type: 'OPEN_CHILD',
+                                isAlert,
+                                focusedTab: getDefaultOpenTab(
+                                  isAlert,
+                                  uiState.step,
+                                  hasCustomRecovery,
+                                  uiState.manualSplitEnabled
+                                ),
+                              })
+                            }
+                            data-test-subj="composeDiscoverYamlQuerySandbox"
+                          >
+                            {QUERY_SANDBOX_LABEL}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={getModeToggleTooltip()}>
+                          <EuiButtonGroup
+                            legend={EDIT_MODE_LEGEND}
+                            options={EDIT_MODE_OPTIONS}
+                            idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                            onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                            isIconOnly
+                            isDisabled={modeToggleDisabled}
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverEditModeToggle"
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
             </EuiFlyoutHeader>
 
-            <EuiFlyoutBody>
-              {validationCallout}
+            <EuiFlyoutBody css={uiState.yamlMode ? composeDiscoverYamlFlyoutBodyCss : undefined}>
               {uiState.yamlMode ? (
-                <React.Suspense fallback={null}>
-                  <LazyYamlRuleForm
-                    services={baseServices}
-                    yamlText={yamlText}
-                    setYamlText={handleSetYamlText}
-                    onBlurSync={handleBlurSync}
-                    onValidate={setYamlHasErrors}
-                    isSubmitting={isSaving}
-                  />
-                </React.Suspense>
+                <>
+                  {validationCallout}
+                  <React.Suspense fallback={null}>
+                    <LazyYamlRuleForm
+                      services={baseServices}
+                      yamlText={yamlText}
+                      setYamlText={handleSetYamlText}
+                      onBlurSync={handleBlurSync}
+                      onValidate={setYamlHasErrors}
+                      isSubmitting={isSaving}
+                      fullHeight
+                    />
+                  </React.Suspense>
+                </>
               ) : (
-                <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
-                  <ComposeDiscoverForm
-                    state={uiState}
-                    dispatch={dispatch}
-                    services={baseServices}
-                    onRecoveryTypeChange={handleRecoveryTypeChange}
-                    onKindChange={handleKindChange}
-                    isEditing={isEditing}
-                    ruleId={ruleId}
-                    builderType={builderType}
-                  />
-                </BuilderStateProvider>
+                <>
+                  {validationCallout}
+                  <BuilderStateProvider
+                    builderState={builderState}
+                    setBuilderState={setBuilderState}
+                  >
+                    <ComposeDiscoverForm
+                      state={uiState}
+                      dispatch={dispatch}
+                      services={baseServices}
+                      onRecoveryTypeChange={handleRecoveryTypeChange}
+                      onKindChange={handleKindChange}
+                      isEditing={isEditing}
+                      builderType={builderType}
+                    />
+                  </BuilderStateProvider>
+                </>
               )}
             </EuiFlyoutBody>
 
@@ -893,12 +1429,12 @@ export function ComposeDiscoverFlyout({
               isCreate={isCreate}
               hasValidationErrors={hasValidationErrors}
               yamlHasErrors={yamlHasErrors}
+              isBuilderMode={isBuilderMode}
+              isBuilderStepValid={isBuilderStepValid}
               isSaving={isSaving}
               onNext={handleNext}
               onFinalSubmit={handleFinalSubmit}
               onYamlSave={handleYamlSave}
-              onRequestClose={handleRequestClose}
-              closeSourceRef={closeSourceRef}
             />
 
             {uiState.childOpen && (
@@ -906,7 +1442,7 @@ export function ComposeDiscoverFlyout({
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
                 tabs={sandboxTabs}
-                timeField={sandboxTimeField || '@timestamp'}
+                timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
                 timeFieldOptions={timeFieldOptions}
                 isTimeFieldResolved={sandboxIsTimeFieldResolved}
@@ -916,18 +1452,20 @@ export function ComposeDiscoverFlyout({
                 onTabChange={handleSandboxTabChange}
                 onAlertEditorMount={onAlertEditorMount}
                 onRecoveryEditorMount={onRecoveryEditorMount}
-                onClose={() => {
-                  syncSandbox();
-                  dispatch({ type: 'CLOSE_CHILD' });
-                }}
+                onBaseEditorMount={onBaseEditorMount}
+                onSingleEditorMount={onSingleEditorMount}
+                onClose={handleSandboxClose}
+                helpText={sandboxHelpText}
+                headerActions={sandboxHeaderActions}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
+                title={getQuerySandboxTitle(isBuilderMode)}
               />
             )}
           </EuiFlyout>
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </ComposeDiscoverTimeFieldContextProvider>
+        </>
       </FormProvider>
     </RuleFormProvider>
   );

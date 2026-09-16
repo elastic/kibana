@@ -339,4 +339,36 @@ describe('sendUpgradeAgentsActions kuery path — cheap count and sync/async bra
     expect(mockUpgradeBatch).toHaveBeenCalled();
     expect(mockUpgradeActionRunner).not.toHaveBeenCalled();
   });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient } = upgradeMocks;
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 17, page: 1, perPage: 0 });
+
+    const result = await sendUpgradeAgentsActions(soClient, esClient, {
+      kuery: 'status:online',
+      version: '8.5.0',
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 17 });
+    expect(mockUpgradeBatch).not.toHaveBeenCalled();
+    expect(mockUpgradeActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient } = upgradeMocks;
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([{ id: 'a1' } as Agent, { notFound: true, id: 'missing' }] as any);
+
+    const result = await sendUpgradeAgentsActions(soClient, esClient, {
+      agentIds: ['a1', 'missing'],
+      version: '8.5.0',
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 1 });
+    expect(mockUpgradeBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
+  });
 });

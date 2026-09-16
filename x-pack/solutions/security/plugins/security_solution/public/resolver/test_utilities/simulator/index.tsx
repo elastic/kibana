@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AnyAction, Store } from 'redux';
+import type { AnyAction, Store } from 'redux-v4';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
@@ -112,16 +112,6 @@ export class Simulator {
     this.store = createMockStore(
       {
         ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            analyzer: {
-              ...mockGlobalState.sourcerer.sourcererScopes.default,
-              selectedPatterns: indices,
-            },
-          },
-        },
         analyzer: {
           [resolverComponentInstanceID]: EMPTY_RESOLVER,
         },

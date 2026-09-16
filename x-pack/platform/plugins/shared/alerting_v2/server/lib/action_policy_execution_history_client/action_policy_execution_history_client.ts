@@ -12,11 +12,11 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
-  type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
+  type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -27,33 +27,40 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
-import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
+import type { ResolvedSearchIds } from './build_execution_history_item';
+import {
+  collectIdsFromEvents,
+  buildExecutionHistoryItem,
+  type NameMaps,
+} from './build_execution_history_item';
 
-const TIME_WINDOW_HOURS = 24;
+// Default lower bound on the event timestamp when the caller does not pass an
+// explicit `start_date`.
+const DEFAULT_TIME_WINDOW_HOURS = 24;
+
+// Pagination defaults applied when the caller omits them
 const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
-
-// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
-// a single broad Action Policy can emit one event referencing thousands of rules.
-// Rule IDs over this cap render as the raw ID in the UI.
-const MAX_RULES_PER_LOOKUP = 1000;
 
 const SEARCH_ID_CAP = 500;
-const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
-export interface ListExecutionHistoryParams {
+// Cap the per-page name-lookup batch.
+const MAX_RULES_PER_NAME_LOOKUP = 1000;
+
+export interface ListExecutionHistoryArgs {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
-}
-
-export interface SearchMatchCounts {
-  policies: number;
-  rules: number;
-  cap: number;
+  episodeIds?: string[];
+  /**
+   * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
+   * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
+   */
+  startDate?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -64,26 +71,10 @@ export interface ListExecutionHistoryResult {
   searchMatches: SearchMatchCounts | null;
 }
 
-export interface CountNewEventsSinceParams {
-  request: KibanaRequest;
-  since: string;
-  search?: string;
-  outcome?: PolicyExecutionOutcomeFilter;
-}
-
-export interface CountNewEventsSinceResult {
-  count: number;
-}
-
-interface ResolvedSearchIds {
-  policyIds: string[];
-  ruleIds: string[];
-  hasMatches: boolean;
-  matches: SearchMatchCounts | null;
-}
-
 @injectable()
 export class ActionPolicyExecutionHistoryClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
@@ -92,69 +83,69 @@ export class ActionPolicyExecutionHistoryClient {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('executionHistory');
+  }
 
   public async listExecutionHistory({
     request,
     page = DEFAULT_PAGE,
-    perPage = DEFAULT_PER_PAGE,
+    perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
-    outcome = DEFAULT_OUTCOME_FILTER,
-  }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
-    const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    ruleIds,
+    outcome,
+    episodeIds,
+    startDate,
+  }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
+    const effectiveStartDate =
+      startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
+    const searchIsActive = search !== undefined && search.trim() !== '';
 
-    const searchIds = await this.resolveSearchIds(search);
+    const matchingSearchIds = await this.resolveSearchIds(search);
 
-    if (search !== undefined && !searchIds.hasMatches) {
-      return { items: [], page, perPage, totalEvents: 0, searchMatches: searchIds.matches };
+    if (searchIsActive && !matchingSearchIds.hasMatches) {
+      return {
+        items: [],
+        page,
+        perPage,
+        totalEvents: 0,
+        searchMatches: matchingSearchIds.matches,
+      };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
-      request,
       spaceId,
-      startDate,
+      startDate: effectiveStartDate,
       page,
       perPage,
-      outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
+      outcomes: outcome,
+      policyIds: matchingSearchIds.policyIds,
+      ruleIds: matchingSearchIds.ruleIds,
+      mandatoryRuleIds: ruleIds,
+      episodeIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
-    const items = result.events.flatMap((event) => denormalizeEvent(event, nameMaps));
+    const items = result.events
+      .map((event) =>
+        buildExecutionHistoryItem(
+          event,
+          nameMaps,
+          searchIsActive ? matchingSearchIds : undefined,
+          ruleIds
+        )
+      )
+      .filter((item): item is PolicyExecutionHistoryItem => item !== null);
 
     return {
       items,
       page: result.page,
       perPage: result.perPage,
       totalEvents: result.total,
-      searchMatches: searchIds.matches,
+      searchMatches: matchingSearchIds.matches,
     };
-  }
-
-  public async countNewEventsSince({
-    request,
-    since,
-    search,
-    outcome = DEFAULT_OUTCOME_FILTER,
-  }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
-    const spaceId = this.spaces.spacesService.getSpaceId(request);
-
-    const searchIds = await this.resolveSearchIds(search);
-    if (search !== undefined && !searchIds.hasMatches) {
-      return { count: 0 };
-    }
-
-    return this.eventLogService.countActionPolicyExecutionEventsSince({
-      request,
-      spaceId,
-      since,
-      outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
-    });
   }
 
   private async resolveSearchIds(search: string | undefined): Promise<ResolvedSearchIds> {
@@ -167,9 +158,12 @@ export class ActionPolicyExecutionHistoryClient {
 
     const policies = this.unwrapFindResult(
       policiesRes,
-      'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED'
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED
     );
-    const rules = this.unwrapFindResult(rulesRes, 'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED');
+    const rules = this.unwrapFindResult(
+      rulesRes,
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED
+    );
 
     const policyIds = new Set<string>(policies.items.map((p) => p.id));
     const ruleIds = new Set<string>(rules.items.map((r) => r.id));
@@ -196,9 +190,18 @@ export class ActionPolicyExecutionHistoryClient {
       this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
-    const policies = this.unwrapArray(policiesRes, 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED');
-    const rules = this.unwrapArray(rulesRes, 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED');
-    const workflows = this.unwrapArray(workflowsRes, 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED');
+    const policies = this.unwrapArray(
+      policiesRes,
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_POLICY_LOOKUP_FAILED
+    );
+    const rules = this.unwrapArray(
+      rulesRes,
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_RULE_LOOKUP_FAILED
+    );
+    const workflows = this.unwrapArray(
+      workflowsRes,
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED
+    );
 
     return {
       policyNames: new Map(policies.map((p) => [p.id, p.name])),
@@ -207,20 +210,20 @@ export class ActionPolicyExecutionHistoryClient {
     };
   }
 
-  private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: string): T[] {
+  private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: AlertingV2LogCode): T[] {
     if (result.status === 'fulfilled') return result.value;
-    this.logFailure(result.reason, code);
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return [];
   }
 
   private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
     if (ruleIds.length === 0) return [];
 
-    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_LOOKUP);
+    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_NAME_LOOKUP);
 
     const response = await this.rulesClient.findRules({
       filter: this.buildRuleIdsFilter(cappedRuleIds),
-      perPage: MAX_RULES_PER_LOOKUP,
+      perPage: MAX_RULES_PER_NAME_LOOKUP,
     });
 
     return response.items;
@@ -234,22 +237,13 @@ export class ActionPolicyExecutionHistoryClient {
 
   private unwrapFindResult<T>(
     result: PromiseSettledResult<{ items: T[]; total: number }>,
-    code: string
+    code: AlertingV2LogCode
   ): { items: T[]; total: number } {
     if (result.status === 'fulfilled') return result.value;
-    this.logFailure(result.reason, code);
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return { items: [], total: 0 };
   }
-
-  private logFailure(reason: unknown, code: string): void {
-    const error = reason instanceof Error ? reason : new Error(String(reason));
-    this.logger.error({ error, code });
-  }
 }
-
-const toOutcomeForService = (
-  outcome: PolicyExecutionOutcomeFilter
-): PolicyExecutionOutcome | undefined => (outcome === 'all' ? undefined : outcome);
 
 // Only treat the search term as a candidate id when it looks like a UUID — Kibana saved
 // objects created via the API use UUIDs by default. Avoids polluting the KQL with ordinary

@@ -46,6 +46,8 @@ import {
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersions } from './model_versions/connector_model_versions';
+import { actionEncryptedRegistrationV3 } from './action_encryption';
+import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -121,19 +123,14 @@ export function setupSavedObjects(
         };
       },
     },
-    modelVersions: connectorModelVersions,
+    modelVersions: connectorModelVersions(encryptedSavedObjects),
   });
 
   // Encrypted attributes
-  // - `secrets` properties will be encrypted
+  // - `secrets` and inbound last-saver `apiKey` / `uiamApiKey` are encrypted
   // - `config` will be included in AAD
   // - everything else excluded from AAD
-  encryptedSavedObjects.registerType({
-    type: ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
-    enforceRandomId: false,
-  });
+  encryptedSavedObjects.registerType(actionEncryptedRegistrationV3);
 
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -209,19 +206,7 @@ export function setupSavedObjects(
     modelVersions: userConnectorTokenModelVersions,
   });
 
-  encryptedSavedObjects.registerType({
-    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['credentials']),
-    attributesToIncludeInAAD: new Set([
-      'profileUid',
-      'connectorId',
-      'credentialType',
-      'expiresAt',
-      'refreshTokenExpiresAt',
-      'createdAt',
-      'updatedAt',
-    ]),
-  });
+  encryptedSavedObjects.registerType(userConnectorTokenEncryptedRegistrationV2);
 
   savedObjects.registerType({
     name: OAUTH_STATE_SAVED_OBJECT_TYPE,

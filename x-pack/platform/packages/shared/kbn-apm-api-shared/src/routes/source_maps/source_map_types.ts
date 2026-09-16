@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const sourceMapRt = t.intersection([
-  t.type({
-    version: t.number,
-    sources: t.array(t.string),
-    mappings: t.string,
-  }),
-  t.partial({
-    names: t.array(t.string),
-    file: t.string,
-    sourceRoot: t.string,
-    sourcesContent: t.array(t.union([t.string, t.null])),
-  }),
-]);
+export const sourceMapSchema = z
+  .object({
+    version: z.number(),
+    sources: z.array(z.string()),
+    mappings: z.string(),
+  })
+  .extend({
+    names: z.array(z.string()).optional(),
+    file: z.string().optional(),
+    sourceRoot: z.string().optional(),
+    sourcesContent: z.array(z.union([z.string(), z.null()])).optional(),
+  });
 
-export type SourceMap = t.TypeOf<typeof sourceMapRt>;
+export type SourceMap = z.infer<typeof sourceMapSchema>;
 
 export interface ApmSourceMapArtifactBody {
   serviceName: string;

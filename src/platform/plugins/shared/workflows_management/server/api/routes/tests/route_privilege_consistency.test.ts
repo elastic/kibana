@@ -14,9 +14,6 @@ jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn(),
 }));
 jest.mock('../../../services/workflow_change_history_service');
-jest.mock('../../../lib/is_workflow_versioning_enabled', () => ({
-  readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
-}));
 
 import { errors } from '@elastic/elasticsearch';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -29,6 +26,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../../../common';
+import { config as pluginConfig } from '../../../config';
 import type { WorkflowsRouter } from '../../../types';
 import { WorkflowsManagementApi } from '../../workflows_management_api';
 import { WorkflowsService } from '../../workflows_management_service';
@@ -43,7 +41,10 @@ import { registerWorkflowRoutes } from '../workflows';
 interface CapturedRoute {
   method: string;
   path: string;
-  security: { authz: { requiredPrivileges: any[] } };
+  security: {
+    authc?: { enabled?: boolean };
+    authz?: { enabled?: boolean; requiredPrivileges?: any[] };
+  };
   handler: (...args: any[]) => Promise<any>;
 }
 
@@ -77,7 +78,17 @@ const PRIVILEGE_SCOPE: Record<string, PrivilegeScope> = {
     writes: [],
     delegates: ['actionsClient'],
   },
+  [WorkflowsManagementApiActions.readManaged]: {
+    reads: [WORKFLOWS_INDEX],
+    writes: [],
+    delegates: ['actionsClient'],
+  },
   [WorkflowsManagementApiActions.readExecution]: {
+    reads: [WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX],
+    writes: [],
+    delegates: ['eventLoggerService'],
+  },
+  [WorkflowsManagementApiActions.readManagedExecution]: {
     reads: [WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX],
     writes: [],
     delegates: ['eventLoggerService'],
@@ -134,12 +145,39 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   'POST:/api/workflows': [WORKFLOWS_INDEX],
   // Existence check before cancelAllActiveWorkflowExecutions (see WorkflowsManagementApi.cancelAllActiveWorkflowExecutions)
   'POST:/api/workflows/workflow/{workflowId}/executions/cancel': [WORKFLOWS_INDEX],
+  // Executing a persisted workflow loads its document to build the execution
+  // model. The definition is never returned to the caller (only an execution
+  // id), so running a workflow does not require the `read` privilege.
+  'POST:/api/workflows/workflow/{id}/run': [WORKFLOWS_INDEX],
+  'POST:/api/workflows/test': [WORKFLOWS_INDEX],
+  // Resume resolves the waiting `waitForInput` step (by run id) before claiming
+  // it — an internal lookup intrinsic to the resume action, not data exposed to
+  // the caller. See WorkflowsManagementApi.resumeWorkflowExecution →
+  // WorkflowExecutionQueryService.getWaitingStepExecutionId.
+  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
 };
 
 /**
- * Routes with conditional privilege behaviour. These routes use `anyRequired`
- * to make `readExecution` optional: when the user holds it, extra execution
- * data is included; when not, the response omits it. Both modes must pass
+ * Per-route exceptions for internal writes.
+ *
+ * Some routes write to an index as an intrinsic part of the action the
+ * privilege already authorizes, not as a separately-privileged mutation. The
+ * resume route stamps the HITL audit envelope (`hitl.{respondedBy,respondedAt,
+ * channel}`) on the waiting step as a first-writer-wins claim — recording who
+ * resumed is part of resuming, so it rides on the `execute` privilege rather
+ * than requiring a distinct step-executions write privilege.
+ */
+const INTERNAL_WRITE_EXCEPTIONS: Record<string, string[]> = {
+  // HITL audit stamp / first-writer-wins claim (see
+  // WorkflowsManagementApi.resumeWorkflowExecution →
+  // WorkflowExecutionQueryService.markStepAsResponded).
+  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
+};
+
+/**
+ * Routes with conditional privilege behaviour. These routes use
+ * `extendedPrivileges` so optional privileges (e.g. `readExecution`) are
+ * surfaced in `authzResult` without gating access. Both modes must pass
  * the privilege check.
  */
 const CONDITIONAL_PRIVILEGE_TESTS: Array<{
@@ -153,7 +191,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read only (no execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -162,7 +202,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [
       WorkflowsManagementApiActions.read,
@@ -170,11 +212,28 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     ],
   },
   {
+    routeKey: 'GET:/api/workflows',
+    label: 'read + readExecution + readManagedExecution (with managed execution history)',
+    authzResult: {
+      [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
+      [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: true,
+    },
+    effectivePrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readExecution,
+      WorkflowsManagementApiActions.readManagedExecution,
+    ],
+  },
+  {
     routeKey: 'GET:/api/workflows/stats',
     label: 'read only (no execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -183,11 +242,28 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [
       WorkflowsManagementApiActions.read,
       WorkflowsManagementApiActions.readExecution,
+    ],
+  },
+  {
+    routeKey: 'GET:/api/workflows/stats',
+    label: 'read + readExecution + readManagedExecution (with managed execution stats)',
+    authzResult: {
+      [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
+      [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: true,
+    },
+    effectivePrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readExecution,
+      WorkflowsManagementApiActions.readManagedExecution,
     ],
   },
 ];
@@ -299,6 +375,15 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'GET:/api/workflows/workflow/{workflowId}/executions': {
     params: { workflowId: 'test-workflow-id' },
   },
+  'GET:/api/workflows/workflow/executions': {
+    query: {
+      query: JSON.stringify({ match_all: {} }),
+      from: 0,
+      size: 25,
+      sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+      trackTotalHits: true,
+    },
+  },
   'GET:/api/workflows/workflow/{workflowId}/executions/steps': {
     params: { workflowId: 'test-workflow-id' },
   },
@@ -306,7 +391,31 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
     params: { executionId: 'test-exec-id' },
     body: { input: {} },
   },
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token' },
+  },
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token', approved: true },
+  },
+  'POST:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token' },
+    body: {},
+  },
 };
+
+/** Public routes that authenticate via external resume token, not Kibana privileges. */
+const EXTERNAL_TOKEN_AUTH_ROUTES = new Set([
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form',
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external',
+  'POST:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external',
+]);
+
+const PRIVILEGED_ROUTE_KEYS = Object.keys(ROUTE_REQUEST_FIXTURES).filter(
+  (routeKey) => !EXTERNAL_TOKEN_AUTH_ROUTES.has(routeKey)
+);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -375,10 +484,12 @@ function assertOperationsConsistent(
   esOps: EsOperation[],
   executionEngineMethods: jest.Mocked<WorkflowsExecutionEnginePluginStart>,
   eventLoggerSearch: jest.Mock,
-  internalReadExceptions: string[] = []
+  internalReadExceptions: string[] = [],
+  internalWriteExceptions: string[] = []
 ) {
   const { allowedReads, allowedWrites, allowedDelegates } = computeAllowedScope(privileges);
   const exceptedReads = new Set(internalReadExceptions);
+  const exceptedWrites = new Set(internalWriteExceptions);
   const violations: string[] = [];
 
   for (const op of esOps) {
@@ -390,7 +501,7 @@ function assertOperationsConsistent(
           )}]`
         );
       }
-      if (op.type === 'write' && !allowedWrites.has(op.index)) {
+      if (op.type === 'write' && !allowedWrites.has(op.index) && !exceptedWrites.has(op.index)) {
         violations.push(
           `ES write on '${op.index}' via ${
             op.method
@@ -528,12 +639,19 @@ describe('Route privilege/ES-operation consistency', () => {
     };
 
     const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]) as any;
-    const service = new WorkflowsService(startServices, mockLogger, '9.0.0');
-    await service.getCoreStart();
+    const mockCoreSetup = { getStartServices: startServices } as any;
+    const mockPluginsSetup = {} as any;
+    const workflowsService = new WorkflowsService(
+      mockCoreSetup,
+      mockPluginsSetup,
+      mockLogger,
+      '9.0.0'
+    );
+    await workflowsService.getCoreStart();
 
     // ── WorkflowsManagementApi ──
 
-    const api = new WorkflowsManagementApi(service, true);
+    const api = new WorkflowsManagementApi(workflowsService, true, mockLogger);
 
     // ── Capturing mock router ──
 
@@ -566,14 +684,16 @@ describe('Route privilege/ES-operation consistency', () => {
       },
     } as unknown as jest.Mocked<WorkflowsRouter>;
 
+    const defaultConfig = pluginConfig.schema.validate({});
     const mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') } as any;
     const mockAudit = createWorkflowManagementAuditLogMock();
 
     const deps: RouteDependencies = {
       router: mockRouter,
       api,
-      service,
+      workflowsService,
       logger: mockLogger,
+      config: defaultConfig,
       spaces: mockSpaces,
       audit: mockAudit,
     };
@@ -589,14 +709,31 @@ describe('Route privilege/ES-operation consistency', () => {
   });
 
   it('should have security config on every route', () => {
-    for (const [, route] of capturedRoutes) {
-      expect(route.security?.authz?.requiredPrivileges).toBeDefined();
-      expect(route.security.authz.requiredPrivileges.length).toBeGreaterThan(0);
+    for (const [routeKey, route] of capturedRoutes) {
+      if (EXTERNAL_TOKEN_AUTH_ROUTES.has(routeKey)) {
+        expect(route.security?.authc?.enabled).toBe(false);
+        expect(route.security?.authz?.enabled).toBe(false);
+      } else {
+        expect(route.security?.authz?.requiredPrivileges).toBeDefined();
+        expect(route.security.authz!.requiredPrivileges!.length).toBeGreaterThan(0);
+      }
     }
   });
 
+  describe('external token auth routes', () => {
+    it.each([...EXTERNAL_TOKEN_AUTH_ROUTES])(
+      '%s: disables Kibana session auth in favor of token auth',
+      (routeKey) => {
+        const route = capturedRoutes.get(routeKey);
+        expect(route).toBeDefined();
+        expect(route?.security?.authc?.enabled).toBe(false);
+        expect(route?.security?.authz?.enabled).toBe(false);
+      }
+    );
+  });
+
   describe('regular privilege modes', () => {
-    it.each(Object.keys(ROUTE_REQUEST_FIXTURES))(
+    it.each(PRIVILEGED_ROUTE_KEYS)(
       '%s: ES operations match declared privileges',
       async (routeKey) => {
         const route = capturedRoutes.get(routeKey);
@@ -616,8 +753,9 @@ describe('Route privilege/ES-operation consistency', () => {
           path: route.path,
         });
 
-        // For routes with anyRequired, simulate the platform populating
-        // authzResult with all privileges granted (maximal access).
+        // Populate authzResult with declared required privileges (maximal
+        // required-privilege access). Optional extendedPrivileges are covered by
+        // the conditional privilege mode tests below.
         const authzResult: Record<string, boolean> = {};
         for (const p of privileges) {
           authzResult[p] = true;
@@ -642,7 +780,8 @@ describe('Route privilege/ES-operation consistency', () => {
           esOps,
           mockExecutionEngine,
           mockEventLoggerSearch,
-          INTERNAL_READ_EXCEPTIONS[routeKey]
+          INTERNAL_READ_EXCEPTIONS[routeKey],
+          INTERNAL_WRITE_EXCEPTIONS[routeKey]
         );
       }
     );

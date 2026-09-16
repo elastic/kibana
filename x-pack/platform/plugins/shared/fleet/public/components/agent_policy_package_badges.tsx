@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FLEET_SERVER_PACKAGE } from '../../common/constants';
 
@@ -103,11 +104,9 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
       {showFleetServerWarning && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="s"
-            color="warning"
-            iconType="warning"
             title={i18n.translate(
               'xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning',
               {

@@ -11,6 +11,7 @@ import { GET_SIEM_READINESS_PIPELINES_API_PATH } from '@kbn/siem-readiness';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 import { getContinuity } from '../dimensions';
+import { assertSiemReadinessEnabled } from '../assert_siem_readiness_enabled';
 
 export const getReadinessPipelinesRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -37,6 +38,15 @@ export const getReadinessPipelinesRoute = (
 
         try {
           const core = await context.core;
+
+          const disabledResponse = await assertSiemReadinessEnabled(
+            core.uiSettings.client,
+            response
+          );
+          if (disabledResponse) {
+            return disabledResponse;
+          }
+
           const esClient = core.elasticsearch.client.asCurrentUser;
 
           const payload = await getContinuity({ esClient, isServerless, logger });

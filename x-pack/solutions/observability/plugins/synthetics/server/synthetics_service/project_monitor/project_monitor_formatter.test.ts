@@ -234,6 +234,46 @@ describe('ProjectMonitorFormatter', () => {
     });
   });
 
+  it('returns invalid location error without logging it as a server error', async () => {
+    logger.error.mockClear();
+
+    const invalidLocationMonitor = {
+      ...testMonitors[0],
+      locations: [],
+      privateLocations: ['does not exist'],
+    };
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default',
+      routeContext,
+      monitors: [invalidLocationMonitor],
+    });
+
+    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+
+    await pushMonitorFormatter.configureAllProjectMonitors();
+
+    expect({
+      createdMonitors: pushMonitorFormatter.createdMonitors,
+      updatedMonitors: pushMonitorFormatter.updatedMonitors,
+      failedMonitors: pushMonitorFormatter.failedMonitors,
+    }).toStrictEqual({
+      createdMonitors: [],
+      updatedMonitors: [],
+      failedMonitors: [
+        {
+          details:
+            "Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location'",
+          id: 'check if title is present 10 0',
+          payload: invalidLocationMonitor,
+          reason: "Couldn't save or update monitor because of an invalid configuration.",
+        },
+      ],
+    });
+
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   it('catches errors from bulk edit method', async () => {
     soClient.bulkCreate.mockImplementation(async () => {
       return {
@@ -382,6 +422,69 @@ describe('ProjectMonitorFormatter', () => {
       createdMonitors: ['check if title is present 10 0', 'check if title is present 10 1'],
       updatedMonitors: [],
       failedMonitors: [],
+    });
+  });
+
+  describe('API Journey monitors on Serverless', () => {
+    const apiMonitor = {
+      type: MonitorTypeEnum.API,
+      id: 'orders-api-health',
+      name: 'Orders API health',
+      schedule: 1,
+      content: 'apiJourney("orders", () => {})',
+      privateLocations: ['Test private location'],
+    };
+
+    const serverlessRouteContext = {
+      ...routeContext,
+      server: { ...serverMock, cloud: { isServerlessEnabled: true } },
+    };
+
+    it('rejects a brand-new API Journey project monitor', async () => {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: 'test-project',
+        spaceId: 'default-space',
+        monitors: [],
+        routeContext: serverlessRouteContext,
+      });
+      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      await pushMonitorFormatter.init();
+
+      const result = pushMonitorFormatter.validateProjectMonitor({
+        monitor: apiMonitor,
+        publicLocations,
+        privateLocations,
+        isNewMonitor: true,
+      });
+
+      expect(result).toBeNull();
+      expect(pushMonitorFormatter.failedMonitors).toEqual([
+        expect.objectContaining({
+          id: 'orders-api-health',
+          reason: 'API Journey monitors are not yet supported on Serverless',
+        }),
+      ]);
+    });
+
+    it('allows re-pushing an already-existing API Journey project monitor unchanged', async () => {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: 'test-project',
+        spaceId: 'default-space',
+        monitors: [],
+        routeContext: serverlessRouteContext,
+      });
+      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      await pushMonitorFormatter.init();
+
+      const result = pushMonitorFormatter.validateProjectMonitor({
+        monitor: apiMonitor,
+        publicLocations,
+        privateLocations,
+        isNewMonitor: false,
+      });
+
+      expect(result).not.toBeNull();
+      expect(pushMonitorFormatter.failedMonitors).toEqual([]);
     });
   });
 });

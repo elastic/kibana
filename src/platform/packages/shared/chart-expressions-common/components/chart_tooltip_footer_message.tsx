@@ -18,6 +18,8 @@ const chartTooltipFooterMessageStyles = {
       color: ${euiThemeContext.euiTheme.colors.textSubdued};
       ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
       font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
+      width: 0;
+      min-width: 100%;
     `,
 };
 

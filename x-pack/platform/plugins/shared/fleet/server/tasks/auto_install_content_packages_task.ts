@@ -63,6 +63,7 @@ export class AutoInstallContentPackagesTask {
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
   private lastPrerelease: boolean = false;
+  private lastDatasetsWithDataCount?: number;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -181,7 +182,22 @@ export class AutoInstallContentPackagesTask {
         {} as { [name: string]: string }
       );
 
-      const packagesToInstall = await this.getPackagesToInstall(esClient, installedPackagesMap);
+      const rolledBackPackages = new Set<string>(
+        installedPackages.items.filter((pkg) => pkg.rolledBack).map((pkg) => pkg.name)
+      );
+      if (rolledBackPackages.size > 0) {
+        this.logger.info(
+          `[AutoInstallContentPackagesTask] Skipping rolled-back packages: ${[
+            ...rolledBackPackages,
+          ].join(', ')}`
+        );
+      }
+
+      const packagesToInstall = await this.getPackagesToInstall(
+        esClient,
+        installedPackagesMap,
+        rolledBackPackages
+      );
       if (packagesToInstall.length > 0) {
         this.logger.info(
           `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
@@ -230,14 +246,16 @@ export class AutoInstallContentPackagesTask {
 
   private async getPackagesToInstall(
     esClient: ElasticsearchClient,
-    installedPackagesMap: { [name: string]: string }
+    installedPackagesMap: { [name: string]: string },
+    rolledBackPackages: Set<string> = new Set()
   ) {
     const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
       this.discoveryMap!
     ).reduce((acc, [dataset, mapValue]) => {
       const packages = mapValue.packages.filter(
         (pkg) =>
-          !installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name])
+          !rolledBackPackages.has(pkg.name) &&
+          (!installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name]))
       );
       if (packages.length > 0) {
         acc[dataset] = { packages };
@@ -297,9 +315,14 @@ export class AutoInstallContentPackagesTask {
     const datasetsWithData = [
       ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
     ].filter((dataset) => !installedSet.has(dataset));
-    this.logger.info(
-      `[AutoInstallContentPackagesTask] Found ${datasetsWithData.length} datasets with data`
-    );
+    const count = datasetsWithData.length;
+    const message = `[AutoInstallContentPackagesTask] Found ${count} datasets with data`;
+    if (this.lastDatasetsWithDataCount !== count) {
+      this.logger.info(message);
+    } else {
+      this.logger.debug(message);
+    }
+    this.lastDatasetsWithDataCount = count;
     return datasetsWithData;
   }
 
