@@ -370,6 +370,29 @@ describe('rule_details', () => {
       );
     });
 
+    it('falls back to createdBy/updatedBy when a profile uid is set but cannot be resolved', async () => {
+      const bulkGet = jest.fn().mockResolvedValue([]);
+      useKibanaMock().services.userProfile.bulkGet = bulkGet;
+      // Use uids distinct from other tests in this suite so this test's query isn't served from
+      // a cached result of a previous test sharing the same module-level `queryClient`.
+      const rule = mockRule({
+        createdBy: 'jdoe',
+        updatedBy: 'asmith',
+        createdByProfileUid: 'unresolvable-created-uid',
+        updatedByProfileUid: 'unresolvable-updated-uid',
+      });
+      renderPage(rule);
+
+      await waitFor(() => {
+        expect(bulkGet).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('ruleCreatedMetadata')).toHaveTextContent('Created by jdoe on');
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by asmith on'
+      );
+    });
+
     it('does not render the actions menu if the user has only read permissions', async () => {
       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);

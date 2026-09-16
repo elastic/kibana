@@ -25,6 +25,8 @@ const OMIT_RULE_FIELDS = [
   'apiKeyOwner',
   'createdBy',
   'updatedBy',
+  'createdByProfileUid',
+  'updatedByProfileUid',
   'id',
   'updatedAt',
   'createdAt',

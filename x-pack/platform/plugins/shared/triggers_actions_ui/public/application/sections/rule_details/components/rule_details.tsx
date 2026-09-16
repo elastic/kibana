@@ -146,10 +146,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     uids: auditProfileUids,
   });
   const creator = rule.createdByProfileUid
-    ? profilesByUid.get(rule.createdByProfileUid)
+    ? profilesByUid.get(rule.createdByProfileUid) ?? rule.createdBy ?? ''
     : rule.createdBy ?? '';
   const updater = rule.updatedByProfileUid
-    ? profilesByUid.get(rule.updatedByProfileUid)
+    ? profilesByUid.get(rule.updatedByProfileUid) ?? rule.updatedBy ?? ''
     : rule.updatedBy ?? '';
 
   useEffect(() => {
