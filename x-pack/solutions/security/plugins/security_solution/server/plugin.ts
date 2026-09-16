@@ -905,7 +905,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, productFeaturesService } = this;
+    const { config, logger, productFeaturesService, ml } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
       core.savedObjects,
@@ -1257,7 +1257,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
-    const { productFeaturesService, ml } = this;
     return {
       getAlertAnalysisWorkflowRuleAttachmentService: async (request, workflowId) => {
         const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
