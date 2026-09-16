@@ -23,14 +23,14 @@ const options = [
     restricted: [
       {
         selector: '.euiComboBoxPill',
-        replacement: 'euiComponents.comboBox(testSubj).getSelectedOptions()',
+        replacement: 'page.components.comboBox(testSubj).getSelectedOptions()',
       },
     ],
   },
 ];
 
 const message =
-  'Raw EUI class selector `.euiComboBoxPill` is restricted. Use euiComponents.comboBox(testSubj).getSelectedOptions() instead.';
+  'Raw EUI class selector `.euiComboBoxPill` is restricted. Use page.components.comboBox(testSubj).getSelectedOptions() instead.';
 
 ruleTester.run('@kbn/eslint/scout_no_raw_eui_selectors', rule, {
   valid: [
