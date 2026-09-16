@@ -39,6 +39,9 @@ import * as i18n from './translations';
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /** Characters of the rule id shown when a rule has no name to display. */
 const SHORT_RULE_ID_LENGTH = 7;
 
@@ -253,12 +256,16 @@ export const EpisodeRuleCell = ({
 
   const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
   const ruleGroupingFields = rule.grouping?.fields ?? [];
-  const sourceGrouping = row.flattened.source_grouping as Record<string, unknown> | undefined;
+  const sourceGrouping = isPlainObject(row.flattened.source_grouping)
+    ? row.flattened.source_grouping
+    : undefined;
   const groupingFields =
     ruleGroupingFields.length > 0
       ? ruleGroupingFields
       : getGroupingFieldsFromSource(sourceGrouping);
-  const groupingData = ruleGroupingFields.length > 0 ? episodeData : sourceGrouping ?? {};
+  // Classic alerts always have `episode_data: null`. If the resolved rule still has v2
+  // grouping.fields, keep those field names but read values from `source_grouping`.
+  const groupingData = Object.keys(episodeData).length > 0 ? episodeData : sourceGrouping ?? {};
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.

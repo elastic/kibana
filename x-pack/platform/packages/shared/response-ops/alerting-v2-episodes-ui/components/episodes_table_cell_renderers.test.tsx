@@ -484,6 +484,23 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
   });
 
+  it('does not render grouping tags when source_grouping is null', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      source_grouping: null,
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
+  });
+
   it('falls back to source_grouping tags when the rule has no grouping.fields', () => {
     const row = makeRow({
       'rule.id': 'r1',
@@ -519,6 +536,23 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByLabelText('host.name: from-episode')).toBeInTheDocument();
     expect(screen.queryByLabelText('host.name: from-source')).not.toBeInTheDocument();
+  });
+
+  it('uses source_grouping values when the rule has grouping.fields but episode_data is empty', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      source_grouping: { host: { name: 'from-source' } },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
   });
 
   it('does not render grouping tags when all grouping values are empty', () => {

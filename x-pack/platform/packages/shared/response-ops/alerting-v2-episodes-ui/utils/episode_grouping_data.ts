@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getValueByFieldPath } from '@kbn/alerting-v2-utils';
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isScalar = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
@@ -22,7 +24,7 @@ const collectScalarStrings = (value: unknown): string[] => {
     return value.flatMap(collectScalarStrings);
   }
   if (isPlainObject(value)) {
-    return Object.values(value as Record<string, unknown>).flatMap(collectScalarStrings);
+    return Object.values(value).flatMap(collectScalarStrings);
   }
   return [];
 };
@@ -81,8 +83,7 @@ const collectLeafPaths = (value: Record<string, unknown>, prefix = ''): string[]
   Object.entries(value).flatMap(([key, child]) => {
     const path = prefix ? `${prefix}.${key}` : key;
     if (isPlainObject(child)) {
-      const nested = collectLeafPaths(child as Record<string, unknown>, path);
-      return nested.length > 0 ? nested : [path];
+      return collectLeafPaths(child, path);
     }
     return [path];
   });
@@ -91,9 +92,7 @@ const collectLeafPaths = (value: Record<string, unknown>, prefix = ''): string[]
  * Derives grouping field names from a v1 `kibana.alert.grouping` object.
  * Nested ECS objects become dotted leaf paths (`host.name`); already-flat keys are kept as-is.
  */
-export const getGroupingFieldsFromSource = (
-  sourceGrouping: Record<string, unknown> | undefined
-): string[] => {
+export const getGroupingFieldsFromSource = (sourceGrouping: unknown): string[] => {
   if (!isPlainObject(sourceGrouping)) {
     return [];
   }

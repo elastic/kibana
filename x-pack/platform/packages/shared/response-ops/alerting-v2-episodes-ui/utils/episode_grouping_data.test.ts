@@ -112,6 +112,7 @@ describe('getNonEmptyGroupingFields', () => {
 describe('getGroupingFieldsFromSource', () => {
   it('returns an empty array when grouping is missing or empty', () => {
     expect(getGroupingFieldsFromSource(undefined)).toEqual([]);
+    expect(getGroupingFieldsFromSource(null)).toEqual([]);
     expect(getGroupingFieldsFromSource({})).toEqual([]);
   });
 
@@ -138,5 +139,11 @@ describe('getGroupingFieldsFromSource', () => {
         host: { name: 'web-01', hostname: 'web-01.example.com' },
       })
     ).toEqual(['host.name', 'host.hostname']);
+  });
+
+  it('skips empty plain-object children', () => {
+    expect(getGroupingFieldsFromSource({ host: {}, 'service.name': 'api' })).toEqual([
+      'service.name',
+    ]);
   });
 });
