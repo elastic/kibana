@@ -112,7 +112,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       await openSelectedRulesToTargetAction(user);
 
       const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
-      expect(modal).toHaveTextContent('permanently discard');
+      expect(modal).toHaveTextContent('rules with changes that will be overwritten');
       expect(modal).toHaveTextContent('2');
       expect(modal).toHaveTextContent('1');
       expect(modal).not.toHaveTextContent('rule-customized');
@@ -345,7 +345,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
       expect(modal).toHaveTextContent('12');
       expect(modal).toHaveTextContent('4');
-      expect(modal).toHaveTextContent('permanently discard');
+      expect(modal).toHaveTextContent('rules with changes that will be overwritten');
       await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
