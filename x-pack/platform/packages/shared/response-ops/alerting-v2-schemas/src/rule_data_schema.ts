@@ -1357,6 +1357,11 @@ export const ruleResponseMetadataSchema = lazySchema(() =>
 export const ruleResponseSchema = lazySchema(() =>
   createRuleDataBaseSchema
     .extend({
+      /**
+       * Absent on execution-compiled builder rules, which persist no query at all
+       * (rule-execution-logic.md "A rule without a persisted query").
+       */
+      query: querySchema.optional(),
       // `template` is server-managed: it is returned but not accepted on write.
       metadata: metadataSchema
         .extend({
