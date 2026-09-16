@@ -18,6 +18,7 @@ export function createScenarios(
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const retry = getService('retry');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -153,18 +154,30 @@ export function createScenarios(
      * The "Export" top nav button can exist even when Reporting is not available
      * (for example, when other non-reporting export integrations are registered).
      *
-     * Validate that reporting-specific export actions are not present. If the export
-     * popover can't be opened at all, this is also an acceptable "not available" state.
+     * Validate that reporting-specific export actions are not present. If Export is a
+     * single remaining action (typically JSON) it runs immediately with no popover;
+     * assert the JSON flyout opened instead of treating a missing popover as success.
      */
     const clickedExport = await PageObjects.exports.clickExportTopNavButton();
     if (!clickedExport) {
       return;
     }
 
-    await testSubjects.existOrFail('exportPopoverPanel');
-    await testSubjects.missingOrFail('exportMenuItem-PDF');
-    await testSubjects.missingOrFail('exportMenuItem-PNG');
-    await testSubjects.missingOrFail('exportMenuItem-CSV');
+    // Export UI varies by app: Discover keeps a popover, Dashboard JSON-only Export
+    // runs immediately (derivative flyout), Visualize opens the share export flyout.
+    await retry.waitFor('export popover or flyout to open', async () => {
+      return (
+        (await testSubjects.exists('exportPopoverPanel', { timeout: 500 })) ||
+        (await testSubjects.exists('exportDerivativeFlyout-exportJson', { timeout: 500 })) ||
+        (await testSubjects.exists('exportItemDetailsFlyout', { timeout: 500 }))
+      );
+    });
+
+    if (await testSubjects.exists('exportPopoverPanel', { timeout: 500 })) {
+      await testSubjects.missingOrFail('exportMenuItem-PDF');
+      await testSubjects.missingOrFail('exportMenuItem-PNG');
+      await testSubjects.missingOrFail('exportMenuItem-CSV');
+    }
   };
 
   return {

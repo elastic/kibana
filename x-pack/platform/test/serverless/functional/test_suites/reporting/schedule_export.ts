@@ -11,29 +11,49 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
     'header',
     'dashboard',
     'discover',
-    'reporting',
     'exports',
+    'appMenu',
+    'timePicker',
   ]);
 
   describe('Schedule export menu', () => {
     before(async () => {
+      // Serverless Observability shows the "Add data" intercept until a data view exists.
+      // Load a data view (not a saved dashboard) so Dashboard/Discover actually render.
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
-    it('does not show Schedule export on dashboards', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+    });
 
-      await PageObjects.reporting.openExportPopover();
+    it('does not show Schedule export on dashboards', async () => {
+      // Open a new dashboard directly. The listing create button is not always present
+      // in serverless chrome, so going through clickNewDashboard times out.
+      await PageObjects.common.navigateToApp('dashboards', { hash: '/create' });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.appMenu.existOrFail('exportTopNavButton');
+
+      await PageObjects.appMenu.clickMenuItem('exportTopNavButton');
       await testSubjects.missingOrFail('scheduleExport');
     });
 
@@ -41,8 +61,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilTabIsLoaded();
 
-      await PageObjects.reporting.openExportPopover();
       await retry.waitFor('the export popover to be opened', async () => {
+        if (!(await PageObjects.exports.isExportPopoverOpen())) {
+          await PageObjects.appMenu.clickMenuItem('exportTopNavButton');
+        }
         return await PageObjects.exports.isExportPopoverOpen();
       });
 
