@@ -16,6 +16,9 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiFlyoutHeader,
   EuiHealth,
   EuiHorizontalRule,
@@ -72,6 +75,13 @@ const CLOSE_EVENT_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.closeEvent',
   {
     defaultMessage: 'Close significant event',
+  }
+);
+
+const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.actionsMenuButtonAriaLabel',
+  {
+    defaultMessage: 'Actions',
   }
 );
 
@@ -180,6 +190,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   } = useFetchSignificantEventLifecycle(event.event_uuid);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
@@ -243,19 +254,64 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       <FlyoutToolbarHeader>
         {!isClosed && canManage && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={CLOSE_EVENT_LABEL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                data-test-subj="sigEventCloseButton"
-                iconType="cross"
-                aria-label={CLOSE_EVENT_LABEL}
-                color="danger"
-                isLoading={isUpdating}
-                isDisabled={isUpdating}
-                onClick={() =>
-                  updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' })
-                }
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
+                <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="sigEventFlyoutActionsButton"
+                    iconType="ellipsis"
+                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                    isLoading={isUpdating}
+                    isDisabled={isUpdating}
+                    onClick={() => setIsActionsMenuOpen((open) => !open)}
+                  />
+                </EuiToolTip>
+              }
+              isOpen={isActionsMenuOpen}
+              closePopover={() => setIsActionsMenuOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                items={[
+                  ...(!isDismissed
+                    ? [
+                        <EuiContextMenuItem
+                          key="dismiss-event"
+                          icon="eyeSlash"
+                          color="primary"
+                          disabled={isUpdating}
+                          onClick={() => {
+                            setIsActionsMenuOpen(false);
+                            setIsDismissModalOpen(true);
+                          }}
+                        >
+                          {DISMISS_EVENT_LABEL}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                  <EuiContextMenuItem
+                    key="close-event"
+                    icon="cross"
+                    color="danger"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      if (!isUpdating) {
+                        setIsActionsMenuOpen(false);
+                        updateEventStatus({
+                          eventUuid: latestEvent.event_uuid,
+                          status: 'closed',
+                        });
+                      }
+                    }}
+                    data-test-subj="sigEventCloseButton"
+                  >
+                    {CLOSE_EVENT_LABEL}
+                  </EuiContextMenuItem>,
+                ]}
               />
-            </EuiToolTip>
+            </EuiPopover>
           </EuiFlexItem>
         )}
         {isDismissModalOpen && (

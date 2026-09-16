@@ -330,7 +330,7 @@ const eventsGetRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
