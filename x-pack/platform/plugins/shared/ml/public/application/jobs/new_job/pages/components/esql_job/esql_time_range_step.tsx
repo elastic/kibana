@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSuperDatePicker } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
 export const EsqlTimeRangeStep = () => {
@@ -16,7 +17,12 @@ export const EsqlTimeRangeStep = () => {
   } = useEsqlWizardContext();
 
   return (
-    <EuiFormRow label="Time range" fullWidth>
+    <EuiFormRow
+      label={i18n.translate('xpack.ml.esqlJob.timeRange.timeRangeLabel', {
+        defaultMessage: 'Time range',
+      })}
+      fullWidth
+    >
       <EuiSuperDatePicker
         start={wizardStart}
         end={wizardEnd}

@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { ErrorType } from '@kbn/ml-common-types/errors';
 
@@ -166,9 +167,16 @@ const EsqlQueryStepContent = () => {
 
   return (
     <EuiForm component="form">
-      <EuiFormRow label="ES|QL query" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.queryLabel', {
+          defaultMessage: 'ES|QL query',
+        })}
+        fullWidth
+      >
         <EuiTextArea
-          aria-label="ES|QL query"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.queryAriaLabel', {
+            defaultMessage: 'ES|QL query',
+          })}
           fullWidth
           value={state.query}
           onChange={(event) => setQueryState({ query: event.target.value })}
@@ -196,9 +204,16 @@ const EsqlQueryStepContent = () => {
         </EuiCallOut>
       ) : null}
 
-      <EuiFormRow label="Source time field" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.sourceTimeFieldLabel', {
+          defaultMessage: 'Source time field',
+        })}
+        fullWidth
+      >
         <EuiFieldText
-          aria-label="Source time field"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.sourceTimeFieldAriaLabel', {
+            defaultMessage: 'Source time field',
+          })}
           fullWidth
           value={state.sourceTimeField}
           onChange={(event) => setQueryState({ sourceTimeField: event.target.value })}
@@ -206,9 +221,16 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Bucket span" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.bucketSpanLabel', {
+          defaultMessage: 'Bucket span',
+        })}
+        fullWidth
+      >
         <EuiFieldText
-          aria-label="Bucket span"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.bucketSpanAriaLabel', {
+            defaultMessage: 'Bucket span',
+          })}
           fullWidth
           value={state.bucketSpan}
           onChange={(event) => setQueryState({ bucketSpan: event.target.value })}
@@ -216,9 +238,16 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Emitted time field" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.emittedTimeFieldLabel', {
+          defaultMessage: 'Emitted time field',
+        })}
+        fullWidth
+      >
         <EuiComboBox
-          aria-label="Emitted time field"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.emittedTimeFieldAriaLabel', {
+            defaultMessage: 'Emitted time field',
+          })}
           singleSelection
           options={allOptions}
           selectedOptions={selectedEmittedTime}
@@ -228,9 +257,16 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Detector fields" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.detectorFieldsLabel', {
+          defaultMessage: 'Detector fields',
+        })}
+        fullWidth
+      >
         <EuiComboBox
-          aria-label="Detector fields"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.detectorFieldsAriaLabel', {
+            defaultMessage: 'Detector fields',
+          })}
           options={detectorOptions}
           selectedOptions={selectedDetectorFields}
           onChange={(options) =>
@@ -241,9 +277,16 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Influencers" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.esqlJob.query.influencersLabel', {
+          defaultMessage: 'Influencers',
+        })}
+        fullWidth
+      >
         <EuiComboBox
-          aria-label="Influencers"
+          aria-label={i18n.translate('xpack.ml.esqlJob.query.influencersAriaLabel', {
+            defaultMessage: 'Influencers',
+          })}
           options={allOptions}
           selectedOptions={selectedInfluencers}
           onChange={(options) => setQueryState({ influencers: options.map(({ label }) => label) })}
@@ -254,7 +297,9 @@ const EsqlQueryStepContent = () => {
 
       {error ? (
         <EuiCallOut
-          title="Unable to read ES|QL columns"
+          title={i18n.translate('xpack.ml.esqlJob.query.readColumnsErrorTitle', {
+            defaultMessage: 'Unable to read ES|QL columns',
+          })}
           color="danger"
           iconType="error"
           announceOnMount
@@ -265,9 +310,15 @@ const EsqlQueryStepContent = () => {
 
       <EuiText size="s" color="subdued">
         <p>
-          For aggregated queries, choose influencers from the fields named after{' '}
-          <code>STATS BY</code>. Delayed-data detection needs a <code>COUNT(*)</code> output and a
-          matching <code>summary_count_field_name</code>.
+          <FormattedMessage
+            id="xpack.ml.esqlJob.query.aggregatedQueryGuidanceDescription"
+            defaultMessage="For aggregated queries, choose influencers from the fields named after {statsBy}. Delayed-data detection needs a {countOutput} output and a matching {summaryCountFieldName}."
+            values={{
+              statsBy: <code>STATS BY</code>,
+              countOutput: <code>COUNT(*)</code>,
+              summaryCountFieldName: <code>summary_count_field_name</code>,
+            }}
+          />
         </p>
       </EuiText>
     </EuiForm>

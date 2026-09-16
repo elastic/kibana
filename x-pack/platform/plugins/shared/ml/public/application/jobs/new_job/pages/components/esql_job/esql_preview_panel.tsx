@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import {
   buildEsqlJobPayload,
   createMeanDetectors,
@@ -40,7 +41,9 @@ const previewErrorReason = (error: unknown): string => {
   if (typeof elasticsearchError?.reason === 'string') return elasticsearchError.reason;
   if (typeof wrappedErrorBody.reason === 'string') return wrappedErrorBody.reason;
   if (typeof error.message === 'string') return error.message;
-  return 'Unable to preview ES|QL datafeed.';
+  return i18n.translate('xpack.ml.esqlJob.preview.fallbackErrorMessage', {
+    defaultMessage: 'Unable to preview ES|QL datafeed.',
+  });
 };
 
 const tableValue = (value: unknown): string => {
@@ -135,17 +138,25 @@ export const EsqlPreviewPanel = () => {
   return (
     <section data-test-subj="mlEsqlPreviewPanel">
       <EuiTitle size="s">
-        <h2>Preview ES|QL output</h2>
+        <h2>
+          {i18n.translate('xpack.ml.esqlJob.preview.title', {
+            defaultMessage: 'Preview ES|QL output',
+          })}
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiButton onClick={preview} data-test-subj="mlEsqlPreviewButton">
-        Preview
+        {i18n.translate('xpack.ml.esqlJob.preview.buttonLabel', {
+          defaultMessage: 'Preview',
+        })}
       </EuiButton>
       {isLoading ? <EuiLoadingSpinner size="m" /> : null}
       <EuiSpacer size="m" />
       {error !== undefined ? (
         <EuiCallOut
-          title="Unable to preview ES|QL datafeed"
+          title={i18n.translate('xpack.ml.esqlJob.preview.errorTitle', {
+            defaultMessage: 'Unable to preview ES|QL datafeed',
+          })}
           color="danger"
           iconType="error"
           announceOnMount
@@ -154,14 +165,25 @@ export const EsqlPreviewPanel = () => {
         </EuiCallOut>
       ) : null}
       {rows.length > 0 ? (
-        <EuiBasicTable items={rows} columns={columns} tableCaption="ES|QL preview output" />
+        <EuiBasicTable
+          items={rows}
+          columns={columns}
+          tableCaption={i18n.translate('xpack.ml.esqlJob.preview.tableCaption', {
+            defaultMessage: 'ES|QL preview output',
+          })}
+        />
       ) : null}
       {!isLoading && error === undefined && rows.length === 0 ? (
         <EuiText size="s" color="subdued">
           <p>
             {hasPreviewed
-              ? 'No output rows were returned for the selected time range.'
-              : 'Select Preview to inspect datafeed output for the selected time range.'}
+              ? i18n.translate('xpack.ml.esqlJob.preview.emptyResultDescription', {
+                  defaultMessage: 'No output rows were returned for the selected time range.',
+                })
+              : i18n.translate('xpack.ml.esqlJob.preview.emptyStateDescription', {
+                  defaultMessage:
+                    'Select Preview to inspect datafeed output for the selected time range.',
+                })}
           </p>
         </EuiText>
       ) : null}
