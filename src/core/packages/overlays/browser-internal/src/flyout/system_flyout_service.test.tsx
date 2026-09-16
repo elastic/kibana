@@ -20,8 +20,20 @@ import type {
   OverlayFlyoutTemplateStart,
   OverlaySystemFlyoutStart,
 } from '@kbn/core-overlays-browser';
+import { useSystemFlyoutSize } from '@kbn/core-overlays-browser';
 import { FlyoutTemplate, useFlyoutClose } from '@kbn/flyout-template';
 import React from 'react';
+
+/** Test content that reads the reactive size and can trigger a reset from inside the flyout. */
+const SizeProbe = () => {
+  const flyoutSize = useSystemFlyoutSize();
+  return (
+    <div>
+      <span data-test-subj="flyout-size">{String(flyoutSize?.size)}</span>
+      <button type="button" data-test-subj="reset-size" onClick={() => flyoutSize?.resetSize()} />
+    </div>
+  );
+};
 
 interface FlyoutManagerEvent {
   type: 'CLOSE_SESSION';
@@ -92,11 +104,15 @@ beforeEach(() => {
 
 /**
  * Resolve the `EuiFlyout` element the service rendered. The service wraps it in a
- * `SystemFlyoutTypeController` render-prop, so invoke that (with the seeded type) to reach it.
+ * `SystemFlyoutController` render-prop, so invoke that (with the seeded type/size) to reach it.
  */
 const getRenderedFlyout = (callIndex = 0) => {
   const controller = mockReactDomRender.mock.calls[callIndex][0].props.children;
-  return controller.props.children(controller.props.initialType ?? 'overlay');
+  return controller.props.children({
+    type: controller.props.initialType ?? 'overlay',
+    size: controller.props.initialSize,
+    onResize: jest.fn(),
+  });
 };
 
 afterEach(() => {
@@ -876,6 +892,45 @@ describe('SystemFlyoutService', () => {
 
       // One flyout is still open, so the offset must not be cleared yet.
       expect(container.style.paddingInlineEnd).toBe('384px');
+    });
+  });
+
+  describe('flyout size', () => {
+    it('seeds the size controller from the "size" and "defaultSize" open options', () => {
+      systemFlyouts.open(<div>content</div>, { size: 640, defaultSize: 's' });
+
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.initialSize).toBe(640);
+      expect(controller.props.resetSizeTarget).toBe('s');
+      expect(getRenderedFlyout().props.size).toBe(640);
+    });
+
+    it('resets to `size` when no `defaultSize` is provided', () => {
+      systemFlyouts.open(<div>content</div>, { size: 'm' });
+
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.resetSizeTarget).toBe('m');
+    });
+
+    it('threads the consumer onResize through and wraps it for the flyout', () => {
+      const onResize = jest.fn();
+      systemFlyouts.open(<div>content</div>, { size: 's', onResize });
+
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.onResize).toBe(onResize);
+      // The flyout receives the controller's wrapper (a function), not the raw consumer callback.
+      expect(typeof getRenderedFlyout().props.onResize).toBe('function');
+    });
+
+    it('resets the live flyout size back to the default via the size context', () => {
+      systemFlyouts.open(<SizeProbe />, { size: 640, defaultSize: 's' });
+
+      const { getByTestId } = render(mockReactDomRender.mock.calls[0][0]);
+      expect(getByTestId('flyout-size')).toHaveTextContent('640');
+
+      fireEvent.click(getByTestId('reset-size'));
+
+      expect(getByTestId('flyout-size')).toHaveTextContent('s');
     });
   });
 });
