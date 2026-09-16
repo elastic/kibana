@@ -183,7 +183,7 @@ describe('cascaded documents helpers utils', () => {
       }
     });
 
-    it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
+    it('should return a single group by field when a where command follows a single-group STATS', () => {
       const queryString = `
      FROM kibana_sample_data_logs
       | WHERE clientip == "177.120.218.48"
@@ -208,6 +208,38 @@ describe('cascaded documents helpers utils', () => {
         { identifier: 'count', aggregation: 'COUNT' },
         { identifier: 'average', aggregation: 'AVG' },
       ]);
+    });
+
+    it('should keep every STATS grouping field when a later WHERE mentions one of them', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS count = COUNT(*) BY clientip, extension.keyword
+        | WHERE \`extension.keyword\` IS NOT NULL
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        { field: 'clientip', type: 'column' },
+        { field: 'extension.keyword', type: 'column' },
+      ]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
+    });
+
+    it('should keep every STATS grouping field when a later WHERE filters an aggregate', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+        | STATS count = COUNT(*) BY clientip, extension.keyword
+        | WHERE count > 10
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        { field: 'clientip', type: 'column' },
+        { field: 'extension.keyword', type: 'column' },
+      ]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
     });
 
     it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
