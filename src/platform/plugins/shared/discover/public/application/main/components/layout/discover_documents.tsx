@@ -372,6 +372,8 @@ function DiscoverDocumentsComponent({
     [rowHeight, dataGridUiState, services.storage, configRowHeight]
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
+  // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
   const { table: esqlTable } = useMemo(
     () =>
       getEsqlDatatableFromDocuments({
@@ -380,6 +382,7 @@ function DiscoverDocumentsComponent({
       }),
     [documentState, isEsqlMode]
   );
+  // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
   const searchContext = useMemo(() => {
     if (!isEsqlMode || !esqlTable || !query || !requestParams.timeRangeAbsolute) {
@@ -392,9 +395,12 @@ function DiscoverDocumentsComponent({
       timeRange: requestParams.timeRangeAbsolute,
       esqlVariables,
       searchSessionId: requestParams.searchSessionId,
+      // Match the table's ES|QL fast-mode setting on the sparkline follow-up.
+      isApproximate: esqlApproximation,
       requestId,
     };
   }, [
+    esqlApproximation,
     esqlTable,
     esqlVariables,
     filters,
@@ -410,6 +416,7 @@ function DiscoverDocumentsComponent({
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
       searchContext,
+      // Spinner while the grid is fetching; warning icon if it finished without context.
       isDataLoading,
     }),
     [cellRendererDensity, cellRendererRowHeight, dataView, isDataLoading, searchContext]
@@ -496,7 +503,6 @@ function DiscoverDocumentsComponent({
   const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
-  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||

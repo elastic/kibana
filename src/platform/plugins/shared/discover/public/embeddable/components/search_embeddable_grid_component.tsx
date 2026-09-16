@@ -259,7 +259,7 @@ export function SearchEmbeddableGridComponent({
       return undefined;
     }
     const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
-    if (!table || !savedSearchQuery || !timeRange) {
+    if (!table || !savedSearchQuery) {
       return undefined;
     }
     return {

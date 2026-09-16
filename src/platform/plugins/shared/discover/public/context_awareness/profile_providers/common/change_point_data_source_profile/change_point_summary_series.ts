@@ -178,7 +178,7 @@ const loadLineSeries = async ({
   }
 
   const query = `${lineEsql} | LIMIT ${LINE_SERIES_LIMIT}`;
-  const namedParams = timeRange ? getNamedParams(query, timeRange, fetchParams.esqlVariables) : [];
+  const namedParams = getNamedParams(query, timeRange, fetchParams.esqlVariables);
   const { rawResponse } = await data.search.esql(
     {
       query,

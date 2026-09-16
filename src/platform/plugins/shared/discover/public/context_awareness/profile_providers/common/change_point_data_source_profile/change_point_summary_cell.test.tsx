@@ -349,6 +349,22 @@ describe('ChangePointSummaryCell', () => {
     expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
   });
 
+  it('subscribes for a completed grid context that has no time range', () => {
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      table: makeTable(NO_BY_ROWS),
+      searchContext: {
+        table: makeTable(NO_BY_ROWS),
+        query: { esql: ESQL_NO_BY },
+        requestId: 1,
+      },
+    });
+
+    expect(mockUseChangePointSummarySeries).toHaveBeenCalled();
+    expect(screen.getByTestId('changePointSummaryChartMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
+  });
+
   it('renders an error icon while loading if no matching card is found', () => {
     const cardRow = { host: 'a', ...CHANGE_POINT_ROW };
     const row = { host: 'b', ...CHANGE_POINT_ROW };

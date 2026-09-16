@@ -319,6 +319,19 @@ describe('change_point_summary_series', () => {
       expect(esql.mock.calls[0][0].params).toEqual(expect.arrayContaining([{ env: 'prod' }]));
     });
 
+    it('forwards ES|QL control params when there is no time range', async () => {
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | WHERE host == ?env | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
+        esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
+      });
+      const ready = await load({ timeRange: undefined });
+
+      expect(ready.status).toBe('ready');
+      expect(getTime).not.toHaveBeenCalled();
+      expect(esql.mock.calls[0][0].params).toEqual([{ env: 'prod' }]);
+    });
+
     it('fetches a line series with extended from when a no-BY annotation is before the range', async () => {
       const { esql, load } = setupLineSearch({
         rows: [{ ...NO_BY_ROW, bucket: '2023-11-10T00:00:00.000Z' }],

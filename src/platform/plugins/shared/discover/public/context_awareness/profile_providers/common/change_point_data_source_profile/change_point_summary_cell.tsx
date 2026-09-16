@@ -198,7 +198,7 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
   );
 
   const fetchParams = useMemo((): ChangePointSummaryFetchParams | undefined => {
-    if (!searchContext?.table?.columns.length || !searchContext.query || !searchContext.timeRange) {
+    if (!searchContext?.table?.columns.length || !searchContext.query) {
       return undefined;
     }
     return {

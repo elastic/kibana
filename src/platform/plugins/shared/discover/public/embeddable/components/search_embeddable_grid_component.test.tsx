@@ -233,6 +233,23 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(lastCallProps?.searchContext?.isApproximate).toBe(true);
     });
 
+    it('still supplies searchContext when fetchContext has no time range', async () => {
+      renderComponent({
+        isEsql: true,
+        fetchContext: { ...fetchContext, timeRange: undefined },
+        columnsMeta,
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = getLastGridProps();
+      expect(lastCallProps?.searchContext?.query).toEqual({ esql: 'FROM test | LIMIT 100' });
+      expect(lastCallProps?.searchContext?.table).toBeDefined();
+      expect(lastCallProps?.searchContext?.timeRange).toBeUndefined();
+    });
+
     it('changes requestId when the grid rows identity changes', async () => {
       const { stateManager } = renderComponent({ isEsql: true, fetchContext, columnsMeta });
 
