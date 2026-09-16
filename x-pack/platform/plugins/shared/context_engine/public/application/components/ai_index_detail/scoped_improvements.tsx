@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { ImprovementAction } from '../../../../common/http_api/improvement_actions';
 import type { Improvement } from '../../../../common/http_api/improvements';
+import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useDecideImprovement } from '../../hooks/use_decide_improvement';
 import { useKibana } from '../../hooks/use_kibana';
-import { useScopedImprovements } from '../../hooks/use_scoped_improvements';
+import { useScopedImprovements, useScopedImprovementsHistory } from '../../hooks/use_scoped_improvements';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { ImprovementRow } from './improvement_row';
 import { RejectImprovementModal } from './reject_improvement_modal';
@@ -48,10 +49,17 @@ export const ScopedImprovements = ({
   const chatOpener = getChatOpener?.();
 
   const aiIndexId = aiIndex?.id;
+  const feedbackLoopEnabled = useFeedbackLoopEnabled();
 
   const scoped = useScopedImprovements({ aiIndexId, actions });
   const { approve, reject, approvingId, rejectingId } = useDecideImprovement(aiIndexId ?? '');
   const [rejecting, setRejecting] = useState<Improvement | undefined>();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const { history, isLoading: historyLoading } = useScopedImprovementsHistory({
+    aiIndexId,
+    actions,
+    enabled: historyOpen,
+  });
 
   const handleTalkWithAgent = (improvement: Improvement) => {
     if (aiIndex) {
@@ -66,42 +74,97 @@ export const ScopedImprovements = ({
     }
   };
 
-  if (scoped.length === 0) {
+  if (scoped.length === 0 && !feedbackLoopEnabled) {
     return null;
   }
 
   return (
     <div data-test-subj={dataTestSubj}>
-      <EuiHorizontalRule margin="m" />
+      {scoped.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="m" />
 
-      <EuiText size="xs" color="subdued">
-        <strong>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.scopedImprovements.title', {
-            defaultMessage:
-              '{count, plural, one {# suggested change} other {# suggested changes}} — nothing is applied until you approve it',
-            values: { count: scoped.length },
-          })}
-        </strong>
-      </EuiText>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              {i18n.translate('xpack.contextEngine.aiIndexDetail.scopedImprovements.title', {
+                defaultMessage:
+                  '{count, plural, one {# suggested change} other {# suggested changes}} — nothing is applied until you approve it',
+                values: { count: scoped.length },
+              })}
+            </strong>
+          </EuiText>
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <div role="list">
-        {scoped.map((improvement, index) => (
-          <React.Fragment key={improvement.improvement_id}>
-            <ImprovementRow
-              improvement={improvement}
-              onApprove={({ improvement_id: id }) => approve({ improvementId: id })}
-              onReject={setRejecting}
-              isApproving={approvingId === improvement.improvement_id}
-              isRejecting={rejectingId === improvement.improvement_id}
-              canDecide={aiIndex !== undefined}
-              onTalkWithAgent={chatOpener ? handleTalkWithAgent : undefined}
-            />
-            {index < scoped.length - 1 && <EuiSpacer size="s" />}
-          </React.Fragment>
-        ))}
-      </div>
+          <div role="list">
+            {scoped.map((improvement, index) => (
+              <React.Fragment key={improvement.improvement_id}>
+                <ImprovementRow
+                  improvement={improvement}
+                  onApprove={({ improvement_id: id }) => approve({ improvementId: id })}
+                  onReject={setRejecting}
+                  isApproving={approvingId === improvement.improvement_id}
+                  isRejecting={rejectingId === improvement.improvement_id}
+                  canDecide={aiIndex !== undefined}
+                  onTalkWithAgent={chatOpener ? handleTalkWithAgent : undefined}
+                />
+                {index < scoped.length - 1 && <EuiSpacer size="s" />}
+              </React.Fragment>
+            ))}
+          </div>
+        </>
+      )}
+
+      {feedbackLoopEnabled && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiAccordion
+            id={`${dataTestSubj}-history`}
+            buttonContent={
+              <EuiText size="xs" color="subdued">
+                <strong>
+                  {i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.scopedImprovements.historyToggle',
+                    { defaultMessage: 'Past decisions' }
+                  )}
+                </strong>
+              </EuiText>
+            }
+            onToggle={setHistoryOpen}
+            data-test-subj="contextImprovementsHistory"
+          >
+            <EuiSpacer size="s" />
+            {historyLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : history.length === 0 ? (
+              <EuiText size="xs" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.scopedImprovements.historyEmpty',
+                    { defaultMessage: 'No past decisions yet.' }
+                  )}
+                </p>
+              </EuiText>
+            ) : (
+              <div role="list">
+                {history.map((improvement, index) => (
+                  <React.Fragment key={improvement.improvement_id}>
+                    <ImprovementRow
+                      improvement={improvement}
+                      onApprove={({ improvement_id: id }) => approve({ improvementId: id })}
+                      onReject={setRejecting}
+                      isApproving={approvingId === improvement.improvement_id}
+                      isRejecting={rejectingId === improvement.improvement_id}
+                      canDecide={aiIndex !== undefined}
+                    />
+                    {index < history.length - 1 && <EuiSpacer size="s" />}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </EuiAccordion>
+        </>
+      )}
 
       {rejecting && (
         <RejectImprovementModal
