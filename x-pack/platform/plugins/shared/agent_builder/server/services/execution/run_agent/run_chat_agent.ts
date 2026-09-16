@@ -19,6 +19,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -64,7 +65,12 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
+import {
+  eventsForContext,
+  groupTimelineEntries,
+  isTimelineRound,
+  roundResponse,
+} from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -207,6 +213,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    conversationId: conversation?.id,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
@@ -217,10 +224,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineRounds(processedConversation.timeline).map((round) => ({
-                input: round.userMessage.data,
-                response: roundResponse(round),
-              }))
+              groupTimelineEntries(processedConversation.timeline).map((entry) =>
+                isTimelineRound(entry)
+                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
+                  : { input: entry.userMessage.data }
+              )
             ),
           },
           modelProvider,
@@ -279,6 +287,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    agentConfiguration,
   });
 
   // Then add dynamic tools
@@ -529,7 +538,7 @@ const getConversationState = ({
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
