@@ -8,12 +8,12 @@
  */
 
 import { parse } from 'yaml';
-import { managedWorkflowDefinitions } from '.';
 import {
   ACTION_WORKFLOW_INPUT,
   ACTION_WORKFLOW_TAG,
   actionMetadataSchema,
-} from '../action_workflow';
+} from './action_workflow';
+import { managedWorkflowDefinitions } from './definitions';
 
 /**
  * Contract test for every action workflow, whoever owns it. It asserts only the

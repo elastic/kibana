@@ -8,11 +8,11 @@
  */
 
 import ACTION_ISOLATE_HOST_YAML from './action_isolate_host.yaml';
-import type { ManagedWorkflowDefinition } from '../../../types';
+import type { ManagedWorkflowDefinition } from '../../../../types';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
-} from '../constants';
+} from '../../constants';
 
 export const ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID = 'system-alertzero-action-isolate-host';
 

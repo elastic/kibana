@@ -8,7 +8,7 @@
  */
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
-import { ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/action_isolate_host';
+import { ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/defend/action_isolate_host';
 import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
@@ -45,7 +45,7 @@ export {
 export {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
-} from './actions/action_isolate_host';
+} from './actions/defend/action_isolate_host';
 export {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,

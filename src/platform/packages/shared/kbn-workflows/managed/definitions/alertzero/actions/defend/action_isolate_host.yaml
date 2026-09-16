@@ -10,6 +10,7 @@ tags:
   # discovered by tag rather than a hardcoded list.
   - action
   - alertzero
+
 consts:
   # Self-describing catalog metadata, read back by the proposals service when a
   # proposal referencing this workflow is created or rendered. Metadata has to
@@ -26,9 +27,11 @@ consts:
   privilege_probe_action_id: "00000000-0000-0000-0000-000000000000"
   # Keep equal to `max-iterations.limit` on the poll loop. 180 × 10s ≈ 30 min.
   max_poll_attempts: 180
+
 settings:
   # Ceiling above the 30 min poll so a timeout zone does not cut the wait short.
   timeout: "35m"
+
 triggers:
   - type: manual
     inputs:
@@ -53,13 +56,13 @@ triggers:
       required:
         - actionInput
       additionalProperties: false
+
 outputs:
   - name: actionId
     type: string
-  - name: status
-    type: string
   - name: wasSuccessful
     type: boolean
+
 steps:
   # GET details requires Actions log (Platinum+), isolate only needs Host
   # isolation. Probe the same route the poll uses so a missing privilege fails
@@ -165,5 +168,4 @@ steps:
     status: completed
     with:
       actionId: "{{ variables.action_id }}"
-      status: "{{ variables.action_status }}"
       wasSuccessful: "${{ variables.was_successful }}"
