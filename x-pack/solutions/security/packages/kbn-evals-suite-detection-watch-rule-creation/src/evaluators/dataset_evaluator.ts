@@ -21,7 +21,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
 import { createToolRoutingEvaluator } from './tool_routing';
-import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
+import {
+  logPairedScores,
+  logRunSummary,
+  withScoreCollection,
+  type PairedScoreSink,
+  type ScoreSink,
+} from './run_summary';
 import {
   extractMitreTechniques,
   hasRequiredFields,
@@ -341,15 +347,17 @@ export const createEvaluateDataset =
 
     // Observe every score so the run can state its own resolution limits.
     const sink: ScoreSink = new Map();
+    const pairedSink: PairedScoreSink = new Map();
     await executorClient.runExperiment(
       {
         name: dataset.name,
         datasets: [dataset],
         task: async ({ input }) => ruleCreationClient.run({ input }),
       },
-      withScoreCollection(allEvaluators, sink)
+      withScoreCollection(allEvaluators, sink, pairedSink)
     );
 
     log.info(`Evaluation complete: "${dataset.name}"`);
     logRunSummary({ sink, datasetName: dataset.name, log });
+    logPairedScores({ pairedSink, datasetName: dataset.name, log });
   };
