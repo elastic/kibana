@@ -14,8 +14,14 @@ export const ruleQueryToApiQuery = (query: RuleQuery): Query => ({
   ...(query.breach.segment.trim() ? { breach: { segment: query.breach.segment } } : {}),
 });
 
-/** Maps an API `Query` response back to the form's `RuleQuery`. */
+/**
+ * Maps an API `Query` response back to the form's `RuleQuery`.
+ *
+ * When the query is absent (execution-compiled builder rules persist none),
+ * returns an empty form query so the editor still opens without pretending the
+ * empty text is the rule's persisted query.
+ */
 export const apiQueryToFormQuery = (query: RuleResponse['query']): RuleQuery => ({
-  base: query.base,
-  breach: { segment: query.breach?.segment ?? '' },
+  base: query?.base ?? '',
+  breach: { segment: query?.breach?.segment ?? '' },
 });
