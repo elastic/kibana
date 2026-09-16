@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import type { FC, ComponentProps } from 'react';
+import type { FC } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
 
 import { getLicenseState } from '../../../store/reducers/license_management';
 
@@ -20,99 +22,80 @@ interface LicenseInfo {
   expirationDate: string | null;
 }
 
-interface LicensePageHeaderProps
-  extends Omit<ComponentProps<typeof EuiPageHeader>, 'pageTitle' | 'description'> {
-  license: LicenseInfo;
-}
+const getTitle = (license: LicenseInfo): string => {
+  if (license.isExpired) {
+    return i18n.translate(
+      'xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle',
+      {
+        defaultMessage: 'Your {licenseType} license has expired',
+        values: {
+          licenseType: license.type,
+        },
+      }
+    );
+  }
 
-export const ActiveLicensePageHeader: FC<LicensePageHeaderProps> = ({ license, ...props }) => {
-  return (
-    <EuiPageHeader
-      {...props}
-      pageTitle={
-        <span data-test-subj="licenseText">
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
-            defaultMessage="Your {licenseType} license is {status}"
-            values={{
-              licenseType: license.type,
-              status: license.status,
-            }}
-          />
-        </span>
-      }
-      description={
-        <span data-test-subj="licenseSubText">
-          {license.expirationDate ? (
-            <FormattedMessage
-              id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
-              defaultMessage="Your license will expire on {licenseExpirationDate}"
-              values={{
-                licenseExpirationDate: <strong>{license.expirationDate}</strong>,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
-              defaultMessage="Your license will never expire."
-            />
-          )}
-        </span>
-      }
-    />
+  return i18n.translate(
+    'xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle',
+    {
+      defaultMessage: 'Your {licenseType} license is {status}',
+      values: {
+        licenseType: license.type,
+        status: license.status,
+      },
+    }
   );
 };
 
-export const ExpiredLicensePageHeader: FC<LicensePageHeaderProps> = ({ license, ...props }) => {
-  return (
-    <EuiPageHeader
-      {...props}
-      pageTitle={
-        <span data-test-subj="licenseText">
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
-            defaultMessage="Your {licenseType} license has expired"
-            values={{
-              licenseType: license.type,
-            }}
-          />
-        </span>
+const getDescription = (license: LicenseInfo): string => {
+  if (license.isExpired) {
+    return i18n.translate(
+      'xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription',
+      {
+        defaultMessage: 'Your license expired on {licenseExpirationDate}',
+        values: {
+          licenseExpirationDate: license.expirationDate ?? '',
+        },
       }
-      description={
-        <span data-test-subj="licenseSubText">
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
-            defaultMessage="Your license expired on {licenseExpirationDate}"
-            values={{
-              licenseExpirationDate: <strong>{license.expirationDate}</strong>,
-            }}
-          />
-        </span>
+    );
+  }
+
+  if (license.expirationDate) {
+    return i18n.translate(
+      'xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription',
+      {
+        defaultMessage: 'Your license will expire on {licenseExpirationDate}',
+        values: {
+          licenseExpirationDate: license.expirationDate,
+        },
       }
-    />
+    );
+  }
+
+  return i18n.translate(
+    'xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription',
+    {
+      defaultMessage: 'Your license will never expire.',
+    }
   );
 };
+
+const getStatusBadge = (license: LicenseInfo): AppHeaderBadge => ({
+  label: capitalize(license.status),
+  color: license.isExpired ? 'danger' : 'success',
+});
 
 export const LicensePageHeader: FC = () => {
   const license = useSelector(getLicenseState);
 
   return (
     <>
-      {license.isExpired ? (
-        <ExpiredLicensePageHeader
-          license={license}
-          bottomBorder
-          iconType="warning"
-          iconProps={{ color: 'danger' }}
-        />
-      ) : (
-        <ActiveLicensePageHeader
-          license={license}
-          bottomBorder
-          iconType="checkCircleFill"
-          iconProps={{ color: 'success' }}
-        />
-      )}
+      <AppHeader
+        title={getTitle(license)}
+        description={getDescription(license)}
+        badges={[getStatusBadge(license)]}
+        spacing="bleed"
+      />
       <EuiSpacer size="l" />
     </>
   );

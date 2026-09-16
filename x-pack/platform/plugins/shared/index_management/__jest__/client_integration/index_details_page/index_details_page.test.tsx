@@ -13,6 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
@@ -1110,18 +1111,33 @@ describe('<IndexDetailsPage />', () => {
       },
     };
 
-    it('semantic text banner is visible if there is no semantic_text field in the mapping', async () => {
+    const platinumLicenseDeps = {
+      plugins: {
+        licensing: {
+          license$: {
+            subscribe: jest.fn((callback) => {
+              callback({ isActive: true, hasAtLeast: jest.fn(() => true) });
+              return { unsubscribe: jest.fn() };
+            }),
+          },
+        },
+      },
+    };
+
+    const openMappingsTab = async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
+      await screen.findByTestId('fieldsList');
+    };
+
+    it('semantic text banner is visible below a platinum license if there is no semantic_text field in the mapping', async () => {
       httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
         mappings: mockIndexMappingResponseWithoutSemanticText,
       });
 
-      await renderPage(undefined, {
-        core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
-      });
-
-      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
-      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
-      await screen.findByTestId('fieldsList');
+      // No licensing plugin is provided, so the license is treated as below platinum.
+      await renderPage();
+      await openMappingsTab();
 
       expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
     });
@@ -1131,13 +1147,34 @@ describe('<IndexDetailsPage />', () => {
         mappings: mockIndexMappingResponseWithSemanticText,
       });
 
-      await renderPage(undefined, {
-        core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
+      await renderPage();
+      await openMappingsTab();
+
+      expect(
+        screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
+      ).not.toBeInTheDocument();
+    });
+
+    it('semantic text banner is not visible with a platinum license', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
       });
 
-      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
-      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
-      await screen.findByTestId('fieldsList');
+      await renderPage(undefined, platinumLicenseDeps);
+      await openMappingsTab();
+
+      expect(
+        screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
+      ).not.toBeInTheDocument();
+    });
+
+    it('semantic text banner is not visible when semantic text is disabled by config', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
+      });
+
+      await renderPage(undefined, { config: { enableSemanticText: false } });
+      await openMappingsTab();
 
       expect(
         screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
@@ -1554,7 +1591,11 @@ describe('<IndexDetailsPage />', () => {
         hasAtLeast: jest.fn(() => true),
       };
 
-      beforeEach(async () => {
+      const setupAddSemanticTextField = async ({
+        hasMLPermissions,
+      }: {
+        hasMLPermissions: boolean;
+      }) => {
         httpRequestsMockHelpers.setInferenceModels({
           data: [
             {
@@ -1579,13 +1620,19 @@ describe('<IndexDetailsPage />', () => {
               },
             },
           },
-          core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
+          core: {
+            application: { capabilities: { ml: { canGetTrainedModels: hasMLPermissions } } },
+          },
           plugins: {
             share: {
               url: {
                 locators: {
+                  // The share mock's `url` is a singleton shared with the top-level `url` dependency,
+                  // so this locator must also satisfy consumers that call `getUrl`/`navigate`.
                   get: jest.fn(() => ({
                     useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+                    getUrl: jest.fn(),
+                    navigate: jest.fn(),
                   })),
                 },
               },
@@ -1604,7 +1651,24 @@ describe('<IndexDetailsPage />', () => {
         await clickMappingsTab();
         await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('createFieldForm');
-      });
+      };
+
+      const selectSemanticTextType = async (fieldName: string) => {
+        const nameInput = screen.getByTestId('nameParameterInput');
+        fireEvent.change(nameInput, { target: { value: fieldName } });
+
+        const typeComboBox = new EuiComboBoxTestHarness('fieldType');
+        await typeComboBox.select(getTypeLabel('semantic_text'));
+        await typeComboBox.close();
+
+        await screen.findByTestId('referenceFieldSelect');
+
+        // The inference id selection is part of the semantic text flow.
+        await screen.findByTestId('selectInferenceId');
+        await screen.findByTestId('inferenceIdButton');
+
+        return typeComboBox;
+      };
 
       afterEach(async () => {
         if (!screen.queryByTestId('indexDetailsMappingsPendingBlock')) return;
@@ -1627,18 +1691,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('can select semantic_text field', async () => {
-        const nameInput = screen.getByTestId('nameParameterInput');
-        fireEvent.change(nameInput, { target: { value: 'semantic_text_name' } });
-
-        const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        await typeComboBox.select(getTypeLabel('semantic_text'));
-        await typeComboBox.close();
-
-        await screen.findByTestId('referenceFieldSelect');
-
-        // The inference id selection is part of the semantic text flow.
-        await screen.findByTestId('selectInferenceId');
-        await screen.findByTestId('inferenceIdButton');
+        await setupAddSemanticTextField({ hasMLPermissions: true });
+        await selectSemanticTextType('semantic_text_name');
 
         await user.click(screen.getByTestId('inferenceIdButton'));
         await screen.findByTestId(`custom-inference_${customInferenceModel}`);
@@ -1646,6 +1700,42 @@ describe('<IndexDetailsPage />', () => {
         // can cancel new field
         const cancelButton = await screen.findByTestId('cancelButton');
         await user.click(cancelButton);
+      }, 20000);
+
+      it('can save a semantic_text field without ML permissions', async () => {
+        await setupAddSemanticTextField({ hasMLPermissions: false });
+        const typeComboBox = await selectSemanticTextType('semantic_text_name');
+
+        // The default inference endpoint is auto-selected once endpoints have loaded.
+        await waitFor(() =>
+          expect(screen.getByTestId('inferenceIdButton')).toHaveTextContent(
+            defaultInferenceEndpoints.ELSER
+          )
+        );
+
+        await user.click(screen.getByTestId('addButton'));
+        // The create-field submit handler focuses the field type input after async validation,
+        // which can re-open the combobox popover. Close it deterministically.
+        await typeComboBox.close();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).not.toBeDisabled()
+        );
+
+        await user.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
+
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
+            body: JSON.stringify({
+              semantic_text_name: {
+                type: 'semantic_text',
+                inference_id: defaultInferenceEndpoints.ELSER,
+              },
+            }),
+          });
+        });
+
+        expect(screen.queryByTestId('indexDetailsSaveMappingsError')).not.toBeInTheDocument();
       }, 20000);
     });
 

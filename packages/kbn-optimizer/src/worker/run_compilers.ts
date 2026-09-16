@@ -31,7 +31,7 @@ const observeCompiler = (
 ): Rx.Observable<CompilerMsg> => {
   const compilerMsgs = new CompilerMsgs(bundle.id);
   const done$ = new Rx.Subject<void>();
-  const { beforeRun, watchRun, done } = compiler.hooks;
+  const { beforeRun, watchRun, afterDone } = compiler.hooks;
 
   /**
    * Called by webpack as a single run compilation is starting
@@ -42,11 +42,11 @@ const observeCompiler = (
   ).pipe(mapTo(compilerMsgs.running()));
 
   /**
-   * Called by webpack as any compilation is complete. If the
+   * Called after all asynchronous done hooks, including report writers, finish. If the
    * needAdditionalPass property is set then another compilation
    * is about to be started, so we shouldn't send complete quite yet
    */
-  const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
+  const complete$ = Rx.fromEventPattern<Stats>((cb) => afterDone.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
       if (stats.compilation.needAdditionalPass) {
         return undefined;
