@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
+import { registerChatRoutes } from './chat';
+import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType, createBadRequestError } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import { registerChatApiRoutes } from './chat_api';
+
+const mockObservableIntoEventSourceStream = jest.fn();
+jest.mock('@kbn/sse-utils-server', () => ({
+  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+    mockObservableIntoEventSourceStream(observable, options),
+  cloudProxyBufferSize: 4096,
+}));
 
 const conversationCreatedEvent = {
   type: ChatEventType.conversationCreated,
@@ -195,6 +203,84 @@ describe('registerChatApiRoutes', () => {
     expect(result.status).toBe(500);
   });
 
+  it('streams the events-native shape: keeps execution_started + execution_terminated, drops round_complete', async () => {
+    const { router, handlers } = captureHandlers();
+    const roundCompleteEvent = { type: ChatEventType.roundComplete, data: {} };
+    const executionStartedEvent = {
+      id: 'r::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: '2024-01-01T00:00:00.000Z',
+      actor: { type: 'agent', id: 'a' },
+      execution_id: 'r::execution',
+      trigger_event_id: 'r::user_message',
+      data: { trigger_type: 'user_message' },
+    };
+    const executionTerminatedEvent = {
+      id: 'r::execution_terminated',
+      type: TimelineEventType.executionTerminated,
+      created_at: '2024-01-01T00:00:00.000Z',
+      actor: { type: 'agent', id: 'a' },
+      execution_id: 'r::execution',
+      trigger_event_id: 'r::user_message',
+      data: {},
+    };
+    const conversationUpdated = {
+      type: ChatEventType.conversationUpdated,
+      data: {
+        conversation_id: 'c',
+        title: 't',
+        access_control: { access_mode: 'private', entries: [] },
+      },
+    };
+    const executeAgent = jest.fn().mockResolvedValue({
+      events$: of(
+        roundCompleteEvent,
+        executionStartedEvent,
+        executionTerminatedEvent,
+        conversationUpdated
+      ),
+    });
+    mockObservableIntoEventSourceStream.mockReset();
+    mockObservableIntoEventSourceStream.mockReturnValue('BODY');
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {
+        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+      },
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const abortedSubject = new Subject<void>();
+    await handlers[`${chatApiPath}/converse/async`](
+      activeContext(true),
+      {
+        body: { agent_id: 'agent-1', input: 'Hello' },
+        events: { aborted$: abortedSubject.asObservable() },
+      },
+      response
+    );
+
+    expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
+    const [passedObservable] = mockObservableIntoEventSourceStream.mock.calls[0] as [
+      { pipe: (...operators: any[]) => any }
+    ];
+    const emitted = (await firstValueFrom(passedObservable.pipe(toArray()))) as Array<{
+      type: string;
+    }>;
+    expect(emitted.map((event) => event.type)).toEqual([
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionTerminated,
+      ChatEventType.conversationUpdated,
+    ]);
+  });
+
   it('404s the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
     const executeAgent = jest.fn();
@@ -220,5 +306,208 @@ describe('registerChatApiRoutes', () => {
     expect(response.notFound).toHaveBeenCalled();
     expect(result).toEqual({ status: 404 });
     expect(executeAgent).not.toHaveBeenCalled();
+  });
+});
+
+describe('user message acknowledgements', () => {
+  it('persists through sync converse without execution setup', async () => {
+    const { router, handlers } = captureHandlers();
+    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
+    const executeAgent = jest.fn();
+    const validateCallbackUrl = jest.fn();
+    const getStartServices = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ get: async () => conversation }),
+        appendUserMessage,
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validateAttachmentInputs: jest.fn().mockImplementation(async (attachments) =>
+          attachments?.map((attachment: { type: string; data: unknown }) => ({
+            id: 'attachment-1',
+            type: attachment.type,
+            data: attachment.data,
+          }))
+        ),
+      },
+      execution: { executeAgent },
+      callbackDeliveryService: { validateCallbackUrl },
+    };
+    const deps = {
+      router,
+      getInternalServices: () => services,
+      coreSetup: { getStartServices },
+      logger: loggingSystemMock.createLogger(),
+    };
+    registerChatApiRoutes(deps as never);
+    registerChatRoutes(deps as never);
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      {
+        ...activeContext(true),
+        agentBuilder: Promise.resolve({ spaces: { getSpaceId: () => 'default' } }),
+      },
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+        },
+      },
+      response
+    );
+    expect(result.status).toBe(200);
+    expect(appendUserMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'context', attachments: undefined })
+    );
+    expect(result.payload).toEqual(conversation);
+    expect(executeAgent).not.toHaveBeenCalled();
+    expect(validateCallbackUrl).not.toHaveBeenCalled();
+    expect(getStartServices).not.toHaveBeenCalled();
+  });
+
+  it('ignores execution options on a user message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
+    const executeAgent = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ get: async () => conversation }),
+        appendUserMessage,
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validateAttachmentInputs: jest.fn().mockResolvedValue(undefined),
+      },
+      execution: { executeAgent },
+    };
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: () => services,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+          agent_id: 'agent-1',
+          connector_id: 'connector-1',
+          read_only: true,
+          _execution_mode: 'local',
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(200);
+    expect(appendUserMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: '00000000-0000-4000-8000-000000000001' })
+    );
+    expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  it('requires conversation_id before persisting a user message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body: { trigger_mode: 'never', input: 'context' } },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
+  });
+
+  it('returns a bad request when user message attachments are invalid', async () => {
+    const { router, handlers } = captureHandlers();
+    const appendUserMessage = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ get: async () => ({}) }),
+        appendUserMessage,
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validateAttachmentInputs: jest
+          .fn()
+          .mockRejectedValue(
+            createBadRequestError('Attachment validation failed: Unknown attachment type: bad')
+          ),
+      },
+    };
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: () => services,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          attachments: [{ type: 'bad', data: {} }],
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(appendUserMessage).not.toHaveBeenCalled();
+  });
+
+  it('requires input or attachments before persisting a user message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
   });
 });

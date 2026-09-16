@@ -14,7 +14,7 @@ import type {
   RuleChangeHistoryDetail,
   RuleChangeHistoryListItem,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package for adapter/consumer convenience. */
 export type { ListRuleChangeHistoryResponse, RuleChangeHistoryDetail, RuleChangeHistoryListItem };
@@ -24,13 +24,13 @@ export type { ListRuleChangeHistoryResponse, RuleChangeHistoryDetail, RuleChange
  * site owns the list template.
  */
 const buildRuleChangeHistoryPath = (id: string): string =>
-  buildPath(ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH, { id });
+  buildPath(ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH, { id });
 
 /**
  * Encodes the `id` and `eventId` path parameters safely for the detail route.
  */
 const buildRuleChangeHistoryEventPath = (id: string, eventId: string): string =>
-  buildPath(`${ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`, { id, eventId });
+  buildPath(`${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`, { id, eventId });
 
 export interface ListRuleChangesParams {
   /** The rule identifier. */

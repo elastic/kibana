@@ -94,7 +94,7 @@ export const allowedExperimentalValues = Object.freeze({
    * serverless project with no linked projects reads exactly as it did before CPS. Off until the
    * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
-  defendCrossProjectSearch: false,
+  defendCrossProjectSearch: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -274,6 +274,12 @@ export const allowedExperimentalValues = Object.freeze({
   endpointForensicAnalysisSkill: false,
 
   /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
@@ -290,6 +296,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
   dexAiSkillRecommendPrebuiltRules: true,
+
+  /**
+   * Enables the detection-coverage Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillDetectionCoverage: false,
 
   /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
@@ -358,7 +370,9 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Threat-intel supply pipeline (indices, ingest adapters, create
    * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Enable with:
+   * off. Direct index access is not yet cross-space hardened, so this must remain
+   * disabled until that isolation is implemented or the administrator trust model
+   * is explicitly accepted. Enable with:
    *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
    */
   threatIntelSupplyEnabled: false,
