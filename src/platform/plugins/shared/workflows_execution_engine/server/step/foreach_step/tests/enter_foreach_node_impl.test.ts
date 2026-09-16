@@ -93,9 +93,12 @@ describe('EnterForeachNodeImpl', () => {
         expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
       });
 
-      it('should set step input equal to provided rendered JSON', async () => {
+      it('should persist foreach before items after evaluation succeeds', async () => {
         await underTest.run();
-        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+        expect(stepExecutionRuntime.setInput).toHaveBeenNthCalledWith(1, {
+          foreach: JSON.stringify(['item1', 'item2', 'item3']),
+        });
+        expect(stepExecutionRuntime.setInput).toHaveBeenNthCalledWith(2, {
           foreach: JSON.stringify(['item1', 'item2', 'item3']),
           items: ['item1', 'item2', 'item3'],
         });
@@ -173,6 +176,12 @@ describe('EnterForeachNodeImpl', () => {
         ).mockReturnValue(null);
         await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
+        );
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: '{{steps.testStep.array}}',
+        });
+        expect(stepExecutionRuntime.setInput).not.toHaveBeenCalledWith(
+          expect.objectContaining({ items: expect.anything() })
         );
       });
 

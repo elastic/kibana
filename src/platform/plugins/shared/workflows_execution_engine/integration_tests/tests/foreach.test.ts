@@ -541,6 +541,44 @@ steps:
     );
   });
 
+  describe('foreach body failure', () => {
+    it('fails the active iteration and foreach without starting later items', async () => {
+      const yaml = `
+steps:
+  - name: loop
+    foreach: '["a","b"]'
+    type: foreach
+    steps:
+      - name: body
+        type: ${FakeConnectors.constantlyFailing.actionTypeId}
+        connector-id: ${FakeConnectors.constantlyFailing.name}
+        with:
+          message: 'fail'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.FAILED);
+
+      const stepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      );
+      const foreachStep = stepExecutions.find((se) => se.stepId === 'loop');
+      const iteration0 = stepExecutions.find(
+        (se) => se.stepId === 'iteration-0' && se.stepType === 'foreach-iteration'
+      );
+      const iteration1 = stepExecutions.find(
+        (se) => se.stepId === 'iteration-1' && se.stepType === 'foreach-iteration'
+      );
+
+      expect(iteration0?.status).toBe(ExecutionStatus.FAILED);
+      expect(foreachStep?.status).toBe(ExecutionStatus.FAILED);
+      expect(iteration1).toBeUndefined();
+    });
+  });
+
   describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(
     'when invalid array is provided to foreach (%s)',
     (outerArrayTestCase) => {

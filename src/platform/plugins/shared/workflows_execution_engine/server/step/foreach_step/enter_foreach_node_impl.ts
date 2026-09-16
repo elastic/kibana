@@ -45,9 +45,16 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     // ExitForeachNodeImpl.
     this.stepIoService.pinForeachSource(this.node.stepId, foreachConfig);
 
+    const foreachInput = Array.isArray(foreachConfig)
+      ? JSON.stringify(foreachConfig)
+      : foreachConfig;
+    this.stepExecutionRuntime.setInput({
+      foreach: foreachInput,
+    });
+
     const evaluatedItems = this.getItems();
     this.stepExecutionRuntime.setInput({
-      foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
+      foreach: foreachInput,
       items: evaluatedItems,
     });
 
