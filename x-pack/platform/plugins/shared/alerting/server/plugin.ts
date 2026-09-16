@@ -68,7 +68,6 @@ import {
 import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
 import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
-import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 import { ALERTING_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import type {
@@ -887,14 +886,7 @@ export class AlertingPlugin {
           return alertDeletionClient!;
         },
         getRulesClient: () => {
-          // A caller running on a borrowed API key (e.g. an Agent Builder task) declares it with
-          // this header so created rules are minted their own framework-managed keys instead of
-          // persisting the caller's. Deriving it here covers every consumer of the request-scoped
-          // rules client (alerting routes, Detection Engine, o11y, ...) without per-route
-          // plumbing. Without API-key authentication the flag is a no-op.
-          return rulesClientFactory!.create(request, savedObjects, {
-            cloneApiKeysOnCreate: request.headers[ALERTING_CLONE_API_KEY_HEADER] === 'true',
-          });
+          return rulesClientFactory!.create(request, savedObjects);
         },
         getRulesSettingsClient: (withoutAuth?: boolean) => {
           if (withoutAuth) {
