@@ -122,6 +122,19 @@ export class AlertZeroPlugin
       },
     });
 
+    if (searchInferenceEndpoints) {
+      searchInferenceEndpoints.features.register({
+        featureId: 'alertzero_alert_triage',
+        parentFeatureId: 'security_search_inference_parent',
+        featureName: 'Alert Triage',
+        featureDescription: 'Model used by the Alert Triage Worker to classify alerts',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        // No ignoreGlobalDefault — falls back to platform default so the Worker works immediately
+        // after onboarding, unlike Hunt Watch's tiered TI features which use ignoreGlobalDefault: true.
+      });
+    }
+
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
