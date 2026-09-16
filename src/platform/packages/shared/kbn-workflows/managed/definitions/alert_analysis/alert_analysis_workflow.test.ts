@@ -654,8 +654,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // Swap to feature-registry connector and clear the uiSettings connector (Z1 invariant)
     expect(setStep.with.connector_id).toBe('');
     expect(setStep.with.connector_id_by_feature).toBe('{{ inputs.connectorIdByFeature }}');
+    // Ternary fallback: false must not be swallowed (Liquid `| default:` treats false as falsy)
+    expect(setStep.with.auto_close_enabled).toBe(
+      '${{ inputs.autoCloseEnabled != null ? inputs.autoCloseEnabled : variables.auto_close_enabled }}'
+    );
+    // Ternary fallback: absent threshold preserves the fetched runtime-config value
+    expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
+      '${{ inputs.autoCloseConfidenceScoreMinThreshold != null ? inputs.autoCloseConfidenceScoreMinThreshold : variables.auto_close_confidence_score_min_threshold }}'
+    );
     // Max threshold collapsed to 1 so the Worker's min threshold acts as a floor only
     expect(setStep.with.auto_close_confidence_score_max_threshold).toBe(1);
+    // String fields use Liquid | default: (safe because empty string is the only falsy edge case
+    // and neither field would be intentionally set to "")
+    expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
+    expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
   });
 
   it('pre-computes connector_configured to keep the analysis_enabled guard a simple and chain', () => {
