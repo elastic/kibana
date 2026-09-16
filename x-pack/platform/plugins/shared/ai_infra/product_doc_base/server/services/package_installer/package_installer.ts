@@ -39,7 +39,6 @@ import {
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
-  validateOpenApiArtifactArchive,
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
   createIndex,
@@ -155,19 +154,6 @@ export class PackageInstaller {
       return;
     }
     await ensureInferenceDeployed({ client: this.esClient, inferenceId });
-  }
-
-  private assertValidArtifactArchive(
-    zipArchive: ZipArchive,
-    archivePath: string,
-    { openApi = false }: { openApi?: boolean } = {}
-  ): void {
-    const validationResult = openApi
-      ? validateOpenApiArtifactArchive(zipArchive, { archivePath })
-      : validateArtifactArchive(zipArchive, { archivePath });
-    if (!validationResult.valid) {
-      throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
-    }
   }
 
   /**
@@ -356,7 +342,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(artifactFullPath);
-      this.assertValidArtifactArchive(zipArchive, artifactFullPath);
+      validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
         loadManifestFile(zipArchive),
@@ -506,7 +492,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath);
+      validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
         loadManifestFile(zipArchive),
@@ -714,7 +700,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi: true });
+      validateArtifactArchive(zipArchive);
 
       for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
@@ -891,7 +877,7 @@ export class PackageInstaller {
         inferenceId,
       });
       try {
-        await this.ensureArtifactArchiveAvailable(artifactFileName, { openApi: true });
+        await this.ensureArtifactArchiveAvailable(artifactFileName);
         return stackVersion;
       } catch (error) {
         if (isArtifactMissingError(error) && explicitVersionProvided && !fallbackVersionsLoaded) {
@@ -939,10 +925,7 @@ export class PackageInstaller {
     return `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
   }
 
-  private async ensureArtifactArchiveAvailable(
-    artifactFileName: string,
-    { openApi = false }: { openApi?: boolean } = {}
-  ): Promise<void> {
+  private async ensureArtifactArchiveAvailable(artifactFileName: string): Promise<void> {
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const precheckArtifactPath = `${
       this.artifactsFolder
@@ -955,7 +938,10 @@ export class PackageInstaller {
         this.artifactRepositoryProxyUrl
       );
       zipArchive = await openZipArchive(downloadedFullPath);
-      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi });
+      const validationResult = validateArtifactArchive(zipArchive);
+      if (!validationResult.valid) {
+        throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
+      }
     } finally {
       zipArchive?.close();
       await Fs.unlink(precheckArtifactPath).catch(() => {});
