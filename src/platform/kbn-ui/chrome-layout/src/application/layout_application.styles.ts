@@ -9,8 +9,9 @@
 
 import { css } from '@emotion/react';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { euiBorderStyles } from '@elastic/eui-theme-common';
 import { layoutVar, layoutLevels } from '../constants';
-import { getHighContrastBorder, getHighContrastFrame } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
@@ -18,8 +19,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
   const isFramedAppearance = appearance === 'framed';
 
   return (useEuiTheme: UseEuiTheme) => {
-    const { euiTheme, highContrastMode } = useEuiTheme;
-    const frame = getHighContrastFrame(useEuiTheme);
+    const { euiTheme } = useEuiTheme;
 
     return css`
       grid-area: application;
@@ -46,19 +46,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
-        ${highContrastMode
-          ? css`
-              outline: ${getHighContrastBorder(useEuiTheme)};
-
-              &:focus:not(:focus-visible) {
-                outline: ${getHighContrastBorder(useEuiTheme)};
-                outline-offset: 0;
-              }
-            `
-          : frame &&
-            css`
-              box-shadow: 0 0 0 ${frame.width} ${frame.color}, ${euiTheme.shadows.xs.down};
-            `}
+        ${euiBorderStyles(useEuiTheme, { side: 'all' })};
       `}
       ${!isFramedAppearance &&
       css`
