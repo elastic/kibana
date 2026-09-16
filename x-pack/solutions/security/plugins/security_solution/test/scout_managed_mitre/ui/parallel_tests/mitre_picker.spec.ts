@@ -35,7 +35,13 @@ test.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
+    });
+
+    // The rule is created through the UI, and Scout configs share a server, so it
+    // would otherwise survive into retries and the sibling coverage overview spec.
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.detectionRule.deleteAll();
     });
 
     test('loads tactics from the managed MITRE API and persists a tactic/technique selection after rule save', async ({
@@ -90,20 +96,9 @@ test.describe(
 
       // --- Assert the saved rule contains the seeded MITRE threat ---
       // After creation Kibana navigates to the rule detail page.
-      const ruleNameHeader = page.locator('[data-test-subj="header-page-title"]');
-      await expect(ruleNameHeader).toContainText(RULE_NAME, { timeout: 30_000 });
-
-      // The About section lists MITRE data in a description list. Find the row
-      // whose title is "MITRE ATT&CK" and assert the tactic and technique names.
-      const aboutSection = page.testSubj.locator('aboutRule');
-      const mitreRow = aboutSection
-        .locator('[data-test-subj="listItemColumnStepRuleDescription"]')
-        .filter({
-          has: page.locator('.euiDescriptionList__title', { hasText: 'MITRE ATT&CK' }),
-        });
-
-      await expect(mitreRow).toContainText(SEEDED_TACTIC_ALPHA.name);
-      await expect(mitreRow).toContainText(SEEDED_TECHNIQUE_ONE.name);
+      await expect(ruleCreateWizard.ruleDetailsTitle).toContainText(RULE_NAME, { timeout: 30_000 });
+      await expect(ruleCreateWizard.savedThreatTactics).toContainText(SEEDED_TACTIC_ALPHA.name);
+      await expect(ruleCreateWizard.savedThreatTechniques).toContainText(SEEDED_TECHNIQUE_ONE.name);
     });
   }
 );

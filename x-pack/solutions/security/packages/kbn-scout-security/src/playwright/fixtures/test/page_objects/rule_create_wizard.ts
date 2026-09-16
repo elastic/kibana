@@ -28,6 +28,9 @@ export class RuleCreateWizardPage {
   readonly addMitreTacticButton: Locator;
   readonly addMitreTechniqueButton: Locator;
   readonly createAndEnable: Locator;
+  readonly ruleDetailsTitle: Locator;
+  readonly savedThreatTactics: Locator;
+  readonly savedThreatTechniques: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -52,6 +55,11 @@ export class RuleCreateWizardPage {
     this.addMitreTacticButton = this.page.testSubj.locator('addMitreAttackTactic');
     this.addMitreTechniqueButton = this.page.testSubj.locator('addMitreAttackTechnique');
     this.createAndEnable = this.page.testSubj.locator('create-enable');
+    // Rule details page, reached after the rule is created.
+    this.ruleDetailsTitle = this.page.testSubj.locator('header-page-title');
+    const aboutSection = this.page.testSubj.locator('aboutRule');
+    this.savedThreatTactics = aboutSection.locator('[data-test-subj="threatTacticLink"]');
+    this.savedThreatTechniques = aboutSection.locator('[data-test-subj="threatTechniqueLink"]');
   }
 
   /**

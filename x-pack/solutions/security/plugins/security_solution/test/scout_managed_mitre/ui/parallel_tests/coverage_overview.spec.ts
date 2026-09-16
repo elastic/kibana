@@ -36,7 +36,7 @@ test.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     test('renders the tactic matrix from the managed source without a loading spinner or error callout', async ({
