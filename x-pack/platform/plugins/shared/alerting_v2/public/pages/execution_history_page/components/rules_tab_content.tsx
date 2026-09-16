@@ -148,7 +148,6 @@ const OUTCOME_OPTIONS: Array<{ value: RuleOutcomeFilter; text: string }> = [
   },
 ];
 
-
 type RulesCache = Record<string, { metadata: { name: string } }>;
 
 const RuleTimestampCell = ({
