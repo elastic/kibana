@@ -337,7 +337,6 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
-      ensureAiIndex,
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
     };

@@ -14,10 +14,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  ContextEnginePluginSetup,
-  ContextEnginePluginStart,
-} from '@kbn/context-engine-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
@@ -41,7 +38,6 @@ export interface AgentBuilderSmlStartDependencies {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
-  contextEngine?: ContextEnginePluginStart;
 }
 
 export interface AgentBuilderSmlPluginSetup {

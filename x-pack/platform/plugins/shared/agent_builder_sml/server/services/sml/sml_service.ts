@@ -45,7 +45,6 @@ export interface SmlServiceSetup {
 interface SmlServiceStartDeps {
   logger: Logger;
   securityAuthz?: AuthorizationServiceSetup;
-  ensureDefaultAiIndex: (spaceId: string) => Promise<boolean>;
 }
 
 export interface SmlServiceInstance {
@@ -76,7 +75,7 @@ class SmlServiceImpl implements SmlServiceInstance {
     };
   }
 
-  start({ logger, securityAuthz, ensureDefaultAiIndex }: SmlServiceStartDeps): SmlService {
+  start({ logger, securityAuthz }: SmlServiceStartDeps): SmlService {
     this.securityAuthz = securityAuthz;
     if (!securityAuthz) {
       logger.warn(
@@ -86,7 +85,6 @@ class SmlServiceImpl implements SmlServiceInstance {
     this.indexer = createSmlIndexer({
       registry: this.registry,
       logger: logger.get('indexer'),
-      ensureDefaultAiIndex,
     });
     this.crawler = new SmlCrawlerImpl({
       indexer: this.indexer,
