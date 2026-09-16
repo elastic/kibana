@@ -17,7 +17,7 @@ const baseRule: RuleApiResponse = {
   kind: 'signal',
   enabled: true,
   version: 1,
-  metadata: { name: 'Test Rule', signature_id: 'test-sig-id' },
+  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 } },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-* | STATS count() BY host.name' },

@@ -458,7 +458,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'alert',
           enabled: true,
           version: 1,
-          metadata: { name: 'CPU high', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'CPU high', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { base: 'FROM logs-* | LIMIT 1' },
@@ -625,7 +625,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'signal',
           enabled: true,
           version: 1,
-          metadata: { name: 'Signal rule', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'Signal rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { base: '', breach: { segment: '' } },
@@ -1089,7 +1089,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'alert',
           enabled: true,
           version: 1,
-          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1152,7 +1152,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'alert',
           enabled: true,
           version: 1,
-          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1256,7 +1256,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'alert',
           enabled: true,
           version: 1,
-          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1430,7 +1430,7 @@ describe('ComposeDiscoverFlyout', () => {
           kind: 'alert',
           enabled: true,
           version: 1,
-          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', tags: [] },
+          metadata: { name: 'Edit rule', signature_id: 'test-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 }, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
