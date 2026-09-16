@@ -59,9 +59,8 @@ apiTest.describe('kibana status api', { tag: tags.deploymentAgnostic }, () => {
     expect(typeof body.metrics.os.load['5m']).toBe('number');
     expect(typeof body.metrics.os.load['15m']).toBe('number');
 
-    // avg/max may be undefined early in the process lifetime; only null is invalid
-    expect(body.metrics.response_times.avg_in_millis).toBeDefined();
-    expect(body.metrics.response_times.max_in_millis).toBeDefined();
+    expect(typeof body.metrics.response_times.avg_in_millis).toBe('number');
+    expect(typeof body.metrics.response_times.max_in_millis).toBe('number');
 
     expect(typeof body.metrics.requests.total).toBe('number');
     expect(typeof body.metrics.requests.disconnects).toBe('number');
