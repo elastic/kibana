@@ -25,6 +25,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
@@ -33,6 +34,16 @@ import { SELF_CALL_HEADER } from './self_client_observer';
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
+
+/**
+ * Supplies request-scoped authentication headers that only Core may stamp. Called last, with the
+ * fully built outbound headers, so it can bind its output to the credential actually being sent.
+ * @internal
+ */
+export type SelfClientAuthHeaderAugmenter = (
+  request: KibanaRequest,
+  outboundHeaders: Headers
+) => Record<string, string> | undefined;
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
@@ -58,6 +69,7 @@ interface HttpSelfClientParams {
   readonly kibanaVersion: string;
   readonly log: Logger;
   readonly target: 'auto' | 'local';
+  readonly getAuthHeaderAugmenter?: () => SelfClientAuthHeaderAugmenter | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
@@ -255,6 +267,16 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     }
 
+    const augmenter = this.params.getAuthHeaderAugmenter?.();
+    if (augmenter) {
+      const augmented = augmenter(this.request, headers);
+      if (augmented) {
+        for (const [name, value] of Object.entries(augmented)) {
+          headers.set(name, value);
+        }
+      }
+    }
+
     return headers;
   }
 
@@ -357,7 +379,8 @@ const isProtectedHeader = (name: string) => {
     lowerName === 'host' ||
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
-    lowerName.startsWith('x-elastic-internal-')
+    lowerName.startsWith('x-elastic-internal-') ||
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
   );
 };
 

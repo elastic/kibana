@@ -60,6 +60,11 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  isExternalUiamCredential,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
@@ -606,6 +611,32 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientAuthHeaderAugmenter((request, outboundHeaders) => {
+        // The attestation is bound to the credential it travels with, and the receiving side
+        // recomputes it from the credential that arrives. Derive it from the outbound header, not
+        // the inbound request: authentication may have swapped the caller's credential for another
+        // one, and an attestation minted for a credential that is not sent can never validate.
+        const authorization = outboundHeaders.get('authorization');
+        const credential = authorization
+          ? HTTPAuthorizationHeader.parseFromValue(authorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+
+        // A user-created (external) UIAM key must not be attested: the receiving Kibana would honor
+        // the attestation and attach the UIAM shared secret, and UIAM rejects external keys
+        // presented with client authentication. The marker is only ever set on fake requests, where
+        // the inbound and outbound credentials are the same one.
+        if (isExternalUiamCredential(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential);
+      });
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
