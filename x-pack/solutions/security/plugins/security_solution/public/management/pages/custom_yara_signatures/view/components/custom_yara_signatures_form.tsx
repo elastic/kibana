@@ -18,9 +18,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, type monaco } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
 import {
   useValidateCustomYaraSignature,
   type UseValidateCustomYaraSignatureResultPayload,
@@ -99,6 +100,8 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
     const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
     const [isYaraSyntaxValid, setIsYaraSyntaxValid] = useState(false);
+    const [signatureEditorInstance, setSignatureEditorInstance] =
+      useState<monaco.editor.IStandaloneCodeEditor | null>(null);
 
     const selectedOsOptions = useMemo(
       () =>
@@ -154,6 +157,19 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
       enabled: !disabled,
       onValidationResult: handleValidationResult,
     });
+
+    useCustomYaraSignatureEditorMarkers({
+      editor: signatureEditorInstance,
+      errors: validationErrors,
+      warnings: validationWarnings,
+    });
+
+    const handleSignatureEditorDidMount = useCallback(
+      (editor: monaco.editor.IStandaloneCodeEditor) => {
+        setSignatureEditorInstance(editor);
+      },
+      []
+    );
 
     const handleOnChangeName = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -333,6 +349,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
             languageId="plaintext"
             value={yaraEntry.value}
             onChange={handleOnSignatureChange}
+            editorDidMount={handleSignatureEditorDidMount}
             width="100%"
             height={200}
             options={{
@@ -348,7 +365,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           />
         </EuiFormRow>
       ),
-      [disabled, getTestId, handleOnSignatureChange, yaraEntry.value]
+      [disabled, getTestId, handleOnSignatureChange, handleSignatureEditorDidMount, yaraEntry.value]
     );
 
     return (
