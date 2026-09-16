@@ -19,6 +19,15 @@ export interface EpisodeDataSourceServices {
   http: HttpStart;
 }
 
+/** Minimal field descriptor used to populate the KQL autocomplete field list. */
+export interface EpisodeSearchField {
+  name: string;
+  type: string;
+  esTypes: string[];
+  searchable: boolean;
+  aggregatable: boolean;
+}
+
 interface EpisodeDataSourceBaseParams {
   services: EpisodeDataSourceServices;
   abortSignal?: AbortSignal;
@@ -72,4 +81,11 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  /**
+   * Returns the field descriptors from this source that should be included in the KQL
+   * search bar autocomplete field list. When present, the episodes search input merges
+   * these fields into its synthetic data view so users can complete field names from this
+   * source in addition to the core v2 episode fields.
+   */
+  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
 }
