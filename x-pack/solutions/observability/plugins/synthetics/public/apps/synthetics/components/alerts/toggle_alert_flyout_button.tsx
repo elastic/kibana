@@ -68,6 +68,8 @@ export const ToggleAlertFlyoutButton = () => {
           name: CREATE_STATUS_RULE,
           'data-test-subj': 'createNewStatusRule',
           icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -99,6 +101,8 @@ export const ToggleAlertFlyoutButton = () => {
           name: CREATE_TLS_RULE_NAME,
           'data-test-subj': 'createNewTLSRule',
           icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
