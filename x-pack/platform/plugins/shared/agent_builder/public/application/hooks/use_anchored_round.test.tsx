@@ -50,7 +50,6 @@ const createRound = (overrides: Partial<ConversationRound> = {}): ConversationRo
 const streamState = (overrides: Partial<ReturnType<typeof useConversationStream>> = {}) =>
   ({
     isResponseLoading: false,
-    error: null,
     isResuming: false,
     ...overrides,
   } as ReturnType<typeof useConversationStream>);
@@ -141,13 +140,6 @@ describe('useAnchoredRoundIndex', () => {
     // Stream settles; the latch (re-set under the new id) keeps the anchor.
     useConversationStreamMock.mockReturnValue(streamState());
     rerender();
-    expect(result.current).toBe(0);
-  });
-
-  it('anchors the last round when the stream errors', () => {
-    useConversationStreamMock.mockReturnValue(streamState({ error: new Error('boom') }));
-
-    const { result } = renderHook(() => useAnchoredRoundIndex());
     expect(result.current).toBe(0);
   });
 

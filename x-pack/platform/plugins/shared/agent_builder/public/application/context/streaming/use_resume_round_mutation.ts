@@ -10,7 +10,6 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
 import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
@@ -33,7 +32,6 @@ export interface ResumeRoundVars {
 
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
-  setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearActiveStream: (conversationId: string) => void;
 }
 
@@ -45,7 +43,6 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  */
 export const useResumeRoundMutation = ({
   conversationStreamService,
-  setError,
   clearActiveStream,
 }: UseResumeRoundMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
@@ -87,7 +84,6 @@ export const useResumeRoundMutation = ({
       streamActions.clearPendingPrompts();
 
       let timelineExecutionId: string | undefined;
-      let stepsAtFailure: ConversationRoundStep[] = [];
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -104,43 +100,32 @@ export const useResumeRoundMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
-          tap({
-            next: (event) => {
-              if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
-                timelineExecutionId ??= event.execution_id;
-              }
-            },
-            // Runs before the upstream `finalize` that clears the draft on stream end.
-            error: () => {
-              stepsAtFailure =
-                conversationStreamService.getSnapshot(vars.conversationId)?.steps ?? [];
-            },
+          tap((event) => {
+            if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+              timelineExecutionId ??= event.execution_id;
+            }
           })
         );
 
+        // Failures are persisted by the server and arrive through the refetch below.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-        });
+        }).catch(() => {});
 
-        if (!controller.signal.aborted) {
-          clearActiveStream(vars.conversationId);
-          await releaseLocalContent({
-            refetch: streamActions.refetchConversation,
-            executionId: timelineExecutionId,
-            clearExecution: (persistedExecutionId) =>
-              conversationStreamService.clearPersistedExecution(
-                vars.conversationId,
-                persistedExecutionId
-              ),
-          });
-        }
-      } catch (err) {
-        setError(vars.conversationId, err, stepsAtFailure);
-        throw err;
+        clearActiveStream(vars.conversationId);
+        await releaseLocalContent({
+          refetch: streamActions.refetchConversation,
+          executionId: timelineExecutionId,
+          clearExecution: (persistedExecutionId) =>
+            conversationStreamService.clearPersistedExecution(
+              vars.conversationId,
+              persistedExecutionId
+            ),
+        });
       } finally {
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {

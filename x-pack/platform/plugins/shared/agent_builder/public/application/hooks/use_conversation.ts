@@ -16,10 +16,8 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
@@ -31,24 +29,19 @@ export const useConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { byConversationId } = useStreamingContext();
 
   const cached = queryClient.getQueryData<Conversation>(queryKey);
-
-  // The query is enabled whenever the conversation exists on the server. The only case we
-  // cannot know that is a new conversation before its first SSE event: the app navigates to
-  // its URL before the request reaches the server, and a GET would 404. The stream's
-  // `execution_started` fetch puts it in the cache, after which the gate never closes again.
   const isThisConversationStreaming = useIsCurrentConversationStreaming();
-  const isUnpersistedNewConversation = isThisConversationStreaming && !cached;
 
-  // @todo: HITL (#291069) and temporary error (#291068) guards, unchanged.
+  // A conversation is persisted once it has been fetched, or when nothing is streaming into it.
+  // The one unknown is a new conversation before its first SSE event: the app navigates to its
+  // URL before the request reaches the server, and a GET would 404. The stream's
+  // `execution_started` fetch puts it in the cache, after which it stays persisted.
+  const isPersisted = Boolean(cached) || !isThisConversationStreaming;
+
+  // @todo: HITL guard (#291069), unchanged.
   const isAwaitingPrompt =
     cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
-
-  const hasUnpersistedError = conversationId
-    ? Boolean(byConversationId[conversationId]?.error)
-    : false;
 
   const {
     data: conversation,
@@ -59,11 +52,7 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    enabled:
-      Boolean(conversationId) &&
-      !isUnpersistedNewConversation &&
-      !isAwaitingPrompt &&
-      !hasUnpersistedError,
+    enabled: Boolean(conversationId) && isPersisted && !isAwaitingPrompt,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -166,22 +155,7 @@ export const useConversationReadOnly = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const conversationId = useConversationId();
-  const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
-
-  const conversationRounds = useMemo(() => {
-    const rounds = conversation?.rounds ?? [];
-    if (Boolean(error) && pendingMessage) {
-      const pendingRound = createNewRound({
-        userMessage: pendingMessage,
-        steps: errorSteps,
-      });
-      return [...rounds, pendingRound];
-    }
-    return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
-
-  return conversationRounds;
+  return useMemo(() => conversation?.rounds ?? [], [conversation?.rounds]);
 };
 
 // Returns a flattened list of all steps across all rounds.
@@ -207,11 +181,8 @@ export const useHasPersistedConversation = () => {
 };
 
 export const useIsUnpersistedConversation = (conversation?: Conversation) => {
-  const conversationId = useConversationId();
-  const { pendingMessage, error } = useStreamRecord(conversationId);
   const isConversationStreaming = useIsCurrentConversationStreaming();
-
-  return Boolean((isConversationStreaming || (error && pendingMessage)) && !conversation);
+  return isConversationStreaming && !conversation;
 };
 
 export const useIsAwaitingPrompt = () => {

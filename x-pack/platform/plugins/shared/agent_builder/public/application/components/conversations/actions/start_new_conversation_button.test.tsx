@@ -10,16 +10,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { StartNewConversationButton } from './start_new_conversation_button';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
-}));
-
-jest.mock('../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_navigation', () => ({
@@ -36,7 +31,6 @@ jest.mock('@kbn/ebt-click', () => ({
 }));
 
 const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseConversationStream = jest.mocked(useConversationStream);
 const mockUseNavigation = jest.mocked(useNavigation);
 const mockUseLastAgentId = jest.mocked(useLastAgentId);
 
@@ -50,18 +44,12 @@ const renderButton = () =>
 describe('StartNewConversationButton', () => {
   let setConversationId: jest.Mock;
   let resetAttachments: jest.Mock;
-  let removeError: jest.Mock;
   let navigateToAgentBuilderUrl: jest.Mock;
 
   beforeEach(() => {
     setConversationId = jest.fn();
     resetAttachments = jest.fn();
-    removeError = jest.fn();
     navigateToAgentBuilderUrl = jest.fn();
-
-    mockUseConversationStream.mockReturnValue({
-      removeError,
-    } as unknown as ReturnType<typeof useConversationStream>);
 
     mockUseNavigation.mockReturnValue({
       navigateToAgentBuilderUrl,
