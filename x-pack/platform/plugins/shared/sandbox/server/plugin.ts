@@ -151,11 +151,15 @@ export class SandboxPlugin
     const logger = this.logger;
 
     const getOrCreateSession = (spaceId: string, sessionId: string): SandboxSession => {
-      const key = `${spaceId}:${sessionId}`;
-      let session = sessions.get(key);
+      // `:` is not a legal space-ID character so this cache key is unambiguous.
+      const cacheKey = `${spaceId}:${sessionId}`;
+      // `__` stays within [a-zA-Z0-9_.-]: the sandbox service passes this value as the
+      // Docker container name and rejects anything outside that character set.
+      const conversationId = `${spaceId}__${sessionId}`;
+      let session = sessions.get(cacheKey);
       if (!session) {
-        session = new SandboxSessionImpl(key, apiClient, logger.get('session'));
-        sessions.set(key, session);
+        session = new SandboxSessionImpl(conversationId, apiClient, logger.get('session'));
+        sessions.set(cacheKey, session);
       }
       return session;
     };
