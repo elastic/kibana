@@ -13,7 +13,8 @@ export type BulkUpdaterWriteResult = 'updated' | 'noop' | 'not_found';
 
 /**
  * Maps a single bulk-updater item response to a coarse write outcome.
- * Throws when ES returned an unexpected error (document missing or ES failure).
+ * Leftover version conflicts after OCC retries are a lost CAS (`noop`).
+ * Throws when ES returned an unexpected error.
  */
 export const getBulkUpdaterWriteResult = (
   item: BulkItemResponse | undefined
@@ -24,6 +25,10 @@ export const getBulkUpdaterWriteResult = (
 
   if (item.error?.type === 'document_missing_exception') {
     return 'not_found';
+  }
+
+  if (item.error?.type === 'version_conflict_engine_exception') {
+    return 'noop';
   }
 
   if (item.error) {

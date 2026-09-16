@@ -103,6 +103,7 @@ export class DocumentVersionManager {
         query: { ids: { values: missing } },
         size: missing.length,
         _source: false,
+        seq_no_primary_term: true,
         ignore_unavailable: true,
       });
 

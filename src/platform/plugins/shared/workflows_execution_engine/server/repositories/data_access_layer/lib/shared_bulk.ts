@@ -146,6 +146,31 @@ const sendBulkRequest = async <TExecution extends { id: string }>(
   });
 };
 
+const refreshWrittenIndexes = async (
+  esClient: ElasticsearchClient,
+  refresh: BulkRequestOptions<{ id: string }>['refresh'],
+  result: Array<BulkItemResponse | undefined>
+): Promise<void> => {
+  if (refresh !== true && refresh !== 'wait_for') {
+    return;
+  }
+
+  const indexes = [
+    ...new Set(
+      result
+        .filter((item) => item?.result === 'updated' || item?.result === 'created')
+        .map((item) => item?.index)
+        .filter((index): index is string => typeof index === 'string' && index.length > 0)
+    ),
+  ];
+
+  if (indexes.length === 0) {
+    return;
+  }
+
+  await esClient.indices.refresh({ index: indexes });
+};
+
 export async function sharedBulk<TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
   request: BulkRequestOptions<TExecution>,
@@ -267,7 +292,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
     if (toSend.length > 0) {
       const esResponse = await sendBulkRequest(
         esClient,
-        { ...request, items: toSend.map(({ plainItem }) => plainItem) },
+        { ...request, refresh: undefined, items: toSend.map(({ plainItem }) => plainItem) },
         logger
       );
 
@@ -383,6 +408,8 @@ export async function sharedBulk<TExecution extends { id: string }>(
     }
     // toSend empty → queuedItems already empty from splice(0) → loop exits naturally.
   }
+
+  await refreshWrittenIndexes(esClient, request.refresh, result);
 
   return { items: result, errors: hasErrors };
 }

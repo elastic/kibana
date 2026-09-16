@@ -122,12 +122,12 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const foundIds = new Set<string>();
 
     for (const doc of mgetResponse.docs) {
-      if ('found' in doc && doc.found && doc._source) {
+      if ('found' in doc && doc.found && doc._source && doc._id) {
         const docId = doc._id;
         if (!foundIds.has(docId)) {
           foundIds.add(docId);
           items.push({
-            document: doc._source as TExecution,
+            document: { ...doc._source, id: docId } as TExecution,
             index: doc._index,
             seqNo: doc._seq_no,
             primaryTerm: doc._primary_term,
@@ -149,6 +149,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       const searchResponse = await this.search({
         query: { ids: { values: mgetMissing } },
         size: mgetMissing.length,
+        seq_no_primary_term: true,
         _source_includes: options?.sourceIncludes,
         _source_excludes: options?.sourceExcludes,
       });
@@ -157,7 +158,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         if (hit._id && hit._source) {
           foundIds.add(hit._id);
           items.push({
-            document: hit._source as TExecution,
+            document: { ...hit._source, id: hit._id } as TExecution,
             index: hit._index,
             seqNo: hit._seq_no,
             primaryTerm: hit._primary_term,

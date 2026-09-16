@@ -162,7 +162,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
         if (toWrite.length > 0) {
           const esResponse = await sharedBulk(
             this.deps.esClient,
-            { refresh: request.refresh, items: toWrite.map(({ plainItem }) => plainItem) },
+            { items: toWrite.map(({ plainItem }) => plainItem) },
             this.deps.logger
           );
 
@@ -177,6 +177,15 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
               hasErrors = hasErrors || !!responseItem.error;
             }
           });
+        }
+      }
+
+      if (request.refresh === true || request.refresh === 'wait_for') {
+        const wrote = result.some(
+          (item) => item?.result === 'updated' || item?.result === 'created'
+        );
+        if (wrote) {
+          await this.deps.esClient.indices.refresh({ index: this.deps.indexName });
         }
       }
     }
