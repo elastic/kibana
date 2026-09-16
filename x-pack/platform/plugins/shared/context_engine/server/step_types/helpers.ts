@@ -89,6 +89,7 @@ export const kiWriterFromContext = ({ workflow, execution }: StepContext): KiWri
   metadata: {
     ...(workflow.version !== undefined && { version: workflow.version }),
     run_id: execution.id,
+    space_id: workflow.spaceId,
   },
 });
 
@@ -411,7 +412,7 @@ export const findKiRevision = async ({
       index: dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
-      query: isDataStream ? kiIdQuery(kiId) : { ids: { values: [kiId] } },
+      query: kiIdQuery(kiId),
       ...(isDataStream && {
         sort: [
           { '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } },

@@ -50,7 +50,10 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
 
-export const mockKiWriter = { uri: 'workflow://wf-1', metadata: { version: 3, run_id: 'exec-1' } };
+export const mockKiWriter = {
+  uri: 'workflow://wf-1',
+  metadata: { version: 3, run_id: 'exec-1', space_id: 'default' },
+};
 
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
 export const mockKiStepTelemetry = () => ({

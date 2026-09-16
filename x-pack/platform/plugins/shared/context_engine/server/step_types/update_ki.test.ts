@@ -10,6 +10,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
+import { kiIdQuery } from '../ai_indices/ki_get';
 import { getUpdateKiStepDefinition } from './update_ki';
 import {
   createMockStepContext,
@@ -115,7 +116,7 @@ describe('getUpdateKiStepDefinition', () => {
         index: 'ai-index-idx-my-ai-index',
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { ids: { values: ['ki-1'] } },
+        query: kiIdQuery('ki-1'),
         size: 2,
         seq_no_primary_term: true,
         _source: ['id', 'governance'],
