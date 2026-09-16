@@ -6,13 +6,17 @@
  */
 
 import { inject, injectable } from 'inversify';
+import Boom from '@hapi/boom';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import type { OpaqueBuilderFields, RuleEventEnrichment } from '@kbn/alerting-v2-rule-builders';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
   resolveAlertEventType,
   type AlertEventsBatchBuilder,
+  type BuildAlertEventsBaseOpts,
 } from '../build_alert_events';
 import {
   LoggerServiceToken,
@@ -20,7 +24,8 @@ import {
 } from '../../services/logger_service/logger_service';
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { BuilderTypeRegistry } from '../../builder_types';
 import type { PluginConfig } from '../../../config';
 
 @injectable()
@@ -32,7 +37,8 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(BuilderTypeRegistry) private readonly registry: BuilderTypeRegistry
   ) {
     this.maxGroupsPerExecution =
       pluginConfigAccessor.get<PluginConfig>().rules.run.maxGroupsPerExecution;
@@ -47,6 +53,59 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       if (!builder) {
+        // Resolve the enrichment hook once per run: look up the registered type
+        // and create a pre-bound callback. A type with no hook pays nothing here.
+        //
+        // Registration rejects `enrichRuleEvent` on write-time types (mode
+        // consistency check in assert_valid_definition.ts), so only
+        // execution-time types reach this branch. For those types,
+        // `state.parsedBuilderFields` is always set by CompileRuleQueryStep
+        // and carries the fields already validated against the type's
+        // `builderFieldsSchema`, satisfying the hook contract's "parsed builder
+        // fields" requirement.
+        //
+        // Ref: rule-event-generation-logic.md "The hook contract"
+        //      rule-event-generation-logic.md "Where the hook runs"
+        let enrichRuleEvent: BuildAlertEventsBaseOpts['enrichRuleEvent'];
+        const builderType = state.rule.metadata.builder_type;
+        if (builderType) {
+          const definition = step.registry.get(builderType);
+          if (definition?.enrichRuleEvent) {
+            const fields = (state.parsedBuilderFields ?? {}) as OpaqueBuilderFields;
+            const ruleIdentity = {
+              id: state.rule.id,
+              signature_id: state.rule.metadata.signature_id,
+              kind: state.rule.kind,
+            };
+            const hookFn = definition.enrichRuleEvent;
+            const bt = builderType;
+            // The try/catch is intentionally scoped to the hook call only. Any
+            // throw from the hook is a deterministic user-source error
+            // (RULE_EVENT_ENRICHMENT_FAILED). Faults elsewhere in buildBatch
+            // (group hashing, document building) propagate with their own
+            // classification.
+            //
+            // Ref: rule-event-generation-logic.md "Failure handling"
+            enrichRuleEvent = (row: Readonly<Record<string, unknown>>): RuleEventEnrichment => {
+              try {
+                return hookFn({ fields, rule: ruleIdentity, row });
+              } catch (hookError) {
+                const msg = hookError instanceof Error ? hookError.message : String(hookError);
+                throw createTaskRunError(
+                  Boom.badRequest(
+                    `Rule event enrichment hook for builder type "${bt}" threw: ${msg}`,
+                    {
+                      code: ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED,
+                      details: { builder_type: bt },
+                    }
+                  ) as Error,
+                  TaskErrorSource.USER
+                );
+              }
+            };
+          }
+        }
+
         builder = createAlertEventsBatchBuilder({
           ruleId: state.input.ruleId,
           spaceId: state.input.spaceId,
@@ -58,13 +117,16 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           activeGroupHashes: new Set(
             (state.activeGroups ?? []).map(({ group_hash: groupHash }) => groupHash)
           ),
+          enrichRuleEvent,
         });
 
         logger.debug({ message: 'Created alert events builder' });
       }
 
       const droppedGroupsBefore = builder.droppedGroupCount;
+
       const alertEventsBatch = builder.buildBatch([...state.esqlRowBatch]);
+
       // Count distinct groups newly dropped by the max this batch
       const groupsDroppedInBatch = builder.droppedGroupCount - droppedGroupsBefore;
 
