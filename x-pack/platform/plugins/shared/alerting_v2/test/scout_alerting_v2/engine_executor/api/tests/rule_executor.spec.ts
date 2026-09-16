@@ -286,7 +286,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        'stamps @timestamp in Elasticsearch on every event of a multi-batch run',
+        'stamps timestamp in Elasticsearch on every event of a multi-batch run',
         async ({ apiServices }) => {
           // The executor omits `@timestamp`; the data stream's final pipeline
           // assigns it at ingest. A run spanning several 100-row batches must
