@@ -32,7 +32,7 @@ import { OBSERVABILITY_ALERTING_INBOX_PATH } from '../../../../public/constants'
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
 
 const READER_ES_PRIVILEGES: ElasticsearchPrivileges = {
-  cluster: ['monitor'],
+  cluster: [],
   indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
 };
 
