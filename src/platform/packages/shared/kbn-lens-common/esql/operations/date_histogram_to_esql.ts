@@ -38,14 +38,22 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
       false
     )?.asMilliseconds() || 3600000;
   const rules = uiSettings?.get<Array<[string, string]>>('dateFormat:scaled');
+  let pattern: string = uiSettings?.get('dateFormat');
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
     if (!Array.isArray(rule) || rule.length !== 2) continue;
     if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
-      return { id: 'date', params: { pattern: rule[1] } };
+      pattern = rule[1];
+      break;
     }
   }
-  return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
+
+  const rangeMs = new Date(dateRange.toDate).getTime() - new Date(dateRange.fromDate).getTime();
+  if (rangeMs > 24 * 60 * 60 * 1000 && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
+    pattern = `YYYY-MM-DD ${pattern}`;
+  }
+
+  return { id: 'date', params: { pattern } };
 };
 
 export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (

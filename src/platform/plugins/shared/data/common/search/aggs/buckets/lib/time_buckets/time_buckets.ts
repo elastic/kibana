@@ -306,13 +306,23 @@ export class TimeBuckets {
     const interval = this.getInterval();
     const rules = this._timeBucketConfig['dateFormat:scaled'];
 
+    let format = this._timeBucketConfig.dateFormat;
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
       if (!rule[0] || (interval && interval >= moment.duration(rule[0]))) {
-        return rule[1];
+        format = rule[1];
+        break;
       }
     }
 
-    return this._timeBucketConfig.dateFormat;
+    // If the format shows time but not date, and the time range spans more than
+    // 24 hours, prepend the date — otherwise the same HH:mm value appears on
+    // multiple days and table rows look like duplicates.
+    const duration = this.getDuration();
+    if (duration && duration.asHours() > 24 && /[Hh]/.test(format) && !/D/.test(format)) {
+      format = `YYYY-MM-DD ${format}`;
+    }
+
+    return format;
   }
 }
