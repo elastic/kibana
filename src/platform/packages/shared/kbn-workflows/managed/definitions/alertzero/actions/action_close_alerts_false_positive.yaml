@@ -1,0 +1,91 @@
+version: "1"
+name: Close alerts as false positive
+description: >
+  AlertZero action: closes a set of security alerts as false positives.
+  Executed by the investigation proposal gate once an analyst approves (or
+  auto-approved by the Alert Triage Worker at Assisted autonomy), so the
+  close is attributed to the approving principal.
+enabled: true
+tags:
+  # Generic tag every action workflow carries; lets the catalog discover
+  # this workflow by tag rather than a hardcoded id list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata read by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Must live
+  # under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Close alerts as false positive
+    category: close
+    description: Closes the specified alerts with workflow_status=closed and workflow_reason=false_positive.
+    impact: high
+    reversible: false
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        # Every action workflow takes a single `actionInput` object. This is
+        # the one people get wrong: the gate passes exactly one key. An action
+        # declaring top-level fields (alertIds, reason, …) receives none.
+        actionInput:
+          type: object
+          description: >
+            Close payload. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names.
+          properties:
+            alertIds:
+              type: array
+              items:
+                type: string
+              description: Alert _id values to close.
+            reason:
+              type: string
+              enum:
+                - false_positive
+              description: Workflow reason recorded on each alert.
+          required:
+            - alertIds
+            - reason
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: closed_count
+    type: number
+  - name: alert_ids
+    type: array
+steps:
+  # Close the alerts. `conflicts: proceed` prevents one alert whose mapping
+  # changed mid-request from aborting the close for the entire batch.
+  # `reason: false_positive` is the cross-Watch contract: rule_tuning_worker.yaml
+  # harvests on `kibana.alert.workflow_reason == "false_positive"`, so this value
+  # must not change without coordinating with that Worker.
+  - name: close_alerts
+    type: kibana.SetAlertsStatus
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      status: closed
+      reason: false_positive
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            terms:
+              _id: "${{ inputs.actionInput.alertIds }}"
+
+  # Emit a structured result so the caller (Worker or gate) can verify the
+  # close landed. `workflow.execute` declares its output as unknown, so the
+  # parent falls back to a heuristic read of the last step unless the child
+  # emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      closed_count: "${{ inputs.actionInput.alertIds | size }}"
+      alert_ids: "${{ inputs.actionInput.alertIds }}"
