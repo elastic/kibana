@@ -39,12 +39,15 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationSearchOptions,
+  SerializedMetadataValue,
+  MetadataFieldValue,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
-import type { ConversationSearchOptions } from '../../../../common/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildPinnedFilter,
@@ -84,6 +87,7 @@ import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
+import { buildSearchSort, compileConversationFilter } from '../search';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -296,14 +300,23 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
-    const { query, agentId, page = 1, perPage = MAX_CONVERSATION_SEARCH_PER_PAGE } = options;
+    const {
+      query,
+      filter,
+      sort,
+      agentId,
+      page = 1,
+      perPage = MAX_CONVERSATION_SEARCH_PER_PAGE,
+    } = options;
+
+    const compiledFilter = compileConversationFilter(filter);
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
     if (agentIds.length === 0) {
       return { results: [], total: 0 };
     }
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = query?.trim();
     const titleMatch = trimmedQuery
       ? [
           {
@@ -341,17 +354,12 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: MAX_RESULT_WINDOW,
       from: (page - 1) * perPage,
       size: perPage,
-      // Relevance first; updated_at/created_at break the frequent _score ties so paging is stable.
-      sort: [
-        { _score: { order: 'desc' } },
-        { updated_at: { order: 'desc' } },
-        { created_at: { order: 'desc' } },
-      ],
+      sort: buildSearchSort({ sort, hasQuery: titleMatch.length > 0 }),
       seq_no_primary_term: true,
       _source: CONVERSATION_LIST_SOURCE_FIELDS,
       query: {
         bool: {
-          filter: this.buildBaseFilters(agentIds),
+          filter: [...this.buildBaseFilters(agentIds), ...(compiledFilter ? [compiledFilter] : [])],
           must: titleMatch,
         },
       },
