@@ -57,7 +57,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 ### Reflow after layout changes
 
-- After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above; do not keep old coordinates that leave gaps. Reflow each section separately.
+- After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above, and do not keep old coordinates that leave gaps. Reflow each section separately.
 - Update existing panels in place. Before applying, check the planned coordinates for avoidable gaps, overlaps, and grid bounds.
 
 ### Section grid rules
@@ -68,7 +68,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
 - When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
-- **Inserting above existing sections:** Top-level panels and sections share the outer grid. To free space above a section, use \`remove_section\` with \`panelAction: "promote"\`, recreate the empty section at a higher \`y\`, then move its original panels back with \`update_panel_layouts\`. Preserve panel IDs and configurations throughout; deleting or regenerating panels is not a layout operation.
+- **Inserting above existing sections:** Top-level panels and sections share the outer grid. To free space above a section, use \`remove_section\` with \`panelAction: "promote"\`, recreate the empty section at a higher \`y\`, then move its original panels back with \`update_panel_layouts\`. Preserve panel IDs and configurations throughout. Deleting or regenerating panels is not a layout operation.
 
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 

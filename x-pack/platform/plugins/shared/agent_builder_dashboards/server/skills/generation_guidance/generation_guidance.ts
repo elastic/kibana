@@ -41,14 +41,14 @@ For a new dashboard:
 
 For an existing dashboard:
 - Use \`edit_panels\` to change existing panel content in place. Reorganizing or enhancing a dashboard does not require replacing panels.
-- For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"); the chart author preserves unrelated presentation settings. Set \`presentationMode: "enhance"\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
-- Set \`appearanceOnly: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`presentationMode\`: a query change and presentation enhancement can share one edit.
+- For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings. Set \`presentationMode: "enhance"\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
+- Set \`appearanceOnly: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`presentationMode\`, so a query change and presentation enhancement can share one edit.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 - Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
 
 ## Panel Inputs
 
-Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels: pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
 - Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. Prefer this over \`source: "config"\` whenever you have an id: it costs far fewer tokens than repeating the payload, and for custom content it is the only way to place the panel that was actually generated — a custom content \`config\` takes a prompt and generates a **new** template, producing a different panel.

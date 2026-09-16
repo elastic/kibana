@@ -221,7 +221,7 @@ describe('createVisualizationGraph', () => {
           'system',
           expect.stringContaining(
             mode === 'enhance'
-              ? 'Reauthor the presentation:'
+              ? 'Reauthor the presentation.'
               : 'preserve unrelated presentation settings'
           ),
         ],

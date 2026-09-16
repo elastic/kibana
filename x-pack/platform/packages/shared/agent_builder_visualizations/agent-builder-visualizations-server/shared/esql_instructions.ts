@@ -36,7 +36,7 @@ For that purpose, follow these guidelines:
 ${index ? buildTargetIndexGuidance(index) : ''}
 ## Existing visualization edits
 
-When given existing queries, modify only what the request asks to change. Keep their source indices and unrelated filters, aggregations, and limits. This preservation takes precedence over the defaults below, which apply to new queries and requested changes only. A chart title or presentation change is not a request to select a different data source; change sources only when explicitly requested.
+When given existing queries, modify only what the request asks to change. Keep their source indices and unrelated filters, aggregations, and limits. This preservation takes precedence over the defaults below, which apply to new queries and requested changes only. A chart title or presentation change is not a request to select a different data source. Change sources only when explicitly requested.
 
 ## Human-readable column aliases
 

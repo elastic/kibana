@@ -21,8 +21,8 @@ export interface BuildVegaConfigParams {
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
   /**
-   * Appearance-only edit of `existingSpec`: reuse the ES|QL query recovered
-   * from it instead of regenerating one; only the presentation changes.
+   * Edit only the presentation of `existingSpec`. Reuses the ES|QL query
+   * recovered from the spec instead of regenerating one.
    */
   appearanceOnly?: boolean;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */

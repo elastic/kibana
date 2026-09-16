@@ -43,12 +43,9 @@ describe('registerSkills', () => {
     expect(skill.content).toContain(
       'a query change and presentation enhancement can share one edit'
     );
-    // Chart presentation guidance and Lens mechanics stay with the chart author.
-    expect(skill.content).not.toContain('CHART DESIGN GUIDANCE');
-    expect(skill.content).not.toContain('COLOR GUIDANCE');
+    // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
     expect(skill.content).not.toContain('CHART RULES FOR');
-    expect(skill.referencedContent?.some(({ name }) => name === 'color-palettes')).toBe(false);
   });
 
   it('assesses the dashboard and asks which prettify mode to apply', () => {

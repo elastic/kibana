@@ -108,8 +108,8 @@ const VisualizationStateAnnotation = Annotation.Root({
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   /**
-   * Appearance-only edit: the existing per-layer `data_source` is kept verbatim
-   * instead of being replaced by the (single) resolved query.
+   * Appearance-only edit. Each layer keeps its existing `data_source` instead
+   * of receiving the single resolved query.
    */
   appearanceOnly: Annotation<boolean>(),
   presentationMode: Annotation<PresentationMode>(),
@@ -240,9 +240,9 @@ export const createVisualizationGraph = async (
       const responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
-      // Pin the ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it. An appearance-only edit keeps
-      // each layer's existing data_source instead, so multi-query layers survive intact.
+      // Pin the ES|QL query before config validation. ES|QL generation owns the query,
+      // and config generation only binds columns from it. An appearance-only edit keeps
+      // each layer's existing data_source instead, so layers with different queries keep them.
       const existingCarriers = state.appearanceOnly
         ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
         : [];

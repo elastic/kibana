@@ -7,40 +7,27 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
-  getChartDesignPromptContent,
   getChartTypeConfigPromptContent,
   getChartTypeSelectionPromptContent,
 } from './chart_type_guidance';
 
 describe('chart type guidance', () => {
-  it('keeps Lens JSON out of the shared design guidance', () => {
-    const design = getChartDesignPromptContent();
-
-    expect(design).toContain('CHART DESIGN GUIDANCE');
-    expect(design).toContain('COLOR GUIDANCE');
-    expect(design).toContain('metric:');
-    expect(design).not.toContain('apply_color_to');
-    expect(design).not.toContain('styling.');
-    expect(design).not.toContain('CHART RULES FOR');
-  });
-
-  it('gives the config author each rule once, in Lens terms where available', () => {
+  it('lists the general rules before the chart-specific ones', () => {
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
     expect(metricConfig).toContain('CHART RULES FOR METRIC');
     expect(metricConfig).toContain('Omit the top-level `title`');
-    expect(metricConfig).not.toContain('No panel title');
     expect(metricConfig).toContain('styling.secondary.label.visible');
     expect(metricConfig).toContain('set `format` on the bound column');
-    expect(metricConfig).not.toContain('show values in their natural unit');
     expect(metricConfig).not.toContain('bar_horizontal');
+    expect(metricConfig.indexOf('set `format` on the bound column')).toBeLessThan(
+      metricConfig.indexOf('Omit the top-level `title`')
+    );
   });
 
   it('keeps metric values uncolored unless a deliberate color config is set', () => {
-    const design = getChartDesignPromptContent();
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(design).toContain('By default a metric is uncolored');
     expect(metricConfig).toContain('By default omit both `color` and `apply_color_to`');
     expect(metricConfig).toContain('Never set `apply_color_to` on its own');
     expect(metricConfig).toContain('only in the same edit that sets a deliberate `color` config');
@@ -52,32 +39,26 @@ describe('chart type guidance', () => {
     expect(xyConfig).toContain('Always set `legend.visibility`');
     expect(xyConfig).toContain('an unset value hides the legend entirely');
     expect(xyConfig).toContain('Use `"auto"`');
-    expect(xyConfig).toContain('`legend.layout: { type: "list" }` without statistics');
+    expect(xyConfig).toContain('`legend.layout: { type: "list" }` without legend statistics');
     expect(xyConfig).toContain('`legend.layout: { type: "grid" }` when statistics are set');
     expect(xyConfig).not.toContain('omit `legend.layout.type`');
     expect(xyConfig).not.toContain('Leave `legend.visibility` unset');
   });
 
   it('leaves pie legends to the Lens default', () => {
-    const design = getChartDesignPromptContent();
     const pieConfig = getChartTypeConfigPromptContent(SupportedChartType.Pie);
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(design).toContain('Keep the Lens default legend');
     expect(pieConfig).toContain('Omit `legend` entirely so Lens applies its defaults');
-    expect(pieConfig).toContain('drop any existing `legend` block');
+    expect(pieConfig).toContain('Drop any existing `legend` block');
     expect(metricConfig).not.toContain('Omit `legend` entirely');
   });
 
-  it('warns both authors that percent formatting multiplies already-scaled columns', () => {
-    const design = getChartDesignPromptContent();
+  it('warns that percent formatting multiplies already-scaled columns', () => {
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(design).toContain('Percent formatting multiplies by 100');
-    expect(design).toContain('plain numbers with a "%" suffix');
     expect(metricConfig).toContain('`{ type: "percent" }` multiplies the value by 100');
     expect(metricConfig).toContain('{ type: "number", decimals: 1, suffix: "%" }');
-    expect(metricConfig).not.toContain('Percent formatting multiplies by 100');
   });
 
   it('lists every chart type in the selection guidance', () => {

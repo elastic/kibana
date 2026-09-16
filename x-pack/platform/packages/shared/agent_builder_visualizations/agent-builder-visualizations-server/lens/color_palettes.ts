@@ -11,18 +11,8 @@ import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './types';
 
 /**
- * Shared color registry, in three parts:
- * - {@link colorDesignPromptContent}: when color adds meaning and how to choose a
- *   palette. Shared by every role.
- * - {@link getPaletteCatalogPromptContent}: the actual Kibana palette catalog
- *   (names, ids, colors) built from `@kbn/palettes`. Shared by every role.
- * - {@link getColorConfigPromptContent}: how to express palette choices in Lens
- *   config, plus the catalog subset the chart type needs. Lens config author
- *   only; the visualization agent gets the design guidance instead.
- */
-
-/**
- * Number of color stops sampled from each palette in catalog previews.
+ * Number of color stops sampled from each categorical palette in previews, and
+ * the default band count for dynamic palettes.
  */
 const CATALOG_PREVIEW_STEPS = 5;
 
@@ -67,32 +57,12 @@ const getCategoricalPalettePreviews = (): string[] =>
     })
   );
 
-export const colorDesignPromptContent = `COLOR GUIDANCE:
-- Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and categorical palettes for distinct categories. Neutral data with no useful color meaning stays uncolored.
-- Choose palettes from the Kibana palette catalog, never invented colors or legacy palettes: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude, and a categorical palette (e.g. "default", "severity") for distinct categories.
-- Thresholds are data values in the metric's own unit and scale. A bounded value alone does not establish meaningful status thresholds.`;
-
 /**
- * The Kibana palette catalog for agents: names, ids, and color previews drawn
- * from Kibana's own palette definitions.
- */
-export const getPaletteCatalogPromptContent = (): string =>
-  [
-    'KIBANA PALETTE CATALOG (from Kibana palette definitions; legacy palettes excluded):',
-    '',
-    `Gradient palettes — for threshold bands and magnitude (${CATALOG_PREVIEW_STEPS}-stop previews; charts may use fewer or more steps sampled from the same palette):`,
-    ...getDynamicPalettePreviews(CATALOG_PREVIEW_STEPS),
-    '',
-    `Categorical palettes — for distinct categories (${CATALOG_PREVIEW_STEPS}-color previews; configs reference the id, not the name):`,
-    ...getCategoricalPalettePreviews(),
-  ].join('\n');
-
-/**
- * Author-only color mechanics for charts that support dynamic or categorical
- * coloring: when to emit explicit steps or mappings, how to express them, and
- * the palette previews sized to the chart's band count (plus the band count of
- * an existing gauge being edited). Charts without such support get nothing;
- * their color policy lives entirely in their chart rules.
+ * Color mechanics for charts that support dynamic or categorical coloring:
+ * when to emit explicit steps or mappings, how to express them, and the
+ * palette previews sized to the chart's band count (plus the band count of an
+ * existing gauge being edited). Charts without such support get nothing.
+ * Their chart rules hold their whole color policy.
  */
 export const getColorConfigPromptContent = (
   chartType: SupportedChartType,
@@ -120,7 +90,7 @@ export const getColorConfigPromptContent = (
 
   if (supportsDynamic && supportsCategorical) {
     lines.push(
-      '- Numeric columns → `color: { type: "auto" }` by default; `color: { type: "dynamic", range, steps: [...] }` only when explicit steps are allowed. Keyword / text columns → `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`. NEVER apply categorical mapping to a numeric column or dynamic steps to a keyword column, and never use the deprecated `type: "legacy_dynamic"`.'
+      '- Numeric columns use `color: { type: "auto" }` by default, and `color: { type: "dynamic", range, steps: [...] }` only when explicit steps are allowed. Keyword and text columns use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`. NEVER apply categorical mapping to a numeric column or dynamic steps to a keyword column, and never use the deprecated `type: "legacy_dynamic"`.'
     );
   }
 
@@ -130,14 +100,14 @@ export const getColorConfigPromptContent = (
         ? 'the band count from the gauge rules above'
         : `exactly ${stepsCount} step${stepsCount === 1 ? '' : 's'}`;
     lines.push(
-      `- Explicit \`steps\`: pick exactly ONE palette from the previews below — "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude. Use ${bandCount}, with every \`steps[*].color\` hex copied from that palette's preview line for that count.`,
-      "- Step thresholds are data values in the metric column's unit and scale, not display labels; for rates, do not assume per-second thresholds unless the ES|QL query computes per-second values. Keep palette order; to reverse, reverse the `steps` colors yourself (there is no `reverse` field)."
+      `- For explicit \`steps\`, pick exactly ONE palette from the previews below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude. Use ${bandCount}, with every \`steps[*].color\` hex copied from that palette's preview line for that count.`,
+      "- Step thresholds are data values in the metric column's unit and scale, not display labels. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values. Keep palette order. To reverse it, reverse the `steps` colors yourself, since there is no `reverse` field."
     );
   }
 
   if (supportsCategorical) {
     lines.push(
-      '- Categorical `palette` MUST be one of the ids below verbatim (e.g. `"default"`, `"severity"`). Leave `mapping: []` unless the user names specific values to color; then use `color: { type: "color_code", value: "#hex" }` per entry, with the hex drawn from one of the palettes below.'
+      '- Categorical `palette` MUST be one of the ids below verbatim (e.g. `"default"`, `"severity"`). Leave `mapping: []` unless the user names specific values to color. In that case use `color: { type: "color_code", value: "#hex" }` per entry, with the hex drawn from one of the palettes below.'
     );
   }
 

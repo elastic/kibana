@@ -27,17 +27,21 @@ describe('Lens config prompt', () => {
     const prompt = createPrompt();
 
     expect(prompt).toContain('preserve unrelated presentation settings');
-    expect(prompt).toContain('Appearance-only edit: each layer keeps its existing data_source');
+    expect(prompt).toContain(
+      'This is an appearance-only edit. Each layer keeps its existing data_source'
+    );
     expect(prompt).not.toContain('Bind only result columns from the resolved ES|QL query');
-    expect(prompt).not.toContain('Reauthor the presentation:');
+    expect(prompt).not.toContain('Reauthor the presentation.');
   });
 
   it('switches enhancement to reauthoring without the preservation rule', () => {
     const prompt = createPrompt('enhance');
 
-    expect(prompt).toContain('Reauthor the presentation: apply every applicable chart rule');
+    expect(prompt).toContain('Reauthor the presentation. Apply every applicable chart rule');
     expect(prompt).toContain('Existing display text is not a naming instruction');
-    expect(prompt).toContain('Appearance-only edit: each layer keeps its existing data_source');
+    expect(prompt).toContain(
+      'This is an appearance-only edit. Each layer keeps its existing data_source'
+    );
     expect(prompt).not.toContain('preserve unrelated presentation settings');
   });
 

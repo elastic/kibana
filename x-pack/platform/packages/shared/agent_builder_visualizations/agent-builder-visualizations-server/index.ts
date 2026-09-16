@@ -6,11 +6,7 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export {
-  getChartDesignPromptContent,
-  getChartTypeSelectionPromptContent,
-} from './lens/chart_type_guidance';
-export { getPaletteCatalogPromptContent } from './lens/color_palettes';
+export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export { presentationModeSchema } from './lens/types';

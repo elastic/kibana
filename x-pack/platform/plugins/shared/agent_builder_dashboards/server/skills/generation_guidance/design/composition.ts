@@ -8,7 +8,7 @@
 export const dashboardCompositionPrompt = `
 ## Dashboard Composition Guidelines
 
-A well-composed dashboard orders panels as summary metrics → trends → breakdowns and distributions:
+A well-composed dashboard orders panels as summary metrics, then trends, then breakdowns and distributions:
 
 1. **Consider a markdown panel when it adds value** — to set context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one.
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
@@ -22,8 +22,8 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 ### When to use sections
 
 - Keep small dashboards flat when a single sequence of panels is easy to scan.
-- Use sections to separate summary metrics, trends, and breakdowns in that order. Each section must contain only panels matching its purpose: a "Key metrics" section contains summary Metric/Gauge panels, not time-series charts or ranking tables.
-- Use per-domain sections when they make the dashboard clearer; keep summary metrics → trends → breakdowns ordered within each domain.
+- Use sections to separate summary metrics, trends, and breakdowns in that order. Each section must contain only panels matching its purpose. A "Key metrics" section contains summary Metric/Gauge panels, not time-series charts or ranking tables.
+- Use per-domain sections when they make the dashboard clearer. Within each domain, keep the same order of summary metrics, then trends, then breakdowns.
 - Prefer sections for larger dashboards, especially when there are roughly 6 or more visualization panels or when the layout would otherwise feel long and hard to navigate.
 - Do not add sections only for decoration. Use them when they make the dashboard structure clearer.
 `;

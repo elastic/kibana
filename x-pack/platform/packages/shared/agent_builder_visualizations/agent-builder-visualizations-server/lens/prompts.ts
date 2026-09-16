@@ -16,11 +16,11 @@ const getEditRulesPromptContent = (presentationMode: PresentationMode): string =
     'EDIT RULES:',
     '- Return the complete updated configuration.',
     presentationMode === 'enhance'
-      ? '- Reauthor the presentation: apply every applicable chart rule below, replacing custom styling and colors the rules do not call for. Use the existing configuration for data, bindings, and thresholds only, not as a presentation template.'
-      : '- Apply the requested changes and any adjustment they require; preserve unrelated presentation settings. Keep ambiguous settings and report the ambiguity in the authoring note.',
+      ? '- Reauthor the presentation. Apply every applicable chart rule below, replacing custom styling and colors the rules do not call for. Use the existing configuration for data, bindings, and thresholds only, not as a presentation template.'
+      : '- Apply the requested changes and any adjustment they require, and preserve unrelated presentation settings. Keep ambiguous settings and report the ambiguity in the authoring note.',
     ...(presentationMode === 'enhance'
       ? [
-          '- Derive every title, label, and description from the query alone, naming the measure and breakdown it computes. Existing display text is not a naming instruction: do not keep, restyle, or recapitalize it unless the query or <user_query> proves it.',
+          '- Derive every title, label, and description from the query alone, naming the measure and breakdown it computes. Existing display text is not a naming instruction. Do not keep, restyle, or recapitalize it unless the query or <user_query> proves it.',
         ]
       : []),
   ].join('\n');
@@ -60,7 +60,7 @@ ${JSON.stringify(schema)}
 1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
 2. ${
       keepsExistingQueries
-        ? 'Appearance-only edit: each layer keeps its existing data_source, column bindings, order, and displayed measures from the existing configuration.'
+        ? 'This is an appearance-only edit. Each layer keeps its existing data_source, column bindings, order, and displayed measures from the existing configuration.'
         : 'Bind only result columns from the resolved ES|QL query supplied with the request.'
     }
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.

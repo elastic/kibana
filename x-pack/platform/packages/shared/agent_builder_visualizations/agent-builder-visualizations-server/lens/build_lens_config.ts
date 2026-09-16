@@ -38,8 +38,8 @@ export interface BuildLensConfigParams {
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   /**
-   * Appearance-only edit of `parsedExistingConfig`: skip query generation and
-   * keep the existing query and column bindings; only the presentation changes.
+   * Edit only the presentation of `parsedExistingConfig`. Skips query
+   * generation and keeps the existing query and column bindings.
    */
   appearanceOnly?: boolean;
   presentationMode?: PresentationMode;

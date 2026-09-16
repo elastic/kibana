@@ -130,7 +130,7 @@ const panelRequestBaseSchema = z.object({
     .max(256)
     .optional()
     .describe(
-      'Exact index, alias, or datastream identified for this panel. Pass it whenever known: each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
+      'Exact index, alias, or datastream identified for this panel. Pass it whenever known, because each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
     ),
   esql: z
     .string()
@@ -198,12 +198,12 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .boolean()
       .optional()
       .describe(
-        '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds): the existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
+        '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds). The existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
       ),
     presentationMode: presentationModeSchema
       .optional()
       .describe(
-        'Lens only. "enhance" applies all presentation defaults, replacing custom styling; "focused" (default) changes only requested settings. Independent of appearanceOnly: enhancement can accompany a query change.'
+        'Lens only. "enhance" applies all presentation defaults, replacing custom styling. "focused" (default) changes only requested settings. Independent of appearanceOnly, so enhancement can accompany a query change.'
       ),
   });
 
