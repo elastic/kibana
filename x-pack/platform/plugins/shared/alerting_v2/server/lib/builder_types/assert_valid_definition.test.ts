@@ -542,4 +542,39 @@ describe('assertValidDefinition — check 8: mode consistency', () => {
   it('accepts an execution-time type with no deriveRuleFields', () => {
     passes({ compilation: 'execution_time', deriveRuleFields: undefined });
   });
+
+  it('accepts enrichRuleEvent on an execution-time type', () => {
+    passes({
+      compilation: 'execution_time',
+      enrichRuleEvent: jest.fn(),
+    });
+  });
+
+  it('rejects enrichRuleEvent on a write-time type', () => {
+    rejects(
+      {
+        compilation: 'write_time',
+        enrichRuleEvent: jest.fn(),
+      },
+      /mode consistency check/
+    );
+  });
+
+  it('rejects enrichRuleEvent when compilation is not set (defaults to write_time semantics)', () => {
+    rejects(
+      {
+        compilation: undefined,
+        enrichRuleEvent: jest.fn(),
+      },
+      /mode consistency check/
+    );
+  });
+
+  it('accepts a write-time type with no enrichRuleEvent', () => {
+    passes({ compilation: 'write_time', enrichRuleEvent: undefined });
+  });
+
+  it('accepts an execution-time type with no enrichRuleEvent', () => {
+    passes({ compilation: 'execution_time', enrichRuleEvent: undefined });
+  });
 });
