@@ -12,6 +12,16 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
+import type { ResponseActionsClient } from './services';
+
+// Keep the real `./services` module, but replace the response actions client factory so tests can
+// assert exactly what `getInternalResponseActionsClient()` hands it.
+jest.mock('./services', () => ({
+  ...jest.requireActual('./services'),
+  getResponseActionsClient: jest.fn(),
+}));
+
+import { getResponseActionsClient } from './services';
 
 describe('test endpoint app context services', () => {
   it('should return undefined on getManifestManager if dependencies are not enabled', async () => {
@@ -233,6 +243,103 @@ describe('test endpoint app context services', () => {
 
       expect(result).toBe(expectedSpace);
       expect(service.getActiveSpace).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('getCurrentUsername', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    let getCurrentUserMock: jest.Mock;
+
+    const startService = () => {
+      startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it("returns the authenticated user's username for the request", () => {
+      startService();
+      getCurrentUserMock.mockReturnValue({ username: 'some-analyst' });
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('some-analyst');
+      expect(getCurrentUserMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns undefined when the request is unauthenticated', () => {
+      startService();
+      getCurrentUserMock.mockReturnValue(null);
+
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+    });
+
+    it('returns undefined when the security plugin is not available', () => {
+      // no setup/start — `this.security` is null
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+    });
+  });
+
+  describe('getInternalResponseActionsClient', () => {
+    let service: EndpointAppContextService;
+
+    const responseActionsClientFactoryMock = getResponseActionsClient as jest.Mock;
+    const fakeClient = {} as ResponseActionsClient;
+
+    const startService = () => {
+      service = new EndpointAppContextService();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(createMockEndpointAppContextServiceStartContract());
+    };
+
+    beforeEach(() => {
+      responseActionsClientFactoryMock.mockReset();
+      responseActionsClientFactoryMock.mockReturnValue(fakeClient);
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('defaults isAutomated to true to preserve behavior for rule-triggered actions', () => {
+      startService();
+
+      const client = service.getInternalResponseActionsClient({ spaceId: 'default' });
+
+      expect(client).toBe(fakeClient);
+      expect(responseActionsClientFactoryMock).toHaveBeenCalledTimes(1);
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      expect(options.isAutomated).toBe(true);
+    });
+
+    it('passes isAutomated: false through to the response actions client factory', () => {
+      startService();
+
+      const client = service.getInternalResponseActionsClient({
+        spaceId: 'default',
+        isAutomated: false,
+      });
+
+      expect(client).toBe(fakeClient);
+      expect(responseActionsClientFactoryMock).toHaveBeenCalledTimes(1);
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      expect(options.isAutomated).toBe(false);
+    });
+
+    it('throws if the service was not started', () => {
+      service = new EndpointAppContextService();
+
+      expect(() => service.getInternalResponseActionsClient({ spaceId: 'default' })).toThrow(
+        /has not been started/
+      );
+      expect(responseActionsClientFactoryMock).not.toHaveBeenCalled();
     });
   });
 });
