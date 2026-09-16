@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
+
 import { Minimatch } from 'minimatch';
 
 import {
@@ -42,12 +44,13 @@ export interface OxlintConfig {
 
 const NO_FLOATING_PROMISES = 'typescript/no-floating-promises';
 
-/** oxlint has no `--ext`; everything but .ts/.tsx is excluded so only TS sources are linted */
-const NON_TS_IGNORE_PATTERNS = ['**/*.{js,jsx,mjs,cjs,mts,cts,json,vue,svelte,astro}'];
-
-// Mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
-// TS1016) that ESLint's parser does not, and declaration files are never type-checked either.
-const DECLARATION_IGNORE_PATTERNS = ['**/*.d.ts'];
+const IGNORE_PATTERNS = [
+  // oxlint has no `--ext`; everything but .ts/.tsx is excluded so only TS sources are linted
+  '**/*.{js,jsx,mjs,cjs,mts,cts,json,vue,svelte,astro}',
+  // mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
+  // TS1016) that ESLint's parser does not, and declaration files are never type-checked either
+  '**/*.d.ts',
+];
 
 const HAS_MAGIC = /[*?[{]/;
 const compile = (glob: string) => new Minimatch(glob, { dot: true });
@@ -117,7 +120,7 @@ const lowerBound = (sorted: readonly string[], prefix: string) => {
  */
 export function generateOxlintConfig(
   projects: readonly LintProject[],
-  repoRelFiles: readonly string[]
+  repoRelFiles: Iterable<string>
 ): OxlintConfig {
   const files = [...repoRelFiles].sort();
   const sortedProjects = [...projects].sort(
@@ -147,9 +150,7 @@ export function generateOxlintConfig(
         continue;
       }
       covered.add(file);
-      coveredDirs.add(
-        rel.includes('/') ? prefix + rel.slice(0, rel.lastIndexOf('/')) : prefix.slice(0, -1)
-      );
+      coveredDirs.add(Path.posix.dirname(file));
       for (const { glob, mm } of RULE_GLOBS) {
         if (mm.match(rel)) {
           on.add(prefix + glob);
@@ -171,12 +172,13 @@ export function generateOxlintConfig(
       rules: { [NO_FLOATING_PROMISES]: NO_FLOATING_PROMISES_RULE },
     });
 
+    const ownedDirs = [...coveredDirs];
     const uncoveredNested = projectDirs
       .filter(
         (dir) =>
           dir !== project.repoRelDir &&
           dir.startsWith(prefix) &&
-          ![...coveredDirs].some((d) => d === dir || d.startsWith(`${dir}/`))
+          !ownedDirs.some((owned) => owned === dir || owned.startsWith(`${dir}/`))
       )
       .map((dir) => `${dir}/**/*`);
 
@@ -194,8 +196,7 @@ export function generateOxlintConfig(
     rules: { ...BASE_RULES },
     overrides,
     ignorePatterns: [
-      ...NON_TS_IGNORE_PATTERNS,
-      ...DECLARATION_IGNORE_PATTERNS,
+      ...IGNORE_PATTERNS,
       // files no active project covers were never linted by the per-project ESLint run
       ...files.filter((file) => !covered.has(file)),
     ],

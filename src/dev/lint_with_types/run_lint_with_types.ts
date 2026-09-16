@@ -53,7 +53,7 @@ export function runLintWithTypes() {
           include: project.config.include ?? [],
           exclude: project.config.exclude ?? [],
         })),
-        Array.from(files)
+        files
       );
       Fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
       log.info(
@@ -67,9 +67,11 @@ export function runLintWithTypes() {
           'oxlint',
           [
             '--type-aware',
-            ...['--config', Path.relative(REPO_ROOT, CONFIG_PATH)],
+            '--config',
+            Path.relative(REPO_ROOT, CONFIG_PATH),
             '--disable-nested-config',
-            ...['--ignore-path', '.eslintignore'],
+            '--ignore-path',
+            '.eslintignore',
             ...(flags.fix ? ['--fix'] : []),
             target ? Path.relative(REPO_ROOT, target.directory) : '.',
           ],
