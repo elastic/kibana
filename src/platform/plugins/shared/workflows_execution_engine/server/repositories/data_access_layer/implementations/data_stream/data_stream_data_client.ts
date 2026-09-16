@@ -301,6 +301,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }> = [];
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIds = new Map<string, number>();
+    const dataStreamMetadata = this.deps.metadataManager.getMeta();
 
     const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
       if (!this.deps.dateField) return item;
@@ -326,7 +327,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
           });
         } else {
           sendable.push({
-            item: { ...withTimestamp(item), index: this.deps.dataStreamName },
+            item: { ...withTimestamp(item), index: dataStreamMetadata.writableIndex },
             originalIndex: i,
           });
         }
@@ -357,7 +358,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
               item: {
                 ...withTimestamp(item),
                 operation: 'create',
-                index: this.deps.dataStreamName,
+                index: dataStreamMetadata.writableIndex,
               },
               originalIndex: i,
             });
