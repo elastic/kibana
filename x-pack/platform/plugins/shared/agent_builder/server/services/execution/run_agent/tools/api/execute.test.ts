@@ -13,6 +13,7 @@ import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/a
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { agentBuilderMocks } from '../../../../../mocks';
 import { createExecuteApiTool } from './execute';
 import type { ApiExecuteResultData } from './execute';
@@ -133,6 +134,7 @@ describe('createExecuteApiTool', () => {
       method: 'GET',
       query: { v8format: true },
       body: undefined,
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
       access: 'public',
     });
     const data = result.results[0].data as ApiExecuteResultData;
@@ -544,6 +546,7 @@ describe('createExecuteApiTool', () => {
       method: 'POST',
       query: undefined,
       body: { title: 'Investigation' },
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
       access: 'public',
     });
   });
