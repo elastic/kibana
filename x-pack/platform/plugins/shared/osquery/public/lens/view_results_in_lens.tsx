@@ -18,6 +18,8 @@ import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/co
 import { FilterStateStore } from '@kbn/es-query';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import type { LogsDataView } from '../common/hooks/use_logs_data_view';
+import type { DateWindowResult } from '../common/pack_view_date_window';
+import { isScheduledExecution } from '../common/is_scheduled_execution';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
@@ -26,7 +28,7 @@ interface ViewResultsInLensActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
-  mode?: string;
+  mode?: DateWindowResult['mode'];
   scheduleId?: string;
   executionCount?: number;
   onMenuItemClick?: () => void;
@@ -51,7 +53,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
       event.preventDefault();
 
       if (logsDataView) {
-        const isScheduled = !!scheduleId && executionCount != null;
+        const isScheduled = isScheduledExecution(scheduleId, executionCount);
         const defaultFrom = isScheduled ? 'now-7d' : 'now-1d';
         lensService?.navigateToPrefilledEditor(
           {
@@ -59,7 +61,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
             time_range: {
               from: startDate ?? defaultFrom,
               to: endDate ?? 'now',
-              mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+              mode: mode ?? (startDate || endDate ? 'absolute' : 'relative'),
             },
             attributes: isScheduled
               ? getLensAttributes(logsDataView, { scheduleId, executionCount })

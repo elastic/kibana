@@ -135,11 +135,39 @@ describe('ViewResultsInLensAction', () => {
           time_range: expect.objectContaining({
             from: '2025-06-15T10:00:00.000Z',
             to: '2025-06-15T11:00:00.000Z',
+            mode: 'absolute',
           }),
           attributes: expect.objectContaining({
             visualizationType: 'lnsPie',
             title: 'Action test-action-123 results',
           }),
+        }),
+        { openInNewTab: true, skipAppLeave: true }
+      );
+    });
+
+    it('should forward mode: relative with an open now end for live windows', () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_range: {
+            from: '2025-06-15T10:00:00.000Z',
+            to: 'now',
+            mode: 'relative',
+          },
         }),
         { openInNewTab: true, skipAppLeave: true }
       );
@@ -240,6 +268,7 @@ describe('ViewResultsInLensAction', () => {
           time_range: expect.objectContaining({
             from: '2025-06-15T10:00:00.000Z',
             to: '2025-06-15T11:00:00.000Z',
+            mode: 'absolute',
           }),
           attributes: expect.objectContaining({
             visualizationType: 'lnsPie',
@@ -251,12 +280,32 @@ describe('ViewResultsInLensAction', () => {
     });
 
     it('menuItem should use same navigateToPrefilledEditor config as button for identical props', () => {
-      const actionId = 'test-action-parity';
+      const sharedProps = {
+        actionId: 'test-action-parity',
+        startDate: '2025-06-15T10:00:00.000Z',
+        endDate: 'now',
+        mode: 'relative' as const,
+      };
+
+      const { unmount } = render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            {...sharedProps}
+            buttonType={ViewResultsActionButtonType.button}
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+      const buttonArgs = mockNavigateToPrefilledEditor.mock.calls[0];
+
+      unmount();
+      jest.clearAllMocks();
 
       render(
         <TestProvidersWithServices>
           <ViewResultsInLensAction
-            actionId={actionId}
+            {...sharedProps}
             buttonType={ViewResultsActionButtonType.menuItem}
           />
         </TestProvidersWithServices>
@@ -264,20 +313,7 @@ describe('ViewResultsInLensAction', () => {
 
       fireEvent.click(screen.getByText('View in Lens'));
 
-      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attributes: expect.objectContaining({
-            state: expect.objectContaining({
-              filters: expect.arrayContaining([
-                expect.objectContaining({
-                  query: { match_phrase: { action_id: actionId } },
-                }),
-              ]),
-            }),
-          }),
-        }),
-        expect.any(Object)
-      );
+      expect(mockNavigateToPrefilledEditor.mock.calls[0]).toEqual(buttonArgs);
     });
   });
 });

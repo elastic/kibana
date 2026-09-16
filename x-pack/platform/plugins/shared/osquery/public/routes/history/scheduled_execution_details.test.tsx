@@ -16,6 +16,7 @@ import {
 } from '../../__test_helpers__/create_mock_kibana_services';
 
 const mockQueryDetailsHeader = jest.fn();
+const mockResultTabs = jest.fn();
 
 jest.mock('../../actions/use_scheduled_execution_details', () => ({
   ...jest.requireActual('../../actions/use_scheduled_execution_details'),
@@ -29,7 +30,11 @@ jest.mock('../live_queries/details/query_details_header', () => ({
   },
 }));
 jest.mock('../saved_queries/edit/tabs', () => ({
-  ResultTabs: () => null,
+  ResultTabs: (props: Record<string, unknown>) => {
+    mockResultTabs(props);
+
+    return null;
+  },
 }));
 jest.mock('../../results/export_filters_context', () => ({
   ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -96,15 +101,26 @@ describe('ScheduledExecutionDetailsPage', () => {
     it('should bracket the execution timestamp on both sides so earlier agent responses are included', () => {
       renderPage();
 
-      const { viewInStartDate, viewInEndDate } = mockQueryDetailsHeader.mock.calls[0][0];
-
-      // `timestamp` is the newest response document for the execution, so a window
-      // starting there would exclude every earlier agent response.
-      expect(new Date(viewInStartDate).getTime()).toBeLessThan(
-        new Date(EXECUTION_TIMESTAMP).getTime()
+      expect(mockQueryDetailsHeader).toHaveBeenCalledWith(
+        expect.objectContaining({
+          viewInStartDate: '2026-09-01T11:00:00.000Z',
+          viewInEndDate: '2026-09-01T13:00:00.000Z',
+          viewInMode: 'absolute',
+        })
       );
-      expect(new Date(viewInEndDate).getTime()).toBeGreaterThan(
-        new Date(EXECUTION_TIMESTAMP).getTime()
+    });
+
+    it('should forward schedule identity to ResultTabs', () => {
+      renderPage();
+
+      expect(mockResultTabs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'schedule-1',
+          startDate: EXECUTION_TIMESTAMP,
+          scheduleId: 'schedule-1',
+          executionCount: 1152,
+          failedAgentsCount: 0,
+        })
       );
     });
 
@@ -129,6 +145,42 @@ describe('ScheduledExecutionDetailsPage', () => {
 
       expect(mockQueryDetailsHeader).not.toHaveBeenCalled();
       expect(screen.getByText('No details for this execution')).toBeInTheDocument();
+    });
+
+    it('should render an empty prompt for a successful response with no action_response hits', () => {
+      mockHookResult({
+        data: {
+          ...baseDetails,
+          timestamp: '',
+          queryName: '',
+          queryText: '',
+          agentCount: 0,
+          successCount: 0,
+          errorCount: 0,
+          totalRows: 0,
+        },
+      });
+
+      renderPage();
+
+      expect(mockQueryDetailsHeader).not.toHaveBeenCalled();
+      expect(screen.getByText('No details for this execution')).toBeInTheDocument();
+    });
+
+    it('should still render details when the pack saved object is gone but hits exist', () => {
+      mockHookResult({
+        data: {
+          ...baseDetails,
+          packName: '',
+          queryName: '',
+          queryText: '',
+        },
+      });
+
+      renderPage();
+
+      expect(mockQueryDetailsHeader).toHaveBeenCalled();
+      expect(screen.queryByText('No details for this execution')).not.toBeInTheDocument();
     });
 
     it('should render an error prompt when the request fails', () => {

@@ -12,8 +12,10 @@ import { useBulkGetUserProfiles } from '../../../actions/use_user_profiles';
 import {
   TestProvidersWithServices,
   createMockKibanaServices,
+  type OsqueryCapabilities,
 } from '../../../__test_helpers__/create_mock_kibana_services';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 jest.mock('../../../actions/use_user_profiles');
 jest.mock('../../../common/experimental_features_context', () => ({
@@ -26,9 +28,6 @@ jest.mock('../../../common/experimental_features_context', () => ({
 jest.mock('../../../results/export_filters_context', () => ({
   useExportFilters: jest.fn().mockReturnValue(undefined),
   ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../timelines/add_to_timeline_button', () => ({
-  AddToTimelineButton: () => null,
 }));
 jest.mock('../../../cases/add_to_cases', () => ({
   AddToCaseWrapper: () => null,
@@ -64,9 +63,9 @@ const baseData: LiveQueryDetailsItem = {
   tags: [],
 };
 
-const setupKibana = (capabilities: Record<string, unknown> = {}) => {
+const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   const services = createMockKibanaServices({
-    capabilities: { writeLiveQueries: true, ...capabilities } as any,
+    capabilities: { writeLiveQueries: true, ...capabilities },
   });
   mockUseKibana.mockReturnValue({ services });
 };
@@ -120,7 +119,7 @@ describe('QueryDetailsHeader', () => {
           {
             uid: 'uid-1',
             user: { full_name: 'Jane Doe', username: 'jane.doe' },
-          } as any,
+          } as UserProfileWithAvatar,
         ],
       ]);
       mockUseBulkGetUserProfiles.mockReturnValue({ profilesMap, isLoading: false });
@@ -249,19 +248,6 @@ describe('QueryDetailsHeader', () => {
     });
   });
 
-  describe('back navigation', () => {
-    it('does not render its own back-to-history control', () => {
-      renderHeader();
-
-      expect(screen.queryByTestId('query-details-back-to-history')).not.toBeInTheDocument();
-    });
-
-    it('does not render a back-to-history control for scheduled executions either', () => {
-      renderHeader({ scheduleId: 'schedule-1', executionCount: 7, packName: 'My Pack' });
-
-      expect(screen.queryByTestId('query-details-back-to-history')).not.toBeInTheDocument();
-    });
-  });
   describe('execution count formatting', () => {
     it('should not locale-format a high execution count', () => {
       renderHeader({ scheduleId: 'schedule-1', executionCount: 1152, packName: 'My Pack' });
@@ -275,14 +261,13 @@ describe('QueryDetailsHeader', () => {
   describe('long query titles', () => {
     const longQuery = `SELECT ${'a'.repeat(400)} FROM processes`;
 
-    it('trims the rendered title but keeps the full query in the tooltip', () => {
+    it('keeps the full query in the heading and the tooltip', () => {
       renderHeader({
         data: { ...baseData, queries: [{ ...baseData.queries![0], query: longQuery }] },
       });
 
       const title = screen.getByTestId('query-details-title');
-      expect(title.textContent!.length).toBeLessThanOrEqual(61);
-      expect(title.textContent).toMatch(/\u2026$/);
+      expect(title).toHaveTextContent(longQuery);
       expect(title).toHaveAttribute('title', longQuery);
     });
 

@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, formatDate } from '@elastic/eui';
+import { EuiText, formatDate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LiveHistoryRow } from '../../../../common/api/unified_history/types';
 import { useBulkGetUserProfiles } from '../../../actions/use_user_profiles';
 import { RunByColumn } from '../../../actions/components/run_by_column';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
@@ -18,72 +18,48 @@ interface RunBySubtitleProps {
 }
 
 const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
-  const actionId = data.action_id;
   const createdAt = data['@timestamp'];
   const userProfileUid = data.user_profile_uid;
   const userId = data.user_id;
 
-  const profileItems = useMemo<LiveHistoryRow[]>(
-    () =>
-      userProfileUid
-        ? [
-            {
-              id: actionId,
-              sourceType: 'live',
-              source: 'Live',
-              timestamp: createdAt,
-              queryText: '',
-              agentCount: 0,
-              successCount: undefined,
-              errorCount: undefined,
-              totalRows: undefined,
-              userProfileUid,
-              userId,
-            },
-          ]
-        : [],
-    [actionId, createdAt, userProfileUid, userId]
+  const profileItems = useMemo(
+    () => (userProfileUid ? [{ userProfileUid }] : []),
+    [userProfileUid]
   );
 
   const { profilesMap, isLoading } = useBulkGetUserProfiles(profileItems);
 
   const timestamp = formatDate(createdAt);
-  const timestampValues = useMemo(() => ({ timestamp }), [timestamp]);
 
   if (!userId && !userProfileUid) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="query-details-run-by">
-        <FormattedMessage
-          id="xpack.osquery.queryDetailsHeader.runByElastic"
-          defaultMessage="Run by: Elastic on {timestamp}"
-          values={timestampValues}
-        />
+        {i18n.translate('xpack.osquery.queryDetailsHeader.runByElastic', {
+          defaultMessage: 'Run by: Elastic on {timestamp}',
+          values: { timestamp },
+        })}
       </EuiText>
     );
   }
 
   return (
     <EuiText size="s" color="subdued" data-test-subj="query-details-run-by">
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage id="xpack.osquery.queryDetailsHeader.runBy" defaultMessage="Run by:" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <RunByColumn
-            userId={userId}
-            userProfileUid={userProfileUid}
-            profilesMap={profilesMap}
-            isLoadingProfiles={isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.osquery.queryDetailsHeader.runByOn"
-            defaultMessage="on {timestamp}"
-            values={timestampValues}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <FormattedMessage
+        id="xpack.osquery.queryDetailsHeader.runByUser"
+        defaultMessage="Run by: {user} on {timestamp}"
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop -- extractor needs an inline values literal; React node cannot go through i18n.translate
+        values={{
+          user: (
+            <RunByColumn
+              userId={userId}
+              userProfileUid={userProfileUid}
+              profilesMap={profilesMap}
+              isLoadingProfiles={isLoading}
+            />
+          ),
+          timestamp,
+        }}
+      />
     </EuiText>
   );
 };

@@ -27,18 +27,21 @@ jest.mock('../../../common/lib/kibana', () => ({
   useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
 }));
 
-const setupKibana = () => {
+const setupKibana = ({
+  discoverShow = true,
+  canUseEditor = true,
+}: { discoverShow?: boolean; canUseEditor?: boolean } = {}) => {
   mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/test');
   mockUseKibana.mockReturnValue({
     services: {
       discover: { locator: { getUrl: mockGetUrl } },
       lens: {
-        canUseEditor: jest.fn().mockReturnValue(true),
+        canUseEditor: jest.fn().mockReturnValue(canUseEditor),
         navigateToPrefilledEditor: mockNavigateToPrefilledEditor,
       },
       application: {
         capabilities: {
-          discover_v2: { show: true },
+          discover_v2: { show: discoverShow },
           osquery: { writeLiveQueries: true },
         },
       },
@@ -64,6 +67,14 @@ describe('ViewInDropdown', () => {
 
     expect(screen.getByTestId('query-details-view-in')).toBeInTheDocument();
     expect(screen.getByText('View in')).toBeInTheDocument();
+  });
+
+  it('hides the trigger when Discover and Lens are both unavailable', () => {
+    setupKibana({ discoverShow: false, canUseEditor: false });
+
+    renderDropdown();
+
+    expect(screen.queryByTestId('query-details-view-in')).not.toBeInTheDocument();
   });
 
   it('opens the panel when the trigger is clicked', async () => {

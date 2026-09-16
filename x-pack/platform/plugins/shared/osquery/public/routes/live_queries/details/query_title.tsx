@@ -16,25 +16,18 @@ const titleCss = {
   marginBottom: 0,
 };
 
-// Trimmed as well as ellipsized; the full query stays in the `title` tooltip.
-const MAX_TITLE_LENGTH = 60;
-
 interface QueryTitleProps {
   query: string;
 }
 
 const QueryTitleComponent: React.FC<QueryTitleProps> = ({ query }) => {
   const oneLine = removeMultilines(query);
-  const displayed =
-    oneLine.length > MAX_TITLE_LENGTH
-      ? `${oneLine.slice(0, MAX_TITLE_LENGTH).trimEnd()}…`
-      : oneLine;
 
   return (
     <EuiText>
       {/* `h2` because `AppHeader` already renders the page `h1` ("Query results"). */}
       <h2 css={titleCss} title={oneLine} data-test-subj="query-details-title">
-        {displayed}
+        {oneLine}
       </h2>
     </EuiText>
   );

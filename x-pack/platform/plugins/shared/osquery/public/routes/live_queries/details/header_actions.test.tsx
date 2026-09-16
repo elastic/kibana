@@ -39,9 +39,6 @@ jest.mock('../../../cases/add_to_cases', () => ({
     return null;
   },
 }));
-jest.mock('../../../timelines/add_to_timeline_button', () => ({
-  AddToTimelineButton: () => null,
-}));
 jest.mock('./view_in_dropdown', () => ({
   ViewInDropdown: (props: Record<string, unknown>) => {
     mockViewInDropdown(props);
@@ -49,8 +46,6 @@ jest.mock('./view_in_dropdown', () => ({
     return null;
   },
 }));
-jest.mock('../../../actions/use_user_profiles');
-
 const mockUseKibana = jest.fn();
 
 jest.mock('../../../common/lib/kibana', () => ({
@@ -84,7 +79,7 @@ const baseData: LiveQueryDetailsItem = {
 
 const renderActions = (props: Partial<Parameters<typeof HeaderActions>[0]> = {}) => {
   const services = createMockKibanaServices({
-    capabilities: { writeLiveQueries: true } as any,
+    capabilities: { writeLiveQueries: true },
   });
   mockUseKibana.mockReturnValue({ services });
 

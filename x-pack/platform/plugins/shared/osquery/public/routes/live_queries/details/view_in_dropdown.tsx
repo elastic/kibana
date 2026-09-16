@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { ViewResultsInDiscoverAction } from '../../../discover/view_results_in_discover';
 import { ViewResultsInLensAction } from '../../../lens/view_results_in_lens';
 import { ViewResultsActionButtonType } from '../../../live_queries/form/pack_queries_status_table';
+import type { DateWindowResult } from '../../../common/pack_view_date_window';
+import { useKibana } from '../../../common/lib/kibana';
 
 const VIEW_IN_ARIA_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.viewInAriaLabel', {
   defaultMessage: 'View results in',
@@ -21,7 +23,7 @@ interface ViewInDropdownProps {
   actionId: string;
   startDate?: string;
   endDate?: string;
-  mode?: string;
+  mode?: DateWindowResult['mode'];
   scheduleId?: string;
   executionCount?: number;
 }
@@ -34,52 +36,77 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
   scheduleId,
   executionCount,
 }) => {
+  const { application, lens } = useKibana().services;
+  const canDiscover = !!application.capabilities.discover_v2?.show;
+  const canLens = !!lens?.canUseEditor();
   const [isOpen, setIsOpen] = useState(false);
   const handleToggle = useCallback(() => setIsOpen((open) => !open), []);
   const handleClose = useCallback(() => setIsOpen(false), []);
 
-  const trigger = (
-    <EuiButtonEmpty
-      iconType="chevronSingleDown"
-      iconSide="right"
-      onClick={handleToggle}
-      data-test-subj="query-details-view-in"
-    >
-      <FormattedMessage id="xpack.osquery.queryDetailsHeader.viewIn" defaultMessage="View in" />
-    </EuiButtonEmpty>
-  );
+  const items = useMemo(() => {
+    const menuItems = [];
 
-  const items = useMemo(
-    () => [
-      <ViewResultsInDiscoverAction
-        key="discover"
-        actionId={actionId}
-        buttonType={ViewResultsActionButtonType.menuItem}
-        startDate={startDate}
-        endDate={endDate}
-        mode={mode}
-        scheduleId={scheduleId}
-        executionCount={executionCount}
-        onMenuItemClick={handleClose}
-      />,
-      <ViewResultsInLensAction
-        key="lens"
-        actionId={actionId}
-        buttonType={ViewResultsActionButtonType.menuItem}
-        startDate={startDate}
-        endDate={endDate}
-        mode={mode}
-        scheduleId={scheduleId}
-        executionCount={executionCount}
-        onMenuItemClick={handleClose}
-      />,
-    ],
-    [actionId, startDate, endDate, mode, scheduleId, executionCount, handleClose]
-  );
+    if (canDiscover) {
+      menuItems.push(
+        <ViewResultsInDiscoverAction
+          key="discover"
+          actionId={actionId}
+          buttonType={ViewResultsActionButtonType.menuItem}
+          startDate={startDate}
+          endDate={endDate}
+          mode={mode}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+          onMenuItemClick={handleClose}
+        />
+      );
+    }
+
+    if (canLens) {
+      menuItems.push(
+        <ViewResultsInLensAction
+          key="lens"
+          actionId={actionId}
+          buttonType={ViewResultsActionButtonType.menuItem}
+          startDate={startDate}
+          endDate={endDate}
+          mode={mode}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+          onMenuItemClick={handleClose}
+        />
+      );
+    }
+
+    return menuItems;
+  }, [
+    actionId,
+    canDiscover,
+    canLens,
+    startDate,
+    endDate,
+    mode,
+    scheduleId,
+    executionCount,
+    handleClose,
+  ]);
+
+  if (!canDiscover && !canLens) {
+    return null;
+  }
 
   return (
     <EuiPopover
-      button={trigger}
+      button={
+        <EuiButtonEmpty
+          iconType="chevronSingleDown"
+          iconSide="right"
+          onClick={handleToggle}
+          data-test-subj="query-details-view-in"
+        >
+          <FormattedMessage id="xpack.osquery.queryDetailsHeader.viewIn" defaultMessage="View in" />
+        </EuiButtonEmpty>
+      }
       isOpen={isOpen}
       closePopover={handleClose}
       panelPaddingSize="none"

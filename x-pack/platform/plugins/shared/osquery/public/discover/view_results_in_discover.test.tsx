@@ -167,6 +167,32 @@ describe('ViewResultsInDiscoverAction', () => {
       });
     });
 
+    it('should forward mode: relative with an open now end for live windows', async () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeRange: {
+              from: '2025-06-15T10:00:00.000Z',
+              to: 'now',
+              mode: 'relative',
+            },
+          })
+        );
+      });
+    });
+
     it('should call locator with schedule_id and execution_count filters for scheduled queries', async () => {
       render(
         <TestProvidersWithServices>
@@ -288,58 +314,45 @@ describe('ViewResultsInDiscoverAction', () => {
     });
 
     it('menuItem should build same URL as button for identical props', async () => {
-      const resolvedUrl = 'http://localhost:5601/app/discover#/consistent-url';
-      mockGetUrl.mockResolvedValue(resolvedUrl);
+      const sharedProps = {
+        actionId: 'test-action-456',
+        startDate: '2025-06-15T10:00:00.000Z',
+        endDate: 'now',
+        mode: 'relative' as const,
+      };
 
       const { unmount } = render(
         <TestProvidersWithServices>
           <ViewResultsInDiscoverAction
-            actionId="test-action-456"
+            {...sharedProps}
             buttonType={ViewResultsActionButtonType.button}
-            startDate="2025-06-15T10:00:00.000Z"
-            endDate="2025-06-15T11:00:00.000Z"
           />
         </TestProvidersWithServices>
       );
 
       await waitFor(() => {
-        expect(screen.getByText('View in Discover').closest('a')).toHaveAttribute(
-          'href',
-          resolvedUrl
-        );
+        expect(mockGetUrl).toHaveBeenCalled();
       });
+      const buttonArgs = mockGetUrl.mock.calls[0][0];
 
       unmount();
       jest.clearAllMocks();
-      mockGetUrl.mockResolvedValue(resolvedUrl);
+      mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/test-url');
 
       render(
         <TestProvidersWithServices>
           <ViewResultsInDiscoverAction
-            actionId="test-action-456"
+            {...sharedProps}
             buttonType={ViewResultsActionButtonType.menuItem}
-            startDate="2025-06-15T10:00:00.000Z"
-            endDate="2025-06-15T11:00:00.000Z"
           />
         </TestProvidersWithServices>
       );
 
       await waitFor(() => {
-        expect(screen.getByText('View in Discover').closest('a')).toHaveAttribute(
-          'href',
-          resolvedUrl
-        );
+        expect(mockGetUrl).toHaveBeenCalled();
       });
 
-      expect(mockGetUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filters: expect.arrayContaining([
-            expect.objectContaining({
-              query: { match_phrase: { action_id: 'test-action-456' } },
-            }),
-          ]),
-        })
-      );
+      expect(mockGetUrl.mock.calls[0][0]).toEqual(buttonArgs);
     });
   });
 });

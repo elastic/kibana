@@ -7,6 +7,7 @@
 
 import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { fullWidthContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -26,7 +27,7 @@ const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('history_details', { liveQueryId: actionId });
   const [isLive, setIsLive] = useState(false);
-  const { data } = useLiveQueryDetails({ actionId, isLive });
+  const { data, isLoading } = useLiveQueryDetails({ actionId, isLive });
 
   const {
     canSave,
@@ -46,26 +47,32 @@ const LiveQueryDetailsPageComponent = () => {
     <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
   ) : null;
 
-  const isSingleQuery = !data?.pack_id && (data?.queries?.length ?? 0) === 1;
+  const query = data?.queries?.[0];
+  const isSingleQuery = !!data && !data.pack_id && data.queries?.length === 1 && query != null;
 
   return (
     <>
       <WithoutHeaderLayout restrictWidth={false}>
         <div css={fullWidthContentCss}>
-          {isSingleQuery && data ? (
+          {isLoading && !data ? (
+            <div data-test-subj="query-details-loading">
+              <EuiSpacer size="l" />
+              <EuiSkeletonText lines={5} />
+            </div>
+          ) : isSingleQuery ? (
             // Only this branch needs the provider; the pack path below gets one from
             // `PackQueriesStatusTable`, which self-wraps.
             <ExportFiltersProvider>
               <QueryDetailsHeader actionId={actionId} data={data} onSaveQuery={onSaveQuery} />
               <ResultTabs
-                actionId={data.queries![0].action_id}
+                actionId={query.action_id}
                 liveQueryActionId={actionId}
                 agentIds={data.agents}
                 startDate={data['@timestamp']}
                 endDate={data.expiration}
-                ecsMapping={data.queries![0].ecs_mapping}
-                failedAgentsCount={data.queries![0].failed ?? 0}
-                error={data.queries![0].error}
+                ecsMapping={query.ecs_mapping}
+                failedAgentsCount={query.failed ?? 0}
+                error={query.error}
               />
             </ExportFiltersProvider>
           ) : (

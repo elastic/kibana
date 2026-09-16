@@ -51,8 +51,10 @@ const ScheduledExecutionDetailsPageComponent = () => {
     [data, scheduleId]
   );
 
+  const hasExecutionHits = Boolean(data?.timestamp && (data.agentCount > 0 || data.totalRows > 0));
+
   const headerData = useMemo<LiveQueryDetailsItem | undefined>(() => {
-    if (!queryData) return undefined;
+    if (!queryData || !hasExecutionHits) return undefined;
 
     return {
       action_id: scheduleId,
@@ -63,7 +65,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
       agent_platforms: [],
       agent_policy_ids: [],
     };
-  }, [queryData, scheduleId, data?.timestamp]);
+  }, [queryData, scheduleId, data?.timestamp, hasExecutionHits]);
 
   // `data.timestamp` is the newest response document for this execution, so the
   // View-in window has to bracket it in both directions — anchoring the start there

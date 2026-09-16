@@ -25,9 +25,6 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../../actions/use_live_query_details');
 jest.mock('./use_save_query_from_details');
 jest.mock('../../../common/hooks/use_breadcrumbs');
-jest.mock('../../../actions/use_user_profiles', () => ({
-  useBulkGetUserProfiles: jest.fn().mockReturnValue({ profilesMap: new Map(), isLoading: false }),
-}));
 jest.mock('../../../common/experimental_features_context', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
   useExperimentalFeatures: jest
@@ -40,10 +37,14 @@ jest.mock('../../../results/export_filters_context', () => ({
   ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useExportFiltersContext: jest.fn().mockReturnValue(null),
 }));
+const mockResultTabs = jest.fn();
+
 jest.mock('../../saved_queries/edit/tabs', () => ({
-  ResultTabs: ({ actionId }: { actionId: string }) => (
-    <div data-test-subj="result-tabs">{`ResultTabs:${actionId}`}</div>
-  ),
+  ResultTabs: (props: { actionId: string }) => {
+    mockResultTabs(props);
+
+    return <div data-test-subj="result-tabs">{`ResultTabs:${props.actionId}`}</div>;
+  },
 }));
 jest.mock('../../../live_queries/form/pack_queries_status_table', () => ({
   PackQueriesStatusTable: () => <div data-test-subj="pack-queries-status-table" />,
@@ -102,18 +103,31 @@ describe('LiveQueryDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useBreadcrumbs as jest.Mock).mockReturnValue(undefined);
-    mockUseSaveQueryFromDetails.mockReturnValue(mockSaveQueryFromDetails as any);
+    mockUseSaveQueryFromDetails.mockReturnValue(
+      mockSaveQueryFromDetails as ReturnType<typeof useSaveQueryFromDetails>
+    );
   });
 
   describe('single-query path', () => {
     it('renders QueryDetailsHeader and ResultTabs, not PackQueriesStatusTable', () => {
-      mockUseLiveQueryDetails.mockReturnValue({ data: singleQueryData } as any);
+      mockUseLiveQueryDetails.mockReturnValue({
+        data: singleQueryData,
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       renderPage();
 
       expect(screen.getByTestId('query-details-header')).toBeInTheDocument();
       expect(screen.getByTestId('result-tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('result-tabs')).toHaveTextContent('ResultTabs:query-action-456');
       expect(screen.queryByTestId('pack-queries-status-table')).not.toBeInTheDocument();
+      expect(mockResultTabs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'query-action-456',
+          liveQueryActionId: 'action-123',
+          startDate: '2025-06-15T10:00:00.000Z',
+        })
+      );
     });
   });
 
@@ -121,7 +135,8 @@ describe('LiveQueryDetailsPage', () => {
     it('renders PackQueriesStatusTable when pack_id is set', () => {
       mockUseLiveQueryDetails.mockReturnValue({
         data: { ...singleQueryData, pack_id: 'pack-1' },
-      } as any);
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       renderPage();
 
@@ -138,7 +153,8 @@ describe('LiveQueryDetailsPage', () => {
             { ...singleQueryData.queries![0], action_id: 'query-2', id: 'query-2' },
           ],
         },
-      } as any);
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       renderPage();
 
@@ -148,8 +164,9 @@ describe('LiveQueryDetailsPage', () => {
 
     it('renders PackQueriesStatusTable when queries is empty', () => {
       mockUseLiveQueryDetails.mockReturnValue({
-        data: { ...singleQueryData, queries: [] },
-      } as any);
+        data: { ...singleQueryData, queries: [] as LiveQueryDetailsItem['queries'] },
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       renderPage();
 
@@ -160,7 +177,8 @@ describe('LiveQueryDetailsPage', () => {
     it('renders PackQueriesStatusTable when queries is undefined', () => {
       mockUseLiveQueryDetails.mockReturnValue({
         data: { ...singleQueryData, queries: undefined },
-      } as any);
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       renderPage();
 
@@ -170,12 +188,16 @@ describe('LiveQueryDetailsPage', () => {
   });
 
   describe('loading state', () => {
-    it('does not crash when data is undefined', () => {
-      mockUseLiveQueryDetails.mockReturnValue({ data: undefined } as any);
+    it('renders a skeleton while the initial fetch is in flight', () => {
+      mockUseLiveQueryDetails.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      } as ReturnType<typeof useLiveQueryDetails>);
 
       expect(() => renderPage()).not.toThrow();
 
-      expect(screen.getByTestId('pack-queries-status-table')).toBeInTheDocument();
+      expect(screen.getByTestId('query-details-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('pack-queries-status-table')).not.toBeInTheDocument();
       expect(screen.queryByTestId('query-details-header')).not.toBeInTheDocument();
     });
   });

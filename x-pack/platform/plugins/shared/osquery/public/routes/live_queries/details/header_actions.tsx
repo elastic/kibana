@@ -16,15 +16,19 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_fe
 import { ExportResultsButton } from '../../../results/export_results_button';
 import { useExportFilters } from '../../../results/export_filters_context';
 import { ViewInDropdown } from './view_in_dropdown';
-import { getPackViewDateWindow } from '../../../common/pack_view_date_window';
+import {
+  getPackViewDateWindow,
+  type DateWindowResult,
+} from '../../../common/pack_view_date_window';
+import { isScheduledExecution } from '../../../common/is_scheduled_execution';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 
-const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
+const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.addTagsLabel', {
   defaultMessage: 'Add tags',
 });
 
 const SCHEDULED_TAGS_DISABLED_LABEL = i18n.translate(
-  'xpack.osquery.packResultsHeader.scheduledTagsDisabledLabel',
+  'xpack.osquery.queryDetailsHeader.scheduledTagsDisabledLabel',
   { defaultMessage: 'Tags are not supported for scheduled queries' }
 );
 
@@ -38,7 +42,7 @@ interface HeaderActionsProps {
   executionCount?: number;
   viewInStartDate?: string;
   viewInEndDate?: string;
-  viewInMode?: string;
+  viewInMode?: DateWindowResult['mode'];
 }
 
 const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
@@ -51,7 +55,7 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
   viewInEndDate,
   viewInMode,
 }) => {
-  const isScheduled = !!scheduleId && executionCount != null;
+  const isScheduled = isScheduledExecution(scheduleId, executionCount);
   const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
   const permissions = useKibana().services.application.capabilities.osquery;
   const canEditTags = !!permissions.writeLiveQueries && !!actionId;
@@ -65,9 +69,9 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
 
   // Not `data.expiration` — that is `@timestamp + 2 weeks`, which would end the
   // Discover/Lens time picker two weeks in the future.
-  const liveWindow = useMemo(
-    () => getPackViewDateWindow({ isScheduled: false, timestamp: createdAt }),
-    [createdAt]
+  const fallbackWindow = useMemo(
+    () => getPackViewDateWindow({ isScheduled, timestamp: createdAt }),
+    [createdAt, isScheduled]
   );
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -85,7 +89,7 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
           <EuiFlexItem grow={false}>
             <ExportResultsButton
               actionId={queryActionId}
-              isLive={!scheduleId}
+              isLive={!isScheduled}
               liveQueryId={actionId}
               scheduleId={scheduleId}
               executionCount={executionCount}
@@ -100,9 +104,9 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
           <EuiFlexItem grow={false}>
             <ViewInDropdown
               actionId={queryActionId}
-              startDate={viewInStartDate ?? liveWindow.startDate}
-              endDate={viewInEndDate ?? liveWindow.endDate}
-              mode={viewInMode ?? liveWindow.mode}
+              startDate={viewInStartDate ?? fallbackWindow.startDate}
+              endDate={viewInEndDate ?? fallbackWindow.endDate}
+              mode={viewInMode ?? fallbackWindow.mode}
               scheduleId={scheduleId}
               executionCount={executionCount}
             />
@@ -138,7 +142,7 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton fill size="m" onClick={onSaveQuery} data-test-subj="save-query-button">
               <FormattedMessage
-                id="xpack.osquery.packResultsHeader.saveQueryButtonLabel"
+                id="xpack.osquery.queryDetailsHeader.saveQueryButtonLabel"
                 defaultMessage="Save query"
               />
             </EuiButton>

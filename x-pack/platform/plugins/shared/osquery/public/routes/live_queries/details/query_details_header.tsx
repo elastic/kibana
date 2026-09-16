@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
+import type { DateWindowResult } from '../../../common/pack_view_date_window';
+import { isScheduledExecution } from '../../../common/is_scheduled_execution';
 import { QueryTitle } from './query_title';
 import { RunBySubtitle } from './run_by_subtitle';
 import { ScheduledRunSubtitle } from './scheduled_run_subtitle';
@@ -25,7 +27,7 @@ interface QueryDetailsHeaderProps {
   packName?: string;
   viewInStartDate?: string;
   viewInEndDate?: string;
-  viewInMode?: string;
+  viewInMode?: DateWindowResult['mode'];
 }
 
 const QueryDetailsHeaderComponent: React.FC<QueryDetailsHeaderProps> = ({
@@ -41,7 +43,7 @@ const QueryDetailsHeaderComponent: React.FC<QueryDetailsHeaderProps> = ({
 }) => {
   const query = data.queries?.[0]?.query ?? '';
   // Scheduled executions have no triggering user, so `Run by` would always say `Elastic`.
-  const isScheduled = !!scheduleId && executionCount != null;
+  const isScheduled = isScheduledExecution(scheduleId, executionCount);
 
   return (
     <div data-test-subj="query-details-header">

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiText, formatDate } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface ScheduledRunSubtitleProps {
   packName?: string;
@@ -25,30 +25,18 @@ const ScheduledRunSubtitleComponent: React.FC<ScheduledRunSubtitleProps> = ({
   // "#1152", not "#1,152".
   const execution = executionCount != null ? String(executionCount) : '';
 
-  const withPackValues = useMemo(
-    () => ({ packName, executionCount: execution, timestamp: formattedTimestamp }),
-    [packName, execution, formattedTimestamp]
-  );
-  const withoutPackValues = useMemo(
-    () => ({ executionCount: execution, timestamp: formattedTimestamp }),
-    [execution, formattedTimestamp]
-  );
-
   return (
     <EuiText size="s" color="subdued" data-test-subj="query-details-scheduled-run">
-      {packName ? (
-        <FormattedMessage
-          id="xpack.osquery.queryDetailsHeader.scheduledRunWithPack"
-          defaultMessage="Scheduled run of {packName} · Execution #{executionCount} on {timestamp}"
-          values={withPackValues}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.osquery.queryDetailsHeader.scheduledRun"
-          defaultMessage="Scheduled run · Execution #{executionCount} on {timestamp}"
-          values={withoutPackValues}
-        />
-      )}
+      {packName
+        ? i18n.translate('xpack.osquery.queryDetailsHeader.scheduledRunWithPack', {
+            defaultMessage:
+              'Scheduled run of {packName} · Execution #{executionCount} on {timestamp}',
+            values: { packName, executionCount: execution, timestamp: formattedTimestamp },
+          })
+        : i18n.translate('xpack.osquery.queryDetailsHeader.scheduledRun', {
+            defaultMessage: 'Scheduled run · Execution #{executionCount} on {timestamp}',
+            values: { executionCount: execution, timestamp: formattedTimestamp },
+          })}
     </EuiText>
   );
 };

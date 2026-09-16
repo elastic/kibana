@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
+import type { DateWindowResult } from '../common/pack_view_date_window';
+import { isScheduledExecution } from '../common/is_scheduled_execution';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 
 interface ViewResultsInDiscoverActionProps {
@@ -18,7 +20,7 @@ interface ViewResultsInDiscoverActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
-  mode?: string;
+  mode?: DateWindowResult['mode'];
   scheduleId?: string;
   executionCount?: number;
   onMenuItemClick?: () => void;
@@ -29,6 +31,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  mode,
   scheduleId,
   executionCount,
   onMenuItemClick,
@@ -44,7 +47,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
 
-      const isScheduled = !!scheduleId && executionCount != null;
+      const isScheduled = isScheduledExecution(scheduleId, executionCount);
 
       const filters = isScheduled
         ? [
@@ -109,7 +112,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             ? {
                 to: endDate,
                 from: startDate,
-                mode: 'absolute',
+                mode: mode ?? 'absolute',
               }
             : {
                 to: 'now',
@@ -121,7 +124,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, executionCount, scheduleId, startDate, locator, logsDataView]);
+  }, [actionId, endDate, executionCount, mode, scheduleId, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
