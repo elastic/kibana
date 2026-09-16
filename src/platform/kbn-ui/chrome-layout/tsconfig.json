@@ -20,8 +20,5 @@
     "packaging/target/**/*",
     "packaging/example/**/*"
   ],
-  "kbn_references": [
-    "@kbn/ui-chrome-layout-constants",
-    "@kbn/ui-chrome-layout-utils"
-  ]
+  "kbn_references": []
 }

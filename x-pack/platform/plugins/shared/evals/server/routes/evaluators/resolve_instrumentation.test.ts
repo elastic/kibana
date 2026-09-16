@@ -18,6 +18,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerResolveInstrumentationRoute } from './resolve_instrumentation';
 import {
@@ -306,10 +307,7 @@ const buildRouteSearchMock = () =>
   });
 
 describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
-  const evaluatorRegistry: EvaluatorRegistry = {
-    list: () => [],
-    get: () => undefined,
-  };
+  const evaluatorRegistry: EvaluatorRegistry = createEvaluatorRegistryMock();
 
   const setup = () => {
     const router = httpServiceMock.createRouter();

@@ -45,6 +45,19 @@ export const serverConfigSchema = schema.object({
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
 
   /**
+   * Cloud security usage reporting. Set `cspm.enabled` to `false` to stop
+   * CSPM billing records. KSPM and CNVM metering are unaffected.
+   *
+   * @example
+   * xpack.securitySolutionServerless.cloudSecurityMetering.cspm.enabled: false
+   */
+  cloudSecurityMetering: schema.object({
+    cspm: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+
+  /**
    * Usage Reporting: the interval between runs of the ai4soc metering task
    */
   ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),

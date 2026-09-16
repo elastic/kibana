@@ -21,11 +21,13 @@ import {
   createSignalEvidenceConsistencyEvaluator,
 } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
+import { topologyCorrectnessEvaluator } from './grouping/topology_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
   continuationRoutingEvaluator,
   continuationStabilityEvaluator,
+  continuationTopologyStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
@@ -42,6 +44,7 @@ export const createDiscoveryEvaluators = (
 ): DiscoveryEvaluator[] => {
   const codeEvaluators: DiscoveryEvaluator[] = [
     groupingCorrectnessEvaluator,
+    topologyCorrectnessEvaluator,
     evidenceCollectionEvaluator,
     createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
@@ -80,5 +83,6 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
     continuationSeverityStabilityEvaluator,
+    continuationTopologyStabilityEvaluator,
     continuationTrajectoryEvaluator,
   ]);

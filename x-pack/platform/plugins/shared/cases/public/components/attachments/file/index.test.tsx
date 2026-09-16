@@ -13,7 +13,11 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { basicCase, basicFileMock } from '../../../containers/mock';
 import { getFileAttachmentType } from '.';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import { renderWithTestingProviders } from '../../../common/mock';
+import {
+  allCasesPermissions,
+  buildCasesPermissions,
+  renderWithTestingProviders,
+} from '../../../common/mock';
 import type { FileViewProps } from '.';
 
 describe('getFileType', () => {
@@ -23,19 +27,21 @@ describe('getFileType', () => {
   const euiTheme = {} as unknown as EuiThemeComputed<{}>;
 
   it('creates the attachment type correctly', () => {
+    expect(fileType.getIcon({} as FileViewProps)).toBe('document');
+    expect(fileType.getLabel()).toBe('Files');
     expect(fileType).toStrictEqual({
       id: FILE_ATTACHMENT_TYPE,
-      icon: 'document',
-      displayName: 'Files',
-      getAttachmentViewObject: expect.any(Function),
-      getAttachmentRemovalObject: expect.any(Function),
-      getAttachmentTabViewObject: expect.any(Function),
+      getIcon: expect.any(Function),
+      getLabel: expect.any(Function),
+      getCreationActivity: expect.any(Function),
+      getRemovalActivity: expect.any(Function),
+      getAttachmentList: expect.any(Function),
       schema: expect.any(Object),
       workflowSchema: false,
     });
   });
 
-  describe('getFileAttachmentViewObject', () => {
+  describe('getCreationActivity', () => {
     const validFileEntry = {
       name: basicFileMock.name,
       extension: basicFileMock.extension ?? 'png',
@@ -50,6 +56,7 @@ describe('getFileType', () => {
       createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
       version: '1',
       caseData: { title: basicCase.title, id: basicCase.id },
+      permissions: allCasesPermissions(),
       rowContext: {
         appId: 'cases',
         manageMarkdownEditIds: [],
@@ -66,7 +73,7 @@ describe('getFileType', () => {
     it('event renders a clickable name if the file is an image', async () => {
       renderWithTestingProviders(
         // @ts-expect-error: event is a React element, not a string
-        fileType.getAttachmentViewObject(attachmentViewProps).event
+        fileType.getCreationActivity(attachmentViewProps).event
       );
 
       expect(await screen.findByText('my-super-cool-screenshot.png')).toBeInTheDocument();
@@ -76,7 +83,7 @@ describe('getFileType', () => {
     it('clicking the name rendered in event opens the file preview', async () => {
       renderWithTestingProviders(
         // @ts-expect-error: event is a React element, not a string
-        fileType.getAttachmentViewObject(attachmentViewProps).event
+        fileType.getCreationActivity(attachmentViewProps).event
       );
 
       await userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
@@ -84,9 +91,9 @@ describe('getFileType', () => {
     });
 
     it('getActions renders a download button', async () => {
-      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      const creationActivity = fileType.getCreationActivity(attachmentViewProps);
 
-      const actions = attachmentViewObject.getActions?.(attachmentViewProps) ?? [];
+      const actions = creationActivity.getActions?.(attachmentViewProps) ?? [];
 
       expect(actions.length).toBe(2);
       expect(actions[0]).toStrictEqual({
@@ -102,9 +109,9 @@ describe('getFileType', () => {
     });
 
     it('getActions renders a delete button', async () => {
-      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      const creationActivity = fileType.getCreationActivity(attachmentViewProps);
 
-      const actions = attachmentViewObject.getActions?.(attachmentViewProps) ?? [];
+      const actions = creationActivity.getActions?.(attachmentViewProps) ?? [];
 
       expect(actions.length).toBe(2);
       expect(actions[1]).toStrictEqual({
@@ -120,9 +127,9 @@ describe('getFileType', () => {
     });
 
     it('clicking the delete button in actions opens deletion modal', async () => {
-      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      const creationActivity = fileType.getCreationActivity(attachmentViewProps);
 
-      const actions = attachmentViewObject.getActions?.(attachmentViewProps) ?? [];
+      const actions = creationActivity.getActions?.(attachmentViewProps) ?? [];
 
       // @ts-expect-error: render exists on CustomAttachmentAction
       renderWithTestingProviders(actions[1].render());
@@ -135,52 +142,72 @@ describe('getFileType', () => {
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
-    it('empty metadata returns blank FileAttachmentViewObject', () => {
+    it('getActions delete control is hidden without delete permission', async () => {
+      const creationActivity = fileType.getCreationActivity(attachmentViewProps);
+      const actions = creationActivity.getActions?.(attachmentViewProps) ?? [];
+
+      // @ts-expect-error: render exists on CustomAttachmentAction
+      renderWithTestingProviders(actions[1].render(), {
+        wrapperProps: { permissions: buildCasesPermissions({ delete: false }) },
+      });
+
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
+    });
+
+    it('getActions omits the delete action entirely without delete permission', () => {
+      const noDeletePermissions = buildCasesPermissions({ delete: false });
+      const creationActivity = fileType.getCreationActivity({
+        ...attachmentViewProps,
+        permissions: noDeletePermissions,
+      });
+
+      const actions =
+        creationActivity.getActions?.({
+          ...attachmentViewProps,
+          permissions: noDeletePermissions,
+        }) ?? [];
+
+      expect(actions.length).toBe(1);
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
+    });
+
+    it('empty metadata returns a creation activity with a delete action', () => {
       expect(
-        fileType.getAttachmentViewObject({
+        fileType.getCreationActivity({
           ...attachmentViewProps,
           metadata: undefined,
         })
       ).toEqual({
         event: 'added an unknown file',
         hideDefaultActions: true,
-        timelineAvatar: 'document',
         getActions: expect.any(Function),
       });
     });
 
-    it('timelineAvatar is image if file is an image', () => {
-      expect(fileType.getAttachmentViewObject(attachmentViewProps)).toEqual(
-        expect.objectContaining({
-          timelineAvatar: 'image',
-        })
-      );
+    it('getIcon is image if file is an image', () => {
+      expect(fileType.getIcon(attachmentViewProps)).toBe('image');
     });
 
     it('children is defined when file is an image', () => {
-      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
-      expect(attachmentViewObject).toEqual(
+      const creationActivity = fileType.getCreationActivity(attachmentViewProps);
+      expect(creationActivity).toEqual(
         expect.objectContaining({
           children: expect.any(Object),
         })
       );
     });
 
-    it('timelineAvatar is document if file is not an image', () => {
+    it('getIcon is document if file is not an image', () => {
       expect(
-        fileType.getAttachmentViewObject({
+        fileType.getIcon({
           ...attachmentViewProps,
           metadata: { files: [{ ...validFileEntry, mimeType: 'text/csv' }], soType: FILE_SO_TYPE },
         })
-      ).toEqual(
-        expect.objectContaining({
-          timelineAvatar: 'document',
-        })
-      );
+      ).toBe('document');
     });
 
     it('default actions should be hidden', () => {
-      expect(fileType.getAttachmentViewObject(attachmentViewProps)).toEqual(
+      expect(fileType.getCreationActivity(attachmentViewProps)).toEqual(
         expect.objectContaining({
           hideDefaultActions: true,
         })
@@ -188,9 +215,9 @@ describe('getFileType', () => {
     });
   });
 
-  describe('getFileAttachmentRemovalObject', () => {
+  describe('getRemovalActivity', () => {
     it('event renders the right message', () => {
-      expect(fileType.getAttachmentRemovalObject?.(undefined as never).event).toBe('removed file');
+      expect(fileType.getRemovalActivity?.(undefined as never).event).toBe('removed file');
     });
   });
 });

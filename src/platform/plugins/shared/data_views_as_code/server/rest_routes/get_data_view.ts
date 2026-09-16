@@ -25,6 +25,7 @@ export const registerGetDataViewAsCodeRoute = ({
     .get({
       path: GET_DATA_VIEW_AS_CODE_PATH,
       access: 'internal',
+      enableQueryVersion: true,
       description: 'Get a data view by id',
       options: {
         availability: {

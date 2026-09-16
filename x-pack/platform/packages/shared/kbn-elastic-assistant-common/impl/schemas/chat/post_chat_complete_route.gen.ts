@@ -47,19 +47,22 @@ export const ChatMessage = lazySchema(() =>
     /**
      * The textual content of the message.
      */
-    content: z.string().optional(),
+    content: z.string().optional().describe('The textual content of the message.'),
     /**
      * The sender role of the message.
      */
-    role: ChatMessageRole,
+    role: ChatMessageRole.describe('The sender role of the message.'),
     /**
      * Metadata to attach to the context of the message.
      */
-    data: MessageData.optional(),
+    data: MessageData.optional().describe('Metadata to attach to the context of the message.'),
     /**
      * List of field names within the data object that should be anonymized.
      */
-    fields_to_anonymize: z.array(z.string()).optional(),
+    fields_to_anonymize: z
+      .array(z.string())
+      .optional()
+      .describe('List of field names within the data object that should be anonymized.'),
   })
 );
 export type ChatMessage = z.infer<typeof ChatMessage>;
@@ -72,43 +75,46 @@ export const ChatCompleteProps = lazySchema(() =>
     /**
      * Existing conversation ID to continue.
      */
-    conversationId: NonEmptyString.optional(),
+    conversationId: NonEmptyString.optional().describe('Existing conversation ID to continue.'),
     /**
      * Prompt template identifier.
      */
-    promptId: z.string().optional(),
+    promptId: z.string().optional().describe('Prompt template identifier.'),
     /**
      * If true, the response will be streamed in chunks.
      */
-    isStream: z.boolean().optional(),
+    isStream: z.boolean().optional().describe('If true, the response will be streamed in chunks.'),
     /**
      * ISO language code for the assistant's response.
      */
-    responseLanguage: z.string().optional(),
+    responseLanguage: z
+      .string()
+      .optional()
+      .describe("ISO language code for the assistant's response."),
     /**
      * LangSmith project name for tracing.
      */
-    langSmithProject: z.string().optional(),
+    langSmithProject: z.string().optional().describe('LangSmith project name for tracing.'),
     /**
      * API key for LangSmith integration.
      */
-    langSmithApiKey: z.string().optional(),
+    langSmithApiKey: z.string().optional().describe('API key for LangSmith integration.'),
     /**
      * Required connector identifier to route the request.
      */
-    connectorId: z.string(),
+    connectorId: z.string().describe('Required connector identifier to route the request.'),
     /**
      * Model ID or name to use for the response.
      */
-    model: z.string().optional(),
+    model: z.string().optional().describe('Model ID or name to use for the response.'),
     /**
      * Whether to persist the chat and response to storage.
      */
-    persist: z.boolean(),
+    persist: z.boolean().describe('Whether to persist the chat and response to storage.'),
     /**
      * List of chat messages exchanged so far.
      */
-    messages: z.array(ChatMessage),
+    messages: z.array(ChatMessage).describe('List of chat messages exchanged so far.'),
   })
 );
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
@@ -118,7 +124,9 @@ export const ChatCompleteRequestQuery = lazySchema(() =>
     /**
      * If true, the response will not include content references.
      */
-    content_references_disabled: BooleanFromString.optional().default(false),
+    content_references_disabled: BooleanFromString.optional()
+      .default(false)
+      .describe('If true, the response will not include content references.'),
   })
 );
 export type ChatCompleteRequestQuery = z.infer<typeof ChatCompleteRequestQuery>;

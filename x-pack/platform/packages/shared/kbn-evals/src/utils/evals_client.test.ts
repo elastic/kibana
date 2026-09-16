@@ -259,6 +259,34 @@ describe('EvalsClient', () => {
     });
   });
 
+  it('getExperimentStats reports no judge model for an experiment scored only by code evaluators', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        experiment_id: 'experiment-123',
+        timestamp: '2026-05-01T11:00:00.000Z',
+        task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
+        total_repetitions: 1,
+        stats: [
+          {
+            dataset_id: 'dataset-1',
+            dataset_name: 'Dataset 1',
+            evaluator_name: 'latency',
+            example_count: 5,
+            stats: { mean: 0.9, median: 0.95, std_dev: 0.03, min: 0.8, max: 1, count: 5 },
+          },
+        ],
+      })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    const result = await client.getExperimentStats('experiment-123');
+
+    expect(result?.evaluatorModel).toBeUndefined();
+    expect(result?.taskModel).toEqual({ id: 'gpt-4', family: 'gpt', provider: 'openai' });
+  });
+
   it('getExperimentScores returns parsed score documents', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
@@ -273,6 +301,31 @@ describe('EvalsClient', () => {
         path: EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', 'experiment-123'),
         method: 'GET',
       })
+    );
+  });
+
+  it('getExperimentScores omits filters it was not given', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(asKbnResponse({ scores: [], total: 0 }));
+    const client = new EvalsClient(kbnClient, log);
+
+    await client.getExperimentScores('experiment-123');
+
+    // Sending them as undefined reaches the route as `suite_id=`, which matches no score at all.
+    expect(kbnClient.request).toHaveBeenCalledWith(expect.objectContaining({ query: {} }));
+  });
+
+  it('getExperimentScores passes the filters it was given', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(asKbnResponse({ scores: [], total: 0 }));
+    const client = new EvalsClient(kbnClient, log);
+
+    await client.getExperimentScores('experiment-123', { suiteId: 'my-suite' });
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { suite_id: 'my-suite' } })
     );
   });
 

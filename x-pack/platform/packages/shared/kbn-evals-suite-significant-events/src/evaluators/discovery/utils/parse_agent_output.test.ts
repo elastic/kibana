@@ -11,6 +11,7 @@ import {
   extractDiscoveriesFromToolCall,
   extractRequestedEventIdsFromToolCall,
   extractSignificantEventsFromToolCall,
+  extractWriteItemsFromToolCall,
 } from './parse_agent_output';
 
 const TOOL_ID_EVENTS_WRITE = platformSignificantEventsTools.eventsWrite;
@@ -93,6 +94,81 @@ describe('extractDiscoveriesFromToolCall', () => {
       }),
     ]);
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
+  });
+
+  it('treats existing_active_event and unchanged_outcome as produced discoveries', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-dedup',
+        params: { items: [{ title: 'Existing episode', status: 'open' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-existing',
+                  written: false,
+                  reason: 'existing_active_event',
+                  existing_event_id: 'event-existing',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-noop',
+        params: {
+          items: [{ event_id: 'event-stable', title: 'Unchanged continuation', status: 'open' }],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-stable',
+                  written: false,
+                  reason: 'unchanged_outcome',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-existing', title: 'Existing episode' }),
+      expect.objectContaining({ event_id: 'event-stable', title: 'Unchanged continuation' }),
+    ]);
+  });
+
+  it('extracts events from live Agent Builder underscore tool ids', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: 'platform_sig_events_events_write',
+        tool_call_id: 'ew-underscore',
+        params: { items: [{ title: 'Live event', status: 'open' }] },
+        results: [
+          {
+            data: {
+              results: [{ index: 0, event_uuid: 'uuid-1', event_id: 'event-1', written: true }],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', title: 'Live event' }),
+    ]);
   });
 
   it('skips misaligned bulk results', () => {
@@ -234,6 +310,41 @@ describe('extractRequestedEventIdsFromToolCall', () => {
     ];
 
     expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['event-A', 'event-B']);
+  });
+});
+
+describe('extractWriteItemsFromToolCall', () => {
+  it('returns raw events_write request items without handler-assigned IDs', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-bulk',
+        params: {
+          items: [
+            {
+              event_id: 'event-1',
+              causal_features: [
+                { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+              ],
+              blast_radius: [],
+            },
+            { status: 'dismissed', causal_features: [], blast_radius: [] },
+          ],
+        },
+      },
+    ];
+
+    expect(extractWriteItemsFromToolCall(steps)).toEqual([
+      {
+        event_id: 'event-1',
+        causal_features: [
+          { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+        ],
+        blast_radius: [],
+      },
+      { status: 'dismissed', causal_features: [], blast_radius: [] },
+    ]);
   });
 });
 

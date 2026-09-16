@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ interface AgentSelectorProps {
 
 export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNavigationPath }) => {
   const { agents, isLoading } = useAgentBuilderAgents();
-  const navigate = useNavigate();
+  const history = useHistory();
   const spaceId = useActiveSpaceId();
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
@@ -36,9 +36,9 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
   const handleAgentChange = useCallback(
     (newAgentId: string) => {
       setStoredAgentId(newAgentId);
-      navigate(getNavigationPath(newAgentId));
+      history.push(getNavigationPath(newAgentId));
     },
-    [navigate, setStoredAgentId, getNavigationPath]
+    [history, setStoredAgentId, getNavigationPath]
   );
 
   return (

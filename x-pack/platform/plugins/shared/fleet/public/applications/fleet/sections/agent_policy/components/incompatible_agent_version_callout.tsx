@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const IncompatibleAgentVersionCallout: React.FC<{
   incompatibility: 'SOME' | 'ALL';
@@ -15,7 +16,7 @@ export const IncompatibleAgentVersionCallout: React.FC<{
 }> = ({ incompatibility, versionCondition }) => {
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -23,22 +24,22 @@ export const IncompatibleAgentVersionCallout: React.FC<{
             defaultMessage="Incompatible agent version"
           />
         }
-        color="warning"
-      >
-        {incompatibility === 'SOME' ? (
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
-            defaultMessage="Some agents using the selected agent policy are running on a version that is not compatible with this integration. This integration requires agents on version {versionCondition}."
-            values={{ versionCondition }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
-            defaultMessage="None of the agents using the selected agent policy are compatible with this integration. This integration requires agents on version {versionCondition}."
-            values={{ versionCondition }}
-          />
-        )}
-      </EuiCallOut>
+        text={
+          incompatibility === 'SOME' ? (
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
+              defaultMessage="Some agents using the selected agent policy are running on a version that is not compatible with this integration. This integration requires agents on version {versionCondition}."
+              values={{ versionCondition }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
+              defaultMessage="None of the agents using the selected agent policy are compatible with this integration. This integration requires agents on version {versionCondition}."
+              values={{ versionCondition }}
+            />
+          )
+        }
+      />
 
       <EuiSpacer size="m" />
     </>

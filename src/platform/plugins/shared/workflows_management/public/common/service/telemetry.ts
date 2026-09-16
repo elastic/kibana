@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowValidationRuleId } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type {
   WorkflowStepTriggerTab,
   WorkflowTriggerTab,
 } from '../../features/run_workflow/ui/types';
-import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
+import type {
+  YamlValidationDiagnostic,
+  YamlValidationResult,
+} from '../../features/validate_workflow_yaml/model/types';
 import {
   WorkflowAiChatEventTypes,
   workflowEventNames,
@@ -31,13 +35,23 @@ import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
 } from '../lib/telemetry/events/workflows/types';
-import type { WorkflowDetailTab } from '../lib/telemetry/events/workflows/ui/types';
+import type {
+  ReportWorkflowExecutionsOpenInEditorClickedActionParams,
+  WorkflowDetailTab,
+} from '../lib/telemetry/events/workflows/ui/types';
 import type { WorkflowValidationErrorType } from '../lib/telemetry/events/workflows/validation/types';
 import type { TelemetryServiceClient } from '../lib/telemetry/types';
 import {
   extractStepInfoFromWorkflowYaml,
   extractWorkflowMetadata,
 } from '../lib/telemetry/utils/extract_workflow_metadata';
+
+/**
+ * Identifies one reported validation error. Keyed on the rule ID rather than the message,
+ * so a reworded or translated message does not re-report the same error.
+ */
+const reportedValidationErrorKey = (result: YamlValidationDiagnostic): string =>
+  `${result.owner}-${result.ruleId}-${result.startLineNumber}-${result.startColumn}`;
 
 export class WorkflowsBaseTelemetry {
   // Track reported validation errors per workflow ID
@@ -281,7 +295,7 @@ export class WorkflowsBaseTelemetry {
    * All errors are reported in a single event.
    *
    * @param params.validationResults - Array of all validation results.
-   *                                   The telemetry service filters for errors, handles deduplication, and extracts error types.
+   *                                   The telemetry service filters for errors, handles deduplication, and extracts rule IDs and error types.
    */
   reportWorkflowValidationError = (params: {
     workflowId?: string;
@@ -291,8 +305,11 @@ export class WorkflowsBaseTelemetry {
   }) => {
     const { workflowId, validationResults, editorType, origin } = params;
 
-    // Filter for errors only
-    const errorResults = validationResults.filter((result) => result.severity === 'error');
+    // Filter for errors only. Decorations carry no `ruleId`, and their severity is
+    // never 'error', so this also narrows the union to diagnostics.
+    const errorResults = validationResults.filter(
+      (result): result is YamlValidationDiagnostic => result.severity === 'error'
+    );
 
     // Get or create the set of reported errors for this workflow
     let workflowReportedErrors = this.reportedValidationErrors.get(workflowId);
@@ -302,26 +319,28 @@ export class WorkflowsBaseTelemetry {
     }
 
     // Find new errors that haven't been reported yet for this workflow
-    const newErrorResults = errorResults.filter((result) => {
-      const errorKey = `${result.owner}-${result.startLineNumber}-${result.startColumn}-${result.message}`;
-      return !workflowReportedErrors.has(errorKey);
-    });
+    const newErrorResults = errorResults.filter(
+      (result) => !workflowReportedErrors.has(reportedValidationErrorKey(result))
+    );
 
     // If there are new errors, report them
     if (newErrorResults.length > 0) {
-      // Deduplicate by owner and message, then extract unique error types
       const uniqueErrorTypes = new Set<WorkflowValidationErrorType>();
+      const uniqueRuleIds = new Set<WorkflowValidationRuleId>();
       for (const result of newErrorResults) {
         uniqueErrorTypes.add(result.owner as WorkflowValidationErrorType);
+        uniqueRuleIds.add(result.ruleId);
       }
 
       const errorTypes = Array.from(uniqueErrorTypes);
+      const ruleIds = Array.from(uniqueRuleIds);
       const errorCount = newErrorResults.length;
 
       this.telemetryService.reportEvent(WorkflowValidationEventTypes.WorkflowValidationError, {
         eventName: workflowEventNames[WorkflowValidationEventTypes.WorkflowValidationError],
         ...(workflowId && { workflowId }),
         errorTypes,
+        ruleIds,
         errorCount,
         ...(editorType && { editorType }),
         ...(origin && { origin }),
@@ -329,18 +348,12 @@ export class WorkflowsBaseTelemetry {
 
       // Track reported errors for this workflow
       newErrorResults.forEach((result) => {
-        const errorKey = `${result.owner}-${result.startLineNumber}-${result.startColumn}-${result.message}`;
-        workflowReportedErrors.add(errorKey);
+        workflowReportedErrors.add(reportedValidationErrorKey(result));
       });
     }
 
     // Clear reported errors that are no longer present for this workflow
-    const currentErrorKeys = new Set(
-      errorResults.map(
-        (result) =>
-          `${result.owner}-${result.startLineNumber}-${result.startColumn}-${result.message}`
-      )
-    );
+    const currentErrorKeys = new Set(errorResults.map(reportedValidationErrorKey));
     const updatedReportedErrors = new Set(
       Array.from(workflowReportedErrors).filter((key) => currentErrorKeys.has(key))
     );
@@ -594,6 +607,52 @@ export class WorkflowsBaseTelemetry {
   reportWorkflowAccessDeniedServerlessTier = () => {
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+    });
+  };
+
+  // Executions view actions
+
+  reportWorkflowExecutionsPageViewed = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsPageViewed, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsPageViewed],
+    });
+  };
+
+  reportWorkflowExecutionsFilterApplied = (params: { filterTypes: string[] }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsFilterApplied, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsFilterApplied],
+      filterTypes: params.filterTypes,
+    });
+  };
+
+  reportWorkflowExecutionsSearchUsed = (params: { hasQuery: boolean }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsSearchUsed, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsSearchUsed],
+      hasQuery: params.hasQuery,
+    });
+  };
+
+  reportWorkflowExecutionsDetailOpened = (params: { executionId: string }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsDetailOpened, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsDetailOpened],
+      executionId: params.executionId,
+    });
+  };
+
+  reportWorkflowExecutionsStepExpanded = (params: { stepType: string }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsStepExpanded, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsStepExpanded],
+      stepType: params.stepType,
+    });
+  };
+
+  reportWorkflowExecutionsOpenInEditorClicked = (
+    params: Omit<ReportWorkflowExecutionsOpenInEditorClickedActionParams, 'eventName'>
+  ) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked],
+      workflowId: params.workflowId,
+      origin: params.origin,
     });
   };
 

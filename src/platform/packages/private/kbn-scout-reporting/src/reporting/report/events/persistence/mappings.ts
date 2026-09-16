@@ -18,6 +18,9 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
+  retry_count: {
+    type: 'integer',
+  },
   build: {
     type: 'object',
     properties: {

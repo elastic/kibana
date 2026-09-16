@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
-import { AGENTS_WRITE_SECURITY } from '../route_security';
+import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 
 /**
  * Picker endpoints for the access flyout.
@@ -25,7 +25,7 @@ export function registerAccessPrincipalsRoutes({ router, logger, coreSetup }: Ro
   router.post(
     {
       path: '/internal/agent_builder/_suggest_user_profiles',
-      security: AGENTS_WRITE_SECURITY,
+      security: AGENT_BUILDER_READ_SECURITY,
       validate: {
         body: schema.object({
           name: schema.string({ minLength: 0, maxLength: 256 }),

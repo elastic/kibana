@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiButton, EuiFormRow, EuiPopover, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
@@ -123,7 +123,9 @@ export const ProjectScopeSelector = ({
   projectRouting,
 }: ProjectScopeSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const effectiveProjectRouting = projectRouting ?? cpsManager.getDefaultProjectRouting();
+  const effectiveProjectRouting = useRef(projectRouting ?? cpsManager.getDefaultProjectRouting());
+  effectiveProjectRouting.current = projectRouting ?? cpsManager.getDefaultProjectRouting();
+
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
     [cpsManager]
@@ -132,9 +134,14 @@ export const ProjectScopeSelector = ({
     fetchProjects,
     PROJECT_ROUTING.ALL
   );
-  const availableProjects = useMemo(
-    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
-    [linkedProjects, originProject]
+
+  const availableProjects = useMemo(() => {
+    return originProject ? [originProject, ...linkedProjects] : linkedProjects;
+  }, [linkedProjects, originProject]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
+    [cpsManager]
   );
 
   if (!isLoading && !error && linkedProjects.length === 0) {
@@ -147,11 +154,12 @@ export const ProjectScopeSelector = ({
     : getProjectScopeButtonLabel({
         availableProjects,
         originProjectId,
-        projectRouting: effectiveProjectRouting,
+        projectRouting: effectiveProjectRouting.current,
       });
 
   return (
     <EuiFormRow
+      css={{ inlineSize: 'fit-content' }}
       error={error ? unavailableLabel : undefined}
       isInvalid={Boolean(error)}
       label={projectScopeLabel}
@@ -162,7 +170,6 @@ export const ProjectScopeSelector = ({
           <EuiButton
             color="text"
             data-test-subj="transformProjectScopePicker"
-            fullWidth
             iconType="crossProjectSearch"
             isDisabled={isLoading || Boolean(error)}
             isLoading={isLoading}
@@ -175,6 +182,7 @@ export const ProjectScopeSelector = ({
         closePopover={() => setIsPopoverOpen(false)}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        panelProps={{ css: { width: 560 } }}
       >
         {error ? (
           <EuiText color="danger" size="s">
@@ -183,9 +191,11 @@ export const ProjectScopeSelector = ({
         ) : (
           <ProjectScopePicker
             availableProjects={availableProjects}
-            onProjectRoutingChange={onProjectRoutingChange}
             originProjectId={originProjectId}
-            projectRouting={effectiveProjectRouting}
+            onProjectRoutingChange={onProjectRoutingChange}
+            projectRouting={effectiveProjectRouting.current!}
+            fetchProjectsByRouting={fetchProjectsByRouting}
+            projectRoutingStrategy="snapshot"
           />
         )}
       </EuiPopover>
