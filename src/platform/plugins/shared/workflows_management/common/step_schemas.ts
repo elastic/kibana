@@ -63,12 +63,15 @@ class StepSchemas {
   }
 
   /**
-   * Helper function to check if a step definition is a public step definition
+   * Whether a step definition came from the public registry. Narrows on
+   * `editorHandlers`, which only the public definition declares; `label` and the
+   * other descriptive fields are required on BaseStepDefinition and so are
+   * present on both surfaces.
    */
   public isPublicStepDefinition(
     stepDefinition: ServerStepDefinition | PublicStepDefinition
   ): stepDefinition is PublicStepDefinition {
-    return 'label' in stepDefinition;
+    return 'editorHandlers' in stepDefinition;
   }
 
   /**
@@ -79,10 +82,9 @@ class StepSchemas {
     if (!stepDefinition) {
       return undefined;
     }
-    // Narrow on the property being read: `editorHandlers` is public-only, while
-    // `label` is required on BaseStepDefinition and so cannot discriminate.
-    const dynamicSchema =
-      'editorHandlers' in stepDefinition ? stepDefinition.editorHandlers?.dynamicSchema : undefined;
+    const dynamicSchema = this.isPublicStepDefinition(stepDefinition)
+      ? stepDefinition.editorHandlers?.dynamicSchema
+      : undefined;
     return {
       outputSchema: stepDefinition.outputSchema,
       getDynamicOutputSchema: dynamicSchema?.getOutputSchema?.bind(dynamicSchema),
