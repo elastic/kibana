@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { extname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { File } from '../file';
-import { LINT_LOG_PREFIX } from './constants';
+import { LINTABLE_EXTENSIONS, LINT_LOG_PREFIX } from './constants';
 
 /**
  * Filters a list of files to only include files oxlint should lint. Ignore
@@ -19,7 +20,7 @@ export async function pickFilesToLint(log: ToolingLog, files: File[]) {
   const filesToLint = [];
 
   for (const file of files) {
-    if (!file.isJs() && !file.isTypescript()) continue;
+    if (!LINTABLE_EXTENSIONS[extname(file.path)]) continue;
 
     log.debug(`${LINT_LOG_PREFIX} linting %j`, file);
     filesToLint.push(file);
