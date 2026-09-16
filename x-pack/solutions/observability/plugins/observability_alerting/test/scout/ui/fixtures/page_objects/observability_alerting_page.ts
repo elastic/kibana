@@ -44,7 +44,7 @@ export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
   /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
 export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
 export const MANAGEMENT_ALERTING_V2_RULES_URL_RE = /\/app\/management\/alertingV2\/rules/;
-export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2\//;
+export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$|\?|#)/;
 
 /**
  * Drives the Observability Alerting mounts (`/app/observability/alerting`).
