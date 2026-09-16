@@ -96,7 +96,9 @@ describe('EsqlQueryStep', () => {
       await Promise.resolve();
     });
 
-    expect(await screen.findByText('event_time')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlEmittedTimeField')).toHaveTextContent('event_time')
+    );
   });
 
   it('uses the first date column when the output has no bucket column', async () => {
@@ -113,7 +115,9 @@ describe('EsqlQueryStep', () => {
       await Promise.resolve();
     });
 
-    expect(await screen.findByText('event_time')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlEmittedTimeField')).toHaveTextContent('event_time')
+    );
   });
 
   it('keeps source time field and bucket span explicit and distinct from emitted time', () => {
