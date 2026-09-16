@@ -97,7 +97,7 @@ export const getActionGroups = ({
   const responseActionItems = !isRemoteDocument
     ? [
         ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
-        ...(isAlert ? hostIsolationItems : []),
+        ...hostIsolationItems,
         ...endpointResponseItems,
         ...(osqueryAvailable ? osqueryItems : []),
       ]

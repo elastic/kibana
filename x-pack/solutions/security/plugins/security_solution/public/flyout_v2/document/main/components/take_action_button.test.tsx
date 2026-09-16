@@ -951,17 +951,17 @@ describe('<TakeActionButton />', () => {
       expect(getByText('Isolate host')).toBeInTheDocument();
     });
 
-    it('should hide the isolate host item for non-alert documents', () => {
+    it('should include the isolate host item for non-alert documents', () => {
       mockUseHostIsolationAction.mockReturnValue([isolateMenuItem]);
 
-      const { getByTestId, queryByText } = renderTakeActionButton({
+      const { getByTestId, getByText } = renderTakeActionButton({
         ...defaultProps,
         hit: createMockHit({ 'event.kind': 'event' }),
       });
 
       fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
-      expect(queryByText('Isolate host')).not.toBeInTheDocument();
+      expect(getByText('Isolate host')).toBeInTheDocument();
     });
 
     it('should hide the isolate host item for remote alerts', () => {

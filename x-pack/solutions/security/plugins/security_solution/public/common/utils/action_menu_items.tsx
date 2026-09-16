@@ -6,8 +6,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import type { EuiContextMenuPanelItemDescriptor, EuiIconProps } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { EuiContextMenuPanelItemDescriptor, EuiIconProps, IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 
@@ -26,7 +25,7 @@ export const isActionMenuItem = (
 /** Applies a single icon to all action-menu items in `items`. */
 export const withActionIcon = (
   items: readonly EuiContextMenuPanelItemDescriptor[],
-  icon: EuiIconType
+  icon: IconType
 ): EuiContextMenuPanelItemDescriptor[] =>
   items.map((item) => (isActionMenuItem(item) ? { ...item, icon } : item));
 
@@ -37,7 +36,7 @@ export const withActionIcon = (
  */
 export const withActionIcons = (
   items: readonly EuiContextMenuPanelItemDescriptor[],
-  iconsByActionId: Readonly<Record<string, EuiIconType>>
+  iconsByActionId: Readonly<Record<string, IconType>>
 ): EuiContextMenuPanelItemDescriptor[] =>
   items.map((item) => {
     if (!isActionMenuItem(item) || typeof item.key !== 'string' || item.icon) {

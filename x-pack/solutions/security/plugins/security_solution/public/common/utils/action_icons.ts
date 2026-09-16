@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EuiIconProps } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { EuiIconProps, IconType } from '@elastic/eui';
 import {
   ADD_TO_CASE_ACTION_IDS,
   ADD_TO_CHAT_ACTION_ID,
@@ -32,7 +31,7 @@ import {
  * Keyed on the action item's stable `key` (same as `data-test-subj` for most items).
  * Used by `withActionIcons` to gap-fill missing icons.
  */
-export const ACTION_ICONS_BY_ID: Readonly<Record<string, EuiIconType>> = {
+export const ACTION_ICONS_BY_ID: Readonly<Record<string, IconType>> = {
   [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ADD_TO_CHAT_ACTION_ID]: 'comment',
   [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
