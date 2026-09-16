@@ -384,11 +384,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
       try {
         if (editMode && defaultValue?.saved_object_id) {
-          await updateAsync(
-            { id: defaultValue?.saved_object_id, ...serializer(values) } as Parameters<
-              typeof updateAsync
-            >[0]
-          );
+          await updateAsync({
+            id: defaultValue?.saved_object_id,
+            ...serializer(values),
+          } as Parameters<typeof updateAsync>[0]);
         } else {
           await createAsync(serializer(values) as Parameters<typeof createAsync>[0]);
         }
