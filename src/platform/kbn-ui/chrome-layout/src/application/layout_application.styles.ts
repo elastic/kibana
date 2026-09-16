@@ -36,10 +36,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       min-height: 0;
 
       z-index: ${layoutLevels.content};
-
       position: relative;
-      display: flex;
-      flex-direction: column;
 
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&
@@ -49,9 +46,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
-        // Frame drawn as a pseudo-element border, like EUI panels. It doesn't affect layout and
-        // lives on this wrapper rather than the scroll container, so it neither scrolls away with
-        // the content nor competes with the focus outline of the scroll container.
+        // Pseudo-element frame on the non-scrolling wrapper: doesn't affect layout, doesn't scroll
+        // away with the content, and doesn't collide with focus outlines.
         // borderBaseFloating is transparent in light mode and visible in dark mode.
         ${euiBorderStyles(useEuiTheme, {
           side: 'all',
@@ -69,16 +65,9 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 };
 
 const scrollContainer: EmotionFn = (useEuiTheme) => css`
-  height: 100%;
   border-radius: inherit;
   display: flex;
   flex-direction: column;
-
-  // Programmatic focus target (skip link, sidenav "focus main content"). The frame is drawn by the
-  // wrapper and the app content signals focus itself, so no ring here.
-  &:focus {
-    outline: none;
-  }
 
   // only restrict overflow scroll on screen (not print) to allow for full page printing
   @media screen {
