@@ -60,9 +60,14 @@ export class ActionPolicyFormPage {
   }
 
   async setMatcher(matcher: string) {
-    // The expression input lives inside a collapsed accordion by default; open it first.
-    await this.advancedMatchingToggle.click();
-    await this.matcherInput.fill(matcher);
+    // Open the accordion only when it is currently collapsed; toggling an
+    // already-open accordion would hide the input and make the fill time out.
+    if ((await this.advancedMatchingToggle.getAttribute('aria-expanded')) !== 'true') {
+      await this.advancedMatchingToggle.click();
+    }
+    // QueryStringInput is React-controlled; fill() races with prop sync.
+    // pressSequentially() drives keydown events that React always wins.
+    await this.matcherInput.pressSequentially(matcher);
     // Typing opens the KQL suggestions popover, which overlays the rest of the
     // form and would swallow the submit click.
     await this.matcherInput.press('Escape');
