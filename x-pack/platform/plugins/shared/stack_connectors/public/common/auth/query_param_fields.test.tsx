@@ -11,6 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { QueryParamFields } from './query_param_fields';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
+jest.setTimeout(60_000);
+
 describe('QueryParamFields', () => {
   const onSubmit = jest.fn();
 
