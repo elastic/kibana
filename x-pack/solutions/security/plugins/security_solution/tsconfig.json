@@ -280,6 +280,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/agent-builder-browser",
+    "@kbn/mitre-attack-plugin",
+    "@kbn/security-mitre-attack-common",
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",

@@ -21,6 +21,12 @@ export type {
   MitreEntityBuckets,
   MitreEntityCollection,
   MitreListParams,
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+  MitreEntitySummary,
+  MitreEntitySummaryBuckets,
+  MitreEntitySummaryCollection,
 } from './src/types';
 
 export {
@@ -31,17 +37,20 @@ export {
   MITRE_ATTACK_ENTITY_SO_TYPE,
 } from './src/constants';
 
-export { buildSoId } from './src/utils';
+export { buildSoId, getMitreEntityDisplayName } from './src/utils';
+
+export {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+  buildMockMitreEntitySummaryBuckets,
+} from './src/mitre_entity_builders';
 
 export { GetMitreEntitiesRequestQuery } from './src/api';
 
 export type {
-  MitreTacticSummary,
-  MitreTechniqueSummary,
-  MitreSubtechniqueSummary,
-  MitreEntitySummary,
-  MitreEntitySummaryBuckets,
   GetMitreEntitiesRequestQueryInput,
   GetMitreEntitiesRequestQueryOutput,
+  GetMitreEntitiesRequestParams,
   GetMitreEntitiesResponse,
 } from './src/api';

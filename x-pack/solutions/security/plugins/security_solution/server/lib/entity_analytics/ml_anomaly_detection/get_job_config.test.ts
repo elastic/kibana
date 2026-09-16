@@ -7,7 +7,8 @@
 
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { getJobConfig } from './get_job_config';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { getJobConfig, resetManagedMitreMapsCache } from './get_job_config';
 
 const soClient = savedObjectsClientMock.create();
 const request = httpServerMock.createKibanaRequest();
@@ -37,6 +38,7 @@ const makeModuleJob = (id: string, customSettings: Record<string, unknown>) => (
 
 beforeEach(() => {
   jest.clearAllMocks();
+  resetManagedMitreMapsCache();
   logger = loggingSystemMock.createLogger();
   mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJob()] });
   mockListModulesFn = jest.fn().mockResolvedValue([]);
@@ -345,6 +347,41 @@ describe('getJobConfig', () => {
     expect(result.get('test-job')?.jobName).toBeNull();
   });
 
+  it('sources MITRE name maps from the managed client when mitreDataClient is provided', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            // TA0099 / T9001 are NOT in the real blob; they exist only in the mock client.
+            threat_tactics: ['TA0099'],
+            threat_techniques: ['T9001'],
+          },
+        }),
+      ],
+    });
+
+    const mockList = jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+      techniques: [{ id: 'T9001', name: 'Managed Technique' }],
+      subtechniques: [],
+    });
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(result.get('test-job')?.threatTactics).toEqual(['Managed Tactic']);
+    expect(result.get('test-job')?.threatTechniques).toEqual(['Managed Technique']);
+  });
+
   it('falls back to the raw ID when a tactic/technique ID is not in the MITRE map', async () => {
     mockJobsFn.mockResolvedValueOnce({
       jobs: [
@@ -417,5 +454,84 @@ describe('getJobConfig', () => {
 
     expect(result.size).toBe(0);
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+  });
+});
+
+describe('managed MITRE list caching', () => {
+  const makeMockList = (empty = false) =>
+    jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: empty ? [] : [{ id: 'TA0099', name: 'Cached Tactic' }],
+      techniques: empty ? [] : [{ id: 'T9001', name: 'Cached Technique' }],
+      subtechniques: [],
+    });
+
+  const makeJobWithCustomSettings = () =>
+    makeJob({ custom_settings: { threat_tactics: ['TA0099'], threat_techniques: ['T9001'] } });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetManagedMitreMapsCache();
+    logger = loggingSystemMock.createLogger();
+    mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    mockListModulesFn = jest.fn().mockResolvedValue([]);
+    mockMl = {
+      anomalyDetectorsProvider: jest.fn().mockReturnValue({ jobs: mockJobsFn }),
+      modulesProvider: jest.fn().mockReturnValue({ listModules: mockListModulesFn }),
+    } as unknown as MlPluginSetup;
+  });
+
+  it('caches the managed result so list() is called only once across two requests', async () => {
+    const mockList = makeMockList();
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    // First call — populates cache
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+    // Second call — should use cache
+    mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not cache an empty response and calls list() again on the next request', async () => {
+    const mockList = makeMockList(true /* empty */);
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    // First call — empty result, must NOT be cached
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+    // Second call — should retry list() because the cache was not set
+    mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(2);
   });
 });

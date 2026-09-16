@@ -9,6 +9,9 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { findRules } from '../../../logic/search/find_rules';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
+import type { ValidMitreIdSets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import { buildValidMitreIdsFromBuckets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 
 jest.mock('../../../logic/search/find_rules');
 
@@ -16,6 +19,13 @@ const VALID_TACTIC_ID = 'TA0005';
 const VALID_TECHNIQUE_ID = 'T1548';
 const BOGUS_TACTIC_ID = 'TA9999';
 const BOGUS_TECHNIQUE_ID = 'T9999';
+
+/** Minimal managed-shaped buckets usable with buildValidMitreIdsFromBuckets. */
+const makeManagedBuckets = (validIds: ValidMitreIdSets) => ({
+  tactics: Array.from(validIds.tactic).map((id) => ({ id })),
+  techniques: Array.from(validIds.technique).map((id) => ({ id })),
+  subtechniques: Array.from(validIds.subtechnique).map((id) => ({ id })),
+});
 
 describe('handleCoverageOverviewRequest', () => {
   beforeEach(() => {
@@ -165,6 +175,85 @@ describe('handleCoverageOverviewRequest', () => {
 
     expect(result.unmapped_rule_ids).toContain('rule-unmapped-id');
     expect(result.invalid_mitre_ids['rule-unmapped-id']).toBeUndefined();
+  });
+
+  it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
+    const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
+      tactics: [{ id: VALID_TACTIC_ID }],
+      techniques: [{ id: VALID_TECHNIQUE_ID }],
+      subtechniques: [],
+    });
+
+    const managedBuckets = makeManagedBuckets(validIdSets);
+    const mockList = jest.fn().mockResolvedValue(managedBuckets);
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const ruleWithBogusIds: Rule = {
+      id: 'rule-bogus',
+      name: 'Bogus',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: BOGUS_TACTIC_ID,
+              name: 'Fake',
+              reference: 'https://attack.mitre.org/tactics/TA9999/',
+            },
+            technique: [],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    const ruleWithValidIds: Rule = {
+      id: 'rule-valid',
+      name: 'Valid',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [
+              {
+                id: VALID_TECHNIQUE_ID,
+                name: 'Abuse Elevation Control Mechanism',
+                reference: 'https://attack.mitre.org/techniques/T1548/',
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 2,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithBogusIds, ruleWithValidIds],
+    });
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
+    // The managed client's list() must have been called to resolve MITRE IDs.
+    expect(mockList).toHaveBeenCalledTimes(1);
+
+    // Bogus tactic not in the managed buckets → invalid.
+    expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
+      expect.arrayContaining([BOGUS_TACTIC_ID])
+    );
+
+    // Valid IDs are in the managed buckets → not invalid.
+    expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
   });
 });
 

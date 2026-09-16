@@ -8,13 +8,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { tacticOrder as mitreTacticOrder } from '../../../../../../common/detection_engine/mitre/mitre_tactics_order';
-import { tactics as mitreTactics } from '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import { useMitreConfiguration } from '../../../../../common/hooks/mitre/use_mitre_configuration';
 import { MitreTacticDot } from './mitre_tactic_dot';
-
-const tacticNames = [...mitreTactics]
-  .sort((a, b) => mitreTacticOrder.indexOf(a.id) - mitreTacticOrder.indexOf(b.id))
-  .map(({ name }) => name);
 
 interface MitreAttackChainProps {
   anomalyCountByTactic?: Readonly<Record<string, number>>;
@@ -35,6 +30,12 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
   showPersistentFirstTacticBadge = false,
   alignLastDotToEnd = false,
 }) => {
+  const { tactics } = useMitreConfiguration({ types: ['tactic'] });
+  const tacticNames = useMemo(
+    () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
+    [tactics]
+  );
+
   const triggeredSet = useMemo(() => new Set(triggeredTactics), [triggeredTactics]);
 
   // Forwarded to every MitreTacticDot component so each dot can detect whether
@@ -56,7 +57,7 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
       if ((anomalyCountByTactic[t] ?? 0) > 0) return t;
     }
     return null;
-  }, [anomalyCountByTactic, showPersistentFirstTacticBadge]);
+  }, [anomalyCountByTactic, showPersistentFirstTacticBadge, tacticNames]);
 
   const [hoveredTactic, setHoveredTactic] = useState<string | null>(null);
   const handleHoverChange = useCallback((tactic: string, isHovered: boolean) => {

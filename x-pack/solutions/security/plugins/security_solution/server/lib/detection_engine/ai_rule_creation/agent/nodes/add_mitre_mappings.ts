@@ -8,18 +8,10 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
-import {
-  tactics,
-  techniques,
-  subtechniques,
-} from '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques';
-import type {
-  MitreTactic,
-  MitreTechnique,
-  MitreSubTechnique,
-} from '../../../../../../common/detection_engine/mitre/types';
 import type {
   Threat,
   ThreatTechnique,
@@ -36,52 +28,63 @@ interface MitreMappingSelectionResponse {
 interface AddMitreMappingsNodeParams {
   model: InferenceChatModel;
   events?: ToolEventEmitter;
+  /** Resolved managed MITRE data client. Absent when xpack.mitreAttack.managedSourceEnabled is off. */
+  mitreDataClient?: MitreAttackDataClient;
 }
 
+/** Retrieves MITRE buckets from the managed client when available, else adapts the static blob. */
+const getMitreBuckets = async (
+  mitreDataClient: MitreAttackDataClient | undefined
+): Promise<MitreEntitySummaryBuckets> => {
+  if (mitreDataClient) {
+    return mitreDataClient.list();
+  }
+
+  // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
+  // Remove once the managed source is the default and the blob is deleted.
+  const { tactics, techniques, subtechniques } = await import(
+    '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
+  );
+  const { transformLegacyMitreData } = await import(
+    '../../../../../../common/detection_engine/mitre/mitre_data_adapter'
+  );
+  return transformLegacyMitreData({ tactics, techniques, subtechniques });
+};
+
 /**
- * Validates and formats the MITRE mapping response according to the Threat schema
+ * Validates and formats the MITRE mapping response according to the Threat schema.
+ * Operates on the managed shape: techniques carry `tactic_ids` (ID-based membership),
+ * and subtechniques carry `technique_id` for parent-technique validation.
  */
-export const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
+export const formatMitreMapping = (
+  response: MitreMappingSelectionResponse,
+  buckets: MitreEntitySummaryBuckets
+): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
-  // Group techniques by tactic
-  const tacticsMap = new Map<string, MitreTactic>();
-  tactics.forEach((tactic: MitreTactic) => {
-    tacticsMap.set(tactic.id, tactic);
-  });
-
-  const techniquesMap = new Map<string, MitreTechnique>();
-  techniques.forEach((technique: MitreTechnique) => {
-    techniquesMap.set(technique.id, technique);
-  });
-
-  const subtechniquesMap = new Map<string, MitreSubTechnique>();
-  subtechniques.forEach((subTechnique: MitreSubTechnique) => {
-    subtechniquesMap.set(subTechnique.id, subTechnique);
-  });
+  const tacticsMap = new Map(buckets.tactics.map((t) => [t.id, t]));
+  const techniquesMap = new Map(buckets.techniques.map((t) => [t.id, t]));
+  const subtechniquesMap = new Map(buckets.subtechniques.map((s) => [s.id, s]));
 
   for (const tacticId of response.tactics || []) {
     const tacticData = tacticsMap.get(tacticId);
     if (tacticData) {
-      // Find techniques that belong to this tactic and validate them against imported data
+      // Find techniques that belong to this tactic and validate them against managed data
       const relevantTechniques = (response.techniques || [])
-        .map((tech: MitreMappingSelectionResponse['techniques'][0]) => {
+        .map((tech) => {
           const techData = techniquesMap.get(tech.id);
           if (!techData) {
             return null;
           }
-          // Check if technique belongs to this tactic
-          const belongsToTactic = techData.tactics.some(
-            (t: string) => t.toLowerCase().replaceAll('-', '') === tacticData.value.toLowerCase()
-          );
-          if (!belongsToTactic) {
+          // Check if technique belongs to this tactic via ID (managed shape uses tactic_ids)
+          if (!techData.tactic_ids.includes(tacticData.id)) {
             return null;
           }
           return { techData, subtechniqueIds: tech.subtechnique || [] };
         })
         .filter((item) => item !== null);
 
-      // Format techniques with subtechniques using data from imports
+      // Format techniques with subtechniques using managed-shape data
       const formattedTechniques = relevantTechniques.map(({ techData, subtechniqueIds }) => {
         const formatted: ThreatTechnique = {
           id: techData.id,
@@ -89,16 +92,16 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
           reference: techData.reference,
         };
 
-        // Add subtechniques if present - validate and get data from imports
+        // Add subtechniques if present — validate and resolve from managed data
         if (subtechniqueIds.length > 0) {
           const formattedSubtechniques = subtechniqueIds
-            .map((subId: string) => {
+            .map((subId) => {
               const subData = subtechniquesMap.get(subId);
               if (!subData) {
                 return null;
               }
-              // Verify subtechnique belongs to the parent technique
-              if (subData.techniqueId !== techData.id) {
+              // Verify subtechnique belongs to the parent technique via technique_id
+              if (subData.technique_id !== techData.id) {
                 return null;
               }
               return {
@@ -132,7 +135,11 @@ export const formatMitreMapping = (response: MitreMappingSelectionResponse): Arr
   return threatMappings;
 };
 
-export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodeParams) => {
+export const addMitreMappingsNode = ({
+  model,
+  events,
+  mitreDataClient,
+}: AddMitreMappingsNodeParams) => {
   const jsonParser = new JsonOutputParser<MitreMappingSelectionResponse>();
 
   return async (state: RuleCreationState): Promise<RuleCreationState> => {
@@ -150,8 +157,9 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
         esql_query: state?.rule?.query || '',
         rule_tags: ruleTags,
       });
+      const mitreBuckets = await getMitreBuckets(mitreDataClient);
 
-      const threatMappings = formatMitreMapping(mitreSelectionResult);
+      const threatMappings = formatMitreMapping(mitreSelectionResult, mitreBuckets);
 
       events?.reportProgress(
         `Identified ${threatMappings.length} MITRE ATT&CK mapping(s) with ${threatMappings.reduce(
