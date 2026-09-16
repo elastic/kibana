@@ -17,6 +17,7 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { ErrorType } from '@kbn/ml-common-types/errors';
 
@@ -26,6 +27,7 @@ import {
   useEsqlWizardContext,
   useOptionalEsqlWizardContext,
 } from './esql_wizard_context';
+import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_warnings';
 
 const DEBOUNCE_MS = 300;
 const NUMERIC_ESQL_TYPES = new Set([
@@ -52,6 +54,27 @@ const firstTimeField = (fields: ESQLFieldWithMetadata[]) =>
   fields.find(({ name }) => name === 'bucket')?.name ??
   fields.find(({ type }) => DATE_ESQL_TYPES.has(type))?.name ??
   '';
+
+const firstDateOutputField = (fields: ESQLFieldWithMetadata[]) =>
+  fields.find(({ type }) => DATE_ESQL_TYPES.has(type))?.name ?? '';
+
+const warningClauseLabels: Record<EsqlQueryWarningClause, string> = {
+  where: i18n.translate('xpack.ml.esqlJob.query.reviewWarningTimeFilter', {
+    defaultMessage: 'time filter',
+  }),
+  sort: i18n.translate('xpack.ml.esqlJob.query.reviewWarningSort', {
+    defaultMessage: 'sort',
+  }),
+  limit: i18n.translate('xpack.ml.esqlJob.query.reviewWarningRowLimit', {
+    defaultMessage: 'row limit',
+  }),
+};
+
+const formatWarningClauses = (clauses: EsqlQueryWarningClause[]) =>
+  clauses
+    .map((clause) => warningClauseLabels[clause])
+    .join(', ')
+    .replace(/, ([^,]*)$/, ', and $1');
 
 export interface EsqlQueryStepState {
   query: string;
@@ -90,6 +113,16 @@ const EsqlQueryStepContent = () => {
   const selectedInfluencers = useMemo(
     () => allOptions.filter(({ label }) => state.influencers.includes(label)),
     [allOptions, state.influencers]
+  );
+  const queryWarnings = useMemo(
+    () =>
+      getEsqlQueryWarnings({
+        query: state.query,
+        sourceTimeField: state.sourceTimeField,
+        emittedTimeField: state.emittedTimeField,
+        fallbackTimeField: firstDateOutputField(state.columns),
+      }),
+    [state.columns, state.emittedTimeField, state.query, state.sourceTimeField]
   );
 
   useEffect(() => {
@@ -139,6 +172,26 @@ const EsqlQueryStepContent = () => {
           data-test-subj="mlEsqlQuery"
         />
       </EuiFormRow>
+
+      {queryWarnings.length > 0 ? (
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.ml.esqlJob.query.reviewWarningTitle', {
+            defaultMessage: 'Review {clauses}',
+            values: { clauses: formatWarningClauses(queryWarnings) },
+          })}
+          color="warning"
+          iconType="warning"
+          data-test-subj="mlEsqlQueryWarning"
+        >
+          <p>
+            {i18n.translate('xpack.ml.esqlJob.query.reviewWarningDescription', {
+              defaultMessage:
+                'This is a Kibana advisory. Remove the conflicting clauses if you want the datafeed to apply its time range, ordering, and safety limit.',
+            })}
+          </p>
+        </EuiCallOut>
+      ) : null}
 
       <EuiFormRow label="Source time field" fullWidth>
         <EuiFieldText

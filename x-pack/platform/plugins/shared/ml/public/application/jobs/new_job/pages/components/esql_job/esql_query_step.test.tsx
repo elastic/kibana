@@ -185,6 +185,28 @@ describe('EsqlQueryStep', () => {
     expect(await screen.findByText('Unknown column [bytes]')).toBeInTheDocument();
   });
 
+  it('shows a non-blocking advisory for a Discover-shaped query while continuing the columns probe', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    const query = 'FROM logs-* | WHERE @timestamp > now() | SORT @timestamp | LIMIT 100';
+    fireEvent.change(screen.getByTestId('mlEsqlQuery'), { target: { value: query } });
+
+    expect(screen.getByTestId('mlEsqlQueryWarning')).toHaveTextContent(
+      'Review time filter, sort, and row limit'
+    );
+    expect(screen.getByTestId('mlEsqlQueryWarning')).toHaveTextContent(
+      'Remove the conflicting clauses if you want the datafeed to apply its time range, ordering, and safety limit.'
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(getEsqlQueryColumns).toHaveBeenLastCalledWith({ query });
+    expect(screen.getByTestId('mlEsqlQuery')).not.toBeDisabled();
+  });
+
   it('does not update state when an in-flight request resolves after unmount', async () => {
     let resolveRequest: (value: { columns: typeof columns }) => void;
     const request = new Promise<{ columns: typeof columns }>((resolve) => {
