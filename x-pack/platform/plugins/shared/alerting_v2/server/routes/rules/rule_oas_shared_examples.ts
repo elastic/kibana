@@ -57,7 +57,9 @@ export const RULE_RESPONSE: RuleResponse = {
   metadata: {
     ...SAMPLE_RULE_DATA.metadata,
     signature_id: 'host-cpu-high-v1',
+    source: { type: 'internal', version: 1 },
     version: 1,
+    revision: 0,
   },
   created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',

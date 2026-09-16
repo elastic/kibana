@@ -9,12 +9,12 @@ import { merge } from 'lodash';
 import type { BuilderTypeManifest, OpaqueBuilderFields } from '@kbn/alerting-v2-rule-builders';
 import { globalFoldedVersions } from '../../lib/builder_types/folded_versions';
 import {
-  ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV4,
-  ruleMetadataSchema as ruleMetadataSchemaV4,
-} from '../schemas/rule_saved_object_attributes/v4';
+  ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV5,
+  ruleMetadataSchema as ruleMetadataSchemaV5,
+} from '../schemas/rule_saved_object_attributes/v5';
 import {
   currentRuleSavedObjectAttributesSchema,
-  ruleSavedObjectAttributesSchemaV5 as latestV5,
+  ruleSavedObjectAttributesSchemaV8 as latestV8,
 } from '../schemas/rule_saved_object_attributes';
 import { fromBuilderManifest, assertBuilderFieldsIsOpenRecord } from './from_builder_manifest';
 
@@ -397,12 +397,12 @@ describe('fromBuilderManifest', () => {
   // ---------------------------------------------------------------------------
 
   describe('open-record assertion: metadata.builder_fields stays an open record', () => {
-    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v5)', () => {
+    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v8)', () => {
       // Pin the alias so that adding a vN+1 schema does not silently leave fold
       // lines on the wrong schema. Update this test when advancing the alias.
       //
       // Ref: rule-data-migration.md "Rollback behavior"
-      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV5);
+      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV8);
     });
 
     // Production-function coverage: assertBuilderFieldsIsOpenRecord is called
@@ -412,11 +412,11 @@ describe('fromBuilderManifest', () => {
       expect(() => assertBuilderFieldsIsOpenRecord()).not.toThrow();
     });
 
-    it('the v4 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
+    it('the v5 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {
       // schema.recordOf(schema.string(), schema.any()) is the expected shape.
       // If builder_fields were tightened to a fixed set of keys, this would throw.
       expect(() =>
-        ruleMetadataSchemaV4.validate({
+        ruleMetadataSchemaV5.validate({
           name: 'test rule',
           builder_fields: {
             unknown_key_1: 'some string',
@@ -434,7 +434,7 @@ describe('fromBuilderManifest', () => {
         nested: { x: 1 },
       };
 
-      const result = ruleMetadataSchemaV4.validate({
+      const result = ruleMetadataSchemaV5.validate({
         name: 'test rule',
         builder_fields: fields,
       });
@@ -442,12 +442,12 @@ describe('fromBuilderManifest', () => {
       expect(result.builder_fields).toEqual(fields);
     });
 
-    it('the full v4 attributes schema also keeps builder_fields open', () => {
+    it('the full v5 attributes schema also keeps builder_fields open', () => {
       // Validate using the composite schema (not just the metadata sub-schema).
       const fullFields = { arbitrary_key: 'value', num: 99 };
 
       expect(() =>
-        ruleSavedObjectAttributesSchemaV4.validate({
+        ruleSavedObjectAttributesSchemaV5.validate({
           kind: 'alert',
           metadata: { name: 'test rule', builder_fields: fullFields },
           time_field: '@timestamp',
@@ -457,8 +457,8 @@ describe('fromBuilderManifest', () => {
             breach: { query: 'FROM logs-* | LIMIT 1' },
           },
           enabled: true,
-          createdBy: 'elastic',
-          updatedBy: 'elastic',
+          createdBy: { profile_uid: 'elastic' },
+          updatedBy: { profile_uid: 'elastic' },
           createdAt: '2026-01-01T00:00:00.000Z',
           updatedAt: '2026-01-01T00:00:00.000Z',
         })

@@ -14,8 +14,10 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
+  computeNextRevision,
   assertImmutableUnchanged,
   assertSignatureIdUnchanged,
+  assertRuleSourceUnchanged,
   validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
@@ -35,6 +37,7 @@ const serverFields = {
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
   signatureId: 'test-sig-id',
+  source: { type: 'internal' as const, version: 1 },
 };
 
 const baseCreateData: ResolvedCreateRuleData = {
@@ -1041,6 +1044,462 @@ describe('utils', () => {
           data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
         })
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 4.2: metadata.revision — the meaningful-edit counter
+  // ---------------------------------------------------------------------------
+
+  describe('computeNextRevision (step 4.2)', () => {
+    const stored = createRuleSoAttributes({ metadata: { name: 'rule-1', revision: 2 } });
+
+    it('returns the current revision when next attrs are identical to stored (no-op update)', () => {
+      // Exact same content: no meaningful change, counter must stay.
+      expect(computeNextRevision(stored, stored)).toBe(2);
+    });
+
+    it('bumps revision by one when any meaningful field differs', () => {
+      const next = {
+        ...stored,
+        metadata: { ...stored.metadata, name: 'renamed' },
+      };
+      expect(computeNextRevision(next, stored)).toBe(3);
+    });
+
+    it('does NOT bump when only excluded fields differ (updated_at, updated_by, version, revision)', () => {
+      // Simulate the stamps that every write applies — these must never trigger a bump.
+      const next = {
+        ...stored,
+        updatedAt: '2099-01-01T00:00:00.000Z',
+        updatedBy: 'some-other-user',
+        metadata: {
+          ...stored.metadata,
+          version: 99,
+          revision: 99,
+        },
+      };
+      expect(computeNextRevision(next, stored)).toBe(2);
+    });
+
+    it('does NOT bump when tags:null clears absent tags (null → undefined normalizes to no change)', () => {
+      // v2's PATCH normalizes `tags: null` → stored as `undefined` (absent).
+      // Both next and stored have tags absent, so the diff sees no difference.
+      const storedNoTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 5 },
+        // no tags field
+      });
+      const nextNoTags = {
+        ...storedNoTags,
+        metadata: { ...storedNoTags.metadata, tags: undefined },
+      };
+      expect(computeNextRevision(nextNoTags, storedNoTags)).toBe(5);
+    });
+
+    it('bumps when tags actually change (non-empty → empty)', () => {
+      const storedWithTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', tags: ['a', 'b'], revision: 3 },
+      });
+      const nextNoTags = {
+        ...storedWithTags,
+        metadata: { ...storedWithTags.metadata, tags: undefined },
+      };
+      expect(computeNextRevision(nextNoTags, storedWithTags)).toBe(4);
+    });
+
+    it('bumps when builder_fields container changes (diffed as one value)', () => {
+      const storedWithBuilder = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'threshold',
+          builder_fields: { threshold: 10 },
+          revision: 1,
+        },
+      });
+      const nextDifferentBuilder = {
+        ...storedWithBuilder,
+        metadata: {
+          ...storedWithBuilder.metadata,
+          builder_fields: { threshold: 20 },
+        },
+      };
+      expect(computeNextRevision(nextDifferentBuilder, storedWithBuilder)).toBe(2);
+    });
+
+    it('falls back to 0 and bumps to 1 when stored has no revision (unmigrated rule)', () => {
+      // Rule created before step 4.2's migration — no revision on disk.
+      const storedNoRevision = createRuleSoAttributes({
+        metadata: { name: 'rule-1' },
+      });
+      const nextChanged = {
+        ...storedNoRevision,
+        metadata: { ...storedNoRevision.metadata, name: 'renamed' },
+      };
+      expect(computeNextRevision(nextChanged, storedNoRevision)).toBe(1);
+    });
+
+    it('falls back to 0 and stays at 0 for an unmigrated rule on a no-op write', () => {
+      const storedNoRevision = createRuleSoAttributes({
+        metadata: { name: 'rule-1' },
+      });
+      expect(computeNextRevision(storedNoRevision, storedNoRevision)).toBe(0);
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — revision (step 4.2)', () => {
+    it('seeds revision at 0 on create', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+      expect(result.metadata.revision).toBe(0);
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — revision (step 4.2)', () => {
+    const baseExisting = createRuleSoAttributes({
+      metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
+    });
+    const baseUpdateServerFields = { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 };
+
+    it('does NOT bump revision when the update changes nothing meaningful', () => {
+      // Sending an empty update — all optional fields omitted, nothing changes.
+      const result = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
+      // Revision stays at 3; only version, updatedAt, updatedBy moved.
+      expect(result.metadata.revision).toBe(3);
+    });
+
+    it('bumps revision by exactly one when a meaningful field changes', () => {
+      const result = buildUpdateRuleAttributes(
+        baseExisting,
+        { metadata: { name: 'renamed-rule' } },
+        baseUpdateServerFields
+      );
+      expect(result.metadata.revision).toBe(4);
+    });
+
+    it('bumps at most once even when multiple fields change in a single update', () => {
+      const result = buildUpdateRuleAttributes(
+        baseExisting,
+        {
+          metadata: { name: 'renamed-rule', tags: ['new-tag'] },
+          time_field: 'event.created',
+        },
+        baseUpdateServerFields
+      );
+      expect(result.metadata.revision).toBe(4);
+    });
+
+    it('version (metadata.version) still increments independently of revision', () => {
+      // No-op update: revision stays, version still moves.
+      const noOpResult = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
+      expect(noOpResult.metadata.version).toBe(2);
+      expect(noOpResult.metadata.revision).toBe(3);
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — revision (step 4.2)', () => {
+    it('includes revision from stored attributes in the response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.revision).toBe(7);
+    });
+
+    it('falls back to 0 for revision when the stored attribute is absent (unmigrated rule)', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', signature_id: 'sig-1' },
+        // no revision
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.revision).toBe(0);
+    });
+
+    it('passes ruleResponseSchema parse with revision present', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+  });
+
+  // ─── Step 4.3: source object ───────────────────────────────────────────────
+
+  describe('assertRuleSourceUnchanged (step 4.3)', () => {
+    describe('no-op cases — should never throw', () => {
+      it('does not throw when source is omitted (undefined)', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() => assertRuleSourceUnchanged(undefined, stored)).not.toThrow();
+      });
+
+      it('does not throw when stored source is absent (pre-migration rule)', () => {
+        const stored = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'internal', version: 1 }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type matches for internal', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'internal', version: 2 }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type and id match for template', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-abc' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 5, id: 'tmpl-abc' }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type and id match for external', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'external', version: 209, id: 'asset-xyz' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'external', version: 210, id: 'asset-xyz' }, stored)
+        ).not.toThrow();
+      });
+    });
+
+    describe('conflict cases — should throw 409 IMMUTABLE_FIELDS_CHANGED', () => {
+      it('throws when type changes from internal to template', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 1, id: 'tmpl-id' }, stored)
+        ).toThrow(
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
+        );
+      });
+
+      it('throws when type changes from template to external', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-id' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'external', version: 1, id: 'tmpl-id' }, stored)
+        ).toThrow(
+          expect.objectContaining({ isBoom: true, output: expect.objectContaining({ statusCode: 409 }) })
+        );
+      });
+
+      it('throws with IMMUTABLE_FIELDS_CHANGED and the changed field name', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        let err: unknown;
+        try {
+          assertRuleSourceUnchanged({ type: 'external', version: 1, id: 'asset-id' }, stored);
+        } catch (e) {
+          err = e;
+        }
+        expect(err).toMatchObject({
+          data: { code: 'IMMUTABLE_FIELDS_CHANGED', details: { fields: ['metadata.source.type'] } },
+        });
+      });
+
+      it('throws when id changes for template source', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-abc' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 1, id: 'tmpl-different' }, stored)
+        ).toThrow(
+          expect.objectContaining({ isBoom: true, output: expect.objectContaining({ statusCode: 409 }) })
+        );
+      });
+
+      it('includes metadata.source.id in the changed-fields list when id differs', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'external', version: 100, id: 'asset-abc' },
+          },
+        });
+        let err: unknown;
+        try {
+          assertRuleSourceUnchanged({ type: 'external', version: 100, id: 'asset-xyz' }, stored);
+        } catch (e) {
+          err = e;
+        }
+        expect(err).toMatchObject({
+          data: { details: { fields: ['metadata.source.id'] } },
+        });
+      });
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — source (step 4.3)', () => {
+    it('stores the declared internal source', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'internal', version: 1 },
+      });
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 1 });
+    });
+
+    it('stores a template source with its id', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'template', version: 1, id: 'tmpl-abc' },
+      });
+      expect(result.metadata.source).toEqual({ type: 'template', version: 1, id: 'tmpl-abc' });
+    });
+
+    it('stores an external source with its id and version', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'external', version: 209, id: 'asset-xyz' },
+      });
+      expect(result.metadata.source).toEqual({ type: 'external', version: 209, id: 'asset-xyz' });
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — source (step 4.3)', () => {
+    it('preserves stored source when update data omits the field', () => {
+      const stored = { type: 'external', version: 100, id: 'asset-id' } as const;
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', source: stored },
+      });
+
+      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+
+      expect(next.metadata.source).toEqual(stored);
+    });
+
+    it('allows version to move while preserving type and id', () => {
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'template', version: 1, id: 'tmpl-abc' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'template', version: 5, id: 'tmpl-abc' } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.source).toEqual({ type: 'template', version: 5, id: 'tmpl-abc' });
+    });
+
+    it('forces stored type and id even when the caller sends different values (assertRuleSourceUnchanged handles the rejection upstream)', () => {
+      // buildUpdateRuleAttributes always restores type and id from storage.
+      // The mismatch rejection happens in assertRuleSourceUnchanged before this
+      // function is called; this test documents that the function is safe.
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'external', version: 100, id: 'original-id' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'external', version: 101, id: 'changed-id' } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      // type and id forced from storage; only version moved
+      expect(next.metadata.source).toEqual({ type: 'external', version: 101, id: 'original-id' });
+    });
+
+    it('uses incoming source as-is when stored source is absent (pre-migration)', () => {
+      const existing = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'internal', version: 2 } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.source).toEqual({ type: 'internal', version: 2 });
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — source (step 4.3)', () => {
+    it('includes internal source from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 3 } },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 3 });
+    });
+
+    it('includes template source with id', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'template', version: 1, id: 'tmpl-id' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'template', version: 1, id: 'tmpl-id' });
+    });
+
+    it('includes external source with id and version', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'external', version: 209, id: 'asset-id' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'external', version: 209, id: 'asset-id' });
+    });
+
+    it('falls back to internal/version-1 when stored source is absent (pre-migration)', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 1 });
+    });
+
+    it('passes ruleResponseSchema parse for each source variant', () => {
+      const variants = [
+        { type: 'internal', version: 1 } as const,
+        { type: 'template', version: 1, id: 'tmpl-id' } as const,
+        { type: 'external', version: 100, id: 'asset-id' } as const,
+      ];
+      for (const source of variants) {
+        const attrs = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source },
+        });
+        const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+        expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+      }
     });
   });
 
