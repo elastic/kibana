@@ -17,6 +17,7 @@
  */
 
 import { Server, ServerCredentials, status as grpcStatus } from '@grpc/grpc-js';
+import { diag } from '@opentelemetry/api';
 import { setTimeout as timer } from 'timers/promises';
 import { config as loggingConfig, LoggingSystem } from '@kbn/core-logging-server-internal';
 
@@ -151,6 +152,7 @@ describe('OtelAppender (real OTel SDK)', () => {
     await system?.stop();
     system = undefined;
     collector.close();
+    jest.restoreAllMocks();
   });
 
   it('delivers records buffered while the collector was failing (retry budget)', async () => {
@@ -202,6 +204,7 @@ describe('OtelAppender (real OTel SDK)', () => {
   });
 
   it('bounds the in-memory queue at maxQueueSize during an outage, dropping overflow', async () => {
+    const diagWarnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
     collector.setMode('unavailable');
     system = await startLoggingSystem(collector.url, {
       maxQueueSize: 512,
@@ -232,5 +235,12 @@ describe('OtelAppender (real OTel SDK)', () => {
     expect(collector.countReceived('marker-queue-511.')).toBe(1);
     expect(collector.countReceived('marker-queue-512.')).toBe(0);
     expect(collector.countReceived('marker-queue-599.')).toBe(0);
+
+    // The drops must be reported: first drop warns immediately, later ones are throttled.
+    const queueFullWarnings = diagWarnSpy.mock.calls.filter(([message]) =>
+      String(message).includes('OTLP log queue full (maxQueueSize: 512)')
+    );
+    expect(queueFullWarnings).toHaveLength(1);
+    expect(queueFullWarnings[0][0]).toContain('discarded 1 log records since last report');
   });
 });

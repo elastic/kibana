@@ -29,7 +29,7 @@ import {
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { resources } from '@elastic/opentelemetry-node/sdk';
-import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
+import { LoggerProvider } from '@opentelemetry/sdk-logs';
 import type {
   OtelAppenderConfig,
   OtelAppenderPluginConfig,
@@ -47,6 +47,7 @@ import {
   toGrpcRootCerts,
 } from './otel_tls';
 import { RetryingLogRecordExporter } from './retrying_log_exporter';
+import { ReportingBatchLogRecordProcessor } from './reporting_batch_processor';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -395,7 +396,7 @@ export class OtelAppender implements DisposableAppender {
 
     this.loggerProvider = new LoggerProvider({
       processors: [
-        new BatchLogRecordProcessor({
+        new ReportingBatchLogRecordProcessor({
           exporter,
           selfObsMeterProvider: meterProvider,
           ...(config.maxQueueSize !== undefined && { maxQueueSize: config.maxQueueSize }),
