@@ -535,6 +535,39 @@ describe('parseSelectedAlertPairs', () => {
     ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
   });
 
+  it('rejects id-based document trigger selections', () => {
+    expect(() =>
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'document',
+          documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+        },
+      })
+    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
+  });
+
+  it('rejects query-based document trigger selections', () => {
+    expect(() =>
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'document',
+          querySelection: { index: 'logs-*', query: { match_all: {} } },
+        },
+      })
+    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
+  });
+
+  it('allows a document trigger with pre-expanded documents (no server-side expansion)', () => {
+    expect(
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'document',
+          documents: [{ id: 'doc-1', index: 'logs-default', data: {} }],
+        },
+      })
+    ).toEqual([]);
+  });
+
   it('throws 400 when alertIds is not an array', () => {
     expect(() => parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })).toThrow(
       'inputs.event.alertIds must be an array.'
