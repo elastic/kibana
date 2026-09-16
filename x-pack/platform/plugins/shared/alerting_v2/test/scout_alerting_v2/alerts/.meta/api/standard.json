@@ -1,1398 +1,1684 @@
 {
-  "sha1": "7d01c1a812eab777008d2bf3bb3eadc0b5ec228a",
+  "sha1": "158770307ada5ecac69a13724db129e978977f55",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "70bceece7fae59d-45b3c8c41811a8e",
-      "title": "Bulk create alert actions API bulk: processes a single valid item and returns counts",
+      "id": "50cd3300664bf57-5e69cce7313c53d",
+      "title": "Bulk episode actions API bulk ack: processes valid items and persists one doc per episode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 30,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 35,
         "column": 23
       }
     },
     {
-      "id": "70bceece7fae59d-1cee0bc023cdbc2",
-      "title": "Bulk create alert actions API bulk: processes mixed (non-lifecycle) action types and persists each side effect",
+      "id": "50cd3300664bf57-da7e1b4a5968ec7",
+      "title": "Bulk episode actions API bulk tag: processes valid items and persists one doc per episode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 68,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 92,
+        "column": 21
+      }
+    },
+    {
+      "id": "50cd3300664bf57-1261dda9aeb8f7c",
+      "title": "Bulk episode actions API bulk unack: persists the unack doc",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 168,
         "column": 27
       }
     },
     {
-      "id": "70bceece7fae59d-7b3e64563584e2a",
-      "title": "Bulk create alert actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
+      "id": "50cd3300664bf57-fd30e57214212b0",
+      "title": "Bulk episode actions API bulk assign: persists the assign doc with its assignee_uid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 146,
-        "column": 29
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 205,
+        "column": 23
       }
     },
     {
-      "id": "70bceece7fae59d-041963df94469ca",
-      "title": "Bulk create alert actions API partial success: reports a per-item error for every action when every group_hash is unknown",
+      "id": "50cd3300664bf57-7f593816bcf3994",
+      "title": "Bulk episode actions API partial success: reports ALERT_EPISODE_NOT_FOUND when some episode_ids are unknown",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 196,
-        "column": 59
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 244,
+        "column": 48
       }
     },
     {
-      "id": "70bceece7fae59d-605da2258a1772e",
-      "title": "Bulk create alert actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
+      "id": "50cd3300664bf57-fbd5779daca4cf9",
+      "title": "Bulk episode actions API partial success: bulk tag reports ALERT_EPISODE_NOT_FOUND keyed by the unknown episode_id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 229,
-        "column": 54
-      }
-    },
-    {
-      "id": "70bceece7fae59d-4fd23b6f5bb61d7",
-      "title": "Bulk create alert actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 289,
-        "column": 24
-      }
-    },
-    {
-      "id": "70bceece7fae59d-07c88f492686cba",
-      "title": "Bulk create alert actions API lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 342,
-        "column": 29
-      }
-    },
-    {
-      "id": "70bceece7fae59d-de54ad98cfa88de",
-      "title": "Bulk create alert actions API lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk activate item whose episode is still active",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 405,
-        "column": 14
-      }
-    },
-    {
-      "id": "70bceece7fae59d-c55706ee9bd2e93",
-      "title": "Bulk create alert actions API schema: rejects an empty array with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 452,
-        "column": 22
-      }
-    },
-    {
-      "id": "70bceece7fae59d-35fd004f301115e",
-      "title": "Bulk create alert actions API schema: rejects more than 100 items with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 458,
-        "column": 12
-      }
-    },
-    {
-      "id": "70bceece7fae59d-de12af21c288402",
-      "title": "Bulk create alert actions API schema: rejects an item missing group_hash with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 472,
-        "column": 5
-      }
-    },
-    {
-      "id": "70bceece7fae59d-51b9f472502ef1b",
-      "title": "Bulk create alert actions API schema: rejects an item with unknown action_type with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 481,
-        "column": 14
-      }
-    },
-    {
-      "id": "70bceece7fae59d-0d2d20b069962e9",
-      "title": "Bulk create alert actions API schema: rejects an item with an invalid per-action body with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 490,
-        "column": 7
-      }
-    },
-    {
-      "id": "70bceece7fae59d-e634706f03876a8",
-      "title": "Bulk create alert actions API schema: rejects an item with empty group_hash with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 505,
-        "column": 14
-      }
-    },
-    {
-      "id": "70bceece7fae59d-7a8a541a4ec37e7",
-      "title": "Bulk create alert actions API schema: rejects an item with group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 516,
-        "column": 12
-      }
-    },
-    {
-      "id": "70bceece7fae59d-df676190a5bc5c1",
-      "title": "Bulk create alert actions API schema: rejects a non-array body with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 534,
-        "column": 14
-      }
-    },
-    {
-      "id": "70bceece7fae59d-2112426fccc9630",
-      "title": "Bulk create alert actions API schema: rejects an item with unknown body fields (strict mode) with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 547,
-        "column": 83
-      }
-    },
-    {
-      "id": "70bceece7fae59d-13da9c7e8f8ad00",
-      "title": "Bulk create alert actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 567,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 293,
         "column": 18
       }
     },
     {
-      "id": "70bceece7fae59d-1f6d426ead65ee3",
-      "title": "Bulk create alert actions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "id": "50cd3300664bf57-fdfc94a59126aaf",
+      "title": "Bulk episode actions API partial success: reports a per-item error for every item when every episode_id is unknown",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_create_alert_action.spec.ts",
-        "line": 643,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 354,
+        "column": 25
+      }
+    },
+    {
+      "id": "50cd3300664bf57-783d1d137d185b9",
+      "title": "Bulk episode actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 373,
+        "column": 77
+      }
+    },
+    {
+      "id": "50cd3300664bf57-cbaa57270d1af92",
+      "title": "Bulk episode actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 432,
+        "column": 15
+      }
+    },
+    {
+      "id": "50cd3300664bf57-862db6a686e0242",
+      "title": "Bulk episode actions API lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 487,
+        "column": 13
+      }
+    },
+    {
+      "id": "50cd3300664bf57-9a5a3fb9a90d87b",
+      "title": "Bulk episode actions API lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk activate item whose episode is still active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 548,
+        "column": 18
+      }
+    },
+    {
+      "id": "50cd3300664bf57-dd45a0b5e63a286",
+      "title": "Bulk episode actions API lifecycle: reports ALERT_EPISODE_NOT_LATEST for a bulk activate item targeting a superseded episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 586,
+        "column": 14
+      }
+    },
+    {
+      "id": "50cd3300664bf57-7594452d99ae473",
+      "title": "Bulk episode actions API lifecycle: bulk ack succeeds on a superseded episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 636,
+        "column": 15
+      }
+    },
+    {
+      "id": "50cd3300664bf57-cc94ca5157630f0",
+      "title": "Bulk episode actions API schema: rejects a bare array body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 688,
+        "column": 69
+      }
+    },
+    {
+      "id": "50cd3300664bf57-5f0a1d0eb62f804",
+      "title": "Bulk episode actions API schema: rejects empty items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 698,
+        "column": 52
+      }
+    },
+    {
+      "id": "50cd3300664bf57-c510dff1468beb0",
+      "title": "Bulk episode actions API schema: rejects more than 100 items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 707,
+        "column": 5
+      }
+    },
+    {
+      "id": "50cd3300664bf57-7a0f5bd2b1c2cf3",
+      "title": "Bulk episode actions API schema: rejects an unknown envelope key with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 717,
+        "column": 92
+      }
+    },
+    {
+      "id": "50cd3300664bf57-f841a807e45387a",
+      "title": "Bulk episode actions API schema: rejects an item missing episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 729,
+        "column": 84
+      }
+    },
+    {
+      "id": "50cd3300664bf57-9d27c737942447c",
+      "title": "Bulk episode actions API schema: rejects an item carrying action_type with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 738,
+        "column": 12
+      }
+    },
+    {
+      "id": "50cd3300664bf57-25e0fb8df2b5e69",
+      "title": "Bulk episode actions API schema: rejects an item carrying group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 754,
+        "column": 4
+      }
+    },
+    {
+      "id": "50cd3300664bf57-2d2ceb87e2e5646",
+      "title": "Bulk episode actions API schema: rejects a bulk tag item keyed by group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 768,
+        "column": 30
+      }
+    },
+    {
+      "id": "50cd3300664bf57-a744e2ca04ce124",
+      "title": "Bulk episode actions API schema: rejects an item with an invalid per-action body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 784,
+        "column": 39
+      }
+    },
+    {
+      "id": "50cd3300664bf57-c87ddb4024f3cd1",
+      "title": "Bulk episode actions API schema: rejects an item with empty episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 800,
+        "column": 51
+      }
+    },
+    {
+      "id": "50cd3300664bf57-e566ea93bb993d5",
+      "title": "Bulk episode actions API schema: rejects an item with episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 811,
+        "column": 13
+      }
+    },
+    {
+      "id": "50cd3300664bf57-8cc395075414cb0",
+      "title": "Bulk episode actions API schema: rejects an item with unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 821,
+        "column": 3
+      }
+    },
+    {
+      "id": "50cd3300664bf57-8b8c4cbe8962e10",
+      "title": "Bulk episode actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 971,
         "column": 27
       }
     },
     {
-      "id": "a25d600c3b770e9-a57eaa7b3356fdf",
-      "title": "Create ack alert action API ack: writes an ack action and returns 204",
+      "id": "50cd3300664bf57-873f38f323f6342",
+      "title": "Bulk episode actions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 988,
+        "column": 27
+      }
+    },
+    {
+      "id": "684750a15c38442-fc65915c28d791c",
+      "title": "Bulk series actions API bulk snooze: processes valid items and persists one doc per series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "684750a15c38442-9db11e9ff5989eb",
+      "title": "Bulk series actions API bulk unsnooze: persists the unsnooze doc",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 94,
+        "column": 25
+      }
+    },
+    {
+      "id": "684750a15c38442-45588f70113de12",
+      "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "684750a15c38442-35368d65a54d69c",
+      "title": "Bulk series actions API partial success: reports a per-item error for every item when every group_hash is unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 179,
+        "column": 25
+      }
+    },
+    {
+      "id": "684750a15c38442-35e2f85b3713277",
+      "title": "Bulk series actions API schema: rejects a bare array body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 208,
+        "column": 28
+      }
+    },
+    {
+      "id": "684750a15c38442-fb36314484eccf9",
+      "title": "Bulk series actions API schema: rejects empty items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 218,
+        "column": 25
+      }
+    },
+    {
+      "id": "684750a15c38442-1bff2d81474ae62",
+      "title": "Bulk series actions API schema: rejects more than 100 items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 226,
+        "column": 59
+      }
+    },
+    {
+      "id": "684750a15c38442-37c8ba6c8712a10",
+      "title": "Bulk series actions API schema: rejects an unknown envelope key with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 240,
+        "column": 5
+      }
+    },
+    {
+      "id": "684750a15c38442-c78b194d2f6d894",
+      "title": "Bulk series actions API schema: rejects an item missing group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 251,
+        "column": 22
+      }
+    },
+    {
+      "id": "684750a15c38442-d3de1139c64cb5a",
+      "title": "Bulk series actions API schema: rejects an item carrying action_type with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 261,
+        "column": 5
+      }
+    },
+    {
+      "id": "684750a15c38442-ef3829d18e84a26",
+      "title": "Bulk series actions API schema: rejects an item carrying episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 273,
+        "column": 5
+      }
+    },
+    {
+      "id": "684750a15c38442-eb219bc5fb2e3d2",
+      "title": "Bulk series actions API schema: rejects an item with an invalid per-action body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 287,
+        "column": 7
+      }
+    },
+    {
+      "id": "684750a15c38442-cf439521e29f2d7",
+      "title": "Bulk series actions API schema: rejects an item with empty group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 300,
+        "column": 22
+      }
+    },
+    {
+      "id": "684750a15c38442-ba1ac7959c30ce9",
+      "title": "Bulk series actions API schema: rejects an item with group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 312,
+        "column": 24
+      }
+    },
+    {
+      "id": "684750a15c38442-605acadcc5a9594",
+      "title": "Bulk series actions API schema: rejects an item with unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 325,
+        "column": 24
+      }
+    },
+    {
+      "id": "684750a15c38442-afdcbb8ee993171",
+      "title": "Bulk series actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 337,
+        "column": 43
+      }
+    },
+    {
+      "id": "684750a15c38442-a0ccfa998529d3b",
+      "title": "Bulk series actions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 353,
+        "column": 25
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-3c3ca0979c6f0e7",
+      "title": "Create ack episode action API ack: writes an ack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
         "line": 35,
         "column": 31
       }
     },
     {
-      "id": "a25d600c3b770e9-ae6edbc3e7f1f41",
-      "title": "Create ack alert action API schema: rejects body missing episode_id with 400",
+      "id": "fc2b57b36f3106f-f4522a7579f39ed",
+      "title": "Create ack episode action API ack: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 64,
-        "column": 7
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-c82f814f625b21f",
-      "title": "Create ack alert action API schema: rejects empty episode_id with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 72,
-        "column": 7
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-b33e8b147dfe956",
-      "title": "Create ack alert action API schema: rejects episode_id over 150 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 81,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 65,
         "column": 12
       }
     },
     {
-      "id": "a25d600c3b770e9-0e3dac89f489830",
-      "title": "Create ack alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "id": "fc2b57b36f3106f-3b8bdccf5601c7f",
+      "title": "Create ack episode action API schema: rejects episode_id in the body (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 88,
-        "column": 7
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-f74b001cd15f206",
-      "title": "Create ack alert action API schema: rejects group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 96,
-        "column": 43
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-facd4d7fed2ad66",
-      "title": "Create ack alert action API returns 404 when group_hash matches no events",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 105,
-        "column": 13
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-b9150b1d7ce3819",
-      "title": "Create ack alert action API returns 404 when episode_id matches no events for the group",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 111,
-        "column": 90
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-fa41f1ec8084501",
-      "title": "Create ack alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 131,
-        "column": 43
-      }
-    },
-    {
-      "id": "a25d600c3b770e9-a81a62422659419",
-      "title": "Create ack alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_alert_action.spec.ts",
-        "line": 140,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 113,
         "column": 9
       }
     },
     {
-      "id": "42088b99ef2f4c8-bc454278ec1a979",
-      "title": "Create activate alert action API activate: writes an activate action and returns 204",
+      "id": "fc2b57b36f3106f-741711f7baf41dd",
+      "title": "Create ack episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-c34747961d9d46f",
+      "title": "Create ack episode action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 136,
+        "column": 11
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-9f7181f3cb67add",
+      "title": "Create ack episode action API returns 404 when episode_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-219a1326a38492d",
+      "title": "Create ack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-63aeefd9fe225c9",
+      "title": "Create ack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 160,
+        "column": 12
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-b370774c3bc25c6",
+      "title": "Create activate episode action API activate: writes an activate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
         "line": 30,
         "column": 23
       }
     },
     {
-      "id": "42088b99ef2f4c8-fbc270f956a66b1",
-      "title": "Create activate alert action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
+      "id": "a1b53f47fd7455e-11e9d92ef4e3e2f",
+      "title": "Create activate episode action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 68,
-        "column": 14
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 70,
+        "column": 22
       }
     },
     {
-      "id": "42088b99ef2f4c8-f761fefd7afc051",
-      "title": "Create activate alert action API schema: rejects body missing reason with 400",
+      "id": "a1b53f47fd7455e-927795a37c2c923",
+      "title": "Create activate episode action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 123,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 125,
         "column": 33
       }
     },
     {
-      "id": "42088b99ef2f4c8-46ab3746c0c8158",
-      "title": "Create activate alert action API schema: rejects empty reason with 400",
+      "id": "a1b53f47fd7455e-56166db84c15360",
+      "title": "Create activate episode action API schema: rejects empty reason with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 129,
+        "column": 9
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-d9fc14cf3953b1f",
+      "title": "Create activate episode action API schema: rejects reason over 1024 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 139,
+        "column": 12
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-d75563cb20f8508",
+      "title": "Create activate episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 146,
+        "column": 7
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-d26f228104b09d4",
+      "title": "Create activate episode action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 154,
+        "column": 40
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-40d516e55df482d",
+      "title": "Create activate episode action API returns 404 when episode_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 163,
+        "column": 13
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-3d2d14b9b90ab51",
+      "title": "Create activate episode action API returns 404 when the episode exists but is not the latest of its series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 172,
+        "column": 13
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-05c5adce1f0e8a3",
+      "title": "Create activate episode action API precondition: rejects activate when the episode is already active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 212,
+        "column": 59
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-9523139905426f6",
+      "title": "Create activate episode action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 249,
+        "column": 45
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-26fa5bf0018d0b7",
+      "title": "Create activate episode action API activate: allows a pending episode to be forced past the activation counter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 285,
+        "column": 45
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-7bcd6accbbcd46c",
+      "title": "Create activate episode action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 317,
+        "column": 35
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-0952e069bc87f95",
+      "title": "Create activate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 363,
+        "column": 14
+      }
+    },
+    {
+      "id": "a1b53f47fd7455e-574f993bf5370cc",
+      "title": "Create activate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 378,
+        "column": 18
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-f158754c10e60c2",
+      "title": "Create assign episode action API assign: writes an assign action with assignee_uid and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 30,
+        "column": 23
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-f642e4b7e384021",
+      "title": "Create assign episode action API assign: null assignee_uid clears the assignee and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 65,
+        "column": 22
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-a0c3238e64cc708",
+      "title": "Create assign episode action API assign: audit actions work on old (superseded) episodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 99,
+        "column": 22
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-73ca3f79c48e0b1",
+      "title": "Create assign episode action API schema: rejects body missing assignee_uid with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 150,
+        "column": 21
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-e37f4ec5579e2c7",
+      "title": "Create assign episode action API schema: rejects episode_id in the body (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 158,
+        "column": 22
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-c3cda3c115e146e",
+      "title": "Create assign episode action API schema: rejects assignee_uid over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 172,
+        "column": 18
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-bd87bc72ac18cdf",
+      "title": "Create assign episode action API schema: rejects assignee_uid that is neither string nor null with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 180,
+        "column": 76
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-3183b7ee1a1bcdc",
+      "title": "Create assign episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 187,
+        "column": 5
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-61ed4d432e754dd",
+      "title": "Create assign episode action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 197,
+        "column": 14
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-9b4342a64b41980",
+      "title": "Create assign episode action API returns 404 when episode_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 204,
+        "column": 56
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-1703188eba307ae",
+      "title": "Create assign episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 214,
+        "column": 7
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-290909946551a59",
+      "title": "Create assign episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 224,
+        "column": 12
+      }
+    },
+    {
+      "id": "001066df0c20ed8-0d5a36a98129d53",
+      "title": "Create deactivate episode action API deactivate: writes a deactivate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 30,
+        "column": 23
+      }
+    },
+    {
+      "id": "001066df0c20ed8-ce381aea60fcc20",
+      "title": "Create deactivate episode action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 69,
+        "column": 22
+      }
+    },
+    {
+      "id": "001066df0c20ed8-52b87d4249173a4",
+      "title": "Create deactivate episode action API schema: rejects body missing reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 134,
+        "column": 27
+      }
+    },
+    {
+      "id": "001066df0c20ed8-ce7e4873423f4a8",
+      "title": "Create deactivate episode action API schema: rejects empty reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
         "line": 127,
         "column": 9
       }
     },
     {
-      "id": "42088b99ef2f4c8-21e56ef81589cba",
-      "title": "Create activate alert action API schema: rejects reason over 1024 chars with 400",
+      "id": "001066df0c20ed8-6fe913f8f6293b6",
+      "title": "Create deactivate episode action API schema: rejects reason over 1024 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 137,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 138,
         "column": 12
       }
     },
     {
-      "id": "42088b99ef2f4c8-3de3c0e389624d0",
-      "title": "Create activate alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "id": "001066df0c20ed8-cce66134b77bad0",
+      "title": "Create deactivate episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 144,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 145,
         "column": 7
       }
     },
     {
-      "id": "42088b99ef2f4c8-d1349a8d9265c13",
-      "title": "Create activate alert action API schema: rejects group_hash over 256 chars with 400",
+      "id": "001066df0c20ed8-3f763a4e23d552c",
+      "title": "Create deactivate episode action API schema: rejects episode_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 152,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 154,
         "column": 40
       }
     },
     {
-      "id": "42088b99ef2f4c8-f19d227f4d55353",
-      "title": "Create activate alert action API returns 404 when group_hash matches no events",
+      "id": "001066df0c20ed8-3d3ec57646e5bbc",
+      "title": "Create deactivate episode action API returns 404 when episode_id matches no events",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 161,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 164,
         "column": 13
       }
     },
     {
-      "id": "42088b99ef2f4c8-269eb6a0af52c8f",
-      "title": "Create activate alert action API precondition: rejects activate when the episode is already active",
+      "id": "001066df0c20ed8-89355778b4b8fd8",
+      "title": "Create deactivate episode action API returns 404 when the episode exists but is not the latest of its series",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 167,
-        "column": 90
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 174,
+        "column": 13
       }
     },
     {
-      "id": "42088b99ef2f4c8-6165a3f45c82dc6",
-      "title": "Create activate alert action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
+      "id": "001066df0c20ed8-fe946d51fc99bee",
+      "title": "Create deactivate episode action API precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 198,
-        "column": 20
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 215,
+        "column": 59
       }
     },
     {
-      "id": "42088b99ef2f4c8-e67ad6d28fe9cbf",
-      "title": "Create activate alert action API activate: allows a pending episode to be forced past the activation counter",
+      "id": "001066df0c20ed8-041d4f47dff2cd0",
+      "title": "Create deactivate episode action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 234,
-        "column": 20
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 252,
+        "column": 45
       }
     },
     {
-      "id": "42088b99ef2f4c8-841c7e2e739604d",
-      "title": "Create activate alert action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
+      "id": "001066df0c20ed8-bff9face1808a5e",
+      "title": "Create deactivate episode action API precondition: allows deactivate of a recovering episode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 265,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 287,
+        "column": 54
+      }
+    },
+    {
+      "id": "001066df0c20ed8-b47c958acaca701",
+      "title": "Create deactivate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 318,
         "column": 24
       }
     },
     {
-      "id": "42088b99ef2f4c8-717bde11704c2e0",
-      "title": "Create activate alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "id": "001066df0c20ed8-87d8fea998cba9a",
+      "title": "Create deactivate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 310,
-        "column": 34
-      }
-    },
-    {
-      "id": "42088b99ef2f4c8-8435c4bbc21382e",
-      "title": "Create activate alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_activate_alert_action.spec.ts",
-        "line": 325,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 330,
         "column": 28
       }
     },
     {
-      "id": "d6cb63f53d01015-d650fb82bcba425",
-      "title": "Create assign alert action API assign: writes an assign action with assignee_uid and returns 204",
+      "id": "4142b94b18e5336-2970509f3772c3b",
+      "title": "Create snooze series action API snooze: writes a snooze action with expiry and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
         "line": 30,
         "column": 23
       }
     },
     {
-      "id": "d6cb63f53d01015-75a5ca1dec303c5",
-      "title": "Create assign alert action API assign: null assignee_uid clears the assignee and returns 204",
+      "id": "4142b94b18e5336-15e3393e10d192e",
+      "title": "Create snooze series action API snooze: writes a snooze action without expiry and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 64,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 65,
         "column": 22
       }
     },
     {
-      "id": "d6cb63f53d01015-5c6d1ef765a457f",
-      "title": "Create assign alert action API schema: rejects body missing episode_id with 400",
+      "id": "4142b94b18e5336-8a59e02e7d55dd1",
+      "title": "Create snooze series action API schema: rejects expiry that is not ISO 8601 with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
         "line": 98,
         "column": 22
       }
     },
     {
-      "id": "d6cb63f53d01015-a68a24c5b76cb6f",
-      "title": "Create assign alert action API schema: rejects body missing assignee_uid with 400",
+      "id": "4142b94b18e5336-b146e52837b6deb",
+      "title": "Create snooze series action API schema: rejects expiry without the time component with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
         "line": 108,
         "column": 22
       }
     },
     {
-      "id": "d6cb63f53d01015-0548b04982f639a",
-      "title": "Create assign alert action API schema: rejects empty episode_id with 400",
+      "id": "4142b94b18e5336-10e6a547f0c136b",
+      "title": "Create snooze series action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 116,
-        "column": 74
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 117,
+        "column": 5
       }
     },
     {
-      "id": "d6cb63f53d01015-6a197aaa0e0a77a",
-      "title": "Create assign alert action API schema: rejects episode_id over 150 chars with 400",
+      "id": "4142b94b18e5336-e6493a3c9fda33d",
+      "title": "Create snooze series action API schema: rejects group_hash over 256 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
         "line": 125,
-        "column": 11
+        "column": 5
       }
     },
     {
-      "id": "d6cb63f53d01015-6b8f80f1551894a",
-      "title": "Create assign alert action API schema: rejects assignee_uid over 256 chars with 400",
+      "id": "4142b94b18e5336-2ec4154f43e28c6",
+      "title": "Create snooze series action API returns 404 when group_hash matches no events",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 131,
-        "column": 12
-      }
-    },
-    {
-      "id": "d6cb63f53d01015-fc757b6c24da49a",
-      "title": "Create assign alert action API schema: rejects assignee_uid that is neither string nor null with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 138,
-        "column": 7
-      }
-    },
-    {
-      "id": "d6cb63f53d01015-e6e3823e24a1551",
-      "title": "Create assign alert action API schema: rejects unknown body fields (strict mode) with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 147,
-        "column": 61
-      }
-    },
-    {
-      "id": "d6cb63f53d01015-8b4a72435223e0a",
-      "title": "Create assign alert action API schema: rejects group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 158,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 130,
         "column": 29
       }
     },
     {
-      "id": "d6cb63f53d01015-c5fa3c3e3921814",
-      "title": "Create assign alert action API returns 404 when group_hash matches no events",
+      "id": "4142b94b18e5336-12f9d0783ba24ea",
+      "title": "Create snooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 167,
-        "column": 16
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 140,
+        "column": 7
       }
     },
     {
-      "id": "d6cb63f53d01015-552dff4b19e052e",
-      "title": "Create assign alert action API returns 404 when episode_id matches no events for the group",
+      "id": "4142b94b18e5336-715a749c02fb8cc",
+      "title": "Create snooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 174,
-        "column": 74
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 150,
+        "column": 12
       }
     },
     {
-      "id": "d6cb63f53d01015-1d6c48fcffd46bf",
-      "title": "Create assign alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "id": "08995d5c2fad38e-eefcae55b02f552",
+      "title": "Create tag episode action API tag: writes a tag action and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 194,
-        "column": 23
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 35,
+        "column": 31
       }
     },
     {
-      "id": "d6cb63f53d01015-6306333415e9f80",
-      "title": "Create assign alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "id": "08995d5c2fad38e-b0b60061f48a124",
+      "title": "Create tag episode action API tag: accepts an empty tags array and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_alert_action.spec.ts",
-        "line": 201,
-        "column": 59
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 70,
+        "column": 19
       }
     },
     {
-      "id": "b1d2d50d663ed5f-98686cb3a728e68",
-      "title": "Create deactivate alert action API deactivate: writes a deactivate action and returns 204",
+      "id": "08995d5c2fad38e-4a431a18ad1c2a2",
+      "title": "Create tag episode action API tag: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 30,
-        "column": 23
-      }
-    },
-    {
-      "id": "b1d2d50d663ed5f-2edcb1c95a530e0",
-      "title": "Create deactivate alert action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 66,
-        "column": 14
-      }
-    },
-    {
-      "id": "b1d2d50d663ed5f-487e1bf243ad021",
-      "title": "Create deactivate alert action API schema: rejects body missing reason with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 131,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 105,
         "column": 27
       }
     },
     {
-      "id": "b1d2d50d663ed5f-4a316ad8b262c8f",
-      "title": "Create deactivate alert action API schema: rejects empty reason with 400",
+      "id": "08995d5c2fad38e-6c4c7b7a0523476",
+      "title": "Create tag episode action API schema: rejects body missing tags with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 124,
-        "column": 9
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 161,
+        "column": 11
       }
     },
     {
-      "id": "b1d2d50d663ed5f-eb9efa862a043f9",
-      "title": "Create deactivate alert action API schema: rejects reason over 1024 chars with 400",
+      "id": "08995d5c2fad38e-d396e79cd204e98",
+      "title": "Create tag episode action API schema: rejects more than 20 tags with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 135,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 167,
         "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-2d3e06701f9306e",
-      "title": "Create deactivate alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "id": "08995d5c2fad38e-f7a4a860c1f123b",
+      "title": "Create tag episode action API schema: rejects an empty tag string with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 142,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 174,
         "column": 7
       }
     },
     {
-      "id": "b1d2d50d663ed5f-5cbce64da2c4462",
-      "title": "Create deactivate alert action API schema: rejects group_hash over 256 chars with 400",
+      "id": "08995d5c2fad38e-85d6219b35643f3",
+      "title": "Create tag episode action API schema: rejects a tag over 128 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 151,
-        "column": 40
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 184,
+        "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-9588ef9eddb155f",
-      "title": "Create deactivate alert action API returns 404 when group_hash matches no events",
+      "id": "08995d5c2fad38e-9a5d5d135c93563",
+      "title": "Create tag episode action API schema: rejects non-string tag elements with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 161,
-        "column": 13
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 193,
+        "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-359c682ca921e0c",
-      "title": "Create deactivate alert action API precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)",
+      "id": "08995d5c2fad38e-df33e3bdcbb9a4a",
+      "title": "Create tag episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 168,
-        "column": 90
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 203,
+        "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-cd5d4a474d3646f",
-      "title": "Create deactivate alert action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
+      "id": "08995d5c2fad38e-348ba7d4a5c969f",
+      "title": "Create tag episode action API schema: rejects episode_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 201,
-        "column": 20
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 212,
+        "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-e7c8b4f02c36693",
-      "title": "Create deactivate alert action API precondition: allows deactivate of a recovering episode",
+      "id": "08995d5c2fad38e-6457ab3cf329083",
+      "title": "Create tag episode action API returns 404 when episode_id matches no events",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 236,
-        "column": 20
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 221,
+        "column": 12
       }
     },
     {
-      "id": "b1d2d50d663ed5f-f6561442bc9621b",
-      "title": "Create deactivate alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "id": "08995d5c2fad38e-952b1b081d041a7",
+      "title": "Create tag episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 265,
-        "column": 23
-      }
-    },
-    {
-      "id": "b1d2d50d663ed5f-787d9672ac4fbc9",
-      "title": "Create deactivate alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_deactivate_alert_action.spec.ts",
-        "line": 275,
-        "column": 9
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-6ddb4f565b4e260",
-      "title": "Create snooze alert action API snooze: writes a snooze action with expiry and returns 204",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 30,
-        "column": 23
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-1351bbe43fd26ef",
-      "title": "Create snooze alert action API snooze: writes a snooze action without expiry and returns 204",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 62,
-        "column": 14
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-beb1b6a014259c2",
-      "title": "Create snooze alert action API schema: rejects expiry that is not ISO 8601 with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 94,
-        "column": 14
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-56c3a01cc9fbed8",
-      "title": "Create snooze alert action API schema: rejects expiry without the time component with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 104,
-        "column": 22
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-051a9fa74ae6e2e",
-      "title": "Create snooze alert action API schema: rejects unknown body fields (strict mode) with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 113,
-        "column": 5
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-0bea23eebbbd8ab",
-      "title": "Create snooze alert action API schema: rejects group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 121,
-        "column": 5
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-8121de32545b23f",
-      "title": "Create snooze alert action API returns 404 when group_hash matches no events",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 126,
-        "column": 29
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-4b51fecc4e78d94",
-      "title": "Create snooze alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 133,
-        "column": 22
-      }
-    },
-    {
-      "id": "f4fc5fcf63bbaf4-fe9a02eda032581",
-      "title": "Create snooze alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_alert_action.spec.ts",
-        "line": 143,
-        "column": 16
-      }
-    },
-    {
-      "id": "70e678583a2b094-d117fbd1bb632ee",
-      "title": "Create tag alert action API tag: writes a tag action and returns 204",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 30,
-        "column": 23
-      }
-    },
-    {
-      "id": "70e678583a2b094-763b9c828ac3b2d",
-      "title": "Create tag alert action API tag: accepts an empty tags array and returns 204",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 63,
-        "column": 22
-      }
-    },
-    {
-      "id": "70e678583a2b094-23866ebe8a575a7",
-      "title": "Create tag alert action API schema: rejects body missing tags with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 96,
-        "column": 21
-      }
-    },
-    {
-      "id": "70e678583a2b094-1a7b0ba8bb0c7ad",
-      "title": "Create tag alert action API schema: rejects more than 20 tags with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 104,
-        "column": 16
-      }
-    },
-    {
-      "id": "70e678583a2b094-3a86f35b1f75dde",
-      "title": "Create tag alert action API schema: rejects an empty tag string with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 114,
-        "column": 32
-      }
-    },
-    {
-      "id": "70e678583a2b094-8a80bfaf73053e6",
-      "title": "Create tag alert action API schema: rejects a tag over 128 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 123,
-        "column": 13
-      }
-    },
-    {
-      "id": "70e678583a2b094-9571ab0bf4e8280",
-      "title": "Create tag alert action API schema: rejects non-string tag elements with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 132,
-        "column": 13
-      }
-    },
-    {
-      "id": "70e678583a2b094-f81e7f2d1741058",
-      "title": "Create tag alert action API schema: rejects unknown body fields (strict mode) with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 141,
-        "column": 33
-      }
-    },
-    {
-      "id": "70e678583a2b094-c481ce7af8f6b0e",
-      "title": "Create tag alert action API schema: rejects group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 150,
-        "column": 39
-      }
-    },
-    {
-      "id": "70e678583a2b094-a660d2d019b829b",
-      "title": "Create tag alert action API returns 404 when group_hash matches no events",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 159,
-        "column": 22
-      }
-    },
-    {
-      "id": "70e678583a2b094-ce7af2912a99812",
-      "title": "Create tag alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 168,
-        "column": 22
-      }
-    },
-    {
-      "id": "70e678583a2b094-4d75b9257dd367d",
-      "title": "Create tag alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_alert_action.spec.ts",
-        "line": 181,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 231,
         "column": 83
       }
     },
     {
-      "id": "9f03ad2b325900a-ac5eb43c121bcb4",
-      "title": "Create unack alert action API unack: writes an unack action and returns 204",
+      "id": "08995d5c2fad38e-d4118782914daeb",
+      "title": "Create tag episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 243,
+        "column": 9
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-d2537288ee1f07c",
+      "title": "Create unack episode action API unack: writes an unack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
         "line": 29,
         "column": 23
       }
     },
     {
-      "id": "9f03ad2b325900a-50ef3d5201ca969",
-      "title": "Create unack alert action API schema: rejects body missing episode_id with 400",
+      "id": "e225861e8bcf6b0-773715de8464089",
+      "title": "Create unack episode action API unack: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 59,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 60,
         "column": 12
       }
     },
     {
-      "id": "9f03ad2b325900a-82dfab928fc6f1f",
-      "title": "Create unack alert action API schema: rejects empty episode_id with 400",
+      "id": "e225861e8bcf6b0-bc4ab824d11900e",
+      "title": "Create unack episode action API schema: rejects episode_id in the body (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 68,
-        "column": 11
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 109,
+        "column": 14
       }
     },
     {
-      "id": "9f03ad2b325900a-81e00e4906a5c73",
-      "title": "Create unack alert action API schema: rejects episode_id over 150 chars with 400",
+      "id": "e225861e8bcf6b0-48a60e9a5560543",
+      "title": "Create unack episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 77,
-        "column": 11
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-177568c80d303ed",
-      "title": "Create unack alert action API schema: rejects unknown body fields (strict mode) with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 83,
-        "column": 12
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-ccd38f2956de307",
-      "title": "Create unack alert action API schema: rejects group_hash over 256 chars with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 91,
-        "column": 12
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-514dd70b61cb658",
-      "title": "Create unack alert action API returns 404 when group_hash matches no events",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 98,
-        "column": 50
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-75ce0e2fd073206",
-      "title": "Create unack alert action API returns 404 when episode_id matches no events for the group",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 106,
-        "column": 16
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-5865f412a128ba7",
-      "title": "Create unack alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 126,
-        "column": 25
-      }
-    },
-    {
-      "id": "9f03ad2b325900a-eb9766fe2b128b2",
-      "title": "Create unack alert action API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_alert_action.spec.ts",
-        "line": 135,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 122,
         "column": 18
       }
     },
     {
-      "id": "42552f0c2273440-419840b1e744371",
-      "title": "Create unsnooze alert action API happy path: writes an unsnooze action and returns 204",
+      "id": "e225861e8bcf6b0-81165803e8d589d",
+      "title": "Create unack episode action API schema: rejects episode_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 130,
+        "column": 98
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-e38b720f708daf5",
+      "title": "Create unack episode action API returns 404 when episode_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-acc40fe337beb0c",
+      "title": "Create unack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 146,
+        "column": 5
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-5d4140188f67b17",
+      "title": "Create unack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 155,
+        "column": 63
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-f6d73fc79183b35",
+      "title": "Create unsnooze series action API happy path: writes an unsnooze action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
         "line": 30,
         "column": 23
       }
     },
     {
-      "id": "42552f0c2273440-19f7d5b79e00b75",
-      "title": "Create unsnooze alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "id": "db1f5b15b3c8591-546087194472dde",
+      "title": "Create unsnooze series action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
-        "line": 64,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 67,
         "column": 14
       }
     },
     {
-      "id": "42552f0c2273440-62d468712a45fe4",
-      "title": "Create unsnooze alert action API schema: rejects group_hash over 256 chars with 400",
+      "id": "db1f5b15b3c8591-a03945c026663d5",
+      "title": "Create unsnooze series action API schema: rejects group_hash over 256 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
-        "line": 74,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 77,
         "column": 98
       }
     },
     {
-      "id": "42552f0c2273440-ab5c7412a8b8649",
-      "title": "Create unsnooze alert action API returns 404 when group_hash matches no events",
+      "id": "db1f5b15b3c8591-0f2a436229ebfc0",
+      "title": "Create unsnooze series action API returns 404 when group_hash matches no events",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
-        "line": 81,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 84,
         "column": 12
       }
     },
     {
-      "id": "42552f0c2273440-e2b967321c2d40c",
-      "title": "Create unsnooze alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "id": "db1f5b15b3c8591-260e24e37815051",
+      "title": "Create unsnooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
-        "line": 88,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 95,
+        "column": 5
       }
     },
     {
-      "id": "42552f0c2273440-ade61fe5089d372",
-      "title": "Create unsnooze alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "id": "db1f5b15b3c8591-a134af93aabad36",
+      "title": "Create unsnooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_alert_action.spec.ts",
-        "line": 100,
-        "column": 12
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 105,
+        "column": 63
       }
     },
     {
