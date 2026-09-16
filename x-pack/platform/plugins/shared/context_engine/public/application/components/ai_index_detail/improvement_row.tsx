@@ -110,8 +110,10 @@ export const ImprovementRow = ({
   canDecide,
   onViewProvenance,
 }: ImprovementRowProps) => {
-  const [isRationaleExpanded, setIsRationaleExpanded] = useState(false);
-  const { text: rationale, isTruncated: isRationaleTruncated } = truncate(improvement.rationale);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { text: rationale, isTruncated } = truncate(improvement.rationale);
+  const changeFields = getProposedChangeFields(improvement);
+  const hasMore = isTruncated || changeFields.length > 0;
   const isOpen = isOpenImprovement(improvement.status);
   const reversibility = getReversibilityNote(improvement.action);
   const isBusy = isApproving || isRejecting;
@@ -146,16 +148,16 @@ export const ImprovementRow = ({
       <EuiSpacer size="s" />
 
       <EuiText size="s" data-test-subj="contextImprovementRationale">
-        <p>{isRationaleExpanded ? improvement.rationale : rationale}</p>
+        <p>{isExpanded ? improvement.rationale : rationale}</p>
       </EuiText>
-      {isRationaleTruncated && (
+      {hasMore && (
         <EuiButtonEmpty
           size="xs"
           flush="left"
-          onClick={() => setIsRationaleExpanded(!isRationaleExpanded)}
-          data-test-subj="contextImprovementRationaleShowMore"
+          onClick={() => setIsExpanded(!isExpanded)}
+          data-test-subj="contextImprovementShowMore"
         >
-          {isRationaleExpanded
+          {isExpanded
             ? i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.showLess', {
                 defaultMessage: 'Show less',
               })
@@ -165,13 +167,16 @@ export const ImprovementRow = ({
         </EuiButtonEmpty>
       )}
 
-      <EuiSpacer size="m" />
-
-      <div data-test-subj="contextImprovementChange">
-        {getProposedChangeFields(improvement).map((field) => (
-          <ChangeField key={field.label} {...field} />
-        ))}
-      </div>
+      {isExpanded && changeFields.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          <div data-test-subj="contextImprovementChange">
+            {changeFields.map((field) => (
+              <ChangeField key={field.label} {...field} />
+            ))}
+          </div>
+        </>
+      )}
 
       {reversibility && (
         <>
