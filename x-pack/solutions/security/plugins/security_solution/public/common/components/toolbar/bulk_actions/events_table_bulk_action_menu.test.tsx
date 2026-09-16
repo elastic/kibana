@@ -8,13 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import {
+  ALERT_STATUS_ACTION_IDS,
   BULK_ADD_TO_CASE_ACTION_ID,
   BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
   RUN_DOCUMENT_WORKFLOW_ACTION_ID,
 } from '../../../constants/action_ids';
 import { ACTION_MENU_GROUP_SEPARATOR_TEST_ID } from '../../../utils/action_menu_items';
 import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
-import { ALERT_STATUS_ACTION_IDS, type BulkActionGroups } from './use_bulk_action_items';
+import type { BulkActionGroups } from './use_bulk_action_items';
 
 const groups: BulkActionGroups = {
   statusItems: [

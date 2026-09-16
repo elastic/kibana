@@ -23,11 +23,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-
-export const RISK_INPUT_ACTION_IDS = {
-  addToNewTimeline: 'add-to-new-timeline',
-  addToCase: 'add-to-case',
-} as const;
+import { RISK_INPUT_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
   const { telemetry } = useKibana().services;

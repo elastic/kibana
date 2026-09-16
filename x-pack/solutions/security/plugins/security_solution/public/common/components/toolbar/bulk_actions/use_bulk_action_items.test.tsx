@@ -57,21 +57,25 @@ describe('useBulkActionItems', () => {
   it('should return "mark as open" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'open-alert-status'
+      )
     ).not.toBeUndefined();
   });
 
   it('should return "mark as acknowledged" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'acknowledged-alert-status'
+      )
     ).not.toBeUndefined();
   });
 
   it('should return "mark as closed" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
-      result.current.items.find(
+      result.current.groups.statusItems.find(
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).not.toBeUndefined();
@@ -83,13 +87,17 @@ describe('useBulkActionItems', () => {
     const { result } = renderUseBulkActionItems();
 
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'open-alert-status'
+      )
     ).toBeUndefined();
     expect(
-      result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
+      result.current.groups.statusItems.find(
+        (item) => item['data-test-subj'] === 'acknowledged-alert-status'
+      )
     ).toBeUndefined();
     expect(
-      result.current.items.find(
+      result.current.groups.statusItems.find(
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).toBeUndefined();
@@ -110,11 +118,30 @@ describe('useBulkActionItems', () => {
       ],
     });
 
-    const customAction = result.current.items.find(({ key }) => key === 'some-custom-action');
+    const customAction = result.current.groups.customItems.find(
+      ({ key }) => key === 'some-custom-action'
+    );
     customAction?.onClick?.({} as MouseEvent<HTMLHRElement>);
 
     expect(onClick).toHaveBeenCalledWith(['mockEventId']);
     expect(customAction?.icon).toBe('gear');
+  });
+
+  it('partitions custom actions by their declared group', () => {
+    const { result } = renderUseBulkActionItems({
+      customBulkActions: [
+        { key: 'case-action', label: 'Case action', groupId: 'cases', onClick: jest.fn() },
+        {
+          key: 'timeline-action',
+          label: 'Timeline action',
+          groupId: 'timeline',
+          onClick: jest.fn(),
+        },
+      ],
+    });
+
+    expect(result.current.groups.casesItems.map(({ key }) => key)).toEqual(['case-action']);
+    expect(result.current.groups.timelineItems.map(({ key }) => key)).toEqual(['timeline-action']);
   });
 
   describe('workflow actions', () => {
@@ -135,7 +162,7 @@ describe('useBulkActionItems', () => {
       });
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).not.toBeUndefined();
@@ -151,7 +178,7 @@ describe('useBulkActionItems', () => {
       const { result } = renderUseBulkActionItems();
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).toBeUndefined();
@@ -175,7 +202,7 @@ describe('useBulkActionItems', () => {
       });
 
       expect(
-        result.current.items.find(
+        result.current.groups.workflowItems.find(
           (item) => item['data-test-subj'] === 'run-document-workflow-action'
         )
       ).toBeUndefined();

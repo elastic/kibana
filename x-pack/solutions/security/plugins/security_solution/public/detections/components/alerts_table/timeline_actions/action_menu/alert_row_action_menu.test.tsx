@@ -9,14 +9,16 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { AlertRowActionMenu, getAlertRowActionGroups } from './alert_row_action_menu';
-import { OSQUERY_ACTION_ID } from '../../../osquery/osquery_action_item';
-import { ADD_TO_CASE_ACTION_IDS } from '../use_add_to_case_actions';
-import { ADD_TO_CHAT_ACTION_ID } from '../../../../../common/constants/action_ids';
-import { ALERT_EXCEPTION_ACTION_IDS } from '../use_add_exception_actions';
-import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../use_run_alert_workflow_panel';
-import { ALERT_TAG_ACTION_ID } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
-import { ALERT_STATUS_ACTION_IDS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import {
+  ADD_TO_CASE_ACTION_IDS,
+  ADD_TO_CHAT_ACTION_ID,
+  ALERT_ASSIGNEE_ACTION_IDS,
+  ALERT_EXCEPTION_ACTION_IDS,
+  ALERT_STATUS_ACTION_IDS,
+  ALERT_TAG_ACTION_ID,
+  OSQUERY_ACTION_ID,
+  RUN_ALERT_WORKFLOW_ACTION_ID,
+} from '../../../../../common/constants/action_ids';
 
 const createItem = (key: string, name: string): EuiContextMenuPanelItemDescriptor => ({
   key,

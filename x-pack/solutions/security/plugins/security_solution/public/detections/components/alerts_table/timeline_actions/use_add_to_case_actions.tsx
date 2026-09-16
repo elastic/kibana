@@ -15,10 +15,7 @@ import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { AlertTableContextMenuItem } from '../types';
 import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
-
-export const ADD_TO_CASE_ACTION_IDS = {
-  addToCase: 'add-to-case-action',
-} as const;
+import { ADD_TO_CASE_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;

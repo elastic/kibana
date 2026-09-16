@@ -207,10 +207,15 @@ export const useBulkAddToCaseActions = ({
                       : [];
                   }
 
+                  const owner = theCase.owner ?? caseOwner;
+                  if (!owner) {
+                    return [];
+                  }
+
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
-                    owner: theCase.owner ?? caseOwner ?? '',
+                    owner,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
                 },

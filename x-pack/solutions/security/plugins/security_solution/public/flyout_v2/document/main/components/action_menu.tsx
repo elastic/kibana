@@ -19,14 +19,19 @@ import {
   withGroupSeparators,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
-import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
-import { ALERT_STATUS_ICON_COLORS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import {
+  ACTION_ICONS_BY_ID,
+  ALERT_STATUS_ICON_COLORS,
+} from '../../../../common/utils/action_icons';
 import type { ReportActionClickedParams } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import {
+  ADD_NOTE_ACTION_ID,
   ADD_TO_CASE_ACTION_IDS,
   ALERT_ASSIGNEE_ACTION_IDS,
+  ALERT_CLOSE_WITH_REASON_ACTION_ID,
   ALERT_EXCEPTION_ACTION_IDS,
+  ALERT_STATUS_ACTION_IDS,
   ALERT_TAG_ACTION_ID,
   EXPLORE_ACTION_ID,
   INVESTIGATE_IN_TIMELINE_ACTION_ID,
@@ -120,10 +125,9 @@ interface ActionMenuProps extends ActionMenuGroupsProps {
 // Keyed on item.key (the stable action id), not data-test-subj.
 const FOOTER_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
   [ADD_TO_CASE_ACTION_IDS.addToCase]: FLYOUT_ACTION.ADD_TO_CASE,
-  // Status items use short keys defined in ALERT_STATUS_ACTION_IDS / ALERT_CLOSE_WITH_REASON_ACTION_ID
-  open: FLYOUT_ACTION.STATUS_OPEN,
-  acknowledge: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
-  'close-alert-with-reason': FLYOUT_ACTION.STATUS_CLOSED,
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: FLYOUT_ACTION.STATUS_OPEN,
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  [ALERT_CLOSE_WITH_REASON_ACTION_ID]: FLYOUT_ACTION.STATUS_CLOSED,
   [ALERT_TAG_ACTION_ID]: FLYOUT_ACTION.ADD_TAGS,
   [ALERT_ASSIGNEE_ACTION_IDS.assign]: FLYOUT_ACTION.ADD_ASSIGNEES,
   [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: FLYOUT_ACTION.REMOVE_ASSIGNEES,
@@ -134,7 +138,7 @@ const FOOTER_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
   [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: FLYOUT_ACTION.RUN_WORKFLOW,
   [RESPOND_ACTION_ID]: FLYOUT_ACTION.RESPOND,
   [OSQUERY_ACTION_ID]: FLYOUT_ACTION.RUN_OSQUERY,
-  'add-note-action': FLYOUT_ACTION.ADD_NOTE,
+  [ADD_NOTE_ACTION_ID]: FLYOUT_ACTION.ADD_NOTE,
   [INVESTIGATE_IN_TIMELINE_ACTION_ID]: FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
   [EXPLORE_ACTION_ID]: FLYOUT_ACTION.EXPLORE,
 };

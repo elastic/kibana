@@ -13,9 +13,7 @@ import { useKibana } from '../../../common/lib/kibana';
  *
  * `createComment` is the sub-privilege the Cases `BulkCreateAttachments` API enforces;
  * `read` is what lets the case selector modal list existing cases.
- * `create` and `update` are not checked: they live inside the single base `all` privilege
- * and cannot be held independently, so checking them adds no signal. Owner is scoped to
- * `APP_ID` (`securitySolution`) to match what the Cases API enforces.
+ * Owner is scoped to `APP_ID` (`securitySolution`) to match what the Cases API enforces.
  */
 export const useCanAttachToCase = (): boolean => {
   const { cases } = useKibana().services;

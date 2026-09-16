@@ -10,6 +10,7 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import type { CustomBulkAction } from '../../../../../common/types';
+import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
 import { useKibana } from '../../../../common/lib/kibana';
 import { generateEventAttachmentWithoutOwner } from '../utils';
@@ -26,9 +27,6 @@ const timelineItemsToCaseEventAttachment = (
   });
   return eventAttachment ? [eventAttachment] : [];
 };
-
-/** Stable key for the bulk "Add to case" item — imported by the menu component's icon map. */
-export const BULK_ADD_TO_CASE_ACTION_ID = 'attach-case' as const;
 
 /**
  * Prepares bulk actions related to case event attachments
@@ -61,6 +59,7 @@ export const useBulkAddEventsToCaseActions = ({
             label: ADD_TO_CASE,
             key: BULK_ADD_TO_CASE_ACTION_ID,
             'data-test-subj': BULK_ADD_TO_CASE_ACTION_ID,
+            groupId: 'cases',
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE,
             onClick: (events: TimelineItem[] = []) =>

@@ -8,9 +8,8 @@
 import { useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../../common/lib/kibana';
+import { EXPLORE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { getExploreButtonInfo } from '../utils/get_explore_url';
-
-export const EXPLORE_ACTION_ID = 'explore-action';
 
 export interface UseExploreActionsParams {
   /**

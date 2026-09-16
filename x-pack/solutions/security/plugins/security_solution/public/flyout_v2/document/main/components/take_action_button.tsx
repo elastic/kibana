@@ -37,6 +37,7 @@ import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import { ADD_NOTE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { ActionMenu, getActionGroups } from './action_menu';
 
@@ -54,7 +55,6 @@ const TAKE_ACTION_MENU = i18n.translate(
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
 });
-const ADD_NOTE_ACTION_ID = 'add-note-action';
 
 export interface TakeActionButtonProps {
   /**
@@ -166,7 +166,7 @@ export const TakeActionButton = memo(
     const noteItems = useMemo(
       () => [
         {
-          'data-test-subj': 'add-note-action',
+          'data-test-subj': ADD_NOTE_ACTION_ID,
           key: ADD_NOTE_ACTION_ID,
           name: ADD_NOTE,
           onClick: () => {

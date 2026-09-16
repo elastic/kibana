@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { EuiIconProps } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   ADD_TO_CASE_ACTION_IDS,
   ADD_TO_CHAT_ACTION_ID,
   ALERT_ASSIGNEE_ACTION_IDS,
+  ALERT_CLOSE_WITH_REASON_ACTION_ID,
   ALERT_EXCEPTION_ACTION_IDS,
+  ALERT_STATUS_ACTION_IDS,
   ALERT_TAG_ACTION_ID,
   BULK_ADD_TO_CASE_ACTION_ID,
   BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
@@ -47,4 +50,11 @@ export const ACTION_ICONS_BY_ID: Readonly<Record<string, EuiIconType>> = {
   [RESPOND_ACTION_ID]: 'bolt',
   [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
   [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
+};
+
+/** Status-dot colours keyed by the action item's stable key. */
+export const ALERT_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  [ALERT_CLOSE_WITH_REASON_ACTION_ID]: 'subdued',
 };

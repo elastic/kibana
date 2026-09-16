@@ -6,13 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import {
-  useBulkAddEventsToCaseActions,
-  BULK_ADD_TO_CASE_ACTION_ID,
-} from './use_bulk_event_actions';
+import { useBulkAddEventsToCaseActions } from './use_bulk_event_actions';
 import { TestProviders } from '../../../../common/mock';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 const mockOpenExistingCase = jest.fn();
 const mockCanUseCases = jest.fn(() => ({
@@ -59,6 +57,7 @@ describe('useBulkAddEventsToCaseActions', () => {
     expect(result.current[0].label).toBeDefined();
     // Key must match BULK_ADD_TO_CASE_ACTION_ID so the menu component's icon map hits it
     expect(result.current[0].key).toBe(BULK_ADD_TO_CASE_ACTION_ID);
+    expect(result.current[0].groupId).toBe('cases');
   });
 
   it('returns one action when the user can only update existing cases', () => {

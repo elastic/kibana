@@ -14,6 +14,7 @@ export interface CustomBulkAction {
   key: string;
   label: string;
   icon?: IconType;
+  groupId?: string;
   disableOnQuery?: boolean;
   disabledLabel?: string;
   onClick: (items?: TimelineItem[]) => void;

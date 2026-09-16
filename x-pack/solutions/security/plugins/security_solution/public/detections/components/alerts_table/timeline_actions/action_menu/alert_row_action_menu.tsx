@@ -16,8 +16,10 @@ import {
   withGroupSeparators,
   withStatusDotIcons,
 } from '../../../../../common/utils/action_menu_items';
-import { ACTION_ICONS_BY_ID } from '../../../../../common/utils/action_icons';
-import { ALERT_STATUS_ICON_COLORS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import {
+  ACTION_ICONS_BY_ID,
+  ALERT_STATUS_ICON_COLORS,
+} from '../../../../../common/utils/action_icons';
 
 /** Subset of AlertRowActionMenuProps needed to derive the visible groups. */
 export interface AlertRowActionGroupsProps {

@@ -13,8 +13,8 @@ import {
   withGroupSeparators,
   withStatusDotIcons,
 } from '../../../utils/action_menu_items';
-import { ACTION_ICONS_BY_ID } from '../../../utils/action_icons';
-import { ALERT_STATUS_ICON_COLORS, type BulkActionGroups } from './use_bulk_action_items';
+import { ACTION_ICONS_BY_ID, ALERT_STATUS_ICON_COLORS } from '../../../utils/action_icons';
+import type { BulkActionGroups } from './use_bulk_action_items';
 
 interface EventsTableBulkActionMenuProps {
   panels: EuiContextMenuPanelDescriptor[];

@@ -10,8 +10,7 @@
  * so that consumer files (icon maps, telemetry maps, tests) can import a single tiny module
  * instead of pulling in the hook files that own the business logic.
  *
- * Each hook that originally defined a constant still exports it (importing from here),
- * so existing importers do not need updating until they're ready.
+ * Producer and consumer modules import these constants directly.
  */
 
 export const ADD_NOTE_ACTION_ID = 'add-note-action' as const;
