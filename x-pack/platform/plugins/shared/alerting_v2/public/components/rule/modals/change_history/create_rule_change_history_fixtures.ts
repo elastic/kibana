@@ -43,6 +43,7 @@ const buildBaseSnapshot = ({
     source: { type: 'internal' as const, version: 1 },
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
+    ownership: { managed: false },
   },
   time_field: 'timestamp',
   schedule: { every: '1m', lookback: '5h' },
