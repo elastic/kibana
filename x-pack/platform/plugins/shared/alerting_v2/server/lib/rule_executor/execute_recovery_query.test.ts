@@ -14,7 +14,7 @@ import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
 
@@ -138,7 +138,9 @@ describe('executeRecoveryQuery', () => {
       breachedGroupHashes: new Set([hashX]),
     });
 
-    const byGroup = Object.fromEntries(events.map((e: AlertEvent) => [e.group_hash, e.status]));
+    const byGroup = Object.fromEntries(
+      events.map((e: AlertEventDocument) => [e.group_hash, e.status])
+    );
     expect(byGroup[hashX]).toBeUndefined();
     expect(byGroup[hashY]).toBe('recovered');
     expect(events.filter((e) => e.status === 'recovered')).toHaveLength(1);

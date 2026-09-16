@@ -15,7 +15,7 @@ import {
   alertEventStatus,
   alertEpisodeStatus,
   alertEventType,
-  type AlertEvent,
+  type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -88,8 +88,6 @@ export class AlertEventsClient {
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
     const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
 
-    const atTimestamp = event.timestamp ?? new Date().toISOString();
-
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
       episodeStatus === alertEpisodeStatus.recovering
@@ -102,10 +100,11 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — no backing rule saved object.
-    const doc: AlertEvent = {
-      '@timestamp': atTimestamp,
-      scheduled_timestamp: atTimestamp,
+    // No `rule` object — no backing rule saved object. A caller-supplied timestamp is
+    // honored as `@timestamp`; otherwise ES sets it at ingest.
+    const doc: AlertEventDocument = {
+      ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
+      scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
       group_hash: groupHash,
       data: event.data ?? {},
       status,

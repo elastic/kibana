@@ -65,7 +65,6 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
     assertEpisodeIsDeactivatable(alertEvent);
 
     const ruleEvent = buildRuleEventDocument({
-      '@timestamp': new Date().toISOString(),
       rule:
         alertEvent.rule_id != null
           ? { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 }

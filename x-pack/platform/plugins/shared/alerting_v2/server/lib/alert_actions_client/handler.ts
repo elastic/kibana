@@ -6,8 +6,8 @@
  */
 
 import type { CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertActionDocument } from '../../resources/datastreams/alert_actions';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { AlertEventRecord } from './types';
 
 /**
@@ -23,8 +23,8 @@ import type { AlertEventRecord } from './types';
  * domain events.
  */
 export interface PreparedAction {
-  alertActionDoc: AlertAction;
-  ruleEvent?: AlertEvent;
+  alertActionDoc: AlertActionDocument;
+  ruleEvent?: AlertEventDocument;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface PreparedAction {
 export interface HandlerItem<TBody extends CreateAlertActionBody> {
   action: TBody;
   alertEvent: AlertEventRecord;
-  alertActionDoc: AlertAction;
+  alertActionDoc: AlertActionDocument;
 }
 
 /**

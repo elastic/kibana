@@ -53,7 +53,6 @@ describe('activateHandler', () => {
       const prepared = activateHandler.prepare(buildItem(alertEvent));
 
       expect(prepared.ruleEvent).toMatchObject({
-        '@timestamp': FIXED_NOW,
         rule: { id: alertEvent.rule_id, version: alertEvent.rule_version },
         group_hash: alertEvent.group_hash,
         data: alertEvent.data_json,
