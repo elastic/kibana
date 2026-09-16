@@ -6,6 +6,7 @@
  */
 
 import { ALERTING_V2_EPISODE_SOURCE_ID } from '../constants';
+import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 
 export interface EpisodeSourceError {
@@ -79,5 +80,16 @@ export const fetchFromV2AndSource = async <TV2, TSource>({
     v2: v2Fetch.results[0],
     additional: sourceFetch.results,
     errors: [...v2Fetch.errors, ...sourceFetch.errors],
+  };
+};
+
+export const fetchEpisodesFromSource = async (
+  source: EpisodeDataSource | undefined,
+  run: (source: EpisodeDataSource) => Promise<AlertEpisode[]> | undefined
+): Promise<FetchFromSourceResult<AlertEpisode[]>> => {
+  const result = await fetchFromSource(source, run);
+  return {
+    ...result,
+    results: result.results.map((rows) => rows.map((ep) => ({ ...ep, source_id: source!.id }))),
   };
 };

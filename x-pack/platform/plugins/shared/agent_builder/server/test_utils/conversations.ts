@@ -72,6 +72,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     markRead: jest.fn(),
     setPinned: jest.fn(),
     list: jest.fn(),
+    search: jest.fn(),
     delete: jest.fn(),
     updateAccessControl: jest.fn(),
     applyTemplate: jest.fn(),
@@ -83,5 +84,6 @@ export const createConversationServiceMock = (): ConversationServiceMock => {
   return {
     getScopedClient: jest.fn().mockImplementation(async () => createConversationClientMock()),
     getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+    appendUserMessage: jest.fn(),
   };
 };
