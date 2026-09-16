@@ -783,13 +783,16 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
   });
 
   it('calls addEvents with the parsed body and returns the materialized events', async () => {
+    const testEvent = {
+      type: 'example.note',
+      data: { text: 'test note' },
+    };
     const materializedEvents = [
       {
-        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-        type: 'security.alert_triaged',
+        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',        
         created_at: '2026-09-14T10:00:00.000Z',
         actor: { type: 'user', id: 'u_profile_1', username: 'alice' },
-        data: { alert_id: 'a1', verdict: 'benign' },
+        ...testEvent,
       },
     ];
     const mockAddEvents = jest.fn().mockResolvedValue(materializedEvents);
@@ -809,7 +812,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       logger: loggingSystemMock.createLogger(),
     } as never);
 
-    const requestBody = { events: [{ type: 'security.alert_triaged', data: { alert_id: 'a1', verdict: 'benign' } }] };
+    const requestBody = { events: [testEvent] };
     const result = await handler!(
       defaultCtx,
       { params: { conversation_id: 'conv-1' }, body: requestBody },
@@ -840,7 +843,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
 
     it('accepts a valid events array', () => {
       expect(() =>
-        getBodySchema().validate({ events: [{ type: 'scratch.note', data: { note: 'hello' } }] })
+        getBodySchema().validate({ events: [{ type: 'example.note', data: { text: 'hello' } }] })
       ).not.toThrow();
     });
 
@@ -849,13 +852,13 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
     });
 
     it('rejects events missing type', () => {
-      expect(() => getBodySchema().validate({ events: [{ data: { note: 'hello' } }] })).toThrow();
+      expect(() => getBodySchema().validate({ events: [{ data: { text: 'hello' } }] })).toThrow();
     });
 
     it('accepts data with arbitrary extra keys (opaque payload)', () => {
       expect(() =>
         getBodySchema().validate({
-          events: [{ type: 'scratch.note', data: { a: 1, b: 'two', c: { nested: true } } }],
+          events: [{ type: 'example.note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } }],
         })
       ).not.toThrow();
     });

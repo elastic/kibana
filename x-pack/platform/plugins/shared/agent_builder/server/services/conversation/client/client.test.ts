@@ -3363,16 +3363,9 @@ describe('ConversationClient', () => {
   });
 
   describe('addEvents', () => {
-    const noteSchema = { safeParse: jest.fn() };
-    const noteDefinition = {
-      type: 'scratch.note',
-      payloadSchema: noteSchema,
-      internal: false,
-    };
 
     beforeEach(() => {
-      noteSchema.safeParse.mockReturnValue({ success: true, data: { note: 'hello' } });
-      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(noteDefinition);
+      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(exampleNoteEventType);
     });
 
     it('calls appendEvents with access converse and returns materialized events', async () => {
@@ -3383,11 +3376,11 @@ describe('ConversationClient', () => {
 
       const result = await client.addEvents({
         id: 'conversation-1',
-        events: [{ type: 'scratch.note', data: { note: 'hello' } }],
+        events: [{ type: 'example.note', data: { text: 'hello' } }],
       });
 
       expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('scratch.note');
+      expect(result[0].type).toBe('example.note');
       expect(result[0].actor.type).toBe(EventActorType.user);
       expect(result[0].actor.id).toBe('user-1');
     });
