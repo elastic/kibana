@@ -24,7 +24,12 @@ export interface SpanFlyoutContentProps {
   traceId?: string;
 }
 
-export function SpanFlyoutContent({ hit, dataView, activeSection, traceId }: SpanFlyoutContentProps) {
+export function SpanFlyoutContent({
+  hit,
+  dataView,
+  activeSection,
+  traceId,
+}: SpanFlyoutContentProps) {
   const { indexes, profileId } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
   const actions = useDocViewerExtensionActionsContext();
