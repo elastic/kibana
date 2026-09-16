@@ -63,9 +63,12 @@ const ConditionQueryBlock = ({
 export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 'full' }) => {
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
-  const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
+  const dataSource = rule.query
+    ? getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE
+    : EMPTY_VALUE;
   const recoveryCondition = getDisplayRecoveryCondition(rule.query, rule.recovery_strategy);
-  const { baseQuery, alertCondition } = getDisplayQueryParts(rule.query);
+  // An execution-time builder rule persists no query, so there are no parts to display.
+  const queryParts = rule.query ? getDisplayQueryParts(rule.query) : undefined;
 
   const conditionItems = [
     {
@@ -177,23 +180,27 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
           <EuiSpacer size="m" />
         </>
       )}
-      <ConditionQueryBlock
-        title={i18n.translate('xpack.alertingV2.ruleDetails.baseQueryTitle', {
-          defaultMessage: 'Base query',
-        })}
-        query={baseQuery}
-        data-test-subj="alertingV2RuleDetailsBaseQuery"
-      />
-      {alertCondition ? (
+      {queryParts ? (
         <>
-          <EuiSpacer size="m" />
           <ConditionQueryBlock
-            title={i18n.translate('xpack.alertingV2.ruleDetails.alertConditionTitle', {
-              defaultMessage: 'Alert condition',
+            title={i18n.translate('xpack.alertingV2.ruleDetails.baseQueryTitle', {
+              defaultMessage: 'Base query',
             })}
-            query={alertCondition}
-            data-test-subj="alertingV2RuleDetailsAlertCondition"
+            query={queryParts.baseQuery}
+            data-test-subj="alertingV2RuleDetailsBaseQuery"
           />
+          {queryParts.alertCondition ? (
+            <>
+              <EuiSpacer size="m" />
+              <ConditionQueryBlock
+                title={i18n.translate('xpack.alertingV2.ruleDetails.alertConditionTitle', {
+                  defaultMessage: 'Alert condition',
+                })}
+                query={queryParts.alertCondition}
+                data-test-subj="alertingV2RuleDetailsAlertCondition"
+              />
+            </>
+          ) : null}
         </>
       ) : null}
 

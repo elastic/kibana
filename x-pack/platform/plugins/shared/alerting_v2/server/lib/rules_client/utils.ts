@@ -574,8 +574,13 @@ export function computeNextRevision(
   return isEqual(nextNorm, storedNorm) ? current : current + 1;
 }
 
-/** Inverse of {@link toStoredQuery}: an empty stored segment reads back as an omitted block. */
-const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
+/**
+ * Inverse of {@link toStoredQuery}: an empty stored segment reads back as an
+ * omitted block. Returns `undefined` when `query` is absent — execution-compiled
+ * rules have no stored query and must not emit one in the response.
+ */
+const toApiQuery = (query: RuleSavedObjectAttributes['query'] | undefined): Query | undefined => {
+  if (query == null) return undefined;
   if (query.format !== 'composed' || query.breach.segment.trim()) {
     return query;
   }
@@ -877,7 +882,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    query: toApiQuery(attrs.query),
+    ...(attrs.query ? { query: toApiQuery(attrs.query) } : {}),
     recovery_strategy: attrs.recovery_strategy,
     no_data_strategy: attrs.no_data_strategy,
     state_transition: attrs.state_transition,
