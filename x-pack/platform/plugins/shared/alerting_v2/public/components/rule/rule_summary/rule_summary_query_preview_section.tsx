@@ -17,6 +17,7 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { FlyoutAccordion } from '@kbn/flyout-sections';
@@ -58,15 +59,29 @@ export const RuleSummaryQueryPreviewSection: React.FC = () => {
       hasBorder={false}
       data-test-subj="ruleSummaryQueryPreview"
     >
-      <RuleFormProvider services={services}>
-        <QuerySandbox
-          query={query}
-          timeField={timeField}
-          dateRange={{ dateStart, dateEnd }}
-          onDateRangeChange={handleDateRangeChange}
-          autoRun
+      {rule.query ? (
+        <RuleFormProvider services={services}>
+          <QuerySandbox
+            query={query}
+            timeField={timeField}
+            dateRange={{ dateStart, dateEnd }}
+            onDateRangeChange={handleDateRangeChange}
+            autoRun
+          />
+        </RuleFormProvider>
+      ) : (
+        <EuiEmptyPrompt
+          iconType="iInCircle"
+          body={
+            <p>
+              {i18n.translate('xpack.alertingV2.ruleSummary.queryPreview.noQueryMessage', {
+                defaultMessage:
+                  "This rule's query is generated from its parameters on each run — there is nothing to preview here.",
+              })}
+            </p>
+          }
         />
-      </RuleFormProvider>
+      )}
     </FlyoutAccordion>
   );
 };

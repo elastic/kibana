@@ -93,7 +93,7 @@ export const SignalRuleOverview: React.FC = () => {
           from: new Date(gteMs).toISOString(),
           to: new Date(lteMs).toISOString(),
         },
-        ruleEsql: getRootEsqlQuery(rule.query),
+        ruleEsql: rule.query ? getRootEsqlQuery(rule.query) : undefined,
       }),
     [share, application.capabilities, uiSettings, gteMs, lteMs, rule.query]
   );
