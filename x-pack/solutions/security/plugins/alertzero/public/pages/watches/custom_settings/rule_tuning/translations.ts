@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** Copy for the Detection Watch settings controls, owned by the Detection Watch team. */
+/** Copy for the Rule Tuning settings controls, owned by the Detection Watch team. */
 
 export const TUNING_THRESHOLDS_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.tuningThresholds.title',
