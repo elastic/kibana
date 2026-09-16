@@ -416,15 +416,18 @@ describe('generateReportHandler', () => {
       await generateReportHandler(mockContext, mockRequest, mockResponse);
 
       const query = getFilterQuery();
-      // When space awareness is off there is no space filter to inject past, but the
-      // result must still be structurally a single-filter node, not a free OR.
-      const queryStr = JSON.stringify(query);
-      // The top-level node must not be a bare OR (bool.should with namespaces:* as a sibling).
-      // Without a space filter _joinFilters returns the single agentsQuery node directly.
+      // When space awareness is off, _joinFilters receives only the user kuery (no space filter),
+      // and returns it as a single node. The result must not be wrapped in a bool.filter
+      // (which would indicate a spurious extra filter was applied), and the query must be
+      // defined (i.e. the handler did not short-circuit).
       expect(query).toBeDefined();
-      // It should not contain a top-level bool.filter array of length > 1 (no space filter)
-      // and should contain no unconstrained namespaces:* at the root.
-      expect(queryStr).not.toMatch(/"should":\[.*"namespaces"\s*:\s*"\*"/);
+      // Without a space filter the top-level node is the raw OR node from the user kuery:
+      // bool.should with 2 members (namespaces:* compiles to exists, agent.id:... to match_phrase).
+      // There must be no outer bool.filter wrapping it — that would only exist if a space filter
+      // had been AND-joined around it.
+      expect(query.bool?.filter).toBeUndefined();
+      expect(Array.isArray(query.bool?.should)).toBe(true);
+      expect((query.bool?.should as unknown[]).length).toBe(2);
     });
 
     it('KQL metacharacters in array agent ids are escaped, not injected', async () => {
