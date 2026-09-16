@@ -41,6 +41,9 @@ jest.mock('./destination_row', () => ({
 }));
 
 jest.mock('../labels', () => ({
+  DISPATCH_PER_LABEL: 'Dispatch per',
+  FREQUENCY_LABEL: 'Frequency',
+  GROUP_BY_LABEL: 'Group by',
   getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
   getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
     throttle?.strategy ?? 'Not configured',
