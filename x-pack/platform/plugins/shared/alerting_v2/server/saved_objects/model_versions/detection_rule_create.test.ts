@@ -42,10 +42,14 @@ import { createUserService } from '../../lib/services/user_service/user_service.
 import { createRuleEventPublisher } from '../../lib/events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 
-jest.mock('../../lib/rule_executor/schedule', () => ({
-  ensureRuleExecutorTaskScheduled: jest.fn().mockResolvedValue({ id: 'task-id' }),
-  getRuleExecutorTaskId: jest.fn().mockReturnValue('task:id'),
-}));
+jest.mock('../../lib/rule_executor/schedule', () => {
+  const actual = jest.requireActual('../../lib/rule_executor/schedule');
+  return {
+    ...actual,
+    ensureRuleExecutorTaskScheduled: jest.fn().mockResolvedValue({ id: 'task-id' }),
+    getRuleExecutorTaskId: jest.fn().mockReturnValue('task:id'),
+  };
+});
 
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
@@ -94,6 +98,17 @@ function createDetectionClient(builderTypeRegistry: BuilderTypeRegistry) {
     page: 1,
     per_page: 1,
   });
+  rulesSavedObjectService.bulkCreate.mockImplementation(async (items) =>
+    items.map((item) => ({
+      id: item.id,
+      attributes: item.attrs,
+      version: 'WzEsMV0=',
+      references: item.references ?? [],
+    }))
+  );
+
+  const taskManager = taskManagerMock.createStart();
+  taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as never);
 
   const { userService } = createUserService();
   const { publisher: ruleEventPublisher } = createRuleEventPublisher();
@@ -107,7 +122,7 @@ function createDetectionClient(builderTypeRegistry: BuilderTypeRegistry) {
   const client = new RulesClient(
     httpServerMock.createKibanaRequest(),
     rulesSavedObjectService,
-    taskManagerMock.createStart(),
+    taskManager,
     userService,
     'default',
     pluginConfigAccessor,
@@ -141,7 +156,6 @@ describe('security.detection.query — create via RulesClient', () => {
 
   it('creates a query rule with managed ownership and no stored query', async () => {
     const { client, rulesSavedObjectService } = createDetectionClient(registry);
-    rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'query-rule-id' });
 
     const res = await client.createRule({
       data: {
@@ -175,7 +189,7 @@ describe('security.detection.query — create via RulesClient', () => {
     expect(res.metadata.builder_type).toBe('security.detection.query');
 
     // Execution-time types persist no query on the stored attributes.
-    const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+    const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
     expect(attrs.query).toBeUndefined();
     expect(attrs.metadata.builder_fields).toMatchObject({
       query: 'host.name: *',
@@ -227,7 +241,6 @@ describe('security.detection.threshold — create via RulesClient', () => {
 
   it('creates a threshold rule with managed ownership and no stored query', async () => {
     const { client, rulesSavedObjectService } = createDetectionClient(registry);
-    rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'threshold-rule-id' });
 
     const res = await client.createRule({
       data: {
@@ -263,7 +276,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
     expect(res.metadata.builder_type).toBe('security.detection.threshold');
 
     // Threshold derives grouping.fields from threshold.field at write time.
-    const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+    const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
     expect(attrs.query).toBeUndefined();
     expect(attrs.grouping?.fields).toEqual(['source.ip']);
   });

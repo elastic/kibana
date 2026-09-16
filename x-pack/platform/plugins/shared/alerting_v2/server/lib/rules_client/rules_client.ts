@@ -453,6 +453,7 @@ export class RulesClient {
     nowIso,
     version,
     template,
+    signatureId,
     validateBuilderFields = true,
   }: {
     data: CreateRuleData;
@@ -462,6 +463,7 @@ export class RulesClient {
     nowIso: string;
     version: number;
     template?: RuleSavedObjectAttributes['metadata']['template'];
+    signatureId: string;
     validateBuilderFields?: boolean;
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
@@ -506,8 +508,7 @@ export class RulesClient {
       updatedAt: nowIso,
       version,
       template,
-      // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
-      signatureId: data.metadata?.signature_id ?? uuidv4(),
+      signatureId,
       // Resolve source: use the caller-supplied value or default to internal.
       // Ref: rule-source.md "Who writes the source"
       source: data.metadata?.source ?? { type: 'internal', version: 1 },
@@ -840,6 +841,13 @@ export class RulesClient {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
+    // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
+    const signatureId = parsed.metadata?.signature_id ?? uuidv4();
+
+    // Space-scoped uniqueness check. Application-level, shares the read-then-write
+    // race v1 has always had (documented and accepted by the design).
+    await this.assertSignatureIdUniqueInSpace(signatureId);
+
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
@@ -848,12 +856,9 @@ export class RulesClient {
       nowIso,
       version: this.getNextVersion(),
       template: params.options?.template,
+      signatureId,
       validateBuilderFields: params.options?.validateBuilderFields ?? true,
     });
-
-    // Space-scoped uniqueness check. Application-level, shares the read-then-write
-    // race v1 has always had (documented and accepted by the design).
-    await this.assertSignatureIdUniqueInSpace(prepared.attrs.metadata.signature_id);
 
     await this.validateSchedule([
       { updatedEvery: prepared.attrs.schedule.every, checkLimit: prepared.enabled },
@@ -902,6 +907,8 @@ export class RulesClient {
       const { id, enabled, ...data } = item;
       const position: BulkCreateItemPosition = { index, ...(id ? { id } : {}) };
       try {
+        const signatureId = data.metadata?.signature_id ?? uuidv4();
+        await this.assertSignatureIdUniqueInSpace(signatureId);
         const rule = this.prepareRuleForCreate({
           data,
           id,
@@ -909,8 +916,8 @@ export class RulesClient {
           actor,
           nowIso,
           version: ruleVersion,
+          signatureId,
         });
-        await this.assertSignatureIdUniqueInSpace(rule.attrs.metadata.signature_id);
         prepared.push(rule);
         positions.set(rule.id, position);
       } catch (e) {
