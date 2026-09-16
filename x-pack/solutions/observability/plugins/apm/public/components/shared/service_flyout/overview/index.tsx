@@ -291,6 +291,7 @@ export function ServiceFlyoutOverview({
         ) : null}
         <EuiFlexItem>
           <ServiceFlyoutTransactionsSection
+            docLinks={core.docLinks}
             http={core.http}
             notifications={core.notifications}
             locators={share.url.locators}
