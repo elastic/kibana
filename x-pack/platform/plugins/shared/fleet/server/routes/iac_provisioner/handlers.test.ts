@@ -74,14 +74,14 @@ describe('renderIacTemplateHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     response = httpServerMock.createResponseFactory();
-    mockedIsEnabled.mockReturnValue(true);
+    mockedIsEnabled.mockResolvedValue(true);
     const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
     logger.get.mockReturnValue(logger);
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
   });
 
   it('returns 404 when the IaC Provisioner is not enabled', async () => {
-    mockedIsEnabled.mockReturnValue(false);
+    mockedIsEnabled.mockResolvedValue(false);
 
     await renderIacTemplateHandler(
       buildContext(),

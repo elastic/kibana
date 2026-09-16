@@ -63,6 +63,7 @@ export class AttachmentServiceImpl implements AttachmentService {
           attachment,
           registry: this.attachmentTypeRegistry,
           resolveContext,
+          validateContext: { request },
         });
       },
       getTypeDefinition: (attachment) => {

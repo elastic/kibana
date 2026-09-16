@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/es-query-constants",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
   "group": "platform",
   "visibility": "shared"
 }
