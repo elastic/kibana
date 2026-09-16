@@ -27,7 +27,6 @@
     "@kbn/core-application-browser",
     "@kbn/i18n-react",
     "@kbn/agent-builder-genai-utils",
-    "@kbn/product-doc-common",
     "@kbn/storage-adapter",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log"

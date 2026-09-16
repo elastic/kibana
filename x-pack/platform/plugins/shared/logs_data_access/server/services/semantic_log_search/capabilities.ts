@@ -12,7 +12,6 @@ import {
   flattenMapping,
   type MappingField,
 } from '@kbn/agent-builder-genai-utils';
-import { resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
 
 /**
  * Information about a semantic_text field including its inference endpoint.
@@ -35,12 +34,10 @@ export interface PatternTextField {
 /**
  * Target capabilities for semantic log search.
  *
- * The capability ladder (from best to fallback):
- * 1. semantic_text + pattern_text: semantic ranking with exact template resolution
- * 2. semantic_text only: semantic ranking with approximate resolution via categorize_text
- * 3. RERANK + CATEGORIZE: runtime semantic ranking via ES|QL (no pre-indexed embeddings)
- *
- * Without any semantic capability, the service returns unavailable.
+ * Detection of `semantic_text` and `pattern_text` is preserved as the input
+ * the pre-indexed rungs will need. Those rungs are not dispatched today;
+ * `search()` uses RERANK + CATEGORIZE, or returns unavailable. The planned
+ * direction for the pre-indexed rungs is Knowledge Indicators in the AI Index.
  */
 export interface TargetCapabilities {
   /** All fields from the flattened mapping */
@@ -51,8 +48,6 @@ export interface TargetCapabilities {
   hasSemanticCapability: boolean;
   /** Whether the target has exact template resolution (pattern_text) */
   hasPatternCapability: boolean;
-  /** Whether the cluster has RERANK capability (runtime semantic ranking) */
-  hasRerankCapability: boolean;
   /** The primary semantic field for the message (typically 'message_semantic' or 'message') */
   primarySemanticField?: SemanticTextField;
   /** The primary pattern field for the message (typically 'message') */
@@ -165,7 +160,6 @@ export async function detectCapabilities(
       patternFields: [],
       hasSemanticCapability: false,
       hasPatternCapability: false,
-      hasRerankCapability: false,
     };
   }
 
@@ -230,7 +224,6 @@ export async function detectCapabilities(
     patternFields: allPatternFields,
     hasSemanticCapability: allSemanticFields.length > 0,
     hasPatternCapability: allPatternFields.length > 0,
-    hasRerankCapability: false, // Set by detectRerankCapability separately
     primarySemanticField,
     primaryPatternField,
   };
@@ -254,21 +247,4 @@ export async function detectRerankCapability(esClient: ElasticsearchClient): Pro
     // Endpoint doesn't exist or inference API not available
     return false;
   }
-}
-
-/**
- * Resolve the default inference endpoint ID.
- *
- * Priority: Jina v5 > EIS ELSER > local ELSER
- *
- * This is used when the target doesn't have a semantic_text field with an explicit
- * inference_id, or when we need to verify the endpoint still exists.
- */
-export async function resolveDefaultInferenceEndpoint(
-  esClient: ElasticsearchClient
-): Promise<string> {
-  return resolveDefaultInferenceIdFromInferenceGet(async () => {
-    const response = await esClient.inference.get({});
-    return { endpoints: response.endpoints };
-  });
 }

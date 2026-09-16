@@ -18,7 +18,7 @@ export const ARMS = {
   baseline: 'baseline',
   /** `get_logs` driven by keyword filters only, the funnel workflow that ships now. */
   keyword: 'keyword',
-  /** `get_logs` with `semanticFilter`, the capability under test. */
+  /** `get_logs_semantic`, the capability under test. */
   semantic: 'semantic',
 } as const;
 

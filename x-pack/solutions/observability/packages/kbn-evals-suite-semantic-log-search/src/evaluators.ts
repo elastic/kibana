@@ -6,7 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import { GET_LOGS_TOOL_ID } from './constants';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
 import type { CorpusProfile } from './corpora';
 import type { RelevanceGrade } from './ground_truth';
 import { matchedLabels, relevantLabels } from './ground_truth';
@@ -183,44 +183,43 @@ const toolIdsFrom = (output: AgentTaskOutput): string[] =>
   output.steps.map((step) => step.tool_id).filter((toolId): toolId is string => Boolean(toolId));
 
 /**
- * Whether the agent reached for the log tool at all. In the baseline arm the tool
- * is not available, so this is expected to be 0 and exists to prove the arm was
- * really configured without it.
+ * Whether the agent reached for a log tool at all. In the baseline arm the tools
+ * are not available, so this is expected to be 0 and exists to prove the arm was
+ * really configured without them.
  */
 export const usedLogToolEvaluator: AgentEvaluator = {
   name: 'Used Log Tool',
   kind: 'CODE',
   direction: 'neutral',
   evaluate: async ({ output }) => {
-    const used = toolIdsFrom(output).includes(GET_LOGS_TOOL_ID);
+    const toolIds = toolIdsFrom(output);
+    const used = toolIds.includes(GET_LOGS_TOOL_ID) || toolIds.includes(GET_LOGS_SEMANTIC_TOOL_ID);
     return {
       score: used ? 1 : 0,
       label: used ? 'used' : 'not used',
-      metadata: { tools: toolIdsFrom(output) },
+      metadata: { tools: toolIds },
     };
   },
 };
 
 /**
- * Whether the agent chose to phrase the question semantically. This is the tool
- * selection signal the parent issue calls out: the capability only lands if the
- * model recognises that a paraphrased question needs the semantic path.
+ * Whether the agent chose the semantic tool. This is the tool selection signal
+ * the parent issue calls out: the capability only lands if the model recognises
+ * that a paraphrased question needs the semantic path.
  */
-export const usedSemanticFilterEvaluator: AgentEvaluator = {
-  name: 'Used Semantic Filter',
+export const usedSemanticToolEvaluator: AgentEvaluator = {
+  name: 'Used Semantic Tool',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output }) => {
-    const semanticCall = output.steps.find(
-      (step) => step.tool_id === GET_LOGS_TOOL_ID && Boolean(step.params?.semanticFilter)
-    );
+    const semanticCall = output.steps.find((step) => step.tool_id === GET_LOGS_SEMANTIC_TOOL_ID);
 
     return {
       score: semanticCall ? 1 : 0,
       label: semanticCall ? 'semantic' : 'keyword',
       explanation: semanticCall
         ? `semanticFilter: "${String(semanticCall.params?.semanticFilter)}"`
-        : 'The agent did not pass semanticFilter',
+        : `The agent did not call ${GET_LOGS_SEMANTIC_TOOL_ID}`,
     };
   },
 };
@@ -255,6 +254,6 @@ export const createCitedRelevantMessagesEvaluator = (corpus: CorpusProfile): Age
 
 export const agentEvaluators = (corpus: CorpusProfile): AgentEvaluator[] => [
   usedLogToolEvaluator,
-  usedSemanticFilterEvaluator,
+  usedSemanticToolEvaluator,
   createCitedRelevantMessagesEvaluator(corpus),
 ];

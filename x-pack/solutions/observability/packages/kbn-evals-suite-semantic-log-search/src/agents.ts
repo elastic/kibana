@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GET_LOGS_TOOL_ID } from './constants';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
 import type { Arm } from './types';
 
 const AGENTS_API_PATH = '/api/agent_builder/agents';
@@ -29,11 +29,10 @@ interface CreateAgentParams {
 /**
  * Creates the agent for one arm.
  *
- * The keyword arm is the semantic arm minus one instruction, so the only
- * difference measured between them is whether the semantic path is reachable.
- * The semantic arm is deliberately *not* told to use `semanticFilter`: whether
- * the model recognises that a paraphrased question needs it is the thing being
- * measured, and instructing it would answer the question by fiat.
+ * The keyword arm gets only `get_logs`. The semantic arm gets both tools; it is
+ * deliberately *not* told to use `get_logs_semantic`, because whether the model
+ * recognises that a paraphrased question needs the semantic path is the thing
+ * being measured.
  */
 export const createArmAgent = async ({
   fetch,
@@ -43,17 +42,14 @@ export const createArmAgent = async ({
 }: CreateAgentParams): Promise<string> => {
   const id = agentIdFor(arm, connectorId);
 
+  const toolIds =
+    arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_TOOL_ID, GET_LOGS_SEMANTIC_TOOL_ID];
+
   const instructions = [
     'You are answering a question about application logs.',
-    `Use the "${GET_LOGS_TOOL_ID}" tool to find evidence before answering.`,
+    'Use a logs tool to find evidence before answering.',
     'Quote the log messages you found verbatim in your answer.',
   ];
-
-  if (arm === 'keyword') {
-    instructions.push(
-      `Do NOT use the "semanticFilter" parameter. Narrow results with "kqlFilter" only.`
-    );
-  }
 
   await fetch(AGENTS_API_PATH, {
     method: 'POST',
@@ -64,7 +60,7 @@ export const createArmAgent = async ({
       description: `Evaluation agent for the "${arm}" arm of semantic log search.`,
       configuration: {
         instructions: instructions.join('\n'),
-        tools: [{ tool_ids: [GET_LOGS_TOOL_ID] }],
+        tools: [{ tool_ids: toolIds }],
       },
     }),
   });
