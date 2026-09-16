@@ -68,7 +68,6 @@ export const roundStepEventId = (roundId: string, sequence: number): string =>
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
 
-
 type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
 
 export const userMessageEvent = (
