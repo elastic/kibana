@@ -163,8 +163,10 @@ export function runAudit(repoRoot: string, pageObjectsIndexPath: string) {
  * consumer census for `pageObjects.<key>`). It is deterministic fact-gathering
  * only: it does not judge whether a low or high count means an object should
  * move, merge, or stay. See the audit tracking issue for the planned
- * additions (duplicate class names, `page.components`/`apiServices` census,
- * `--check`/`--report` modes, a baseline file).
+ * additions (duplicate class names, `page.components`/`apiServices` census).
+ *
+ * Meant to be run by hand on a cadence, not in CI, so there is no check mode
+ * and no baseline file: it reports and exits 0.
  */
 export const auditCmd: Command<void> = {
   name: 'audit',
