@@ -577,6 +577,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+/** Maximum accepted length for a conversation metadata key */
+export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */
@@ -704,7 +707,18 @@ export interface BackgroundExecutionState {
   completed_at?: BackgroundExecutionCompletedAt;
 }
 
-export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+/**
+ * Identity of one attachment, without any of its version content.
+ */
+export type ConversationAttachmentSummary = Pick<VersionedAttachment, 'id' | 'type'>;
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds' | 'attachments'> & {
+  /**
+   * The conversation's active attachments, narrowed to their id and type: rows returned without
+   * rounds exclude attachment content from the query's `_source`
+   */
+  attachments?: ConversationAttachmentSummary[];
+};
 
 export interface ConversationPermissions {
   rename: boolean;
