@@ -653,12 +653,12 @@ export const saveAutomationHandler = async ({
     });
 
     // Fail-fast: reject before attach when the index cannot accept this automation.
-    await aiIndexService.assertCanAcceptAutomation(aiIndexId, {
+    await aiIndexService.assertCanAcceptAutomation(aiIndexId, spaceId, {
       type: 'workflow',
       value: params.workflowId,
     });
 
-    const attachStatus = await aiIndexService.addAutomation(aiIndexId, {
+    const attachStatus = await aiIndexService.addAutomation(aiIndexId, spaceId, {
       type: 'workflow',
       value: params.workflowId,
     });
@@ -690,6 +690,7 @@ export const saveAutomationHandler = async ({
   // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
   await aiIndexService.assertCanAcceptAutomation(
     aiIndexId,
+    spaceId,
     existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
   );
 
@@ -704,7 +705,7 @@ export const saveAutomationHandler = async ({
 
   let result: SaveAutomationResult;
   try {
-    const attachStatus = await aiIndexService.addAutomation(aiIndexId, {
+    const attachStatus = await aiIndexService.addAutomation(aiIndexId, spaceId, {
       type: 'workflow',
       value: workflowId,
     });
