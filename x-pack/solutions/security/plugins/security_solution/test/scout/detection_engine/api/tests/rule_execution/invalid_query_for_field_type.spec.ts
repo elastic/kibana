@@ -109,6 +109,7 @@ apiTest.describe(
               headers: adminHeaders,
               responseType: 'json',
             });
+            expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
             lastExecution = (response.body as RuleResponse).execution_summary;
 
             return lastExecution?.last_execution.status;
