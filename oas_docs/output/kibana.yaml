@@ -97643,6 +97643,11 @@ components:
         download_source_id:
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            type: string
+          maxItems: 3
+          type: array
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -104687,6 +104692,11 @@ components:
                               type: string
                       required:
                         - key
+                sources:
+                  items:
+                    type: string
+                  maxItems: 3
+                  type: array
                 sourceURI:
                   type: string
                 ssl:
@@ -114600,6 +114610,11 @@ components:
         download_source_id:
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string
@@ -122650,6 +122665,11 @@ components:
         download_source_id:
           nullable: true
           type: string
+        download_source_ids:
+          items:
+            type: string
+          maxItems: 3
+          type: array
         fleet_server_host_id:
           nullable: true
           type: string

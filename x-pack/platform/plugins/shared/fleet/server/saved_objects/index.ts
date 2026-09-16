@@ -361,6 +361,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -571,6 +572,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
