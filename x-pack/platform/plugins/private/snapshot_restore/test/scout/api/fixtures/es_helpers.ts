@@ -17,6 +17,11 @@ export interface SeedSlmPolicy {
     indices?: string | string[];
     ignoreUnavailable?: boolean;
   };
+  retention?: {
+    expireAfter: string;
+    maxCount: number;
+    minCount: number;
+  };
 }
 
 /** Registers a local `fs` snapshot repository (only usable on non-Cloud deployments). */
@@ -27,8 +32,9 @@ export const createFsRepository = (esClient: EsClient, name: string, location: s
     repository: { type: 'fs', settings: { location } },
   });
 
+// Deletes ignore 404 so teardown continues past resources that no longer exist.
 export const deleteRepository = (esClient: EsClient, name: string) =>
-  esClient.snapshot.deleteRepository({ name });
+  esClient.snapshot.deleteRepository({ name }, { ignore: [404] });
 
 export const putSlmPolicy = (esClient: EsClient, policy: SeedSlmPolicy) =>
   esClient.slm.putLifecycle({
@@ -44,10 +50,19 @@ export const putSlmPolicy = (esClient: EsClient, policy: SeedSlmPolicy) =>
           },
         }
       : {}),
+    ...(policy.retention
+      ? {
+          retention: {
+            expire_after: policy.retention.expireAfter,
+            max_count: policy.retention.maxCount,
+            min_count: policy.retention.minCount,
+          },
+        }
+      : {}),
   });
 
 export const deleteSlmPolicy = (esClient: EsClient, policyName: string) =>
-  esClient.slm.deleteLifecycle({ policy_id: policyName });
+  esClient.slm.deleteLifecycle({ policy_id: policyName }, { ignore: [404] });
 
 /** Triggers an SLM policy run and returns the generated snapshot name. */
 export const executeSlmPolicy = async (esClient: EsClient, policyName: string): Promise<string> => {
@@ -62,7 +77,7 @@ export const createSnapshot = (esClient: EsClient, snapshot: string, repository:
   esClient.snapshot.create({ snapshot, repository, wait_for_completion: true });
 
 export const deleteAllSnapshotsInRepo = (esClient: EsClient, repository: string) =>
-  esClient.snapshot.delete({ repository, snapshot: '*' });
+  esClient.snapshot.delete({ repository, snapshot: '*' }, { ignore: [404] });
 
 /**
  * Waits for a specific snapshot to reach a terminal state. SLM runs are asynchronous, so this

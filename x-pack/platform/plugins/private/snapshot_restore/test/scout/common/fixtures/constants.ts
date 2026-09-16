@@ -8,12 +8,11 @@
 import type { KibanaRole } from '@kbn/scout';
 
 /**
- * Least-privilege role for the Snapshot and Restore APIs. The routes disable Kibana
- * authorization and act as the current user via the ES client, so the API key needs the
- * matching cluster privileges: `manage` for snapshot/repository operations and
- * `nodes.info`, and `manage_slm` for SLM policy create/execute/status.
+ * Least-privilege role for the Snapshot and Restore APIs: the routes disable Kibana
+ * authorization and act as the current user via the ES client, so only ES cluster
+ * privileges are needed (`manage` for snapshots/repositories, `manage_slm` for SLM).
  */
 export const SNAPSHOT_RESTORE_ADMIN_ROLE: KibanaRole = {
   elasticsearch: { cluster: ['manage', 'manage_slm'] },
-  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+  kibana: [],
 };

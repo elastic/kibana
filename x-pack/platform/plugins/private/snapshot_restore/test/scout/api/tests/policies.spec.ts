@@ -70,19 +70,21 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
 
   // Seed a policy directly via ES so the PUT request has something to update.
   const seedUpdatePolicy = async (esClient: EsClient) => {
+    createdPolicyNames.add(UPDATE_POLICY_NAME);
     await putSlmPolicy(esClient, {
       policyName: UPDATE_POLICY_NAME,
       snapshotName: UPDATE_SNAPSHOT_NAME,
       schedule: '0 30 1 * * ?',
       repository: repoName,
       config: { indices: ['my_index'], ignoreUnavailable: true },
+      retention: { expireAfter: '7d', maxCount: 20, minCount: 2 },
     });
-    createdPolicyNames.add(UPDATE_POLICY_NAME);
   };
 
   apiTest('create: should create a SLM policy', async ({ apiClient, esClient }) => {
     const policyName = CREATE_POLICY_NAME;
 
+    createdPolicyNames.add(policyName);
     const response = await apiClient.post(`${API_BASE_PATH}/policies`, {
       headers: headers(),
       responseType: 'json',
@@ -111,7 +113,6 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ acknowledged: true });
-    createdPolicyNames.add(policyName);
 
     const policyFromEs = await esClient.slm.getLifecycle({ policy_id: policyName, human: true });
     expect(policyFromEs[policyName].policy).toStrictEqual({
@@ -139,6 +140,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
     async ({ apiClient, esClient }) => {
       const policyName = CREATE_REQUIRED_FIELDS_POLICY_NAME;
 
+      createdPolicyNames.add(policyName);
       const response = await apiClient.post(`${API_BASE_PATH}/policies`, {
         headers: headers(),
         responseType: 'json',
@@ -154,7 +156,6 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ acknowledged: true });
-      createdPolicyNames.add(policyName);
 
       const policyFromEs = await esClient.slm.getLifecycle({
         policy_id: policyName,
