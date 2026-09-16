@@ -254,6 +254,6 @@ export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL =
   '[data-test-subj="exceptionItemDeleteConfirmModal"]';
 
 export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN =
-  '[data-test-subj="confirmModalConfirmButton"]';
+  '[data-test-subj="exceptionItemDeleteConfirmModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
