@@ -135,9 +135,12 @@ test.describe(
       await pageObjects.alertsTablePage.clickViewInvestigation();
 
       const requestUrl = new URL((await requestPromise).url());
-      expect(page.url()).toContain(`/app/nightshift?alertId=${alertId}`);
+      expect(page.url()).toContain(
+        `/app/nightshift?alertId=${alertId}&investigationId=investigation-1`
+      );
       expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
       expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
 
     test('views a completed investigation from the alert detail action menu', async ({
@@ -158,9 +161,12 @@ test.describe(
       await pageObjects.alertPage.clickViewInvestigation();
 
       const requestUrl = new URL((await requestPromise).url());
-      expect(page.url()).toContain(`/app/nightshift?alertId=${alertId}`);
+      expect(page.url()).toContain(
+        `/app/nightshift?alertId=${alertId}&investigationId=investigation-1`
+      );
       expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
       expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
   }
 );

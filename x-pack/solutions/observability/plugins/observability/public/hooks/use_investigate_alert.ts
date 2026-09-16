@@ -62,14 +62,18 @@ export const useInvestigateAlert = ({
         : false,
   });
   const [isStarting, setIsStarting] = useState(false);
-  const latestStatus = investigations?.results[0]?.status;
+  const latestInvestigation = investigations?.results[0];
+  const latestStatus = latestInvestigation?.status;
   const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
   const viewInvestigationUrl =
-    alertId && investigations?.results.length
+    alertId && latestInvestigation
       ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-          path: `?${new URLSearchParams({ alertId }).toString()}`,
+          path: `?${new URLSearchParams({
+            alertId,
+            investigationId: latestInvestigation.investigation_id,
+          }).toString()}`,
         })
       : undefined;
   const viewInvestigationActionLabel = i18n.translate(

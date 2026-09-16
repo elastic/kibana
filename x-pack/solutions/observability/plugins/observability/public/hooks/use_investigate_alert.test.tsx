@@ -103,13 +103,20 @@ describe('useInvestigateAlert', () => {
 
   it('returns Investigating and disables starts for an ongoing investigation', async () => {
     mockInvestigationsApi({
-      list: { results: [{ status: 'running' }], page: 1, size: 1, total: 1 },
+      list: {
+        results: [{ investigation_id: 'inv-running', status: 'running' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      },
     });
     const { result } = renderInvestigateAlert();
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
     expect(result.current.isInvestigating).toBe(true);
-    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?alertId=alert-1');
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?alertId=alert-1&investigationId=inv-running'
+    );
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',
@@ -119,23 +126,33 @@ describe('useInvestigateAlert', () => {
 
   it('returns Re-investigate after a completed investigation', async () => {
     mockInvestigationsApi({
-      list: { results: [{ status: 'completed' }], page: 1, size: 2, total: 1 },
+      list: {
+        results: [{ investigation_id: 'inv-completed', status: 'completed' }],
+        page: 1,
+        size: 2,
+        total: 1,
+      },
     });
     const { result } = renderInvestigateAlert('alert/1');
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Re-investigate'));
     expect(result.current.isInvestigating).toBe(false);
     expect(result.current.viewInvestigationActionLabel).toBe('View investigation');
-    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?alertId=alert%2F1');
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?alertId=alert%2F1&investigationId=inv-completed'
+    );
     expect(getUrlForApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID, {
-      path: '?alertId=alert%2F1',
+      path: '?alertId=alert%2F1&investigationId=inv-completed',
     });
   });
 
   it('keeps the completed investigation link while a newer investigation is active', async () => {
     mockInvestigationsApi({
       list: {
-        results: [{ status: 'running' }, { status: 'completed' }],
+        results: [
+          { investigation_id: 'inv-running', status: 'running' },
+          { investigation_id: 'inv-completed', status: 'completed' },
+        ],
         page: 1,
         size: 2,
         total: 2,
@@ -144,7 +161,9 @@ describe('useInvestigateAlert', () => {
     const { result } = renderInvestigateAlert();
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
-    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?alertId=alert-1');
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?alertId=alert-1&investigationId=inv-running'
+    );
   });
 
   it('returns the completed investigation link without write availability', async () => {
@@ -152,12 +171,19 @@ describe('useInvestigateAlert', () => {
       if (endpoint === 'GET /internal/nightshift/investigations/availability') {
         throw new Error('Forbidden');
       }
-      return { results: [{ status: 'completed' }], page: 1, size: 2, total: 1 };
+      return {
+        results: [{ investigation_id: 'inv-completed', status: 'completed' }],
+        page: 1,
+        size: 2,
+        total: 1,
+      };
     });
     const { result } = renderInvestigateAlert();
 
     await waitFor(() =>
-      expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?alertId=alert-1')
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?alertId=alert-1&investigationId=inv-completed'
+      )
     );
     expect(result.current.showInvestigateAction).toBe(false);
   });
