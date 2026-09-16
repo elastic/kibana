@@ -115,7 +115,7 @@ export const ConversationsPage: React.FC = () => {
   } = useKibana<CoreStart>();
 
   // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
-  const isFlyoutRequested = Boolean(selectedConversationId && show);
+  const isFlyoutRequested = !!(selectedConversationId && show);
 
   const selectedDetailsConversation = useMemo(
     () =>
@@ -206,7 +206,7 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedConversationId && show && (
+      {isFlyoutRequested && (
         <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
           isLoading={isLoading}
