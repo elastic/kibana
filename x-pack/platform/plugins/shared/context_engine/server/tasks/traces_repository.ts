@@ -66,26 +66,50 @@ export const spaceFromTracesIndex = (index: string | undefined | null): string |
 };
 
 /**
+ * The only columns whose absence is an expected, tolerable condition: they only
+ * appear in the traces mapping once `agentBuilder:tracing:includeToolDetails`
+ * (off by default) has been enabled on the cluster. On a cluster where it was
+ * never on, the mapping lacks these two columns and query verification fails —
+ * without the guard below the signal generator task would burn its maxAttempts
+ * and die instead of treating the batch as empty.
+ *
+ * Deliberately NOT a wildcard match: `runEsqlQuery` is shared by the
+ * execute-tool, invoke-agent, and self-analysis queries, so a misspelled or
+ * renamed *required* column must still surface as a real failure instead of
+ * being silently swallowed into an empty batch.
+ */
+const OPTIONAL_TRACE_DETAIL_COLUMNS = new Set([
+  'attributes.gen_ai.tool.call.arguments',
+  'attributes.gen_ai.tool.call.result',
+]);
+
+const UNKNOWN_COLUMN_PATTERN = /Unknown column \[([^\]]+)\]/g;
+
+/**
  * ES|QL reports a missing column as a 400 `verification_exception` whose reason
  * contains `Unknown column [<name>]` — the column-level counterpart to
  * `isEsqlUnknownIndexError` from `@kbn/storage-adapter`.
  *
- * Relevant here specifically: the trace queries below read
- * `attributes.gen_ai.tool.call.arguments` / `.result`, which only appear in the
- * traces mapping once `agentBuilder:tracing:includeToolDetails` (off by default)
- * has been enabled on the cluster. On a cluster where it was never on, the
- * mapping lacks those columns and query verification fails — without this guard
- * the signal generator task burns its maxAttempts and dies instead of treating
- * the batch as empty.
+ * Returns true only when EVERY `Unknown column [...]` mentioned in the reason
+ * is one of `OPTIONAL_TRACE_DETAIL_COLUMNS`. If the reason names an unknown
+ * column outside that set (e.g. a typo'd `trace_id` or `@timestamp`), this
+ * returns false so the caller treats it as a real error rather than an empty
+ * batch.
  */
 export const isEsqlUnknownColumnError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError)) return false;
   const body = error.body as { error?: { type?: string; reason?: string } } | undefined;
+  if (error.statusCode !== 400 || body?.error?.type !== 'verification_exception') {
+    return false;
+  }
+  const reason = body?.error?.reason;
+  if (typeof reason !== 'string' || !reason.includes('Unknown column')) {
+    return false;
+  }
+  const unknownColumns = [...reason.matchAll(UNKNOWN_COLUMN_PATTERN)].map((match) => match[1]);
   return (
-    error.statusCode === 400 &&
-    body?.error?.type === 'verification_exception' &&
-    typeof body?.error?.reason === 'string' &&
-    body.error.reason.includes('Unknown column')
+    unknownColumns.length > 0 &&
+    unknownColumns.every((column) => OPTIONAL_TRACE_DETAIL_COLUMNS.has(column))
   );
 };
 
