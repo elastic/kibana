@@ -108,7 +108,7 @@ describe('`onWriteError` is accepted only through the runtime schema', () => {
     ['array', ['a']],
   ])('rejects a %s from the YAML appender schema', (_label, onWriteError) => {
     expect(() => Appenders.configSchema.validate({ ...fileAppenderConfig, onWriteError })).toThrow(
-      /Additional properties are not allowed/
+      /definition for this key is missing/
     );
   });
 
