@@ -29,10 +29,11 @@ export interface BuildFeedbackContextDeps {
 /** Assembles everything one analysis run reads. */
 export const buildFeedbackContext = async (
   aiIndexId: string,
+  spaceId: string,
   { esClient, aiIndexService, improvementsService }: BuildFeedbackContextDeps,
   { now }: { now?: Date } = {}
 ): Promise<FeedbackAnalysisContext> => {
-  const aiIndex = await aiIndexService.get(aiIndexId);
+  const aiIndex = await aiIndexService.get(aiIndexId, spaceId);
   const feedbackAnalysis = aiIndex.feedback_analysis;
 
   const allowedActions: ImprovementAction[] = feedbackAnalysis?.allowed_actions ?? [
@@ -44,6 +45,7 @@ export const buildFeedbackContext = async (
     selectSignals(esClient, {
       destValue: aiIndex.dest.value,
       sources: aiIndex.sources,
+      spaceId,
       signalTimeRange: feedbackAnalysis?.signal_time_range,
       signalFilter: feedbackAnalysis?.signal_filter,
       ...(now ? { now } : {}),

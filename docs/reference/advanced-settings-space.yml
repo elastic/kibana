@@ -474,6 +474,7 @@ groups:
         id: timepicker-quickranges
         description: |
           The list of ranges to show in the Quick section of the time filter. This must be an array of objects, with each object containing `from`, `to` (refer to [accepted formats](elasticsearch://reference/elasticsearch/rest-apis/common-options.md#date-math)), and `display` (the title to be displayed).
+          Users cannot delete these ranges from the time filter. Only user-created presets can be deleted. To save or delete user-created presets, refer to [Filtering in Kibana](docs-content://explore-analyze/query-filter/filtering.md#set-time-filter).
         datatype: string
         applies_to:
           stack: ga

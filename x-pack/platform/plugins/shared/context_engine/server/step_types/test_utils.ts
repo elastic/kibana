@@ -16,10 +16,12 @@ export const createMockStepContext = ({
   input,
   esClient,
   abortController = new AbortController(),
+  spaceId = 'default',
 }: {
   input: unknown;
   esClient: unknown;
   abortController?: AbortController;
+  spaceId?: string;
 }): StepHandlerContext => {
   return {
     input,
@@ -29,7 +31,7 @@ export const createMockStepContext = ({
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
       getContext: jest.fn().mockReturnValue({
-        workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId: 'default', version: 3 },
+        workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId, version: 3 },
         execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
         kibanaUrl: '',
       }),
