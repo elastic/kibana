@@ -75,7 +75,7 @@ export interface DeleteRuleArgs {
 }
 
 export interface BulkDeleteRulesArgs {
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 

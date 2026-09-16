@@ -176,16 +176,10 @@ describe('Perform bulk action route', () => {
         body: { ...getBulkDisableRuleActionSchemaMock(), action: BulkActionTypeEnum.delete },
       });
 
-    it('returns 200 and counts the rule as deleted when deletion reports a 404 (rule already deleted)', async () => {
+    it('returns 200 when bulkDeleteRules reports a concurrently-deleted rule as success', async () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
-        rules: [],
-        errors: [
-          {
-            message: 'Rule not found',
-            status: 404,
-            rule: { id: mockRule.id, name: mockRule.name },
-          },
-        ],
+        rules: [mockRule],
+        errors: [],
       });
 
       const response = await server.inject(
