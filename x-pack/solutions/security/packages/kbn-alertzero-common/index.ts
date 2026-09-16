@@ -124,12 +124,6 @@ export {
   type TimelineEvent,
 } from './impl/schemas';
 
-export type {
-  WorkerSettingsDeclaration,
-  WorkerExtrasDeclaration,
-} from './impl/worker_settings/types';
-export { ALERT_TRIAGE_SETTINGS } from './impl/worker_settings/floor_watch';
-
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,

@@ -20,13 +20,10 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { Worker } from '@kbn/alertzero-common';
-import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useAlertZeroConfig } from '../../hooks/use_alertzero_config';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 import { AutonomySlider } from './components/autonomy_slider';
-import { MinimumConfidenceScoreField } from './components/minimum_confidence_score_field';
 import { ScheduleIntervalField } from './components/schedule_interval_field';
 import { SettingsSection } from './components/settings_section';
 import { WorkerSkillsTable } from './components/worker_skills_table';
@@ -37,13 +34,7 @@ import { workerName } from './workers/translations';
 
 const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
   const { mutate: updateWorker } = useUpdateWorker();
-  const config = useAlertZeroConfig();
   const settingsLocked = worker.state === 'unavailable';
-
-  const showConfidenceField =
-    worker.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID &&
-    config.featureFlags.alertTriageWorkerEnabled &&
-    worker.settings.extras?.autoCloseConfidenceScoreMinThreshold != null;
 
   return (
     <SettingsSection
@@ -82,21 +73,6 @@ const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
             isDisabled={settingsLocked}
             onChange={(scheduleInterval) =>
               updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
-            }
-          />
-        </>
-      ) : null}
-      {showConfidenceField ? (
-        <>
-          <EuiSpacer size="m" />
-          <MinimumConfidenceScoreField
-            current={worker.settings.extras!.autoCloseConfidenceScoreMinThreshold as number}
-            isDisabled={settingsLocked}
-            onChange={(autoCloseConfidenceScoreMinThreshold) =>
-              updateWorker({
-                workerId: worker.id,
-                patch: { extras: { autoCloseConfidenceScoreMinThreshold } },
-              })
             }
           />
         </>

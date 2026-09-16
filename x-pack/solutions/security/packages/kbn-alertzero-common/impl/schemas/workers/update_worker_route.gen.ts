@@ -63,12 +63,6 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       "New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule."
     ),
-    extras: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe(
-        "Worker-specific extra settings patch. Validated against the Worker's extras declaration schema; unknown keys are rejected with 400."
-      ),
   })
 );
 export type UpdateWorkerRequestBody = z.infer<typeof UpdateWorkerRequestBody>;

@@ -10,7 +10,7 @@ import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
 export type WorkerSettingsPatch = Pick<
   UpdateWorkerRequestBody,
-  'autonomyLevel' | 'scheduleInterval' | 'extras'
+  'autonomyLevel' | 'scheduleInterval'
 >;
 
 export interface WorkerSettingsRegistration {
