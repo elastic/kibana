@@ -28,7 +28,7 @@ const nonBlankString = (max: number) =>
     });
 
 /**
- * Bounded non-blank string used as `data.dashboardId` on dashboard artifacts.
+ * Bounded non-blank string used as `data.dashboard_id` on dashboard artifacts.
  * Also reused by the agent-builder `set_dashboards` operation so tool-level
  * validation stays in sync with the registered dashboard schema.
  */
@@ -53,9 +53,9 @@ export function registerBuiltinArtifactTypes(registry: ArtifactTypeRegistry): vo
     type: DASHBOARD_ARTIFACT_TYPE,
     dataSchema: z
       .object({
-        dashboardId: dashboardIdSchema,
+        dashboard_id: dashboardIdSchema,
       })
       .strict(),
-    references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
+    references: [{ field: 'dashboard_id', savedObjectType: 'dashboard' }],
   });
 }

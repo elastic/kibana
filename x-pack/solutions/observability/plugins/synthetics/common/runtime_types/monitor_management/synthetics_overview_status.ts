@@ -78,6 +78,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   t.partial({
     projectId: t.string,
     updated_at: t.string,
+    created_at: t.string,
     timestamp: t.string,
     spaces: t.array(t.string),
     urls: t.string,
@@ -110,6 +111,16 @@ export const OverviewStatusCodec = t.interface({
   allIds: t.array(t.string),
 });
 
+export const PaginatedOverviewStatusCodec = t.intersection([
+  OverviewStatusCodec,
+  t.partial({
+    configs: t.array(OverviewStatusMetaDataCodec),
+    total: t.number,
+    page: t.number,
+    perPage: t.number,
+  }),
+]);
+
 // Response of the supplementary "stale before the window" lookup. The overview
 // status endpoint only classifies a monitor as `stale` when it has a run inside
 // the window that then went quiet; a monitor that stopped reporting *before* the
@@ -136,6 +147,7 @@ export const OverviewStaleStatusCodec = t.interface({
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
+export type PaginatedOverviewStatus = t.TypeOf<typeof PaginatedOverviewStatusCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
 export type OverviewStalePriorRun = t.TypeOf<typeof OverviewStalePriorRunCodec>;
 export type OverviewStaleStatus = t.TypeOf<typeof OverviewStaleStatusCodec>;

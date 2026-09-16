@@ -1,5 +1,5 @@
 {
-  "sha1": "7fc7574c64c4200e6d623df3f874843b657f411a",
+  "sha1": "77c76ca8f01cfdc97f9429db26ee8230d24e634b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,6 +30,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
         "line": 122,
         "column": 61
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-1c8a48f6e9e3b2b",
+      "title": "security.patchRule workflow step patches only the provided fields of an existing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 108,
+        "column": 5
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-00dc7b076afda15",
+      "title": "security.patchRule workflow step fails the step when the rule does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 139,
+        "column": 22
       }
     },
     {

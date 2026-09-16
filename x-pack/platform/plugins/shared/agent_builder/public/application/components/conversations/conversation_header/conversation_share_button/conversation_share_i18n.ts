@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const inviteLabel = i18n.translate('xpack.agentBuilder.conversationSharing.invite', {
-  defaultMessage: 'Invite',
-});
-
 export const sharingLabel = i18n.translate('xpack.agentBuilder.conversationSharing.title', {
   defaultMessage: 'Sharing',
 });
@@ -59,6 +55,20 @@ export const currentMembersLabel = i18n.translate(
   }
 );
 
+export const agentAccessHelpLabel = (agentName: string) =>
+  i18n.translate('xpack.agentBuilder.conversationSharing.agentAccessHelp', {
+    defaultMessage:
+      'Search results display all users, but only users with access to {agentName} can see this chat.',
+    values: { agentName },
+  });
+
+export const agentAccessHelpAriaLabel = i18n.translate(
+  'xpack.agentBuilder.conversationSharing.agentAccessHelpAriaLabel',
+  {
+    defaultMessage: 'Who can access this chat?',
+  }
+);
+
 export const searchUsersLabel = i18n.translate(
   'xpack.agentBuilder.conversationSharing.searchUsers',
   {
@@ -77,11 +87,18 @@ export const removeMemberLabel = i18n.translate(
   }
 );
 
-export const extraMembersLabel = (count: number) =>
-  i18n.translate('xpack.agentBuilder.conversationSharing.extraMembersLabel', {
-    defaultMessage: '{count, plural, one {# more member} other {# more members}}',
+export const participantsCountAriaLabel = (count: number) =>
+  i18n.translate('xpack.agentBuilder.conversationSharing.participantsCountAriaLabel', {
+    defaultMessage: 'Sharing, {count, plural, one {# user has access} other {# users have access}}',
     values: { count },
   });
+
+export const publicAccessAriaLabel = i18n.translate(
+  'xpack.agentBuilder.conversationSharing.publicAccessAriaLabel',
+  {
+    defaultMessage: 'Sharing, public',
+  }
+);
 
 export const saveErrorLabel = i18n.translate('xpack.agentBuilder.conversationSharing.saveError', {
   defaultMessage: 'Failed to update sharing settings',
