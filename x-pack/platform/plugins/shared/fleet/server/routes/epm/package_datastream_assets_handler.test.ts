@@ -439,4 +439,49 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
+
+  it('should block removal when a conflicting policy appears on a later fetchAllItems page', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy1',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
+    // Page 1: only the target policy. Page 2: a conflicting policy using the same dataset.
+    // If the handler stopped after the first page it would miss the conflict and incorrectly
+    // allow deletion.
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [packagePolicy1];
+        yield [
+          {
+            ...testPackagePolicy,
+            id: 'conflict-policy-page-2',
+            namespace: 'default',
+            inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
+          },
+        ];
+      })()
+    );
+
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
+    mockedIsInputPackageDatasetUsedByMultiplePolicies.mockReturnValue(true);
+
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      `Datastreams matching custom are in use by other package policies and cannot be removed`
+    );
+    expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
 });
