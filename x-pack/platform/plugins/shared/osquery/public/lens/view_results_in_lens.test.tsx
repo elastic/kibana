@@ -215,6 +215,71 @@ describe('ViewResultsInLensAction', () => {
       expect(screen.getByText('View in Lens').closest('button')).toBeDisabled();
     });
   });
+
+  describe('menuItem variant', () => {
+    it('should render as context menu item and call navigateToPrefilledEditor on click', () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId="test-action-id"
+            buttonType={ViewResultsActionButtonType.menuItem}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      const item = screen.getByText('View in Lens');
+      expect(item).toBeInTheDocument();
+
+      fireEvent.click(item);
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '',
+          time_range: expect.objectContaining({
+            from: '2025-06-15T10:00:00.000Z',
+            to: '2025-06-15T11:00:00.000Z',
+          }),
+          attributes: expect.objectContaining({
+            visualizationType: 'lnsPie',
+            title: 'Action test-action-id results',
+          }),
+        }),
+        { openInNewTab: true, skipAppLeave: true }
+      );
+    });
+
+    it('menuItem should use same navigateToPrefilledEditor config as button for identical props', () => {
+      const actionId = 'test-action-parity';
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.menuItem}
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            state: expect.objectContaining({
+              filters: expect.arrayContaining([
+                expect.objectContaining({
+                  query: { match_phrase: { action_id: actionId } },
+                }),
+              ]),
+            }),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+  });
 });
 
 describe('getLensAttributes', () => {

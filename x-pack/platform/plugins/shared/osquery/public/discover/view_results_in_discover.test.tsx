@@ -264,4 +264,82 @@ describe('ViewResultsInDiscoverAction', () => {
       });
     });
   });
+
+  describe('menuItem variant', () => {
+    it('should render as EuiContextMenuItem with same href as button variant', async () => {
+      mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/menu-url');
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-id"
+            buttonType={ViewResultsActionButtonType.menuItem}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        const link = screen.getByText('View in Discover').closest('a');
+        expect(link).toHaveAttribute('href', 'http://localhost:5601/app/discover#/menu-url');
+        expect(link).toHaveAttribute('target', '_blank');
+      });
+    });
+
+    it('menuItem should build same URL as button for identical props', async () => {
+      const resolvedUrl = 'http://localhost:5601/app/discover#/consistent-url';
+      mockGetUrl.mockResolvedValue(resolvedUrl);
+
+      const { unmount } = render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-456"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('View in Discover').closest('a')).toHaveAttribute(
+          'href',
+          resolvedUrl
+        );
+      });
+
+      unmount();
+      jest.clearAllMocks();
+      mockGetUrl.mockResolvedValue(resolvedUrl);
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-456"
+            buttonType={ViewResultsActionButtonType.menuItem}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('View in Discover').closest('a')).toHaveAttribute(
+          'href',
+          resolvedUrl
+        );
+      });
+
+      expect(mockGetUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.arrayContaining([
+            expect.objectContaining({
+              query: { match_phrase: { action_id: 'test-action-456' } },
+            }),
+          ]),
+        })
+      );
+    });
+  });
 });
