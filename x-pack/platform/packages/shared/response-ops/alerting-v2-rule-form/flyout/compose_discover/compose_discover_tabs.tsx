@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { RuleQuery } from '../../form/types';
 import type { QueryTab } from './types';
-import { MIN_EDITOR_HEIGHT } from './constants';
+import { MIN_EDITOR_HEIGHT, ESQL_EDITOR_LINE_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
+import { addPrettifyAction } from './esql_prettify_action';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
-type LineNumbersType = monaco.editor.LineNumbersType;
 
 interface ComposeDiscoverTabsProps {
   baseQuery: string;
@@ -29,6 +29,7 @@ interface ComposeDiscoverTabsProps {
   tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
    * When true, only the editor content is rendered — the tab bar is omitted.
    * Used when the parent renders tabs in the flyout header instead.
@@ -45,10 +46,8 @@ const LOCKED_EDITOR_STYLES: React.CSSProperties = {
 
 interface LockedBaseEditorProps {
   query: string;
+  dataTestSubj?: string;
 }
-
-const LOCKED_FONT_SIZE = 13;
-const LOCKED_LINE_HEIGHT = 18;
 
 const SPLIT_EDITOR_CONTAINER_STYLES: React.CSSProperties = {
   display: 'flex',
@@ -61,8 +60,19 @@ const BLOCK_EDITOR_WRAPPER_STYLES: React.CSSProperties = {
   minHeight: MIN_EDITOR_HEIGHT,
 };
 
-const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
-  const [height, setHeight] = useState(query.split('\n').length * LOCKED_LINE_HEIGHT + 4);
+const LOCKED_BASE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+  ...ESQL_CODE_EDITOR_OPTIONS,
+  // Drop bottom padding so the locked base sits flush against the block editor below.
+  padding: { top: ESQL_CODE_EDITOR_OPTIONS.padding?.top, bottom: 0 },
+  readOnly: true,
+  domReadOnly: true,
+  scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
+  renderLineHighlight: 'none',
+  overviewRulerLanes: 0,
+};
+
+const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query, dataTestSubj }) => {
+  const [height, setHeight] = useState(() => query.split('\n').length * ESQL_EDITOR_LINE_HEIGHT);
 
   const handleEditorMount = useCallback((editor: IStandaloneCodeEditor) => {
     const updateHeight = () => setHeight(editor.getContentHeight());
@@ -76,19 +86,9 @@ const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
         languageId={ESQL_LANG_ID}
         value={query}
         height={height}
-        options={{
-          readOnly: true,
-          domReadOnly: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
-          renderLineHighlight: 'none',
-          overviewRulerLanes: 0,
-          fontSize: LOCKED_FONT_SIZE,
-          lineHeight: LOCKED_LINE_HEIGHT,
-          automaticLayout: true,
-        }}
+        options={LOCKED_BASE_EDITOR_OPTIONS}
         editorDidMount={handleEditorMount}
+        dataTestSubj={dataTestSubj}
       />
     </div>
   );
@@ -101,6 +101,18 @@ interface BlockEditorProps {
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
   readOnly?: boolean;
+  /** Drop top padding so this editor sits flush against the locked base above. */
+  flushTop?: boolean;
+  dataTestSubj?: string;
+  /**
+   * Register the Prettify (Cmd/Ctrl+I) action. Only enable for complete queries
+   * (the base tab); alert/recovery blocks hold a partial fragment that can't be
+   * formatted on its own, so Prettify would be a dead no-op there.
+   *
+   * TODO: support prettifying alert/recovery fragments — e.g. format the composed
+   * `base + fragment`, then write back only the fragment portion.
+   */
+  enablePrettify?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -109,20 +121,32 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   lineNumberOffset,
   onEditorMount,
   readOnly = false,
+  flushTop = false,
+  dataTestSubj,
+  enablePrettify = false,
 }) => {
-  const options = useMemo(() => {
-    const lineNumbers: LineNumbersType | undefined =
-      lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : undefined;
-    return {
-      minimap: { enabled: false },
-      automaticLayout: true,
-      scrollBeyondLastLine: false,
-      fontSize: 13,
+  const options = useMemo(
+    (): monaco.editor.IStandaloneEditorConstructionOptions => ({
+      ...ESQL_CODE_EDITOR_OPTIONS,
       readOnly,
       domReadOnly: readOnly,
-      ...(lineNumbers && { lineNumbers }),
-    };
-  }, [lineNumberOffset, readOnly]);
+      lineNumbers: lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : 'on',
+      ...(flushTop
+        ? { padding: { top: 0, bottom: ESQL_CODE_EDITOR_OPTIONS.padding?.bottom } }
+        : {}),
+    }),
+    [lineNumberOffset, readOnly, flushTop]
+  );
+
+  const handleEditorMount = useCallback(
+    (editor: IStandaloneCodeEditor) => {
+      if (enablePrettify && !readOnly) {
+        addPrettifyAction(editor);
+      }
+      onEditorMount?.(editor);
+    },
+    [onEditorMount, readOnly, enablePrettify]
+  );
 
   return (
     <CodeEditor
@@ -131,7 +155,8 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       onChange={onChange}
       height="100%"
       options={options}
-      editorDidMount={onEditorMount}
+      editorDidMount={handleEditorMount}
+      dataTestSubj={dataTestSubj}
     />
   );
 };
@@ -261,6 +286,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
   hideTabBar = false,
   readOnly = false,
 }) => {
@@ -292,13 +318,18 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
             value={baseQuery}
             onChange={onBaseQueryChange}
             lineNumberOffset={0}
+            onEditorMount={onBaseEditorMount}
             readOnly={readOnly}
+            enablePrettify
+            dataTestSubj="composeDiscoverBlockEditor-base"
           />
         );
       case 'alert':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={alertBlock}
@@ -306,6 +337,8 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onAlertEditorMount}
                 readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
+                dataTestSubj="composeDiscoverBlockEditor-alert"
               />
             </div>
           </div>
@@ -313,7 +346,9 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
       case 'recovery':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={recoveryBlock}
@@ -321,6 +356,8 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onRecoveryEditorMount}
                 readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
+                dataTestSubj="composeDiscoverBlockEditor-recovery"
               />
             </div>
           </div>

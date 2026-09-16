@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { CPSProject } from '../../../types';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import {
@@ -26,6 +27,12 @@ const typeSecurityExpression = {
   operator: FilterOperator.EQUALS,
   tagName: '_type',
   tagValue: 'security',
+} as const;
+
+const aliasExistsExpression = {
+  operator: FilterOperator.EXISTS,
+  tagName: '_alias',
+  tagValue: undefined,
 } as const;
 
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
@@ -369,6 +376,166 @@ describe('projectPickerDerivatives', () => {
     // equality with the default can never hold — the semantic comparison must
     expect(derivedState.currentProjectRouting).toBe('_type:security AND (_id:p1 OR _id:p2)');
     expect(derivedState.isUsingSpaceDefaults).toBe(true);
+  });
+
+  it('emits PROJECT_ROUTING.ORIGIN for snapshot origin-only selection with exists `_alias`', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'snapshot',
+        defaultProjectRouting: PROJECT_ROUTING.ORIGIN,
+        filterExpressions: createFilterExpressions([[aliasExistsExpression]]),
+        filteredProjectIds: ['origin', 'p2'],
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe(PROJECT_ROUTING.ORIGIN);
+    expect(derivedState.isUsingSpaceDefaults).toBe(true);
+  });
+
+  it('emits `_id:origin` for snapshot origin-only selection with no filters', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'snapshot',
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe('_id:origin');
+  });
+
+  it('emits `_id:origin` when snapshot has only the origin project available and no filters', () => {
+    const availableProjects = new Map([['origin', createProject({ _id: 'origin' })]]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'snapshot',
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe('_id:origin');
+  });
+
+  it('emits PROJECT_ROUTING.ORIGIN for dynamic origin-only selection with exists `_alias`', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'dynamic',
+        filterExpressions: createFilterExpressions([[aliasExistsExpression]]),
+        filteredProjectIds: ['origin', 'p2'],
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe(PROJECT_ROUTING.ORIGIN);
+  });
+
+  it('emits PROJECT_ROUTING.ALL for dynamic exists `_alias` with no exclusions', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'dynamic',
+        defaultProjectRouting: PROJECT_ROUTING.ALL,
+        filterExpressions: createFilterExpressions([[aliasExistsExpression]]),
+        filteredProjectIds: ['origin', 'p2'],
+        excludedOverrides: [],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin', 'p2']);
+    expect(derivedState.currentProjectRouting).toBe(PROJECT_ROUTING.ALL);
+    expect(derivedState.isUsingSpaceDefaults).toBe(true);
+  });
+
+  it('keeps snapshot filter clauses instead of collapsing origin-only selection to ORIGIN', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'snapshot',
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['origin'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe('_type:security AND _id:origin');
+  });
+
+  it('encodes an explicit snapshot id when the origin project id is unknown', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        originProjectId: undefined,
+        projectRoutingStrategy: 'snapshot',
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['p1']);
+    expect(derivedState.currentProjectRouting).toBe('_id:p1');
+  });
+
+  it('encodes dynamic origin-only selection as _id exclusions', () => {
+    const availableProjects = new Map([
+      ['origin', createProject({ _id: 'origin' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'dynamic',
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.selectedProjectIds).toEqual(['origin']);
+    expect(derivedState.currentProjectRouting).toBe('_id:* AND NOT _id:p2');
   });
 
   describe('displayedFilterExpressions / isFilterProposalPending', () => {

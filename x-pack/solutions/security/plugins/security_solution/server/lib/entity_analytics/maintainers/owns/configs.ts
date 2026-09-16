@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import {
   buildRawIdentifiersEsqlQuery,
@@ -73,7 +73,7 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
       kind: 'override',
       id: OKTA_ENTITY_SOURCE,
       name: 'Okta Entity Analytics',
-      indexPattern: getLatestEntityIndexPattern,
+      indexPattern: (namespace) => getEntitiesAlias(ENTITY_LATEST, namespace),
       targetEntityType: 'host',
       relationshipKey: RELATIONSHIP_KEY,
       customActor: { fields: ['entity.id'] },

@@ -13,6 +13,7 @@ export const MonitorSortFieldSchema = schema.maybe(
     schema.literal('enabled'),
     schema.literal('status'),
     schema.literal('updated_at'),
+    schema.literal('created_at'),
     schema.literal('urls'),
     schema.literal(`${ConfigKey.NAME}.keyword`),
     schema.literal(`${ConfigKey.TAGS}.keyword`),
@@ -24,3 +25,15 @@ export const MonitorSortFieldSchema = schema.maybe(
 );
 
 export type MonitorListSortField = TypeOf<typeof MonitorSortFieldSchema>;
+
+/** Sort fields the overview status route actually applies in `sortConfigs`. */
+export const OverviewStatusSortFieldSchema = schema.maybe(
+  schema.oneOf([
+    schema.literal('status'),
+    schema.literal('updated_at'),
+    schema.literal('created_at'),
+    schema.literal('urls'),
+    schema.literal(`${ConfigKey.NAME}.keyword`),
+    schema.literal(`${ConfigKey.MONITOR_TYPE}.keyword`),
+  ])
+);

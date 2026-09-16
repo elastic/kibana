@@ -97,6 +97,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Discovery ──────────────────────────────────────────────────────────────
     getMe: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve details about the currently authenticated Microsoft account, including display ' +
         'name, email address, and user ID. Use this to confirm authentication is working and to ' +
@@ -112,6 +113,7 @@ export const OneDrive: ConnectorSpec = {
 
     getDrive: {
       isTool: true,
+      scope: 'read',
       description:
         "Retrieve metadata about the authenticated user's personal OneDrive, including quota " +
         'information (used space and total capacity), drive ID, and owner details. Use this to ' +
@@ -128,6 +130,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Browse ─────────────────────────────────────────────────────────────────
     getItemChildren: {
       isTool: true,
+      scope: 'read',
       description:
         'List the files and subfolders within a OneDrive folder. Pass an empty string or omit ' +
         'itemId to list the root of the drive. Use the item IDs returned here with getFileMetadata ' +
@@ -154,6 +157,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Search ─────────────────────────────────────────────────────────────────
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for files and folders in OneDrive by keyword. Searches across file names and ' +
         'content. Returns matching items with IDs, names, paths, and metadata. Use this as the ' +
@@ -181,6 +185,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Metadata ───────────────────────────────────────────────────────────────
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a specific file or folder by its item ID. Returns name, size, ' +
         'content type, modification date, path, and a time-limited download URL. ' +
@@ -205,6 +210,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Content ────────────────────────────────────────────────────────────────
     getFileContent: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a file from OneDrive. Text files (.txt, .md, .csv, .json) are ' +
         'returned as a plain UTF-8 string. Binary files (PDFs, .docx, .xlsx, images) are returned ' +
@@ -233,6 +239,7 @@ export const OneDrive: ConnectorSpec = {
     // ── Shared ─────────────────────────────────────────────────────────────────
     listSharedWithMe: {
       isTool: true,
+      scope: 'read',
       description:
         "List files that others have shared with the authenticated user's OneDrive. " +
         'Items on external drives include a remoteItem property. To use getFileMetadata or ' +
@@ -256,6 +263,7 @@ export const OneDrive: ConnectorSpec = {
 
     listRecentFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List files the authenticated user has recently accessed or modified. ' +
         'Files on external drives include a remoteItem property. To use getFileMetadata or ' +

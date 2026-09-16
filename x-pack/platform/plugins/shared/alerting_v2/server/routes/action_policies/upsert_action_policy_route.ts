@@ -13,6 +13,7 @@ import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
   errorResponseSchema,
+  ID_MAX_LENGTH,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -28,7 +29,7 @@ import {
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const actionPolicyIdParamsSchema = z.object({
-  id: z.string().describe('The identifier for the action policy.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the action policy.'),
 });
 
 @injectable()
@@ -44,6 +45,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',

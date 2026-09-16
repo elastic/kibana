@@ -40,20 +40,21 @@ Response shape: `{ "knowledge_indicators": [...], "page": 1, "per_page": 100, "r
 Example: platform_core_execute_esql call (with required modifications applied)
 ```json
 {
-  "query": "FROM logs | WHERE @timestamp >= \"2026-07-06T20:00:00Z\" AND @timestamp <= NOW() | WHERE body.text : \"failed to charge card\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
+  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
+  "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```
 Response when rows found:
 ```json
 {
-  "columns": [{ "name": "@timestamp" }, { "name": "body.text" }],
-  "values": [["2026-07-06T20:01:12Z", "Error: ..."]]
+  "columns": [{ "name": "<returned column>" }],
+  "values": [["<timestamp>", "<matching row>"]]
 }
 ```
 Response when empty:
 ```json
 {
-  "columns": [{ "name": "@timestamp" }, { "name": "body.text" }],
+  "columns": [{ "name": "<returned column>" }],
   "values": []
 }
 ```
@@ -88,7 +89,7 @@ For each match retain **correlation context**:
 - **For `kind: "query"`**: `description` and `evidence[]` define the expected incident mechanism, `features[]` references identify feature KIs.
 - **For `kind: "feature"`**: `properties` are stable identity and topology facts. `evidence[]` supports hypotheses. `meta` contains diagnostic hints, not current-state proof. `title`, `subtype`, and `tags[]` and classify context.
 
-This context may support or reject an incident match when rows are sparse. Detections with NO_MATCH do not proceed through Steps 3–5; emit a quiet signal entry for each with `verdict: "not_checked"` (omit `collected_at` and `evidence`). Set `description` to a plain-language summary using `rule_name` — never the UUID mapping notation. Example: `"<rule_name>: no backed query KI matched this detection."`.
+This context may support or reject an incident match when rows are sparse. Detections with NO_MATCH do not proceed through Steps 3–5: do **not** invent a query, and do **not** call `platform_core_execute_esql` for them. Emit a quiet signal entry for each with `verdict: "not_checked"` (omit `collected_at` and `evidence`). Set `description` to a plain-language summary using `rule_name` — never the UUID mapping notation. Example: `"<rule_name>: no backed query KI matched this detection."`. Empty invented success-log samples are invalid here; the verdict is `not_checked`, not `inconclusive`.
 
 ---
 
@@ -98,54 +99,100 @@ Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In on
 
 **Required modifications before executing every query:**
 1. Remove `METADATA _id, _source`.
-2. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp ASC | LIMIT 1`.
-   - Text field: ONLY `body.text` (OTel Semconv) or `message` (ECS). Try `body.text` first; fall back to `message` on empty.
-   - Never project other fields — unmapped columns cause `Unknown column` errors.
-   - Aggregation queries (have `STATS`/`BY`): execute as-is — no projection.
+2. Row-level queries preserve the authored KI shape. Never append or force a `KEEP` projection, and never choose a text field. When the KI contains an authored projection, leave it unchanged; otherwise append only `| SORT @timestamp ASC | LIMIT 5`, so the bounded raw sample returns its native columns and values. If an existing KI limit is stricter, retain that lower limit.
+   - Aggregation queries (have `STATS`/`BY`): keep the aggregation and bound the response with `| LIMIT 2`; do not add a row projection.
    - `ASC` returns the earliest matching log — onset evidence for root-cause hypothesis.
-   - **Executed form vs. stored form**: the projection tail (`| KEEP ... | SORT ... | LIMIT 1`) is the *executed* form only — it MUST NOT be stored in `evidence.esql_query`. Derive `evidence.esql_query` by applying only Step 1 (remove `METADATA`) and Step 3 (insert time-scoping `WHERE`) to the original KI query — never copy the tool result's `data.esql` value (it already contains the post-tail interpolated form). For aggregation queries (`STATS`/`BY`), no projection tail is ever appended, so the stored form equals the executed form. This rule applies to both primary queries and contradiction follow-up calls.
-3. Time scoping: insert `| WHERE @timestamp >= "<detection @timestamp>" AND @timestamp <= NOW()` immediately after `FROM` **for execution**. The lower bound MUST be an absolute ISO-8601 string copied directly from the detection doc (e.g. `"2026-06-11T15:03:00Z"`). Source: the `@timestamp` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `@timestamp` in the batch. **Never use any relative time expression** — `"now-15m"`, `NOW() - 15 minutes`, or any other form. Skip for `ROW`/`SHOW`/`METRICS` queries.
-   - **Upper bound in the stored form**: `NOW()` is a live function and must not appear in `evidence.esql_query`. Replace it with the same absolute ISO-8601 string written to `collected_at` (or the current wall-clock ISO string when `collected_at` is absent) so the stored query records the window that was actually evaluated.
+   - **Executed form vs. stored form**: ordering and limit are executed only and must not be stored in `evidence.esql_query`. Preserve any original KI projection in the stored query, with `METADATA` removed and the required `?_tstart`/`?_tend` predicate; never copy the tool result's rewritten query.
+3. **Mandatory time scope:** insert `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` immediately after `FROM` and pass a matching `time_range`. Placeholders bind only that argument; omitting it falls back to screen context or the last 24 hours. Let `t` be the detection `@timestamp`. Discovery runs at or just after the change point: there is no future data, so `to` is always `now`, never `t+15m` or `t+60m`. Primary sample: `{ "from": "t-15m", "to": "now" }` so `ASC LIMIT 5` is the onset of the elapsed neighborhood. Rate aggregate: `{ "from": "t-60m", "to": "now" }`. Absent, mismatched, or unapplied range → `inconclusive`. Skip `ROW`/`SHOW`/`METRICS`.
 4. **Never** modify `WHERE` clauses, field names, or `FROM`. This can lead to unnecessary errors. Skip the query on execution failure.
 5. If the KI's `query.esql.query` starts with `FROM $.<name>`, the `$.` is a required, literal part of the Streams-backed view reference — copy it verbatim, never strip or "correct" it.
 
-```
 KI query (original):
-  FROM logs.* METADATA _id, _source | WHERE body.text : "ECONNREFUSED" | LIMIT 1
+  FROM <source> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
 
-Executed form (sent to platform_core_execute_esql — Steps 1+2+3 applied, upper bound = NOW()):
-  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1
-
-Stored form (written to evidence.esql_query — Steps 1+3 only, NO projection tail, upper bound = absolute collected_at):
-  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= "2026-06-11T15:10:00.000Z" | WHERE body.text : "ECONNREFUSED"
+Executed form (sent to platform_core_execute_esql):
+```json
+{
+  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
+  "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
+}
 ```
 
-**Budget — exactly 1 call per matched rule.** Every rule with a matched backed query KI gets exactly 1 confirmation call. Never skip a rule's query based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional. Do not run contradiction follow-ups, retries, or a third wave. Note any checks skipped because the budget was exhausted in `summary`.
+Stored form (written to evidence.esql_query — no executed ordering/limit tail):
+```json
+{
+  "esql_query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate>",
+  "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
+}
+```
+
+**Rate-evidence budget:** follow the section below. Health/success, aggregation, unmatched, refuting, and off-topic paths stay one call. Do not leave grounding, search existing events, or write events while any eligible on-topic failure KI still lacks its rate aggregate.
 
 **Deduplication before executing:**
-- Identical query bodies (after METADATA stripped and KEEP/SORT/LIMIT appended): execute once, write 1 `signals` entry per KI.
+- Identical query bodies (after `METADATA` stripped and the bounded sample tail applied): execute once, write 1 `signals` entry per KI.
 - Strict subset WHERE: execute only the more permissive query; write entries for both KIs.
+
+### Rate evidence
+
+A matching sample proves the authored mechanism is present. It does not prove the rate is newly elevated. Both are required for `confirms`. Do not use a single percentage or a 100-row floor — those mute high-volume streams and miss first-onset.
+
+1. Run the aggregate only after a backed, failure-oriented, row-level sample is on-topic and unambiguous. Otherwise keep the sample verdict (`refutes` / `off_topic` / `inconclusive`) and stop. When those conditions hold the aggregate is mandatory — never skip it; without rate evidence the verdict stays `inconclusive`, never `confirms`. Dispatch discipline: after the sample wave returns, collect every KI whose sample is an on-topic failure and dispatch all of their rate aggregates together as the next parallel wave (same wave rules as Step 3). Count before dispatching: the wave must contain exactly one aggregate per distinct on-topic failure predicate — an older-looking sample does not exempt its KI; the aggregate is what decides whether the pattern is current. Grounding is incomplete while any such KI lacks an executed aggregate.
+2. Budget: one sample (Step 3) plus at most one aggregate. No schema probe, retry, or second aggregate.
+3. Keep the KI `FROM` and predicates. Replace the row tail with:
+
+```json
+{
+  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | EVAL rate_bucket = CASE(@timestamp < \"<detection @timestamp>\", \"pre\", \"post\") | STATS matching_rows = COUNT(*) BY rate_bucket | LIMIT 2",
+  "time_range": { "from": "<detection @timestamp - 60m>", "to": "now" }
+}
+```
+
+   `CASE` puts `@timestamp < t` in pre and `@timestamp >= t` in post, matching `>= ?_tstart AND < ?_tend`. Pre is `t-60m <= @timestamp < t`; post is `t <= @timestamp < now`. The instant `t` is counted once (post). The window is verbatim: `from` is exactly `t-60m` and `to` is `now` — never widen the window and never start it at `t` (that empties the pre bucket by construction); a self-chosen window is a mismatched range → `inconclusive`. Do not set `to` to `t+60m` (or any time after now): that window has not elapsed at discovery.
+
+   Pre is a 60-minute bucket; post is often shorter (`now - t`). Raw counts are not comparable across those windows, and the sample query's 15-minute window is not a rate denominator. Compute:
+
+   1. `pre_minutes` = 60 when `from` is `t-60m` and that lookback has elapsed.
+   2. `post_minutes` = elapsed minutes from `t` to `now` (the aggregate `to`).
+   3. `pre_rate` = pre `matching_rows` / `pre_minutes`. A missing `pre` bucket is 0 rows (first-onset input).
+   4. `post_rate` = post `matching_rows` / `post_minutes`.
+
+   If elapsed post is unknown or ~0, rate evidence cannot show elevation → `inconclusive`. Never `MIN`/`MAX(@timestamp)`.
+
+   Example: the aggregate returns `[240, "pre"], [120, "post"]` and `t` is 30 minutes before `now`.
+   - Intended: `240/60 = 4/min` and `120/30 = 4/min` → similar rates → `inconclusive`.
+   - Avoided: `120` vs `240` as a drop, or `120/15 = 8/min` vs `4/min` as a doubling.
+
+   If the sample already returned one aggregatable identity column (keyword values present; not a guessed field and not a text mapping), group with filtered aggregates instead of the `EVAL`/`CASE` tail so each entity's pre and post counts arrive paired on one row: `| STATS pre_rows = COUNT(*) WHERE @timestamp < "<detection @timestamp>", post_rows = COUNT(*) WHERE @timestamp >= "<detection @timestamp>" BY <identity column> | SORT post_rows DESC | LIMIT 20`. The global total is the sum of the returned groups; treat groups cut by the limit as unknown, not zero. Do not invent `host.name` or other fields. A mapping or aggregation error → `inconclusive`, no retry.
+4. Judge volume, not a fixed lift:
+   - **Large counts** (hundreds to tens of thousands): single-digit percent is background. Confirm only a clear step-up (tens of percent), at global level or on a grouped entity from step 3.
+   - **First-onset:** near-empty pre and sustained post mass with an on-topic sample is elevation. Empty pre is not a veto. An absent `pre` row (or `pre_rows = 0`) means the pre count is zero — treat it as first-onset input, never as a missing bucket. A KI-filtered aggregate that returns only `post` is that shape: matching pre count is 0, not “baseline unmeasurable.” Do not infer index coverage from a matching-only aggregate. Unmeasurable coverage applies only when there is evidence the stream had **no documents of any kind** before `t`; without that evidence, apply first-onset.
+   - **Tiny counts** (ones or tens on both sides): ignore percent (2 vs 8 is noise) → `inconclusive`. Tiny-counts applies only when the post rate is comparable to the pre rate; a near-zero pre with a clearly higher post rate is first-onset.
+   - **Tool error, unapplied range, missing `post` bucket, or unknown duration → `inconclusive`.** A missing `pre` bucket is NOT in this list — absent pre means first-onset (zero pre count); apply the first-onset rule above, not `inconclusive`. Confusing missing pre with missing post is the most common verdict error.
+   - A flat global total with one grouped entity that is clearly elevated → `confirms`. A flat global and flat groups → `inconclusive`.
 
 ---
 
 ### Step 4: Record Signal Verdicts
 
-**One `signals` entry per rule — never two**, regardless of how many calls you made for it. When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call. In both primary and follow-up calls, `evidence.esql_query` stores the pre-tail form (Steps 1+3 only — no grounding `| KEEP @timestamp` projection tail); never copy `data.esql` from the tool result. Each signal entry combines the detection metadata and the query result into one object. See `<output_format>` for the exact format.
+**One `signals` entry per rule — never two**, regardless of how many calls you made for it. When an eligible rate aggregation ran, the single entry narrates both the supporting sample and pre/post rate evidence; its `evidence.esql_query`/`evidence.result` reflect the aggregate — stored verbatim including its `EVAL`/`STATS` and the literal detection timestamp, with only the trailing `SORT`/`LIMIT` removed. In both calls, `evidence.esql_query` stores the reader-facing query rather than copying `data.esql` from the tool result. Each signal entry combines detection metadata and query result. See `<output_format>` for the exact format.
 
 1. **Write the Signal Description** using the compact **Found / Impact** format (keep under 350 chars). **Found** names the concrete row signature and failing target from the query result without reproducing raw sensitive values; refer to sensitive field names and exposure type only. Never say only that rows were returned. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only. The structured `verdict` carries the conclusion. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first; never omit Impact on `confirms`. Concretely:
    - **Confirms**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked."`
+   - **Inconclusive (background rate)**: `"Found: matching failure logs at similar pre/post rates (~N/min). Impact: not a newly elevated failure."` Never use outage Impact on rate-flat `inconclusive`.
    - **Off-topic (signature mismatch)**: `"Found: upstream API error, not a metrics export failure. Impact: unrelated to metrics export."`
    - **Off-topic match**: `"Found: different service/failure; substring match only."`
    - **Inconclusive (no match)**: `"Found: no match."`
    - **Refutes (healthy rows)**: `"Found: healthy transaction log, no error signature. Impact: none."`
 
-   `result: found` means a row was returned — it does **not** mean the hypothesis is confirmed. Healthy rows use `refutes`; a genuinely returned row that does not address the authored hypothesis uses `off_topic`. Empty or errored evidence uses `inconclusive`; never assign `off_topic` without a returned row. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`.
+   `result: found` means a row was returned — it does **not** mean the hypothesis is confirmed. Healthy rows use `refutes`; a genuinely returned row that does not address the authored hypothesis uses `off_topic`. Empty or errored evidence uses `inconclusive`; never assign `off_topic` without a returned row. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. When the KI names alternatives (for example, service A **or** service B, or error signature A **or** signature B), a row matching any one documented alternative is on-topic; set `confirms` when it directly supports that alternative's failure or degradation. Use `off_topic` only when it matches none of them.
 
 2. **Set `verdict` from the row content and result**:
-   - `confirms` only for a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
+   - **Completeness gate first:** list every row-level failure KI whose sample was on-topic; each must have an executed rate aggregate in your context. If any is missing, return to the Rate evidence step and run the missing aggregates now — do not record verdicts yet. `confirms` from sample rows alone and any rate-based reasoning ("no elevation", "background rate", "not newly elevated") without an executed aggregate are both invalid.
+   - For an eligible row-level failure KI, a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade is `confirms` **only** after its rate evidence meets the policy above. The error signature in the found row is itself the mechanism — do not require a separate independent confirmation of the dependency path on top of a clearly on-topic error row. Otherwise it is `inconclusive`.
+   - Aggregation KIs retain their existing behavior: `confirms` only for a found result that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
    - `refutes` for successful healthy, positive, or no-failure found rows.
    - `off_topic` for a found row that does not address the authored rule hypothesis.
-   - `inconclusive` for empty or errored evidence when a query ran. It cannot establish a mechanism, impact, or severity tier.
+   - `inconclusive` for empty or errored evidence when a query ran, and for on-topic found rows whose rate evidence does not show new elevation (rate-flat, tiny counts, or missing/unusable rate evidence). It cannot establish a mechanism, impact, or severity tier. An event whose signals are all `inconclusive` or weaker must not be written `open` at `60-high` or above, and per Step 5 emits empty `causal_features` and `blast_radius`.
    - `not_checked` only when no backed query KI exists.
    - When an off-topic found row contains a concrete non-benign error, preserve only a redacted signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
 
@@ -154,8 +201,8 @@ Stored form (written to evidence.esql_query — Steps 1+3 only, NO projection ta
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI search.
 
 1. **Correlate signal verdicts and create active paths.** Review every `signals` entry with its `verdict`. Only `confirms` signals can establish an active path. If no signal has verdict `confirms`, emit empty `causal_features` and `blast_radius` and skip the remaining sub-steps. For each confirming signal, apply this order:
-   - Match the failed service or component named by the signal's found row to a fetched dependency's `source`.
-   - If that dependency's fetched `evidence`, `description`, or `meta` documents a connection, timeout, refusal, or protocol failure, activate the dependency path even when the current row does not repeat the dependency target and even when the dependency is absent from `query.features[]`.
+   - Match the failed service or component named by the signal's found row to a fetched dependency's `source`. A matching dependency `target`, shared technology, or another signal's affected service does not activate that path.
+   - Only after that source match, if the dependency's fetched `evidence`, `description`, or `meta` documents a connection, timeout, refusal, or protocol failure, activate the dependency path even when the current row does not repeat the dependency target and even when the dependency is absent from `query.features[]`.
    - Resolve the dependency's `target` to fetched entity or infrastructure KIs by feature ID, `properties.name`, or stable identity properties such as `technology`. Use the dependency's authored fields and the candidate's attribution metadata to disambiguate; technology alone is insufficient when multiple candidates match.
    - Correlate activated paths across all confirming signals in the batch before assigning fields.
    - Treat the resulting active paths as the authoritative grounding output. Preserve every grounded dependency edge that belongs to an active path; do not reduce the output to only the edges named directly in the current log row.
@@ -163,17 +210,19 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
    Example: a confirming signal identifies `service-a` as unable to connect to a database; a fetched dependency has `source: service-a`, `target: sql`, and connection-timeout evidence; and one fetched entity has `name: orders-db`, `technology: sql`, with metadata attributing it to `service-a`. Activate the path, select `orders-db` as causal, and retain the dependency as blast radius. If multiple entities match `sql` without attribution, select no target and use `service-a` as the causal fallback.
 2. **Build `causal_features`.** Add the entity or infrastructure that a confirming signal's found row identifies as failed. Otherwise, for an activated dependency path with a confirmed source match, add the uniquely attributed fetched target. If no target entity or infrastructure KI resolves, add the activated path's fetched source instead. Do not invent missing targets.
 3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source entity when the active path's signal shows that source is affected and it is not already in `causal_features`, and add any other affected entity or infrastructure component only when a confirming signal's found row shows that impact. A `causal_features` entry cannot also appear in `blast_radius`. Use:
-   - cause: `{ feature_id, name, stream_name? }`
-   - dependency: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`
-   - entity: `{ type: "entity", feature_id, name, stream_name? }`
-   - infrastructure: `{ type: "infrastructure", feature_id, title?, workloads, stream_name? }`
+   - cause: `{ feature_id, type, subtype, name, stream_name? }`
+   - dependency: `{ type: "dependency", subtype, feature_id, source, target, protocol?, stream_name? }`
+   - entity: `{ type: "entity", subtype, feature_id, name, stream_name? }`
+   - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, stream_name? }`
+
+   Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label shown above.
 4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and `not_checked` may inform narrative assessment but cannot establish active topology.
 
 </procedure>
 
 <output_format>
 
-**signals** — always emit; one entry per detection rule — every rule that ran `platform_core_execute_esql` plus every "no confirming query available" rule. `[]` only when no ES|QL calls were made and no rules were active. Never emit two entries for the same rule; each entry reflects the one confirmation query.
+**signals** — always emit; one entry per detection rule — every rule that ran `platform_core_execute_esql` plus every "no confirming query available" rule. `[]` only when no ES|QL calls were made and no rules were active. Never emit two entries for the same rule; each entry reflects its bounded sample and, when eligible, its conditional aggregate.
 
 Each entry:
 - `type`: always `"detection"`
@@ -181,7 +230,7 @@ Each entry:
 - `description`: Signal Verdict narrative; never include raw sensitive values from the query row
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
-- `evidence`: `{ esql_query, result }` for the one confirmation query; omit for quiet rules. `esql_query` is the stored reader-facing form (time-scoped with absolute timestamps; must not include the grounding `| KEEP @timestamp` projection tail or `NOW()`; aggregation `SORT`/`LIMIT` from the KI query may remain). `result`: `"found"` | `"empty"` | `"error"`
+- `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet rules. `esql_query` retains `?_tstart` / `?_tend` and any original KI projection, but omits executed ordering and limit tails. `time_range` is the absolute `{ from, to }` window bound at execution — always record it; without it a placeholder query cannot be interpreted. `result`: `"found"` | `"empty"` | `"error"`
 - `metadata`: detection input
 - `causal_features`: array with Causal Features entries; emit `[]` when empty
 - `blast_radius`: array with Blast Radius entries, emit [] when empty

@@ -77,8 +77,10 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     await browseIntegrations.navigateTo();
     await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
+    // Nginx is grouped into a collection tile when enableIntegrationCollectionTiles is on,
+    // so searching for it surfaces the collection card rather than individual epr cards.
     await browseIntegrations.searchForIntegration('nginx');
 
-    await browseIntegrations.expectIntegrationCardToBeVisible('nginx');
+    await browseIntegrations.expectCollectionCardToBeVisible('nginx');
   });
 });

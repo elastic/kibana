@@ -19,7 +19,7 @@ import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
-import { smlIndexName } from './services/sml/sml_storage';
+import { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 import {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,
@@ -94,10 +94,7 @@ export class AgentBuilderSmlPlugin
     });
 
     setupDeps.contextEngine?.registerAiIndex(agentBuilderDefaultAiIndexId, {
-      description:
-        'Kibana resources available for use in Agent Builder, including dashboards, ' +
-        'visualizations, connectors, workflows, alerting rules, action policies, ' +
-        'and significant events.',
+      description: smlAiIndexDescription,
       dest: { type: 'index', value: smlIndexName },
       automations: [],
       sources: [],

@@ -43,7 +43,7 @@ export interface ProjectPickerStoredState {
   controlsState: ProjectPickerControlsState;
   originProjectId?: string;
   defaultProjectRouting: ProjectRouting;
-  projectRoutingStrategy: ProjectRoutingStrategy;
+  projectRoutingStrategy: Omit<ProjectRoutingStrategy, 'unknown'>;
   /**
    * True once the user has changed filter or selection state through a public action.
    * Sticky for the lifetime of the store; internal (underscore-prefixed) reducers never set it.

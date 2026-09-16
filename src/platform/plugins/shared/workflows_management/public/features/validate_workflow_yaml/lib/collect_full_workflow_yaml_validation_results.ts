@@ -26,8 +26,13 @@ import type { GetStepPropertyHandler } from '../../../widgets/workflow_yaml_edit
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import type { YamlValidationResult } from '../model/types';
 
+export type ConnectorTypesValidationState =
+  | { status: 'loading' }
+  | { status: 'ready'; value: Record<string, ConnectorTypeInfo> }
+  | { status: 'failed'; error: string };
+
 export interface WorkflowYamlValidationContext {
-  connectorTypes: Record<string, ConnectorTypeInfo> | null;
+  connectorTypes: ConnectorTypesValidationState;
   connectorsManagementUrl: string;
   workflows: WorkflowsResponse | null;
   getPropertyHandler: GetStepPropertyHandler;
@@ -86,10 +91,12 @@ export async function collectFullWorkflowYamlValidationResults({
     workflowDefinition,
   });
 
-  results.push(
-    ...validateConnectorIds(connectorIdItems, connectorTypes, connectorsManagementUrl),
-    ...validateGraphBuild(graphBuildError, workflowLookup, lineCounter)
-  );
+  if (connectorTypes.status === 'ready') {
+    results.push(
+      ...validateConnectorIds(connectorIdItems, connectorTypes.value, connectorsManagementUrl)
+    );
+  }
+  results.push(...validateGraphBuild(graphBuildError, workflowLookup, lineCounter));
 
   if (stepPropertyItems.length > 0) {
     results.push(...(await validateStepProperties(stepPropertyItems)));

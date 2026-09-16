@@ -127,7 +127,7 @@ export function LogoIcon({
       <EuiAvatar
         color={color}
         iconType={resolvedIconType}
-        name="logoIcon"
+        name=""
         size={size}
         type={avatarType}
         className={className}

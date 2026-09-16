@@ -13,6 +13,10 @@ import { IMPORT_METHOD_DLM, IMPORT_METHOD_ILM } from './constants';
 import { ImportLifecycleFlyout } from './import_lifecycle_flyout';
 import type { ImportLifecycleOption } from './types';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 const options: ImportLifecycleOption[] = [
   {
     name: 'ilm-with-downsampling',

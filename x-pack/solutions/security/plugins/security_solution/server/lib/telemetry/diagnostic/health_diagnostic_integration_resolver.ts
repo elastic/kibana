@@ -10,9 +10,8 @@ import type { PackageService } from '@kbn/fleet-plugin/server';
 import {
   QueryType,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
-  type HealthDiagnosticQueryV3,
+  type IndexQuery,
+  type ApiQuery,
   type ApiExecutableQuery,
   type ExecutableQuery,
   type SkippedQuery,
@@ -30,11 +29,10 @@ export class IntegrationResolverImpl implements IntegrationResolver {
   async resolve(queries: HealthDiagnosticQuery[]): Promise<ResolvedQuery[]> {
     const needsFleet = queries.some(
       (q) =>
-        ('version' in q && q.version === 2 && !(q as HealthDiagnosticQueryV2).index) ||
-        ('version' in q &&
-          q.version === 3 &&
-          (q as HealthDiagnosticQueryV3).type === 'API' &&
-          (q as HealthDiagnosticQueryV3).integrations?.length)
+        'kind' in q &&
+        (q.kind === 'index' || q.kind === 'api') &&
+        (q as IndexQuery | ApiQuery).integrations !== undefined &&
+        ((q as IndexQuery | ApiQuery).integrations ?? []).length > 0
     );
     let installedPackages: InstalledPackage[] = [];
     let fleetUnavailable = false;
@@ -57,27 +55,25 @@ export class IntegrationResolverImpl implements IntegrationResolver {
 
     const resolved = await Promise.all(
       queries.map(async (query): Promise<ResolvedQuery[]> => {
-        if ('version' in query && query.version === 1) {
-          return [this.resolveV1(query)];
-        } else if ('version' in query && query.version === 2) {
-          // skip ESQL queries with FROM clause since either `integrations` or `index` specify on
-          // which indices or datastreams run the query.
+        if (!('kind' in query)) {
+          return [this.resolveUnknown(query)];
+        }
+        if (query.kind === 'index') {
           if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
             return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
           }
-          if ((query as HealthDiagnosticQueryV2).index) {
-            // index-based v2: resolve directly, no Fleet needed
+          if (query.index) {
             return [{ kind: 'executable', query } as ExecutableQuery];
           }
           if (fleetUnavailable) {
             return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
           }
-          return this.resolveV2(query as HealthDiagnosticQueryV2, installedPackages);
-        } else if ('version' in query && query.version === 3 && query.type === 'API') {
+          return this.resolveIndexWithIntegrations(query, installedPackages);
+        } else if (query.kind === 'api') {
           if (fleetUnavailable && query.integrations && query.integrations.length > 0) {
             return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
           }
-          return [await this.resolveV3(query, installedPackages)];
+          return [await this.resolveApi(query, installedPackages)];
         } else {
           return [this.resolveUnknown(query)];
         }
@@ -86,12 +82,8 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     return resolved.flat();
   }
 
-  private resolveV1(query: HealthDiagnosticQueryV1): ExecutableQuery {
-    return { kind: 'executable', query };
-  }
-
-  private resolveV2(
-    query: HealthDiagnosticQueryV2,
+  private resolveIndexWithIntegrations(
+    query: IndexQuery,
     installedPackages: InstalledPackage[]
   ): ResolvedQuery[] {
     const { integrations: patterns, datastreamTypes: typePatterns } = query;
@@ -152,8 +144,8 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     return { kind: 'skipped', query, reason: 'parse_failure' };
   }
 
-  private resolveV3(
-    query: HealthDiagnosticQueryV3,
+  private resolveApi(
+    query: ApiQuery,
     installedPackages: InstalledPackage[]
   ): ApiExecutableQuery | SkippedQuery {
     if (!query.integrations || query.integrations.length === 0) {
@@ -169,7 +161,7 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     });
     const match = installedPackages.find((pkg) => patterns.some((re) => re.test(pkg.name)));
     if (!match) {
-      this.logger.debug('No matching integration found for v3 API query, skipping', {
+      this.logger.debug('No matching integration found for API query, skipping', {
         queryName: query.name,
       } as LogMeta);
       return { kind: 'skipped', query, reason: 'integration_not_installed' };

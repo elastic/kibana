@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Detection Watch Worker-specific settings
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AnalysisWindowDays:
+      type: integer
+      minimum: 1
+      maximum: 30
+      description: >-
+        How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
+        analysis_window_days input.
+
+    RuleTuningWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch.
+        Sent whole on write; a replacement missing a field is rejected.
+      required:
+        - analysisWindowDays
+      properties:
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'

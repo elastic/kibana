@@ -6,10 +6,13 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControlInput,
   ConversationListOptions,
-  ConversationWithoutRounds,
+  ConversationSearchOptions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+  ConversationListResult,
+  MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 
 /**
@@ -24,22 +27,39 @@ export interface ConversationCreatePublicRequest {
   title?: string;
   /** Defaults to `{ access_mode: 'private', entries: [] }`. */
   accessControl?: ConversationAccessControlInput;
+  /**
+   * Optional conversation template to apply.
+   */
+  templateId?: string;
+  /**
+   * Initial metadata values. Requires `templateId`.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
 }
 
 /**
- * A conversation client exposing get, list, and create operations.
+ * A conversation client exposing get, bulk get, list, search, and create operations.
  */
 export interface ConversationPublicClient {
   /**
    * Retrieve a single conversation by its ID, including all rounds.
    */
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
+  /**
+   * Retrieve several conversations by ID in one request, without their rounds.
+   */
+  bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  /**
+   * Search the conversations readable by the current user, by free-text title query, by KQL
+   * filter, or both.
+   */
+  search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */
-  create(request: ConversationCreatePublicRequest): Promise<Conversation>;
+  create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
 }

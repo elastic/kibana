@@ -25,6 +25,8 @@ export type { DashboardStart, DashboardSetup } from './plugin';
 export type { DashboardListingTab } from './dashboard_listing/types';
 export { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 export type { OpenDashboardChatActionContext } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
+export { PRETTIFY_DASHBOARD_ACTION_ID } from './dashboard_app/prettify/prettify_dashboard_action';
+export type { PrettifyDashboardActionContext } from './dashboard_app/prettify/prettify_dashboard_action';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';

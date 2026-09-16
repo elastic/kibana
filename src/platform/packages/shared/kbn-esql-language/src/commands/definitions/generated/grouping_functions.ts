@@ -48,17 +48,17 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'date',
@@ -69,36 +69,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date',
@@ -109,156 +109,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'keyword',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'text',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date',
@@ -269,36 +149,76 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
-          type: 'text',
+          type: 'date',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date',
@@ -309,76 +229,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'text',
+          type: 'keyword',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'text',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date',
@@ -389,36 +269,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'text',
+          type: 'keyword',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date',
@@ -429,17 +309,497 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'date',
@@ -450,17 +810,17 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'date_nanos',
@@ -471,36 +831,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -511,36 +871,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -551,36 +911,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'date',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -591,36 +951,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -631,36 +991,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -671,36 +1031,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -711,36 +1071,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'date',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -751,36 +1111,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -791,36 +1151,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'text',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'text',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'date_nanos',
@@ -831,17 +1191,377 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'date_nanos',
@@ -852,17 +1572,17 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'double',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'double',
@@ -873,17 +1593,17 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'double',
@@ -894,36 +1614,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -934,36 +1654,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -974,76 +1694,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
       ],
       returnType: 'double',
@@ -1054,36 +1734,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
-          type: 'integer',
+          type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1094,36 +1774,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1134,76 +1814,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
-          type: 'double',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
           type: 'long',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
       ],
       returnType: 'double',
@@ -1214,36 +1854,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
-          type: 'long',
+          type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1254,17 +1894,36 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1273,503 +1932,503 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'double',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
-      returnType: 'double',
+      returnType: 'double_range',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'exponential_histogram',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'long',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'long',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'double',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'double',
@@ -1778,118 +2437,59 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
           type: 'double',
           optional: false,
+          hint: {
+            kind: 'constant',
+          },
           description:
             'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
-          hint: {
-            kind: 'constant',
-          },
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
-          hint: {
-            kind: 'constant',
-          },
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1898,38 +2498,38 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'integer',
+          type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1938,38 +2538,38 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'integer',
+          type: 'double',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -1978,38 +2578,38 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'double',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -2018,38 +2618,38 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'integer',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
         },
       ],
       returnType: 'double',
@@ -2058,38 +2658,179 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
         {
           name: 'from',
-          type: 'long',
+          type: 'integer',
           optional: false,
-          description:
-            'Start of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
         },
         {
           name: 'to',
           type: 'long',
           optional: false,
-          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'double',
@@ -2100,20 +2841,845 @@ const bucketDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Numeric or date expression from which to derive buckets.',
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
         },
         {
           name: 'buckets',
           type: 'long',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double_range',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+      ],
+      returnType: 'double_range',
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
@@ -2128,6 +3694,7 @@ const bucketDefinition: FunctionDefinition = {
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)\n| SORT b1, b2\n| KEEP s1, b1, s2, b2',
     'FROM employees\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)',
+    'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime, bucket) BY bucket = BUCKET(responseTime, 1)\n| SORT RANGE_MIN(bucket)',
   ],
 };
 
@@ -2150,8 +3717,8 @@ const categorizeDefinition: FunctionDefinition = {
           description: 'Expression to categorize',
         },
       ],
-      license: 'platinum',
       returnType: 'keyword',
+      license: 'platinum',
     },
     {
       params: [
@@ -2162,8 +3729,8 @@ const categorizeDefinition: FunctionDefinition = {
           description: 'Expression to categorize',
         },
       ],
-      license: 'platinum',
       returnType: 'keyword',
+      license: 'platinum',
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
@@ -2193,11 +3760,11 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date',
@@ -2208,11 +3775,11 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date_nanos',
@@ -2223,31 +3790,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2258,31 +3825,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2293,31 +3860,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2328,31 +3895,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2363,31 +3930,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2398,31 +3965,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2433,31 +4000,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2468,31 +4035,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2503,31 +4070,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2538,31 +4105,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2573,31 +4140,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2608,31 +4175,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2643,31 +4210,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2678,31 +4245,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2713,31 +4280,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2748,31 +4315,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2783,31 +4350,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date',
@@ -2818,31 +4385,31 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
         {
           name: 'from',
           type: 'text',
           optional: true,
-          description:
-            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
         {
           name: 'to',
           type: 'text',
           optional: true,
-          description:
-            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -2853,11 +4420,11 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date',
@@ -2868,11 +4435,11 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description:
-            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date_nanos',
@@ -2905,30 +4472,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -2939,30 +4506,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -2973,30 +4540,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3007,30 +4574,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3041,30 +4608,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3075,30 +4642,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3109,30 +4676,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3143,30 +4710,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3177,30 +4744,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3211,30 +4778,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3245,30 +4812,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3279,30 +4846,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3313,30 +4880,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3347,30 +4914,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3381,30 +4948,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3415,30 +4982,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3449,30 +5016,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3483,30 +5050,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'integer',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3517,30 +5084,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3551,30 +5118,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3585,30 +5152,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3619,30 +5186,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3653,30 +5220,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3687,30 +5254,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3721,30 +5288,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3755,30 +5322,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3789,30 +5356,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3823,30 +5390,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3857,30 +5424,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3891,30 +5458,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3925,30 +5492,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -3959,30 +5526,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -3993,30 +5560,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4027,30 +5594,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4061,30 +5628,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4095,30 +5662,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'long',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4129,11 +5696,11 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
       ],
       returnType: 'date',
@@ -4144,11 +5711,11 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -4159,30 +5726,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4193,30 +5760,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4227,30 +5794,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4261,30 +5828,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4295,30 +5862,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4329,30 +5896,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4363,30 +5930,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4397,30 +5964,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4431,30 +5998,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4465,30 +6032,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4499,30 +6066,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4533,30 +6100,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4567,30 +6134,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4601,30 +6168,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4635,30 +6202,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4669,30 +6236,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'date_nanos',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',
@@ -4703,30 +6270,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date',
@@ -4737,30 +6304,30 @@ const tstepDefinition: FunctionDefinition = {
           name: 'step',
           type: 'time_duration',
           optional: false,
-          description:
-            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Fixed bucket width on a UTC grid, or a target bucket count. When a bucket count is provided, the actual step width is derived from `from` and `to` and rounded up so the target bucket count is not exceeded. TSTEP always needs a range to anchor the grid; when `from` and `to` are omitted, the range is derived from the request `@timestamp` filter.',
         },
         {
           name: 'from',
           type: 'keyword',
           optional: true,
-          description:
-            'Start of the time range that anchors the step grid. Required together with `to`.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Start of the time range that anchors the step grid. Required together with `to`.',
         },
         {
           name: 'to',
           type: 'keyword',
           optional: true,
-          description: 'End of the time range. Required together with `from`.',
           hint: {
             kind: 'constant',
           },
+          description: 'End of the time range. Required together with `from`.',
         },
       ],
       returnType: 'date_nanos',

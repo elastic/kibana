@@ -224,6 +224,7 @@ async function prepareApiKeys(
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+    refresh: false,
   });
 
   // collect generated API keys
@@ -266,12 +267,12 @@ async function updateAttributes({
     attributes.throttle ?? null
   );
 
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     attributes.tags,
     apiKeyAttributes?.uiamApiKey,
-    apiKeyAttributes?.apiKeyCreatedByUser,
     context.isServerless,
-    context.featureFlags
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted

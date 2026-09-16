@@ -367,36 +367,8 @@ export const REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE = i18n.translate(
   }
 );
 
-export const WORKFLOW_START_SUCCESS_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.toast',
-  {
-    defaultMessage: 'Workflow successfully started',
-  }
-);
-
-export const WORKFLOW_START_SUCCESS_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.button',
-  {
-    defaultMessage: 'View workflow execution',
-  }
-);
-
-export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.failed.toast',
-  {
-    defaultMessage: 'Workflow failed to start',
-  }
-);
-
 export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
-  {
-    defaultMessage: 'Run workflow',
-  }
-);
-
-export const RUN_WORKFLOW_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow.button',
   {
     defaultMessage: 'Run workflow',
   }
