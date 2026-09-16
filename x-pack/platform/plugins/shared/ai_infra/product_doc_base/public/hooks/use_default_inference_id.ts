@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { ResourceType } from '@kbn/product-doc-common';
 import type { ProductDocBasePluginStart } from '../types';
 
@@ -28,7 +29,7 @@ export function useDefaultInferenceId(
   });
 
   return {
-    inferenceId: data,
+    inferenceId: data ?? defaultInferenceEndpoints.ELSER,
     isLoading,
     isError,
   };
