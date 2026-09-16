@@ -148,7 +148,10 @@ describe('generateEsqlQuery date histogram', () => {
       if (result.success) {
         const bucketKey = 'BUCKET(order_date, 75, ?_tstart, ?_tend)';
         const bucketEntry = result.esAggsIdMap[bucketKey]?.[0];
-        expect(bucketEntry?.format).toEqual({ id: 'date', params: { pattern: 'YYYY-MM-DD HH:mm:ss' } });
+        expect(bucketEntry?.format).toEqual({
+          id: 'date',
+          params: { pattern: 'YYYY-MM-DD HH:mm:ss' },
+        });
       }
     });
 
