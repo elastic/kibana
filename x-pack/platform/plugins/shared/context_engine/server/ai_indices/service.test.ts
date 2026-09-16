@@ -216,7 +216,7 @@ describe('AiIndexService', () => {
       await service.create('customer_support', DEFAULT_SPACE, properties);
 
       expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'ai-view-customer_support',
+        name: 'v-ai-index-customer_support',
         query: [
           'FROM ai-index-ds-customer_support* METADATA _id',
           'EVAL id = COALESCE(id, _id)',
@@ -243,7 +243,7 @@ describe('AiIndexService', () => {
       });
 
       expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'ai-view-logs_app',
+        name: 'v-ai-index-logs_app',
         query: [
           'FROM ai-index-idx-logs-app',
           'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
@@ -348,7 +348,7 @@ describe('AiIndexService', () => {
       });
 
       expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'ai-view-customer_support',
+        name: 'v-ai-index-customer_support',
         query: expect.stringContaining('FROM ai-index-ds-customer_support_v2 METADATA _id'),
       });
     });
@@ -662,7 +662,7 @@ describe('AiIndexService', () => {
         }),
       });
       expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'ai-view-elastic',
+        name: 'v-ai-index-elastic',
         query: expect.stringContaining('FROM ai-index-idx-sml-data'),
       });
     });
@@ -1087,7 +1087,7 @@ describe('AiIndexService', () => {
       await service.delete('customer_support', DEFAULT_SPACE);
 
       expect(esClient.esql.deleteView).toHaveBeenCalledWith(
-        { name: 'ai-view-customer_support' },
+        { name: 'v-ai-index-customer_support' },
         { ignore: [404] }
       );
     });

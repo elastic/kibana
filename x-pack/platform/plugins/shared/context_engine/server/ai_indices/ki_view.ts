@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 
-export const KI_VIEW_PREFIX = 'ai-view-';
+export const KI_VIEW_PREFIX = 'v-ai-index-';
 
 export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_PREFIX}${aiIndexId}`;
 

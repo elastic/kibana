@@ -12,10 +12,10 @@ import { apiTest, testData } from '../fixtures';
 
 const COLLECTION = 'api/context_engine/ai_index';
 const AI_INDEX_ID = 'scout_view_ai_index';
-const VIEW_NAME = `ai-view-${AI_INDEX_ID}`;
+const VIEW_NAME = `v-ai-index-${AI_INDEX_ID}`;
 const DEST = 'ai-index-idx-scout-view';
 const DS_AI_INDEX_ID = 'scout_view_ai_index_ds';
-const DS_VIEW_NAME = `ai-view-${DS_AI_INDEX_ID}`;
+const DS_VIEW_NAME = `v-ai-index-${DS_AI_INDEX_ID}`;
 const DS_DEST = 'ai-index-ds-scout-view';
 
 const API_HEADERS = {
