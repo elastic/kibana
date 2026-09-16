@@ -85,8 +85,13 @@ describe('buildEsqlJobPayload', () => {
       'script_fields',
       'runtime_mappings',
       'indices_options',
-      'project_routing',
       'scroll_size',
     ].forEach((field) => expect(datafeed).not.toHaveProperty(field));
+  });
+
+  it('omits project routing so the datafeed searches all linked projects', () => {
+    const { datafeed: putBody } = buildEsqlJobPayload(input);
+
+    expect(putBody).not.toHaveProperty('project_routing');
   });
 });
