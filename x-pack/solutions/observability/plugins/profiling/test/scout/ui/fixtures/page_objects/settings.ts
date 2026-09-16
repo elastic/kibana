@@ -16,6 +16,7 @@ export class ProfilingSettingsPage {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
     await this.page
       .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
+      .getByText('Settings')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
