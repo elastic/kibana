@@ -17,8 +17,8 @@ allowed to use.
 | `baseline` | The default agent, which has no log-specific tool | `evals/agent` only |
 
 `evals/retrieval` executes the tool directly, so the ranking is deterministic and no model is in
-the loop. `evals/agent` goes through `converse`, which is where token cost, latency and tool
-selection become measurable.
+the loop. `evals/agent` goes through `converse`, which is where token cost, latency and answer
+quality become measurable. Each arm gets exactly one tool to isolate the retrieval comparison.
 
 ## Corpus profiles
 
@@ -88,7 +88,7 @@ relevant and a trap. Those two properties are what keep the metrics meaningful.
 | `Recall` | maximize | Over the labelled set |
 | `Hard Negatives@K` | minimize | Lexical traps in the top K |
 | `Distinct Relevant Messages@K` | maximize | The metric the parent issue's acceptance criteria use |
-| `Used Semantic Tool` | maximize | Agent arms: did the model reach for `get_logs_semantic` |
+| `Used Log Tool` | neutral | Agent arms: verifies each arm is configured correctly |
 | `Relevant Messages Cited` | maximize | Agent arms: coverage of the answer, not its quality |
 | `Input Tokens` / `Output Tokens` / `Latency` / `Tool Calls` | minimize | From `@kbn/evals` trace-based evaluators |
 

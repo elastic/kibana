@@ -203,28 +203,6 @@ export const usedLogToolEvaluator: AgentEvaluator = {
 };
 
 /**
- * Whether the agent chose the semantic tool. This is the tool selection signal
- * the parent issue calls out: the capability only lands if the model recognises
- * that a paraphrased question needs the semantic path.
- */
-export const usedSemanticToolEvaluator: AgentEvaluator = {
-  name: 'Used Semantic Tool',
-  kind: 'CODE',
-  direction: 'maximize',
-  evaluate: async ({ output }) => {
-    const semanticCall = output.steps.find((step) => step.tool_id === GET_LOGS_SEMANTIC_TOOL_ID);
-
-    return {
-      score: semanticCall ? 1 : 0,
-      label: semanticCall ? 'semantic' : 'keyword',
-      explanation: semanticCall
-        ? `semanticFilter: "${String(semanticCall.params?.semanticFilter)}"`
-        : `The agent did not call ${GET_LOGS_SEMANTIC_TOOL_ID}`,
-    };
-  },
-};
-
-/**
  * How many of the labelled relevant messages the agent's answer actually names.
  *
  * Substring matching over prose is a coverage signal, not a quality judgement:
@@ -254,6 +232,5 @@ export const createCitedRelevantMessagesEvaluator = (corpus: CorpusProfile): Age
 
 export const agentEvaluators = (corpus: CorpusProfile): AgentEvaluator[] => [
   usedLogToolEvaluator,
-  usedSemanticToolEvaluator,
   createCitedRelevantMessagesEvaluator(corpus),
 ];
