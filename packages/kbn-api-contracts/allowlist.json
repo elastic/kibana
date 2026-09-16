@@ -238,7 +238,87 @@
       "prUrl": "https://github.com/elastic/kibana/pull/286654"
     },
     {
-      "path": "/api/alerting/v2/action_policies",
+      "path": "/api/fleet/agents/bulk_migrate",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_privilege_level_change",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_reassign",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_remove_collectors",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_request_diagnostics",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_rollback",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_unenroll",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_update_agent_tags",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_upgrade",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of IDs; adding maxLength/maxSize to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+      "path": "/api/fleet/epm/packages/_bulk",
+      "method": "post",
+      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). Each item in the 'packages' array accepts a string (package name) or a package object; adding maxLength to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
+      "approvedBy": "@elastic/fleet",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/288283"
+    },
+    {
+            "path": "/api/alerting/v2/action_policies",
       "method": "post",
       "reason": "Intentional: action policy 'matcher' changed from a KQL query string to a structured object ({ tags, expression }). Alerting v2 action policies are experimental and have no external consumers.",
       "approvedBy": "@elastic/response-ops",
@@ -374,8 +454,7 @@
       "reason": "Intentional: 'rule.id' and 'rule.name' removed from the request body. Matching no longer evaluates KQL over rule fields; it intersects the rule's tags with the structured matcher's tag clause. Alerting v2 action policies are experimental and have no external consumers.",
       "approvedBy": "@elastic/response-ops",
       "oasdiffId": "request-property-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288179"
-    },
+      "prUrl": "https://github.com/elastic/kibana/pull/288179"    },
     {
       "path": "/api/detection_engine/rules",
       "method": "delete",
