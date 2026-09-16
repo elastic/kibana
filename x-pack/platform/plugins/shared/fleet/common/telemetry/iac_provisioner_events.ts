@@ -117,14 +117,19 @@ export const IAC_PROVISIONER_RENDER_FALLBACK_EVENT: EventTypeOpts<IacProvisioner
     },
   };
 
-/** Vocabulary for IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT.outcome — queried by exact string. */
+/**
+ * Vocabulary for IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT.outcome — queried by exact
+ * string. `not_checked` is the verify route's answer to `compare: false` (integration set only,
+ * no IaCP call); it is a read and never reaches the event.
+ */
 export type IacKeyVerificationOutcome =
   | 'matches'
   | 'no_key'
   | 'key_mismatch'
   | 'unsupported_provider'
   | 'no_integrations'
-  | 'key_unavailable';
+  | 'key_unavailable'
+  | 'not_checked';
 /**
  * Where the check was asked for. Derived server-side from the request: 'onboarding' when new
  * integrations are supplied (AWS onboarding, Existing Identity), 'flyout' when none are
@@ -162,7 +167,7 @@ export const IAC_PROVISIONER_KEY_VERIFICATION_COMPLETED_EVENT: EventTypeOpts<Iac
         type: 'keyword',
         _meta: {
           description:
-            "Result of comparing the stored key with the current render: 'matches'; 'no_key' (connector deployed the static template); 'key_mismatch' (deployed template differs from the current render); 'unsupported_provider' (IaCP has no blueprints for this provider); 'no_integrations' (nothing renderable attached); 'key_unavailable' (IaCP unreachable or predates the templateSha contract — failed open).",
+            "Result of comparing the stored key with the current render: 'matches'; 'no_key' (connector deployed the static template); 'key_mismatch' (deployed template differs from the current render); 'unsupported_provider' (IaCP has no blueprints for this provider); 'no_integrations' (nothing renderable attached); 'key_unavailable' (IaCP unreachable or predates the templateSha contract — failed open). 'not_checked' (compare: false, integration set only) is never reported: no comparison ran.",
         },
       },
       hasDeploymentId: {

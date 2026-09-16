@@ -16,7 +16,7 @@ export interface IacTemplateDetailsProps {
   iacDeploymentId: string;
   isDeploymentIdInvalid: boolean;
   onIacDeploymentIdChange: (value: string) => void;
-  /** Stack-level actions (Redeploy), rendered between the title and the Deployment ID field. */
+  /** Stack-level actions (the upgrade callout or Redeploy), rendered between the title and the Deployment ID field. */
   actions?: React.ReactNode;
 }
 

@@ -18,6 +18,12 @@ export interface UseVerifyIacKeyParams {
    * connector's current set only (flyout).
    */
   integrations?: RenderIacTemplateIntegration[];
+  /**
+   * False asks for the integration set only (outcome `not_checked`): no IaCP comparison, no
+   * status write. The flyout uses it on open; the daily task is what discovers upgrades
+   * (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  compare?: boolean;
   enabled: boolean;
 }
 
@@ -28,13 +34,15 @@ export const VERIFY_IAC_KEY_STALE_TIME_MS = 30_000;
 export const useVerifyIacKey = ({
   cloudConnectorId,
   integrations,
+  compare,
   enabled,
 }: UseVerifyIacKeyParams) =>
   useQuery<VerifyCloudConnectorIacKeyResponse, Error>(
-    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integrations],
+    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integrations, compare],
     async () => {
       const { data, error } = await sendVerifyCloudConnectorIacKey(cloudConnectorId as string, {
         integrations,
+        ...(compare !== undefined ? { compare } : {}),
       });
       if (error || !data) {
         throw error ?? new Error('Empty verify response');
@@ -44,10 +52,11 @@ export const useVerifyIacKey = ({
     {
       enabled: enabled && Boolean(cloudConnectorId),
       retry: false,
-      // Every check is a full render on the provisioner (artifact included), so do not re-run it
-      // just because the user came back from the CloudFormation tab: the Verify button refetches
-      // explicitly, and a changed integration set changes the query key. Seen in the 2026-09-09
-      // walkthrough: seven identical checks in forty seconds from window-focus refetches.
+      // A comparing check is a full render on the provisioner (artifact included), so do not
+      // re-run it just because the user came back from the CloudFormation tab: a changed
+      // integration set changes the query key, and the flyout re-checks explicitly after an
+      // Update. Seen in the 2026-09-09 walkthrough: seven identical checks in forty seconds from
+      // window-focus refetches.
       refetchOnWindowFocus: false,
       staleTime: VERIFY_IAC_KEY_STALE_TIME_MS,
     }

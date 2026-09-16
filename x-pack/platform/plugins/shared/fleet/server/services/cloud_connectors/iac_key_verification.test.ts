@@ -505,13 +505,99 @@ describe('verifyCloudConnectorIacKey', () => {
     expect(result).toMatchObject({ deploymentId: 'not-an-arn', region: undefined });
   });
 
+  describe('compare: false (integration set only)', () => {
+    it('returns the merged set, deployment id and region as not_checked without asking IaCP', async () => {
+      soClient.get.mockResolvedValueOnce(
+        connector({ iac_key: 'sha256:old', iac_deployment_id: STACK_ARN })
+      );
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', undefined, {
+        compare: false,
+      });
+
+      expect(result).toEqual({
+        matches: true,
+        outcome: 'not_checked',
+        deploymentId: STACK_ARN,
+        region: 'us-east-1',
+        integrations: [
+          { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+        ],
+      });
+      expect(mockedRender).not.toHaveBeenCalled();
+      expect(mockedResolve).not.toHaveBeenCalled();
+    });
+
+    it('persists nothing and reports no telemetry: it is a read', async () => {
+      soClient.get.mockResolvedValueOnce(
+        connector({ iac_key: 'sha256:old', iac_upgrade_status: 'upgrade_available' })
+      );
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1', [], { compare: false });
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(reportIacProvisionerKeyVerificationCompleted).not.toHaveBeenCalled();
+      expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
+    });
+
+    it('still merges added integrations into the returned set', async () => {
+      soClient.get.mockResolvedValueOnce(connector({}));
+
+      const result = await verifyCloudConnectorIacKey(
+        soClient,
+        'cc-1',
+        [
+          {
+            name: 'aws',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+          },
+        ],
+        { compare: false }
+      );
+
+      expect(result.integrations).toEqual([
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+            { name: 'guardduty', enabledInputs: ['aws-cloudwatch'] },
+          ],
+        },
+      ]);
+    });
+
+    it('compares by default when the option is omitted', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
+      mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', undefined, {});
+
+      expect(result.outcome).toBe('matches');
+      expect(mockedRender).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('persisting the upgrade status', () => {
     const expectStatusWritten = (status: string) => {
       expect(soClient.update).toHaveBeenCalledWith('fleet-cloud-connector', 'cc-1', {
         iac_upgrade_status: status,
-        iac_upgrade_checked_at: expect.any(String),
       });
     };
+
+    it('writes the status only, never the checked-at stamp, which belongs to the daily task', async () => {
+      // A re-check that stamped the time would make it look as if the task had just run
+      // (https://github.com/elastic/ingest-dev/issues/9415).
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
+      mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      const [, , body] = soClient.update.mock.calls[0];
+      expect(body).toEqual({ iac_upgrade_status: 'up_to_date' });
+      expect(body).not.toHaveProperty('iac_upgrade_checked_at');
+    });
 
     it('stores up_to_date when a re-check matches', async () => {
       soClient.get.mockResolvedValueOnce(

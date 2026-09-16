@@ -63,6 +63,19 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     ).not.toThrow();
   });
 
+  it('accepts compare as a boolean and rejects a non-boolean', () => {
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ compare: false })
+    ).not.toThrow();
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ compare: true, integrations: [] })
+    ).not.toThrow();
+    // schema.boolean() coerces the strings 'true'/'false'; anything else is rejected.
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ compare: 'later' })
+    ).toThrow();
+  });
+
   it('rejects a surface field: the server derives the telemetry surface from the integrations', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'onboarding' })

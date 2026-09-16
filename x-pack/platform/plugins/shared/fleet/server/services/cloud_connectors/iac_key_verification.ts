@@ -213,8 +213,11 @@ export const toUpgradeStatus = (
 
 /**
  * A re-check of the connector as it stands asks exactly what the daily upgrade task asks, so a
- * definite answer replaces the stored status instead of waiting up to a day for the task. A failed
- * write is logged and swallowed: the caller still gets its answer and the task will retry.
+ * definite answer replaces the stored status instead of waiting up to a day for the task. Only
+ * the status is written: `iac_upgrade_checked_at` is the daily task's stamp (the only thing that
+ * discovers upgrades), and a re-check must not make it look as if the task had just run
+ * (https://github.com/elastic/ingest-dev/issues/9415). A failed write is logged and swallowed:
+ * the caller still gets its answer and the task will retry.
  */
 const persistUpgradeStatus = async (
   soClient: SavedObjectsClientContract,
@@ -236,7 +239,7 @@ const persistUpgradeStatus = async (
     await soClient.update<CloudConnectorSOAttributes>(
       CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
       cloudConnectorId,
-      { iac_upgrade_status: status, iac_upgrade_checked_at: new Date().toISOString() }
+      { iac_upgrade_status: status }
     );
   } catch (error) {
     logger.error(
@@ -256,10 +259,20 @@ const persistUpgradeStatus = async (
   logger.info(message);
 };
 
+export interface VerifyCloudConnectorIacKeyOptions {
+  /**
+   * False resolves the connector's integration set (merged with `newIntegrations`) and returns
+   * `not_checked` without asking IaCP, persisting anything or reporting telemetry: a read, for
+   * a surface that only needs the set to render from (the flyout on open).
+   */
+  compare?: boolean;
+}
+
 export const verifyCloudConnectorIacKey = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
-  newIntegrations?: IacIntegrationSelection[]
+  newIntegrations?: IacIntegrationSelection[],
+  { compare = true }: VerifyCloudConnectorIacKeyOptions = {}
 ): Promise<IacKeyVerification> => {
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
@@ -279,6 +292,13 @@ export const verifyCloudConnectorIacKey = async (
   const deploymentId = attributes.iac_deployment_id || undefined;
   const region = parseAwsRegionFromArn(deploymentId);
   const { cloudProvider } = attributes;
+
+  if (!compare) {
+    logger.debug(
+      `IaC integration set read for connector ${cloudConnectorId} (${cloudProvider}), no comparison`
+    );
+    return { matches: true, outcome: 'not_checked', deploymentId, region, integrations };
+  }
 
   const finish = (outcome: IacKeyVerificationOutcome): IacKeyVerification => {
     logger.info(

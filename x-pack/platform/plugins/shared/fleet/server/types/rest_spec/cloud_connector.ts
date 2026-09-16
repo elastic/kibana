@@ -363,14 +363,16 @@ export const VerifyCloudConnectorIacKeyRequestSchema = {
     integrations: schema.maybe(
       schema.arrayOf(RenderIacTemplateIntegrationSchema, { maxSize: MAX_IAC_RENDER_INTEGRATIONS })
     ),
+    // False: return the integration set only (outcome `not_checked`), no IaCP call, no write.
+    compare: schema.maybe(schema.boolean()),
   }),
 };
 
 export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   matches: schema.boolean(),
   reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
-  // `matches` is true for both a definite match and a check that could not run (fail open);
-  // `outcome` lets the flyout hide its upgrade callout only on the former.
+  // `matches` is true for a definite match, a check that could not run (fail open) and a
+  // `compare: false` read (`not_checked`); `outcome` tells them apart.
   outcome: schema.oneOf([
     schema.literal('matches'),
     schema.literal('no_key'),
@@ -378,6 +380,7 @@ export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
     schema.literal('unsupported_provider'),
     schema.literal('no_integrations'),
     schema.literal('key_unavailable'),
+    schema.literal('not_checked'),
   ]),
   deploymentId: schema.maybe(schema.string()),
   region: schema.maybe(schema.string()),

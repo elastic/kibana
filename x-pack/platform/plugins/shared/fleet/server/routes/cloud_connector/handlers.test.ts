@@ -54,7 +54,7 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
     // Forwarded as the array it arrived as, so the service merges every package at once.
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations);
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations, { compare: true });
     expect(response.ok).toHaveBeenCalledWith({
       body: { matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] },
     });
@@ -69,7 +69,21 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
 
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', undefined);
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', undefined, { compare: true });
+  });
+
+  it('forwards compare:false so the service returns the integration set without a comparison', async () => {
+    const notChecked = { matches: true, outcome: 'not_checked' as const, integrations: [] };
+    mockedVerify.mockResolvedValueOnce(notChecked);
+    const request = httpServerMock.createKibanaRequest({
+      params: { cloudConnectorId: 'cc-1' },
+      body: { compare: false },
+    });
+
+    await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
+
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', undefined, { compare: false });
+    expect(response.ok).toHaveBeenCalledWith({ body: notChecked });
   });
 
   it('returns 404 when the connector does not exist', async () => {

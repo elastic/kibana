@@ -65,10 +65,23 @@ describe('IacUpgradeCallout', () => {
     expect(screen.queryByText(/Fill in the Deployment ID below first/)).not.toBeInTheDocument();
   });
 
-  it('renders checked-at text when checkedAt is provided', () => {
-    renderComponent({ checkedAt: new Date().toISOString() });
+  it('renders the checked-at time as an absolute date-time with the relative form after it', () => {
+    // "Checked 1 second ago" alone does not say whether this is the daily task's verdict or
+    // the re-check that just ran.
+    const checkedAt = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    renderComponent({ checkedAt: checkedAt.toISOString() });
 
-    expect(screen.getByText(/Checked/)).toBeInTheDocument();
+    const line = screen.getByText(/^Checked /);
+    // Same locale-aware formatting FormattedDate uses (jest runs with the en locale).
+    const absolute = new Intl.DateTimeFormat('en', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    }).format(checkedAt);
+    expect(line).toHaveTextContent(`Checked ${absolute} (2 hours ago)`);
   });
 
   it('does not render checked-at text when checkedAt is absent', () => {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
@@ -64,10 +64,25 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
       {checkedAt && (
         <p>
           <EuiTextColor color="subdued">
+            {/* Absolute first: "1 second ago" alone hides whether this is the daily task's
+                verdict or the re-check that just ran. */}
             <FormattedMessage
               id="xpack.fleet.cloudConnector.policiesFlyout.checkedAt"
-              defaultMessage="Checked {when}"
-              values={{ when: <FormattedRelative value={checkedAt} /> }}
+              defaultMessage="Checked {when} ({ago})"
+              values={{
+                when: (
+                  <FormattedDate
+                    value={checkedAt}
+                    year="numeric"
+                    month="short"
+                    day="numeric"
+                    hour="numeric"
+                    minute="numeric"
+                    second="numeric"
+                  />
+                ),
+                ago: <FormattedRelative value={checkedAt} />,
+              }}
             />
           </EuiTextColor>
         </p>
@@ -78,7 +93,7 @@ export const IacUpgradeCallout: React.FC<IacUpgradeCalloutProps> = ({
   return (
     <KbnWarningCallout
       title={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.upgradeTitle', {
-        defaultMessage: 'CloudFormation stack update available',
+        defaultMessage: 'CloudFormation stack upgrade available',
       })}
       // Medium, not small: EUI renders a small callout's `text` inline (title · text), which
       // would run these paragraphs together on one line.

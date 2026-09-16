@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -53,6 +53,7 @@ import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector, updateCloudConnector } from '../hooks/use_update_cloud_connector';
 import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
 import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
+import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
 import {
   useCloudConnectorTemplate,
   type TemplateRendered,
@@ -149,31 +150,24 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     }
   );
 
-  // Runs whenever the IaC section is shown, not only on 'upgrade_available': the verdict carries
-  // the connector's integration set, which "Redeploy CloudFormation stack" needs even when the
-  // stack is current. It is a plain re-check; the query's staleTime absorbs re-mounts.
-  const { data: verification, refetch: refetchVerification } = useVerifyIacKey({
+  // A read of the connector's integration set (compare: false): Update and Redeploy render
+  // exactly this set. No IaCP comparison and no status write on open — the daily task is the only
+  // thing that discovers upgrades and stamps the check time; the flyout displays and acts
+  // (https://github.com/elastic/ingest-dev/issues/9415).
+  const { data: verification } = useVerifyIacKey({
     cloudConnectorId,
+    compare: false,
     enabled: showIac,
   });
-
-  // Opening the flyout runs the check on its own, and the server stores the status it derives.
-  // Nothing else re-reads that, so any arriving verdict refreshes the queries that carry it.
-  useEffect(() => {
-    if (!verification) {
-      return;
-    }
-    queryClient.invalidateQueries(['get-cloud-connectors']);
-    queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
-  }, [verification, queryClient, cloudConnectorId]);
 
   const onTemplateRendered = useCallback(
     ({ key, blueprintId, blueprintVersion }: TemplateRendered) => {
       // Runs on the Update / Redeploy click once the render succeeds; Kibana cannot see the user
       // apply the update in AWS, so the key and its blueprint provenance are stored at click time
-      // (idempotent when unchanged). With the new key stored, the re-check answers `matches` and
-      // the server persists `up_to_date`, so the upgrade callout clears itself without a second
-      // click (https://github.com/elastic/ingest-dev/issues/9415). Raw request: no toast.
+      // (idempotent when unchanged). One comparing re-check follows: with the new key stored it
+      // answers `matches` and the server persists `up_to_date`, and the invalidations re-read the
+      // stored status that drives the callout, so it clears itself without a second click
+      // (https://github.com/elastic/ingest-dev/issues/9415). Raw requests: no toast.
       if (key && cloudConnectorId) {
         updateCloudConnector(http, cloudConnectorId, {
           iac_key: key,
@@ -181,11 +175,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           iac_blueprint_version: blueprintVersion,
           ...(iacDeploymentIdToSave ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
         })
-          .then(() => refetchVerification())
+          .then(() => sendVerifyCloudConnectorIacKey(cloudConnectorId, {}))
           .then(() => {
-            // Also invalidated here, not only in the verdict effect above: an unchanged verdict
-            // comes back as the same object (React Query keeps the old reference for deep-equal
-            // data), so the effect would not fire for it.
             queryClient.invalidateQueries(['get-cloud-connectors']);
             queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
           })
@@ -194,7 +185,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           });
       }
     },
-    [cloudConnectorId, http, iacDeploymentIdToSave, queryClient, refetchVerification]
+    [cloudConnectorId, http, iacDeploymentIdToSave, queryClient]
   );
 
   const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
@@ -227,16 +218,15 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [analytics, editedIacDeploymentId, iacKey, launchButtonProps]
   );
 
-  // A definite live verdict of "current" hides the callout right away, without waiting for the
-  // connector list to be re-read (the stored status can be up to a day old). `matches` alone is
-  // not enough: it is also true when the check could not run (fail open), and the stored status
-  // must stand then.
-  const showUpgradeCallout =
-    showIac && iacUpgradeStatus === 'upgrade_available' && verification?.outcome !== 'matches';
-  // Redeploy is a forced render for identities whose stack is current as far as Kibana knows:
-  // the update link was lost, or the console bounced the user to sign in first. Offered to
-  // keyless connectors too (https://github.com/elastic/ingest-dev/issues/9415).
-  const showRedeploy = showIac && hasRenderableIntegrations && hasValidDeploymentId;
+  // The stored status alone drives the callout: nothing in the flyout compares templates, and
+  // the re-check after Update refreshes the status through the connector queries.
+  const showUpgradeCallout = showIac && iacUpgradeStatus === 'upgrade_available';
+  // Redeploy is a forced render for identities whose stack is current as far as Kibana knows,
+  // for when the stack was not deployed or updated when the user was asked to. Offered to
+  // keyless connectors too, but not alongside the upgrade callout, whose Update is the action
+  // then (https://github.com/elastic/ingest-dev/issues/9415).
+  const showRedeploy =
+    showIac && !showUpgradeCallout && hasRenderableIntegrations && hasValidDeploymentId;
 
   const handleDeleteConnector = useCallback(() => {
     setIsDeleteModalVisible(true);
@@ -463,66 +453,53 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {showUpgradeCallout && (
-          <>
-            <IacUpgradeCallout
-              checkedAt={iacUpgradeCheckedAt}
-              hasKey={Boolean(iacKey)}
-              canUpdate={hasValidDeploymentId && hasRenderableIntegrations}
-              isUpdating={isGeneratingTemplate}
-              onUpdateStack={() => launchTemplate('update_stack_clicked')}
-            />
-            {templateGenerationError && (
-              <>
-                <EuiSpacer size="m" />
-                <KbnDangerCallout
-                  announceOnMount
-                  data-test-subj={
-                    CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT
-                  }
-                  title={templateGenerationError}
-                  size="s"
-                />
-              </>
-            )}
-            <EuiSpacer size="m" />
-          </>
-        )}
         {showIac && (
           <>
             <IacTemplateDetails
               iacDeploymentId={editedIacDeploymentId}
               isDeploymentIdInvalid={deploymentIdInvalid}
               onIacDeploymentIdChange={setEditedIacDeploymentId}
+              // One stack action at a time: the upgrade callout's Update while an update is
+              // pending, Redeploy otherwise. The render error follows whichever is shown.
               actions={
-                showRedeploy ? (
+                showUpgradeCallout || showRedeploy ? (
                   <>
-                    <EuiButton
-                      size="s"
-                      iconType="popout"
-                      isLoading={isGeneratingTemplate}
-                      onClick={() => launchTemplate('redeploy_clicked')}
-                      data-test-subj={
-                        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON
-                      }
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.cloudConnector.policiesFlyout.redeployButton"
-                        defaultMessage="Redeploy CloudFormation stack"
+                    {showUpgradeCallout ? (
+                      <IacUpgradeCallout
+                        checkedAt={iacUpgradeCheckedAt}
+                        hasKey={Boolean(iacKey)}
+                        canUpdate={hasValidDeploymentId && hasRenderableIntegrations}
+                        isUpdating={isGeneratingTemplate}
+                        onUpdateStack={() => launchTemplate('update_stack_clicked')}
                       />
-                    </EuiButton>
-                    <EuiSpacer size="xs" />
-                    <EuiText size="xs" color="subdued">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.fleet.cloudConnector.policiesFlyout.redeployHelp"
-                          defaultMessage="Opens the AWS console with a freshly generated template for this identity's integrations. Use it if the stack was not deployed or updated when you were asked to."
-                        />
-                      </p>
-                    </EuiText>
-                    {/* The upgrade callout shows render errors next to its own Update button;
-                        with no callout, Redeploy is the only launch, so the error belongs here. */}
-                    {templateGenerationError && !showUpgradeCallout && (
+                    ) : (
+                      <>
+                        <EuiButton
+                          size="s"
+                          iconType="popout"
+                          isLoading={isGeneratingTemplate}
+                          onClick={() => launchTemplate('redeploy_clicked')}
+                          data-test-subj={
+                            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.cloudConnector.policiesFlyout.redeployButton"
+                            defaultMessage="Redeploy CloudFormation stack"
+                          />
+                        </EuiButton>
+                        <EuiSpacer size="xs" />
+                        <EuiText size="xs" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.fleet.cloudConnector.policiesFlyout.redeployHelp"
+                              defaultMessage="Opens the AWS console with a freshly generated template for this identity's integrations. Use it if the stack was not deployed or updated when you were asked to."
+                            />
+                          </p>
+                        </EuiText>
+                      </>
+                    )}
+                    {templateGenerationError && (
                       <>
                         <EuiSpacer size="s" />
                         <KbnDangerCallout

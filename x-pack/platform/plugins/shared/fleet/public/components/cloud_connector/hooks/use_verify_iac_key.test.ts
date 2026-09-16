@@ -104,11 +104,11 @@ describe('useVerifyIacKey', () => {
     expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations });
     // A changed selection must miss the cache, so the set is part of the key.
     expect(
-      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations])
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations, undefined])
     ).toBeDefined();
   });
 
-  it('omits integrations from the body when none are passed (flyout)', async () => {
+  it('omits integrations and compare from the body when none are passed', async () => {
     mockSendVerify.mockResolvedValue({
       data: { matches: true, outcome: 'matches', integrations: [] },
       error: null,
@@ -118,5 +118,30 @@ describe('useVerifyIacKey', () => {
 
     await waitFor(() => expect(mockSendVerify).toHaveBeenCalled());
     expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations: undefined });
+    expect(mockSendVerify.mock.calls[0][1]).not.toHaveProperty('compare');
+  });
+
+  it('sends compare:false in the body and keys the query on it (flyout on open)', async () => {
+    // A read of the integration set must not share a cache entry with a comparing check.
+    mockSendVerify.mockResolvedValue({
+      data: { matches: true, outcome: 'not_checked', integrations: [] },
+      error: null,
+    } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
+
+    renderHook(() => useVerifyIacKey({ cloudConnectorId: 'cc-1', compare: false, enabled: true }), {
+      wrapper,
+    });
+
+    await waitFor(() => expect(mockSendVerify).toHaveBeenCalled());
+    expect(mockSendVerify).toHaveBeenCalledWith('cc-1', {
+      integrations: undefined,
+      compare: false,
+    });
+    expect(
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', undefined, false])
+    ).toBeDefined();
+    expect(
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', undefined, undefined])
+    ).toBeUndefined();
   });
 });
