@@ -12,7 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   type Worker,
 } from '@kbn/alertzero-common';
-import { RuleTuningSettings } from './detection_watch_settings';
+import { RuleTuningSettings } from './rule_tuning_settings';
 
 const ruleTuning: Worker = {
   id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
