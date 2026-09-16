@@ -85,6 +85,8 @@ const expectedNamespacesFilterQuery = {
 const expectedAgentIdFilterQuery = {
   bool: {
     filter: [
+      // Space filter comes first (spaceFilter is prepended to the _joinFilters array)
+      expectedNamespacesFilterQuery,
       {
         bool: {
           should: [
@@ -92,7 +94,8 @@ const expectedAgentIdFilterQuery = {
               bool: {
                 should: [
                   {
-                    match: {
+                    // Quoted agent ids compile to match_phrase (not match)
+                    match_phrase: {
                       'agent.id': 'agent1',
                     },
                   },
@@ -104,7 +107,7 @@ const expectedAgentIdFilterQuery = {
               bool: {
                 should: [
                   {
-                    match: {
+                    match_phrase: {
                       'agent.id': 'agent2',
                     },
                   },
@@ -116,39 +119,50 @@ const expectedAgentIdFilterQuery = {
           minimum_should_match: 1,
         },
       },
-      expectedNamespacesFilterQuery,
     ],
   },
 };
 
+// _joinFilters parses each input string into its own AST node before AND-joining them.
+// 'status:online AND policy_id:policy1' is parsed as a single and-node, so the outer
+// bool.filter has exactly 2 members: [namespaceFilter, andNode(status, policy_id)].
 const expectedKueryFilterQuery = {
   bool: {
     filter: [
-      {
-        bool: {
-          should: [
-            {
-              match: {
-                status: 'online',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        bool: {
-          should: [
-            {
-              match: {
-                policy_id: 'policy1',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
+      // Space filter comes first (spaceFilter is prepended to the _joinFilters array)
       expectedNamespacesFilterQuery,
+      // The user kuery 'status:online AND policy_id:policy1' is parsed as one AST node
+      // whose inner AND is represented as a nested bool.filter.
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      status: 'online',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      policy_id: 'policy1',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
     ],
   },
 };
@@ -360,6 +374,123 @@ describe('generateReportHandler', () => {
         }),
         expect.any(Function)
       );
+    });
+  });
+
+  describe('space awareness filter injection (security regression)', () => {
+    // Helper: extract the ES DSL query from the first reporting call.
+    const getFilterQuery = () => {
+      const mock = jest.mocked(
+        appContextService.getReportingStart()!.handleGenerateSystemReportRequest
+      );
+      const reportParams = mock.mock.calls[0][1].reportParams as {
+        searchSource: { filter: Array<{ query: unknown }> };
+      };
+      return reportParams.searchSource.filter[0].query as {
+        bool?: { filter?: unknown[]; should?: unknown[] };
+      };
+    };
+
+    it('OR-leading kuery cannot bypass the space filter (string branch)', async () => {
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: 'namespaces:* OR agent.id:no-such-agent' },
+      });
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      const query = getFilterQuery();
+      // Top-level must be bool.filter (AND), never bool.should (OR).
+      expect(query.bool?.should).toBeUndefined();
+      expect(Array.isArray(query.bool?.filter)).toBe(true);
+      expect((query.bool?.filter as unknown[]).length).toBe(2);
+      // The space (namespace) filter must be present and be the first member.
+      expect((query.bool?.filter as unknown[])[0]).toEqual(expectedNamespacesFilterQuery);
+    });
+
+    it('OR-leading kuery cannot bypass the space filter when space awareness is disabled', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: 'namespaces:* OR agent.id:no-such-agent' },
+      });
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      const query = getFilterQuery();
+      // When space awareness is off there is no space filter to inject past, but the
+      // result must still be structurally a single-filter node, not a free OR.
+      const queryStr = JSON.stringify(query);
+      // The top-level node must not be a bare OR (bool.should with namespaces:* as a sibling).
+      // Without a space filter _joinFilters returns the single agentsQuery node directly.
+      expect(query).toBeDefined();
+      // It should not contain a top-level bool.filter array of length > 1 (no space filter)
+      // and should contain no unconstrained namespaces:* at the root.
+      expect(queryStr).not.toMatch(/"should":\[.*"namespaces"\s*:\s*"\*"/);
+    });
+
+    it('KQL metacharacters in array agent ids are escaped, not injected', async () => {
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          ...baseRequestBodyMock,
+          agents: ['a) or namespaces:* or (b', 'agent"quoted', 'back\\slash'],
+        },
+      });
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      const query = getFilterQuery();
+      // Must be a bool.filter (AND), not a bool.should (OR leak).
+      expect(query.bool?.should).toBeUndefined();
+      expect(Array.isArray(query.bool?.filter)).toBe(true);
+      // First member: space filter. Second member: the agent id OR-list.
+      expect((query.bool?.filter as unknown[]).length).toBe(2);
+      const agentsPart = (query.bool?.filter as Array<{ bool: { should: unknown[] } }>)[1];
+      // The agent ids should produce exactly 3 match_phrase clauses (one per id), not more.
+      expect(agentsPart.bool.should.length).toBe(3);
+      // The cross-space leak field must not appear outside the namespace filter subtree.
+      const agentsStr = JSON.stringify(agentsPart);
+      expect(agentsStr).not.toContain('"namespaces"');
+    });
+
+    it('bare KQL keywords used as agent ids are treated as literals when quoted', async () => {
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: ['and', 'or', 'not', 'agent one'] },
+      });
+
+      // Should not throw (keywords become literals inside quotes)
+      await expect(
+        generateReportHandler(mockContext, mockRequest, mockResponse)
+      ).resolves.not.toThrow();
+
+      const query = getFilterQuery();
+      const agentsPart = (query.bool?.filter as Array<{ bool: { should: unknown[] } }>)[1];
+      expect(agentsPart.bool.should.length).toBe(4);
+    });
+
+    it('space awareness disabled — no space filter applied for kuery', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: 'status:online' },
+      });
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      const query = getFilterQuery();
+      const queryStr = JSON.stringify(query);
+      // No namespace constraint should appear in the DSL.
+      expect(queryStr).not.toContain('namespaces');
+    });
+
+    it('empty agents array throws FleetError with a clear message before touching reporting', async () => {
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: [] },
+      });
+
+      await expect(generateReportHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
+        new FleetError('At least one agent id must be provided')
+      );
+      expect(
+        appContextService.getReportingStart()?.handleGenerateSystemReportRequest
+      ).not.toHaveBeenCalled();
     });
   });
 
