@@ -42,6 +42,23 @@ describe('verification query codec', () => {
   it('requires the API key id', () => {
     expect(isRight(params.decode({ query: { endpointId: 'opentelemetry' } }))).toBe(false);
   });
+
+  // An empty id makes Elasticsearch list every key the caller owns, so the ownership check
+  // would pass for anybody holding a key.
+  it('rejects an empty API key id', () => {
+    expect(isRight(params.decode({ query: { apiKeyId: '', endpointId: 'opentelemetry' } }))).toBe(
+      false
+    );
+  });
+
+  it('rejects an API key id longer than 64 characters', () => {
+    expect(
+      isRight(params.decode({ query: { apiKeyId: 'a'.repeat(65), endpointId: 'opentelemetry' } }))
+    ).toBe(false);
+    expect(
+      isRight(params.decode({ query: { apiKeyId: 'a'.repeat(64), endpointId: 'opentelemetry' } }))
+    ).toBe(true);
+  });
 });
 
 describe('verification handler', () => {
@@ -125,22 +142,10 @@ describe('verification handler', () => {
     expect(getApiKey).toHaveBeenCalledWith({ id: 'key-id', owner: true, active_only: true });
   });
 
-  it('rejects an API key id longer than 64 characters with 400', async () => {
-    await expect(handler(createResources({ apiKeyId: 'a'.repeat(65) }))).rejects.toMatchObject({
-      output: { statusCode: 400 },
-    });
-    expect(getApiKey).not.toHaveBeenCalled();
-  });
+  it('reports a receipt when the search matches', async () => {
+    search.mockResolvedValue({ hits: { hits: [{ _id: 'receipt-id' }] } });
 
-  it('reports the latest receipt timestamp when a receipt exists', async () => {
-    search.mockResolvedValue({
-      hits: { hits: [{ _source: { '@timestamp': '2026-09-11T10:00:00.000Z' } }] },
-    });
-
-    await expect(handler(createResources())).resolves.toEqual({
-      received: true,
-      lastReceivedAt: '2026-09-11T10:00:00.000Z',
-    });
+    await expect(handler(createResources())).resolves.toEqual({ received: true });
   });
 
   it('reports nothing received when the search returns no hit', async () => {
@@ -164,6 +169,7 @@ describe('verification handler', () => {
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 1,
+        _source: false,
         query: {
           bool: {
             filter: [

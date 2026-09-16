@@ -27,7 +27,6 @@ export const getReceiptsIndexTemplate = (): IndicesPutIndexTemplateRequest => ({
   template: {
     settings: {
       'index.hidden': true,
-      'index.number_of_shards': 1,
     },
     lifecycle: { data_retention: INGEST_RECEIPTS_RETENTION },
     mappings: {

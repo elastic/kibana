@@ -77,10 +77,26 @@ describe('useIngestReceiptToast', () => {
     expect(mockCallApi).toHaveBeenCalledWith(
       'GET /internal/observability_onboarding/api_endpoints/verification',
       {
-        signal: null,
+        signal: expect.any(AbortSignal),
         params: { query: { apiKeyId: 'key-id', endpointId: ApiEndpointId.OpenTelemetry } },
       }
     );
+  });
+
+  it('aborts the in flight request when the page goes away', async () => {
+    mockCallApi.mockResolvedValue({ received: false });
+
+    const { unmount } = renderHook(() =>
+      useIngestReceiptToast({ [ApiEndpointId.OpenTelemetry]: 'key-id' })
+    );
+    await advanceBy(POLL_INTERVAL_MS);
+
+    const { signal } = mockCallApi.mock.calls[0][1];
+    expect(signal.aborted).toBe(false);
+
+    unmount();
+
+    expect(signal.aborted).toBe(true);
   });
 
   it('does not poll before a key has been created', async () => {
@@ -122,14 +138,61 @@ describe('useIngestReceiptToast', () => {
 
     expect(addSuccess).toHaveBeenCalledTimes(1);
     expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Data received',
-      text: 'OpenTelemetry is receiving data with the API key you created.',
+      title: 'We are receiving your data',
+      text: 'The OpenTelemetry endpoint accepted a request with the API key you created.',
     });
 
     await advanceBy(POLL_INTERVAL_MS * 3);
 
     expect(mockCallApi).toHaveBeenCalledTimes(1);
     expect(addSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('polls again when a new key replaces one that already got a toast', async () => {
+    mockCallApi.mockResolvedValue({ received: true });
+
+    const { rerender } = renderHook(
+      ({ apiKeyIds }: { apiKeyIds: Partial<Record<ApiEndpointId, string>> }) =>
+        useIngestReceiptToast(apiKeyIds),
+      { initialProps: { apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'first-key-id' } } }
+    );
+    await advanceBy(POLL_INTERVAL_MS);
+
+    expect(mockCallApi).toHaveBeenCalledTimes(1);
+    expect(addSuccess).toHaveBeenCalledTimes(1);
+
+    rerender({ apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'second-key-id' } });
+    await advanceBy(POLL_INTERVAL_MS);
+
+    expect(mockCallApi).toHaveBeenCalledTimes(2);
+    expect(mockCallApi).toHaveBeenLastCalledWith(
+      'GET /internal/observability_onboarding/api_endpoints/verification',
+      expect.objectContaining({
+        params: { query: { apiKeyId: 'second-key-id', endpointId: ApiEndpointId.OpenTelemetry } },
+      })
+    );
+    expect(addSuccess).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives a replacement key its own thirty minute window', async () => {
+    mockCallApi.mockResolvedValue({ received: false });
+
+    const { rerender } = renderHook(
+      ({ apiKeyIds }: { apiKeyIds: Partial<Record<ApiEndpointId, string>> }) =>
+        useIngestReceiptToast(apiKeyIds),
+      { initialProps: { apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'first-key-id' } } }
+    );
+    await advanceBy(POLL_INTERVAL_MS);
+    await advanceBy(POLL_DURATION_MS + POLL_INTERVAL_MS);
+
+    const callsWhenGivingUp = mockCallApi.mock.calls.length;
+    await advanceBy(POLL_INTERVAL_MS * 3);
+    expect(mockCallApi).toHaveBeenCalledTimes(callsWhenGivingUp);
+
+    rerender({ apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'second-key-id' } });
+    await advanceBy(POLL_INTERVAL_MS);
+
+    expect(mockCallApi).toHaveBeenCalledTimes(callsWhenGivingUp + 1);
   });
 
   it('polls each endpoint that has a key independently', async () => {
@@ -150,8 +213,8 @@ describe('useIngestReceiptToast', () => {
     expect(mockCallApi).toHaveBeenCalledTimes(2);
     expect(addSuccess).toHaveBeenCalledTimes(1);
     expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Data received',
-      text: 'Elasticsearch is receiving data with the API key you created.',
+      title: 'We are receiving your data',
+      text: 'The Elasticsearch endpoint accepted a request with the API key you created.',
     });
 
     await advanceBy(POLL_INTERVAL_MS);

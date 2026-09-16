@@ -48,10 +48,22 @@ export interface ApiEndpointApiKeyResponse {
 
 export interface ApiEndpointVerificationResponse {
   received: boolean;
-  lastReceivedAt?: string;
 }
 
 const MAX_API_KEY_ID_LENGTH = 64;
+
+export interface ApiKeyIdBrand {
+  readonly ApiKeyId: unique symbol;
+}
+
+// The id is opaque to us, only its shape is worth guarding. An empty id makes Elasticsearch
+// list every key the caller owns, which passes the ownership check and searches for nothing.
+const apiKeyIdRt = t.brand(
+  t.string,
+  (value): value is t.Branded<string, ApiKeyIdBrand> =>
+    value.length > 0 && value.length <= MAX_API_KEY_ID_LENGTH,
+  'ApiKeyId'
+);
 
 // ES-compatible bulk availability is based on managed ingest URL presence, not the legacy OTLP feature flag.
 export const hasManagedElasticsearchBulkEndpoint = (managedOtlpServiceUrl?: string): boolean =>
@@ -233,7 +245,7 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
   },
   params: t.type({
     query: t.type({
-      apiKeyId: t.string,
+      apiKeyId: apiKeyIdRt,
       endpointId: t.keyof({
         [ApiEndpointId.Prometheus]: null,
         [ApiEndpointId.OpenTelemetry]: null,
@@ -248,10 +260,6 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
         query: { apiKeyId, endpointId },
       },
     } = resources;
-
-    if (apiKeyId.length > MAX_API_KEY_ID_LENGTH) {
-      throw Boom.badRequest('The apiKeyId parameter is too long.');
-    }
 
     const {
       elasticsearch: { client },
@@ -280,12 +288,12 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
       throw Boom.notFound();
     }
 
-    const response = await client.asInternalUser.search<{ '@timestamp': string }>({
+    // Only the existence of a recent receipt is reported, so no document body is needed.
+    const response = await client.asInternalUser.search({
       index: INGEST_RECEIPTS_DATA_STREAM,
       ignore_unavailable: true,
       size: 1,
-      sort: [{ [INGEST_RECEIPT_FIELDS.timestamp]: 'desc' }],
-      _source: [INGEST_RECEIPT_FIELDS.timestamp],
+      _source: false,
       query: {
         bool: {
           filter: [
@@ -303,15 +311,7 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
-    const [latestReceipt] = response.hits.hits;
-    if (!latestReceipt) {
-      return { received: false };
-    }
-
-    return {
-      received: true,
-      lastReceivedAt: latestReceipt._source?.[INGEST_RECEIPT_FIELDS.timestamp],
-    };
+    return { received: response.hits.hits.length > 0 };
   },
 });
 

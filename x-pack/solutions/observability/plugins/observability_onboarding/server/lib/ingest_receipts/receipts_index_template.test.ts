@@ -25,8 +25,11 @@ describe('getReceiptsIndexTemplate', () => {
     expect(template.data_stream).toEqual({ hidden: true });
     expect(template.template?.settings).toEqual({
       'index.hidden': true,
-      'index.number_of_shards': 1,
     });
+  });
+
+  it('sets no setting a serverless project could reject', () => {
+    expect(Object.keys(template.template?.settings ?? {})).toEqual(['index.hidden']);
   });
 
   it('uses data stream lifecycle retention only', () => {
@@ -66,7 +69,7 @@ describe('getReceiptsIndexTemplate', () => {
       priority: 500,
       _meta: { managed: true, managedBy: 'observability_onboarding', schemaVersion: 1 },
       template: {
-        settings: { 'index.hidden': true, 'index.number_of_shards': 1 },
+        settings: { 'index.hidden': true },
         lifecycle: { data_retention: '2d' },
         mappings: {
           dynamic: 'strict',
