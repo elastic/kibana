@@ -62,20 +62,18 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
 
 const memorySection = (
   { memory_enabled: memoryEnabled }: AiIndexHttpItem,
-  counts: KiTypeCount[],
   target: string
 ): string[] => {
   if (!memoryEnabled) {
     return [];
   }
 
-  const countByType = new Map(counts.map(({ type, count }) => [type, count]));
   return [
     'Memory',
     'Memory writes are enabled for this AI-index registry entry.',
     'Available memory types',
-    `memory.session: ${countByType.get('memory.session') ?? 0}`,
-    `memory.session_fact: ${countByType.get('memory.session_fact') ?? 0}`,
+    'memory.session',
+    'memory.session_fact',
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
     'Recall active, unexpired memory with ES|QL:',
@@ -129,7 +127,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    memorySection(aiIndex, kiTypeCounts, target),
+    memorySection(aiIndex, target),
     exampleQueriesSection(target),
   ]);
 };

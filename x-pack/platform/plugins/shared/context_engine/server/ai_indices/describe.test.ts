@@ -165,7 +165,7 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
   });
 
-  it('renders memory capability and live type counts when memory writes are enabled', async () => {
+  it('renders memory capability without treating document counts as logical memory counts', async () => {
     describeAiIndexAggregationsMock.mockResolvedValue({
       kiTypeCounts: [
         { type: 'memory.session', count: 2 },
@@ -184,8 +184,8 @@ describe('describeAiIndex', () => {
         'Memory',
         'Memory writes are enabled for this AI-index registry entry.',
         'Available memory types',
-        'memory.session: 2',
-        'memory.session_fact: 7',
+        'memory.session',
+        'memory.session_fact',
         'Use platform.context_engine.remember to write memory.',
         'Use platform.context_engine.forget with a memory id to tombstone memory.',
         'Recall active, unexpired memory with ES|QL:',
