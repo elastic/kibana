@@ -8,7 +8,7 @@
 import type { AlertingServerSetup } from './plugin';
 import { AlertingPlugin } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, statusServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -31,6 +31,8 @@ import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+import { RulesClientFactory } from './rules_client_factory';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
 const mockAlertService = alertsServiceMock.create();
 jest.mock('./alerts_service/alerts_service', () => ({
@@ -169,6 +171,60 @@ describe('Alerting Plugin', () => {
           });
 
           expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
+        });
+
+        describe('route handler context getRulesClient()', () => {
+          const getContextProvider = async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            plugin = new AlertingPlugin(context);
+            plugin.setup(setupMocks, mockPlugins);
+            await waitForSetupComplete(setupMocks);
+
+            return setupMocks.http.registerRouteHandlerContext.mock.calls[0][1] as unknown as (
+              ctx: unknown,
+              req: KibanaRequest
+            ) => Promise<{ getRulesClient: () => unknown }>;
+          };
+
+          it('derives cloneApiKeysOnCreate from the clone API key header', async () => {
+            const contextProvider = await getContextProvider();
+            const createSpy = jest
+              .spyOn(RulesClientFactory.prototype, 'create')
+              .mockReturnValue({} as ReturnType<RulesClientFactory['create']>);
+
+            try {
+              const request = httpServerMock.createKibanaRequest({
+                headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+              });
+              (await contextProvider({}, request)).getRulesClient();
+
+              expect(createSpy).toHaveBeenCalledWith(request, expect.anything(), {
+                cloneApiKeysOnCreate: true,
+              });
+            } finally {
+              createSpy.mockRestore();
+            }
+          });
+
+          it('does not set cloneApiKeysOnCreate without the header', async () => {
+            const contextProvider = await getContextProvider();
+            const createSpy = jest
+              .spyOn(RulesClientFactory.prototype, 'create')
+              .mockReturnValue({} as ReturnType<RulesClientFactory['create']>);
+
+            try {
+              const request = httpServerMock.createKibanaRequest();
+              (await contextProvider({}, request)).getRulesClient();
+
+              expect(createSpy).toHaveBeenCalledWith(request, expect.anything(), {
+                cloneApiKeysOnCreate: false,
+              });
+            } finally {
+              createSpy.mockRestore();
+            }
+          });
         });
 
         describe('registerType()', () => {

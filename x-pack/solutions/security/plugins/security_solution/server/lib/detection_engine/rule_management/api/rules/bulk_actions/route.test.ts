@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_CLONE_API_KEY_HEADER, gapFillStatus } from '@kbn/alerting-plugin/common';
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -900,35 +900,6 @@ describe('Perform bulk action route', () => {
         })
       );
       expect(clients.rulesClient.update).not.toHaveBeenCalled();
-    });
-
-    it('forwards the clone API key directive to the duplicate so a borrowed key is not persisted', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: getPerformBulkActionDuplicateSchemaMock(),
-        headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
-      });
-
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(clients.rulesClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({ options: { cloneApiKey: true } })
-      );
-    });
-
-    it('does not set the clone API key option when the directive is absent', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: getPerformBulkActionDuplicateSchemaMock(),
-      });
-
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(clients.rulesClient.create).toHaveBeenCalledWith(
-        expect.not.objectContaining({ options: expect.anything() })
-      );
     });
 
     it('deletes cloned rule_default exception lists when rule creation fails', async () => {

@@ -20,27 +20,14 @@ export interface DispatchApiRequestParams {
   request: KibanaRequest;
 }
 
-// Matches POST /api/alerting/rule and /api/alerting/rule/{id} (create with a caller-chosen id).
-const ALERTING_RULE_CREATE_PATH = /^\/api\/alerting\/rule(?:\/[^/]+)?$/;
-
-// Detection Engine paths that create rules: the custom-rule endpoint, and _bulk_action, whose
-// `duplicate` action creates. Paths here are never space-prefixed; selfClient prepends the base path.
-const DETECTION_ENGINE_RULE_CREATE_PATHS = new Set([
-  '/api/detection_engine/rules',
-  '/api/detection_engine/rules/_bulk_action',
-]);
-
-const isBorrowedKeyRuleCreate = (method: string, path: string): boolean =>
-  method.toUpperCase() === 'POST' &&
-  (ALERTING_RULE_CREATE_PATH.test(path) || DETECTION_ENGINE_RULE_CREATE_PATHS.has(path));
-
-// The agent's requests authenticate with the API key Task Manager granted for this run-agent
-// task, which TM invalidates once the task drains. Alerting persists an API-key caller's
-// credential on created rules by default ("the user owns this key"), which for this borrowed key
-// would kill every rule from the conversation about an hour after the task completes. This header
-// tells alerting (and Detection Engine, which creates via RulesClient) to mint the rule its own
-// framework-managed key instead.
-const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
+// Every self-call the agent makes authenticates with the API key Task Manager granted for this
+// run-agent task, which TM invalidates once the task drains. Rule-creating endpoints persist an
+// API-key caller's credential on the created rule by default ("the user owns this key"), which
+// for this borrowed key would kill the rule about an hour after the task completes. This header
+// declares the credential as borrowed so alerting mints the rule its own framework-managed key.
+// It is stamped on all self-calls rather than a per-endpoint allowlist: the declaration is true
+// for every one of them, and routes that do not consult it ignore it.
+const borrowedKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
 
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
@@ -64,7 +51,7 @@ export const dispatchApiRequest = async ({
       method,
       query: toSelfFetchQuery(querystring),
       body,
-      ...(isBorrowedKeyRuleCreate(method, path) ? { headers: cloneApiKeyHeaders } : {}),
+      headers: borrowedKeyHeaders,
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }

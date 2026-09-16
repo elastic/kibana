@@ -16,7 +16,6 @@ import type {
   GapFillStatus,
   GapReasonType,
 } from '@kbn/alerting-plugin/common';
-import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
@@ -336,11 +335,6 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.duplicate: {
-              // A Kibana-internal caller running on a borrowed API key (e.g. an Agent Builder task)
-              // declares it with this header so the duplicate is minted its own framework-managed
-              // key instead of keeping the caller's, which is invalidated when the task drains.
-              const cloneApiKey = request.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true';
-
               const bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
@@ -393,7 +387,6 @@ export const performBulkActionRoute = (
                           exceptionsList: exceptions,
                         },
                       },
-                      ...(cloneApiKey ? { options: { cloneApiKey } } : {}),
                       changeTracking: {
                         action: SecurityRuleChangeTrackingAction.ruleDuplicate,
                         metadata: {

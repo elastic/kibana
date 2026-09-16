@@ -53,7 +53,6 @@ export interface IDetectionRulesClient {
 export interface CreateCustomRuleArgs {
   params: RuleCreateProps;
   changeTracking?: SecurityRuleChangeTracking;
-  cloneApiKey?: boolean;
 }
 
 export interface CreatePrebuiltRuleArgs {

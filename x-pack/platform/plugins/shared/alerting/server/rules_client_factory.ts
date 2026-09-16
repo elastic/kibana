@@ -61,7 +61,8 @@ export interface RulesClientCreateOptions {
   /**
    * When true, clone the request's API key for each newly created rule.
    * The cloned key is independent, non-expiring, and managed by alerting
-   * (invalidated on rule delete/update). Only applies to rule creation.
+   * (invalidated on rule delete/update). Only applies to rule creation, and
+   * is a no-op unless the request is API-key authenticated (nothing to clone).
    */
   cloneApiKeysOnCreate?: boolean;
 }

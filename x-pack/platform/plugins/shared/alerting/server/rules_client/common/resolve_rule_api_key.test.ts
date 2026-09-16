@@ -88,16 +88,28 @@ describe('resolveRuleAPIKey', () => {
   });
 
   describe('cloneApiKeysOnCreate flag', () => {
-    test('clones on create (no existing) regardless of auth type', async () => {
+    test('clones on create (no existing) when the request is API-key-authed', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true);
 
       expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
       expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
-      expect(context.isAuthenticationTypeAPIKey).not.toHaveBeenCalled();
+    });
+
+    test('is a no-op without API-key auth (nothing to clone): grants as usual', async () => {
+      const context = createMockContext({
+        cloneApiKeysOnCreate: true,
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true);
+
+      expect(result).toEqual({ createdAPIKey: grantedKey, isAuthTypeApiKey: false });
+      expect(context.createAPIKey).toHaveBeenCalledWith('test-rule', undefined);
+      expect(context.cloneAPIKey).not.toHaveBeenCalled();
     });
 
     test('does not apply to regen (existing rule) — falls through to framework-managed logic', async () => {

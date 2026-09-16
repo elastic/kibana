@@ -30,7 +30,6 @@ interface CreateRuleOptions {
   initialRevision?: number;
   allowMissingConnectorSecrets?: boolean;
   changeTracking?: SecurityRuleChangeTracking;
-  cloneApiKey?: boolean;
 }
 
 export const createRule = async ({
@@ -42,7 +41,6 @@ export const createRule = async ({
   initialRevision,
   allowMissingConnectorSecrets,
   changeTracking,
-  cloneApiKey,
 }: CreateRuleOptions): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, rule.type);
 
@@ -60,7 +58,6 @@ export const createRule = async ({
     options: {
       id,
       initialRevision,
-      ...(cloneApiKey ? { cloneApiKey } : {}),
     },
     changeTracking,
     allowMissingConnectorSecrets,

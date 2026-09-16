@@ -62,16 +62,6 @@ const getVersionedRoute = (router: MockServer['router']): Route => {
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
 
-const toFixtureHeaders = (headers: KibanaRequest['headers']): Record<string, string> => {
-  const record: Record<string, string> = {};
-  for (const [key, value] of Object.entries(headers)) {
-    if (typeof value === 'string') {
-      record[key] = value;
-    }
-  }
-  return record;
-};
-
 class MockServer {
   constructor(
     public readonly router = httpServiceMock.createRouter(),
@@ -122,7 +112,6 @@ class MockServer {
       body: this.maybeValidate(request.body, validations.body),
       query: this.maybeValidate(request.query, validations.query),
       params: this.maybeValidate(request.params, validations.params),
-      headers: toFixtureHeaders(request.headers),
     });
 
     return validatedRequest;
