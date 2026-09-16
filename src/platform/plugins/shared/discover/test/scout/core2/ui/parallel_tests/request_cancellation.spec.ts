@@ -29,7 +29,7 @@ const STALLED_LOGSTASH_WARNING_QUERY = JSON.stringify({
         error_type: 'warning',
         message: "'Fake slow request'",
         name: '*',
-        stall_time_seconds: 15,
+        stall_time_seconds: 5,
       },
     ],
   },
