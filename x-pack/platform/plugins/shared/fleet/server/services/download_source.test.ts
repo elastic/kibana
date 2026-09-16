@@ -359,12 +359,12 @@ describe('Download Service', () => {
     it('does not persist body id to saved object attributes', async () => {
       const soClientMock = getMockedSoClient();
 
-      await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+      await downloadSourceService.update(soClientMock, 'download-source-test', {
         id: 'evil-injected-id',
         name: 'Updated name',
         host: 'http://test.co',
         is_default: false,
-      } as any);
+      });
 
       const updateCall = soClientMock.update.mock.calls.find(
         (call) => call[1] === 'download-source-test'
