@@ -43,7 +43,6 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
-import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_details_from_record';
 import { getAncestorsIndexById } from './utils/get_ancestors_index_by_id';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
@@ -140,7 +139,7 @@ export const DocumentFlyout = memo(
     const ancestorsIndexById = useMemo(
       () =>
         getAncestorsIndexById(
-          getTimelineEventsDetailsFromRecord(hit),
+          hit,
           hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
         ),
       [hit]

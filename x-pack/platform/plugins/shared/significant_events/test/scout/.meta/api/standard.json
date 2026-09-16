@@ -1,5 +1,5 @@
 {
-  "sha1": "82a3d6fce25e7e3da64f434f93a615702a55acfa",
+  "sha1": "404c8c4f99a4331615f99b4cb9539f772a5431f0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -112,8 +112,8 @@
       }
     },
     {
-      "id": "7998edec061cd06-3b7d4b7c8c80cdb",
-      "title": "Significant Events run quota authorization denies a manager whose Streams privilege is limited to one space",
+      "id": "7998edec061cd06-474b7573b22c201",
+      "title": "Significant Events run quota authorization denies a manager whose Nightshift privilege is limited to one space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -128,8 +128,8 @@
       }
     },
     {
-      "id": "7998edec061cd06-5fed36fa861660c",
-      "title": "Significant Events run quota authorization allows an all-spaces Streams manager to update and restore settings",
+      "id": "7998edec061cd06-ef381f2f9a77c63",
+      "title": "Significant Events run quota authorization allows an all-spaces Nightshift manager to update and restore settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -240,20 +240,6 @@
       }
     },
     {
-      "id": "cf67417434c65bf-e01fb638ca0f6e9",
-      "title": "Significant Events plugin hard-disable (Logs Essentials) public significant events API returns 404 when the plugin is unloaded",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
-        "line": 22,
-        "column": 17
-      }
-    },
-    {
       "id": "cf67417434c65bf-5c3eced8e270bba",
       "title": "Significant Events plugin hard-disable (Logs Essentials) availability API returns 404 when the plugin is unloaded",
       "expectedStatus": "passed",
@@ -263,8 +249,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
-        "line": 32,
-        "column": 20
+        "line": 20,
+        "column": 17
       }
     },
     {

@@ -22,6 +22,6 @@ export type {
 
 export { alertSnapshotSchema, type AlertSnapshot } from '../common';
 
-export { InvestigationUnavailableError } from './client/errors';
+export { InvestigationQuotaDeniedError, InvestigationUnavailableError } from './client/errors';
 
 export type { NightshiftInvestigationsRouteRepository } from './routes';

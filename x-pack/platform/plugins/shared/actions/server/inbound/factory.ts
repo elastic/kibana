@@ -11,6 +11,7 @@ import type { InMemoryConnector } from '../types';
 import type { InboundEventsClient } from './client';
 import { buildInboundEventsClient } from './client';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
+import { getDecryptedInboundConnector } from './get_decrypted_inbound_connector';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
 export type { InboundEventsClient } from './client';
@@ -39,5 +40,7 @@ export function createInboundEventsClient(args: InboundEventsClientArgs): Inboun
     ...rest,
     getUnsecuredSavedObjectsClient: (spaceId) =>
       createUnsecuredInboundSavedObjectsClient({ getStartServices, spaceId }),
+    getDecryptedConnectorAttributes: (connectorId, spaceId) =>
+      getDecryptedInboundConnector({ getStartServices, connectorId, spaceId }),
   });
 }
