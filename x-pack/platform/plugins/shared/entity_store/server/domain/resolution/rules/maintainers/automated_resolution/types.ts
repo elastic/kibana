@@ -28,11 +28,9 @@ export interface PerRuleState extends EntityMaintainerState {
 // added without a state migration, and watermarks for rules this version doesn't know
 // (e.g. written by a newer node during a rolling upgrade) pass through untouched.
 //
-// `version` tracks one-time upgrades of this state blob:
-//   2 — reset the email rule watermark so case-insensitive matching can heal
-//       pre-existing case-split groups
-//   3 — reset the SID rule watermark so `local` entities created while that
-//       rule scanned empty `windows`/`system` namespaces are not left behind
+// `version` tracks one-time upgrades of this state blob (see migrate.ts):
+//   2 — reset email watermark
+//   3 — reset SID watermark
 export interface AutomatedResolutionState extends EntityMaintainerState {
   version: number;
   rules: Record<string, PerRuleState>;

@@ -74,10 +74,9 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
-// Version 2 reset the email watermark for case-insensitive matching. Version 3
-// resets the SID watermark so `local` entities created while that rule scanned
-// empty feeder namespaces are not left behind the already-advanced watermark.
+// 2 — email watermark (case-insensitive match)
 const EMAIL_WATERMARK_RESET_VERSION = 2;
+// 3 — SID watermark (`local` entities created while the rule scanned empty feeders)
 const SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION = 3;
 
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
@@ -98,8 +97,6 @@ const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleSt
  * In practice there are three real inputs:
  *  - the current `{ version, rules }` shape — passed through when version is current,
  *    which also preserves rule ids this version may not know yet;
- *  - `{ version: 2, rules }` — SID watermark is reset so `local` entities created
- *    while the rule scanned empty `windows`/`system` namespaces are not skipped;
  *  - `{ rules }` without `version` — email watermark is reset so case-insensitive
  *    matching can heal pre-existing case-split groups (one-time);
  *  - the original flat `{ lastProcessedTimestamp, lastRun }` — moved into
@@ -147,6 +144,9 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
+  // The SID rule kept advancing its watermark over empty `windows`/`system`
+  // scans after the IdP gate change. `local` entities created in that window
+  // sit behind it and would never be considered without a one-time reset.
   if (
     storedVersion < SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION &&
     Object.hasOwn(rules, sidRuleId)

@@ -252,14 +252,13 @@ async function resolveMatchGroup(
   }
 
   if (row.unresolvedNamespaces.length < row.unresolvedCount) {
-    // Two unresolved entities in one namespace (including two `local` hosts
-    // sharing an email) decline the whole group, including a clear IDP pair
-    // sitting next to them. Decline-all is intentional: dropping the doubled
-    // namespace can promote a worse target (two ADs + one Okta → Okta wins).
-    //
-    // The SID rule opts `local` out of that guard: N `local` entities sharing
-    // a domain SID are one account by construction. Cheap-skip here only when
-    // no opted-out namespace is in the bucket; otherwise re-check after fetch.
+    // More unresolved entities than distinct namespaces means at least one
+    // namespace appears twice. That is usually a decline (two AD accounts
+    // sharing an email must not make Okta the target). `VALUES(namespace)` is
+    // a set, so this cheap check cannot tell *which* namespace is duplicated:
+    // skip only when none of the namespaces in the bucket are allow-listed.
+    // The SID rule allow-lists `local` because one domain SID on N hosts is
+    // one account; other duplicate namespaces are still declined after fetch.
     const extrasCouldBeAllowed = allowedDuplicateNamespaces.some((namespace) =>
       row.unresolvedNamespaces.includes(namespace)
     );

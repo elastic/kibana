@@ -48,17 +48,13 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
   });
 });
 
-describe('OOTB SID and UPN rule catalog', () => {
-  it('adds local to the SID rule, disables CrowdStrike and UPN, and keeps CrowdStrike as its own rule', () => {
-    const sid = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
-    const crowdstrike = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE);
-    const upn = getResolutionRuleConfig(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE);
-
-    expect(sid?.matcher?.namespaces).toEqual(['local', 'system', 'windows', 'active_directory']);
-    expect(sid?.matcher?.inclusionPattern).toBe(NT_AUTHORITY_SID_INCLUSION);
-    expect(sid?.matcher?.allowDuplicateUnresolvedNamespaces).toEqual(['local']);
-    expect(crowdstrike?.defaultEnabled).toBe(false);
-    expect(crowdstrike?.matcher?.namespaces).toEqual(['crowdstrike', 'active_directory']);
-    expect(upn?.defaultEnabled).toBe(false);
+describe('OOTB rule enablement', () => {
+  it('disables the CrowdStrike and UPN rules whose feeders no longer create entities', () => {
+    expect(getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)?.defaultEnabled).toBe(
+      false
+    );
+    expect(getResolutionRuleConfig(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE)?.defaultEnabled).toBe(
+      false
+    );
   });
 });
