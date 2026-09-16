@@ -20,5 +20,8 @@
     ],
     "optionalPlugins": ["usageCollection", "cloud"],
     "extraPublicDirs": ["public/common"]
+  },
+  "build": {
+    "noParse": ["server/declarative_connectors/specs/*.yaml"]
   }
 }
