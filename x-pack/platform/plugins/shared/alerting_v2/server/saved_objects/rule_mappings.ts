@@ -8,21 +8,33 @@
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 import type { BuilderTypeManifest } from '@kbn/alerting-v2-rule-builders';
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
+import {
+  securityDetectionQueryManifest,
+  securityDetectionThresholdManifest,
+} from '@kbn/security-detection-rule-schema';
 import { assembleBuilderFieldsMappings } from './assemble_builder_fields_mappings';
 
 /**
  * The list of builder type manifests whose sub-field mappings are assembled
  * into `metadata.builder_fields.properties` in the static mapping.
  *
- * Starts empty: no builder types are registered on this branch yet. Step 3.5
- * routes the two detection-type manifests (`securityDetectionQuery` and
- * `securityDetectionThreshold`) in here. Two manifests declaring the same leaf
- * path with different field types fail `alerting_v2`'s setup; identical
- * declarations merge silently (the shared detection fragment's sub-fields).
+ * Each manifest listed here must have a corresponding fold line in
+ * rule_model_versions.ts. The two sources — static mappings and model versions
+ * — are deliberately coupled: both import the same manifest objects, so the
+ * mappings and the version history cannot disagree, and core's startup
+ * consistency check passes by construction.
+ *
+ * Identical sub-field declarations across manifests (e.g. the shared detection
+ * fragment's risk_score/max_signals/note/setup) merge silently.
+ * Conflicting declarations (same path, different field type) fail alerting_v2's
+ * setup immediately.
  *
  * Ref: rule-type-registration.md "The fold into the saved-object registration"
  */
-const BUILDER_MANIFESTS: BuilderTypeManifest[] = [];
+const BUILDER_MANIFESTS: BuilderTypeManifest[] = [
+  securityDetectionQueryManifest,
+  securityDetectionThresholdManifest,
+];
 
 /**
  * Mappings for the rule saved object.
