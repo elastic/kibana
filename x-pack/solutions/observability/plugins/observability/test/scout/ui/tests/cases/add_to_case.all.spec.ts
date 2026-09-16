@@ -13,7 +13,7 @@ import { CASES_ALL_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 
 // Ported from the "When user has all privileges for cases" suite in the FTR
 // pages/alerts/add_to_case.ts. A user with cases write privileges sees the
-// add-to-case row action and can open the case selector.
+// add-to-case row action and can create a case from the case selector.
 test.describe(
   'Observability alerts - add to case (all privileges)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -38,12 +38,14 @@ test.describe(
       await expect(alertsTablePage.addToCaseAction).toBeVisible();
     });
 
-    test('opens the case selector from "Add to case"', async ({ pageObjects }) => {
+    test('opens the create-case flyout from the case selector', async ({ pageObjects }) => {
       const { alertsTablePage } = pageObjects;
       await alertsTablePage.waitForTableToLoad();
       await alertsTablePage.openActionsMenuForRow(0);
       await alertsTablePage.clickAddToCase();
       await expect(alertsTablePage.addToExistingCaseModal).toBeVisible();
+      await alertsTablePage.clickCreateCase();
+      await expect(alertsTablePage.createCaseFlyout).toBeVisible();
     });
   }
 );
