@@ -267,16 +267,27 @@ export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   }
 });
 
+const LOOKBACK_DESCRIPTION =
+  'Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.';
+const LOOKBACK_UPDATE_DESCRIPTION = `${LOOKBACK_DESCRIPTION} Set to \`null\` to clear it.`;
+
 export const scheduleSchema = z
   .object({
     every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m, 1h.'),
-    lookback: durationSchema
-      .optional()
-      .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
+    lookback: durationSchema.optional().describe(LOOKBACK_DESCRIPTION),
   })
   .strict()
   .describe('Execution schedule configuration.')
   .meta({ id: 'alerting_rule_schedule' });
+
+/**
+ * Partial schedule shape used in update requests. Extends the standard partial
+ * with a nullable `lookback` so a stored lookback can be removed by sending
+ * `null`. The create schema does not allow `null` here; only updates do.
+ */
+export const scheduleUpdatePartialSchema = scheduleSchema.partial().extend({
+  lookback: durationSchema.optional().nullable().describe(LOOKBACK_UPDATE_DESCRIPTION),
+});
 
 /** Query (required) */
 
@@ -1007,7 +1018,7 @@ export const updateRuleDataSchema = z
       })
       .optional(),
     time_field: z.string().min(1).max(128).optional().describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleUpdatePartialSchema.optional().nullable(),
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema
       .optional()
