@@ -26,7 +26,6 @@ import {
 import { appContextService } from '../../services';
 
 import { FleetNotFoundError } from '../../errors';
-import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
@@ -37,7 +36,7 @@ jest.mock('../../services/package_policy', () => {
   return {
     packagePolicyService: {
       get: jest.fn(),
-      list: jest.fn(),
+      fetchAllItems: jest.fn(),
     },
   };
 });
@@ -123,9 +122,11 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
     packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [packagePolicy1, testPackagePolicy],
-    } as any);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [packagePolicy1, testPackagePolicy];
+      })()
+    );
 
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
@@ -139,10 +140,6 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await deletePackageDatastreamAssetsHandler(context, request, response);
     expect(response.ok).toHaveBeenCalledWith({
       body: { success: true },
-    });
-
-    expect(packagePolicyServiceMock.list.mock.calls[0][1]).toMatchObject({
-      perPage: SO_SEARCH_LIMIT,
     });
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).toHaveBeenCalledWith({
@@ -213,9 +210,11 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
     packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [packagePolicy1, testPackagePolicy],
-    } as any);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [packagePolicy1, testPackagePolicy];
+      })()
+    );
 
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
@@ -265,7 +264,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       new FleetNotFoundError('Package policy with id idontexist not found')
     );
-    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -293,7 +292,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       new FleetNotFoundError('Package policy with id policy-other-pkg not found')
     );
-    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -321,7 +320,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       new FleetNotFoundError('Package policy with id policy-other-version not found')
     );
-    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -346,7 +345,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
       new FleetNotFoundError('Package policy with id other-space-policy-id not found')
     );
-    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
     expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -367,9 +366,11 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
     packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [testPackagePolicy, packagePolicy1],
-    } as any);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [testPackagePolicy, packagePolicy1];
+      })()
+    );
 
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
@@ -407,18 +408,20 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       },
     });
     packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [
-        packagePolicy1,
-        testPackagePolicy,
-        {
-          ...testPackagePolicy,
-          id: 'namespace-new',
-          namespace: 'new',
-          inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
-        },
-      ],
-    } as any);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [
+          packagePolicy1,
+          testPackagePolicy,
+          {
+            ...testPackagePolicy,
+            id: 'namespace-new',
+            namespace: 'new',
+            inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
+          },
+        ];
+      })()
+    );
 
     mockedGetCustomDatasetStreams.mockReturnValue([
       { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },

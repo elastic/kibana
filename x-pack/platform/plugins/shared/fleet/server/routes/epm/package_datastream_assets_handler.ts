@@ -11,7 +11,11 @@ import semverValid from 'semver/functions/valid';
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages/get';
-import type { DeletePackageDatastreamAssetsRequestSchema, FleetRequestHandler } from '../../types';
+import type {
+  DeletePackageDatastreamAssetsRequestSchema,
+  FleetRequestHandler,
+  PackagePolicy,
+} from '../../types';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
@@ -19,7 +23,7 @@ import {
   isInputPackageDatasetUsedByMultiplePolicies,
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.params>,
@@ -58,11 +62,13 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
     }
 
     const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
+    const allPackagePolicies: PackagePolicy[] = [];
+    for await (const page of await packagePolicyService.fetchAllItems(allSpacesSoClient, {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-      spaceId: '*',
-      perPage: SO_SEARCH_LIMIT,
-    });
+      spaceIds: ['*'],
+    })) {
+      allPackagePolicies.push(...page);
+    }
 
     const customDatasetStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
 

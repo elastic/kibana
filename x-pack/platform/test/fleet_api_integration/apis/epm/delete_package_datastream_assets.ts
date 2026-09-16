@@ -166,17 +166,18 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 200 when the package policy belongs to the request space', async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
-        const agentPolicyId = await createAgentPolicy();
+        const agentPolicyId = await createAgentPolicy(spaceA);
         const packagePolicyId = await createPackagePolicy(
           agentPolicyId,
-          `dataset-default-${Date.now()}`
+          `dataset-a-${Date.now()}`,
+          spaceA
         );
 
         try {
-          const res = await deleteDatastreamAssets(packagePolicyId, undefined, 200);
+          const res = await deleteDatastreamAssets(packagePolicyId, spaceA, 200);
           expect(res.body).to.eql({ success: true });
         } finally {
-          await deleteAgentPolicy(agentPolicyId);
+          await deleteAgentPolicy(agentPolicyId, spaceA);
         }
       });
     });
