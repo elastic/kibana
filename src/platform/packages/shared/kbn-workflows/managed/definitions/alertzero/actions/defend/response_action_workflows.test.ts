@@ -24,10 +24,11 @@ import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
 import { WorkflowSchema } from '../../../../../spec/schema';
 
 /**
- * These three actions replace custom workflow steps. They dispatch via the
- * public response-action API, then poll GET /api/endpoint/action/{id} until
- * `isCompleted` (or the 10-minute / 60-attempt ceiling). The YAML is the
- * source of truth; this suite pins the shared poll contract and catalog shape.
+ * These three actions probe Actions-log privilege, dispatch via the
+ * public response-action API, then poll GET /api/endpoint/action/{id}
+ * until `isCompleted` (or the 10-minute / 60-attempt ceiling). The
+ * YAML is the source of truth; this suite pins the shared pre-flight,
+ * poll contract, and catalog shape.
  */
 
 interface YamlStep {
@@ -36,7 +37,7 @@ interface YamlStep {
   condition?: string;
   timeout?: string;
   'max-iterations'?: { limit?: number; 'on-limit'?: string } | number;
-  'on-failure'?: { retry?: { 'max-attempts'?: number; delay?: string } };
+  'on-failure'?: { retry?: { 'max-attempts'?: number; delay?: string }; continue?: boolean };
   with?: Record<string, unknown>;
   steps?: YamlStep[];
   else?: YamlStep[];
@@ -45,7 +46,10 @@ interface YamlStep {
 interface YamlWorkflow {
   name: string;
   tags?: string[];
-  consts?: { actionMetadata?: { category?: string; impact?: string } };
+  consts?: {
+    actionMetadata?: { category?: string; impact?: string };
+    privilege_probe_action_id?: string;
+  };
   outputs?: Array<{ name: string; type?: string }>;
   steps: YamlStep[];
 }
@@ -116,6 +120,39 @@ describe('AlertZero response-action workflows', () => {
 
       expect(requestSteps.length).toBeGreaterThan(0);
       expect(unscoped.map((step) => `${step.name}: ${String(step.with?.path)}`)).toEqual([]);
+    });
+
+    it('probes Actions-log privilege with a sentinel GET before dispatching', () => {
+      // GET details requires Actions log; the POST does not. A missing privilege
+      // must fail closed so we never isolate/kill/suspend a host we cannot wait on.
+      const probeIndex = parsed.steps.findIndex((step) => step.name === 'probe_action_details');
+      const dispatchIndex = parsed.steps.findIndex((step) => step.name === 'dispatch');
+      const probe = stepByName('probe_action_details');
+      const capture = stepByName('capture_probe_status');
+      const failIfCannotPoll = stepByName('fail_if_cannot_poll');
+      const failStep = stepByName('missing_actions_log_privilege');
+
+      expect(parsed.consts?.privilege_probe_action_id).toBe('00000000-0000-0000-0000-000000000000');
+
+      expect(probe?.type).toBe('kibana.request');
+      expect(probe?.with?.method).toBe('GET');
+      expect(probe?.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}'
+      );
+      expect(probe?.['on-failure']).toEqual({ continue: true });
+
+      expect(capture?.type).toBe('data.set');
+      expect(capture?.with?.probe_http_status).toContain(
+        'steps.probe_action_details.error.message'
+      );
+
+      expect(failIfCannotPoll?.type).toBe('if');
+      expect(failIfCannotPoll?.condition).toContain('HTTP 404');
+      expect(failStep?.type).toBe('workflow.fail');
+      expect(failStep?.with?.message).toEqual(expect.stringContaining('Actions log privilege'));
+
+      expect(probeIndex).toBeGreaterThanOrEqual(0);
+      expect(probeIndex).toBeLessThan(dispatchIndex);
     });
 
     it('dispatches the response action to the public API with the versioned header and no retry', () => {

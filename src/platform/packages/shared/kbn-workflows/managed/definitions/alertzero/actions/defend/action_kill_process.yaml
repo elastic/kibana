@@ -22,6 +22,9 @@ consts:
     reversible: false
     approvalPolicy: always-gate
   actionLabel: Kill process
+  # Sentinel id used only to probe Actions-log privilege before killing.
+  # A 404 means the privilege is present; anything else must fail closed.
+  privilege_probe_action_id: "00000000-0000-0000-0000-000000000000"
 triggers:
   - type: manual
     inputs:
@@ -87,6 +90,40 @@ outputs:
   - name: message
     type: string
 steps:
+  # GET details requires Actions log (Platinum+); kill process only needs
+  # Process Operations. Probe the same route the poll uses so a missing
+  # privilege fails before the process is touched. kibana.request throws
+  # `HTTP <status>: …`.
+  - name: probe_action_details
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  # Separate step: Liquid cannot read a variable written by the same data.set.
+  - name: capture_probe_status
+    type: data.set
+    with:
+      probe_http_status: "{{ steps.probe_action_details.error.message | slice: 0, 8 }}"
+
+  - name: fail_if_cannot_poll
+    type: if
+    condition: '${{ steps.probe_action_details.error != blank and variables.probe_http_status != "HTTP 404" }}'
+    steps:
+      - name: missing_actions_log_privilege
+        type: workflow.fail
+        with:
+          message: >
+            Cannot wait for kill-process completion: GET /api/endpoint/action/{id}
+            failed ({{ steps.probe_action_details.error.message }}). The
+            approver needs the Actions log privilege in addition to Process
+            Operations.
+
   # POST queues the command; 200 means accepted, not that the process is dead.
   # kibana.request is sent verbatim, so the path is prefixed with the executing space.
   # No retries: the API is non-idempotent — each POST creates a new action ID.
