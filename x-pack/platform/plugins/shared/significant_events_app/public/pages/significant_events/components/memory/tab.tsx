@@ -28,6 +28,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import {
@@ -57,11 +58,11 @@ export function MemoryTab() {
   const {
     core: {
       application: {
-        capabilities: { streams },
+        capabilities: { nightshift },
       },
     },
   } = useKibana();
-  const canManage = streams?.manage === true;
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -127,7 +128,7 @@ export function MemoryTab() {
         defaultMessage: 'Detect Gaps',
       }),
       testSubj: 'streamsMemoryDetectGapsButton',
-      requiresManage: false,
+      requiresManage: true,
       mutation: detectGaps,
     },
   ];
@@ -407,10 +408,15 @@ export function MemoryTab() {
                 />
               ) : (
                 <EuiText color="subdued">
-                  {i18n.translate('xpack.significantEventsApp.memory.empty', {
-                    defaultMessage:
-                      'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
-                  })}
+                  {canManage
+                    ? i18n.translate('xpack.significantEventsApp.memory.empty', {
+                        defaultMessage:
+                          'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
+                      })
+                    : i18n.translate('xpack.significantEventsApp.memory.emptyReadOnly', {
+                        defaultMessage:
+                          'No memory entries yet. Agents will automatically create entries as they learn.',
+                      })}
                 </EuiText>
               )}
             </EuiFlexItem>
@@ -456,7 +462,11 @@ export function MemoryTab() {
       </EuiFlexGroup>
 
       {selectedEntryId && (
-        <EntryFlyout entryId={selectedEntryId} onClose={() => setSelectedEntryId(null)} />
+        <EntryFlyout
+          entryId={selectedEntryId}
+          onClose={() => setSelectedEntryId(null)}
+          canManage={canManage}
+        />
       )}
       {selectedChange && (
         <ChangeFlyout

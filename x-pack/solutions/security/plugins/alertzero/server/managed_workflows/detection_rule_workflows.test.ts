@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
@@ -169,17 +170,22 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // The review has no gate of its own: the decision lives on the investigation as a
-    // proposal, and the gate workflow runs the edit-rule action as the approver. The
-    // gate types actionInput as an object, so the manual variant must omit the key
-    // rather than pass an empty value, hence two calls instead of one.
+    // Query and manual decisions live on the investigation as proposals, and the gate
+    // workflow runs the edit-rule action as the approver. The gate types actionInput
+    // as an object, so the manual variant must omit the key rather than pass an empty
+    // value, hence two calls instead of one. Exception and risk score changes still
+    // use an in-run waitForApproval until their proposal actions exist.
     it('gates the review through the investigation proposal workflow', () => {
       const { steps } = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
       const all = flattenSteps(steps as unknown as NestedStep[]);
 
-      expect(all.map(({ type }) => type)).not.toContain('waitForApproval');
+      const interim = all.filter(({ type }) => type === 'waitForApproval');
+      expect(interim.map(({ name }) => name)).toEqual(['review_tuning']);
+      expect(String(interim[0].if)).toContain("change_type == 'exception'");
+      expect(String(interim[0].if)).toContain("change_type == 'risk_score'");
+      expect(String(interim[0].if)).not.toContain("'query'");
       expect(all.map(({ type }) => type)).not.toContain('waitForInput');
 
       const proposals = all.filter(
@@ -215,11 +221,15 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      expect(action.if).toContain('steps.rule_tune_supported.output.auto == true');
+      expect(action.if).toContain(
+        "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+      );
 
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
-      expect(manual.if).toContain('steps.rule_tune_supported.output.auto == false');
+      expect(manual.if).toContain(
+        "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
+      );
 
       for (const proposal of proposals) {
         expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
@@ -460,7 +470,7 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        expect(applied.if).toContain('steps.record_decision.output.applied == true');
+        expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
         expect(applied.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
@@ -468,8 +478,15 @@ describe('detection rule workflows', () => {
         // Approving a recommendation the pipeline cannot apply itself acknowledges
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
-        expect(acknowledged.if).toContain('steps.record_decision.output.approved == true');
-        expect(acknowledged.if).toContain('steps.rule_tune_supported.output.auto == false');
+        expect(acknowledged.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
+        );
+        expect(acknowledged.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+        );
+        expect(acknowledged.if).toContain(
+          'steps.can_preview_query_change.output.supported == false'
+        );
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.acknowledged_tag }}',
@@ -502,7 +519,74 @@ describe('detection rule workflows', () => {
         expect(String(flags.dismissed)).toContain(
           "steps.propose_manual.output.status == 'dismissed'"
         );
-        expect(reviewSteps.map(({ type }) => type)).not.toContain('security.patchRule');
+
+        // record_outcome reads from record_apply_results to avoid Liquid parentheses;
+        // the query path is applied by the gate's action, the others in-run.
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.query_applied)).toContain(
+          'steps.record_decision.output.applied == true'
+        );
+        expect(String(applyResults.with?.query_applied)).not.toContain('apply_query_tuning');
+        const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
+        for (const flag of ['query_applied', 'exception_applied', 'risk_score_applied']) {
+          expect(String(outcome.with?.rule_patched)).toContain(
+            `steps.record_apply_results.output.${flag} == true`
+          );
+        }
+
+        // The review never patches a query itself; only the risk score path patches in-run.
+        expect(reviewSteps.some(({ name }) => name === 'apply_query_tuning')).toBe(false);
+        expect(
+          reviewSteps.filter(({ type }) => type === 'security.patchRule').map(({ name }) => name)
+        ).toEqual(['apply_risk_score_tuning']);
+      });
+
+      it('applies exceptions via security.createRuleException for approved exception proposals', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_exception_tuning')!;
+        expect(apply.type).toBe('security.createRuleException');
+        expect(apply.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
+        );
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        expect(apply.with?.rule_id).toBe('{{ inputs.rule_uuid }}');
+        expect(apply.with?.entries).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'exception'"
+        );
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          'steps.apply_exception_tuning.error == null'
+        );
+      });
+
+      it('applies risk score changes via security.patchRule for approved risk score proposals', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_risk_score_tuning')!;
+        expect(apply.type).toBe('security.patchRule');
+        expect(apply.if).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
+        );
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        const patch = apply.with?.patch as Record<string, string>;
+        expect(patch.id).toBe('{{ inputs.rule_uuid }}');
+        expect(patch.risk_score).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}'
+        );
+        expect(patch.severity).toBe(
+          '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'risk_score'"
+        );
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          'steps.apply_risk_score_tuning.error == null'
+        );
       });
 
       // The action ran inside the gate, so the patched rule is not visible here; the
@@ -561,9 +645,32 @@ describe('detection rule workflows', () => {
         const comment = String((compose.with as Record<string, string>).comment);
 
         expect(String(action.if)).not.toContain('record_preview_outcome');
-        expect(comment).toContain('The backtest could not verify the proposed query');
-        expect(comment).toContain('The proposed query is still applied to the rule.');
+        expect(comment).toContain('{% if steps.can_preview_query_change.output.supported %}');
+        expect(comment).toContain('inconclusive');
+        expect(comment).toContain('not previewed or applied automatically');
       });
+
+      it.each([
+        ['gate ran the action on a query change', true, 'query', true],
+        ['gate dismissed', false, 'query', false],
+        ['gate ran but the change was not a query', true, 'exception', false],
+        ['no decision recorded', undefined, 'query', false],
+      ])(
+        'records query application only from the gate result: %s',
+        (_scenario, applied, changeType, expected) => {
+          const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results');
+          const expression = String(applyResults?.with?.query_applied).slice(3, -2).trim();
+
+          expect(
+            createWorkflowLiquidEngine().evalValueSync(expression, {
+              steps: {
+                record_decision: { output: { applied } },
+                diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              },
+            })
+          ).toBe(expected);
+        }
+      );
 
       // A partial or timed-out alert count would understate a backtest, so the
       // preview worker must fail its verdict instead of reporting a low number.
@@ -587,10 +694,7 @@ describe('detection rule workflows', () => {
       });
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
-        const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
-        const supported = reviewSteps.find(({ name }) => name === 'rule_tune_supported')!;
-        const condition = String(supported.with?.auto);
-
+        const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.data_view_id == null'
         );
@@ -600,7 +704,17 @@ describe('detection rule workflows', () => {
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.alert_suppression == null'
         );
-        expect(condition).toContain('steps.record_auto_apply_support.output.supported == true');
+        expect(String(support.with?.supported)).toContain(
+          "steps.diagnose_rule.output.structured_output.change_type == 'query'"
+        );
+        expect(String(support.with?.supported)).toContain(
+          "steps.fetch_rule.output.type == 'query'"
+        );
+
+        const previews = reviewSteps.find(({ name }) => name === 'run_previews')!;
+        expect(String(previews.if)).toContain(
+          'steps.can_preview_query_change.output.supported == true'
+        );
       });
 
       it('bounds direct review inputs', () => {
@@ -666,10 +780,11 @@ describe('detection rule workflows', () => {
         expect(message).not.toContain('time_window_hours');
       });
 
-      it('does not use classify_review or can_apply', () => {
+      it('does not use redundant proposal classification steps', () => {
         for (const steps of [tuningSteps, reviewSteps]) {
           expect(steps.some(({ name }) => name === 'classify_review')).toBe(false);
-          expect(JSON.stringify(steps)).not.toContain('can_apply');
+          expect(steps.some(({ name }) => name === 'record_apply_path')).toBe(false);
+          expect(steps.some(({ name }) => name === 'classify_proposal')).toBe(false);
         }
       });
 
