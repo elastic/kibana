@@ -117,12 +117,15 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 
-export class SignificantEventsPlugin implements Plugin<
-  void,
-  void,
-  SignificantEventsPluginSetupDependencies,
-  SignificantEventsPluginStartDependencies
-> {
+export class SignificantEventsPlugin
+  implements
+    Plugin<
+      void,
+      void,
+      SignificantEventsPluginSetupDependencies,
+      SignificantEventsPluginStartDependencies
+    >
+{
   public logger: Logger;
   public server?: SignificantEventsServer;
   private isDev: boolean;
@@ -345,7 +348,8 @@ export class SignificantEventsPlugin implements Plugin<
     let syncWorkflowService: SyncWorkflowService | undefined;
     let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
-      SignificantEventsScheduledWorkflowsService | undefined;
+      | SignificantEventsScheduledWorkflowsService
+      | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
       continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
