@@ -83,6 +83,24 @@ export async function queryMonitorHeatmap({
               field: 'summary.down',
             },
           },
+          last_down: {
+            filter: {
+              range: {
+                'summary.down': {
+                  gt: 0,
+                },
+              },
+            },
+            aggs: {
+              latest: {
+                top_hits: {
+                  size: 1,
+                  _source: ['state.id'],
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                },
+              },
+            },
+          },
         },
       },
     },

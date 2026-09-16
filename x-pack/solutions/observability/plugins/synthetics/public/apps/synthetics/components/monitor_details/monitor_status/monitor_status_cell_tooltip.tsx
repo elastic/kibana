@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, EuiText, useEuiTheme } from '@elastic/eui';
 
 import type { TooltipValue } from '@elastic/charts';
 import { TooltipTable, TooltipHeader, TooltipContainer } from '@elastic/charts';
@@ -90,6 +90,13 @@ export const MonitorStatusCellTooltip = ({
         ]}
         items={tooltipValues}
       />
+      {!isLoading && timeBin.downs > 0 ? (
+        <div css={{ padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}` }}>
+          <EuiText size="xs" color="subdued">
+            {labels.CLICK_TO_VIEW_ERROR_DETAILS}
+          </EuiText>
+        </div>
+      ) : null}
     </TooltipContainer>
   );
 };
