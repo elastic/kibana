@@ -97,6 +97,20 @@ describe('SecurityRoutePageWrapper', () => {
     expect(mockRedirect).toHaveBeenCalled();
   });
 
+  it('should render children for the entity analytics bookmark when the app link is gone', () => {
+    mockUseLinkInfo.mockReturnValue(undefined);
+
+    const { getByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
   it('should render NoPrivilegesPage when unauthorized', () => {
     mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
 

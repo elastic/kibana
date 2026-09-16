@@ -152,6 +152,10 @@ export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signa
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = '/entity_analytics_overview' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;

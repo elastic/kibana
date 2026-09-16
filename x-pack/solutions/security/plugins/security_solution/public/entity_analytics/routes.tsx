@@ -15,6 +15,8 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_LANDING_PATH,
+  ENTITY_ANALYTICS_OVERVIEW_PATH,
   SecurityPageName,
   USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
 } from '../../common/constants';
@@ -160,6 +162,10 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
 
+const RedirectToEntityAnalyticsHome: React.FC = () => (
+  <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />
+);
+
 // ---- Route definitions ----
 export const routes = [
   {
@@ -190,5 +196,13 @@ export const routes = [
       EntityAnalyticsHomePageContainer,
       SecurityPageName.entityAnalyticsHomePage
     ),
+  },
+  {
+    path: ENTITY_ANALYTICS_LANDING_PATH,
+    component: RedirectToEntityAnalyticsHome,
+  },
+  {
+    path: ENTITY_ANALYTICS_OVERVIEW_PATH,
+    component: RedirectToEntityAnalyticsHome,
   },
 ];
