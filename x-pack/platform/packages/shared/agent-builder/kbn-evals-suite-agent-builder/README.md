@@ -29,29 +29,7 @@ telemetry.tracing.exporters:
 
 Define the models to evaluate as inference endpoint definitions in the `KIBANA_TESTING_INFERENCE_ENDPOINTS` environment variable (raw or base64-encoded JSON; `node scripts/evals init` can generate it for EIS and OpenRouter):
 
-```bash
-export KIBANA_TESTING_INFERENCE_ENDPOINTS='{"my-connector":{"name":"My Test Connector","inferenceId":"my-connector","provider":"openai","taskType":"chat_completion","providerConfig":{"model_id":"gpt-4o","url":"https://api.openai.com/v1/chat/completions"},"secrets":{"providerSecrets":{"api_key":"your-api-key"}}}}'
-```
-
-Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`; evals reuses it as-is:
-
-```yaml
-# In kibana.dev.yml
-xpack.actions.preconfigured:
-  my-connector:
-    name: My Test Connector
-    actionTypeId: .inference
-    config:
-      provider: openai
-      taskType: chat_completion
-      inferenceId: my-connector
-      providerConfig:
-        model_id: gpt-4o
-        url: https://api.openai.com/v1/chat/completions
-    secrets:
-      providerSecrets:
-        api_key: <your-api-key>
-```
+Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`.
 
 See [Connector definitions and inference endpoints](../../kbn-evals/README.md#connector-definitions-and-inference-endpoints) for the full shape.
 
