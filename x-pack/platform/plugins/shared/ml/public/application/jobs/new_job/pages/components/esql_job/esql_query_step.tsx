@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -36,6 +36,10 @@ const NUMERIC_ESQL_TYPES = new Set([
   'double',
 ]);
 const DATE_ESQL_TYPES = new Set(['date', 'date_nanos']);
+
+const invalidateRequest = (requestGeneration: MutableRefObject<number>) => {
+  requestGeneration.current++;
+};
 
 const toOptions = (fields: ESQLFieldWithMetadata[]): EuiComboBoxOptionOption[] =>
   fields.map(({ name, type }) => ({ label: name, append: type }));
@@ -124,7 +128,10 @@ export const EsqlQueryStep = () => {
       );
     }, DEBOUNCE_MS);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      invalidateRequest(requestGeneration);
+    };
   }, [mlApi, query]);
 
   return (

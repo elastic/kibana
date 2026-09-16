@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
 import { EsqlQueryStep } from './esql_query_step';
@@ -65,6 +65,38 @@ describe('EsqlQueryStep', () => {
       expect(screen.getByTestId('mlEsqlEmittedTimeField')).toHaveTextContent('bucket')
     );
     expect(getEsqlQueryColumns).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      fireEvent.focus(within(screen.getByTestId('mlEsqlDetectorFields')).getByRole('combobox'));
+    });
+    expect(screen.getByText('doc_count')).toBeInTheDocument();
+    expect(screen.getByText('avg_bytes')).toBeInTheDocument();
+    expect(screen.queryByText('host')).not.toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.focus(within(screen.getByTestId('mlEsqlInfluencers')).getByRole('combobox'));
+    });
+    expect(screen.getAllByText('bucket')).not.toHaveLength(0);
+    expect(screen.getAllByText('host')).not.toHaveLength(0);
+    expect(screen.getAllByText('doc_count')).not.toHaveLength(0);
+    expect(screen.getAllByText('avg_bytes')).not.toHaveLength(0);
+  });
+
+  it('uses the first date_nanos column when the output has no bucket column', async () => {
+    getEsqlQueryColumns.mockResolvedValue({
+      columns: [
+        { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
+        { name: 'event_time', type: 'date_nanos', hasConflict: false, userDefined: false },
+      ],
+    });
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(await screen.findByText('event_time')).toBeInTheDocument();
   });
 
   it('keeps source time field and bucket span explicit and distinct from emitted time', () => {
@@ -72,6 +104,12 @@ describe('EsqlQueryStep', () => {
 
     expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('@timestamp');
     expect(screen.getByTestId('mlEsqlBucketSpan')).toHaveValue('1h');
+    fireEvent.change(screen.getByTestId('mlEsqlSourceTimeField'), {
+      target: { value: 'event.ingested' },
+    });
+    fireEvent.change(screen.getByTestId('mlEsqlBucketSpan'), { target: { value: '15m' } });
+    expect(screen.getByTestId('mlEsqlSourceTimeField')).toHaveValue('event.ingested');
+    expect(screen.getByTestId('mlEsqlBucketSpan')).toHaveValue('15m');
     expect(screen.getByTestId('mlEsqlEmittedTimeField')).not.toHaveTextContent('@timestamp');
   });
 
@@ -124,5 +162,28 @@ describe('EsqlQueryStep', () => {
     });
 
     expect(await screen.findByText('Unknown column [bytes]')).toBeInTheDocument();
+  });
+
+  it('does not update state when an in-flight request resolves after unmount', async () => {
+    let resolveRequest: (value: { columns: typeof columns }) => void;
+    const request = new Promise<{ columns: typeof columns }>((resolve) => {
+      resolveRequest = resolve;
+    });
+    getEsqlQueryColumns.mockReturnValueOnce(request);
+    const consoleError = jest.spyOn(console, 'error').mockImplementation();
+    const { unmount } = renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+    unmount();
+    await act(async () => {
+      resolveRequest!({ columns });
+      await Promise.resolve();
+    });
+
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });
