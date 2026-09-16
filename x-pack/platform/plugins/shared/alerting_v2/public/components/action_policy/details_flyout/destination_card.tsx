@@ -9,11 +9,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -37,9 +35,9 @@ export const DestinationCard = ({ destination }: Props) => {
 const WorkflowDestinationCard = ({ id }: { id: string }) => {
   const { data: workflow } = useFetchWorkflow(id);
   const application = useService(CoreStart('application'));
-  const { euiTheme } = useEuiTheme();
 
   const name = workflow?.name ?? id;
+  const description = workflow?.description;
   const href = application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` });
   const connectorTypes = getWorkflowConnectorTypes(workflow?.definition);
   const hasConnectorIcons = connectorTypes.length > 0;
@@ -56,42 +54,42 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
       data-test-subj="actionPolicyDestinationCard"
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="workflow" size="m" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-          <EuiToolTip
-            content={name}
-            position="top"
-            anchorProps={{ css: { minWidth: 0, overflow: 'hidden' } }}
-          >
-            <EuiText
-              size="s"
-              tabIndex={0}
-              css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              data-test-subj="actionPolicyDestinationCardTitle"
-            >
-              <strong>{name}</strong>
-            </EuiText>
-          </EuiToolTip>
-        </EuiFlexItem>
-        {hasConnectorIcons && (
-          <>
-            <EuiFlexItem
-              grow={false}
-              css={{
-                alignSelf: 'center',
-                width: 1,
-                height: euiTheme.size.base,
-                backgroundColor: euiTheme.colors.borderBaseSubdued,
-              }}
-            />
-            <EuiFlexItem grow={false}>
-              <WorkflowConnectorIcons types={connectorTypes} />
+        <EuiFlexItem grow css={{ minWidth: 0 }}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+              <EuiToolTip
+                content={name}
+                position="top"
+                anchorProps={{ css: { minWidth: 0, overflow: 'hidden' } }}
+              >
+                <EuiText
+                  size="s"
+                  tabIndex={0}
+                  css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  data-test-subj="actionPolicyDestinationCardTitle"
+                >
+                  <strong>{name}</strong>
+                </EuiText>
+              </EuiToolTip>
             </EuiFlexItem>
-          </>
-        )}
-        <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+            {hasConnectorIcons && (
+              <EuiFlexItem grow={false}>
+                <WorkflowConnectorIcons types={connectorTypes} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {description && (
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              data-test-subj="actionPolicyDestinationCardDescription"
+            >
+              {description}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip content={openLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="external"

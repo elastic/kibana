@@ -71,7 +71,7 @@ export const ActionPolicyDetailsFlyout = ({
   isStateLoading = false,
   isSnoozeLoading = false,
   session = 'never',
-  ownFocus = true,
+  ownFocus = false,
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
@@ -116,8 +116,9 @@ export const ActionPolicyDetailsFlyout = ({
   return (
     <>
       <FlyoutTemplate
-        type="push"
+        type="overlay"
         size="m"
+        resizable
         ownFocus={ownFocus}
         session={session}
         onClose={onClose}

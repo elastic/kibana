@@ -28,6 +28,8 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+const mockWorkflowData: Record<string, object> = {};
+
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (id: string) => ({
     data: {
@@ -39,6 +41,7 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
           { type: '.slack', name: 'send slack' },
         ],
       },
+      ...mockWorkflowData[id],
     },
     isLoading: false,
   }),
@@ -79,6 +82,22 @@ describe('DestinationCard', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/app/workflows/wf-42');
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders the workflow description when present', () => {
+    mockWorkflowData['wf-42'] = { description: 'Sends alerts to email and Slack' };
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardDescription')).toHaveTextContent(
+      'Sends alerts to email and Slack'
+    );
+    delete mockWorkflowData['wf-42'];
+  });
+
+  it('does not render a description element when description is absent', () => {
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.queryByTestId('actionPolicyDestinationCardDescription')).toBeNull();
   });
 
   it('renders nothing for a non-workflow destination type', () => {
