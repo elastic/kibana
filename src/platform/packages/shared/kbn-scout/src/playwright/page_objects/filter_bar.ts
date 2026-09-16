@@ -160,11 +160,7 @@ export class FilterBar {
   }
 
   async getFilterEditorSelectedPhrases(): Promise<string[]> {
-    // The component object matches data-test-subj exactly, and this element
-    // carries two space-separated subjs, so the full attribute value is needed.
-    return this.page.components
-      .comboBox('filterParamsComboBox phrasesParamsComboxBox')
-      .getSelectedOptions();
+    return this.page.components.comboBox('filterParamsComboBox').getSelectedOptions();
   }
 
   async closeFieldEditorModal() {
