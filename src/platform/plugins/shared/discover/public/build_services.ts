@@ -82,7 +82,7 @@ import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_serv
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 import { createDiscoverSessionClient, createSessionService, type SessionService } from './session';
 
-const USE_DISCOVER_SESSION_HTTP_API = false;
+const USE_DISCOVER_SESSION_HTTP_API = true;
 
 /**
  * Location state of internal Discover history instance

@@ -24,11 +24,21 @@ import { createSessionService } from './session_service';
 
 describe('filter normalization when loading a Discover session', () => {
   it.each([
-    { path: 'legacy', useHttpApi: false },
-    { path: 'HTTP', useHttpApi: true },
+    {
+      path: 'legacy',
+      useHttpApi: false,
+      expectedApiCalls: [],
+      expectedLegacyCalls: [['session-id']],
+    },
+    {
+      path: 'HTTP',
+      useHttpApi: true,
+      expectedApiCalls: [['session-id']],
+      expectedLegacyCalls: [],
+    },
   ])(
     'does not mark a $path session as unsaved after initializing its filters',
-    async ({ useHttpApi }) => {
+    async ({ useHttpApi, expectedApiCalls, expectedLegacyCalls }) => {
       const services = createDiscoverServicesMock();
       const filterManager = new FilterManager(services.uiSettings);
       services.filterManager = filterManager;
@@ -105,7 +115,7 @@ describe('filter normalization when loading a Discover session', () => {
         persistedDataViews: [dataViewMock],
       });
       toolkit.internalState.dispatch(
-        internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: true })
       );
       await toolkit.internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
       await toolkit.internalState
@@ -113,13 +123,9 @@ describe('filter normalization when loading a Discover session', () => {
         .unwrap();
       await toolkit.initializeSingleTab({ tabId: 'tab-id' });
 
-      expect(apiClient.get).toHaveBeenCalledTimes(useHttpApi ? 1 : 0);
-      expect(legacyGet).toHaveBeenCalledTimes(useHttpApi ? 0 : 1);
-      if (useHttpApi) {
-        expect(apiClient.get).toHaveBeenCalledWith('session-id');
-      } else {
-        expect(legacyGet).toHaveBeenCalledWith('session-id');
-      }
+      expect(apiClient.get.mock.calls).toEqual(expectedApiCalls);
+      expect(legacyGet.mock.calls).toEqual(expectedLegacyCalls);
+
       const filters = toolkit.getCurrentTab().appState.filters;
       expect(filters).toHaveLength(1);
       expect(filters?.[0].query).toEqual(originalFilters[0].query);

@@ -10,13 +10,12 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiDescriptionList,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiText,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -36,27 +35,26 @@ export const showSessionWarnings = ({
   core: Pick<CoreStart, 'notifications' | 'overlays' | 'rendering'>;
 }) => {
   const openModal = () => {
-    const warningDetails = warnings.map((warning) => {
+    const warningDetails = warnings.map((warning, index) => {
       const tabName =
         session.tabs.find((tab) => tab.id === warning.tab_id)?.label || warning.tab_id;
+      const title =
+        warning.type === 'dropped_panel'
+          ? i18n.translate('discover.sessionLoadWarnings.controlTitle', {
+              defaultMessage: 'Tab "{tabName}": control "{controlId}"',
+              values: { tabName, controlId: warning.panel_id },
+            })
+          : i18n.translate('discover.sessionLoadWarnings.propertyTitle', {
+              defaultMessage: 'Tab "{tabName}": property "{property}"',
+              values: { tabName, property: warning.key },
+            });
 
-      return {
-        title:
-          warning.type === 'dropped_panel'
-            ? i18n.translate('discover.sessionLoadWarnings.controlTitle', {
-                defaultMessage: 'Tab "{tabName}": control "{controlId}"',
-                values: { tabName, controlId: warning.panel_id },
-              })
-            : i18n.translate('discover.sessionLoadWarnings.propertyTitle', {
-                defaultMessage: 'Tab "{tabName}": property "{property}"',
-                values: { tabName, property: warning.key },
-              }),
-        description: (
-          <EuiCodeBlock language="text" fontSize="m" paddingSize="s" isCopyable>
-            {warning.message}
-          </EuiCodeBlock>
-        ),
-      };
+      return (
+        <li key={`${index}-${warning.tab_id}`}>
+          <strong>{title}</strong>
+          <p css={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{warning.message}</p>
+        </li>
+      );
     });
 
     const modal = core.overlays.openModal(
@@ -74,7 +72,9 @@ export const showSessionWarnings = ({
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiDescriptionList listItems={warningDetails} />
+            <EuiText size="s">
+              <ul>{warningDetails}</ul>
+            </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty onClick={() => modal.close()}>

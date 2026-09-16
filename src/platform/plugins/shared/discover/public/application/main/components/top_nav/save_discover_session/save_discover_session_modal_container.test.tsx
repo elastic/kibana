@@ -846,13 +846,14 @@ describe('DiscoverSessionSaveModalContainer', () => {
         message: 'An internal server error occurred. Check Kibana server logs for details.',
       },
     ])(
-      'should show one HTTP $status toast and pass $format unchanged to the details',
+      'should show one HTTP $status toast with $format details and no client stack',
       async ({ status, message }) => {
         const services = createDiscoverServicesMock();
         const error = Object.assign(new Error(message), {
           name: DISCOVER_SESSION_HTTP_ERROR_NAME,
           code: String(status),
         });
+        const originalStack = error.stack;
         const { modalProps, onClose } = await setup({
           isEmbedded: true,
           mockSaveDiscoverSession: () => Promise.reject(error),
@@ -865,12 +866,13 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
         expect(services.toastNotifications.addError).toHaveBeenCalledTimes(1);
         expect(services.toastNotifications.addError).toHaveBeenCalledWith(
-          expect.objectContaining({ name: error.name, code: error.code, message: error.message }),
+          { name: error.name, code: error.code, message: error.message },
           {
             title: sessionSaveErrorMessages[status]?.title,
             toastMessage: sessionSaveErrorMessages[status]?.description,
           }
         );
+        expect(error.stack).toBe(originalStack);
         expect(services.toastNotifications.addDanger).not.toHaveBeenCalled();
         expect(services.toastNotifications.addSuccess).not.toHaveBeenCalled();
         expect(onClose).not.toHaveBeenCalled();

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject, EMPTY } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import {
@@ -217,6 +217,7 @@ const testControlFactory: EmbeddablePublicDefinition<OptionsListESQLControlState
           serializeState: () => initialState,
           applySerializedState: jest.fn(),
           anyStateChange$: EMPTY,
+          latestState$: of(initialState),
         }),
         hasUnsavedChanges$,
       },

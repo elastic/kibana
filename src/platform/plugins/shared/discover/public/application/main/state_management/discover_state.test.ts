@@ -373,7 +373,7 @@ describe('Discover state', () => {
       'shows $toastCount warning toasts when loading $warnings',
       async ({ warnings, toastCount }) => {
         const { internalState, services } = getDiscoverInternalStateMock();
-        const session = createDiscoverSessionMock();
+        const session = createDiscoverSessionMock({ id: 'test-session' });
         jest.spyOn(services.sessionService, 'get').mockResolvedValueOnce({ session, warnings });
 
         await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
