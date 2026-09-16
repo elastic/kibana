@@ -39,7 +39,7 @@ export interface ServiceAccountsServiceStartParams {
   /** Whether saved object encryption is possible, captured from the encrypted saved objects setup contract. */
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   getSpaceId: (request: KibanaRequest) => string;
 }
 
@@ -60,7 +60,7 @@ export class ServiceAccountsService {
     encryptedSavedObjects,
     canEncrypt,
     getCurrentUser,
-    getCurrentProfileId,
+    getCurrentUserProfileId,
     getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts?.enabled) {
@@ -111,7 +111,7 @@ export class ServiceAccountsService {
         backend,
         checkPrivilegesWithRequest,
         getCurrentUser,
-        getCurrentProfileId,
+        getCurrentUserProfileId,
         getSpaceId,
         canEncrypt,
       }),

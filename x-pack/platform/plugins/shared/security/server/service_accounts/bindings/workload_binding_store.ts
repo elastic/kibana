@@ -146,14 +146,17 @@ export class WorkloadBindingStore {
 
     // The coordinates are authenticated data, so a mismatch cannot come from tampering — it would
     // mean this ID was derived from different coordinates than the ones stored under it.
-    if (
-      attributes.pluginId !== coordinates.pluginId ||
-      attributes.workloadType !== coordinates.workloadType ||
-      attributes.workloadId !== coordinates.workloadId ||
-      attributes.spaceId !== coordinates.spaceId
-    ) {
+    const mismatches = (['pluginId', 'workloadType', 'workloadId', 'spaceId'] as const)
+      .filter((coordinate) => attributes[coordinate] !== coordinates[coordinate])
+      .map(
+        (coordinate) =>
+          `${coordinate}: expected [${coordinates[coordinate]}], got [${attributes[coordinate]}]`
+      );
+    if (mismatches.length > 0) {
       this.logger.error(
-        `Service account workload binding [${id}] does not describe the workload it was looked up by.`
+        `Service account workload binding [${id}] does not describe the workload it was looked up by: ${mismatches.join(
+          '; '
+        )}`
       );
       throw Boom.forbidden('The service account binding for this workload is inconsistent.');
     }

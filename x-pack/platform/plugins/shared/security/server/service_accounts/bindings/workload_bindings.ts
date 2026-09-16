@@ -47,7 +47,7 @@ export interface ServiceAccountWorkloadBindingsApi {
     pluginId: string,
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
-  ): Promise<void>;
+  ): Promise<boolean>;
 
   getBinding(
     pluginId: string,
@@ -72,7 +72,7 @@ export interface ServiceAccountWorkloadBindingsOptions {
    * Resolves the user profile behind a request, including the creator of an API key. Used to keep
    * bindings traceable to a person; failures are tolerated rather than failing the bind.
    */
-  getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   /**
    * Resolves the space a request is acting in.
    */
@@ -88,7 +88,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private readonly backend: ServiceAccountsBackend;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  private readonly getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  private readonly getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
   private readonly getSpaceId: (request: KibanaRequest) => string;
   private readonly canEncrypt: boolean;
 
@@ -99,7 +99,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     backend,
     checkPrivilegesWithRequest,
     getCurrentUser,
-    getCurrentProfileId,
+    getCurrentUserProfileId,
     getSpaceId,
     canEncrypt,
   }: ServiceAccountWorkloadBindingsOptions) {
@@ -109,7 +109,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.backend = backend;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.getCurrentUser = getCurrentUser;
-    this.getCurrentProfileId = getCurrentProfileId;
+    this.getCurrentUserProfileId = getCurrentUserProfileId;
     this.getSpaceId = getSpaceId;
     this.canEncrypt = canEncrypt;
   }
@@ -154,25 +154,29 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     pluginId: string,
     request: KibanaRequest,
     { workloadType, workloadId }: ServiceAccountWorkloadRef
-  ): Promise<void> {
+  ): Promise<boolean> {
     this.ensureAvailable();
 
     // Same gate as bindWorkload: unbinding a workload silently drops it to no identity at all, which is
     // as much a privileged change as granting one.
     await this.ensureCanManage(request, 'unbind a service account from a workload');
 
-    const deleted = await this.store.delete({
-      pluginId,
-      workloadType,
-      workloadId,
-      spaceId: this.getSpaceId(request),
-    });
+    const spaceId = this.getSpaceId(request);
+    const deleted = await this.store.delete({ pluginId, workloadType, workloadId, spaceId });
 
     if (deleted) {
       this.logger.debug(
-        `Unbound the service account from workload [${workloadType}/${workloadId}] of plugin [${pluginId}]`
+        `Unbound the service account from workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
+      );
+    } else {
+      // Worth a warning rather than silence: a plugin deleting a workload from the wrong space would
+      // otherwise leave a binding behind with nothing to show for it.
+      this.logger.warn(
+        `Unbinding matched no binding for workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
       );
     }
+
+    return deleted;
   }
 
   async getBinding(
@@ -250,7 +254,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
    */
   private async resolveUserProfileId(request: KibanaRequest): Promise<string | undefined> {
     try {
-      return (await this.getCurrentProfileId(request)) ?? undefined;
+      return (await this.getCurrentUserProfileId(request)) ?? undefined;
     } catch (e) {
       this.logger.debug(
         `Could not resolve a user profile for the principal binding a service account: ${getDetailedErrorMessage(

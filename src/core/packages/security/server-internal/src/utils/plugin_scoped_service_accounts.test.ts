@@ -134,6 +134,74 @@ describe('createPluginScopedServiceAccounts', () => {
     });
   });
 
+  describe('for a malformed workload ID', () => {
+    const calls = (workloadId: string) =>
+      [
+        [
+          'bindWorkload',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.bindWorkload(httpServerMock.createKibanaRequest(), {
+              ...WORKLOAD,
+              workloadId,
+              serviceAccountId: 'sa-1',
+            }),
+        ],
+        [
+          'unbindWorkload',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.unbindWorkload(httpServerMock.createKibanaRequest(), {
+              ...WORKLOAD,
+              workloadId,
+            }),
+        ],
+        [
+          'getWorkloadBinding',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.getWorkloadBinding({ ...WORKLOAD_IN_SPACE, workloadId }),
+        ],
+        [
+          'withScopedRequestForWorkload',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.withScopedRequestForWorkload({ ...WORKLOAD_IN_SPACE, workloadId }, jest.fn()),
+        ],
+      ] as const;
+
+    const expectNoDelegateCalls = () => {
+      expect(delegate.bindWorkload).not.toHaveBeenCalled();
+      expect(delegate.unbindWorkload).not.toHaveBeenCalled();
+      expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    };
+
+    it.each(calls(''))(
+      '%s rejects an empty ID without reaching the delegate',
+      async (_name, call) => {
+        await expect(call(scopedTo('alerting'))).rejects.toThrow(
+          'Plugin [alerting] supplied an empty service account workload ID; workload IDs must be non-empty strings.'
+        );
+        expectNoDelegateCalls();
+      }
+    );
+
+    it.each(calls('x'.repeat(513)))(
+      '%s rejects an ID longer than 512 characters without reaching the delegate',
+      async (_name, call) => {
+        await expect(call(scopedTo('alerting'))).rejects.toThrow(
+          'Plugin [alerting] supplied a service account workload ID that is too long: it must be at most 512 characters, but got 513.'
+        );
+        expectNoDelegateCalls();
+      }
+    );
+
+    it('accepts an ID of exactly 512 characters', async () => {
+      delegate.getWorkloadBinding.mockResolvedValue(null);
+      const params = { ...WORKLOAD_IN_SPACE, workloadId: 'x'.repeat(512) };
+
+      await expect(scopedTo('alerting').getWorkloadBinding(params)).resolves.toBeNull();
+      expect(delegate.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
+    });
+  });
+
   it('cannot reach a type that only another plugin registered', async () => {
     await expect(scopedTo('workflows').getWorkloadBinding(WORKLOAD_IN_SPACE)).rejects.toThrow(
       'Plugin [workflows] has not registered service account workload type [rule].'

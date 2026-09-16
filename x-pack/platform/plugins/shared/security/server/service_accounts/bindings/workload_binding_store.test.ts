@@ -8,6 +8,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type { WorkloadBindingAttributes } from './binding_saved_object';
 import {
@@ -38,17 +39,19 @@ describe('WorkloadBindingStore', () => {
   let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
   let isEncryptionError: jest.Mock<boolean, [Error]>;
+  let logger: MockedLogger;
   let store: WorkloadBindingStore;
 
   beforeEach(() => {
     client = savedObjectsClientMock.create();
     encryptedClient = encryptedSavedObjectsMock.createClient();
     isEncryptionError = jest.fn().mockReturnValue(false);
+    logger = loggingSystemMock.createLogger();
     store = new WorkloadBindingStore({
       client,
       encryptedClient,
       isEncryptionError,
-      logger: loggingSystemMock.create().get('workload-bindings'),
+      logger,
     });
   });
 
@@ -229,18 +232,61 @@ describe('WorkloadBindingStore', () => {
       });
     });
 
-    it('fails closed when the stored document describes different coordinates', async () => {
+    it('returns the binding when every coordinate matches', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
         id: getWorkloadBindingId(COORDINATES),
         type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
         references: [],
-        attributes: attributes({ workloadId: 'a-different-rule' }),
+        attributes: attributes(),
+      });
+
+      await expect(store.getVerified(COORDINATES)).resolves.toEqual(
+        expect.objectContaining({ ...COORDINATES, serviceAccountId: 'service-account-id' })
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it.each(['pluginId', 'workloadType', 'workloadId', 'spaceId'] as const)(
+      'fails closed when only the stored [%s] differs from the coordinates looked up',
+      async (coordinate) => {
+        encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: getWorkloadBindingId(COORDINATES),
+          type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          references: [],
+          attributes: attributes({ [coordinate]: 'something-else' }),
+        });
+
+        await expect(store.getVerified(COORDINATES)).rejects.toMatchObject({
+          message: 'The service account binding for this workload is inconsistent.',
+          output: { statusCode: 403 },
+        });
+        // Only the offending coordinate is reported, with both sides, so the log tells which one.
+        expect(logger.error).toHaveBeenCalledWith(
+          `Service account workload binding [${getWorkloadBindingId(
+            COORDINATES
+          )}] does not describe the workload it was looked up by: ${coordinate}: expected [${
+            COORDINATES[coordinate]
+          }], got [something-else]`
+        );
+      }
+    );
+
+    it('reports every mismatching coordinate when several differ', async () => {
+      encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: getWorkloadBindingId(COORDINATES),
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        references: [],
+        attributes: attributes({ workloadId: 'a-different-rule', spaceId: 'marketing' }),
       });
 
       await expect(store.getVerified(COORDINATES)).rejects.toMatchObject({
-        message: 'The service account binding for this workload is inconsistent.',
         output: { statusCode: 403 },
       });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'workloadId: expected [rule-id], got [a-different-rule]; spaceId: expected [default], got [marketing]'
+        )
+      );
     });
 
     it('propagates unrelated failures rather than reporting "no binding"', async () => {

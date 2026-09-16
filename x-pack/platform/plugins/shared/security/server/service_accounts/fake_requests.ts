@@ -69,7 +69,10 @@ export interface CreateServiceAccountFakeRequestParams {
  * saved objects read against a briefly unavailable cluster, say — that the next refresh may not
  * hit again. Latching those would kill a still-valid execution over one blip.
  */
-const isTerminalMintFailure = (err: unknown, raisedByInterceptor: boolean): boolean => {
+const isTerminalMintFailure = (
+  err: unknown,
+  { raisedByInterceptor }: { raisedByInterceptor: boolean }
+): boolean => {
   if (err instanceof ServiceAccountTokenExchangeError) {
     return !err.retryable;
   }
@@ -253,7 +256,7 @@ export class ServiceAccountFakeRequests {
           entry.mintInterceptor !== undefined &&
           !(exchangeFailure !== undefined && err === exchangeFailure.error);
 
-        if (isTerminalMintFailure(err, raisedByInterceptor)) {
+        if (isTerminalMintFailure(err, { raisedByInterceptor })) {
           entry.nonRetryableError =
             err instanceof Error
               ? err
@@ -279,13 +282,15 @@ export class ServiceAccountFakeRequests {
   }
 
   /**
-   * Drops the request from the registry: transparent credential replacement is permanently
-   * disabled and the request rides out the remainder of its current token. Idempotent; returns
-   * whether the request was registered.
+   * Drops the request from the registry and strips its credential.
+   * Idempotent; returns whether the request was registered.
    */
   release(request: KibanaRequest): boolean {
     const released = this.registry.delete(request);
     if (released) {
+      // Same shared raw headers as the refresh path writes to, so every scoped client derived from
+      // this request loses the credential at once.
+      delete (request.headers as Record<string, string>).authorization;
       this.logger.debug('Released a service account bound fake request');
     }
     return released;
@@ -317,9 +322,12 @@ export class ServiceAccountFakeRequests {
 
   private ensureWithinLifetime(entry: ServiceAccountFakeRequestEntry): void {
     // Expiry stops replacement; an already-issued token retains its upstream expiration.
-    if (Date.now() - entry.createdAt >= entry.maxLifetimeMs) {
+    const ageMs = Date.now() - entry.createdAt;
+    if (ageMs >= entry.maxLifetimeMs) {
+      // The age is what makes an anomaly visible: a request refreshed long after its lifetime
+      // points at a caller holding on to one it should have let go of.
       this.logger.debug(
-        `Refresh lifetime expired for a fake request bound to service account ${entry.serviceAccountId}`
+        `Refresh lifetime expired for a fake request bound to service account ${entry.serviceAccountId}: the request is ${ageMs}ms old, the lifetime is ${entry.maxLifetimeMs}ms`
       );
       entry.nonRetryableError = new Error(
         'The lease on this service account bound request has expired; refusing to mint a replacement credential.'

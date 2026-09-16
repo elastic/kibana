@@ -553,7 +553,7 @@ describe('UiamServiceAccounts', () => {
     });
 
     describe('#releaseFakeRequest', () => {
-      it('permanently disables credential replacement for the request', async () => {
+      it('permanently disables credential replacement and strips the credential', async () => {
         const request = await serviceAccounts.createFakeRequest({
           serviceAccountId: 'service-account-id',
         });
@@ -565,8 +565,8 @@ describe('UiamServiceAccounts', () => {
 
         await expect(serviceAccounts.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
-        // The request rides out its current token; nothing is replaced.
-        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+        // A request kept past its release must not keep acting on the credential it was minted with.
+        expect(request.headers.authorization).toBeUndefined();
       });
 
       it('is a no-op for requests this backend did not mint', () => {

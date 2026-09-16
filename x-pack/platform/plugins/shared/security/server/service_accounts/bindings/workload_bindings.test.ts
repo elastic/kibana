@@ -43,7 +43,7 @@ describe('ServiceAccountWorkloadBindings', () => {
   let license: ReturnType<typeof licenseMock.create>;
   let checkPrivileges: jest.Mock;
   let getCurrentUser: jest.Mock;
-  let getCurrentProfileId: jest.Mock;
+  let getCurrentUserProfileId: jest.Mock;
   let getSpaceId: jest.Mock;
   let logger: MockedLogger;
   let mintedRequest: KibanaRequest;
@@ -57,7 +57,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       backend,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally: checkPrivileges }),
       getCurrentUser,
-      getCurrentProfileId,
+      getCurrentUserProfileId,
       getSpaceId,
       canEncrypt: true,
       ...overrides,
@@ -89,7 +89,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     getCurrentUser = jest
       .fn()
       .mockReturnValue(mockAuthenticatedUser({ username: 'elastic', profile_uid: 'profile-uid' }));
-    getCurrentProfileId = jest.fn().mockResolvedValue('profile-uid');
+    getCurrentUserProfileId = jest.fn().mockResolvedValue('profile-uid');
     getSpaceId = jest.fn().mockReturnValue('default');
 
     bindings = build();
@@ -181,12 +181,15 @@ describe('ServiceAccountWorkloadBindings', () => {
 
   describe('#unbindWorkload', () => {
     it('removes the binding behind the same privilege gate as bindWorkload', async () => {
-      await bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD);
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).resolves.toBe(true);
 
       expect(checkPrivileges).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('removes the binding in the space of the request, not one the caller names', async () => {
@@ -211,11 +214,17 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(store.delete).not.toHaveBeenCalled();
     });
 
-    it('succeeds when there was no binding to remove', async () => {
+    it('reports, rather than fails, when there was no binding to remove', async () => {
       store.delete.mockResolvedValue(false);
+      getSpaceId.mockReturnValue('marketing');
+
       await expect(
         bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
-      ).resolves.toBeUndefined();
+      ).resolves.toBe(false);
+      // Names the space: the likeliest cause is a workload deleted from a different one.
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Unbinding matched no binding for workload [rule/rule-id] of plugin [alerting] in space [marketing]'
+      );
     });
   });
 

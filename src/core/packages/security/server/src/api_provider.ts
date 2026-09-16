@@ -84,13 +84,13 @@ export interface ServiceAccountsServiceContract
    * @param pluginId - The id of the plugin that owns the workload.
    * @param request - The request, whose space the binding is removed from.
    * @param params - The parameters.
-   * @returns A promise that resolves when the workload is unbound.
+   * @returns Whether a binding existed and was removed.
    */
   unbindWorkload(
     pluginId: string,
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
-  ): Promise<void>;
+  ): Promise<boolean>;
 
   /**
    * Retrieves a workload binding.

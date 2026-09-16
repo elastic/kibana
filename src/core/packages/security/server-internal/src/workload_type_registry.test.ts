@@ -72,6 +72,26 @@ describe('WorkloadTypeRegistry', () => {
     );
   });
 
+  it('rejects a name longer than 256 characters', () => {
+    expect(() =>
+      registry.register('alerting', { type: 'rule', name: 'a'.repeat(256) })
+    ).not.toThrow();
+    expect(() => registry.register('alerting', { type: 'job', name: 'b'.repeat(257) })).toThrow(
+      'Service account workload type [job] registered by plugin [alerting] has a name that is too long: it must be at most 256 characters, but got 257.'
+    );
+  });
+
+  it('rejects a description longer than 1024 characters', () => {
+    expect(() =>
+      registry.register('alerting', { type: 'rule', name: 'Name', description: 'a'.repeat(1024) })
+    ).not.toThrow();
+    expect(() =>
+      registry.register('alerting', { type: 'job', name: 'Name', description: 'b'.repeat(1025) })
+    ).toThrow(
+      'Service account workload type [job] registered by plugin [alerting] has a description that is too long: it must be at most 1024 characters, but got 1025.'
+    );
+  });
+
   it('rejects a duplicate type from the same plugin', () => {
     registry.register('alerting', { type: 'rule', name: 'Alerting rule' });
 

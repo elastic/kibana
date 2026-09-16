@@ -37,6 +37,8 @@ export const resolveWorkloadBinder = async (
 
   if (user.api_key) {
     const variant = user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack';
+    // TODO: record the creator's user profile for UIAM API keys too, once fake requests can
+    // resolve user profiles: https://github.com/elastic/kibana/issues/271760
     return {
       type: 'api_key',
       apiKeyId: user.api_key.id,

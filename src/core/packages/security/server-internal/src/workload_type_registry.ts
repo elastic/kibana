@@ -9,7 +9,9 @@
 
 import type { ServiceAccountWorkloadTypeRegistration } from '@kbn/core-security-server';
 import {
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from '@kbn/core-security-server';
 
@@ -23,11 +25,11 @@ export class WorkloadTypeRegistry {
   >();
 
   /**
-   * Records a workload type for a plugin. Throws on an invalid type or name, and when the plugin
-   * has already registered that type.
+   * Records a workload type for a plugin. Throws on an invalid type, name or description, and
+   * when the plugin has already registered that type.
    */
   public register(pluginId: string, registration: ServiceAccountWorkloadTypeRegistration): void {
-    const { type, name } = registration;
+    const { type, name, description } = registration;
 
     if (type.length > SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH) {
       throw new Error(
@@ -44,6 +46,21 @@ export class WorkloadTypeRegistry {
     if (name.trim().length === 0) {
       throw new Error(
         `Service account workload type [${type}] registered by plugin [${pluginId}] must have a non-empty name.`
+      );
+    }
+
+    if (name.length > SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH) {
+      throw new Error(
+        `Service account workload type [${type}] registered by plugin [${pluginId}] has a name that is too long: it must be at most ${SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH} characters, but got ${name.length}.`
+      );
+    }
+
+    if (
+      description !== undefined &&
+      description.length > SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH
+    ) {
+      throw new Error(
+        `Service account workload type [${type}] registered by plugin [${pluginId}] has a description that is too long: it must be at most ${SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH} characters, but got ${description.length}.`
       );
     }
 

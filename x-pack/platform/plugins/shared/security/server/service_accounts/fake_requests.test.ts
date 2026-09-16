@@ -225,6 +225,12 @@ describe('ServiceAccountFakeRequests', () => {
       expect(mintToken).not.toHaveBeenCalled();
       // The request rides out its current (long-dead) token; nothing is replaced.
       expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      // The age is logged so a request refreshed long past its lifetime stands out.
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Refresh lifetime expired for a fake request bound to service account sa-id: the request is ${
+          REQUEST_LIFETIME_MS + 1
+        }ms old, the lifetime is ${REQUEST_LIFETIME_MS}ms`
+      );
     });
 
     it('honors a configured registry lifetime', async () => {
@@ -479,7 +485,7 @@ describe('ServiceAccountFakeRequests', () => {
       expect(fakeRequests.release(httpServerMock.createFakeKibanaRequest({}))).toBe(false);
     });
 
-    it('permanently disables credential replacement', async () => {
+    it('permanently disables credential replacement and strips the credential', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
 
@@ -490,8 +496,18 @@ describe('ServiceAccountFakeRequests', () => {
         'The provided request is not bound to a service account.'
       );
       expect(mintToken).not.toHaveBeenCalled();
-      // The request rides out its current token; nothing is replaced.
-      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      // A request kept past its release must not keep acting on the credential it was minted with.
+      expect(request.headers.authorization).toBeUndefined();
+      expect(Object.keys(request.headers)).toEqual([]);
+    });
+
+    it('leaves the headers of a request it never minted alone', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'Bearer someone_elses' },
+      });
+
+      expect(fakeRequests.release(request)).toBe(false);
+      expect(request.headers.authorization).toBe('Bearer someone_elses');
     });
 
     it('discards a mint that lands after the release rather than handing back its token', async () => {
@@ -514,7 +530,8 @@ describe('ServiceAccountFakeRequests', () => {
       await expect(inflight).rejects.toThrowError(
         'The request bound to this service account was released while its credential was being replaced.'
       );
-      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      // The release stripped the credential, and the late mint must not put one back.
+      expect(request.headers.authorization).toBeUndefined();
     });
 
     it('does not record a refresh failure against a request that was already released', async () => {

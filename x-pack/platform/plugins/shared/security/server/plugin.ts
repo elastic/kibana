@@ -544,7 +544,7 @@ export class SecurityPlugin
       encryptedSavedObjects,
       canEncrypt: this.canEncryptSavedObjects,
       getCurrentUser: this.authenticationStart.getCurrentUser,
-      getCurrentProfileId: (request) =>
+      getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });

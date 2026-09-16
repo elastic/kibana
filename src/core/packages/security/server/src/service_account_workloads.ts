@@ -22,6 +22,29 @@ export const SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX = /^[a-z0-9_]+$/;
 export const SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH = 256;
 
 /**
+ * Upper bound on the human-readable name of a workload type.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH = 256;
+
+/**
+ * Upper bound on the description of a workload type.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH = 1024;
+
+/**
+ * Upper bound on a workload ID. Workload IDs are hashed into a binding's saved object ID, so this
+ * is not a storage limit; it bounds what a binding's authenticated attributes and log lines carry.
+ * Wide enough for any saved object ID, which is what most workloads are keyed by.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH = 512;
+
+/**
  * Declares a kind of workload that a plugin runs as service accounts.
  *
  * Workload types are scoped to the plugin that registers them: two plugins may each register a
@@ -37,11 +60,13 @@ export interface ServiceAccountWorkloadTypeRegistration {
    */
   type: string;
   /**
-   * Human-readable label, e.g. `Alerting rule`.
+   * Human-readable label, e.g. `Alerting rule`. Must be non-blank and no longer than
+   * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH}.
    */
   name: string;
   /**
-   * Optional longer description of what the workload does.
+   * Optional longer description of what the workload does. No longer than
+   * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH}.
    */
   description?: string;
 }

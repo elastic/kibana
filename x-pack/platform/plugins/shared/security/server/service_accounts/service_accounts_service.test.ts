@@ -47,7 +47,7 @@ describe('ServiceAccountsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       encryptedSavedObjects,
       canEncrypt: true,
-      getCurrentProfileId: jest.fn().mockResolvedValue(null),
+      getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
       getSpaceId: jest.fn().mockReturnValue('default'),
       ...overrides,
     };

@@ -10,7 +10,9 @@
 import type {
   CoreServiceAccountsService,
   ServiceAccountsServiceContract,
+  ServiceAccountWorkloadRef,
 } from '@kbn/core-security-server';
+import { SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH } from '@kbn/core-security-server';
 import type { WorkloadTypeRegistry } from '../workload_type_registry';
 
 export interface PluginScopedServiceAccountsOptions {
@@ -21,8 +23,8 @@ export interface PluginScopedServiceAccountsOptions {
 
 /**
  * Builds the service accounts contract one plugin receives at start. The workload methods refuse
- * any workload type the plugin did not register, and otherwise call the delegate with the plugin's
- * id, which the plugin itself never supplies.
+ * any workload type the plugin did not register and any malformed workload ID, and otherwise call
+ * the delegate with the plugin's id, which the plugin itself never supplies.
  */
 export const createPluginScopedServiceAccounts = ({
   pluginId,
@@ -37,25 +39,44 @@ export const createPluginScopedServiceAccounts = ({
     }
   };
 
+  const ensureWellFormedWorkloadId = (workloadId: string): void => {
+    if (typeof workloadId !== 'string' || workloadId.length === 0) {
+      throw new Error(
+        `Plugin [${pluginId}] supplied an empty service account workload ID; workload IDs must be non-empty strings.`
+      );
+    }
+
+    if (workloadId.length > SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH) {
+      throw new Error(
+        `Plugin [${pluginId}] supplied a service account workload ID that is too long: it must be at most ${SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH} characters, but got ${workloadId.length}.`
+      );
+    }
+  };
+
+  const ensureValid = ({ workloadType, workloadId }: ServiceAccountWorkloadRef): void => {
+    ensureRegistered(workloadType);
+    ensureWellFormedWorkloadId(workloadId);
+  };
+
   // `async` so that an unregistered type surfaces as a rejected promise rather than a synchronous
   // throw, which callers of a promise-returning API would not expect.
   return {
     isEnabled: delegate.isEnabled,
     create: delegate.create,
     bindWorkload: async (request, params) => {
-      ensureRegistered(params.workloadType);
+      ensureValid(params);
       return await delegate.bindWorkload(pluginId, request, params);
     },
     unbindWorkload: async (request, params) => {
-      ensureRegistered(params.workloadType);
+      ensureValid(params);
       return await delegate.unbindWorkload(pluginId, request, params);
     },
     getWorkloadBinding: async (params) => {
-      ensureRegistered(params.workloadType);
+      ensureValid(params);
       return await delegate.getWorkloadBinding(pluginId, params);
     },
     withScopedRequestForWorkload: async (params, fn) => {
-      ensureRegistered(params.workloadType);
+      ensureValid(params);
       return await delegate.withScopedRequestForWorkload(pluginId, params, fn);
     },
   };

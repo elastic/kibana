@@ -58,11 +58,13 @@ export interface CoreServiceAccountsService {
 
   /**
    * Removes the binding of a workload in the space of the request. Succeeds whether or not a binding existed, and
-   * takes effect on a running execution at its next credential mint.
+   * takes effect on a running execution at its next credential mint. Resolves to whether a binding
+   * was removed, so a caller can tell a real unbind from a no-op (a workload deleted from the wrong
+   * space, say).
    *
    * Plugins must call this from their own workload-delete path; nothing else removes a binding.
    */
-  unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadRef): Promise<void>;
+  unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadRef): Promise<boolean>;
 
   /**
    * Returns the workload's binding, or `null` when it has none. Throws if the stored binding fails
@@ -76,7 +78,8 @@ export interface CoreServiceAccountsService {
    * Runs `fn` with a request authenticated as the workload's service account, for use with
    * `asScoped(...)` facilities. The credential is minted, replaced, and finally retired around
    * `fn`: the binding is verified before the first mint and re-checked before every replacement,
-   * and once `fn` settles the request can never be re-credentialed again.
+   * and once `fn` settles the request's credential is removed and can never be replaced again, so a
+   * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
    * Rejects when the workload has no binding (a 404), and whenever bindings are unavailable.
    */

@@ -20,7 +20,10 @@ export type {
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
+  SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
 export type {
