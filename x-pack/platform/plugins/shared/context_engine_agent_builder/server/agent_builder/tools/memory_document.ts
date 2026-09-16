@@ -16,13 +16,15 @@ interface MemoryWriter {
   metadata: Record<string, string | number>;
 }
 
+type MemoryLifecycleStatus = 'active' | 'deleted';
+
 interface MemoryGovernance {
   provenance?: {
     created_by?: MemoryWriter;
     updated_by?: MemoryWriter;
   };
   lifecycle?: {
-    status?: string;
+    status?: MemoryLifecycleStatus;
   };
 }
 
