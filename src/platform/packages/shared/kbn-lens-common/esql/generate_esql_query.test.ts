@@ -23,83 +23,9 @@ describe('generateEsqlQuery', () => {
     return defaultUiSettingsGet(key);
   });
 
-  it('should produce valid esql for date histogram and count', () => {
-    const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'date_histogram',
-            sourceField: 'order_date',
-            label: 'Date histogram',
-            dataType: 'date',
-            isBucketed: true,
-            interval: 'auto',
-          },
-        ],
-        [
-          '2',
-          {
-            operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-          },
-        ],
-      ],
-      mockLayer,
-      mockIndexPattern,
-      uiSettings,
-      mockDateRange,
-      new Date()
-    );
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
-      );
-    }
-  });
-
-  it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
-    const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'date_histogram',
-            sourceField: 'order_date',
-            label: 'Date histogram',
-            dataType: 'date',
-            isBucketed: true,
-            params: { includeEmptyRows: true },
-          } as DateHistogramIndexPatternColumn,
-        ],
-        [
-          '2',
-          {
-            operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-          },
-        ],
-      ],
-      mockLayer,
-      mockIndexPattern,
-      uiSettings,
-      mockDateRange,
-      new Date()
-    );
-
-    expect(result).toEqual({
-      success: false,
-      reason: 'include_empty_rows_not_supported',
-    });
-  });
+  // NOTE: happy-path generation (date histogram + count) and the
+  // include_empty_rows / formula failure reasons are covered by the shared
+  // case matrix in esql_conversion_cases.test.ts (@kbn/lens-test-helpers).
 
   it('should return failure with drop_partials_not_supported reason if drop partial intervals is set', () => {
     const result = generateEsqlQuery(
@@ -136,33 +62,6 @@ describe('generateEsqlQuery', () => {
     expect(result).toEqual({
       success: false,
       reason: 'drop_partials_not_supported',
-    });
-  });
-
-  it('should return failure with formula_not_supported reason if lens formula is used', () => {
-    const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'formula',
-            label: 'Formula',
-            isBucketed: false,
-            params: {},
-            dataType: 'number',
-          },
-        ],
-      ],
-      mockLayer,
-      mockIndexPattern,
-      uiSettings,
-      mockDateRange,
-      new Date()
-    );
-
-    expect(result).toEqual({
-      success: false,
-      reason: 'formula_not_supported',
     });
   });
 

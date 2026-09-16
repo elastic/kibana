@@ -51,25 +51,8 @@ describe('generateEsqlQuery date histogram', () => {
   });
 
   describe('auto interval', () => {
-    it('should use BUCKET(..., 75, ?_tstart, ?_tend) when date range is provided', () => {
-      const dateHistogramCol: DateHistogramIndexPatternColumn = {
-        ...baseDateHistogramColumn,
-        params: { interval: 'auto' },
-      };
-      const result = generateEsqlQuery(
-        buildAggEntries(dateHistogramCol),
-        buildLayer(dateHistogramCol),
-        mockIndexPattern,
-        uiSettings,
-        mockDateRange,
-        new Date()
-      );
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.esql).toContain('BUCKET(order_date, 75, ?_tstart, ?_tend)');
-      }
-    });
+    // NOTE: auto interval with a provided date range is covered by the shared
+    // case matrix in esql_conversion_cases.test.ts (@kbn/lens-test-helpers).
 
     it(`should fall back to 'auto' when params.interval is missing (uses BUCKET(order_date, 75, ?_tstart, ?_tend))`, () => {
       const dateHistogramCol = {
@@ -120,25 +103,8 @@ describe('generateEsqlQuery date histogram', () => {
   });
 
   describe('fixed (non-auto) interval', () => {
-    it('should use BUCKET(..., 1 hour) for interval 1h', () => {
-      const dateHistogramCol: DateHistogramIndexPatternColumn = {
-        ...baseDateHistogramColumn,
-        params: { interval: '1h' },
-      };
-      const result = generateEsqlQuery(
-        buildAggEntries(dateHistogramCol),
-        buildLayer(dateHistogramCol),
-        mockIndexPattern,
-        uiSettings,
-        mockDateRange,
-        new Date()
-      );
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.esql).toContain('BUCKET(order_date, 1 hour)');
-      }
-    });
+    // NOTE: the 1h fixed interval is covered by the shared case matrix in
+    // esql_conversion_cases.test.ts (@kbn/lens-test-helpers).
 
     it('should use BUCKET(..., 30 minutes) for interval 30m', () => {
       const dateHistogramCol: DateHistogramIndexPatternColumn = {
