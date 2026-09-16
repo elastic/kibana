@@ -239,6 +239,10 @@ async function preprocessDocumentEvent(
     return inputs;
   }
 
+  if (rawHits.length === 0) {
+    throw new Error('No documents found with the provided selection');
+  }
+
   const documents: DocumentEventEntry[] = rawHits.map(({ _id, _index, _source }) => ({
     id: _id,
     index: _index,
