@@ -9,11 +9,15 @@ import { apiTest, tags } from '@kbn/scout';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { waitForDiffEvent } from '../../../scout_security_audit/api/helpers/audit_log';
+import {
+  type SavedObjectAuditEvent,
+  waitForAuditEvent,
+  waitForDiffEvent,
+} from '../../../security_audit_helpers/audit_log';
 import {
   buildDashboardAttributes,
   buildNestedAttributes,
-} from '../../../scout_security_audit/api/helpers/object_builders';
+} from '../../../security_audit_helpers/object_builders';
 
 const TYPE = 'index-pattern';
 const DASHBOARD_TYPE = 'dashboard';
@@ -84,10 +88,10 @@ const waitForHeapUsageBelow = async (
  * while diffs are enabled. If that work grows unbounded, Kibana OOMs or the
  * heap never settles and the suite fails.
  *
- * Run with:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet security_audit_so_diff_oom
- *   node scripts/playwright test --project local --grep @stateful-classic \
+ * Run with (boots the constrained stack, picked from the suite path, then runs the tests):
+ *   node scripts/scout run-tests --arch stateful --domain classic \
  *     --config x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/playwright.config.ts
+ * See ../../README.md for running against an already-started stack.
  */
 apiTest.describe(
   'Saved object audit diffs OOM prevention',
@@ -298,9 +302,27 @@ apiTest.describe(
       }
     );
 
+    // The most recent update diff for `id` is already in the log from the previous
+    // iteration, so match on the iteration-specific title rather than on the id alone.
+    const waitForTitleUpdateDiff = (id: string, title: string) =>
+      waitForAuditEvent(
+        (raw) => {
+          const ev = raw as SavedObjectAuditEvent;
+          return (
+            ev.event?.action === 'saved_object_update' &&
+            ev.kibana?.saved_object?.id === id &&
+            ev.kibana?.diff?.ops.some((op) => op.path === '/title' && op.value === title) === true
+          );
+        },
+        { description: `saved_object_update diff for ${id} with title ${title}` }
+      );
+
     apiTest(
       'sequential updates to a large object succeed under constrained heap',
       async ({ apiClient, samlAuth }) => {
+        // 15 sequential writes plus two heap-settle waits of up to 15s each can exceed
+        // the 60s default per-test budget on a loaded machine.
+        apiTest.setTimeout(180_000);
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const headers = { ...cookieHeader, ...KBN_HEADERS };
         await expectHeapUsageWithinBudget(apiClient, headers);
@@ -323,7 +345,7 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(updateRes).toHaveStatusCode(200);
-          await waitForDiffEvent('saved_object_update', id);
+          await waitForTitleUpdateDiff(id, `oom-seq-${i}`);
         }
 
         await expectHeapUsageWithinBudget(apiClient, headers);

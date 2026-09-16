@@ -7219,7 +7219,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
       savedObjectDiffTypesToInclude: ['connector', 'dashboard'],
       ...extra,
     });
-    return { securityExtension, auditLogger, logger };
+    return { securityExtension, auditLogger, logger, typeRegistry: typeRegistryMocked };
   }
 
   beforeEach(() => {
@@ -7571,6 +7571,31 @@ describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => 
     });
   });
 
+  it('uses the caller-resolved name when the name attribute is encrypted (never ciphertext)', () => {
+    const { securityExtension, auditLogger, typeRegistry } = setupForEmit(true, {
+      includeSavedObjectNames: true,
+    });
+    typeRegistry.getNameAttribute.mockReturnValue('name');
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1', name: 'Plaintext Name' },
+      outcome: 'success',
+      before: { name: 'cipher-old' },
+      after: { name: 'cipher-new' },
+      attributesToRedact: ['name'],
+    });
+
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.kibana.saved_object.name).toBe('Plaintext Name');
+    expect(logged.kibana.diff.ops).toContainEqual({
+      op: 'replace',
+      path: '/name',
+      value: '[redacted]',
+      oldValue: '[redacted]',
+    });
+  });
+
   it('falls back to the tracked name when no attributes were recorded', () => {
     const { securityExtension, auditLogger } = setupForEmit(true, {
       includeSavedObjectNames: true,
@@ -7735,6 +7760,20 @@ describe('result-only audit mode (savedObjectDiffEnabled)', () => {
     });
     accessControlServiceMock.enforceAccessControl.mockReset();
     getCurrentUser.mockReturnValue(null);
+  });
+
+  it('keeps the pre-operation event and reports the feature inactive when the audit logger is disabled', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+    // @ts-expect-error
+    auditLogger.enabled = false;
+
+    expect(securityExtension.savedObjectDiffEnabled).toBe(false);
+    expect(securityExtension.shouldComputeSavedObjectDiff('a')).toBe(false);
+
+    await securityExtension.authorizeCreate({ namespace, object: writeObj });
+
+    // The pre-operation audit path runs as in non-diff mode (the logger itself then drops it).
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
   });
 
   it('suppresses the pre-operation (unknown outcome) event for authorized creates', async () => {

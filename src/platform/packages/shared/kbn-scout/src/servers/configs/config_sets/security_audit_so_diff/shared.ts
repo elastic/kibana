@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AUDIT_LOG_PATH, securityAuditServerArgs } from '../security_audit/shared';
-
-export { AUDIT_LOG_PATH };
+import { securityAuditServerArgs } from '../security_audit/shared';
 
 // Diff-only flags, shared with the Serverless OTel audit config set so both
 // stacks allow-list the same types. Does not include the file-appender args —

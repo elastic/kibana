@@ -359,7 +359,7 @@ export const performBulkUpdate = async <T>(
         );
 
         const auditRecord = auditRecords[index];
-        auditRecord?.setBefore(cloneDeep(migrated.attributes) as Record<string, unknown>);
+        auditRecord?.setBefore(cloneDeep(migrated.attributes ?? {}) as Record<string, unknown>);
 
         const updatedAttributes = mergeAttributes
           ? mergeForUpdate({

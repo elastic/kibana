@@ -240,11 +240,10 @@ export const performBulkCreate = async <T>(
   );
 
   // Track each authorized object for auditing (flushed by the repository once the
-  // operation settles). `after` is only recorded during response mapping, from the
-  // migrated (stored) attributes — never the caller's plaintext, so failures flushed
-  // before that point cannot leak unencrypted ESO attributes into the audit log;
-  // `before` is populated by the overwrite preflight fetch. Objects rejected before
-  // authorization are not audited.
+  // operation settles). `after` is set from the migrated (stored) attributes right after
+  // migrateInputDocument, before the ES write — never the caller's plaintext; `before`
+  // comes from the overwrite preflight or the dedicated before-state fetch.
+  // Objects rejected before authorization are not audited.
   // Indexed by request position so duplicate `{type, id}` entries each get their own event.
   const auditRecords: Array<WriteAuditRecord | undefined> = [];
   if (auditDiffRecorder) {

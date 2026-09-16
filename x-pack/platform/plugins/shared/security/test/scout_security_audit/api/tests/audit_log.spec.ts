@@ -8,7 +8,7 @@
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { waitForAuditEvent } from '../helpers/audit_log';
+import { waitForAuditEvent } from '../../../security_audit_helpers/audit_log';
 
 apiTest.describe(
   'Audit log — ECS field shape (local file appender)',

@@ -310,6 +310,12 @@ describe('computeJsonPatch', () => {
       expect(patch.noOps).toHaveLength(1);
     });
 
+    it('treats an object whose only values are undefined as an empty-object leaf (matches what ES stores)', () => {
+      const patch = computeJsonPatch({ a: { a: {} }, b: { a: { b: undefined } } });
+      expect(patch.ops).toHaveLength(0);
+      expect(patch.noOps).toStrictEqual([{ path: '/a' }]);
+    });
+
     it('produces a remove op when an attribute changes from a value to undefined (treated as absent)', () => {
       const patch = computeJsonPatch({
         a: { title: 'old', extra: 'present' },

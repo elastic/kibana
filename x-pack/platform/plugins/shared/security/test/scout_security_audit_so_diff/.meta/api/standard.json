@@ -1,5 +1,5 @@
 {
-  "sha1": "a88b681c6686c0ba70eb7586d5ed3bb7adfdf732",
+  "sha1": "8b923c6e8626d32cd04736b7e536d8f2b335671a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 136,
-        "column": 58
+        "line": 141,
+        "column": 15
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 170,
-        "column": 25
+        "line": 172,
+        "column": 34
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 198,
-        "column": 25
+        "line": 202,
+        "column": 79
       }
     },
     {
@@ -98,12 +98,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 240,
+        "line": 243,
         "column": 13
       }
     },
     {
-      "id": "b56ee1f41d6fee2-ed9b398b43317bf",
+      "id": "b56ee1f41d6fee2-9226df51e2a741a",
       "title": "Audit log — saved object diffs (ECS file appender) emits unknown when a write does not complete after authorization",
       "expectedStatus": "passed",
       "tags": [
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 275,
+        "line": 278,
         "column": 48
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 311,
+        "line": 317,
         "column": 25
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 322,
+        "line": 328,
         "column": 9
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 357,
+        "line": 363,
         "column": 27
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 382,
+        "line": 388,
         "column": 11
       }
     }

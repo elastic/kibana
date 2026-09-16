@@ -162,12 +162,10 @@ export const performBulkDelete = async <T>(
   const auditRecords: Array<WriteAuditRecord | undefined> = [];
   if (auditDiffRecorder) {
     expectedResults.forEach(({ value }, index) => {
-      if (value.id) {
-        auditRecords[index] = auditDiffRecorder.track(
-          { type: value.type, id: value.id, name: authObjects[index]?.name },
-          { key: String(index) }
-        );
-      }
+      auditRecords[index] = auditDiffRecorder.track(
+        { type: value.type, id: value.id, name: authObjects[index]?.name },
+        { key: String(index) }
+      );
     });
   }
 

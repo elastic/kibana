@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InitialBenchConfig } from '@kbn/bench';
+
 /**
  * `@kbn/bench` config for the saved object diff helper. Not run in CI; see ../README.md.
  *
@@ -19,7 +21,7 @@ const bench = (name: string, description: string, file: string) => ({
   compare: { missing: 'skip' as const },
 });
 
-const config = {
+const config: InitialBenchConfig = {
   runs: 3,
   name: 'saved-object-diff',
   benchmarks: [
@@ -41,4 +43,5 @@ const config = {
   ],
 };
 
+// eslint-disable-next-line import/no-default-export
 export default config;

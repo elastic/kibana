@@ -1,5 +1,5 @@
 {
-  "sha1": "c21b5ce5eefc952fe4231ef2a1eaa2b13f0b4c24",
+  "sha1": "e25578ecaf24f51d2c48be0a1a081d5910866c93",
   "testChannels": [
     "ci-batch-weekly"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 202,
-        "column": 53
+        "line": 126,
+        "column": 13
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 235,
-        "column": 16
+        "line": 158,
+        "column": 17
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 266,
-        "column": 25
+        "line": 184,
+        "column": 21
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 307,
-        "column": 70
+        "line": 228,
+        "column": 15
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 350,
-        "column": 9
+        "line": 276,
+        "column": 60
       }
     }
   ]

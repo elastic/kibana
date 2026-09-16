@@ -1233,6 +1233,71 @@ describe('#bulkCreate', () => {
         });
         await expect(bulkCreateSuccess(client, repository, [obj1, obj2])).resolves.toBeDefined();
       });
+
+      it('still creates and audits with before={} when the before-state mget fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        // obj1/obj2 are single-namespace, so there's no preflight mget — the only mget is
+        // the before-state fetch.
+        client.mget.mockRejectedValueOnce(new Error('mget boom'));
+
+        await expect(
+          bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true })
+        ).resolves.toBeDefined();
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('before-state'));
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: {},
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            outcome: 'success',
+            before: {},
+          })
+        );
+      });
+
+      it('audits duplicate {type, id} entries in one request as separate events', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const dupe = { ...obj1, attributes: { title: 'Dupe' } };
+        const objects = [obj1, dupe];
+        // first entry commits, second hits a conflict in the ES bulk response
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(
+          createConflictErrorPayload(obj1.type, obj1.id) as unknown as Payload
+        );
+        client.bulk.mockResponseOnce(getMockBulkCreateResponse(objects));
+
+        await repository.bulkCreate(objects);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Dupe' }),
+          })
+        );
+        mockGetBulkOperationError.mockReset();
+      });
     });
 
     describe('security', () => {

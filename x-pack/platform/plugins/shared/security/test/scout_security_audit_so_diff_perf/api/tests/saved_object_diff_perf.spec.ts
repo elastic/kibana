@@ -14,7 +14,7 @@ import { expect } from '@kbn/scout/api';
 import {
   buildDashboardAttributes,
   buildNestedAttributes,
-} from '../../../scout_security_audit/api/helpers/object_builders';
+} from '../../../security_audit_helpers/object_builders';
 
 /**
  * Saved object audit diff performance measurements.
@@ -147,6 +147,10 @@ apiTest.describe(
   'Saved object audit diffs — performance measurements',
   { tag: [...tags.stateful.classic] },
   () => {
+    // Every workload runs tens of sequential ~1s writes plus >10s of fixed settle sleeps in
+    // `measure`, well past the 60s Scout default per-test timeout.
+    apiTest.setTimeout(300_000);
+
     const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
     const stamp = Date.now();
 

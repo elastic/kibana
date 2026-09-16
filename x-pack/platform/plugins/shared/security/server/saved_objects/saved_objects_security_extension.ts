@@ -326,7 +326,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
-  public readonly savedObjectDiffEnabled: boolean;
+  private readonly savedObjectDiffConfigEnabled: boolean;
   private readonly savedObjectDiffTypesToInclude: Set<string>;
   private readonly savedObjectDiffFieldSizeLimit?: number;
   private readonly logger?: Logger;
@@ -348,7 +348,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.savedObjectDiffEnabled = savedObjectDiffEnabled;
+    this.savedObjectDiffConfigEnabled = savedObjectDiffEnabled;
     this.savedObjectDiffTypesToInclude = new Set(savedObjectDiffTypesToInclude);
     this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
     this.logger = logger;
@@ -616,6 +616,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         unauthorizedTypes,
       });
     }
+  }
+
+  /**
+   * Diff auditing is only active when the audit logger can actually write events;
+   * otherwise recorders, before-state reads, and diffs would be pure cost.
+   */
+  public get savedObjectDiffEnabled(): boolean {
+    return this.savedObjectDiffConfigEnabled && this.auditLogger.enabled;
   }
 
   /**
@@ -928,14 +936,17 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     // Name from `after`, then `before`, then the caller-resolved name (e.g. a failure
-    // flushed before any state was recorded). `addAuditEvent` handles redaction.
+    // flushed before any state was recorded). `after`/`before` hold stored (encrypted)
+    // attributes, so an encrypted name attribute falls back to the caller's plaintext name.
     let name = params.savedObject.name;
     try {
       const nameAttribute = this.typeRegistry.getNameAttribute(type);
-      name =
-        SavedObjectsUtils.getName(nameAttribute, { attributes: params.after }) ??
-        SavedObjectsUtils.getName(nameAttribute, { attributes: params.before }) ??
-        params.savedObject.name;
+      const nameIsRedacted = params.attributesToRedact?.includes(nameAttribute) ?? false;
+      name = nameIsRedacted
+        ? params.savedObject.name
+        : SavedObjectsUtils.getName(nameAttribute, { attributes: params.after }) ??
+          SavedObjectsUtils.getName(nameAttribute, { attributes: params.before }) ??
+          params.savedObject.name;
     } catch (error) {
       this.logger?.error(
         `Failed to resolve the saved object name for the ${

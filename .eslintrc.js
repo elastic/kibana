@@ -904,7 +904,6 @@ module.exports = {
         '**/playwright.v2.config.ts',
         '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
-        '**/*.benchmark.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',

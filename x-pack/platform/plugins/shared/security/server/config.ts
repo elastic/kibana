@@ -310,7 +310,7 @@ export const ConfigSchema = schema.object({
           defaultValue: [],
           maxSize: 50,
         }),
-        fieldSizeLimit: schema.byteSize({ defaultValue: '48kb' }),
+        fieldSizeLimit: schema.byteSize({ defaultValue: '48kb', min: '1b' }),
       }),
       appender: schema.maybe(coreConfig.logging.appenders),
       ignore_filters: schema.maybe(
@@ -332,7 +332,7 @@ export const ConfigSchema = schema.object({
           return 'xpack.security.audit.savedObjectDiff.enabled requires xpack.security.audit.enabled to be true';
         }
         if (value.savedObjectDiff.enabled && value.savedObjectDiff.typesToInclude.length === 0) {
-          return 'xpack.security.audit.savedObjectDiff.typesToInclude must be non-empty when savedObjectDiff.enabled is true';
+          return 'xpack.security.audit.savedObjectDiff.typesToInclude must be non-empty when xpack.security.audit.savedObjectDiff.enabled is true';
         }
       },
     }

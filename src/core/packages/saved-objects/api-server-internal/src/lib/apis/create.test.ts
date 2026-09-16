@@ -991,6 +991,28 @@ describe('#create', () => {
         );
       });
 
+      it('still creates and audits with before={} when the before-state fetch fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        client.get.mockRejectedValueOnce(new Error('get boom'));
+
+        await expect(
+          createSuccess(type, { title: 'new-title' }, { id, overwrite: true })
+        ).resolves.toBeDefined();
+
+        expect(client.index).toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('before-state'));
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: {},
+            after: expect.any(Object),
+          })
+        );
+      });
+
       it('does not fetch before-state on overwrite when the type is not on the allow list', async () => {
         securityExtension.savedObjectDiffEnabled = true;
         securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);

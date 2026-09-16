@@ -59,6 +59,10 @@ export const escapeJsonPointerSegment = (segment: string): string =>
  * are skipped entirely — they are absent from Elasticsearch documents, so a leaf
  * with value `undefined` should be treated the same as a missing key.
  */
+/** Whether a plain object has at least one non-`undefined` value; `{ a: undefined }` is stored by ES as `{}`. */
+const hasDefinedKeys = (obj: object): boolean =>
+  Object.values(obj).some((value) => value !== undefined);
+
 const flattenToJsonPointers = (
   obj: Record<string, unknown>,
   prefix = '',
@@ -67,7 +71,7 @@ const flattenToJsonPointers = (
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined) continue;
     const path = `${prefix}/${escapeJsonPointerSegment(key)}`;
-    if (isPlainObject(value) && Object.keys(value as object).length > 0) {
+    if (isPlainObject(value) && hasDefinedKeys(value as object)) {
       flattenToJsonPointers(value as Record<string, unknown>, path, result);
     } else {
       result[path] = value;

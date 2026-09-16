@@ -15,7 +15,7 @@ import {
   waitForAuditEvent,
   waitForDiffEvent,
   waitForSavedObjectEvent,
-} from '../../../scout_security_audit/api/helpers/audit_log';
+} from '../../../security_audit_helpers/audit_log';
 
 // `index-pattern` is a standard, non-hidden type creatable through the public
 // saved objects HTTP API, and its attributes are plain strings — convenient for
@@ -53,8 +53,8 @@ apiTest.describe(
   },
   () => {
     // Objects registered here are torn down after each test so re-runs don't
-    // accumulate state on shared or long-lived stacks. Tests that delete their
-    // own objects (the delete/bulk-delete cases) don't need to register them.
+    // accumulate state on shared or long-lived stacks. The delete cases register
+    // theirs too so a failed delete assertion cannot leak them.
     const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
     const connectorsToCleanUp: string[] = [];
 
@@ -141,6 +141,7 @@ apiTest.describe(
         body: { attributes: { title: 'to-delete' } },
         responseType: 'json',
       });
+      savedObjectsToCleanUp.push({ type: TYPE, id });
 
       const res = await apiClient.delete(`api/saved_objects/${TYPE}/${id}`, {
         headers,
@@ -173,6 +174,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(res).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: TYPE, id: idA }, { type: TYPE, id: idB });
 
         const diffA = await waitForDiffEvent('saved_object_create', idA);
         const diffB = await waitForDiffEvent('saved_object_create', idB);
@@ -197,6 +199,7 @@ apiTest.describe(
           ],
           responseType: 'json',
         });
+        savedObjectsToCleanUp.push({ type: TYPE, id: idA }, { type: TYPE, id: idB });
 
         const res = await apiClient.post('api/saved_objects/_bulk_delete', {
           headers,

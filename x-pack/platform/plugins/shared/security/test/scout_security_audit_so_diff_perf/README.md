@@ -6,8 +6,9 @@ the cost of the opt-in field-level diff added to saved object audit events
 
 They are a **measurement suite, not a regression gate**. The tests only assert that writes
 succeed and Kibana stays available; the value is in the metrics they attach to the report.
-They are scheduled on the `ci-batch-weekly` Scout channel rather than on every commit, and
-are intended to be run by hand when the diff path changes or before a release.
+The suite is **not run in CI** (it is listed under `excluded_configs` in
+`.buildkite/scout_ci_config.yml`) and is intended to be run by hand when the diff path changes
+or before a release.
 
 ### 💡 What is measured
 
@@ -17,7 +18,7 @@ Two layers:
   synthetic objects of known shape and reports CPU time per call, patch size, ops/noOps
   counts, and (with `--expose-gc`) heap allocated per call and heap retained by the result.
   Answers "what does one diff of an N-leaf object cost?".
-- **End-to-end suite (`api/`)**: runs five write workloads through the public saved objects
+- **End-to-end suite (`api/`)**: runs six write workloads through the public saved objects
   API against a running Kibana and samples Kibana's process metrics around each one.
   Answers "what happens to the event loop, memory, and audit volume under load?". Run it once
   with diffs **on** and once with diffs **off** and compare.
@@ -29,6 +30,7 @@ Two layers:
 | 3 | Sequential bulk update | 5 rounds × 20 objects × 400 panels |
 | 4 | Import with overwrite | 2 passes × 30 objects × 200 panels; the second pass overwrites, exercising before-state reads |
 | 5 | Concurrent bulk create | 3 rounds × 8 parallel batches × 6 objects × 1000 panels |
+| 6 | Sequential dashboard update | 20 title-only updates to one 60-panel dashboard (≈49 KB `panelsJSON` string) |
 
 Every request stays under 1 MB so the same suite runs against Cloud deployments, whose default
 `server.maxPayload` is 1 MB.
@@ -38,8 +40,8 @@ event loop utilization peak (from `GET /api/stats?extended=true`, polled every s
 before / peak / settled and RSS peak, and, when the audit log file is readable from the test
 runner (local runs only), audit events and KB written.
 
-All objects the suite creates are `index-pattern` saved objects with ids prefixed
-`so-diff-perf-` and are deleted after each test.
+Workloads 1-5 write `index-pattern` saved objects and workload 6 writes a `dashboard`; all ids
+are prefixed `so-diff-perf-` and are deleted after each test.
 
 ### ⚙️ Server configuration
 
@@ -47,7 +49,7 @@ Two Scout server config sets exist for local runs, identical except for the feat
 
 | Config set | Diffs | Notes |
 |---|---|---|
-| `security_audit_so_diff_perf` | on | 1.5 GB old-space heap, audit file appender, `typesToInclude: ["index-pattern"]`, `ops.interval: 2000` |
+| `security_audit_so_diff_perf` | on | 1.5 GB old-space heap, audit file appender, `typesToInclude: ["index-pattern","dashboard"]`, `fieldSizeLimit: 100kb`, `ops.interval: 2000` |
 | `security_audit_so_diff_perf_baseline` | off | same heap, appender and ops interval |
 
 The 1.5 GB heap is the smallest that boots the full default Scout Kibana. To reproduce Cloud's
@@ -55,28 +57,35 @@ The 1.5 GB heap is the smallest that boots the full default Scout Kibana. To rep
 
 ### 🧪 Running locally
 
-Boot the diffs-on stack and run the suite:
-
-```bash
-node scripts/scout start-server --arch stateful --domain classic --serverConfigSet security_audit_so_diff_perf
-```
-
-In a second terminal:
+One command boots the diffs-on ES + Kibana stack (the server config set is picked from the
+suite path) and runs the suite:
 
 ```bash
 SO_DIFF_PERF_LABEL=diffs-on node scripts/scout run-tests --arch stateful --domain classic \
   --config x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/playwright.config.ts
 ```
 
-Stop the stack, then repeat with the baseline config set and label:
+Then run the baseline by overriding the server config set and label:
 
 ```bash
-node scripts/scout start-server --arch stateful --domain classic --serverConfigSet security_audit_so_diff_perf_baseline
 SO_DIFF_PERF_LABEL=diffs-off node scripts/scout run-tests --arch stateful --domain classic \
+  --serverConfigSet security_audit_so_diff_perf_baseline \
   --config x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/playwright.config.ts
 ```
 
 `SO_DIFF_PERF_LABEL` is a free-form label stored in the results so the two runs can be told apart.
+
+To iterate against an already-running stack, start it once with the config set you want and
+then run Playwright directly:
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet security_audit_so_diff_perf
+```
+
+```bash
+SO_DIFF_PERF_LABEL=diffs-on node scripts/playwright test --project local \
+  --config x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/playwright.config.ts
+```
 
 ### ☁️ Running against a Cloud deployment
 
@@ -90,11 +99,12 @@ Under **Kibana user settings** apply (diffs-on run):
 ```yaml
 xpack.security.audit.enabled: true
 xpack.security.audit.savedObjectDiff.enabled: true
-xpack.security.audit.savedObjectDiff.typesToInclude: ["index-pattern"]
+xpack.security.audit.savedObjectDiff.typesToInclude: ["index-pattern", "dashboard"]
+xpack.security.audit.savedObjectDiff.fieldSizeLimit: 100kb
 ops.interval: 2000
 ```
 
-For the baseline run, omit the two `savedObjectDiff` lines (or set `enabled: false`).
+For the baseline run, omit the three `savedObjectDiff` lines (or set `enabled: false`).
 Either create two deployments or change the settings between runs.
 
 Once the deployment is up, write `.scout/servers/cloud_ech.json`:
@@ -145,7 +155,8 @@ the concurrent workload, and audit KB written.
 Treat differences under about 10% as run-to-run noise. The roughly one second floor on every
 request is Elasticsearch's write refresh, not Kibana.
 
-`results/` holds tables from past runs, with the environment they were taken on.
+`results/` is a git-ignored scratch directory for tables saved from local runs; nothing in it is
+committed. The report attachments above are the only output the suite produces on its own.
 
 ### 🔬 Micro-benchmark
 

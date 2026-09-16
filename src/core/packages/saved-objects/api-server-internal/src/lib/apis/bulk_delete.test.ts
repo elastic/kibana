@@ -781,6 +781,96 @@ describe('#bulkDelete', () => {
 
         await expect(repository.bulkDelete([obj1, obj2])).resolves.toBeDefined();
       });
+
+      it('still deletes and audits with before={} when the before-state mget fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        // obj1/obj2 are single-namespace, so the only mget is the before-state fetch.
+        client.mget.mockRejectedValueOnce(new Error('mget boom'));
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, [obj1, obj2]));
+
+        const result = await repository.bulkDelete([obj1, obj2]);
+
+        expect(result).toEqual({
+          statuses: [createBulkDeleteSuccessStatus(obj1), createBulkDeleteSuccessStatus(obj2)],
+        });
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('before-state'));
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: {},
+            after: {},
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            outcome: 'success',
+            before: {},
+          })
+        );
+      });
+
+      it('audits duplicate {type, id} entries in one request as separate events', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const objects = [obj1, obj1];
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, objects));
+        // first entry deletes, second fails in the ES bulk response
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(expectErrorNotFound(obj1).error as Payload);
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, objects));
+
+        await repository.bulkDelete(objects);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'unknown',
+          })
+        );
+        mockGetBulkOperationError.mockReset();
+      });
+
+      it('audits an object rejected before authorization (unsupported type) as unknown', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const unknownObj = { ...obj1, type: 'unknownType' };
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj2]));
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, [obj2]));
+
+        const result = await repository.bulkDelete([unknownObj, obj2]);
+
+        expect(result.statuses[0]).toEqual(
+          expect.objectContaining({ type: 'unknownType', id: obj1.id, success: false })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: expect.objectContaining({ type: 'unknownType', id: obj1.id }),
+            outcome: 'unknown',
+            before: {},
+            after: {},
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            outcome: 'success',
+          })
+        );
+      });
     });
 
     describe('security', () => {

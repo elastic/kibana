@@ -405,16 +405,16 @@ export interface SetAccessControlToWriteParams {
   preflightAccessControl?: SavedObjectAccessControl;
 }
 
-/**
- * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
- * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
- */
 /** Saved object writes that emit a post-operation audit event when diff auditing is enabled. */
 export type SavedObjectDiffAuditAction =
   | 'saved_object_create'
   | 'saved_object_update'
   | 'saved_object_delete';
 
+/**
+ * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
+ * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
+ */
 export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for the CREATE security action

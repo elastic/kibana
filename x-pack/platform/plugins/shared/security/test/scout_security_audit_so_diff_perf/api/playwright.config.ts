@@ -7,8 +7,8 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-// Measurement suite, not a regression gate: scheduled on the weekly batch only.
+// Measurement suite, not a regression gate: not run in CI (excluded in
+// .buildkite/scout_ci_config.yml); run by hand, see ../README.md.
 export default createPlaywrightConfig({
   testDir: './tests',
-  metadata: { scout: { testChannels: ['ci-batch-weekly'] } },
 });

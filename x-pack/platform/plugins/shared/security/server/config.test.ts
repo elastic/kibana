@@ -2031,6 +2031,17 @@ describe('audit.savedObjectDiff config', () => {
     ).toThrow(/savedObjectDiff\.enabled requires xpack\.security\.audit\.enabled/);
   });
 
+  it('throws when fieldSizeLimit is zero', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          savedObjectDiff: { enabled: true, typesToInclude: ['dashboard'], fieldSizeLimit: '0b' },
+        },
+      })
+    ).toThrow(/fieldSizeLimit/);
+  });
+
   it('does not throw when savedObjectDiff is disabled and audit is disabled', () => {
     expect(() =>
       ConfigSchema.validate({
