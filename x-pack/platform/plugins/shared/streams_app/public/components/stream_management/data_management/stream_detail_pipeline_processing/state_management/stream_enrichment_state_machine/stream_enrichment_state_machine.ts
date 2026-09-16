@@ -427,6 +427,7 @@ export const streamEnrichmentMachine = setup({
                     { type: 'storeSavedPipeline' },
                     { type: 'commitSavedState' },
                     { type: 'notifyUpsertStreamSuccess' },
+                    { type: 'refreshDefinition' },
                   ],
                 },
                 onError: {
