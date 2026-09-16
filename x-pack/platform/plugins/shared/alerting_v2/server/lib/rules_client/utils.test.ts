@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
-import type { RotationCandidate } from './types';
+import type { ResolvedCreateRuleData, RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
@@ -35,7 +35,7 @@ const serverFields = {
   version: 1,
 };
 
-const baseCreateData: CreateRuleData = {
+const baseCreateData: ResolvedCreateRuleData = {
   kind: 'alert',
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
@@ -56,7 +56,7 @@ const createRuleSoAttributesWithArtifacts = () =>
 describe('utils', () => {
   describe('transformCreateRuleBodyToRuleSoAttributes', () => {
     it('maps description into saved object attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'rule-with-desc', description: 'My rule description' },
       };
@@ -73,7 +73,7 @@ describe('utils', () => {
     });
 
     it('passes metadata.builder_type through to SO attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       };
@@ -90,7 +90,7 @@ describe('utils', () => {
     });
 
     it('stores the query exactly as sent', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
       };
@@ -104,7 +104,7 @@ describe('utils', () => {
     });
 
     it('stores a breach-less query without inventing a breach block', () => {
-      const data: CreateRuleData = { ...baseCreateData, query: { base: 'FROM metrics-*' } };
+      const data: ResolvedCreateRuleData = { ...baseCreateData, query: { base: 'FROM metrics-*' } };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
@@ -119,7 +119,7 @@ describe('utils', () => {
     });
 
     it('stores the lifecycle objects the request provided', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
         recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
@@ -133,7 +133,7 @@ describe('utils', () => {
     });
 
     it('stores no lifecycle objects for a signal rule', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         kind: 'signal',
         recovery: undefined,
@@ -147,7 +147,7 @@ describe('utils', () => {
     });
 
     it('normalises a null state_transition to an absent one', () => {
-      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+      const data: ResolvedCreateRuleData = { ...baseCreateData, state_transition: null };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
@@ -155,7 +155,7 @@ describe('utils', () => {
     });
 
     it('stores the state_transition phases the request provided', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         state_transition: { pending: { count: 3, timeframe: '5m', operator: 'and' } },
       };
@@ -316,23 +316,6 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
-    });
-
-    it('rejects query change on a builder rule without explicit builder_type clear', () => {
-      const existing = createRuleSoAttributes({
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
-      });
-      const updateData: UpdateRuleData = {
-        query: { base: 'FROM new-index | LIMIT 1' },
-      };
-
-      expect(() =>
-        buildUpdateRuleAttributes(existing, updateData, {
-          updatedBy: { profile_uid: 'user-2' },
-          updatedAt: '2025-01-02T00:00:00.000Z',
-          version: 2,
-        })
-      ).toThrow(/Cannot update the query on a builder rule/);
     });
 
     it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
@@ -684,7 +667,7 @@ describe('utils', () => {
     });
 
     it('round-trips description through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'round-trip-rule', description: 'Round-trip desc' },
       };
@@ -737,7 +720,7 @@ describe('utils', () => {
     });
 
     it('round-trips a breach-less query through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { base: 'FROM metrics-*' },
       };

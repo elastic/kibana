@@ -302,9 +302,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured parameters for the rule builder identified by \`builder_type\`. The server generates the rule query from these fields.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "builder_type": Object {
                   "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
                   "maxLength": 64,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "description": Object {
@@ -672,7 +683,11 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery": Object {
               "allOf": Array [
@@ -711,7 +726,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },
