@@ -24,6 +24,7 @@ export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export { SetupTechnology } from './types';
 export type {
   CloudConnector,
+  CloudConnectorIacState,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
   CloudConnectorVars,
@@ -146,6 +147,15 @@ export type {
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
 export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
+export { useIacProvisioner } from './hooks/use_iac_provisioner';
+export type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+  RenderIacTemplateRequest,
+  RenderIacTemplateResponse,
+} from '../common/types/rest_spec/iac_provisioner';
+export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 
