@@ -2673,5 +2673,49 @@ describe('StepIoService', () => {
 
       expect(service.getStepOutput(id)).toEqual(aggregate);
     });
+
+    // The evicted flag alone cannot carry this one. An output over
+    // `evictionMinBytes` can be written, flushed and evicted AGAIN while a fetch
+    // from before the write is still outstanding, so by the time the response
+    // lands the flag is true for a second, unrelated reason. Applying it then
+    // would install the older value and clear the flag, leaving nothing to
+    // re-fetch the correct one. The per-id write generation is what separates
+    // "same eviction episode" from "a newer value exists".
+    it('discards a stale fetch even when the output was evicted again meanwhile', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const id = 'exec_parallel';
+      state.upsertStep({ id, stepId: 'fan_out', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput(id, null, EVICTION_THRESHOLD * 2);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      let releaseRead: (docs: unknown[]) => void = () => {};
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          releaseRead = resolve as (docs: unknown[]) => void;
+        })
+      );
+
+      const inFlight = service.rehydrateOutputs([id]);
+
+      // Written large enough to be an eviction candidate once flushed.
+      const aggregate = { results: [1, 2], total: 2 } as unknown as JsonValue;
+      service.setStepOutput(id, aggregate, EVICTION_THRESHOLD * 2);
+
+      // Flush, then the deferred cycle evicts it -- the flag is true again.
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.getStepOutput(id)).toBeUndefined();
+
+      releaseRead([{ id, output: null, workflowRunId: 'test-workflow-execution-id' }]);
+      await inFlight;
+
+      // The stale document must not be installed, and the id must stay evicted
+      // so the next read fetches the aggregate that IS now in Elasticsearch.
+      expect(service.getStepOutput(id)).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(true);
+    });
   });
 });

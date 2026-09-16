@@ -228,6 +228,18 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private transientlyRehydratedIds = new Set<string>();
   /**
+   * Bumped on every output write, per step execution. Snapshotted by
+   * {@link rehydrateOutputs} before its fetch and re-checked after, so a
+   * response that was issued before a write cannot be applied on top of it.
+   *
+   * The evicted flag alone is not sufficient: an output larger than
+   * `evictionMinBytes` can be written, flushed and evicted again while a fetch
+   * from before the write is still outstanding, which makes the flag true a
+   * second time. The counter distinguishes "still the same eviction episode"
+   * from "a newer value exists", which the flag cannot.
+   */
+  private outputWriteGenerations = new Map<string, number>();
+  /**
    * Per-consumer read-pins: the step execution ids each consuming node has
    * pinned for the duration of its own execution. Keyed by
    * {@link PrepareForReadArgs.consumerId} (= the consuming node's step
@@ -394,6 +406,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // matters for re-entrant aggregators (e.g. `parallel`) that finish on a
     // resume tick and are consumed by the next step before the flush lands.
     this.forgetTransientRehydration(stepExecutionId);
+    this.outputWriteGenerations.set(
+      stepExecutionId,
+      (this.outputWriteGenerations.get(stepExecutionId) ?? 0) + 1
+    );
 
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
@@ -1065,6 +1081,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const startMs = performance.now();
     const expectedRunId = this.state.getWorkflowExecutionId();
+    // Snapshot BEFORE the fetch so a write that lands during it is detectable.
+    const generationsAtRequest = new Map(
+      idsToRehydrate.map((id) => [id, this.outputWriteGenerations.get(id) ?? 0])
+    );
     const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
       'id',
       'output',
@@ -1076,6 +1096,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // a custom resume path with mis-typed IDs). Drop any doc whose
     // workflowRunId disagrees with the current execution rather than
     // restoring foreign output into memory.
+    // Ids whose response we deliberately drop below. They must NOT be confused
+    // with ids Elasticsearch never returned: the cleanup at the end clears the
+    // evicted flag for those, which for a superseded id would leave it neither
+    // resident nor evicted -- so nothing would ever fetch it again -- and would
+    // log it as data loss.
+    const supersededIds = new Set<string>();
     const docs = fetched.filter((doc) => {
       if (doc.workflowRunId && doc.workflowRunId !== expectedRunId) {
         this.logger?.error(
@@ -1090,11 +1116,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // this id. In both cases what is in memory is at least as fresh as this
       // document, and applying it would replace a correct value with an older
       // one -- `null`, when the step had not yet written an output at fetch time.
+      // A write during the fetch makes this response obsolete, whatever the
+      // evicted flag now says. Checked first because the flag can be true again
+      // for a second reason: an output over `evictionMinBytes` can be written,
+      // flushed and re-evicted inside this window, and then the flag alone would
+      // wave the stale document through -- installing an older value AND
+      // clearing the flag, so nothing would ever re-fetch the correct one.
+      if ((this.outputWriteGenerations.get(doc.id) ?? 0) !== generationsAtRequest.get(doc.id)) {
+        this.logger?.debug(
+          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten while the fetch was in flight`
+        );
+        supersededIds.add(doc.id);
+        return false;
+      }
       // Still being evicted is what makes this document authoritative.
       if (!this.evictedOutputIds.has(doc.id)) {
         this.logger?.debug(
           `Stale rehydration response discarded for step '${doc.id}': its output was rewritten or restored while the fetch was in flight`
         );
+        supersededIds.add(doc.id);
         return false;
       }
       return true;
@@ -1140,7 +1180,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     // Defensive: drop IDs not returned by ES so we don't retry forever.
-    const stillEvictedAfterFetch = idsToRehydrate.filter((id) => this.evictedOutputIds.has(id));
+    const stillEvictedAfterFetch = idsToRehydrate.filter(
+      (id) => this.evictedOutputIds.has(id) && !supersededIds.has(id)
+    );
     for (const id of stillEvictedAfterFetch) {
       this.clearEvicted(id);
     }
