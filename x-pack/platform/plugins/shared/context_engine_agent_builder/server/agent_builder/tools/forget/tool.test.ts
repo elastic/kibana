@@ -122,6 +122,9 @@ describe('forget tool', () => {
     expect(tool.id).toBe(CONTEXT_ENGINE_FORGET_TOOL_ID);
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ aiIndexId: 'support' }).success).toBe(false);
+    expect(tool.schema.shape.aiIndexId.description).toContain(
+      'not the backing Elasticsearch index or data stream name'
+    );
     expect(tool.annotations?.destructiveHint).toBe(true);
     expect(tool.confirmation).toEqual({ askUser: 'always' });
   });
