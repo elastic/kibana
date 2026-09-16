@@ -11,7 +11,6 @@ import type { NewTermsRuleParams } from '../../rule_schema';
 import type { GetFilterArgs } from '../utils/get_filter';
 import { getFilter } from '../utils/get_filter';
 import { singleSearchAfter } from '../utils/single_search_after';
-import { reportMissingAggregations } from '../utils/no_readable_shards';
 import {
   buildCompositeNewTermsAgg,
   buildCompositeDocFetchAgg,
@@ -161,7 +160,6 @@ const multiTermsCompositeNonRetryable = async ({
       searchResult: pageSearchResult,
       searchDuration: pageSearchDuration,
       searchErrors: pageSearchErrors,
-      searchWarnings: pageSearchWarnings,
       loggedRequests: pageSearchLoggedRequests = [],
     } = await singleSearchAfter({
       searchRequest,
@@ -180,22 +178,12 @@ const multiTermsCompositeNonRetryable = async ({
 
     result.searchAfterTimes.push(pageSearchDuration);
     result.errors.push(...pageSearchErrors);
-    result.warningMessages.push(...pageSearchWarnings);
     loggedRequests.push(...pageSearchLoggedRequests);
     logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
     const pageSearchResultWithAggs = pageSearchResult as CompositeNewTermsAggResult;
     if (!pageSearchResultWithAggs.aggregations) {
-      reportMissingAggregations({
-        searchResult: pageSearchResult,
-        searchErrors: pageSearchErrors,
-        searchWarnings: pageSearchWarnings,
-        result,
-        inputIndex,
-        unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
-      });
-
-      return { loggedRequests };
+      throw new Error('Aggregations were missing on new terms search result');
     }
 
     // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -225,7 +213,6 @@ const multiTermsCompositeNonRetryable = async ({
         searchResult: docFetchSearchResult,
         searchDuration: docFetchSearchDuration,
         searchErrors: docFetchSearchErrors,
-        searchWarnings: docFetchSearchWarnings,
         loggedRequests: docFetchLoggedRequests = [],
       } = await singleSearchAfter({
         searchRequest: searchRequestPhase3,
@@ -243,22 +230,12 @@ const multiTermsCompositeNonRetryable = async ({
       });
       result.searchAfterTimes.push(docFetchSearchDuration);
       result.errors.push(...docFetchSearchErrors);
-      result.warningMessages.push(...docFetchSearchWarnings);
       loggedRequests.push(...docFetchLoggedRequests);
 
       const docFetchResultWithAggs = docFetchSearchResult as CompositeDocFetchAggResult;
 
       if (!docFetchResultWithAggs.aggregations) {
-        reportMissingAggregations({
-          searchResult: docFetchSearchResult,
-          searchErrors: docFetchSearchErrors,
-          searchWarnings: docFetchSearchWarnings,
-          result,
-          inputIndex,
-          unexpectedErrorMessage: 'Aggregations were missing on document fetch search result',
-        });
-
-        return { loggedRequests };
+        throw new Error('Aggregations were missing on document fetch search result');
       }
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);

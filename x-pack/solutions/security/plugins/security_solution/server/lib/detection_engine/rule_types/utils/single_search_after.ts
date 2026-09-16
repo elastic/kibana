@@ -14,7 +14,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SignalSource, LoggedRequestsConfig } from '../types';
-import { createErrorsFromShard, createWarningsFromClusters, makeFloatString } from './utils';
+import { createErrorsFromShard, makeFloatString } from './utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -39,7 +39,6 @@ export const singleSearchAfter = async <
   searchResult: ESSearchResponse<SignalSource, TSearchRequest>;
   searchDuration: string;
   searchErrors: string[];
-  searchWarnings: string[];
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
   return withSecuritySpan('singleSearchAfter', async () => {
@@ -55,10 +54,6 @@ export const singleSearchAfter = async <
 
       const searchErrors = createErrorsFromShard({
         errors: nextSearchAfterResult._shards.failures ?? [],
-      });
-      const searchWarnings = createWarningsFromClusters({
-        clusters: nextSearchAfterResult._clusters,
-        shardErrors: searchErrors,
       });
 
       if (loggedRequestsConfig) {
@@ -76,7 +71,6 @@ export const singleSearchAfter = async <
         searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
-        searchWarnings,
         loggedRequests,
       };
     } catch (exc) {

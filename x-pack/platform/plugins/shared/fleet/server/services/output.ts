@@ -133,12 +133,11 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
     logger.warn(`ssl value: ${ssl}`);
   }
-  // canonical id placed last so attributes.id cannot shadow it
   return {
+    id: outputId ?? so.id,
     ...atributes,
     ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
-    id: outputId ?? so.id,
   };
 }
 
@@ -913,10 +912,7 @@ class OutputService {
       );
     }
 
-    // id is stripped to prevent poisoning the saved object's identity field.
-    const updateData: Nullable<Partial<OutputSOAttributes>> = {
-      ...omit(data, ['ssl', 'secrets', 'id']),
-    };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (

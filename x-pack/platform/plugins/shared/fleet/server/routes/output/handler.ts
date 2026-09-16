@@ -98,15 +98,8 @@ export const putOutputHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { id: bodyId, ...outputUpdate } = request.body as typeof request.body & { id?: string };
+  const outputUpdate = request.body;
   try {
-    if (bodyId !== undefined && bodyId !== request.params.outputId) {
-      return response.badRequest({
-        body: {
-          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
-        },
-      });
-    }
     await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
