@@ -16,7 +16,7 @@ import {
   EuiToken,
   EuiToolTip,
   useEuiTheme,
-  type IconType
+  type IconType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
