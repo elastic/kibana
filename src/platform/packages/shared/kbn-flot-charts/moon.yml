@@ -26,7 +26,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.js'
-    - index.d.ts
+    - '**/*'
     - '!target/**/*'
 tasks: {}
