@@ -44,7 +44,7 @@ function getColumnRemapping(viz: GaugeVisualizationState): IdRemapping {
 const alignExtraLayers: NormalizerConfig<GaugeAttributes> = {
   order: -2,
   original: (attributes) => {
-    const gaugeLayerId = (attributes.state.visualization as GaugeVisualizationState).layerId;
+    const gaugeLayerId = attributes.state.visualization.layerId;
     const formBased = attributes.state.datasourceStates.formBased;
 
     if (!formBased?.layers || !gaugeLayerId) {
@@ -118,7 +118,7 @@ const alignLegacyTypes: NormalizerConfig<GaugeAttributes> = {
     return attributes;
   },
   transformed: (attributes) => {
-    const viz = attributes.state.visualization as GaugeVisualizationState;
+    const viz = attributes.state.visualization;
 
     // The transform always emits optional accessor and label keys, even when
     // undefined. The original side only sets the keys it actually carries, so
@@ -160,8 +160,8 @@ const alignESQLColumns: NormalizerConfig<GaugeAttributes> = {
 
 export const normalizeGauge = mergeNormalizers<GaugeAttributes>([
   getCommonNormalizer<GaugeAttributes>(({ state: { visualization } }) => ({
-    layerRemapping: [[(visualization as GaugeVisualizationState).layerId, DEFAULT_LAYER_ID]],
-    columnRemapping: getColumnRemapping(visualization as GaugeVisualizationState),
+    layerRemapping: [[visualization.layerId, DEFAULT_LAYER_ID]],
+    columnRemapping: getColumnRemapping(visualization),
   })),
   getPaletteNormalizer<GaugeAttributes>('state.visualization.palette'),
   alignExtraLayers,
