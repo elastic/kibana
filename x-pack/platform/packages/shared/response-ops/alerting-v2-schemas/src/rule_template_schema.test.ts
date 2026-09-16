@@ -263,6 +263,16 @@ describe('rule template create-rule schema coupling', () => {
                   ],
                   "type": "object",
                 },
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured parameters for the rule builder identified by \`builder.type\`. The server generates the rule query from these fields.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "description": Object {
                   "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
                   "maxLength": 1024,
@@ -324,29 +334,6 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "__schema2": Object {
-              "additionalProperties": false,
-              "description": "ES|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it.",
-              "properties": Object {
-                "base": Object {
-                  "description": "ES|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`.",
-                  "maxLength": 10000,
-                  "minLength": 1,
-                  "type": "string",
-                },
-                "breach": Object {
-                  "allOf": Array [
-                    Object {
-                      "$ref": "#/definitions/alerting_rule_breach",
-                    },
-                  ],
-                },
-              },
-              "required": Array [
-                "base",
-              ],
-              "type": "object",
-            },
-            "__schema3": Object {
               "additionalProperties": false,
               "properties": Object {
                 "data": Object {
@@ -504,6 +491,29 @@ describe('rule template create-rule schema coupling', () => {
               },
               "required": Array [
                 "strategy",
+              ],
+              "type": "object",
+            },
+            "alerting_rule_query": Object {
+              "additionalProperties": false,
+              "description": "ES|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it.",
+              "properties": Object {
+                "base": Object {
+                  "description": "ES|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`.",
+                  "maxLength": 10000,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "breach": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/alerting_rule_breach",
+                    },
+                  ],
+                },
+              },
+              "required": Array [
+                "base",
               ],
               "type": "object",
             },
@@ -672,7 +682,7 @@ describe('rule template create-rule schema coupling', () => {
             "artifacts": Object {
               "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. An empty array is rejected: omit \`artifacts\` on create, or send \`null\` on PATCH to clear.",
               "items": Object {
-                "$ref": "#/definitions/__schema3",
+                "$ref": "#/definitions/__schema2",
               },
               "maxItems": 100,
               "minItems": 1,
@@ -711,7 +721,11 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "query": Object {
-              "$ref": "#/definitions/__schema2",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery": Object {
               "allOf": Array [
@@ -743,7 +757,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },
