@@ -23,6 +23,7 @@ const requireMatch = (id: (typeof RESOLUTION_RULE_IDS)[keyof typeof RESOLUTION_R
 const EMAIL = requireMatch(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH);
 const WINDOWS_SID = requireMatch(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
 const ENTRA_GUID = requireMatch(RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE);
+const CROWDSTRIKE_SID = requireMatch(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE);
 const UPN = requireMatch(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE);
 
 describe('ES|QL matcher query builder', () => {
@@ -31,6 +32,7 @@ describe('ES|QL matcher query builder', () => {
       ['email', EMAIL],
       ['windows SID', WINDOWS_SID],
       ['entra GUID', ENTRA_GUID],
+      ['crowdstrike SID', CROWDSTRIKE_SID],
       ['UPN cross-field', UPN],
     ])('emits a valid query for %s', async (_name, spec) => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec });
@@ -83,7 +85,7 @@ describe('ES|QL matcher query builder', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: WINDOWS_SID });
       expect(query).toContain('match_value RLIKE "S-1-5-.*"');
       expect(query).toContain(
-        'entity.namespace IN ("local", "system", "windows", "crowdstrike", "active_directory")'
+        'entity.namespace IN ("local", "system", "windows", "active_directory")'
       );
       expect(WINDOWS_SID.inclusionPattern).toBe('S-1-5-.*');
       expect(WINDOWS_SID.allowDuplicateUnresolvedNamespaces).toEqual(['local']);

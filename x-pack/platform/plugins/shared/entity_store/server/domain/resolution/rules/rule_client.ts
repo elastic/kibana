@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, isSavedObjectErrorResult, type Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { ResolutionRuleId } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
 import { EntityResolutionRuleAttributes } from './saved_object';
@@ -95,22 +95,17 @@ export class ResolutionRulesClient {
   }
 
   private async getOverrides(): Promise<Map<ResolutionRuleId, EntityResolutionRuleAttributes>> {
-    const response = await this.soClient.bulkGet<EntityResolutionRuleAttributes>(
-      RESOLUTION_RULE_CONFIGS.map((config) => ({
-        type: EntityResolutionRuleTypeName,
-        id: this.getSavedObjectId(config.id),
-      }))
-    );
+    const response = await this.soClient.find<EntityResolutionRuleAttributes>({
+      type: EntityResolutionRuleTypeName,
+      perPage: RESOLUTION_RULE_CONFIGS.length,
+    });
 
-    const overrides = new Map<ResolutionRuleId, EntityResolutionRuleAttributes>();
-    for (const savedObject of response.saved_objects) {
-      if (isSavedObjectErrorResult(savedObject)) {
-        continue;
-      }
-      const attributes = EntityResolutionRuleAttributes.parse(savedObject.attributes);
-      overrides.set(attributes.id, attributes);
-    }
-    return overrides;
+    return new Map(
+      response.saved_objects.map((savedObject) => [
+        savedObject.attributes.id,
+        EntityResolutionRuleAttributes.parse(savedObject.attributes),
+      ])
+    );
   }
 
   private async getOverride(

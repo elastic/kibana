@@ -575,7 +575,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'SID bridge still links a pre-upgrade CrowdStrike-namespace entity to Active Directory',
+    'CrowdStrike SID bridge does not link leftover crowdstrike-namespace entities when left at the default (disabled)',
     async ({ apiClient, esClient }) => {
       const sid = 'S-1-5-21-444-555-666-2002';
       const csEntity = 'test13-crowdstrike';
@@ -594,8 +594,54 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         userId: sid,
       });
 
-      await triggerMaintainerRun(apiClient, internalHeaders);
-      await waitForResolution(esClient, csEntity, adEntity);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, csEntity);
+      await assertNotResolved(esClient, adEntity);
+    }
+  );
+
+  apiTest(
+    'CrowdStrike SID bridge links leftover crowdstrike-namespace entities to Active Directory when enabled',
+    async ({ apiClient, esClient }) => {
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+        ),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+
+      try {
+        const sid = 'S-1-5-21-444-555-666-2003';
+        const csEntity = 'test13-crowdstrike-enabled';
+        const adEntity = 'test13-ad-enabled';
+
+        await seedUserEntity(esClient, {
+          entityId: csEntity,
+          namespace: 'crowdstrike',
+          email: 'test13-cs-enabled@sid.example',
+          userId: sid,
+        });
+        await seedUserEntity(esClient, {
+          entityId: adEntity,
+          namespace: 'active_directory',
+          email: 'test13-ad-enabled@sid.example',
+          userId: sid,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, csEntity, adEntity);
+      } finally {
+        const disable = await apiClient.put(
+          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+            RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+          ),
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+        expect(disable.statusCode).toBe(200);
+      }
     }
   );
 

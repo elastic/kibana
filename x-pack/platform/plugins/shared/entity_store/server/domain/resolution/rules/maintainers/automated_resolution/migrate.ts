@@ -7,10 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import {
-  RESOLUTION_RULE_IDS,
-  RETIRED_RESOLUTION_RULE_IDS,
-} from '../../../../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import {
   AUTOMATED_RESOLUTION_STATE_VERSION,
   type AutomatedResolutionState,
@@ -77,8 +74,6 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
-const RETIRED_RULE_IDS = new Set<string>(Object.values(RETIRED_RESOLUTION_RULE_IDS));
-
 // Version 2 reset the email watermark for case-insensitive matching. Version 3
 // resets the SID watermark so `local` entities created while that rule scanned
 // empty feeder namespaces are not left behind the already-advanced watermark.
@@ -91,9 +86,6 @@ const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleSt
   }
   const rules: Record<string, PerRuleState> = {};
   for (const [id, rule] of Object.entries(value)) {
-    if (RETIRED_RULE_IDS.has(id)) {
-      continue;
-    }
     rules[id] = sanitizeRule(rule, logger);
   }
   return rules;
@@ -105,8 +97,7 @@ const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleSt
  *
  * In practice there are three real inputs:
  *  - the current `{ version, rules }` shape — passed through when version is current,
- *    which also preserves rule ids this version may not know yet (retired ids are
- *    stripped; see `RETIRED_RESOLUTION_RULE_IDS`);
+ *    which also preserves rule ids this version may not know yet;
  *  - `{ version: 2, rules }` — SID watermark is reset so `local` entities created
  *    while the rule scanned empty `windows`/`system` namespaces are not skipped;
  *  - `{ rules }` without `version` — email watermark is reset so case-insensitive

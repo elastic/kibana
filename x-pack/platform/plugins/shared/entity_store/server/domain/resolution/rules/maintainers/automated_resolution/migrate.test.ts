@@ -6,16 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  RESOLUTION_RULE_IDS,
-  RETIRED_RESOLUTION_RULE_IDS,
-} from '../../../../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import { migrate } from './migrate';
 import { AUTOMATED_RESOLUTION_STATE_VERSION, type AutomatedResolutionState } from './types';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
 const SID_RULE = RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE;
-const RETIRED_CROWDSTRIKE = RETIRED_RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE;
+const CROWDSTRIKE_RULE = RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE;
 
 const ZEROED_STATS = {
   skippedOversizedBuckets: 0,
@@ -53,7 +50,7 @@ const FIXTURES: Record<string, unknown> = {
         lastProcessedTimestamp: '2026-09-10T00:00:00Z',
         lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
       },
-      [RETIRED_CROWDSTRIKE]: {
+      [CROWDSTRIKE_RULE]: {
         lastProcessedTimestamp: '2026-09-10T00:00:00Z',
         lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
       },
@@ -136,7 +133,7 @@ describe('automated-resolution state migration', () => {
     });
   });
 
-  it('resets the SID watermark on a v2 upgrade and drops the retired CrowdStrike rule', () => {
+  it('resets the SID watermark on a v2 upgrade and leaves the CrowdStrike rule state in place', () => {
     const output = migrate(FIXTURES['v2-sid-backfill'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
@@ -147,7 +144,7 @@ describe('automated-resolution state migration', () => {
       skippedAmbiguousBuckets: 0,
       ...ZEROED_STATS,
     });
-    expect(output.rules[RETIRED_CROWDSTRIKE]).toBeUndefined();
+    expect(output.rules[CROWDSTRIKE_RULE].lastProcessedTimestamp).toBe('2026-09-10T00:00:00Z');
   });
 
   it('resets the email watermark once when version is missing from per-rule state', () => {

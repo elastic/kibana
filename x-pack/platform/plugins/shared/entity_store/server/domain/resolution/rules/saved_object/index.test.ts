@@ -51,7 +51,7 @@ describe('EntityResolutionRuleType', () => {
     expect(() => createSchema?.validate({ ...validAttributes, kind: 'unknown_kind' })).toThrow();
   });
 
-  it('model version 2 accepts the new OOTB rule ids, cross_field kind, and the retired CrowdStrike id', () => {
+  it('model version 2 accepts the new OOTB rule ids and cross_field kind', () => {
     const createSchema = modelVersions[2].schemas?.create;
     const windowsSid = {
       id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
@@ -65,8 +65,8 @@ describe('EntityResolutionRuleType', () => {
       managed: true,
       enabled: true,
     };
-    const retiredCrowdstrike = {
-      id: 'crowdstrike_sid_bridge',
+    const crowdstrike = {
+      id: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
       kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
       managed: true,
       enabled: true,
@@ -74,7 +74,7 @@ describe('EntityResolutionRuleType', () => {
 
     expect(createSchema?.validate(windowsSid)).toEqual(windowsSid);
     expect(createSchema?.validate(upn)).toEqual(upn);
-    expect(createSchema?.validate(retiredCrowdstrike)).toEqual(retiredCrowdstrike);
+    expect(createSchema?.validate(crowdstrike)).toEqual(crowdstrike);
   });
 
   it('latest schema accepts every current rule id', () => {

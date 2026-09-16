@@ -92,7 +92,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     defaultEnabled: true,
     matcher: {
       field: 'user.id',
-      namespaces: ['local', 'system', 'windows', 'crowdstrike', 'active_directory'],
+      namespaces: ['local', 'system', 'windows', 'active_directory'],
       lowercase: false,
       inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
       exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
@@ -110,6 +110,19 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       namespaces: ['m365_defender', 'entra_id'],
       lowercase: false,
       inclusionPattern: ENTRA_GUID_INCLUSION,
+    },
+  },
+  {
+    id: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+    kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    description:
+      'Links CrowdStrike-namespace user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.',
+    defaultEnabled: false,
+    matcher: {
+      field: 'user.id',
+      namespaces: ['crowdstrike', 'active_directory'],
+      lowercase: false,
+      inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
     },
   },
   {

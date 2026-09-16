@@ -21,7 +21,7 @@ const createClient = (soClient: Partial<SavedObjectsClientContract>) =>
 describe('ResolutionRulesClient', () => {
   it('returns in-code defaults when no overrides exist', async () => {
     const soClient = {
-      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
     };
     const client = createClient(soClient);
 
@@ -40,7 +40,7 @@ describe('ResolutionRulesClient', () => {
 
   it('merges saved object overrides over in-code defaults', async () => {
     const soClient = {
-      bulkGet: jest.fn().mockResolvedValue({
+      find: jest.fn().mockResolvedValue({
         saved_objects: [
           {
             attributes: {
@@ -114,34 +114,5 @@ describe('ResolutionRulesClient', () => {
     const error = await client.setEnabled('unknown' as never, true).catch((err) => err);
 
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
-  });
-
-  it('bulkGets only the rule ids this version still knows', async () => {
-    const soClient = {
-      bulkGet: jest.fn().mockResolvedValue({
-        saved_objects: [
-          { error: { statusCode: 404 }, attributes: undefined },
-          ...RESOLUTION_RULE_CONFIGS.slice(1).map(() => ({
-            error: { statusCode: 404 },
-            attributes: undefined,
-          })),
-        ],
-      }),
-    };
-    const client = createClient(soClient);
-
-    await client.getEffectiveRules();
-
-    expect(soClient.bulkGet).toHaveBeenCalledWith(
-      RESOLUTION_RULE_CONFIGS.map((config) =>
-        expect.objectContaining({
-          id: expect.stringContaining(config.id),
-        })
-      )
-    );
-    expect(soClient.bulkGet.mock.calls[0][0]).toHaveLength(RESOLUTION_RULE_CONFIGS.length);
-    expect(JSON.stringify(soClient.bulkGet.mock.calls[0][0])).not.toContain(
-      'crowdstrike_sid_bridge'
-    );
   });
 });
