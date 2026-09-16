@@ -862,12 +862,26 @@ describe('RulesListTableContainer', () => {
         {
           ...mockRules[0],
           id: 'rule-3',
-          metadata: { name: 'Rule Three', signature_id: 'test-sig-id', tags: [], revision: 0, source: { type: 'internal' as const, version: 1 }, ownership: { managed: false } },
+          metadata: {
+            name: 'Rule Three',
+            signature_id: 'test-sig-id',
+            tags: [],
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         },
         {
           ...mockRules[1],
           id: 'rule-4',
-          metadata: { name: 'Rule Four', signature_id: 'test-sig-id', tags: [], revision: 0, source: { type: 'internal' as const, version: 1 }, ownership: { managed: false } },
+          metadata: {
+            name: 'Rule Four',
+            signature_id: 'test-sig-id',
+            tags: [],
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         },
       ] as RuleApiResponse[];
 

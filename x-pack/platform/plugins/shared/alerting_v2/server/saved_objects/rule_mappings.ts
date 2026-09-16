@@ -55,6 +55,30 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
           ignore_above: BUILDER_FIELDS_IGNORE_ABOVE,
           properties: assembleBuilderFieldsMappings(BUILDER_MANIFESTS),
         },
+        // Mirrors the model version '9' mappings_addition verbatim.
+        // Kibana core validates at startup that every addition declared in
+        // a model version is present verbatim in the static mappings.
+        // Ref: rule-identity.md "Storage and migration"
+        signature_id: { type: 'keyword', ignore_above: 256 },
+        // Ref: rule-source.md "Storage and migration"
+        source: {
+          properties: {
+            type: { type: 'keyword', ignore_above: 256 },
+            id: { type: 'keyword', ignore_above: 256 },
+            version: { type: 'integer' },
+          },
+        },
+        // Ref: rule-ownership.md "Storage, mapping, and migration"
+        ownership: {
+          properties: {
+            managed: { type: 'boolean' },
+            solution: { type: 'keyword', ignore_above: 256 },
+            domain: { type: 'keyword', ignore_above: 256 },
+            app: { type: 'keyword', ignore_above: 128 },
+          },
+        },
+        // Ref: rule-types.md "The discriminator must be indexed and filterable"
+        builder_type: { type: 'keyword', ignore_above: 256 },
       },
     },
     enabled: { type: 'boolean' },
