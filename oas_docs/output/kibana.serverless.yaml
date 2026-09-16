@@ -141443,7 +141443,6 @@ components:
         - kind
         - metadata
         - schedule
-        - query
     Kibana_HTTP_APIs_alerting_bulk_create_rules_request:
       additionalProperties: false
       type: object
