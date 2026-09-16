@@ -349,6 +349,9 @@ export const performBulkActionRoute = (
                     // instead makes every action look like it is being *removed*, which trips
                     // the removal carve-outs and skips validation entirely - the dry run would
                     // then report success for a duplicate that `rulesClient.create` denies.
+                    // Skip Defend runscript *payload* revalidation (script library) so dry-run
+                    // does not newly fail copies whose scripts have changed since the source
+                    // rule was saved. Osquery authz and Endpoint authz still run.
                     rulePayload: {
                       response_actions: rule.params.responseActions?.map(
                         transformAlertToRuleResponseAction
@@ -359,6 +362,7 @@ export const performBulkActionRoute = (
                     spaceId,
                     checkOsqueryResponseActionAuthz:
                       ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+                    skipRunscriptPayloadValidation: true,
                   });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early

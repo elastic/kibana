@@ -28,7 +28,7 @@ const createMockService = () => ({
   create: jest.fn().mockResolvedValue({}),
   // Osquery resolves the stored saved query / pack to decide this; the persisted copy on the
   // rule is not authoritative. Default to the persisted verdict so existing cases read naturally.
-  containsDynamicQueries: jest.fn().mockResolvedValue(false),
+  containsDynamicQueries: jest.fn().mockResolvedValue({ isDynamic: false }),
   stop: jest.fn(),
   logger: { error: jest.fn(), warn: jest.fn() } as unknown as Logger,
 });
@@ -106,7 +106,7 @@ describe('osqueryResponseAction', () => {
         },
       };
 
-      mockService.containsDynamicQueries.mockResolvedValue(true);
+      mockService.containsDynamicQueries.mockResolvedValue({ isDynamic: true });
 
       await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
 
@@ -159,7 +159,7 @@ describe('osqueryResponseAction', () => {
       };
 
       // The stored saved query now carries `{{...}}`.
-      mockService.containsDynamicQueries.mockResolvedValue(true);
+      mockService.containsDynamicQueries.mockResolvedValue({ isDynamic: true });
 
       await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
 
@@ -185,6 +185,123 @@ describe('osqueryResponseAction', () => {
         expect.objectContaining({ pack_id: 'my-pack-123', saved_query_id: 'saved-1' }),
         { space: { id: DEFAULT_SPACE_ID } }
       );
+    });
+
+    it('passes the preflight storedQuery into create', async () => {
+      const storedQuery = { savedObjectId: 'so-1', query: 'SELECT * FROM processes;' };
+      mockService.containsDynamicQueries.mockResolvedValue({ isDynamic: false, storedQuery });
+
+      const alerts = [createMockAlert()];
+      const responseAction: RuleResponseOsqueryAction = {
+        actionTypeId: '.osquery',
+        params: { savedQueryId: 'saved-1', query: 'SELECT * FROM processes;' },
+      };
+
+      await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
+
+      expect(mockService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ saved_query_id: 'saved-1' }),
+        expect.objectContaining({ storedQuery, space: { id: DEFAULT_SPACE_ID } })
+      );
+    });
+
+    it('passes the preflight storedQuery into every per-alert create', async () => {
+      const storedQuery = {
+        savedObjectId: 'so-1',
+        query: 'SELECT * FROM processes where pid={{process.pid}};',
+      };
+      mockService.containsDynamicQueries.mockResolvedValue({ isDynamic: true, storedQuery });
+
+      const alerts = [
+        createMockAlert(),
+        createMockAlert({
+          _id: 'alert-2',
+          agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' },
+        }),
+      ];
+      const responseAction: RuleResponseOsqueryAction = {
+        actionTypeId: '.osquery',
+        params: { savedQueryId: 'saved-1', query: 'SELECT * FROM processes;' },
+      };
+
+      await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
+
+      expect(mockService.create).toHaveBeenCalledTimes(2);
+      expect(mockService.create).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        expect.objectContaining({
+          storedQuery,
+          alertData: expect.objectContaining({ _id: 'alert-1' }),
+        })
+      );
+      expect(mockService.create).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        expect.objectContaining({
+          storedQuery,
+          alertData: expect.objectContaining({ _id: 'alert-2' }),
+        })
+      );
+    });
+
+    it('does not reject and fans out per alert when the parameterization preflight fails', async () => {
+      mockService.containsDynamicQueries.mockRejectedValue(new Error('ES unavailable'));
+
+      const alerts = [
+        createMockAlert(),
+        createMockAlert({
+          _id: 'alert-2',
+          agent: { id: 'agent-2', name: 'host-2', type: 'endpoint' },
+        }),
+      ];
+      const responseAction: RuleResponseOsqueryAction = {
+        actionTypeId: '.osquery',
+        params: { savedQueryId: 'saved-1', query: 'SELECT * FROM processes;' },
+      };
+
+      await osqueryResponseAction(responseAction, mockService, endpointService, { alerts });
+
+      expect(mockService.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('ES unavailable')
+      );
+      expect(mockService.create).toHaveBeenCalledTimes(2);
+      expect(mockService.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertData: expect.objectContaining({ _id: 'alert-1' }) })
+      );
+    });
+
+    it('waits for per-alert create calls to settle', async () => {
+      let resolveCreate: (value?: unknown) => void = () => undefined;
+      const pendingCreate = new Promise((resolve) => {
+        resolveCreate = resolve;
+      });
+      mockService.create.mockReturnValue(pendingCreate);
+      mockService.containsDynamicQueries.mockResolvedValue({ isDynamic: true });
+
+      const alerts = [createMockAlert()];
+      const responseAction: RuleResponseOsqueryAction = {
+        actionTypeId: '.osquery',
+        params: {
+          savedQueryId: 'saved-1',
+          query: 'SELECT * FROM processes where pid={{process.pid}};',
+        },
+      };
+
+      let settled = false;
+      const run = osqueryResponseAction(responseAction, mockService, endpointService, {
+        alerts,
+      }).then(() => {
+        settled = true;
+      });
+
+      await Promise.resolve();
+      expect(settled).toBe(false);
+
+      resolveCreate({});
+      await run;
+      expect(settled).toBe(true);
     });
   });
 });

@@ -35,7 +35,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
       {
         id?: string;
         query?: string;
-        queries?: Array<{ query: string; ecs_mapping?: Record<string, unknown> }>;
+        queries?:
+          | Array<{ query: string; ecs_mapping?: Record<string, unknown> }>
+          | Record<string, { query: string; ecs_mapping?: Record<string, unknown> }>;
         ecs_mapping?: Array<{ key: string; value: Record<string, unknown> }>;
       }
     > = {}
@@ -192,6 +194,17 @@ describe('isOsqueryResponseActionAuthorized', () => {
 
     it('should authorize a resolvable pack_id', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID })
+      ).resolves.toBe(true);
+    });
+
+    it('should authorize a pack whose queries are stored as a record', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [PACK_ID]: { queries: { q1: { query: 'select 1;' } } } }
+      );
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID })
@@ -557,6 +570,23 @@ describe('isOsqueryResponseActionAuthorized', () => {
       });
     });
 
+    it('should retry capability resolution after a rejected lookup', async () => {
+      const resolveCapabilities = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('capabilities unavailable'))
+        .mockResolvedValue({ osquery: { writeLiveQueries: true, runSavedQueries: false } });
+      const coreStart = {
+        capabilities: { resolveCapabilities },
+        savedObjects: { getScopedClient: jest.fn() },
+      } as unknown as CoreStart;
+
+      await expect(isOsqueryResponseActionAuthorized(coreStart, request, {})).rejects.toThrow(
+        'capabilities unavailable'
+      );
+      await expect(isOsqueryResponseActionAuthorized(coreStart, request, {})).resolves.toBe(true);
+      expect(resolveCapabilities).toHaveBeenCalledTimes(2);
+    });
+
     it('should not read saved objects when writeLiveQueries short-circuits', async () => {
       const coreStart = withSavedQuery({ writeLiveQueries: true, runSavedQueries: false });
 
@@ -634,6 +664,32 @@ describe('isOsqueryResponseActionAuthorized', () => {
       const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
       expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, `::${PACK_ID}`);
       expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, PACK_ID);
+    });
+
+    it('should share a cache entry between padded and trimmed saved query ids', async () => {
+      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+
+      await isOsqueryResponseActionAuthorized(coreStart, request, {
+        saved_query_id: ` ${SAVED_QUERY_ID} `,
+      });
+      await isOsqueryResponseActionAuthorized(coreStart, request, {
+        saved_query_id: SAVED_QUERY_ID,
+      });
+
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+    });
+
+    it('should share a cache entry between padded and trimmed pack ids', async () => {
+      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+
+      await isOsqueryResponseActionAuthorized(coreStart, request, {
+        pack_id: ` ${PACK_ID} `,
+      });
+      await isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID });
+
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.get).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -11,7 +11,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
-import { PARAMETER_NOT_FOUND, SAVED_QUERY_NOT_FOUND } from '../../../common/translations/errors';
+import {
+  PARAMETER_NOT_FOUND,
+  SAVED_QUERY_LOOKUP_FAILED,
+  SAVED_QUERY_NOT_FOUND,
+} from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   containsDynamicQuery,
@@ -55,13 +59,26 @@ export const createDynamicQueries = async ({
 }: CreateDynamicQueriesParams) => {
   const savedQueryId = params.saved_query_id?.trim();
   const enforceStoredSavedQuery = Boolean(useStoredQuery && savedQueryId);
-  const storedSavedQuery =
-    storedQuery ??
-    (params.queries?.length && !enforceStoredSavedQuery
-      ? undefined
-      : await lookupSavedQuery(spaceScopedClient, savedQueryId ?? ''));
-
+  let storedSavedQuery = storedQuery;
   let unresolvedSavedQueryError: string | undefined;
+
+  // Lookup and stored-content fallbacks are only for `useStoredQuery`. A `writeLiveQueries`
+  // caller must not have omitted SQL/mapping filled in from the saved object.
+  const shouldLookupSavedQuery = enforceStoredSavedQuery && storedSavedQuery === undefined;
+
+  if (shouldLookupSavedQuery) {
+    try {
+      storedSavedQuery = await lookupSavedQuery(spaceScopedClient, savedQueryId ?? '');
+    } catch (lookupError) {
+      // Live-query callers need the throw. Rule runs have no caller to receive a status code, so
+      // record a distinct lookup failure on the action instead of mislabeling it as not-found.
+      if (!reportErrorsOnAction) {
+        throw lookupError;
+      }
+
+      unresolvedSavedQueryError = SAVED_QUERY_LOOKUP_FAILED;
+    }
+  }
 
   if (enforceStoredSavedQuery && params.queries?.length) {
     // An action carrying both a `saved_query_id` and a `queries[]` is ambiguous: the saved
@@ -74,7 +91,10 @@ export const createDynamicQueries = async ({
       );
   }
 
-  if (enforceStoredSavedQuery && !storedSavedQuery) {
+  // A resolved object with no `query` is a valid SO shape (`schema.maybe(string)`). Treat that
+  // like a 404 on the enforced path so caller SQL never fills in. Empty string is kept (`== null`
+  // is nullish-only, matching `??`).
+  if (enforceStoredSavedQuery && storedSavedQuery?.query == null && !unresolvedSavedQueryError) {
     if (!reportErrorsOnAction) {
       throw new CustomHttpRequestError(`Saved query [${savedQueryId}] could not be resolved`, 400);
     }
@@ -88,8 +108,8 @@ export const createDynamicQueries = async ({
   const query = unresolvedSavedQueryError
     ? undefined
     : useStoredQuery
-    ? storedSavedQuery?.query ?? params.query
-    : params.query ?? storedSavedQuery?.query;
+    ? storedSavedQuery?.query
+    : params.query;
   // True when the SQL below came from the saved object rather than the caller.
   const isStoredQueryDispatched = Boolean(useStoredQuery && storedSavedQuery?.query);
   // When the stored SQL is what gets dispatched, the stored mapping has to travel with it: a
@@ -101,7 +121,7 @@ export const createDynamicQueries = async ({
   const suppliedEcsMapping = isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping;
   const ecsMapping = isStoredQueryDispatched
     ? storedSavedQuery?.ecs_mapping ?? suppliedEcsMapping
-    : suppliedEcsMapping ?? storedSavedQuery?.ecs_mapping;
+    : suppliedEcsMapping;
   const prebuiltId = storedSavedQuery?.savedObjectId ?? savedQueryId;
 
   if (params.queries?.length && !enforceStoredSavedQuery) {

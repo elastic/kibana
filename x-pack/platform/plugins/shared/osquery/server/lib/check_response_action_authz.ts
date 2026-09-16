@@ -7,6 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import type { CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CheckResponseActionAuthzParams } from '../types';
 import { CustomHttpRequestError } from '../common/error';
@@ -19,6 +20,9 @@ interface OsqueryCapabilities {
   runSavedQueries: boolean;
 }
 
+// Cache capability resolution per request so bulk operations (e.g., duplicating
+// hundreds of rules) only call resolveCapabilities once per request. Evict on
+// rejection so a transient failure is not sticky for the rest of the request.
 const capabilitiesCache = new WeakMap<KibanaRequest, Promise<OsqueryCapabilities>>();
 const referenceCache = new WeakMap<
   KibanaRequest,
@@ -34,7 +38,13 @@ const resolveCachedQueryReference = (
   // Ids are unconstrained strings, so a separator-joined key collides: `saved_query_id: 'q'` with
   // `pack_id: '::'` and `saved_query_id: 'q::'` with no pack id would share one entry and resolve
   // each other's object. Rule import and bulk duplicate check many actions under one request.
-  const cacheKey = JSON.stringify([spaceId, reference.saved_query_id, reference.pack_id]);
+  // Resolution trims ids and coalesces a missing space to `default`; key the same way so padded
+  // ids and an omitted space share one lookup.
+  const cacheKey = JSON.stringify([
+    spaceId ?? DEFAULT_SPACE_ID,
+    reference.saved_query_id?.trim(),
+    reference.pack_id?.trim(),
+  ]);
   let perRequest = referenceCache.get(request);
 
   if (!perRequest) {
@@ -74,7 +84,10 @@ export const getOsqueryCapabilities = (
         writeLiveQueries: !!resolved.osquery.writeLiveQueries,
         runSavedQueries: !!resolved.osquery.runSavedQueries,
       };
-    })();
+    })().catch((error) => {
+      capabilitiesCache.delete(request);
+      throw error;
+    });
     capabilitiesCache.set(request, promise);
   }
 

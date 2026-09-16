@@ -9,7 +9,11 @@ import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { PARAMETER_NOT_FOUND, SAVED_QUERY_NOT_FOUND } from '../../../common/translations/errors';
+import {
+  PARAMETER_NOT_FOUND,
+  SAVED_QUERY_LOOKUP_FAILED,
+  SAVED_QUERY_NOT_FOUND,
+} from '../../../common/translations/errors';
 import type { SavedObjectsClient } from '@kbn/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -154,7 +158,7 @@ describe('create queries', () => {
       expect(queries[0].error).toBe(undefined);
     });
 
-    it('derives query and ecs_mapping from the saved query when the caller omitted them', async () => {
+    it('does not fill omitted SQL or mapping from the saved object when useStoredQuery is not set', async () => {
       const get = jest.fn().mockResolvedValue({
         attributes: {
           query: 'select 1;',
@@ -170,6 +174,30 @@ describe('create queries', () => {
         } as unknown as OsqueryAppContext,
         spaceId,
         spaceScopedClient: soClientWithGet(get),
+      });
+
+      expect(get).not.toHaveBeenCalled();
+      expect(queries[0].query).toBeUndefined();
+      expect(queries[0].ecs_mapping).toBeUndefined();
+    });
+
+    it('derives query and ecs_mapping from the saved query when useStoredQuery is set', async () => {
+      const get = jest.fn().mockResolvedValue({
+        attributes: {
+          query: 'select 1;',
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
+
+      const queries = await createDynamicQueries({
+        params: { saved_query_id: 'sq-1', agent_ids: [TEST_AGENT] },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
       });
 
       expect(get).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
@@ -340,6 +368,7 @@ describe('create queries', () => {
         } as unknown as OsqueryAppContext,
         spaceId,
         spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
       });
 
       expect(get).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
@@ -357,11 +386,12 @@ describe('create queries', () => {
           } as unknown as OsqueryAppContext,
           spaceId,
           spaceScopedClient: soClientWithGet(get),
+          useStoredQuery: true,
         })
       ).rejects.toThrow('elasticsearch unavailable');
     });
 
-    it('falls back when the saved query 404s', async () => {
+    it('does not look up a saved query when useStoredQuery is not set', async () => {
       const get = jest
         .fn()
         .mockRejectedValue(
@@ -382,6 +412,7 @@ describe('create queries', () => {
         spaceScopedClient: soClientWithGet(get),
       });
 
+      expect(get).not.toHaveBeenCalled();
       expect(queries[0].query).toBe('select 1;');
     });
 
@@ -434,6 +465,7 @@ describe('create queries', () => {
         } as unknown as OsqueryAppContext,
         spaceId,
         spaceScopedClient: { find, get } as unknown as SavedObjectsClient,
+        useStoredQuery: true,
       });
 
       expect(get).not.toHaveBeenCalled();
@@ -469,6 +501,31 @@ describe('create queries', () => {
       expect(queries).toHaveLength(1);
       expect(queries[0].error).toBe(SAVED_QUERY_NOT_FOUND);
       // The caller's own SQL must not be dispatched as a fallback.
+      expect(queries[0].query).toBeUndefined();
+    });
+
+    it('records a lookup-failure error when reportErrorsOnAction is set and saved-query lookup throws a generic SO error', async () => {
+      const get = jest.fn().mockRejectedValue(new Error('elasticsearch unavailable'));
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+        reportErrorsOnAction: true,
+      });
+
+      expect(queries).toHaveLength(1);
+      expect(queries[0].error).toBe(SAVED_QUERY_LOOKUP_FAILED);
+      expect(queries[0].error).not.toBe(SAVED_QUERY_NOT_FOUND);
       expect(queries[0].query).toBeUndefined();
     });
 
@@ -527,6 +584,70 @@ describe('create queries', () => {
       expect(get).not.toHaveBeenCalled();
       expect(client.find).not.toHaveBeenCalled();
       expect(queries[0].query).toBe('select 1;');
+    });
+
+    it('fails closed when the resolved saved query has no query', async () => {
+      await expect(
+        createDynamicQueries({
+          params: {
+            saved_query_id: 'sq-1',
+            query: 'select 42 as custom;',
+            agent_ids: [TEST_AGENT],
+          },
+          agents: [TEST_AGENT],
+          osqueryContext: {
+            service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+          } as unknown as OsqueryAppContext,
+          spaceId,
+          spaceScopedClient: mockSavedObjectsClient,
+          useStoredQuery: true,
+          storedQuery: { savedObjectId: 'so-uuid-1' },
+        })
+      ).rejects.toThrow('could not be resolved');
+    });
+
+    it('records SAVED_QUERY_NOT_FOUND when the resolved saved query has no query and reportErrorsOnAction is set', async () => {
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
+        useStoredQuery: true,
+        reportErrorsOnAction: true,
+        storedQuery: { savedObjectId: 'so-uuid-1' },
+      });
+
+      expect(queries).toHaveLength(1);
+      expect(queries[0].error).toBe(SAVED_QUERY_NOT_FOUND);
+      expect(queries[0].query).toBeUndefined();
+    });
+
+    it('does not treat an empty-string stored query as missing on the enforced path', async () => {
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
+        useStoredQuery: true,
+        storedQuery: { savedObjectId: 'so-uuid-1', query: '' },
+      });
+
+      expect(queries[0].error).toBeUndefined();
+      expect(queries[0].query).not.toBe('select 42 as custom;');
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, keyBy, pickBy, xorWith } from 'lodash';
+import { isEqual, keyBy, pickBy } from 'lodash';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
@@ -99,6 +99,31 @@ const normalizeResponseActionForComparison = (
   return normalized as unknown as ResponseAction;
 };
 
+/**
+ * Items in `source` whose occurrence count exceeds that in `other`.
+ * `xorWith` is set-like (`baseDifference` + `baseUniq`), so `[A, A]` vs `[A]` would skip authz.
+ */
+const excessOccurrences = <T>(
+  source: T[],
+  other: T[],
+  comparator: (a: T, b: T) => boolean
+): T[] => {
+  const remaining = other.slice();
+  const excess: T[] = [];
+
+  for (const item of source) {
+    const matchIndex = remaining.findIndex((candidate) => comparator(item, candidate));
+
+    if (matchIndex === -1) {
+      excess.push(item);
+    } else {
+      remaining.splice(matchIndex, 1);
+    }
+  }
+
+  return excess;
+};
+
 export type CheckOsqueryResponseActionAuthz = (actionParams: {
   saved_query_id?: string;
   pack_id?: string;
@@ -129,6 +154,14 @@ export interface ValidateRuleResponseActionsOptions<
    * When provided, osquery response actions will be validated for privileges.
    */
   checkOsqueryResponseActionAuthz?: CheckOsqueryResponseActionAuthz;
+  /**
+   * Skip Elastic Defend runscript *payload* revalidation (script exists, OS,
+   * required input). Endpoint authz and the runscript feature-flag check still run.
+   * Used by bulk duplicate: the source rule already passed payload validation, and
+   * re-checking the scripts library on dry-run would newly fail copies whose
+   * scripts have since changed.
+   */
+  skipRunscriptPayloadValidation?: boolean;
 }
 
 /**
@@ -144,6 +177,7 @@ export const validateRuleResponseActions = async <
   rulePayload: { response_actions: ruleResponseActions },
   existingRule,
   checkOsqueryResponseActionAuthz,
+  skipRunscriptPayloadValidation,
 }: ValidateRuleResponseActionsOptions<T>): Promise<void> => {
   const logger = endpointService.createLogger('validateRuleResponseActions');
   const existingRuleResponseActions = existingRule?.params?.responseActions;
@@ -169,13 +203,15 @@ export const validateRuleResponseActions = async <
   const normalizedPayloadActions = (ruleResponseActions ?? []).map(
     normalizeResponseActionForComparison
   );
-  const responseActionsToValidate = xorWith<ResponseAction | RuleResponseAction>(
-    normalizedPayloadActions,
-    (existingRuleResponseActions ?? []).map(
-      normalizeResponseActionForComparison
-    ) as unknown as RuleResponseAction[],
-    isEqual
-  );
+  const normalizedExistingActions = (existingRuleResponseActions ?? []).map(
+    normalizeResponseActionForComparison
+  ) as unknown as RuleResponseAction[];
+  // Multiset symmetric difference: extra payload copies must be authorized (`[A] -> [A, A]`),
+  // and removals still flow through so endpoint authz on delete is unchanged.
+  const responseActionsToValidate = [
+    ...excessOccurrences(normalizedPayloadActions, normalizedExistingActions, isEqual),
+    ...excessOccurrences(normalizedExistingActions, normalizedPayloadActions, isEqual),
+  ];
 
   if (responseActionsToValidate.length === 0) {
     logger.debug(() => `Nothing to do - no changes were made to response actions`);
@@ -215,6 +251,11 @@ export const validateRuleResponseActions = async <
               `Endpoint runscript automated response action is not enabled`,
               400
             );
+          }
+
+          if (skipRunscriptPayloadValidation) {
+            logger.debug(() => `Skipping runscript payload validation on duplicate`);
+            break;
           }
 
           // validate runscript response action if it is defined in the rule update payload,
@@ -281,10 +322,11 @@ export const validateRuleResponseActions = async <
             ('ecsMapping' in params ? params.ecsMapping : undefined),
         });
       } else {
-        logger.warn(
-          `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
-            actionData
-          )}`
+        logger.debug(
+          () =>
+            `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
+              actionData
+            )}`
         );
       }
     } else {

@@ -144,6 +144,31 @@ describe('resolveQueryReference', () => {
     });
   });
 
+  it('should resolve a pack whose queries are stored as a record', async () => {
+    const coreStart = createMockCoreStart({
+      default: {
+        [PACK_ID]: {
+          queries: {
+            processes: { query: 'select 1;' },
+            listening_ports: {
+              query: 'select 2;',
+              ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+            },
+          },
+        },
+      },
+    });
+
+    await expect(
+      resolveQueryReference(coreStart, 'default', { pack_id: PACK_ID })
+    ).resolves.toEqual({
+      savedObjectId: PACK_ID,
+      isPack: true,
+      queries: ['select 1;', 'select 2;'],
+      queryEcsMappings: [undefined, { 'host.name': { field: 'name' } }],
+    });
+  });
+
   it('should return undefined for a reference that does not exist', async () => {
     const coreStart = createMockCoreStart({ default: {} });
 

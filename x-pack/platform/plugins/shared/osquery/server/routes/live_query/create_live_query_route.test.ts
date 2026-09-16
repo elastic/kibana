@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 import { API_VERSIONS } from '../../../common/constants';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createLiveQueryRoute } from './create_live_query_route';
 import { createActionHandler } from '../../handlers';
@@ -99,21 +100,23 @@ describe('createLiveQueryRoute', () => {
   const createOsqueryContext = ({
     coreStart,
     racGet,
+    getActiveSpace,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
+    getActiveSpace?: jest.Mock;
   }): OsqueryAppContext =>
     ({
       getStartServices: jest.fn().mockResolvedValue([coreStart, { security: {} }]),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        getActiveSpace: getActiveSpace ?? jest.fn().mockResolvedValue({ id: 'default' }),
         getRuleRegistryService: jest.fn().mockReturnValue({
           getRacClientWithRequest: jest.fn().mockResolvedValue({
             get: racGet ?? jest.fn(),
           }),
         }),
       },
-      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() }) },
     } as unknown as OsqueryAppContext);
 
   const getRouteHandler = (mockRouter: ReturnType<typeof createMockRouter>): RequestHandler => {
@@ -131,14 +134,19 @@ describe('createLiveQueryRoute', () => {
     {
       coreStart,
       racGet,
+      getActiveSpace,
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
+      getActiveSpace?: jest.Mock;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
     const mockRouter = createMockRouter();
-    createLiveQueryRoute(mockRouter, createOsqueryContext({ coreStart: start, racGet }));
+    createLiveQueryRoute(
+      mockRouter,
+      createOsqueryContext({ coreStart: start, racGet, getActiveSpace })
+    );
 
     const mockRequest = httpServerMock.createKibanaRequest({ body });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -154,6 +162,42 @@ describe('createLiveQueryRoute', () => {
       response: { action_id: 'action-1' },
       fleetActionsCount: 1,
     } as Awaited<ReturnType<typeof createActionHandler>>);
+  });
+
+  it('returns 500 when resolving the active space fails', async () => {
+    const getActiveSpace = jest.fn().mockRejectedValue(new Error('spaces unavailable'));
+    const response = await invokeRoute(
+      { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] },
+      { getActiveSpace }
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: expect.objectContaining({
+        message: 'Error occurred while authorizing the live query request',
+      }),
+    });
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when resolving osquery capabilities fails', async () => {
+    const coreStart = createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
+    (coreStart.capabilities.resolveCapabilities as jest.Mock).mockRejectedValue(
+      new Error('capabilities unavailable')
+    );
+
+    const response = await invokeRoute(
+      { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] },
+      { coreStart }
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: expect.objectContaining({
+        message: 'Error occurred while authorizing the live query request',
+      }),
+    });
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
   it('returns 403 for a saved_query_id that does not resolve', async () => {
@@ -353,6 +397,33 @@ describe('createLiveQueryRoute', () => {
     );
   });
 
+  it('dispatches ad-hoc SQL for a writeLiveQueries caller without stored fill-in', async () => {
+    const coreStart = createMockCoreStart(
+      { [SAVED_QUERY_ID]: { query: STORED_QUERY } },
+      { writeLiveQueries: true, runSavedQueries: false }
+    );
+    const adHocSql = 'select 42 as custom;';
+
+    const response = await invokeRoute(
+      {
+        saved_query_id: SAVED_QUERY_ID,
+        query: adHocSql,
+        agent_ids: ['agent-1'],
+      },
+      { coreStart }
+    );
+
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ query: adHocSql, saved_query_id: SAVED_QUERY_ID }),
+      expect.objectContaining({
+        useStoredQuery: false,
+        storedQuery: undefined,
+      })
+    );
+  });
+
   it('returns 403 for an investigation-guide query when the caller lacks runSavedQueries', async () => {
     const coreStart = createMockCoreStart({}, { writeLiveQueries: false, runSavedQueries: false });
     const racGet = jest.fn().mockResolvedValue({
@@ -386,6 +457,21 @@ describe('createLiveQueryRoute', () => {
       expect.anything(),
       expect.objectContaining({ useStoredQuery: false })
     );
+  });
+
+  it('returns 400 PARAMETER_NOT_FOUND when the handler created no Fleet actions', async () => {
+    mockedCreateActionHandler.mockResolvedValue({
+      response: { action_id: 'action-1' },
+      fleetActionsCount: 0,
+    } as Awaited<ReturnType<typeof createActionHandler>>);
+
+    const response = await invokeRoute({
+      saved_query_id: SAVED_QUERY_ID,
+      agent_ids: ['agent-1'],
+    });
+
+    expect(response.badRequest).toHaveBeenCalledWith({ body: PARAMETER_NOT_FOUND });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 
   it('returns 403 when a guide-matching query smuggles a rogue queries[] alongside it', async () => {

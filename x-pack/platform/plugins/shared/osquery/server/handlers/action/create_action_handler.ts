@@ -10,6 +10,7 @@ import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -20,7 +21,7 @@ import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
-import { PACK_NOT_FOUND } from '../../../common/translations/errors';
+import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { ResolvedQueryReference } from '../../lib/resolve_query_reference';
 
@@ -113,7 +114,9 @@ export const createActionHandler = async (
         throw packError;
       }
 
-      unresolvedPackError = PACK_NOT_FOUND;
+      unresolvedPackError = SavedObjectsErrorHelpers.isNotFoundError(packError)
+        ? PACK_NOT_FOUND
+        : PACK_LOOKUP_FAILED;
     }
   }
 

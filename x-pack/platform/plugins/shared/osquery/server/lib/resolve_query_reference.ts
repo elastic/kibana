@@ -12,6 +12,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/types';
 import type { PackSavedObject, SavedQuerySavedObject } from '../common/types';
 import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import { convertECSMappingToObject } from '../routes/utils';
 
 /** Normalizes SO `ecs_mapping` (array or record) to the record form used on live-query bodies. */
 export const toEcsMappingRecord = (
@@ -29,11 +30,7 @@ export const toEcsMappingRecord = (
       return undefined;
     }
 
-    return mapping.reduce<Record<string, unknown>>((acc, { key, value }) => {
-      acc[key] = value;
-
-      return acc;
-    }, {});
+    return convertECSMappingToObject(mapping);
   }
 
   return Object.keys(mapping).length ? mapping : undefined;
@@ -135,8 +132,14 @@ export const resolveQueryReference = async (
   try {
     if (trimmedPackId) {
       const packSO = await soClient.get<PackSavedObject>(packSavedObjectType, trimmedPackId);
-
-      const packQueries = packSO.attributes.queries ?? [];
+      // SO schema / V4 backfill still allow a record; `.map` is array-only.
+      const rawPackQueries = packSO.attributes.queries as
+        | PackSavedObject['queries']
+        | Record<string, PackSavedObject['queries'][number]>
+        | undefined;
+      const packQueries = Array.isArray(rawPackQueries)
+        ? rawPackQueries
+        : Object.values(rawPackQueries ?? {});
 
       return {
         savedObjectId: packSO.id,

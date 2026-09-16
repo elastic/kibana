@@ -13,12 +13,25 @@ import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';
 import { containsDynamicQuery } from '../../../common/utils/replace_params_query';
-import { resolveQueryReference } from '../../lib/resolve_query_reference';
+import {
+  resolveQueryReference,
+  type ResolvedQueryReference,
+} from '../../lib/resolve_query_reference';
 
 export interface CreateActionOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
   space?: { id: string };
+  /** Authz-resolved saved query / pack from preflight; when set, dispatch skips a second lookup. */
+  storedQuery?: ResolvedQueryReference;
 }
+
+export interface ContainsDynamicQueriesResult {
+  isDynamic: boolean;
+  storedQuery?: ResolvedQueryReference;
+}
+
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 export const createActionService = (osqueryContext: OsqueryAppContext) => {
   let licenseSubscription: Subscription | null = null;
@@ -38,7 +51,8 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
    * a saved query needs only `writeSavedQueries` — a lower bar than editing the rule — so a
    * template added there would otherwise leave the stale persisted copy looking static, the run
    * would take the non-parameterized branch, and nothing would be dispatched at all. Resolve the
-   * stored content so the decision matches what actually runs.
+   * stored content so the decision matches what actually runs, and return that reference so
+   * `create()` can skip a second lookup.
    */
   const containsDynamicQueries = async (
     // Only the referenced ids and the SQL are read, so accept that narrow shape rather than a
@@ -50,38 +64,40 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
       pack_id?: string;
     },
     options?: { space?: { id: string } }
-  ): Promise<boolean> => {
+  ): Promise<ContainsDynamicQueriesResult> => {
     const persisted = params.queries?.length
       ? params.queries.map(({ query }) => query)
       : [params.query];
-
-    if (persisted.some((query) => query && containsDynamicQuery(query))) {
-      return true;
-    }
+    const persistedIsDynamic = persisted.some((query) => query && containsDynamicQuery(query));
 
     if (!params.saved_query_id?.trim() && !params.pack_id?.trim()) {
-      return false;
+      return { isDynamic: persistedIsDynamic };
     }
 
-    const [coreStart] = await osqueryContext.getStartServices();
-
     try {
+      const [coreStart] = await osqueryContext.getStartServices();
       const resolved = await resolveQueryReference(coreStart, options?.space?.id, {
         saved_query_id: params.saved_query_id,
         pack_id: params.pack_id,
       });
 
       const stored = resolved?.queries ?? (resolved?.query ? [resolved.query] : []);
+      const storedIsDynamic = stored.some((query) => query && containsDynamicQuery(query));
 
-      return stored.some((query) => query && containsDynamicQuery(query));
+      return {
+        isDynamic: persistedIsDynamic || storedIsDynamic,
+        ...(resolved ? { storedQuery: resolved } : {}),
+      };
     } catch (error) {
-      // Unresolvable stored content is reported on the action document by the dispatch path.
-      // Fall back to the persisted copy's verdict rather than failing the whole rule run here.
+      // Could not read stored SQL, so it cannot be treated as static: fail toward dynamic so
+      // per-alert `alertData` is supplied. 404s return undefined above and never enter here.
       logger.warn(
-        `Unable to resolve stored osquery content to determine parameterization: ${error.message}`
+        `Unable to resolve stored osquery content to determine parameterization: ${toErrorMessage(
+          error
+        )}`
       );
 
-      return false;
+      return { isDynamic: true };
     }
   };
 
@@ -97,6 +113,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
       error,
       // Rule-run dispatches stored content for saved_query_id / pack_id.
       useStoredQuery: true,
+      storedQuery: options?.storedQuery,
       // A throw here would be swallowed by osqueryResponseAction and the rule run would still
       // report success; record the failure on the action document so the alert's Osquery
       // Results tab shows why nothing ran.

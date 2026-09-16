@@ -822,6 +822,7 @@ describe('Perform bulk action route', () => {
         endpointService: expect.any(Object),
         spaceId: 'default',
         rulePayload: { response_actions: mockRule.params.responseActions },
+        skipRunscriptPayloadValidation: true,
       });
     });
 
@@ -852,6 +853,7 @@ describe('Perform bulk action route', () => {
       // Params reach the validator in the snake_case payload shape, as they would on a create.
       expect(validateRuleResponseActionsMock).toHaveBeenCalledWith(
         expect.objectContaining({
+          skipRunscriptPayloadValidation: true,
           rulePayload: {
             response_actions: [
               {

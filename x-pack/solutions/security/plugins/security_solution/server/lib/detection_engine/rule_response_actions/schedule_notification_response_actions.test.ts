@@ -34,7 +34,7 @@ describe('ScheduleNotificationResponseActions', () => {
     create: jest.fn().mockResolvedValue({}),
     // Osquery resolves the stored saved query / pack to decide whether this run substitutes
     // parameters, rather than trusting the copy persisted on the rule.
-    containsDynamicQueries: jest.fn().mockResolvedValue(false),
+    containsDynamicQueries: jest.fn().mockResolvedValue({ isDynamic: false }),
     stop: jest.fn(),
     logger: {
       error: jest.fn(),
@@ -149,11 +149,31 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
+    it('does not reject when the osquery parameterization preflight fails', async () => {
+      const signals = getSignals();
+      osqueryActionMock.containsDynamicQueries.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await expect(
+        scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [
+            {
+              actionTypeId: ResponseActionTypesEnum['.osquery'],
+              params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+            } as RuleResponseAction,
+          ],
+        })
+      ).resolves.toEqual(expect.anything());
+
+      expect(osqueryActionMock.create).toHaveBeenCalled();
+    });
+
     it('should pass alertData when dynamic queries are present', async () => {
       const dynamicQuery = 'select * from uptime where id = {{host.id}}';
       const signals = getSignals();
       // The parameterization verdict now comes from osquery resolving the stored content.
-      osqueryActionMock.containsDynamicQueries.mockResolvedValueOnce(true);
+      osqueryActionMock.containsDynamicQueries.mockResolvedValueOnce({ isDynamic: true });
       await scheduleNotificationResponseActions({
         signals,
         signalsCount: signals.length,

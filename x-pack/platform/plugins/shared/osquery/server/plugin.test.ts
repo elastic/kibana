@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { OSQUERY_SEARCH_STRATEGY } from './search_strategy/constants';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { OsqueryPlugin } from './plugin';
 import type { SetupPlugins } from './types';
 
@@ -38,6 +39,9 @@ jest.mock('./lib/telemetry/receiver', () => ({
   TelemetryReceiver: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
 }));
 jest.mock('./lib/schema_service', () => ({ SchemaService: jest.fn(() => ({})) }));
+jest.mock('./lib/check_response_action_authz', () => ({
+  checkResponseActionAuthz: jest.fn(),
+}));
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -99,5 +103,38 @@ describe('OsqueryPlugin setup', () => {
         service: expect.any(Object),
       })
     );
+  });
+
+  it('should pass getSpaceId(request) as the fourth checkResponseActionAuthz argument', async () => {
+    const { core, plugins } = createSetupDeps();
+    const getSpaceId = jest.fn().mockReturnValue('space-a');
+    plugins.spaces = { spacesService: { getSpaceId } } as SetupPlugins['spaces'];
+
+    const plugin = new OsqueryPlugin(coreMock.createPluginInitializerContext());
+    const setup = plugin.setup(core, plugins);
+    const request = httpServerMock.createKibanaRequest();
+    const actionParams = { saved_query_id: 'q1' };
+
+    await setup.checkResponseActionAuthz(request, actionParams);
+
+    expect(getSpaceId).toHaveBeenCalledWith(request);
+    expect(checkResponseActionAuthz).toHaveBeenCalledWith(
+      core,
+      request,
+      actionParams,
+      getSpaceId(request)
+    );
+  });
+
+  it('should pass undefined as the fourth checkResponseActionAuthz argument when spaces is omitted', async () => {
+    const { core, plugins } = createSetupDeps();
+    const plugin = new OsqueryPlugin(coreMock.createPluginInitializerContext());
+    const setup = plugin.setup(core, plugins);
+    const request = httpServerMock.createKibanaRequest();
+    const actionParams = { saved_query_id: 'q1' };
+
+    await setup.checkResponseActionAuthz(request, actionParams);
+
+    expect(checkResponseActionAuthz).toHaveBeenCalledWith(core, request, actionParams, undefined);
   });
 });

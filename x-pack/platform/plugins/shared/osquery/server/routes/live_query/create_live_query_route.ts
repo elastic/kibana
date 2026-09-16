@@ -39,8 +39,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       security: {
         authz: {
           enabled: false,
-          reason:
-            'Authorization depends on the request body; see isOsqueryResponseActionAuthorized.',
+          reason: 'Authorization depends on the request body; see authorizeOsqueryResponseAction.',
         },
       },
     })
@@ -65,11 +64,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
         const logger = osqueryContext.logFactory.get('liveQuery');
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const { writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(
-          coreStartServices,
-          request
-        );
 
         const client = await osqueryContext.service
           .getRuleRegistryService()
@@ -88,10 +82,19 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           alertError = error;
         }
 
-        // Resolving the reference reads saved objects, so a transient ES/SO failure must not
-        // escape as an unhandled rejection on a request that only asked for an authz decision.
+        // Space, capabilities, and reference resolution all read ES/SO. A transient failure
+        // must not escape as an unhandled rejection on a request that only asked for an authz
+        // decision.
+        let space: { id: string } | undefined;
+        let writeLiveQueries: boolean;
+        let runSavedQueries: boolean;
         let authorization: AuthorizeOsqueryResponseActionResult;
         try {
+          space = await osqueryContext.service.getActiveSpace(request);
+          ({ writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(
+            coreStartServices,
+            request
+          ));
           authorization = await authorizeOsqueryResponseAction(
             coreStartServices,
             request,
