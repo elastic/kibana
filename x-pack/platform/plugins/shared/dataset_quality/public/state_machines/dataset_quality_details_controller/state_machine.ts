@@ -121,10 +121,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'done',
-                        actions: [
-                          'resetQualityIssuesChart',
-                          'notifyFetchDataStreamDetailsFailed',
-                        ],
+                        actions: ['resetQualityIssuesChart', 'notifyFetchDataStreamDetailsFailed'],
                       },
                     ],
                   },
@@ -188,10 +185,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                       {
                         target: 'errorFetchingDataStreamSettings',
-                        actions: [
-                          'resetQualityIssuesChart',
-                          'notifyFetchDataStreamSettingsFailed',
-                        ],
+                        actions: ['resetQualityIssuesChart', 'notifyFetchDataStreamSettingsFailed'],
                       },
                     ],
                   },
