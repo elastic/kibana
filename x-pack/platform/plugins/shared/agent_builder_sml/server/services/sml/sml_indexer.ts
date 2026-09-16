@@ -247,15 +247,13 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    // The id and origin reference derive from the attachment type, so the entry must agree.
     if (smlEntry.type !== attachmentType) {
       this.logger.warn(
-        `SML indexer: type '${attachmentType}' returned an entry of type '${smlEntry.type}' for origin '${originId}' — skipping (fail closed), existing entry left intact`
+        `SML indexer: skipping origin '${originId}': the '${attachmentType}' type returned an entry with type '${smlEntry.type}', which must match. The existing entry is unchanged.`
       );
       return;
     }
 
-    // The deterministic id makes the bulk index an overwrite, so no delete precedes it.
     const entryId = smlEntryId(attachmentType, originId);
     const creation = await this.readCreation({ entryId, esClient });
 
@@ -322,7 +320,7 @@ class SmlIndexerImpl implements SmlIndexer {
     return { kibana: { privileges: { name: [] } } };
   }
 
-  /** Creation time and creator of the existing entry, so re-indexing keeps them. */
+  /** Reads the existing entry's creation time and creator. */
   private async readCreation({
     entryId,
     esClient,

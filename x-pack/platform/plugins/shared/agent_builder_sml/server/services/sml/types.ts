@@ -193,7 +193,7 @@ export interface SmlTypeDefinition {
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
-/** How a referenced URI relates to an entry. Mirrors the KI schema's `references.relation`. */
+/** How a referenced URI relates to the entry. */
 export type SmlReferenceRelation = 'derived_from' | 'relates_to' | 'supersedes';
 
 export interface SmlReference {
@@ -201,7 +201,7 @@ export interface SmlReference {
   relation?: SmlReferenceRelation;
 }
 
-/** Who wrote an entry, as stored under `governance.provenance`. */
+/** The writer recorded under `governance.provenance`. */
 export interface SmlWriter {
   /** `user://<id>` for a user, `crawler://sml` for the crawler. */
   uri: string;
@@ -212,9 +212,7 @@ export interface SmlWriter {
  * An SML document, exactly as stored in the index and as handed to consumers (notably
  * {@link SmlTypeDefinition.toAttachment}).
  *
- * The index is `dynamic: strict` with mappings owned by the shared AI index templates. SML's
- * bookkeeping uses the KI schema fields: `id` is `${type}:${originId}`, the origin is the
- * `derived_from` reference, and the writer is recorded under `governance.provenance`.
+ * `id` is `${type}:${originId}` and the origin is the `derived_from` reference.
  */
 export interface SmlDocument {
   /** Creation time */

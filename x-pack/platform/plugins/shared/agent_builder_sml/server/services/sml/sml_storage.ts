@@ -12,7 +12,7 @@ import { isResponseError } from '@kbn/es-errors';
 /** The Elastic AI index. Kibana owns its creation; Elasticsearch owns its mappings. */
 export const smlIndexName = '.ai-index-idx-elastic-index';
 
-/** Query DSL path of the ingestion method recorded on the last write. */
+/** Field holding the ingestion method of the last write. */
 export const INGESTION_METHOD_FIELD = 'governance.provenance.updated_by.metadata.ingestion_method';
 
 /**

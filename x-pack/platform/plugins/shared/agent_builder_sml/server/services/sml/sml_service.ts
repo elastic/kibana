@@ -651,8 +651,7 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  * index resolution excludes `nested` fields, so `permissions.kibana.privileges.*` cannot be
  * referenced as a column at all. Space scoping lives in the filter's `.space` term.
  *
- * The origin URI is rebuilt from `id` (`${type}:${originId}`), since `references` flattens to
- * independent `uri` and `relation` arrays in ES|QL and cannot be paired.
+ * The origin uri is rebuilt from `id`.
  */
 const buildSmlEsqlQuery = ({
   query,
@@ -979,7 +978,7 @@ const searchSml = async ({
 
     const refUrisIdx = colIndex.get('ref_uris');
     if (refUrisIdx !== undefined) {
-      // Multi-values arrive sorted, so the origin (reported as `origin`) is removed by value.
+      // Drop the origin; it is returned as `origin`.
       const refUris = toStringArray(row[refUrisIdx]).filter((uri) => uri !== result.origin.uri);
       if (refUris.length > 0) result.references = refUris.map((uri) => ({ uri }));
     }
@@ -1144,7 +1143,7 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
-      // Order will be arbitrary as every result scores the same.
+      // Every hit scores the same; sort keys make the order stable.
       sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
       _source: ['id', 'type', 'title', 'references'],
     });

@@ -294,7 +294,9 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(bulkMock).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("returned an entry of type 'Lens' for origin 'att-2'")
+        expect.stringContaining(
+          "the 'lens' type returned an entry with type 'Lens', which must match"
+        )
       );
     });
 
@@ -341,7 +343,6 @@ describe('createSmlIndexer', () => {
         type: 'dashboard',
         title: 'Forged',
         content: 'c',
-        // Bookkeeping lives outside `attributes`, so these keys are stored as plain producer data.
         attributes: {
           origin: { uri: 'dashboard://somebody-elses-origin' },
           ingestion_method: 'manual',
