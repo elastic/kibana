@@ -56,10 +56,14 @@ import { toFindRulesArgs } from '../../routes/rules/get_rules_route';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RulesClient } from './rules_client';
 
-jest.mock('../rule_executor/schedule', () => ({
-  ensureRuleExecutorTaskScheduled: jest.fn().mockResolvedValue({ id: 'task-123' }),
-  getRuleExecutorTaskId: jest.fn().mockReturnValue('task:fallback'),
-}));
+jest.mock('../rule_executor/schedule', () => {
+  const actual = jest.requireActual('../rule_executor/schedule');
+  return {
+    ...actual,
+    ensureRuleExecutorTaskScheduled: jest.fn().mockResolvedValue({ id: 'task-123' }),
+    getRuleExecutorTaskId: jest.fn().mockReturnValue('task:fallback'),
+  };
+});
 
 // ---------------------------------------------------------------------------
 // Fixture builder type: execution-time, with a validateFields hook
@@ -201,6 +205,15 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
     });
 
     taskManager.bulkRemove.mockResolvedValue({ statuses: [] });
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as never);
+    rulesSavedObjectService.bulkCreate.mockImplementation(async (items) =>
+      items.map((item) => ({
+        id: item.id,
+        attributes: item.attrs,
+        version: 'WzEsMV0=',
+        references: item.references ?? [],
+      }))
+    );
   });
 
   function createClient(callerIdentity?: { solution?: string; app?: string }): RulesClient {
@@ -287,7 +300,6 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
         page: 1,
         per_page: 1,
       });
-      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-opt-out' });
 
       const client = createClient({ solution: 'security' });
 
@@ -299,11 +311,12 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
             builder_fields: SCHEMA_INVALID_FIELDS,
           },
         },
-        options: { validateBuilderFields: false },
+        options: { id: 'rule-opt-out', validateBuilderFields: false },
       });
 
       // The write succeeded and the rule was stored.
       expect(rule.id).toBe('rule-opt-out');
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -446,7 +459,6 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
         page: 1,
         per_page: 1,
       });
-      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-hook-skipped' });
 
       const client = createClient({ solution: 'security' });
 
@@ -457,7 +469,7 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_fields: HOOK_INVALID_FIELDS },
         },
-        options: { validateBuilderFields: false },
+        options: { id: 'rule-hook-skipped', validateBuilderFields: false },
       });
 
       expect(rule.id).toBe('rule-hook-skipped');
@@ -720,7 +732,6 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
         page: 1,
         per_page: 1,
       });
-      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-ok' });
 
       const client = createClient({ solution: 'security' });
       // kind: 'signal' matches the pin — should succeed.
