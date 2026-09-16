@@ -66,10 +66,8 @@ export const getWorkflowExecution = async ({
         stepExecutions = await getStepExecutionsByWorkflowExecution({
           stepExecutionsDataClient,
           workflowExecutionId,
-          stepExecutionIds: doc.stepExecutionIds?.slice(
-            0,
-            WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT
-          ),
+          stepExecutionIds: doc.stepExecutionIds,
+          maxSteps: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT,
           sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
         });
       } catch (error) {

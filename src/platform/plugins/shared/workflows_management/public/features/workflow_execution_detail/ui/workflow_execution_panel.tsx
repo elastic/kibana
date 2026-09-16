@@ -32,6 +32,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { getOmittedStepExecutionsCount } from '../../../../common';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
@@ -54,7 +55,7 @@ const i18nTexts = {
 
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
-  /** Paginated steps-list `total`; callout when this exceeds the loaded step rows. */
+  /** Paginated steps-list `total`; callout when this exceeds the UI page budget. */
   stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
@@ -91,7 +92,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
       !showBackButton && execution && isTerminalStatus(execution.status)
     );
     const loadedCount = execution?.stepExecutions.length ?? 0;
-    const omittedCount = Math.max(0, stepExecutionsTotal - loadedCount);
+    const omittedCount = getOmittedStepExecutionsCount(stepExecutionsTotal);
 
     return (
       <EuiFlexGroup

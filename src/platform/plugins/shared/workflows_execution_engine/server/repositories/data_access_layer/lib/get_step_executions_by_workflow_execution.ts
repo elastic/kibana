@@ -10,11 +10,15 @@
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { GetStepExecutionsByIdsOptions, StepExecutionsDataClient } from '../types';
 
+const DEFAULT_SEARCH_SIZE = 10_000;
+
 export interface GetStepExecutionsByWorkflowExecutionParams {
   stepExecutionsDataClient: StepExecutionsDataClient;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
   sourceExcludes?: GetStepExecutionsByIdsOptions['sourceExcludes'];
+  /** Caps mget ids and the legacy search `size`. Search defaults to 10_000. */
+  maxSteps?: number;
 }
 
 /**
@@ -27,9 +31,11 @@ export const getStepExecutionsByWorkflowExecution = async ({
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
+  maxSteps,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
   if (stepExecutionIds?.length) {
-    const { items } = await stepExecutionsDataClient.getByIds(stepExecutionIds, { sourceExcludes });
+    const ids = maxSteps != null ? stepExecutionIds.slice(0, maxSteps) : stepExecutionIds;
+    const { items } = await stepExecutionsDataClient.getByIds(ids, { sourceExcludes });
     return items.map(({ document }) => document);
   }
 
@@ -39,7 +45,7 @@ export const getStepExecutionsByWorkflowExecution = async ({
     },
     ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
     sort: 'startedAt:desc',
-    size: 10000,
+    size: maxSteps ?? DEFAULT_SEARCH_SIZE,
   });
 
   return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);

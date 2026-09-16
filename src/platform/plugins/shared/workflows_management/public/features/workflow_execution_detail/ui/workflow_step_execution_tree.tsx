@@ -41,6 +41,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { areStepExecutionsUnavailable } from '../../../../common';
 import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
 import { buildIterationVirtualId } from '../lib/build_iteration_pseudo_step';
 import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
@@ -1123,7 +1124,7 @@ const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSi
 
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
-  /** Paginated steps-list `total`; empty truncated state when this is > 0 and no rows loaded. */
+  /** Paginated steps-list `total`; empty truncated state when a finished run loaded no rows. */
   stepExecutionsTotal?: number;
   definition: WorkflowYaml | null;
   error: Error | null;
@@ -1213,10 +1214,17 @@ export const WorkflowStepExecutionTree = ({
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
+  const stepExecutionsUnavailable =
+    execution != null &&
+    areStepExecutionsUnavailable({
+      stepExecutionsTotal,
+      loadedCount: execution.stepExecutions.length,
+      isInProgress: isInProgressStatus(execution.status),
+    });
 
   const openNodes = useMemo(() => {
     if (!execution || !definition || error) return [] as OpenTreeNode[];
-    if (stepExecutionsTotal > 0 && execution.stepExecutions.length === 0) {
+    if (stepExecutionsUnavailable) {
       return [] as OpenTreeNode[];
     }
     if (
@@ -1329,7 +1337,7 @@ export const WorkflowStepExecutionTree = ({
     onStepExecutionClick,
     onToggleGap,
     selectedId,
-    stepExecutionsTotal,
+    stepExecutionsUnavailable,
   ]);
 
   const defaultExpandedIds = useMemo(() => {
@@ -1391,7 +1399,7 @@ export const WorkflowStepExecutionTree = ({
     );
   }
 
-  if (stepExecutionsTotal > 0 && execution.stepExecutions.length === 0) {
+  if (stepExecutionsUnavailable) {
     const omittedCount = stepExecutionsTotal;
     return (
       <EuiEmptyPrompt

@@ -18,6 +18,11 @@ import type {
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import { searchStepExecutions, type StepExecutionListResult } from './search_step_executions';
+import {
+  ES_MAX_RESULT_WINDOW,
+  WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE,
+  WorkflowHistoryPaginationError,
+} from '../../lib/workflow_history_pagination_error';
 
 const PARENT_SOURCE_INCLUDES: Array<keyof EsWorkflowExecution> = [
   'spaceId',
@@ -106,6 +111,11 @@ export const getExecutionStepExecutions = async ({
       );
       return toResult(doc, emptyPage(page, size, total));
     }
+  }
+
+  const from = (page - 1) * size;
+  if (from + size > ES_MAX_RESULT_WINDOW) {
+    throw new WorkflowHistoryPaginationError(WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE);
   }
 
   try {

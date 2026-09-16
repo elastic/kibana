@@ -144,7 +144,7 @@ describe('WorkflowExecutionPanel', () => {
 
     it('should show a truncation warning with the omitted step count', () => {
       renderComponent({
-        stepExecutionsTotal: 13,
+        stepExecutionsTotal: 1842,
         execution: {
           ...mockExecution,
           stepExecutions: [
@@ -167,7 +167,34 @@ describe('WorkflowExecutionPanel', () => {
       expect(
         screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout')
       ).toBeInTheDocument();
-      expect(screen.getByText(/12 step executions were not loaded/)).toBeInTheDocument();
+      expect(screen.getByText(/842 step executions were not loaded/)).toBeInTheDocument();
+    });
+
+    it('should not show a truncation warning for mget gaps on a single page', () => {
+      renderComponent({
+        stepExecutionsTotal: 500,
+        execution: {
+          ...mockExecution,
+          stepExecutions: [
+            {
+              id: 'step-1',
+              stepId: 'step-1',
+              stepType: 'console',
+              scopeStack: [],
+              workflowRunId: 'exec-123',
+              workflowId: 'workflow-123',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2024-01-01T10:00:00Z',
+              topologicalIndex: 0,
+              globalExecutionIndex: 0,
+              stepExecutionIndex: 0,
+            },
+          ],
+        },
+      });
+      expect(
+        screen.queryByTestId('workflowExecutionStepExecutionsTruncatedCallout')
+      ).not.toBeInTheDocument();
     });
 
     it('should not show a truncation warning when the step list is empty', () => {

@@ -290,6 +290,28 @@ describe('getWorkflowExecution', () => {
       expect(result?.version).toBeUndefined();
     });
 
+    it('should cap search fallback size at the embed max', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: undefined },
+        ] as unknown as EsWorkflowExecution[])
+      );
+      mockStepDataClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(mockStepDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT,
+        })
+      );
+    });
+
     it('should load only the first step ids up to the mget cap', async () => {
       const manyIds = Array.from(
         { length: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT + 1 },

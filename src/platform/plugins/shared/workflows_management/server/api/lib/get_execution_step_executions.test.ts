@@ -22,6 +22,7 @@ import {
 } from '@kbn/workflows-execution-engine/server/mocks';
 import { getExecutionStepExecutions } from './get_execution_step_executions';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE } from '../../lib/workflow_history_pagination_error';
 
 const sizeExceededError = () =>
   new errors.RequestAbortedError(
@@ -148,6 +149,44 @@ describe('getExecutionStepExecutions', () => {
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Failed to get workflow execution exec-1 with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=1, size=100)'
     );
+  });
+
+  it('throws WorkflowHistoryPaginationError when legacy from plus size exceeds the result window', async () => {
+    mockParent(undefined);
+
+    await expect(
+      getExecutionStepExecutions({
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+        ...baseParams,
+        page: 3,
+        size: 5000,
+      })
+    ).rejects.toThrow(WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE);
+
+    expect(mockStepDataClient.search).not.toHaveBeenCalled();
+  });
+
+  it('does not throw for mget paging past the Elasticsearch result window', async () => {
+    mockParent(['a']);
+
+    const result = await getExecutionStepExecutions({
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      ...baseParams,
+      page: 3,
+      size: 5000,
+    });
+
+    expect(mockStepDataClient.search).not.toHaveBeenCalled();
+    expect(result.stepExecutionListResult).toEqual({
+      results: [],
+      total: 1,
+      page: 3,
+      size: 5000,
+    });
   });
 
   it('falls back to search when stepExecutionIds are missing', async () => {
