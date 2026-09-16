@@ -14,7 +14,7 @@ start  -->  [iterate: start again]  -->  stop
 logs (tail background service output)
 ```
 
-`start` is the only command you need. On first run it auto-detects missing config and connectors, prompting you through setup before starting the stack. Use `init` separately only if you want to run setup in isolation (e.g. exporting `KIBANA_TESTING_AI_CONNECTORS` for use across terminals). Pass `--skip-init` to bypass these checks.
+`start` is the only command you need. On first run it auto-detects missing config and connectors, prompting you through setup before starting the stack. Use `init` separately only if you want to run setup in isolation (e.g. exporting `KIBANA_TESTING_INFERENCE_ENDPOINTS` for use across terminals). Pass `--skip-init` to bypass these checks.
 
 EDOT and Scout run as **persistent background daemons**. They survive between `start` runs so you can iterate on eval suites without waiting for ES/Kibana to restart each time.
 
@@ -24,13 +24,15 @@ EDOT and Scout run as **persistent background daemons**. They survive between `s
 
 Interactive wizard that creates a custom config file and discovers EIS models or validates existing connectors. Running `init` separately is **optional** -- `start` auto-triggers setup when config or connectors are missing.
 
-Use `init` when you want to create a config file for a bespoke (non-golden-cluster, non-local) setup, or to export `KIBANA_TESTING_AI_CONNECTORS` to your shell.
+Use `init` when you want to create a config file for a bespoke (non-golden-cluster, non-local) setup, or to export `KIBANA_TESTING_INFERENCE_ENDPOINTS` to your shell.
 
 ```bash
 node scripts/evals init
 ```
 
 EIS connector discovery is automatically skipped when a valid cache exists at `~/.elastic/eis-connectors-cache.json` (7-day TTL). To force re-discovery, delete the cache file and run `init` again.
+
+Discovered EIS models and generated OpenRouter entries are emitted as **inference endpoint definitions** (`actionTypeId: .inference`), not stack connectors: EIS ids bind to endpoints provisioned by EIS/CCM, and OpenRouter endpoints are created on demand during the run. Legacy `.gen-ai` definitions are no longer treated as LLM definitions and silently fall back to a deprecated stack connector, see [Connector definitions and inference endpoints](./README.md#connector-definitions-and-inference-endpoints).
 
 #### `init config` -- Create a custom config file
 
