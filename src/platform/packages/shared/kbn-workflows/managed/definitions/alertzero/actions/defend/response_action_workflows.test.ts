@@ -20,8 +20,8 @@ import {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './action_suspend_process';
-import { ALERTZERO_ACTION_WORKFLOW_IDS } from '..';
-import { WorkflowSchema } from '../../../../spec/schema';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
+import { WorkflowSchema } from '../../../../../spec/schema';
 
 /**
  * These three actions replace custom workflow steps. They dispatch via the

@@ -26,9 +26,9 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/action_isolate_host.yaml';
-import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/action_kill_process.yaml';
-import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/action_suspend_process.yaml';
+import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
+import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
+import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
 import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/dark_continuous_threat_hunt.yaml';
 import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';

@@ -9,9 +9,11 @@
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
-import { ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/action_isolate_host';
-import { ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID } from './actions/action_kill_process';
-import { ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID } from './actions/action_suspend_process';
+import {
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from './actions/defend';
 import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
@@ -52,15 +54,11 @@ export {
 export {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
-} from './actions/action_isolate_host';
-export {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
-} from './actions/action_kill_process';
-export {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
-} from './actions/action_suspend_process';
+} from './actions/defend';
 export {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
