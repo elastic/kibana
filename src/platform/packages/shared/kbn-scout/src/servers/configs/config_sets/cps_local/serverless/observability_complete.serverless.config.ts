@@ -16,6 +16,7 @@ import { servers as uiamConfig } from '../../uiam_local/serverless/observability
 import type { ScoutServerConfig } from '../../../../../types';
 import { withoutSecurityTestEndpoints } from './utils';
 
+// random change
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
   servers: {
