@@ -113,14 +113,13 @@ const updateKiById = async ({
 
   const failures = response.failures ?? [];
   if (failures.length > 0) {
+    const reason = failures[0].cause?.reason ?? 'shard write failure';
     throw new ApplyImprovementError(
-      `Failed to update Knowledge Indicator [${kiId}] in [${dest.value}]: ${JSON.stringify(
-        failures[0]
-      )}`
+      `Failed to update Knowledge Indicator [${kiId}] in [${dest.value}]: ${reason}`
     );
   }
 
-  if ((response.updated ?? 0) === 0) {
+  if ((response.updated ?? 0) === 0 && (response.noops ?? 0) === 0) {
     throw new ApplyImprovementError(
       `Knowledge Indicator [${kiId}] was not found in [${dest.value}]. It may have been removed since the suggestion was made.`
     );
