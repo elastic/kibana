@@ -52,6 +52,6 @@ export const renderAlertTriageWorkerYaml = (
   values: AlertTriageWorkerTemplateValues
 ): string =>
   renderCommonWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    '__WORKER_AUTO_CLOSE_THRESHOLD__',
     String(values.autoCloseConfidenceScoreMinThreshold)
   );
