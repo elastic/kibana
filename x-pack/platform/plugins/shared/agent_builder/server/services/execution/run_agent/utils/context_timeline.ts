@@ -13,6 +13,7 @@ import type {
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserMessageEvent,
+  ConversationEvent,
 } from '@kbn/agent-builder-common';
 import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -33,11 +34,8 @@ export type ProcessedTimelineEvent =
   | Exclude<TimelineEvent, UserMessageEvent>
   | ProcessedUserMessageEvent;
 
-type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent;
-type UserMessageOf<E extends AnyTimelineEvent> = Extract<
-  E,
-  { type: TimelineEventType.userMessage }
->;
+type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | ConversationEvent;
+type UserMessageOf<E extends AnyTimelineEvent> = E & UserMessageEvent;
 
 /** A round as it appears on the normalized context timeline: one execution triggered by a user message. */
 export interface TimelineRound<E extends AnyTimelineEvent = TimelineEvent> {

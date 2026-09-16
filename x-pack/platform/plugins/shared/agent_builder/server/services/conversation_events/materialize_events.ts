@@ -18,11 +18,11 @@ export const materializeConversationEvents = ({
   actor: EventActor;
   now: Date;
 }): ConversationEvent[] => {
-  const created_at = now.toISOString();
+  const createdAt = now.toISOString();
   return events.map((event) => ({
     ...event,
     id: uuid_v4(),
     actor,
-    created_at,
+    created_at: createdAt,
   }));
 };

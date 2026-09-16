@@ -293,6 +293,9 @@ export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly TimelineEventType[] =
 export const isBuiltInConversationEventType = (type: string): type is TimelineEventType =>
   (BUILT_IN_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type);
 
+export const isTimelineEvent = (event: ConversationEvent): event is TimelineEvent =>
+  isBuiltInConversationEventType(event.type);
+
 /**
  * Union of the string values of all built-in timeline event types.
  * Uses template-literal distribution so that `'user_message' extends BuiltInConversationEventTypeValue`

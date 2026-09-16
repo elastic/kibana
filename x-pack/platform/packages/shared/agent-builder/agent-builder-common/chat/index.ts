@@ -223,5 +223,6 @@ export {
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
   isBuiltInConversationEventType,
+  isTimelineEvent,
   type ValidConversationEventType,
 } from './timeline_events';
