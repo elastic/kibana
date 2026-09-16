@@ -24,3 +24,11 @@ export const RULE_CHANGES_HISTORY_RESOURCE_KEY = 'rule-changes-history';
  * created before versioning).
  */
 export const RULE_VERSION_FALLBACK = 1;
+
+/**
+ * Fallback `metadata.revision` value when a rule has no persisted revision yet
+ * (e.g. rules created before this field was introduced, pending model-version
+ * migration). Zero means "never meaningfully edited", which is a safe read-time
+ * default for any pre-existing rule.
+ */
+export const RULE_REVISION_FALLBACK = 0;
