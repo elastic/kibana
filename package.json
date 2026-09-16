@@ -1843,6 +1843,7 @@
     "@kbn/evals-suite-attack-discovery": "workspace:*",
     "@kbn/evals-suite-attack-discovery-agent-builder": "workspace:*",
     "@kbn/evals-suite-detection-watch-rule-creation": "workspace:*",
+    "@kbn/evals-suite-detection-watch-rule-tuning": "workspace:*",
     "@kbn/evals-suite-endpoint": "workspace:*",
     "@kbn/evals-suite-entity-analytics": "workspace:*",
     "@kbn/evals-suite-lead-generation": "workspace:*",

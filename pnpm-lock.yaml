@@ -5244,6 +5244,9 @@ importers:
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
+      '@kbn/evals-suite-detection-watch-rule-tuning':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning
       '@kbn/evals-suite-endpoint':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
@@ -9433,6 +9436,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
