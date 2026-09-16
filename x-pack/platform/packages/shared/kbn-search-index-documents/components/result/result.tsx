@@ -53,14 +53,14 @@ export const Result: React.FC<ResultProps> = ({
   const tooltipText =
     fields.length <= defaultVisibleFields
       ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.allVisible', {
-          defaultMessage: 'All fields are visible',
-        })
+        defaultMessage: 'All fields are visible',
+      })
       : isExpanded
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
+        ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
           defaultMessage: 'Show {amount} fewer fields',
           values: { amount: fields.length - defaultVisibleFields },
         })
-      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
+        : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
           defaultMessage: 'Show {amount} more fields',
           values: { amount: fields.length - defaultVisibleFields },
         });
@@ -80,7 +80,7 @@ export const Result: React.FC<ResultProps> = ({
                   title={
                     metaData.title ??
                     i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: '{id}',
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }
@@ -94,7 +94,7 @@ export const Result: React.FC<ResultProps> = ({
                   title={
                     metaData.title ??
                     i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: '{id}',
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }

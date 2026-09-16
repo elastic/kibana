@@ -67,27 +67,12 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.data.preview.description"
-                    defaultMessage="Max 10 documents displayed for performance reasons."
+                    defaultMessage="Max 10 documents displayed."
                   />
                 </p>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="refresh"
-            size="s"
-            onClick={onRefresh}
-            isLoading={isLoading}
-            isDisabled={isLoading}
-            data-test-subj="indexDetailsDataPreviewRefreshButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.indexDetails.data.preview.refreshButtonLabel"
-              defaultMessage="Refresh"
-            />
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
