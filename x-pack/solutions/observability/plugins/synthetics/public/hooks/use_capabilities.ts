@@ -34,6 +34,16 @@ export const useCanManageRules = () => {
   return !!(capabilities?.save || capabilities?.canManageRules);
 };
 
+/**
+ * Whether the current user can edit the per-space allowed-monitor-types policy.
+ * Requires the dedicated `canManageMonitorTypes` sub-feature — deliberately NOT
+ * granted by `save`, so monitor writers cannot widen the policy that limits them.
+ */
+export const useCanManageMonitorTypes = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!capabilities?.canManageMonitorTypes;
+};
+
 export const useCanUsePublicLocationsPermission = (): boolean =>
   !!(useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true);
 

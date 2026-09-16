@@ -28,6 +28,7 @@ export const DynamicSettingsAttributesCodec = t.intersection([
     defaultStatusRuleEnabled: t.boolean,
     defaultTLSRuleEnabled: t.boolean,
     rebalancePrivateLocationShardsEnabled: t.boolean,
+    allowedMonitorTypes: t.array(t.string),
   }),
 ]);
 

@@ -58,6 +58,14 @@ export const setDynamicSettings = async ({
   );
 };
 
+export const setAllowedMonitorTypes = async (
+  allowedMonitorTypes: string[]
+): Promise<{ allowedMonitorTypes: string[] }> => {
+  return await apiService.put(SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY, {
+    allowedMonitorTypes,
+  });
+};
+
 export const triggerMwSync = async (): Promise<void> => {
   const url = SYNTHETICS_API_URLS.TRIGGER_TASK_RUN.replace(
     '{taskType}',

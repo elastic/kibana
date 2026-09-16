@@ -658,6 +658,43 @@ describe('validateMonitor', () => {
     });
   });
 
+  describe('allowed monitor types policy', () => {
+    it('validates when the type is in the allow-list', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default', false, [testMonitor.type]);
+      expect(result.valid).toBe(true);
+    });
+
+    it('invalidates when the type is not in the allow-list', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+      const allowed = [
+        MonitorTypeEnum.HTTP,
+        MonitorTypeEnum.TCP,
+        MonitorTypeEnum.ICMP,
+        MonitorTypeEnum.BROWSER,
+        MonitorTypeEnum.API,
+      ].filter((type) => type !== testMonitor.type);
+      const result = validateMonitor(testMonitor, 'default', false, allowed);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor type is not allowed in this space',
+      });
+      expect(result.details).toContain(testMonitor.type);
+    });
+
+    it('treats an empty allow-list as no restriction', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default', false, []);
+      expect(result.valid).toBe(true);
+    });
+
+    it('treats an undefined allow-list as no restriction', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result.valid).toBe(true);
+    });
+  });
+
   describe('Project Monitor', () => {
     it(`when schedule is not valid`, () => {
       const result = validateProjectMonitor(

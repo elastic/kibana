@@ -27,6 +27,7 @@ export const DynamicSettingsCodec = z.looseObject({
   defaultStatusRuleEnabled: z.boolean().optional(),
   privateLocationsSyncInterval: z.number().optional(),
   rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
+  allowedMonitorTypes: z.array(z.string()).optional(),
 });
 
 export const LocationMonitorsType = z.array(

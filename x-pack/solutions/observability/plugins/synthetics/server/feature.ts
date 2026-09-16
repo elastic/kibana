@@ -32,6 +32,7 @@ import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
+export const MANAGE_MONITOR_TYPES_API = 'manage-monitor-types';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
@@ -145,6 +146,29 @@ const canManageRulesPrivilege: SubFeaturePrivilegeGroupConfig = {
         },
       },
       ui: ['canManageRules'],
+    },
+  ],
+};
+
+const canManageMonitorTypesPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent',
+  privileges: [
+    {
+      id: 'can_manage_monitor_types',
+      name: i18n.translate('xpack.synthetics.features.canManageMonitorTypes.label', {
+        defaultMessage: 'Manage allowed monitor types',
+      }),
+      // `includeIn: 'none'` — never granted implicitly, not even to base `all`.
+      // Base `all` (monitor writers) can create monitors but must NOT be able to
+      // widen the per-space allow-list that constrains them. Only a role that
+      // explicitly adds this privilege can edit the policy via the dedicated route.
+      includeIn: 'none',
+      api: [MANAGE_MONITOR_TYPES_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canManageMonitorTypes'],
     },
   ],
 };
@@ -275,6 +299,16 @@ export const syntheticsFeature = {
           'Create, update, delete, enable, disable, run, and backfill Synthetics and Uptime alert rules, including the default status and TLS rules. This does not grant permission to create or edit monitors.',
       }),
       privilegeGroups: [canManageRulesPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.monitorTypes', {
+        defaultMessage: 'Monitor types policy',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.monitorTypes.description', {
+        defaultMessage:
+          'Configure which monitor types (e.g. HTTP, TCP, ICMP, browser) may be created in a space. This does not grant permission to create or edit monitors.',
+      }),
+      privilegeGroups: [canManageMonitorTypesPrivilege],
     },
   ],
 };

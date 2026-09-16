@@ -78,7 +78,8 @@ const getApiServerlessValidationError = (
 export function validateMonitor(
   monitorFields: MonitorFields,
   spaceId: string,
-  isServerless = false
+  isServerless = false,
+  allowedMonitorTypes?: string[]
 ): ValidationResult {
   const { MonitorTypeCodec, formatZodErrors, monitorTypeToCodecMap, ICMPFieldsCodec } =
     getZodMonitorCodecs();
@@ -117,6 +118,20 @@ export function validateMonitor(
       details: formatZodErrors(decodedType.error, { rootName: 'type', input: monitorType }).join(
         ' | '
       ),
+      payload: monitorFields,
+    };
+  }
+
+  // Per-space allow-list: an empty/undefined list means no restriction.
+  if (
+    allowedMonitorTypes &&
+    allowedMonitorTypes.length > 0 &&
+    !allowedMonitorTypes.includes(monitorType)
+  ) {
+    return {
+      valid: false,
+      reason: DISALLOWED_MONITOR_TYPE_ERROR,
+      details: DISALLOWED_MONITOR_TYPE_DETAILS(monitorType, allowedMonitorTypes),
       payload: monitorFields,
     };
   }
@@ -572,6 +587,23 @@ const INVALID_PAYLOAD_ERROR = i18n.translate(
 const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
   defaultMessage: 'Monitor type is invalid',
 });
+
+const DISALLOWED_MONITOR_TYPE_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.disallowedMonitorTypeError',
+  {
+    defaultMessage: 'Monitor type is not allowed in this space',
+  }
+);
+
+const DISALLOWED_MONITOR_TYPE_DETAILS = (monitorType: string, allowedMonitorTypes: string[]) =>
+  i18n.translate('xpack.synthetics.server.monitors.disallowedMonitorTypeDetails', {
+    defaultMessage:
+      'Monitor type "{monitorType}" is not permitted in this space. Allowed types are: {allowedMonitorTypes}.',
+    values: {
+      monitorType,
+      allowedMonitorTypes: allowedMonitorTypes.join(', '),
+    },
+  });
 
 const INVALID_SCHEDULE_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidScheduleError',

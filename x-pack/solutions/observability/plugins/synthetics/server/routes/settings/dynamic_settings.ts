@@ -81,6 +81,9 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     const {
       privateLocationsSyncInterval,
       rebalancePrivateLocationShardsEnabled,
+      // Editing the monitor-type allow-list requires the manage-monitor-types
+      // privilege, so ignore it here even if a monitor writer round-trips it.
+      allowedMonitorTypes: _ignoredAllowedMonitorTypes,
       ...otherSettings
     } = request.body;
     const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
@@ -174,6 +177,7 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
+    allowedMonitorTypes: attr.allowedMonitorTypes,
   };
 };
 
@@ -197,6 +201,8 @@ export const DynamicSettingsSchema = schema.object({
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
   rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
+  // Tolerated but ignored here; see the PUT handler and the dedicated policy route.
+  allowedMonitorTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string()),
