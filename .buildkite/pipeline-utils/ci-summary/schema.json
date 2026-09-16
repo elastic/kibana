@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ci-artifacts.kibana.dev/ci-summary/schema/v1.json",
+  "title": "Kibana CI Summary",
+  "description": "Per-build summary of Buildkite job outcomes, produced by the Post-Build step while the build is still running. Published to https://ci-artifacts.kibana.dev/ci-summary/build/<BUILDKITE_BUILD_ID>.json and https://ci-artifacts.kibana.dev/ci-summary/pr/<PR_NUMBER>/latest.json. Contains no raw log bytes; logTailUrl requires Buildkite auth. Additive fields may appear within the same schemaVersion; consumers must ignore unknown properties.",
+  "type": "object",
+  "required": ["schemaVersion", "complete", "generatedAt", "build", "summary", "jobs"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "complete": {
+      "type": "boolean",
+      "description": "False when the producer hit a cap or partial error. The manifest is still usable."
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "build": {
+      "type": "object",
+      "required": [
+        "id",
+        "number",
+        "pipeline",
+        "url",
+        "branch",
+        "commit",
+        "prNumber",
+        "state",
+        "startedAt",
+        "finishedAt",
+        "durationMs"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "number": { "type": "integer" },
+        "pipeline": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "branch": { "type": "string" },
+        "commit": { "type": "string" },
+        "prNumber": { "type": ["integer", "null"] },
+        "state": {
+          "enum": ["passed", "failed"],
+          "description": "Derived from job outcomes visible at Post-Build time (same rule as the GitHub commit status), not the Buildkite build state, which is still `running`."
+        },
+        "startedAt": { "type": ["string", "null"], "format": "date-time" },
+        "finishedAt": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Buildkite finished_at when available; otherwise the observation time. Steps sequenced after Post-Build are not included."
+        },
+        "durationMs": { "type": ["integer", "null"] }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "total",
+        "passed",
+        "failed",
+        "softFailed",
+        "skipped",
+        "canceled",
+        "unfinished",
+        "retried"
+      ],
+      "description": "Counts over final attempts only (retried attempts are excluded from total).",
+      "properties": {
+        "total": { "type": "integer" },
+        "passed": { "type": "integer" },
+        "failed": { "type": "integer" },
+        "softFailed": { "type": "integer" },
+        "skipped": { "type": "integer" },
+        "canceled": { "type": "integer" },
+        "unfinished": {
+          "type": "integer",
+          "description": "Jobs still running or pending when the manifest was produced (Post-Build itself and anything after it)."
+        },
+        "retried": {
+          "type": "integer",
+          "description": "Attempts superseded by a retry. Non-zero on a passed build means something flaked."
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/job" }
+    }
+  },
+  "definitions": {
+    "job": {
+      "type": "object",
+      "required": [
+        "id",
+        "key",
+        "label",
+        "state",
+        "exitStatus",
+        "softFailed",
+        "retried",
+        "retryCount",
+        "durationMs",
+        "url",
+        "failureKind",
+        "failingSection"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "key": { "type": ["string", "null"] },
+        "label": { "type": "string" },
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "soft_failed",
+            "timed_out",
+            "canceled",
+            "skipped",
+            "running",
+            "pending"
+          ]
+        },
+        "exitStatus": { "type": ["integer", "null"] },
+        "softFailed": { "type": "boolean" },
+        "retried": {
+          "type": "boolean",
+          "description": "True when this attempt was superseded by a retry. The final attempt has retried=false."
+        },
+        "retryCount": { "type": "integer" },
+        "durationMs": { "type": ["integer", "null"] },
+        "url": { "type": "string", "format": "uri" },
+        "failureKind": {
+          "enum": ["test_failures", "command_failed", "timeout", "agent_lost", "canceled", null]
+        },
+        "failingSection": {
+          "type": ["string", "null"],
+          "description": "Last Buildkite section header (`--- name`) open when the command exited."
+        },
+        "testFailures": {
+          "type": "object",
+          "required": ["count", "githubIssues", "artifactGlob"],
+          "properties": {
+            "count": { "type": "integer" },
+            "githubIssues": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "artifactGlob": {
+              "type": "string",
+              "description": "Buildkite artifact glob for the per-test failure JSON files of this job."
+            }
+          }
+        },
+        "logTailUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Buildkite artifact (auth required) with the tail of the failing section, ANSI stripped."
+        }
+      }
+    }
+  }
+}

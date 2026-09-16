@@ -337,6 +337,27 @@ export class BuildkiteClient {
     return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
   };
 
+  // https://buildkite.com/docs/apis/rest-api/jobs#get-a-jobs-log-output
+  getJobLog = async (
+    pipelineSlug: string,
+    buildNumber: string | number,
+    jobId: string,
+    limits: { maxBytes?: number; timeoutMs?: number } = {}
+  ): Promise<string> => {
+    const resp = await this.http.get(
+      `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/jobs/${encodeURIComponent(
+        jobId
+      )}/log`,
+      {
+        headers: { Accept: 'text/plain' },
+        responseType: 'text',
+        maxContentLength: limits.maxBytes ?? -1,
+        timeout: limits.timeoutMs ?? 0,
+      }
+    );
+    return resp.data as string;
+  };
+
   getArtifacts = async (
     pipelineSlug: string,
     buildNumber: string | number

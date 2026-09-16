@@ -10,6 +10,7 @@
 export * from './affected-packages/index.ts';
 export * from './agent_images.ts';
 export * from './buildkite/index.ts';
+export * as CiSummary from './ci-summary/index.ts';
 export * as CiStats from './ci-stats/index.ts';
 export {
   isScoutTestPath,
