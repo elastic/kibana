@@ -26,8 +26,11 @@ interface AlertPair {
 }
 
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds` and rejects query-based alert
- * selections, which cannot be proven to belong to the case before trigger preprocessing.
+ * Reads the (id, index) pairs from `inputs.event.alertIds` and rejects selections that cannot
+ * be proven to belong to the case before trigger preprocessing: query-based alert selections and
+ * server-side `document`-trigger expansions (`documentIds` / `querySelection`). Document triggers
+ * expand into arbitrary documents that the case-membership model does not cover, so allowing them
+ * here would let the case-scoped run endpoint inject documents outside the case.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
  * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
@@ -36,11 +39,19 @@ interface AlertPair {
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
 export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
-  const { alertIds, querySelection, triggerType } = getRecord(inputs.event) ?? {};
+  const { alertIds, querySelection, documentIds, triggerType } = getRecord(inputs.event) ?? {};
 
   if (triggerType === 'alert' && querySelection != null) {
     throw Boom.badRequest(
       'Query-based alert selections are not supported when running workflows from cases.'
+    );
+  }
+
+  // Server-side document expansion bypasses the alert-membership model, so reject it on the cases
+  // path — symmetric with the query-based alert rejection above.
+  if (triggerType === 'document' && (documentIds != null || querySelection != null)) {
+    throw Boom.badRequest(
+      'Document trigger selections are not supported when running workflows from cases.'
     );
   }
 
