@@ -8,8 +8,9 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getNamedParams } from '@kbn/esql-utils';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import {
   DATASET_FILTERING_FEATURE_FLAG_KEY,
@@ -41,11 +42,21 @@ export const registerGetSourceInfoRoute = (
               to: schema.string({ maxLength: 100 }),
             })
           ),
+          esqlVariables: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                key: schema.string({ maxLength: 1000 }),
+                value: schema.any(),
+                type: schema.string({ maxLength: 100 }),
+              }),
+              { maxSize: 1000 }
+            )
+          ),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query, projectRouting, timeRange } = request.body;
+      const { query, projectRouting, timeRange, esqlVariables } = request.body;
 
       if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
         return response.badRequest({
@@ -59,12 +70,21 @@ export const registerGetSourceInfoRoute = (
         DATASET_FILTERING_FEATURE_FLAG_KEY,
         false
       );
-
       try {
-        const namedParams = getStartEndParams(query, timeRange);
+        const namedParams = getNamedParams(
+          query,
+          timeRange,
+          esqlVariables as ESQLControlVariable[] | undefined
+        );
 
         const [timeFieldResult, columnsResult] = await Promise.all([
-          resolveTimeField(client, query, logger.get(), datasetFilteringEnabled, projectRouting),
+          resolveTimeField(
+            client,
+            query,
+            logger.get(),
+            datasetFilteringEnabled,
+            projectRouting
+          ).catch(() => ({ timeField: undefined })),
           client.esql
             .query({
               query: `${query} | LIMIT 0`,

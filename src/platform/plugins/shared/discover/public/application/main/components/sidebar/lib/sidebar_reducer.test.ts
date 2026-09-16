@@ -41,31 +41,33 @@ describe('sidebar reducer', function () {
       allFields: [dataView.fields[0]],
     };
 
+    const dataViewSource = new DataViewSource(dataView);
+
     // DataView → DataView: keep allFields to avoid a loading flash
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isEsqlMode: false,
+        dataSource: dataViewSource,
       },
     });
     expect(resultForDocuments).toEqual(
       expect.objectContaining({
         dataView,
-        dataSource: undefined,
+        dataSource: dataViewSource,
         allFields: state.allFields,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
 
-    // ES|QL fetch: clear allFields
-    const resultForEsqlQuery = discoverSidebarReducer(state, {
+    // No source yet (first load): clear allFields
+    const resultForNoSource = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isEsqlMode: true,
+        dataSource: undefined,
       },
     });
-    expect(resultForEsqlQuery).toEqual(
+    expect(resultForNoSource).toEqual(
       expect.objectContaining({
         dataView,
         dataSource: undefined,
@@ -75,11 +77,28 @@ describe('sidebar reducer', function () {
       })
     );
 
-    // ES|QL → DataView transition: clear allFields even though isEsqlMode is false
+    // ES|QL fetch: populate allFields immediately from resultColumns
     const esqlSource = createMockEsqlSource(
       [],
       [{ id: '1', name: 'AVG(bytes)', meta: { type: 'number' } }]
     );
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+      payload: {
+        dataSource: esqlSource,
+      },
+    });
+    expect(resultForEsqlQuery).toEqual(
+      expect.objectContaining({
+        dataView,
+        dataSource: esqlSource,
+        allFields: expect.arrayContaining([expect.objectContaining({ name: 'AVG(bytes)' })]),
+        fieldCounts: null,
+        status: DiscoverSidebarReducerStatus.PROCESSING,
+      })
+    );
+
+    // ES|QL → DataView transition: clear allFields
     const esqlState: DiscoverSidebarReducerState = {
       ...state,
       dataSource: esqlSource,
@@ -88,13 +107,13 @@ describe('sidebar reducer', function () {
     const resultForEsqlToDataView = discoverSidebarReducer(esqlState, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isEsqlMode: false,
+        dataSource: dataViewSource,
       },
     });
     expect(resultForEsqlToDataView).toEqual(
       expect.objectContaining({
         dataView,
-        dataSource: undefined,
+        dataSource: dataViewSource,
         allFields: null,
         fieldCounts: null,
         status: DiscoverSidebarReducerStatus.PROCESSING,

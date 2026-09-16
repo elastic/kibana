@@ -13,6 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EsqlSource } from '@kbn/data-source';
 import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
@@ -192,7 +193,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ({ esqlSource, dataView } = await initializeEsqlDataSource(
         initialQuery.esql,
         services,
-        persistedTabDataView
+        persistedTabDataView,
+        esqlControls ? extractEsqlVariables(esqlControls) : undefined
       ));
       // Set currentDataSource$ to the real EsqlSource before setDataView runs,
       // and tell setDataView not to overwrite it with DataViewSource(dataView).
@@ -362,13 +364,15 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 async function initializeEsqlDataSource(
   esql: string,
   services: DiscoverServices,
-  persistedTabDataView: DataView | undefined
+  persistedTabDataView: DataView | undefined,
+  esqlVariables?: ESQLControlVariable[]
 ): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
   const esqlSource = await createEsqlSource({
     esql,
     http: services.http,
     projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
     timeRange: services.data.query.timefilter.timefilter.getTime(),
+    esqlVariables,
   });
   services.dataSourceService.registerEsqlSource(esqlSource);
   // Register in the DataViews cache for filter pill backward compat only — this synthetic DataView

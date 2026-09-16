@@ -224,6 +224,7 @@ export function initializeFetch({
                   http: discoverServices.http,
                   projectRoutingFallback: fetchContext.projectRouting,
                   timeRange: getTimeRangeFromFetchContext(fetchContext),
+                  esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
                 }),
               };
             }

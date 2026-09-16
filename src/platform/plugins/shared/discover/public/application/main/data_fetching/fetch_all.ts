@@ -106,7 +106,14 @@ export function fetchAll(
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$, { query });
+    sendLoadingMsg(dataSubjects.documents$, {
+      query,
+      ...(isEsqlQuery && currentEsqlSource
+        ? { dataSource: currentEsqlSource }
+        : !isEsqlQuery && dataView.id
+        ? { dataSource: new DataViewSource(dataView) }
+        : {}),
+    });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
@@ -140,7 +147,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(async ({ records, interceptedWarnings = [], esqlHeaderWarning }) => {
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -202,7 +209,10 @@ export function fetchAll(
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
       .catch((e) => {
-        sendErrorMsg(dataSubjects.documents$, e, { query });
+        sendErrorMsg(dataSubjects.documents$, e, {
+          query,
+          ...(isEsqlQuery && currentEsqlSource ? { dataSource: currentEsqlSource } : {}),
+        });
         sendErrorMsg(dataSubjects.main$, e);
       });
 

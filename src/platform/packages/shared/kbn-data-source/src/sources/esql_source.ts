@@ -14,9 +14,11 @@ import type { HttpStart } from '@kbn/core/public';
 import {
   getIndexPatternFromESQLQuery,
   getESQLSourceInfo,
+  buildEsqlSourceCacheKey,
   isComputedColumn,
   getQuerySummary,
 } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
@@ -43,6 +45,11 @@ export interface EsqlSourceArgs {
    * named parameters can be executed for schema discovery.
    */
   timeRange?: { from: string; to: string };
+  /**
+   * Passed to the source_info route so that queries using ES|QL control
+   * variables (`?variable_name`) can be executed for schema discovery.
+   */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface EsqlSourceConstructorArgs {
@@ -64,6 +71,11 @@ interface EsqlSourceConstructorArgs {
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
 export class EsqlSource implements DataSourceBase {
+  // Instance cache keyed by (query, projectRouting, cleanVariables).
+  // `meta` is stripped from variables because it is client-only and must not affect caching.
+  private static readonly instanceCache = new Map<string, EsqlSource>();
+  private static readonly MAX_CACHE_SIZE = 100;
+
   public readonly kind = 'esql' as const;
   public readonly id: string;
   public readonly query: string;
@@ -104,6 +116,15 @@ export class EsqlSource implements DataSourceBase {
 
   /** Async factory — id derivation via `crypto.subtle` requires async. */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
+    const { cacheKey: instanceKey, cleanVariables } = buildEsqlSourceCacheKey(
+      args.query,
+      args.projectRouting,
+      args.esqlVariables
+    );
+
+    const cached = EsqlSource.instanceCache.get(instanceKey);
+    if (cached) return cached;
+
     const title = getIndexPatternFromESQLQuery(args.query);
 
     let timeFieldName: string | undefined = args.timeFieldName;
@@ -116,6 +137,7 @@ export class EsqlSource implements DataSourceBase {
         http: args.http,
         projectRouting: args.projectRouting,
         timeRange: args.timeRange,
+        esqlVariables: cleanVariables,
       }).catch(() => null);
 
       if (info) {
@@ -139,13 +161,20 @@ export class EsqlSource implements DataSourceBase {
       timeFieldName ?? null,
     ]);
     const hash = await sha256(hashInput);
-    return new EsqlSource({
+    const instance = new EsqlSource({
       id: `esql-${hash}`,
       query: args.query,
       title,
       timeFieldName,
       resultColumns,
     });
+
+    if (EsqlSource.instanceCache.size >= EsqlSource.MAX_CACHE_SIZE) {
+      const oldestKey = EsqlSource.instanceCache.keys().next().value;
+      if (oldestKey) EsqlSource.instanceCache.delete(oldestKey);
+    }
+    EsqlSource.instanceCache.set(instanceKey, instance);
+    return instance;
   }
 
   public get name(): string {

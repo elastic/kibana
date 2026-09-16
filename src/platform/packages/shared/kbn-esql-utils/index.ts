@@ -103,6 +103,7 @@ export {
   type ESQLSourceKind,
   ensureApproximationLicense,
   getESQLSourceInfo,
+  buildEsqlSourceCacheKey,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

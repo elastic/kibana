@@ -42,6 +42,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
+import { createEsqlSource } from '../data_fetching/create_esql_source';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getProfileAppStateDefaults } from './utils/profile_app_state_defaults';
@@ -303,9 +304,20 @@ export function getDataStateContainer({
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
-          const currentDataSource = currentDataSource$.getValue();
-          const currentEsqlSource =
-            currentDataSource?.kind === 'esql' ? (currentDataSource as EsqlSource) : undefined;
+          let currentEsqlSource: EsqlSource | undefined;
+          if (isOfAggregateQueryType(appState.query)) {
+            const freshEsqlSource = await createEsqlSource({
+              esql: appState.query.esql,
+              http: services.http,
+              projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
+              timeRange: timefilter.getTime(),
+              esqlVariables: getCurrentTab().esqlVariables ?? undefined,
+            });
+            if (freshEsqlSource !== currentDataSource$.getValue()) {
+              currentDataSource$.next(freshEsqlSource);
+            }
+            currentEsqlSource = freshEsqlSource;
+          }
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;

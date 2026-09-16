@@ -8,6 +8,7 @@
  */
 import type { HttpStart } from '@kbn/core/public';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 
 export interface ESQLSourceInfo {
@@ -17,18 +18,43 @@ export interface ESQLSourceInfo {
 
 const sourceInfoCache = new LRUCache<string, Promise<ESQLSourceInfo>>({ max: 100 });
 
+/**
+ * Strips the client-only `meta` field from ES|QL control variables and returns
+ * a stable JSON cache key for `(query, projectRouting, variables)`.
+ * `meta` must never reach the server and must not influence cache behaviour.
+ */
+export function buildEsqlSourceCacheKey(
+  query: string,
+  projectRouting: string | undefined,
+  esqlVariables: ESQLControlVariable[] | undefined
+): { cacheKey: string; cleanVariables: ESQLControlVariable[] | undefined } {
+  const cleanVariables = esqlVariables?.map(
+    ({ key, value, type }) => ({ key, value, type } as ESQLControlVariable)
+  );
+  return {
+    cacheKey: JSON.stringify([query, projectRouting ?? null, cleanVariables ?? null]),
+    cleanVariables,
+  };
+}
+
 export async function getESQLSourceInfo({
   query,
   http,
   projectRouting,
   timeRange,
+  esqlVariables,
 }: {
   query: string;
   http: HttpStart;
   projectRouting?: string;
   timeRange?: { from: string; to: string };
+  esqlVariables?: ESQLControlVariable[];
 }): Promise<ESQLSourceInfo> {
-  const cacheKey = JSON.stringify([query, projectRouting]);
+  const { cacheKey, cleanVariables } = buildEsqlSourceCacheKey(
+    query,
+    projectRouting,
+    esqlVariables
+  );
 
   const cached = sourceInfoCache.get(cacheKey);
   if (cached !== undefined) {
@@ -37,7 +63,7 @@ export async function getESQLSourceInfo({
 
   const pending = http
     .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({ query, projectRouting, timeRange }),
+      body: JSON.stringify({ query, projectRouting, timeRange, esqlVariables: cleanVariables }),
     })
     .catch((error) => {
       sourceInfoCache.delete(cacheKey);

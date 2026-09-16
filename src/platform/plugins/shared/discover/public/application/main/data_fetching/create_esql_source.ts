@@ -10,19 +10,22 @@
 import type { HttpStart } from '@kbn/core/public';
 import { EsqlSource } from '@kbn/data-source';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 export async function createEsqlSource({
   esql,
   http,
   projectRoutingFallback,
   timeRange,
+  esqlVariables,
 }: {
   esql: string;
   http?: HttpStart;
   projectRoutingFallback?: string;
   timeRange?: { from: string; to: string };
+  esqlVariables?: ESQLControlVariable[];
 }): Promise<EsqlSource> {
   const projectRouting =
     getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;
-  return EsqlSource.create({ query: esql, projectRouting, http, timeRange });
+  return EsqlSource.create({ query: esql, projectRouting, http, timeRange, esqlVariables });
 }

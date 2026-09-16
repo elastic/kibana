@@ -34,7 +34,7 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        isEsqlMode: boolean;
+        dataSource: DataSource | undefined;
       };
     }
   | {
@@ -97,13 +97,20 @@ export function discoverSidebarReducer(
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING: {
       const wasEsql = state.dataSource?.kind === 'esql';
+      const { dataSource } = action.payload;
+      let allFields: DataViewField[] | null;
+      if (dataSource?.kind === 'esql') {
+        allFields = getEsqlQueryFieldList(dataSource.resultColumns);
+      } else if (dataSource && !wasEsql) {
+        allFields = state.allFields;
+      } else {
+        allFields = null;
+      }
       return {
         ...state,
-        dataSource: undefined,
+        dataSource,
         fieldCounts: null,
-        // Clear when entering ES|QL mode OR when leaving ES|QL mode (transitioning to DataView).
-        // Keep existing fields otherwise (DataView→DataView) to avoid a loading flash.
-        allFields: action.payload.isEsqlMode || wasEsql ? null : state.allFields,
+        allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
     }
