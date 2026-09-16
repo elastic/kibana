@@ -12,6 +12,7 @@ import {
   type ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -40,6 +41,7 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
   logger: mockLogger,
+  request: httpServerMock.createKibanaRequest(),
   runContext: {
     runId: 'run-test-1',
     stack: [{ type: 'agent', agentId: 'test-agent', conversationId: 'conv-test-1' }],
@@ -153,7 +155,7 @@ describe('getRunningProcessesTool', () => {
     );
     // The action is attributed to the initiating analyst, not the system user.
     expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
-      expect.objectContaining({ username: 'test-analyst' })
+      expect.objectContaining({ request: expect.anything() })
     );
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(true);

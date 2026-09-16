@@ -94,13 +94,9 @@ export const unisolateHostTool = (
         const { agentId, agentType } = resolved;
         const endpointIds = [agentId];
 
-        // Attribute the action to the initiating analyst (falls back to the
-        // default system user when the current user cannot be resolved) so the
-        // Response Actions audit trail records who requested it, not `elastic`.
-        const username = endpointAppContextService.getCurrentUsername(request);
         const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
           spaceId,
-          username,
+          request,
           agentType,
           // Analyst-initiated via chat (gated behind HITL confirmation), not a
           // system/rule-triggered action — RESPONSE_ACTIONS_SUPPORT_MAP gates
