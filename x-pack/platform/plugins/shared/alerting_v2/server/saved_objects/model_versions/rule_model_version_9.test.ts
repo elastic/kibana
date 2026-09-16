@@ -6,7 +6,12 @@
  */
 
 /**
- * Step 4.5: model version '10' backfill and static mapping tests.
+ * Step 4.5: framework field backfill and static mapping tests.
+ *
+ * Originally written for model version '10'. The POC's five model versions
+ * ('7'–'11') were squashed into a single '7' to satisfy the saved-objects
+ * checker's one-new-version-per-PR rule. All tests now target the squashed '7',
+ * which carries the same backfill and mappings as the original '10'.
  *
  * Tests that:
  * 1. The backfill sets signature_id to the document id when absent.
@@ -21,7 +26,7 @@
  * 10. The backfill preserves an already-stamped ownership object.
  * 11. A document with all four field families already present migrates without
  *     any field being overwritten.
- * 12. Version '10' is present in ruleModelVersions with both changes.
+ * 12. The squashed version '7' is present in ruleModelVersions with both changes.
  * 13. The static rule_mappings.ts carries all five new top-level metadata paths.
  *
  * Ref: rule-identity.md "Storage and migration"
@@ -44,20 +49,22 @@ type BackfillFn = (doc: { id: string; attributes: { metadata?: Record<string, un
 };
 
 /**
- * Extracts the `backfillFn` from model version '10'.
+ * Extracts the `backfillFn` from the squashed model version '7'.
  *
- * The version has two changes: mappings_addition first, data_backfill second.
- * We reach into the changes array to find the data_backfill entry.
+ * The squashed '7' has four mappings_addition changes and one data_backfill.
+ * Neither manifest fold (query or threshold) contributes a data_backfill at
+ * version 1 (version 1 is exempt from the identity backfill), so there is
+ * exactly one data_backfill entry — the framework-fields one originally from '10'.
  */
-function getV9BackfillFn(): BackfillFn {
-  const v10 = ruleModelVersions['10'] as {
+function getV7BackfillFn(): BackfillFn {
+  const v7 = ruleModelVersions['7'] as {
     changes: Array<{
       type: string;
       backfillFn?: BackfillFn;
     }>;
   };
-  expect(v10).toBeDefined();
-  const backfillChange = v10.changes.find((c) => c.type === 'data_backfill');
+  expect(v7).toBeDefined();
+  const backfillChange = v7.changes.find((c) => c.type === 'data_backfill');
   expect(backfillChange).toBeDefined();
   return backfillChange!.backfillFn!;
 }
@@ -66,7 +73,7 @@ function getV9BackfillFn(): BackfillFn {
  * Runs the backfill on a synthetic doc and returns the resulting metadata.
  */
 function runBackfill(id: string, metadata: Record<string, unknown>): Record<string, unknown> {
-  const fn = getV9BackfillFn();
+  const fn = getV7BackfillFn();
   const result = fn({ id, attributes: { metadata } });
   return result.attributes.metadata as Record<string, unknown>;
 }
@@ -75,7 +82,7 @@ function runBackfill(id: string, metadata: Record<string, unknown>): Record<stri
 // 1–2. signature_id
 // ---------------------------------------------------------------------------
 
-describe('model version 10 backfill — signature_id', () => {
+describe('squashed model version 7 backfill — signature_id', () => {
   it('sets signature_id to the document id when absent', () => {
     const meta = runBackfill('rule-uuid-001', {});
     expect(meta.signature_id).toBe('rule-uuid-001');
@@ -91,7 +98,7 @@ describe('model version 10 backfill — signature_id', () => {
 // 3–4. source
 // ---------------------------------------------------------------------------
 
-describe('model version 10 backfill — source', () => {
+describe('squashed model version 7 backfill — source', () => {
   it('sets source to { type: internal, version: 1 } when absent', () => {
     const meta = runBackfill('rule-uuid-003', {});
     expect(meta.source).toEqual({ type: 'internal', version: 1 });
@@ -108,7 +115,7 @@ describe('model version 10 backfill — source', () => {
 // 5–6. revision
 // ---------------------------------------------------------------------------
 
-describe('model version 10 backfill — revision', () => {
+describe('squashed model version 7 backfill — revision', () => {
   it('sets revision to 0 when absent', () => {
     const meta = runBackfill('rule-uuid-005', {});
     expect(meta.revision).toBe(0);
@@ -124,7 +131,7 @@ describe('model version 10 backfill — revision', () => {
 // 7–10. ownership
 // ---------------------------------------------------------------------------
 
-describe('model version 10 backfill — ownership', () => {
+describe('squashed model version 7 backfill — ownership', () => {
   it('stamps managed ownership for security.detection.query', () => {
     const meta = runBackfill('rule-uuid-007', {
       builder_type: 'security.detection.query',
@@ -173,9 +180,9 @@ describe('model version 10 backfill — ownership', () => {
 // 11. Full migration: all four field families already present
 // ---------------------------------------------------------------------------
 
-describe('model version 10 backfill — full document migration', () => {
+describe('squashed model version 7 backfill — full document migration', () => {
   it('migrates a pre-existing rule to carry all four field families', () => {
-    // Simulate a rule stored before version 10 was released — none of the new
+    // Simulate a rule stored before this version was released — none of the new
     // fields are present. The backfill must add all four.
     const meta = runBackfill('legacy-rule-id', {
       name: 'My detection rule',
@@ -194,7 +201,7 @@ describe('model version 10 backfill — full document migration', () => {
 
   it('does not overwrite any field already set by the Phase 4 write paths', () => {
     // Simulate a rule created after steps 4.1–4.4 were deployed but before
-    // model version 10 was released. All new fields are already present.
+    // this model version was released. All new fields are already present.
     const meta = runBackfill('new-rule-id', {
       name: 'Already migrated rule',
       builder_type: 'security.detection.query',
@@ -212,29 +219,45 @@ describe('model version 10 backfill — full document migration', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 12. Version '10' structure
+// 12. Squashed version '7' structure
 // ---------------------------------------------------------------------------
 
-describe("ruleModelVersions version '10'", () => {
-  it("contains key '10'", () => {
-    expect(ruleModelVersions).toHaveProperty('10');
+describe("ruleModelVersions squashed version '7' (framework fields)", () => {
+  it("contains key '7'", () => {
+    expect(ruleModelVersions).toHaveProperty('7');
   });
 
-  it("version '10' has a mappings_addition change", () => {
-    const v10 = ruleModelVersions['10'] as { changes: Array<{ type: string }> };
-    expect(v10.changes.some((c) => c.type === 'mappings_addition')).toBe(true);
+  it("squashed version '7' has the framework-fields mappings_addition (signature_id present)", () => {
+    // Selecting by signature_id presence makes this specific: it passes only if the
+    // framework-fields block is present, not just any mappings_addition.
+    const v7 = ruleModelVersions['7'] as {
+      changes: Array<{ type: string; addedMappings?: unknown }>;
+    };
+    const frameworkMappings = v7.changes.find(
+      (c) =>
+        c.type === 'mappings_addition' &&
+        (c.addedMappings as any)?.metadata?.properties?.signature_id !== undefined
+    );
+    expect(frameworkMappings).toBeDefined();
   });
 
-  it("version '10' has a data_backfill change", () => {
-    const v10 = ruleModelVersions['10'] as { changes: Array<{ type: string }> };
-    expect(v10.changes.some((c) => c.type === 'data_backfill')).toBe(true);
+  it("squashed version '7' has a data_backfill change", () => {
+    const v7 = ruleModelVersions['7'] as { changes: Array<{ type: string }> };
+    expect(v7.changes.some((c) => c.type === 'data_backfill')).toBe(true);
   });
 
-  it("version '10' mappings_addition covers all five new metadata paths", () => {
-    const v10 = ruleModelVersions['10'] as {
+  it("squashed version '7' framework mappings_addition covers all five new metadata paths", () => {
+    const v7 = ruleModelVersions['7'] as {
       changes: Array<{ type: string; addedMappings?: Record<string, unknown> }>;
     };
-    const mappingsChange = v10.changes.find((c) => c.type === 'mappings_addition');
+    // The squashed '7' has four mappings_addition changes. The framework-fields one
+    // (originally version '10') is the only one with signature_id at the top level of
+    // metadata.properties (the manifest-fold ones nest under builder_fields.properties).
+    const mappingsChange = v7.changes.find(
+      (c) =>
+        c.type === 'mappings_addition' &&
+        (c.addedMappings as any)?.metadata?.properties?.signature_id !== undefined
+    );
     expect(mappingsChange).toBeDefined();
 
     const metaProps = (
@@ -254,7 +277,7 @@ describe("ruleModelVersions version '10'", () => {
 // 13. Static rule_mappings carries all new metadata fields
 // ---------------------------------------------------------------------------
 
-describe('ruleMappings — Phase 4 framework fields (model version 10)', () => {
+describe('ruleMappings — Phase 4 framework fields (squashed model version 7)', () => {
   const metaProperties = () => {
     const meta = ruleMappings.properties?.metadata as
       | { properties?: Record<string, unknown> }
