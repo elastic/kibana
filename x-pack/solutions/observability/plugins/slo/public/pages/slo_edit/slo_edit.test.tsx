@@ -365,8 +365,8 @@ describe('SLO Edit Page', () => {
       });
     });
 
-    it('allows Synthetics availability SLOs to use timeslices', async () => {
-      const { getByTestId } = render(<SloEditPage />);
+    it('allows Synthetics availability SLOs to use timeslices with guidance about the monitor interval', async () => {
+      const { getByTestId, queryByText, getByText } = render(<SloEditPage />);
 
       fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
         target: { value: 'sli.synthetics.availability' },
@@ -376,12 +376,22 @@ describe('SLO Edit Page', () => {
         expect(getByTestId('sloFormBudgetingMethodSelect')).toBeEnabled();
       });
 
+      expect(
+        queryByText('Match the timeslice window to the monitor interval')
+      ).not.toBeInTheDocument();
+
       fireEvent.change(getByTestId('sloFormBudgetingMethodSelect'), {
         target: { value: 'timeslices' },
       });
 
       expect(getByTestId('sloFormObjectiveTimesliceTargetInput')).toBeEnabled();
       expect(getByTestId('sloFormObjectiveTimesliceWindowInput')).toBeEnabled();
+      expect(getByText('Match the timeslice window to the monitor interval')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Set the timeslice window to at least the monitor run interval. A shorter window can cause periods without monitor executions to inflate the calculated SLI and reduce burn rates.'
+        )
+      ).toBeInTheDocument();
     });
   });
 

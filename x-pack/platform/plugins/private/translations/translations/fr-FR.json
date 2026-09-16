@@ -51399,7 +51399,6 @@
     "xpack.slo.sloEdit.sliType.histogram.toTooltip": "La valeur \"to\" (à) n'est PAS inclusive.",
     "xpack.slo.sloEdit.sliType.histogram.valueCountLabel": "Compte de valeurs",
     "xpack.slo.sloEdit.sliType.sourceTitle": "Source",
-    "xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage": "L'indicateur de disponibilité des matières synthétiques exige que la méthode de budgétisation soit réglée sur \"Occurrences\".",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel": "Ajouter un indicateur",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricLabel": "Ajouter un indicateur",
     "xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder": "Choisir une agrégation",
