@@ -14,6 +14,7 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../../queries/episodes_query';
+import type { SeverityExtension } from '../../types/episode_data_source';
 import { buildClassicAlertsQuery, buildClassicAlertsSort } from '../utils/query';
 import {
   type ClassicAlertSource,
@@ -29,6 +30,7 @@ export interface FetchClassicAlertsAsEpisodesOptions extends BaseRacOptions {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   sortState?: EpisodesSortState;
+  severityExtensions?: SeverityExtension[];
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
@@ -44,6 +46,7 @@ export const fetchClassicAlertsAsEpisodes = async ({
   timeRange,
   filterState,
   sortState,
+  severityExtensions,
   abortSignal,
   services: { http },
 }: FetchClassicAlertsAsEpisodesOptions): Promise<AlertEpisode[]> => {
@@ -52,7 +55,7 @@ export const fetchClassicAlertsAsEpisodes = async ({
     {
       rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      sort: buildClassicAlertsSort(sortState),
+      sort: buildClassicAlertsSort(sortState, severityExtensions),
       size: Math.min(pageSize, CLASSIC_ALERTS_LIST_PAGE_SIZE),
       track_total_hits: false,
       _source: [...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS],

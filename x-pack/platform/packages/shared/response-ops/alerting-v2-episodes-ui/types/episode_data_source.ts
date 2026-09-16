@@ -85,6 +85,14 @@ export interface EpisodeActionExtension<TContext = void> {
   ) => Promise<SourceActionResult>;
 }
 
+export interface SeverityExtension {
+  value: string;
+  label: string;
+  color: string;
+  sortRank: number;
+  filterDotColor?: string;
+}
+
 export interface EpisodeDataSource {
   id: string;
   queryKeyPrefix: readonly unknown[];
@@ -95,4 +103,5 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  severityExtensions?: SeverityExtension[];
 }
