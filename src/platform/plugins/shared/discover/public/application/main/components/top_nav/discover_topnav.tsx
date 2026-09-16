@@ -339,8 +339,9 @@ export const DiscoverTopNav = ({
     setIsLiveEsqlEmpty(isEmptyEsqlQuery(nextQuery));
   }, []);
 
+  const disableEmptyEsqlSubmit = isEsqlMode && isLiveEsqlEmpty;
   const disableEmptyEsqlControls = isUninitializedEsqlTab && isLiveEsqlEmpty;
-  const emptyEsqlQueryDisabledTooltip = disableEmptyEsqlControls
+  const emptyEsqlQueryDisabledTooltip = disableEmptyEsqlSubmit
     ? i18n.translate('discover.topNav.emptyEsqlQueryDisabledTooltip', {
         defaultMessage: 'Enter an ES|QL query to enable this.',
       })
@@ -416,7 +417,7 @@ export const DiscoverTopNav = ({
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
-        disableSubmitAction={disableEmptyEsqlControls}
+        disableSubmitAction={disableEmptyEsqlSubmit}
         onQueryChange={onQueryChange}
         onSavedQueryIdChange={updateSavedQueryId}
         disableSubscribingToGlobalDataServices={true}
