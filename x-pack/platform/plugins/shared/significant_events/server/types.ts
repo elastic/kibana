@@ -7,7 +7,10 @@
 
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import type {
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+} from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -57,6 +60,7 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
+  nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
 
 export interface SignificantEventsPluginStartDependencies {
