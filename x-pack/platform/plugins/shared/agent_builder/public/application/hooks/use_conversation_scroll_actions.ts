@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const AT_BOTTOM_THRESHOLD = 50;
 const SMOOTH_SCROLL_TIMEOUT_MS = 2000;
@@ -15,8 +15,12 @@ const isAtBottom = (el: HTMLElement) =>
 
 export const useConversationScrollActions = ({
   scrollContainer,
+  scrollContainerHeight,
+  anchoredItemKey,
 }: {
   scrollContainer: HTMLDivElement | null;
+  scrollContainerHeight: number;
+  anchoredItemKey?: string;
 }) => {
   const stuckToBottomRef = useRef(true);
   const smoothScrollingRef = useRef(false);
@@ -88,6 +92,27 @@ export const useConversationScrollActions = ({
       onComplete();
     }, SMOOTH_SCROLL_TIMEOUT_MS);
   }, [scrollContainer]);
+
+  // The content is kept at least one viewport tall from the anchored item down, so "scrolled to
+  // the bottom" puts that item at the top of the container. The answer fills the reserved space
+  // without changing the content's size; once it outgrows it, the view follows as usual.
+  const reserveAnchorSpace = useCallback(() => {
+    const content = scrollContainer?.firstElementChild;
+    if (!scrollContainer || !(content instanceof HTMLElement)) return;
+    const anchored = anchoredItemKey
+      ? scrollContainer.querySelector<HTMLElement>(`[data-timeline-item-key="${anchoredItemKey}"]`)
+      : null;
+    if (!anchored) {
+      content.style.minHeight = '';
+      return;
+    }
+    const anchoredTop = anchored.getBoundingClientRect().top - content.getBoundingClientRect().top;
+    content.style.minHeight = `${Math.ceil(anchoredTop + scrollContainer.clientHeight)}px`;
+  }, [scrollContainer, anchoredItemKey]);
+
+  useLayoutEffect(() => {
+    reserveAnchorSpace();
+  }, [reserveAnchorSpace, scrollContainerHeight]);
 
   useEffect(() => {
     cancelSmoothScroll();

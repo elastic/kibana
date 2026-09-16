@@ -44,7 +44,7 @@ export const Timeline: React.FC<TimelineProps> = ({ items, agent, conversationAt
             content = null;
         }
         return (
-          <EuiFlexItem key={item.key} grow={false}>
+          <EuiFlexItem key={item.key} grow={false} data-timeline-item-key={item.key}>
             {content}
           </EuiFlexItem>
         );

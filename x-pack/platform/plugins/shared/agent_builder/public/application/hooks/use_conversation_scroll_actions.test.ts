@@ -20,6 +20,21 @@ const createScrollContainer = ({ scrollTop }: { scrollTop: number }) => {
   return container;
 };
 
+const renderScrollActions = (scrollContainer: HTMLDivElement, anchoredItemKey?: string) =>
+  renderHook(() =>
+    useConversationScrollActions({ scrollContainer, scrollContainerHeight: 400, anchoredItemKey })
+  );
+
+const withAnchoredItemAt = (scrollContainer: HTMLDivElement, top: number) => {
+  const content = scrollContainer.firstElementChild as HTMLElement;
+  content.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
+  const anchored = document.createElement('div');
+  anchored.setAttribute('data-timeline-item-key', 'round-1::user_message');
+  anchored.getBoundingClientRect = () => ({ top } as DOMRect);
+  content.appendChild(anchored);
+  return content;
+};
+
 // Scrolled to the very bottom: scrollHeight - scrollTop - clientHeight === 0.
 const atBottom = () => createScrollContainer({ scrollTop: 600 });
 
@@ -28,7 +43,7 @@ const scrolledUp = () => createScrollContainer({ scrollTop: 100 });
 describe('useConversationScrollActions', () => {
   it('shows the scroll button without moving the view when a remote round arrives at the bottom', () => {
     const scrollContainer = atBottom();
-    const { result } = renderHook(() => useConversationScrollActions({ scrollContainer }));
+    const { result } = renderScrollActions(scrollContainer);
 
     expect(result.current.showScrollButton).toBe(false);
 
@@ -42,7 +57,7 @@ describe('useConversationScrollActions', () => {
 
   it('keeps the scroll button and the view put when a remote round arrives while scrolled up', () => {
     const scrollContainer = scrolledUp();
-    const { result } = renderHook(() => useConversationScrollActions({ scrollContainer }));
+    const { result } = renderScrollActions(scrollContainer);
 
     act(() => {
       result.current.stopFollowingBottom();
@@ -52,9 +67,28 @@ describe('useConversationScrollActions', () => {
     expect(scrollContainer.scrollTop).toBe(100);
   });
 
+  it('reserves one container height of content below the anchored item', () => {
+    const scrollContainer = atBottom();
+    const content = withAnchoredItemAt(scrollContainer, 100);
+
+    renderScrollActions(scrollContainer, 'round-1::user_message');
+
+    expect(content.style.minHeight).toBe('500px');
+  });
+
+  it('reserves nothing when no item is anchored', () => {
+    const scrollContainer = atBottom();
+    const content = withAnchoredItemAt(scrollContainer, 100);
+    content.style.minHeight = '500px';
+
+    renderScrollActions(scrollContainer);
+
+    expect(content.style.minHeight).toBe('');
+  });
+
   it('hides the scroll button when the user sends a message', () => {
     const scrollContainer = scrolledUp();
-    const { result } = renderHook(() => useConversationScrollActions({ scrollContainer }));
+    const { result } = renderScrollActions(scrollContainer);
 
     act(() => {
       result.current.stopFollowingBottom();
