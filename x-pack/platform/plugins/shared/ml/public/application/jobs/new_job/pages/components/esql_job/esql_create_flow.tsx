@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+import { i18n } from '@kbn/i18n';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { isJobIdValid, createDatafeedId } from '../../../../../../../common/util/job_utils';
@@ -43,10 +45,18 @@ const isValidRange = (start: string, end: string) =>
   ![start, end].some((value) => value === '' || value === '0' || value === 'MAX');
 
 const phaseLabel: Record<Exclude<CreatePhase, 'idle' | 'success' | 'error'>, string> = {
-  creatingJob: 'creating the job',
-  creatingDatafeed: 'creating the datafeed',
-  openingJob: 'opening the job',
-  startingDatafeed: 'starting the datafeed',
+  creatingJob: i18n.translate('xpack.ml.esqlJob.create.creatingJob', {
+    defaultMessage: 'creating the job',
+  }),
+  creatingDatafeed: i18n.translate('xpack.ml.esqlJob.create.creatingDatafeed', {
+    defaultMessage: 'creating the datafeed',
+  }),
+  openingJob: i18n.translate('xpack.ml.esqlJob.create.openingJob', {
+    defaultMessage: 'opening the job',
+  }),
+  startingDatafeed: i18n.translate('xpack.ml.esqlJob.create.startingDatafeed', {
+    defaultMessage: 'starting the datafeed',
+  }),
 };
 
 export const EsqlCreateFlow = () => {
@@ -118,7 +128,18 @@ export const EsqlCreateFlow = () => {
       const failedPhase = phaseLabel[currentPhase];
       const reason = nextError instanceof Error ? nextError.message : String(nextError);
       setError(
-        `Unable to complete ES|QL job setup while ${failedPhase} (job: ${jobId}, datafeed: ${nextDatafeedId}, window: ${state.wizardStart} to ${state.wizardEnd}): ${reason}`
+        i18n.translate('xpack.ml.esqlJob.create.failureMessage', {
+          defaultMessage:
+            'Unable to complete ES|QL job setup while {failedPhase} (job: {jobId}, datafeed: {datafeedId}, window: {start} to {end}): {reason}',
+          values: {
+            failedPhase,
+            jobId,
+            datafeedId: nextDatafeedId,
+            start: state.wizardStart,
+            end: state.wizardEnd,
+            reason,
+          },
+        })
       );
       setPhase('error');
     }
@@ -128,13 +149,20 @@ export const EsqlCreateFlow = () => {
     <section data-test-subj="mlEsqlCreateFlow">
       <EuiSpacer size="l" />
       <EuiFormRow
-        label="Job ID"
+        label={i18n.translate('xpack.ml.esqlJob.create.jobIdLabel', {
+          defaultMessage: 'Job ID',
+        })}
         isInvalid={jobIdInvalid}
-        error="Use lowercase letters, numbers, hyphens, and underscores; begin and end with a letter or number."
+        error={i18n.translate('xpack.ml.esqlJob.create.invalidJobId', {
+          defaultMessage:
+            'Use lowercase letters, numbers, hyphens, and underscores; begin and end with a letter or number.',
+        })}
         fullWidth
       >
         <EuiFieldText
-          aria-label="Job ID"
+          aria-label={i18n.translate('xpack.ml.esqlJob.create.jobIdLabel', {
+            defaultMessage: 'Job ID',
+          })}
           value={state.jobId}
           onChange={(event) => setJobId(event.target.value)}
           maxLength={JOB_ID_MAX_LENGTH}
@@ -145,7 +173,12 @@ export const EsqlCreateFlow = () => {
         />
       </EuiFormRow>
       <EuiText size="s" color="subdued">
-        <p data-test-subj="mlEsqlDatafeedId">Datafeed ID: {datafeedId}</p>
+        <p data-test-subj="mlEsqlDatafeedId">
+          {i18n.translate('xpack.ml.esqlJob.create.datafeedId', {
+            defaultMessage: 'Datafeed ID: {datafeedId}',
+            values: { datafeedId },
+          })}
+        </p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiButton
@@ -155,26 +188,31 @@ export const EsqlCreateFlow = () => {
         isDisabled={!isValid || isSubmitting}
         data-test-subj="mlEsqlCreateJobButton"
       >
-        Create job and start datafeed
+        {i18n.translate('xpack.ml.esqlJob.create.buttonLabel', {
+          defaultMessage: 'Create job and start datafeed',
+        })}
       </EuiButton>
       {error !== undefined ? (
-        <EuiCallOut
-          title="Unable to create and start ES|QL job"
-          color="danger"
-          iconType="error"
+        <KbnDangerCallout
+          title={i18n.translate('xpack.ml.esqlJob.create.failureTitle', {
+            defaultMessage: 'Unable to create and start ES|QL job',
+          })}
           announceOnMount
           text={<p>{error}</p>}
         />
       ) : null}
       {phase === 'success' ? (
-        <EuiCallOut
-          title="ES|QL job created and datafeed started"
-          color="success"
-          iconType="check"
+        <KbnSuccessCallout
+          title={i18n.translate('xpack.ml.esqlJob.create.successTitle', {
+            defaultMessage: 'ES|QL job created and datafeed started',
+          })}
           announceOnMount
           text={
             <p>
-              Job {state.jobId} and datafeed {datafeedId} are running.
+              {i18n.translate('xpack.ml.esqlJob.create.successMessage', {
+                defaultMessage: 'Job {jobId} and datafeed {datafeedId} are running.',
+                values: { jobId: state.jobId, datafeedId },
+              })}
             </p>
           }
         />

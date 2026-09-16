@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlCreateFlow } from './esql_create_flow';
+import type { EsqlQueryStepState } from './esql_query_step';
 import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
 
 const mockAddJob = jest.fn();
@@ -30,11 +31,17 @@ jest.mock('../../../../../contexts/kibana/use_create_url', () => ({
   useNavigateToManagementMlLink: () => mockNavigateToManagement,
 }));
 
-const ValidWizardState = () => {
+const ValidWizardState = ({
+  queryProbeState = 'success',
+  queryState,
+}: {
+  queryProbeState?: 'idle' | 'loading' | 'error' | 'success';
+  queryState?: Partial<EsqlQueryStepState>;
+}) => {
   const { setQueryProbeState, setQueryState } = useEsqlWizardContext();
 
   useEffect(() => {
-    setQueryProbeState('success');
+    setQueryProbeState(queryProbeState);
     setQueryState({
       columns: [
         { name: 'bucket', type: 'date', userDefined: false },
@@ -44,16 +51,17 @@ const ValidWizardState = () => {
       emittedTimeField: 'bucket',
       detectorFields: ['avg_bytes'],
       influencers: ['host'],
+      ...queryState,
     });
-  }, [setQueryProbeState, setQueryState]);
+  }, [queryProbeState, queryState, setQueryProbeState, setQueryState]);
 
   return null;
 };
 
-const renderCreateFlow = () =>
+const renderCreateFlow = (props?: React.ComponentProps<typeof ValidWizardState>) =>
   renderWithI18n(
     <EsqlWizardProvider>
-      <ValidWizardState />
+      <ValidWizardState {...props} />
       <EsqlCreateFlow />
     </EsqlWizardProvider>
   );
@@ -124,6 +132,29 @@ describe('EsqlCreateFlow', () => {
     expect(mockAddJob).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['no detector', { detectorFields: [] }],
+    ['missing emitted time field', { emittedTimeField: '' }],
+    ['stale emitted time field', { emittedTimeField: 'removed_time' }],
+  ])('disables create with %s and makes no API calls', (_description, queryState) => {
+    renderCreateFlow({ queryState });
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+    expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
+    expect(mockAddJob).not.toHaveBeenCalled();
+  });
+
+  it.each(['loading', 'error'] as const)(
+    'disables create while the query column probe is %s and makes no API calls',
+    (queryProbeState) => {
+      renderCreateFlow({ queryProbeState });
+
+      fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+      expect(screen.getByTestId('mlEsqlCreateJobButton')).toBeDisabled();
+      expect(mockAddJob).not.toHaveBeenCalled();
+    }
+  );
+
   it('prevents duplicate submits while the job request is pending', async () => {
     let resolveAddJob: () => void;
     mockAddJob.mockImplementation(
@@ -145,16 +176,35 @@ describe('EsqlCreateFlow', () => {
     });
   });
 
-  it('stops at the failed lifecycle stage and identifies the persisted IDs', async () => {
-    mockAddDatafeed.mockRejectedValue(new Error('datafeed rejected'));
-    renderCreateFlow();
-    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
-    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
-    await waitFor(() => expect(createButton).toBeEnabled());
-    fireEvent.click(createButton);
+  it.each([
+    [
+      'creating the job',
+      mockAddJob,
+      'job rejected',
+      [mockAddDatafeed, mockOpenJob, mockStartDatafeed],
+    ],
+    [
+      'creating the datafeed',
+      mockAddDatafeed,
+      'datafeed rejected',
+      [mockOpenJob, mockStartDatafeed],
+    ],
+    ['opening the job', mockOpenJob, 'open rejected', [mockStartDatafeed]],
+    ['starting the datafeed', mockStartDatafeed, 'start rejected', []],
+  ])(
+    'stops after failure while %s and identifies the IDs and window',
+    async (phase, failingCall, reason, laterCalls) => {
+      failingCall.mockRejectedValue(new Error(reason));
+      renderCreateFlow();
+      fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+      const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+      await waitFor(() => expect(createButton).toBeEnabled());
+      fireEvent.click(createButton);
 
-    expect(await screen.findByText(/creating the datafeed/)).toBeInTheDocument();
-    expect(mockOpenJob).not.toHaveBeenCalled();
-    expect(mockStartDatafeed).not.toHaveBeenCalled();
-  });
+      expect(await screen.findByText(new RegExp(phase))).toHaveTextContent(
+        'job: esql-job-1, datafeed: datafeed-esql-job-1, window: now-15m to now'
+      );
+      laterCalls.forEach((call) => expect(call).not.toHaveBeenCalled());
+    }
+  );
 });

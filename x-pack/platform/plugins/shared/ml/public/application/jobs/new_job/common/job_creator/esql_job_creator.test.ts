@@ -6,7 +6,7 @@
  */
 
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { buildEsqlJobPayload } from './esql_job_creator';
+import { buildEsqlJobPayload, createMeanDetectors } from './esql_job_creator';
 
 describe('buildEsqlJobPayload', () => {
   const detectors: Detector[] = [{ function: 'mean', field_name: 'avg_bytes' }];
@@ -93,5 +93,14 @@ describe('buildEsqlJobPayload', () => {
     const { datafeed: putBody } = buildEsqlJobPayload(input);
 
     expect(putBody).not.toHaveProperty('project_routing');
+  });
+});
+
+describe('createMeanDetectors', () => {
+  it('maps each selected numeric field to the detector shape used by preview and create', () => {
+    expect(createMeanDetectors(['avg_bytes', 'latency'])).toStrictEqual([
+      { function: 'mean', field_name: 'avg_bytes' },
+      { function: 'mean', field_name: 'latency' },
+    ]);
   });
 });
