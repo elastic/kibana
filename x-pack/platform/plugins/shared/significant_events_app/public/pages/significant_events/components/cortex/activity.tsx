@@ -24,7 +24,7 @@ export function CortexActivity({ pages, onSelectPage }: CortexActivityProps) {
 
   return (
     <div data-test-subj="nightshiftCortexActivity">
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>
           <FormattedMessage
             id="xpack.significantEventsApp.cortex.activityTitle"
@@ -34,7 +34,7 @@ export function CortexActivity({ pages, onSelectPage }: CortexActivityProps) {
       </EuiTitle>
       <EuiSpacer />
       {recent.length === 0 ? (
-        <EuiText color="subdued">
+        <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.significantEventsApp.cortex.activityEmptyDescription"
             defaultMessage="No Cortex updates yet. Pages appear here after investigations write to the wiki."

@@ -476,6 +476,105 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(result).toEqual({ investigation_id: 'exec-manual' });
   });
 
+  it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: '  Why did payment\n  timeouts increase?  ',
+    });
+
+    // The workflow context feeds ensureOrCreate(), the record write feeds the list immediately;
+    // both have to carry the same summary or the headline changes when the workflow catches up.
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ summary: 'Why did payment timeouts increase?' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({
+          subject_summary: 'Why did payment timeouts increase?',
+        }),
+      })
+    );
+  });
+
+  it('truncates a long prompt rather than storing it whole as the headline', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'a'.repeat(500),
+    });
+
+    const { context } = mockManagement.runWorkflow.mock.calls[0][2] as {
+      context: { summary: string };
+    };
+    expect(context.summary).toHaveLength(200);
+    expect(context.summary.endsWith('…')).toBe(true);
+  });
+
+  it('keeps an explicit subject summary over the prompt', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ summary: 'Checkout latency' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
+  it('leaves a non-manual subject without a summary alone', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-sig');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'event-1' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    const { context } = mockManagement.runWorkflow.mock.calls[0][2] as {
+      context: Record<string, unknown>;
+    };
+    expect(context).not.toHaveProperty('summary');
+  });
+
   it('keeps significant event runs on the significant events investigation workflow', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');

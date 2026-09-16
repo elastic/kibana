@@ -107,6 +107,36 @@ const workflowIdForSubject = (subject: InvestigationSubject): string =>
 const installAgentForSubject = (subject: InvestigationSubject) =>
   subject.type === 'manual' ? installDeductiveInvestigationAgent : installInvestigationAgent;
 
+/** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
+const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
+
+/**
+ * A manual investigation's subject id is the placeholder `manual`, so until the agent writes its
+ * summary the UI would label the run "manual". The prompt is the only thing that describes the run
+ * at this point, so it stands in as the subject summary; the agent's summary takes precedence once
+ * the run completes.
+ */
+const withDerivedSubjectSummary = (
+  subject: InvestigationSubject,
+  message: string
+): InvestigationSubject => {
+  if (subject.type !== 'manual' || subject.summary) {
+    return subject;
+  }
+
+  const collapsed = message.replace(/\s+/g, ' ').trim();
+  if (!collapsed) {
+    return subject;
+  }
+
+  const summary =
+    collapsed.length > MAX_DERIVED_SUBJECT_SUMMARY_LENGTH
+      ? `${collapsed.slice(0, MAX_DERIVED_SUBJECT_SUMMARY_LENGTH - 1).trimEnd()}…`
+      : collapsed;
+
+  return { ...subject, summary };
+};
+
 const isInvestigationWorkflowExecution = (execution: {
   workflowId?: string | null;
   originManagedWorkflowId?: string | null;
@@ -372,6 +402,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const prepared = this.prepareAgentInput(subject, message, context);
+    const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
 
@@ -415,10 +446,10 @@ export class NightshiftInvestigationsClient {
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...prepared.context,
-        source: subject.type,
-        [`${subject.type}_id`]: subject.id,
+        source: resolvedSubject.type,
+        [`${resolvedSubject.type}_id`]: resolvedSubject.id,
         trigger_type,
-        ...(subject.summary ? { summary: subject.summary } : {}),
+        ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
     };
 
@@ -436,7 +467,7 @@ export class NightshiftInvestigationsClient {
 
     await this.create({
       investigationId: executionId,
-      subject,
+      subject: resolvedSubject,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {

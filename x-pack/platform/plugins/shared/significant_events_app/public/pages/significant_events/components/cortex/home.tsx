@@ -44,7 +44,7 @@ export function CortexHome({ pages, stats, onSelectPage }: CortexHomeProps) {
 
   return (
     <div data-test-subj="nightshiftCortexHome">
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>
           <FormattedMessage
             id="xpack.significantEventsApp.cortex.homeTitle"

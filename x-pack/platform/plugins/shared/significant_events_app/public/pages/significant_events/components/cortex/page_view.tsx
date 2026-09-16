@@ -65,7 +65,7 @@ export function CortexPageView({ pageId }: CortexPageViewProps) {
 
   return (
     <div data-test-subj="nightshiftCortexPageView">
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>{page.title}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -97,7 +97,7 @@ export function CortexPageView({ pageId }: CortexPageViewProps) {
       {page.description !== undefined && page.description.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiText color="subdued">
+          <EuiText size="s" color="subdued">
             <p>{page.description}</p>
           </EuiText>
         </>
@@ -114,12 +114,12 @@ export function CortexPageView({ pageId }: CortexPageViewProps) {
             }
           `}
         >
-          <EuiMarkdownFormat>
+          <EuiMarkdownFormat textSize="s">
             {contentWithoutDuplicateTitle(page.title, page.content)}
           </EuiMarkdownFormat>
         </div>
       ) : (
-        <EuiText color="subdued">
+        <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.significantEventsApp.cortex.pageEmptyContentDescription"
             defaultMessage="This page has no content yet."
