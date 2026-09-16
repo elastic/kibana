@@ -12863,6 +12863,8 @@ paths:
               - kind
               - enabled
               - name
+              - builder_type
+              - builder_fields.risk_score
             type: string
         - description: The direction to sort rules.
           in: query
@@ -12901,6 +12903,13 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          ownership:
+                            managed: false
+                          revision: 0
+                          signature_id: host-cpu-high-v1
+                          source:
+                            type: internal
+                            version: 1
                           tags:
                             - production
                             - infra
@@ -13073,6 +13082,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -13806,6 +13822,13 @@ paths:
                         metadata:
                           description: Alerts when average CPU usage exceeds a threshold.
                           name: Host CPU high
+                          ownership:
+                            managed: false
+                          revision: 0
+                          signature_id: host-cpu-high-v1
+                          source:
+                            type: internal
+                            version: 1
                           tags:
                             - production
                             - infra
@@ -14687,6 +14710,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -14861,6 +14891,13 @@ paths:
                     metadata:
                       description: Updated description.
                       name: Host CPU high (updated)
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -15045,7 +15082,7 @@ paths:
                     recovering_count: 1
                   time_field: '@timestamp'
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_replace_rule'
       responses:
         '200':
           content:
@@ -15065,6 +15102,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -15105,6 +15149,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -15279,6 +15330,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -15456,6 +15514,13 @@ paths:
                     metadata:
                       description: Alerts when average CPU usage exceeds a threshold.
                       name: Host CPU high
+                      ownership:
+                        managed: false
+                      revision: 0
+                      signature_id: host-cpu-high-v1
+                      source:
+                        type: internal
+                        version: 1
                       tags:
                         - production
                         - infra
@@ -91781,7 +91846,6 @@ components:
         - kind
         - metadata
         - schedule
-        - query
     Kibana_HTTP_APIs_alerting_new_snooze_series_action:
       additionalProperties: false
       type: object
@@ -91950,6 +92014,217 @@ components:
         - per_page
         - total_events
         - search_matches
+    Kibana_HTTP_APIs_alerting_replace_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          type: array
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        kind:
+          anyOf:
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+              enum:
+                - alert
+              type: string
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+              enum:
+                - signal
+              type: string
+          description: The kind of the rule.
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_replace_rule_metadata'
+        no_data_strategy:
+          anyOf:
+            - description: Holds the last known episode status when no data is present.
+              enum:
+                - last_known_status
+              type: string
+            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+              enum:
+                - emit
+              type: string
+            - description: Resolves the alert episode to inactive on the first no-data run.
+              enum:
+                - recover
+              type: string
+            - description: No-data situations are ignored (default).
+              enum:
+                - none
+              type: string
+          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery_strategy:
+          anyOf:
+            - description: recovers groups that stop breaching (default).
+              enum:
+                - no_breach
+              type: string
+            - description: uses a custom recovery query to detect recovery.
+              enum:
+                - query
+              type: string
+            - description: disables recovery entirely.
+              enum:
+                - none
+              type: string
+          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          additionalProperties: false
+          description: Episode state transition thresholds (alert-only).
+          nullable: true
+          type: object
+          properties:
+            pending_count:
+              description: Consecutive breaches before transitioning to active.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            pending_operator:
+              description: How to combine count and timeframe for pending.
+              enum:
+                - AND
+                - OR
+              type: string
+            pending_timeframe:
+              description: Time window for pending evaluation, e.g. 5m, 15m.
+              type: string
+            recovering_count:
+              description: Consecutive recoveries before transitioning to inactive.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            recovering_operator:
+              description: How to combine count and timeframe for recovering.
+              enum:
+                - AND
+                - OR
+              type: string
+            recovering_timeframe:
+              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              type: string
+        time_field:
+          default: '@timestamp'
+          description: Time field used for the lookback window range filter.
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+    Kibana_HTTP_APIs_alerting_replace_rule_metadata:
+      additionalProperties: false
+      type: object
+      properties:
+        builder_fields:
+          additionalProperties: {}
+          description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+          type: object
+        builder_type:
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          type: string
+        description:
+          description: Human-readable description of the rule.
+          maxLength: 1024
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        owner:
+          description: Owner of the rule.
+          maxLength: 256
+          type: string
+        signature_id:
+          description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
+          maxLength: 256
+          minLength: 1
+          type: string
+        source:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                type:
+                  enum:
+                    - internal
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The id of the template the rule was created from.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - template
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The stable id of the external asset.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - external
+                  type: string
+                version:
+                  description: Asset version the rule is synced to.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+      required:
+        - name
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
@@ -92113,9 +92388,14 @@ components:
       description: Rule metadata.
       type: object
       properties:
+        builder_fields:
+          additionalProperties: {}
+          description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+          type: object
         builder_type:
           description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
           maxLength: 64
+          minLength: 1
           type: string
         description:
           description: Human-readable description of the rule.
@@ -92130,6 +92410,72 @@ components:
           description: Owner of the rule.
           maxLength: 256
           type: string
+        signature_id:
+          description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
+          maxLength: 256
+          minLength: 1
+          type: string
+        source:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                type:
+                  enum:
+                    - internal
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The id of the template the rule was created from.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - template
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The stable id of the external asset.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - external
+                  type: string
+                version:
+                  description: Asset version the rule is synced to.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -92283,7 +92629,6 @@ components:
         - kind
         - metadata
         - schedule
-        - query
         - id
         - enabled
         - created_by
@@ -92294,9 +92639,14 @@ components:
       additionalProperties: false
       type: object
       properties:
+        builder_fields:
+          additionalProperties: {}
+          description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+          type: object
         builder_type:
           description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
           maxLength: 64
+          minLength: 1
           type: string
         description:
           description: Human-readable description of the rule.
@@ -92311,6 +92661,108 @@ components:
           description: Owner of the rule.
           maxLength: 256
           type: string
+        ownership:
+          discriminator:
+            propertyName: managed
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                domain:
+                  type: string
+                managed:
+                  enum:
+                    - true
+                  type: boolean
+                solution:
+                  type: string
+              required:
+                - managed
+                - solution
+                - domain
+            - additionalProperties: false
+              type: object
+              properties:
+                app:
+                  maxLength: 128
+                  type: string
+                managed:
+                  enum:
+                    - false
+                  type: boolean
+              required:
+                - managed
+        revision:
+          description: Number of meaningful configuration edits. Incremented only when rule data changes, not on technical mutations like enable/disable. Starts at 0.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+        signature_id:
+          description: Stable logical-rule identifier. Set at creation (caller-supplied or UUID v4). Immutable.
+          maxLength: 256
+          minLength: 1
+          type: string
+        source:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                type:
+                  enum:
+                    - internal
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The id of the template the rule was created from.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - template
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The stable id of the external asset.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - external
+                  type: string
+                version:
+                  description: Asset version the rule is synced to.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -92327,7 +92779,11 @@ components:
           type: integer
       required:
         - name
+        - signature_id
+        - source
         - version
+        - revision
+        - ownership
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
@@ -92487,8 +92943,15 @@ components:
           additionalProperties: false
           type: object
           properties:
+            builder_fields:
+              additionalProperties: {}
+              description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+              nullable: true
+              type: object
             builder_type:
+              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
               maxLength: 64
+              minLength: 1
               nullable: true
               type: string
             description:
@@ -92504,6 +92967,72 @@ components:
               description: Owner of the rule.
               maxLength: 256
               type: string
+            signature_id:
+              description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
+              maxLength: 256
+              minLength: 1
+              type: string
+            source:
+              discriminator:
+                propertyName: type
+              oneOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - internal
+                      type: string
+                    version:
+                      description: Content version. Starts at 1.
+                      maximum: 9007199254740991
+                      minimum: 1
+                      type: integer
+                  required:
+                    - type
+                    - version
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    id:
+                      description: The id of the template the rule was created from.
+                      maxLength: 150
+                      minLength: 1
+                      type: string
+                    type:
+                      enum:
+                        - template
+                      type: string
+                    version:
+                      description: Content version. Starts at 1.
+                      maximum: 9007199254740991
+                      minimum: 1
+                      type: integer
+                  required:
+                    - type
+                    - version
+                    - id
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    id:
+                      description: The stable id of the external asset.
+                      maxLength: 150
+                      minLength: 1
+                      type: string
+                    type:
+                      enum:
+                        - external
+                      type: string
+                    version:
+                      description: Asset version the rule is synced to.
+                      maximum: 9007199254740991
+                      minimum: 1
+                      type: integer
+                  required:
+                    - type
+                    - version
+                    - id
             tags:
               items:
                 maxLength: 128
@@ -92561,8 +93090,9 @@ components:
               maxLength: 32
               type: string
             lookback:
-              description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL. Set to `null` to clear it.
               maxLength: 32
+              nullable: true
               type: string
         state_transition:
           anyOf:
