@@ -119,7 +119,7 @@ describe('RuleSummaryFlyoutContainer', () => {
     mockUseResolveSourceRule.mockReturnValue(noSourceRule);
   });
 
-  describe('v2 rules', () => {
+  describe('v2 rules (no sourceRuleInfo)', () => {
     it('renders the loading flyout while the rule is in flight', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
 
@@ -159,7 +159,7 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
     });
 
-    it('does not call useFetchRule with undefined when isSourceRule is false', () => {
+    it('does not call useFetchRule with undefined when sourceRuleInfo is absent', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
 
       renderContainer();
@@ -168,7 +168,7 @@ describe('RuleSummaryFlyoutContainer', () => {
     });
   });
 
-  describe('source rules', () => {
+  describe('source rules (sourceRuleInfo provided)', () => {
     it('skips the v2 fetch and resolves via the data source', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
       mockUseResolveSourceRule.mockReturnValue({
@@ -178,7 +178,7 @@ describe('RuleSummaryFlyoutContainer', () => {
         isError: false,
       });
 
-      renderContainer({ isSourceRule: true });
+      renderContainer({ sourceRuleInfo: {} });
 
       expect(mockUseFetchRule).toHaveBeenCalledWith(undefined);
       expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveTextContent('Classic rule');
@@ -195,7 +195,7 @@ describe('RuleSummaryFlyoutContainer', () => {
         isLoading: true,
       });
 
-      renderContainer({ isSourceRule: true });
+      renderContainer({ sourceRuleInfo: {} });
 
       expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
     });
@@ -204,7 +204,7 @@ describe('RuleSummaryFlyoutContainer', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
       mockUseResolveSourceRule.mockReturnValue(noSourceRule);
 
-      renderContainer({ isSourceRule: true });
+      renderContainer({ sourceRuleInfo: {} });
 
       expect(screen.getByTestId('mockEntityNotFoundFlyout')).toBeInTheDocument();
     });

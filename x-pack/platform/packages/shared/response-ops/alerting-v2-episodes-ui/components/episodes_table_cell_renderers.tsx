@@ -134,7 +134,7 @@ export interface EpisodeRuleCellProps extends CellRendererProps {
    * Called when the rule name is clicked, for hosts that show the rule somewhere on the page
    * instead of navigating to it. Modified and non-left clicks still follow the link.
    */
-  onRuleNameClick?: (ruleId: string, isSourceRule: boolean, ruleCategory?: string) => void;
+  onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
   /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
   sourceDataViewsByRule?: Map<string, DataView>;
 }
@@ -255,15 +255,17 @@ export const EpisodeRuleCell = ({
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
-  const isSourceRule = row.flattened.supports_actions === false;
-  const actionContext = row.flattened.source_action_context as
-    | { ruleCategory?: string }
-    | undefined;
-  const ruleCategory = actionContext?.ruleCategory;
+  const sourceRuleInfo =
+    row.flattened.supports_actions === false
+      ? {
+          category: (row.flattened.source_action_context as { ruleCategory?: string } | undefined)
+            ?.ruleCategory,
+        }
+      : undefined;
   const nameLinkProps = onRuleNameClick
     ? getRouterLinkProps({
         href: detailsHref,
-        onClick: () => onRuleNameClick(ruleId, isSourceRule, ruleCategory),
+        onClick: () => onRuleNameClick(ruleId, sourceRuleInfo),
       })
     : { href: detailsHref };
 

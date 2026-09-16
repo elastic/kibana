@@ -28,8 +28,7 @@ import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 
 interface Props {
   ruleId: string;
-  isSourceRule?: boolean;
-  ruleCategory?: string;
+  sourceRuleInfo?: { category?: string };
   /** Defaults to `push`, which keeps the flyout beside the content it was opened from. */
   type?: EuiFlyoutProps['type'];
   onClose: () => void;
@@ -39,13 +38,13 @@ interface Props {
 
 export const RuleSummaryFlyoutContainer = ({
   ruleId,
-  isSourceRule = false,
-  ruleCategory,
+  sourceRuleInfo,
   type = 'push',
   onClose,
   onEdit,
   onClone,
 }: Props) => {
+  const isSourceRule = sourceRuleInfo !== undefined;
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const canWrite = useService(UserCapabilities).canWrite('rules');
@@ -75,7 +74,7 @@ export const RuleSummaryFlyoutContainer = ({
     return (
       <SourceRuleSummaryFlyout
         rule={sourceRule as unknown as SourceRuleData}
-        ruleCategory={ruleCategory}
+        ruleCategory={sourceRuleInfo?.category}
         ruleDetailsHref={sourceRuleDetailsHref}
         type={type}
         onClose={onClose}
