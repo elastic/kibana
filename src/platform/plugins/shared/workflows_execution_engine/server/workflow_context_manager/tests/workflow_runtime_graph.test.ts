@@ -128,6 +128,60 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     expect(remint).toBe(enterId);
   });
 
+  it('rebuilds a synthetic current node omitted from the persisted stack', () => {
+    const compiled = WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
+    const first = new WorkflowRuntimeGraph(compiled, []);
+    const enterId = first.insertSyntheticScope(
+      'enterForeach_outerLoop',
+      'iteration-0',
+      'foreach-iteration'
+    );
+    const parkedStack = first.getNodeStack(enterId).stackFrames;
+    const parkedNodeIds = parkedStack.flatMap((frame) =>
+      frame.nestedScopes.map((scope) => scope.nodeId)
+    );
+
+    expect(parkedNodeIds).toContain('enterForeach_outerLoop');
+    expect(parkedNodeIds).not.toContain(enterId);
+
+    const resumed = new WorkflowRuntimeGraph(compiled, parkedStack);
+    const node = resumed.getNode(enterId);
+
+    expect(node?.id).toBe(enterId);
+    expect(node?.type).toBe('enter-foreach-iteration');
+    expect(node?.stepId).toBe('iteration-0');
+    expect(resumed.getNode(enterId.replace(/^enter/, 'exit'))?.type).toBe('exit-foreach-iteration');
+  });
+
+  it('rebuilds a synthetic exit current node omitted from the persisted stack', () => {
+    const compiled = WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
+    const first = new WorkflowRuntimeGraph(compiled, []);
+    const enterId = first.insertSyntheticScope(
+      'enterForeach_outerLoop',
+      'iteration-0',
+      'foreach-iteration'
+    );
+    const exitId = enterId.replace(/^enter/, 'exit');
+    const parkedStack = first.getNodeStack(exitId).stackFrames;
+    const resumed = new WorkflowRuntimeGraph(compiled, parkedStack);
+
+    expect(resumed.getNode(exitId)?.id).toBe(exitId);
+    expect(resumed.getNode(exitId)?.type).toBe('exit-foreach-iteration');
+    expect(resumed.getNode(enterId)?.id).toBe(enterId);
+  });
+
+  it('does not rebuild a replaced synthetic id after a later iteration is minted', () => {
+    const overlay = createOverlay();
+    const enter0 = overlay.insertSyntheticScope(
+      'enterForeach_outerLoop',
+      'iteration-0',
+      'foreach-iteration'
+    );
+    overlay.insertSyntheticScope('enterForeach_outerLoop', 'iteration-1', 'foreach-iteration');
+
+    expect(overlay.getNode(enter0)).toBeUndefined();
+  });
+
   describe('wrap once, rename the pair', () => {
     it('topo-next after the first iteration exit is the owner exit', () => {
       const overlay = createOverlay();
@@ -299,5 +353,39 @@ describe('WorkflowExecutionCursor synthetic commit', () => {
 
     expect(cursor.currentNode?.id).toBe('enterSynthetic_enterForeach_outerLoop_0');
     expect(cursor.currentNode?.type).toBe('enter-iteration');
+  });
+
+  it('can navigate to a synthetic enter after resume when that node is not on the stack', () => {
+    const liveGraph = createOverlay();
+    const liveCursor = new WorkflowExecutionCursor({
+      nodeId: 'enterForeach_outerLoop',
+      workflowExecutionGraph: liveGraph,
+    });
+    liveCursor.navigateToSynthetic({
+      stepId: 'iteration-0',
+      stepType: 'foreach-iteration',
+    });
+    liveCursor.commitPendingNavigation();
+
+    const parkedNode = liveCursor.currentNode;
+    expect(parkedNode?.id).toBe('enterSynthetic_enterForeach_outerLoop_iteration-0');
+    const parkedId = parkedNode?.id;
+    const parkedStack = liveCursor.currentStackFrames;
+    if (parkedId == null) {
+      throw new Error('Synthetic enter was not the current node');
+    }
+
+    const compiled = WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
+    const resumedGraph = new WorkflowRuntimeGraph(compiled, parkedStack);
+    const resumedCursor = new WorkflowExecutionCursor({
+      nodeId: parkedId,
+      stackFrames: parkedStack,
+      workflowExecutionGraph: resumedGraph,
+    });
+
+    expect(() => resumedCursor.navigateToNode(parkedId)).not.toThrow();
+    resumedCursor.commitPendingNavigation();
+    expect(resumedCursor.currentNode?.id).toBe(parkedId);
+    expect(resumedCursor.currentNode?.type).toBe('enter-foreach-iteration');
   });
 });
