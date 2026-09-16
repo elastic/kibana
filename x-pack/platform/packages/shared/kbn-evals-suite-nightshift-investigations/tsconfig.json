@@ -12,6 +12,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/es-snapshot-loader",
     "@kbn/evals",
+    "@kbn/evals-extensions",
     "@kbn/inference-common",
     "@kbn/kibana-api-cli",
     "@kbn/kbn-client",
