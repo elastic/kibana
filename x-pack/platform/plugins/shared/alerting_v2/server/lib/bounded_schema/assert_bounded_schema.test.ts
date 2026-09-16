@@ -23,8 +23,22 @@ const defaultSubject: BoundedSchemaSubject = {
   },
 };
 
+// Builder-check subject: same as defaultSubject but with builderChecks: true.
+// Used for tests that exercise check 3's builder-only extensions (no-defaults,
+// no-transforms, top-level key count). These checks must NOT run for artifact
+// types; the non-builder `subject()` helper intentionally leaves builderChecks
+// unset to verify that.
+const defaultBuilderSubject: BoundedSchemaSubject = {
+  ...defaultSubject,
+  builderChecks: true,
+};
+
 function subject(overrides?: Partial<BoundedSchemaSubject['limits']>): BoundedSchemaSubject {
   return { ...defaultSubject, limits: { ...defaultSubject.limits, ...overrides } };
+}
+
+function builderSubject(overrides?: Partial<BoundedSchemaSubject['limits']>): BoundedSchemaSubject {
+  return { ...defaultBuilderSubject, limits: { ...defaultBuilderSubject.limits, ...overrides } };
 }
 
 function passes(schema: z.ZodType, overrides?: Partial<BoundedSchemaSubject['limits']>): void {
@@ -37,6 +51,21 @@ function rejects(
   overrides?: Partial<BoundedSchemaSubject['limits']>
 ): void {
   expect(() => assertBoundedSchema(schema, 'test.type', subject(overrides))).toThrow(match);
+}
+
+function builderPasses(
+  schema: z.ZodType,
+  overrides?: Partial<BoundedSchemaSubject['limits']>
+): void {
+  expect(() => assertBoundedSchema(schema, 'test.type', builderSubject(overrides))).not.toThrow();
+}
+
+function builderRejects(
+  schema: z.ZodType,
+  match: string | RegExp,
+  overrides?: Partial<BoundedSchemaSubject['limits']>
+): void {
+  expect(() => assertBoundedSchema(schema, 'test.type', builderSubject(overrides))).toThrow(match);
 }
 
 // ---------------------------------------------------------------------------
@@ -179,10 +208,7 @@ describe('assertBoundedSchema rejection: unbounded strings', () => {
 
 describe('assertBoundedSchema rejection: unbounded arrays', () => {
   it('rejects an array field with no max()', () => {
-    rejects(
-      z.object({ tags: z.array(z.string().max(50)) }).strict(),
-      /array is missing maxItems/
-    );
+    rejects(z.object({ tags: z.array(z.string().max(50)) }).strict(), /array is missing maxItems/);
   });
 
   it('rejects an array with maxItems one above the arrayItems cap', () => {
@@ -236,6 +262,278 @@ describe('assertBoundedSchema rejection: disallowed constructs', () => {
       z.object({ b: z.number() }).strict()
     );
     rejects(intersected, /uses allOf\/not/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Check 3 extension: top-level key count cap
+// Builder-schemas only (builderChecks: true required).
+// ---------------------------------------------------------------------------
+
+describe('assertBoundedSchema check 3: top-level key count', () => {
+  // The cap is MAX_BUILDER_FIELDS_KEYS = 64 (the same constant the wire schema uses).
+
+  it('accepts an object with exactly 64 top-level keys', () => {
+    const shape: Record<string, z.ZodType> = {};
+    for (let i = 0; i < 64; i++) {
+      shape[`field_${i}`] = z.string().max(10);
+    }
+    builderPasses(z.object(shape).strict());
+  });
+
+  it('rejects an object with 65 top-level keys', () => {
+    const shape: Record<string, z.ZodType> = {};
+    for (let i = 0; i < 65; i++) {
+      shape[`field_${i}`] = z.string().max(10);
+    }
+    builderRejects(z.object(shape).strict(), /top-level key count 65 exceeds framework cap 64/);
+  });
+
+  it('does not apply the key-count cap when builderChecks is absent (non-builder callers)', () => {
+    // Without builderChecks: true, the cap does not fire. Artifact schemas and
+    // other non-builder callers must not be rejected by a builder-only rule.
+    const shape: Record<string, z.ZodType> = {};
+    for (let i = 0; i < 65; i++) {
+      shape[`field_${i}`] = z.string().max(10);
+    }
+    const largeSchema = z.object(shape).strict();
+    // The non-builder subject has no builderChecks — must not throw the key-count error
+    // (it may throw for other reasons like totalBytes, but not the key-count one).
+    expect(() => assertBoundedSchema(largeSchema, 'test.type', subject())).not.toThrow(
+      /top-level key count/
+    );
+  });
+
+  it('does not apply the key-count cap to nested objects', () => {
+    // A nested object with many keys is fine — the cap is for the root only.
+    const nestedShape: Record<string, z.ZodType> = {};
+    for (let i = 0; i < 65; i++) {
+      nestedShape[`nested_${i}`] = z.string().max(10);
+    }
+    const schema = z.object({ wrapper: z.object(nestedShape).strict() }).strict();
+    // This will fail the total-bytes cap before the key count, so just confirm
+    // the error message does NOT mention the top-level key count.
+    expect(() => assertBoundedSchema(schema, 'test.type', builderSubject())).not.toThrow(
+      /top-level key count/
+    );
+  });
+
+  it('applies the key-count cap to each branch of a root-level union', () => {
+    // A builderFieldsSchema that is a union of strict objects must have its
+    // key count verified in every branch. Before this fix the path for union
+    // branches was "${rootPath}|N" (not === rootPath), so the check was
+    // silently skipped and a branch with 65+ keys only failed on the wire.
+    //
+    // Ref: rule-type-registration.md "Registration-time checks" item 3
+    const branchShape: Record<string, z.ZodType> = {};
+    for (let i = 0; i < 65; i++) {
+      branchShape[`f_${i}`] = z.string().max(10);
+    }
+    const schema = z.union([
+      z.object(branchShape).strict(),
+      z.object({ kind: z.literal('a') }).strict(),
+    ]);
+    builderRejects(schema, /top-level key count 65 exceeds framework cap 64/);
+  });
+
+  it('accepts a union where every branch is within the key cap', () => {
+    const schema = z.union([
+      z.object({ kind: z.literal('a'), value: z.string().max(10) }).strict(),
+      z.object({ kind: z.literal('b'), score: z.number() }).strict(),
+    ]);
+    builderPasses(schema);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Check 3 extension: no defaults (JSON-schema `default` keyword)
+// Builder-schemas only (builderChecks: true required).
+// ---------------------------------------------------------------------------
+
+describe('assertBoundedSchema check 3: no default keyword', () => {
+  it('rejects a schema with .default() (caught by the companion Zod walk)', () => {
+    // The Zod tree walk runs first and catches ZodDefault before the JSON
+    // schema walk sees the `default` keyword.
+    const schema = z.object({ val: z.string().max(10).default('x') }).strict();
+    builderRejects(schema, /\.default\(\) is not allowed/);
+  });
+
+  it('rejects a schema with .catch() (caught by the companion Zod walk)', () => {
+    // The Zod tree walk catches ZodCatch; the JSON schema walk would also see
+    // the emitted `default` keyword but does not get there first.
+    const schema = z.object({ val: z.string().max(10).catch('fallback') }).strict();
+    builderRejects(schema, /\.catch\(\) is not allowed/);
+  });
+
+  it('rejects a default nested inside an array item', () => {
+    // The companion Zod walk catches this; the JSON-schema walk would too if
+    // the default keyword propagates. Either way the schema is rejected.
+    const schema = z
+      .object({
+        tags: z.array(z.string().max(10).default('x')).max(5),
+      })
+      .strict();
+    builderRejects(schema, /\.default\(\)|\.catch\(\)/);
+  });
+
+  it('accepts a schema with optional fields (no default, just optional)', () => {
+    const schema = z.object({ val: z.string().max(10).optional() }).strict();
+    builderPasses(schema);
+  });
+
+  it('does not reject .default() when builderChecks is absent (non-builder callers)', () => {
+    // Without builderChecks: true, .default() does not cause a rejection.
+    // Artifact type schemas may legitimately carry defaults in their validation
+    // logic; the builder-only rule must not affect them.
+    const schema = z.object({ val: z.string().max(10).default('x') }).strict();
+    // passes() uses the non-builder subject — must not throw the builder-only error.
+    expect(() => assertBoundedSchema(schema, 'test.type', subject())).not.toThrow(
+      /\.default\(\) is not allowed/
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Check 3 extension: no transforms (companion Zod tree walk)
+// Builder-schemas only (builderChecks: true required).
+// ---------------------------------------------------------------------------
+
+describe('assertBoundedSchema check 3: no transforms', () => {
+  it('rejects a schema with .transform()', () => {
+    const schema = z
+      .object({
+        val: z
+          .string()
+          .max(10)
+          .transform((x) => x.toUpperCase()),
+      })
+      .strict();
+    builderRejects(schema, /transform/);
+  });
+
+  it('rejects a schema with .pipe()', () => {
+    const schema = z.object({ val: z.string().max(10).pipe(z.string().max(5)) }).strict();
+    builderRejects(schema, /transform|pipe/);
+  });
+
+  it('rejects a .transform() nested inside an array item', () => {
+    const schema = z
+      .object({
+        items: z
+          .array(
+            z
+              .string()
+              .max(10)
+              .transform((x) => x)
+          )
+          .max(5),
+      })
+      .strict();
+    builderRejects(schema, /transform/);
+  });
+
+  it('rejects a .transform() on a nested object field', () => {
+    const schema = z
+      .object({
+        inner: z
+          .object({
+            val: z
+              .string()
+              .max(10)
+              .transform((x) => x),
+          })
+          .strict(),
+      })
+      .strict();
+    builderRejects(schema, /transform/);
+  });
+
+  it('accepts a schema with .optional() (not a transform)', () => {
+    const schema = z.object({ val: z.string().max(10).optional() }).strict();
+    builderPasses(schema);
+  });
+
+  it('accepts a schema with .nullable() (not a transform)', () => {
+    const schema = z.object({ val: z.string().max(10).nullable() }).strict();
+    builderPasses(schema);
+  });
+
+  it('does not reject .transform() when builderChecks is absent (non-builder callers)', () => {
+    // Without builderChecks: true, .transform() does not cause a rejection.
+    const schema = z
+      .object({
+        val: z
+          .string()
+          .max(10)
+          .transform((x) => x.toUpperCase()),
+      })
+      .strict();
+    expect(() => assertBoundedSchema(schema, 'test.type', subject())).not.toThrow(/transform/);
+  });
+
+  // --- coerce rejection ---
+
+  it('rejects z.coerce.string() (coerce flag detected regardless of type name)', () => {
+    // z.coerce.string() keeps _def.type === "string" but sets _def.coerce = true.
+    // The walk must check the coerce flag, not only the type name.
+    const schema = z.object({ val: z.coerce.string().max(10) }).strict();
+    builderRejects(schema, /z\.coerce\.\* is not allowed/);
+  });
+
+  it('rejects z.coerce.number() (coerce flag detected regardless of type name)', () => {
+    const schema = z.object({ n: z.coerce.number() }).strict();
+    builderRejects(schema, /z\.coerce\.\* is not allowed/);
+  });
+
+  // --- value-rewriting string checks ---
+
+  it('rejects .trim() (overwrite check on a string)', () => {
+    // .trim() is stored internally as a ZodCheckOverwrite, which is the same
+    // mechanism as .toLowerCase() and .normalize(). All three must be rejected.
+    const schema = z.object({ val: z.string().max(10).trim() }).strict();
+    builderRejects(schema, /value-rewriting string checks/);
+  });
+
+  it('rejects .toLowerCase() (overwrite check on a string)', () => {
+    const schema = z.object({ val: z.string().max(10).toLowerCase() }).strict();
+    builderRejects(schema, /value-rewriting string checks/);
+  });
+
+  it('rejects .normalize() (overwrite check on a string)', () => {
+    const schema = z.object({ val: z.string().max(10).normalize() }).strict();
+    builderRejects(schema, /value-rewriting string checks/);
+  });
+
+  // --- readonly: recurse, not reject ---
+
+  it('accepts .readonly() wrapping a plain string (readonly is transparent)', () => {
+    // .readonly() does not change values; the walk must recurse into it.
+    const schema = z.object({ val: z.string().max(10).readonly() }).strict();
+    builderPasses(schema);
+  });
+
+  it('rejects a .transform() hidden behind .readonly()', () => {
+    // .readonly() wraps the type but does not hide its inner banned construct.
+    // The walk must recurse through readonly and find the pipe inside.
+    const schema = z
+      .object({
+        val: z
+          .string()
+          .max(10)
+          .transform((x) => x)
+          .readonly(),
+      })
+      .strict();
+    builderRejects(schema, /transform/);
+  });
+
+  // --- fail-closed: unknown node kinds ---
+
+  it('rejects z.lazy() (unknown kind rejected to fail closed)', () => {
+    // .lazy() defers schema creation and can hide banned constructs inside.
+    // The walk cannot inspect deferred schemas, so it fails closed.
+    const schema = z.object({ val: z.lazy(() => z.string().max(10)) }).strict();
+    builderRejects(schema, /unsupported schema kind "lazy"/);
   });
 });
 
@@ -347,9 +645,7 @@ describe('assertBoundedSchema byte estimator', () => {
       // inner object: 2 + (0+3+1+16) = 22
       // key "inner": 5+2=7
       // outer: 2 + (0+7+1+22) = 32
-      const schema = z
-        .object({ inner: z.object({ x: z.number() }).strict() })
-        .strict();
+      const schema = z.object({ inner: z.object({ x: z.number() }).strict() }).strict();
       passes(schema, { totalBytes: 32 });
       rejects(schema, /worst-case size 32 exceeds framework cap 31/, { totalBytes: 31 });
     });
