@@ -280,7 +280,14 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const ruleIds = useMemo(
-    () => [...new Set((episodesData ?? []).map((row) => row['rule.id']))],
+    () =>
+      [
+        ...new Set(
+          (episodesData ?? [])
+            .map((row) => row['rule.id'])
+            .filter((id): id is string => id != null)
+        ),
+      ],
     [episodesData]
   );
 
@@ -302,9 +309,10 @@ const AlertEpisodesListPageContent = () => {
     }));
     const cachedIds = new Set(Object.keys(rulesCache));
     for (const ep of episodesData ?? []) {
-      if (!cachedIds.has(ep['rule.id']) && ep['rule.name']) {
-        cachedIds.add(ep['rule.id']);
-        options.push({ label: ep['rule.name'], value: ep['rule.id'] });
+      const epRuleId = ep['rule.id'];
+      if (epRuleId && !cachedIds.has(epRuleId) && ep['rule.name']) {
+        cachedIds.add(epRuleId);
+        options.push({ label: ep['rule.name'], value: epRuleId });
       }
     }
     return options;

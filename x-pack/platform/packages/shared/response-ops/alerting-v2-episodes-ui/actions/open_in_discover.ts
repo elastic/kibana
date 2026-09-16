@@ -28,12 +28,15 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   order: 50,
   displayName: i18n.OPEN_IN_DISCOVER,
   iconType: 'discoverApp',
-  isCompatible: ({ episodes }) => episodes.length === 1,
+  // External alerts (no rule.id) cannot be opened in Discover
+  isCompatible: ({ episodes }) => episodes.length === 1 && episodes[0]['rule.id'] != null,
   execute: async ({ episodes }) => {
     const [ep] = episodes;
+    const ruleId = ep['rule.id'];
+    if (!ruleId) return;
     const href = await deps.getDiscoverHref({
       episodeIsoTimestamp: ep['@timestamp'],
-      ruleId: ep['rule.id'],
+      ruleId,
     });
     if (!href) return;
     await deps.application.navigateToUrl(href);

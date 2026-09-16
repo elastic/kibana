@@ -30,7 +30,16 @@ export const alertEpisodeSchema = z
     '@timestamp': z.iso.datetime(),
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
     'episode.status': alertEpisodeStatusSchema,
-    'rule.id': z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
+    // nullable so ES|QL null (external alerts without a rule) is accepted;
+    // transform to undefined so the output type stays `string | undefined`
+    // and existing callers that expect `string | undefined` are unaffected.
+    'rule.id': z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .nullable()
+      .optional()
+      .transform((v) => v ?? undefined),
     group_hash: z.string().min(1).max(MAX_FINGERPRINT_LENGTH),
     first_timestamp: z.iso.datetime(),
     last_timestamp: z.iso.datetime(),

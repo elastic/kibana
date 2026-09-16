@@ -24,7 +24,8 @@ export const episodeAttachmentDataSchema = z
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
     'episode.label': z.string().min(1).max(MAX_EPISODE_LABEL_LENGTH).optional(),
     'episode.status': alertEpisodeStatusSchema,
-    'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
+    // Optional: external alerts (no rule) produce undefined here
+    'rule.id': z.string().min(1).max(ID_MAX_LENGTH).optional(),
     group_hash: z.string().min(1).max(MAX_FINGERPRINT_LENGTH),
     first_timestamp: z.iso.datetime(),
     last_timestamp: z.iso.datetime(),
