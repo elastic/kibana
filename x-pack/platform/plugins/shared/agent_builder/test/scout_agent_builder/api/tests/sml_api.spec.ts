@@ -38,8 +38,7 @@ const SML_FIXTURE_NOW = '2024-06-01T12:00:00.000Z';
 /** An SML document as written to the index: bookkeeping lives under the flattened `attributes`. */
 const SML_CRAWLER = { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' as const } };
 
-// Entry ids follow the indexer's `${type}:${originId}` convention; the search path derives the
-// origin uri from the id.
+// Ids are `${type}:${originId}`; the search path derives the origin uri from the id.
 const indexedDocument = ({
   type,
   originId,

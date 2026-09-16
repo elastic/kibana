@@ -338,8 +338,7 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('uses an empty string when the origin uri carries no id', async () => {
-      // Defensive contract: the origin id is parsed out of the derived_from reference. A malformed
-      // uri must thread an empty string down to `getActionPolicy` rather than crash the call.
+      // A malformed derived_from uri yields an empty origin id instead of crashing the call.
       getActionPolicy.mockResolvedValueOnce({ ...baseActionPolicyAttrs, id: '' });
 
       const document = buildSmlDocument();
