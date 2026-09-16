@@ -117,7 +117,7 @@ const RuleNameGroupContent = React.memo<{
     <div css={panelWrapperCss}>
       <EuiFlexGroup
         data-test-subj={RULE_NAME_GROUP_TEST_ID}
-        gutterSize="m"
+        gutterSize="s"
         alignItems="center"
         responsive={false}
         wrap={false}

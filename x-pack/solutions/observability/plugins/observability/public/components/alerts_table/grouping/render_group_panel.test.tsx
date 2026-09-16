@@ -48,6 +48,7 @@ describe('renderGroupPanel', () => {
     const countBadge = getByTestId(`${RULE_NAME_GROUP_TAGS_TEST_ID}DisplayPopoverButton`);
 
     expect(group).toContainElement(tags);
+    expect(group).toHaveStyle({ gap: '8px' });
     expect(group).toHaveTextContent('APM Failed Transaction Rate');
     expect(countBadge).toHaveTextContent('3');
     expect(queryByText('prod')).not.toBeInTheDocument();
