@@ -55,6 +55,12 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
           side: 'all',
           borderColor: euiTheme.colors.borderBaseFloating,
         })}
+
+        // Draw the frame just outside the box, like an outline, so sticky bars and fixed bars
+        // aligned to the application edges (e.g. the console bottom bar) can't cover it.
+        &::after {
+          inset: -${euiTheme.border.width.thin};
+        }
       `}
       ${!isFramedAppearance &&
       css`
