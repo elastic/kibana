@@ -79,6 +79,7 @@ export class FeatureFlagsService {
   private readonly contextChanged$ = new Subject<void>();
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
+  private waitForContextReadyPromise: Promise<void> | undefined;
 
   /**
    * The core service's constructor
@@ -314,18 +315,22 @@ export class FeatureFlagsService {
    */
   private waitForContextReady(): Promise<void> {
     if (this.mustWaitForContextReady()) {
-      // Wait until the context is ready
-      return firstValueFrom(
-        this.contextChanged$.pipe(
-          // Re-check in case the context was "updated" without actually adding anything.
-          filter(() => !this.mustWaitForContextReady()),
-          // Wait for 200ms before timing out. `appendContext` is typically called with a debounce of 100ms.
-          // If context is not available in double that time, we probably will not have any context.
-          timeout({ first: 200, with: () => EMPTY })
-        ),
-        // Adding a default value to avoid the promise being rejected if the service stops before the context is ready.
-        { defaultValue: undefined }
-      );
+      // Wait until the context is ready but only if we haven't already waited for it before.
+      this.waitForContextReadyPromise =
+        this.waitForContextReadyPromise ??
+        firstValueFrom(
+          this.contextChanged$.pipe(
+            // Re-check in case the context was "updated" without actually adding anything.
+            filter(() => !this.mustWaitForContextReady()),
+            // Wait for 200ms before timing out. `appendContext` is typically called with a debounce of 100ms.
+            // If context is not available in double that time, we probably will not have any context.
+            timeout({ first: 200, with: () => EMPTY })
+          ),
+          // Adding a default value to avoid the promise being rejected if the service stops before the context is ready.
+          { defaultValue: undefined }
+        );
+
+      return this.waitForContextReadyPromise;
     }
 
     return Promise.resolve();
