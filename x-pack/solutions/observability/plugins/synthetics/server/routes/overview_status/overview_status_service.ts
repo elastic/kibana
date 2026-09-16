@@ -437,6 +437,18 @@ export class OverviewStatusService {
         });
         break;
       }
+      case 'created_at': {
+        // Same "missing sorts as now" fallback as `updated_at` above, for the
+        // same reason: Heartbeat / CCS remote monitors have no local saved
+        // object, so `created_at` is absent rather than falsy-zero.
+        const now = Date.now();
+        configs.sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : now;
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : now;
+          return dir * (aTime - bTime);
+        });
+        break;
+      }
       case 'urls': {
         const withUrl = configs.filter((m) => m.urls);
         const withoutUrl = configs.filter((m) => !m.urls);
