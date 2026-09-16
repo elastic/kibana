@@ -59,15 +59,9 @@ const makeRule = (overrides: Partial<SourceRuleData> = {}): SourceRuleData => ({
   updated_by: 'admin',
   updated_at: '2026-06-01T12:00:00.000Z',
   rule_type_id: '.es-query',
-  consumer: 'stackAlerts',
   params: {
-    criteria: [
-      { comparator: '>', threshold: [100] },
-      { comparator: '<', threshold: [50] },
-    ],
     groupBy: ['host.name', 'service.name'],
   },
-  alert_delay: { active: 3 },
   ...overrides,
 });
 
@@ -120,7 +114,6 @@ describe('SourceRuleSummaryFlyout', () => {
     expect(screen.getByTestId('sourceRuleType')).toHaveTextContent('Elasticsearch query');
     expect(screen.getByTestId('sourceRuleGroupKey')).toHaveTextContent('host.name, service.name');
     expect(screen.getByTestId('sourceRuleSchedule')).toBeInTheDocument();
-    expect(screen.getByTestId('sourceRuleAlertDelay')).toBeInTheDocument();
   });
 
   it('falls back to rule_type_id when ruleCategory is not provided', () => {

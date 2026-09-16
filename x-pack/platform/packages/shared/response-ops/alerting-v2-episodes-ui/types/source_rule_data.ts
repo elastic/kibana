@@ -15,9 +15,7 @@ export interface SourceRuleData {
   enabled?: boolean;
   schedule?: { interval?: string };
   rule_type_id?: string;
-  consumer?: string;
   params?: Record<string, unknown>;
-  alert_delay?: { active?: number };
   created_by?: string | null;
   updated_by?: string | null;
   created_at?: string;

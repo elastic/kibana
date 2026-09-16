@@ -62,7 +62,7 @@ const buildConditionItems = (
   rule: SourceRuleData,
   ruleCategory: string | undefined
 ): DetailItem[] => {
-  const { schedule, rule_type_id: ruleTypeId, params, alert_delay: alertDelay } = rule;
+  const { schedule, rule_type_id: ruleTypeId, params } = rule;
   const groupBy = extractGroupBy(params?.groupBy as string | string[] | undefined);
 
   const items: DetailItem[] = [];
@@ -97,19 +97,6 @@ const buildConditionItems = (
         values: { interval: schedule.interval },
       }),
       'data-test-subj': 'sourceRuleSchedule',
-    });
-  }
-
-  if (alertDelay?.active != null && alertDelay.active > 1) {
-    items.push({
-      title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.alertDelay', {
-        defaultMessage: 'Alert delay',
-      }),
-      description: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.alertDelayValue', {
-        defaultMessage: '{count} consecutive {count, plural, one {match} other {matches}}',
-        values: { count: alertDelay.active },
-      }),
-      'data-test-subj': 'sourceRuleAlertDelay',
     });
   }
 

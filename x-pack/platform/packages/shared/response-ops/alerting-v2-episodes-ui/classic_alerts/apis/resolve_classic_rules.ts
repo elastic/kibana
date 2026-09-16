@@ -31,9 +31,7 @@ interface ClassicRule {
   enabled?: boolean;
   schedule?: { interval?: string };
   rule_type_id?: string;
-  consumer?: string;
   params?: Record<string, unknown>;
-  alert_delay?: { active?: number };
   created_by?: string | null;
   updated_by?: string | null;
   created_at?: string;
@@ -59,9 +57,7 @@ const adaptClassicRule = (rule: ClassicRule): RuleResponse =>
     created_at: rule.created_at ?? '',
     updated_at: rule.updated_at ?? '',
     rule_type_id: rule.rule_type_id,
-    consumer: rule.consumer,
     params: rule.params,
-    alert_delay: rule.alert_delay,
   } as unknown as RuleResponse);
 
 export interface ResolveClassicRulesParams {
