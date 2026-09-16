@@ -27,7 +27,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
   const objectRemover = new ObjectRemover(supertest);
   const retry = getService('retry');
 
-  describe('user managed api key', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/290845
+  describe.skip('user managed api key', () => {
     let apiKey: string;
 
     before(async () => {

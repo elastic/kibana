@@ -108,57 +108,41 @@ export async function cleanSeedData(
 
   // Local seed reset only: deleting an Alerting v2 rule leaves its historical `.rule-events`.
   // Resolve the rule ids before deleting queries so repeated seed runs do not retain stale
-  // synthetic events. List every query on the stream to catch leftovers from earlier runs.
-  const listRes = await kibanaRequest(
-    config,
-    'GET',
-    `/api/streams/${encodeURIComponent(ctx.streamName)}/queries`,
-    undefined,
-    ctx.space
-  );
-  if (listRes.status === 404) {
-    log.info(`clean: stream "${ctx.streamName}" not found, skipping query cleanup`);
-  } else if (listRes.status >= 300) {
+  // synthetic events. Discovery list needs a range; one hour keeps occurrence work cheap.
+  const listPath = `/internal/streams/_queries?from=2020-01-01T00:00:00.000Z&to=2020-01-01T01:00:00.000Z&bucketSize=1h&streamNames=${encodeURIComponent(
+    ctx.streamName
+  )}&status=active&status=draft&perPage=1000`;
+  const listRes = await kibanaRequest(config, 'GET', listPath, undefined, ctx.space);
+  if (listRes.status >= 300) {
     throw new Error(`clean: failed to list queries (HTTP ${listRes.status})`);
   }
-  const allQueries =
-    listRes.status < 300 ? (listRes.data as { queries?: StreamQuery[] })?.queries ?? [] : [];
-  const queryIds = allQueries
-    .map((q) => q.id)
-    .filter((id): id is string => typeof id === 'string' && id.length > 0);
+  const allQueries = (listRes.data as { queries: StreamQuery[] }).queries;
+  const queryIds = allQueries.map((q) => q.id);
   const ruleIds = allQueries.map((query) =>
     computeRuleId(ctx.streamName, query.id, query.esql.query)
   );
 
   if (queryIds.length > 0) {
-    if (ruleIds.length > 0) {
-      await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
-    }
+    await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
   }
 
   await cleanDetectionAndEventHistory(esClient, ruleIds, ctx.space, log);
 
-  for (const queryId of queryIds) {
-    const path = `/api/streams/${encodeURIComponent(ctx.streamName)}/queries/${encodeURIComponent(
-      queryId
-    )}`;
-    try {
-      const delRes = await kibanaRequest(config, 'DELETE', path, undefined, ctx.space);
-      if (delRes.status >= 300 && delRes.status !== 404) {
-        log.warning(
-          `clean: DELETE query "${queryId}" → HTTP ${delRes.status} ${JSON.stringify(delRes.data)}`
-        );
-      }
-    } catch (err) {
-      log.warning(
-        `clean: DELETE query "${queryId}" threw: ${
-          err instanceof Error ? err.message : String(err)
-        }`
+  if (queryIds.length > 0) {
+    const delRes = await kibanaRequest(
+      config,
+      'POST',
+      '/internal/streams/queries/_bulk_delete',
+      { queryIds },
+      ctx.space
+    );
+    const failed =
+      delRes.status >= 300 ? queryIds.length : (delRes.data as { failed?: number }).failed ?? 0;
+    if (failed > 0) {
+      throw new Error(
+        `clean: bulk delete queries failed (HTTP ${delRes.status}) ${JSON.stringify(delRes.data)}`
       );
     }
-  }
-
-  if (queryIds.length > 0) {
     log.info(`clean: deleted ${queryIds.length} query/queries from stream "${ctx.streamName}"`);
   }
 

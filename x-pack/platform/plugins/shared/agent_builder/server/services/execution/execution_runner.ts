@@ -71,13 +71,14 @@ import {
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
+  executionStartedEvents$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -300,6 +301,10 @@ const handleConversationExecution = async ({
       })
     : EMPTY;
 
+  const startedEvents$ = storeConversation
+    ? executionStartedEvents$({ conversation, agentEvents$ })
+    : EMPTY;
+
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
@@ -315,6 +320,11 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+  const privacySettings = await loadTracingPrivacySettings({
+    uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
+    logger,
+    spaceId,
+  });
 
   return withConverseSpan(
     {
@@ -323,6 +333,7 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
+      privacySettings,
       opikHeaders,
     },
     (span) => {
@@ -342,7 +353,13 @@ const handleConversationExecution = async ({
           )
         : EMPTY;
 
-      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+      return merge(
+        conversationIdEvent$,
+        agentEvents$,
+        startedEvents$,
+        persistenceEvents$,
+        titleAttr$
+      ).pipe(
         filter((event) => !isRoundStartedEvent(event)),
         // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
         // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
