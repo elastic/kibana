@@ -29,4 +29,6 @@ export interface ActionPolicyFormState {
    * to the action policy API directly.
    */
   inlineActions: InlineWorkflowActionDraft[];
+  /** Whether the policy is enabled. Editable on update; omitted from create payload. */
+  enabled: boolean;
 }

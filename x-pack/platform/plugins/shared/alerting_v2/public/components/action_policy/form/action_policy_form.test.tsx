@@ -7,23 +7,28 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
 import { ActionPolicyForm } from './action_policy_form';
 import type { ActionPolicyFormState } from './types';
+import { setActionPolicyPrototypeView } from './components/rule_tags_prototype_toggle';
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
+const mockBasePathPrepend = jest.fn((path: string) => path);
 let mockWorkflowsEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return { getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'http') {
+      return { basePath: { prepend: mockBasePathPrepend } };
     }
     if (token === 'uiSettings') {
       return { get: () => mockWorkflowsEnabled };
@@ -53,6 +58,7 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  getDefaultInlineActionStepDefinition: () => INLINE_DEFS[0],
   InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
     <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
   ),
@@ -83,21 +89,67 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
 }));
 
 jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_fetch_workflows', () => ({
-  useFetchWorkflows: () => ({
-    data: { results: [], total: 0, page: 1, size: 100 },
+  useFetchRuleTags: () => ({
+    data: ['production', 'critical', 'staging'],
     isLoading: false,
   }),
 }));
 
-const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: () => ({
+    data: undefined,
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
+jest.mock('../../../hooks/use_fetch_workflows', () => ({
+  useFetchWorkflows: () => ({
+    data: {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Slack notification workflow',
+          description: 'Sends alerts to Slack',
+          enabled: true,
+          definition: {
+            name: 'Slack notification workflow',
+            enabled: true,
+            triggers: [{ type: 'alert', enabled: true }],
+            steps: [{ name: 'notify', type: 'slack', with: {} }],
+          },
+          createdAt: '2026-01-01T00:00:00.000Z',
+          history: [],
+          valid: true,
+        },
+        {
+          id: 'workflow-2',
+          name: 'Email digest workflow',
+          description: 'Sends email digests',
+          enabled: true,
+          definition: {
+            name: 'Email digest workflow',
+            enabled: true,
+            triggers: [{ type: 'scheduled', enabled: true }],
+            steps: [{ name: 'email', type: 'email', with: {} }],
+          },
+          createdAt: '2026-01-01T00:00:00.000Z',
+          history: [],
+          valid: true,
+        },
+      ],
+      total: 2,
+      page: 1,
+      size: 100,
+    },
+    isLoading: false,
+  }),
+}));
+
+const renderForm = (
+  defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
+  variant: 'full' | 'essential' = 'full'
+) => {
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({
       mode: 'onBlur',
@@ -107,7 +159,7 @@ const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) =
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm variant={variant} />
         </FormProvider>
       </I18nProvider>
     );
@@ -128,11 +180,18 @@ describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
     jest.clearAllMocks();
+    setActionPolicyPrototypeView('ap_improv');
   });
 
-  it('renders tags input', () => {
+  it('renders the rule tags scope field and advanced matching accordion', async () => {
+    const user = userEvent.setup();
     renderForm();
-    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+    expect(screen.getByTestId('policyScopeSummary')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagsInlinePicker')).toBeInTheDocument();
+    expect(screen.getByTestId('advancedMatchingAccordion')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('advancedMatchingAccordion'));
+    expect(screen.getByTestId('matcherInput')).toBeInTheDocument();
   });
 
   it('shows required errors for name on blur', async () => {
@@ -144,22 +203,21 @@ describe('ActionPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('renders grouping mode toggle with Per Episode selected by default', () => {
+  it('renders grouping mode toggle with Per alert selected by default', () => {
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     expect(toggle).toBeInTheDocument();
-    const perEpisodeButton = toggle.querySelector('button[aria-pressed="true"]');
-    expect(perEpisodeButton).toBeInTheDocument();
+    const selectedButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(selectedButton).toHaveTextContent('Per alert');
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_episode mode', () => {
+  it('shows frequency select for per_episode mode', () => {
     renderForm();
 
-    const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
-    expect(strategySelect).toBeInTheDocument();
-    expect(strategySelect).toHaveValue('on_status_change');
+    expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
   it('shows interval input when per_status_interval strategy is selected', async () => {
@@ -173,49 +231,39 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
   });
 
-  it('shows group by and strategy when Per Group mode is selected', async () => {
+  it('shows group by and strategy when Combined mode is selected with Group by field', async () => {
     const user = userEvent.setup();
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[1]); // Per Group is the second button
+    await user.click(buttons[1]); // Combined
+    await user.click(screen.getByTestId('groupByFieldSwitch'));
 
     expect(screen.getByTestId(TEST_SUBJ.groupByInput)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toBeInTheDocument();
   });
 
-  it('shows strategy select with time_interval when Digest mode is selected', async () => {
+  it('shows strategy select with time_interval when Combined mode is selected', async () => {
     const user = userEvent.setup();
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[2]); // Digest is the third button
+    await user.click(buttons[1]); // Combined
 
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
     expect(strategySelect).toBeInTheDocument();
     expect(strategySelect).toHaveValue('time_interval');
   });
 
-  it('shows interval input when time_interval is the default strategy in digest mode', async () => {
+  it('pre-fills interval with 5m when switching to Combined mode', async () => {
     const user = userEvent.setup();
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[2]); // Digest is the third button
-
-    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
-  });
-
-  it('pre-fills interval with 5m when switching to digest mode', async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
-    const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[2]); // Digest
+    await user.click(buttons[1]); // Combined
 
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
   });
@@ -229,8 +277,7 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
   });
 
-  it('preserves groupBy fields when switching away from per_field and back', async () => {
-    const user = userEvent.setup();
+  it('marks Combined selected when groupingMode is per_field', () => {
     renderForm({
       ...DEFAULT_FORM_STATE,
       groupingMode: 'per_field',
@@ -240,20 +287,10 @@ describe('ActionPolicyForm', () => {
     });
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
-    const buttons = toggle.querySelectorAll('button');
-
-    // Switch to Per Episode
-    await user.click(buttons[0]);
-    expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
-
-    // Switch back to Per Group
-    await user.click(buttons[1]);
-    const groupByInput = screen.getByTestId(TEST_SUBJ.groupByInput);
-    expect(groupByInput).toBeInTheDocument();
-
-    // The previously selected groupBy values should still be present as pills
-    expect(screen.getByTitle('host.name')).toBeInTheDocument();
-    expect(screen.getByTitle('service.name')).toBeInTheDocument();
+    const selectedButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(selectedButton).toHaveTextContent('Combined');
+    expect(screen.getByTestId('groupByFieldSwitch')).toBeChecked();
+    expect(screen.getByTestId(TEST_SUBJ.groupByInput)).toBeInTheDocument();
   });
 
   it('pre-fills interval with 5m on mount when strategy needs interval and interval is empty', () => {
@@ -267,15 +304,32 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
   });
 
-  it('renders create workflow link when workflows are enabled', () => {
+  it('renders enriched workflow options with name and description', async () => {
+    const user = userEvent.setup();
     renderForm();
 
-    expect(screen.getByTestId('createWorkflowLink')).toBeInTheDocument();
-    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute(
-      'href',
-      '/app/workflows/create'
+    const destinationsCombo = screen.getByTestId('destinationsInput');
+    await user.click(within(destinationsCombo).getByRole('combobox'));
+    expect(
+      await screen.findByRole('option', { name: 'Slack notification workflow' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Email digest workflow' })).toBeInTheDocument();
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
+  });
+
+  it('renders essential variant with name, rule tags, and workflows', () => {
+    renderForm(
+      {
+        ...DEFAULT_FORM_STATE,
+        matcher: { tags: ['production'] },
+      },
+      'essential'
     );
-    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('essentialRuleTagsInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('descriptionInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupingModeToggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
   });
 
   it('renders warning callout when workflows are disabled', () => {
@@ -288,18 +342,30 @@ describe('ActionPolicyForm', () => {
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
   });
 
-  it('renders the simple workflow builder add buttons when workflows are enabled', () => {
+  it('hides the chart for AP improv and shows it for Visual chart', async () => {
     renderForm();
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-email')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
-  });
+    expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
+      'Per alert: Best when you need visibility into each alert separately.'
+    );
+    expect(screen.queryByTestId('dispatchOptionDiagram')).not.toBeInTheDocument();
 
-  it('hides the simple workflow builder when workflows are disabled', () => {
-    mockWorkflowsEnabled = false;
-    renderForm();
+    act(() => {
+      setActionPolicyPrototypeView('visual_chart');
+    });
 
-    expect(screen.queryByTestId('simpleWorkflowBuilder')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('dispatchOptionDiagram')).toBeInTheDocument();
+    expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('dispatchConfigModeHelp')).toBeInTheDocument();
+
+    act(() => {
+      setActionPolicyPrototypeView('ap_improv');
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('dispatchOptionDiagram')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
   });
 });

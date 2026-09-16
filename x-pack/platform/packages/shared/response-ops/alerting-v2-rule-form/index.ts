@@ -70,12 +70,15 @@ export {
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
+  buildInlineWorkflowStepDraft,
+  inlineDraftFromWorkflowDetail,
 } from './actions_form';
 export type {
   ActionDraft,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
+  InlineWorkflowStepDraft,
 } from './actions_form';
 export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';

@@ -82,6 +82,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onBulkUpdateApiKey: jest.fn(),
+  onBulkLinkActionPolicy: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
   onQuickEdit: jest.fn(),
@@ -393,6 +394,19 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('bulkDeleteRules'));
 
       expect(onBulkDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens bulk actions popover and calls onBulkLinkActionPolicy', async () => {
+      const onBulkLinkActionPolicy = jest.fn();
+      renderTable({ selectedCount: 1, onBulkLinkActionPolicy });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      expect(await screen.findByTestId('bulkLinkActionPolicy')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('bulkLinkActionPolicy'));
+
+      expect(onBulkLinkActionPolicy).toHaveBeenCalledTimes(1);
     });
 
     it('opens bulk actions popover and calls onBulkUpdateApiKey', async () => {

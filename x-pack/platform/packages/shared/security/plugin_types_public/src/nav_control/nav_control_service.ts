@@ -9,6 +9,12 @@ import type { IconType } from '@elastic/eui';
 import type { MouseEvent, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 
+export interface UserMenuPanelItem {
+  name: ReactNode;
+  onClick?: () => void;
+  'data-test-subj'?: string;
+}
+
 export interface UserMenuLink {
   label: string;
   iconType: IconType;
@@ -18,6 +24,11 @@ export interface UserMenuLink {
   onClick?: (event: MouseEvent<Element>) => void;
   /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
+  /**
+   * When set, clicking this link opens a nested secondary context-menu panel
+   * containing these items (with a back control to the root menu).
+   */
+  panelItems?: UserMenuPanelItem[];
 }
 
 export interface SecurityNavControlServiceStart {

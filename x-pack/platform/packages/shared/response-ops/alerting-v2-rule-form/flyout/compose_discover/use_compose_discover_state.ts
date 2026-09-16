@@ -15,15 +15,17 @@ import type {
   QueryTab,
 } from './types';
 
-export const getStepIds = (isAlert: boolean): StepId[] =>
-  isAlert
-    ? ['alertCondition', 'outcome', 'details', 'notifications']
-    : ['alertCondition', 'outcome', 'details'];
+export const getStepIds = (_isAlert: boolean): StepId[] => [
+  'alertCondition',
+  'outcome',
+  'details',
+];
 
-export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
-  isAlert
-    ? ['builderCondition', 'outcome', 'details', 'notifications']
-    : ['builderCondition', 'outcome', 'details'];
+export const getBuilderStepIds = (_isAlert: boolean): StepId[] => [
+  'builderCondition',
+  'outcome',
+  'details',
+];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;

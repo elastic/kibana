@@ -10,6 +10,8 @@ export {
   buildInlineWorkflowYaml,
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
+export { buildInlineWorkflowStepDraft } from './helpers/build_inline_workflow_step_draft';
+export { inlineDraftFromWorkflowDetail } from './helpers/inline_draft_from_workflow_detail';
 export {
   buildRuleScopedMatcher,
   buildRuleNotificationTag,
@@ -25,7 +27,7 @@ export {
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
 export { ActionForm, createInitialActionFormValue } from './action_form';
 export { InlineWorkflowEditor } from './components/inline_workflow_editor';
-export { isActionValid } from './types';
+export { isActionValid, isInlineStepValid } from './types';
 export type {
   ActionDraft,
   ActionFormValue,
@@ -33,4 +35,5 @@ export type {
   ExistingWorkflowActionDraft,
   InlineActionStepType,
   InlineWorkflowActionDraft,
+  InlineWorkflowStepDraft,
 } from './types';

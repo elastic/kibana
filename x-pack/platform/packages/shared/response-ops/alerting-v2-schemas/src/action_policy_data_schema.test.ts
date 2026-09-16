@@ -207,7 +207,7 @@ describe('createActionPolicyDataSchema', () => {
           ...base,
           destinations: [],
         })
-      ).toThrow();
+      ).toThrow('At least one destination must be provided');
     });
 
     it('rejects missing name', () => {

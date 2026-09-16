@@ -93,6 +93,7 @@ export interface RulesListTableProps {
   onBulkDisable: () => void;
   onBulkDelete: () => void;
   onBulkUpdateApiKey: () => void;
+  onBulkLinkActionPolicy: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -141,6 +142,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
+  onBulkLinkActionPolicy,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -513,6 +515,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onBulkEnable={onBulkEnable}
             onBulkDisable={onBulkDisable}
             onBulkUpdateApiKey={onBulkUpdateApiKey}
+            onBulkLinkActionPolicy={onBulkLinkActionPolicy}
             onBulkDelete={onBulkDelete}
           />
         ) : null}

@@ -15,6 +15,9 @@ import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-co
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
+  /** Kept for callers; match API currently keys off tags only. */
+  ruleId?: string;
+  name?: string;
   tags?: string[];
 }
 
@@ -27,12 +30,16 @@ export interface UseMatchedActionPoliciesResult {
 
 export const useMatchedActionPolicies = ({
   http,
+  ruleId,
+  name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
+  // Always fetch on mount so catch-all policies appear before the rule has tags.
+  // Request body follows the structured match-for-rule API (tags only).
   const body = { rule: tags?.length ? { tags } : {} };
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', tags],
+    queryKey: ['matchedActionPolicies', ruleId, name, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
         `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,

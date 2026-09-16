@@ -6,7 +6,19 @@
  */
 
 import type { UseQueryResult } from '@kbn/react-query';
-import type { WorkflowListDto } from '@kbn/workflows';
+import type { WorkflowListDto, WorkflowYaml } from '@kbn/workflows';
+
+const mockDefinition = (
+  name: string,
+  triggers: WorkflowYaml['triggers'],
+  steps: WorkflowYaml['steps']
+): WorkflowYaml =>
+  ({
+    name,
+    enabled: true,
+    triggers,
+    steps,
+  } as WorkflowYaml);
 
 const MOCK_WORKFLOWS: WorkflowListDto = {
   page: 1,
@@ -18,17 +30,28 @@ const MOCK_WORKFLOWS: WorkflowListDto = {
       name: 'Slack notification workflow',
       description: 'Sends alerts to Slack',
       enabled: true,
-      definition: null,
+      definition: mockDefinition(
+        'Slack notification workflow',
+        [{ type: 'alert', enabled: true }],
+        [{ name: 'notify', type: 'slack', with: {} }]
+      ),
       createdAt: '2026-01-01T00:00:00.000Z',
       history: [],
       valid: true,
     },
     {
       id: 'workflow-2',
-      name: 'PagerDuty escalation workflow',
-      description: 'Escalates to PagerDuty',
+      name: 'Notify SRE team by email',
+      description: 'This workflow send an email and uses slack channel sre-critical',
       enabled: true,
-      definition: null,
+      definition: mockDefinition(
+        'PagerDuty escalation workflow',
+        [{ type: 'alert', enabled: true }],
+        [
+          { name: 'page', type: 'pagerduty', with: {} },
+          { name: 'notify', type: 'slack', with: {} },
+        ]
+      ),
       createdAt: '2026-01-01T00:00:00.000Z',
       history: [],
       valid: true,
@@ -38,7 +61,11 @@ const MOCK_WORKFLOWS: WorkflowListDto = {
       name: 'Email digest workflow',
       description: 'Sends email digests',
       enabled: true,
-      definition: null,
+      definition: mockDefinition(
+        'Email digest workflow',
+        [{ type: 'scheduled', enabled: true, with: { every: '1h' } }],
+        [{ name: 'email', type: 'email', with: {} }]
+      ),
       createdAt: '2026-01-01T00:00:00.000Z',
       history: [],
       valid: true,

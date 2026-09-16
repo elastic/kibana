@@ -30,6 +30,7 @@ export interface RulesBulkActionsProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkUpdateApiKey: () => void;
+  onBulkLinkActionPolicy: () => void;
   onBulkDelete: () => void;
 }
 
@@ -49,6 +50,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
+  onBulkLinkActionPolicy,
 }) => {
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
@@ -74,6 +76,11 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   const handleBulkUpdateApiKey = () => {
     setIsBulkActionsOpen(false);
     onBulkUpdateApiKey();
+  };
+
+  const handleBulkLinkActionPolicy = () => {
+    setIsBulkActionsOpen(false);
+    onBulkLinkActionPolicy();
   };
 
   return (
@@ -133,6 +140,16 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
               >
                 {i18n.translate('xpack.alertingV2.rulesList.bulkAction.updateApiKey', {
                   defaultMessage: 'Update API key',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="linkActionPolicy"
+                icon={<EuiIcon type="link" size="m" aria-hidden={true} />}
+                onClick={handleBulkLinkActionPolicy}
+                data-test-subj="bulkLinkActionPolicy"
+              >
+                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.linkActionPolicy', {
+                  defaultMessage: 'Link to Action policy',
                 })}
               </EuiContextMenuItem>,
               <EuiContextMenuItem

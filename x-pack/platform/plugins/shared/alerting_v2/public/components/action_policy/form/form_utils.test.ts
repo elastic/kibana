@@ -20,6 +20,7 @@ describe('action policy form utils', () => {
     throttleInterval: '',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     inlineActions: [],
+    enabled: true,
   };
 
   describe('toCreatePayload', () => {
@@ -129,6 +130,7 @@ describe('action policy form utils', () => {
         group_by: null,
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        enabled: true,
       });
     });
 
@@ -164,6 +166,7 @@ describe('action policy form utils', () => {
         group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        enabled: true,
       });
     });
   });
@@ -203,6 +206,7 @@ describe('action policy form utils', () => {
         throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
+        enabled: true,
       });
     });
 
@@ -226,6 +230,7 @@ describe('action policy form utils', () => {
         throttleInterval: '',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
+        enabled: true,
       });
     });
   });

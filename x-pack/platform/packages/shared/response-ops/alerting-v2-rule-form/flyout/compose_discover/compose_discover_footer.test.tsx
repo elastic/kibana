@@ -13,6 +13,7 @@ import { createInitialState } from './use_compose_discover_state';
 import type { ComposeDiscoverState, StepDefinition } from './types';
 import type { FormValues } from '../../form/types';
 import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compose_discover_footer';
+import { CreateActionPolicySecondaryFlyoutProvider } from './create_action_policy_secondary_flyout_context';
 
 const ALERT_CONDITION_STEP: StepDefinition = {
   id: 'alertCondition',
@@ -28,7 +29,7 @@ const BUILDER_CONDITION_STEP: StepDefinition = {
 
 const DETAILS_STEP: StepDefinition = {
   id: 'details',
-  title: 'Details & Artifacts',
+  title: 'Detail & actions',
   render: () => null,
 };
 
@@ -57,7 +58,9 @@ const Wrapper = ({
   const form = useForm<FormValues>({ defaultValues: defaults });
   return (
     <IntlProvider locale="en">
-      <FormProvider {...form}>{children}</FormProvider>
+      <CreateActionPolicySecondaryFlyoutProvider>
+        <FormProvider {...form}>{children}</FormProvider>
+      </CreateActionPolicySecondaryFlyoutProvider>
     </IntlProvider>
   );
 };

@@ -21,6 +21,8 @@ const createWrapper = () => {
   );
 };
 
+const MATCH_PATH = '/internal/alerting/v2/action_policies/_match_for_rule';
+
 describe('useMatchedActionPolicies', () => {
   it('returns items from the API on success', async () => {
     const http = httpServiceMock.createStartContract();
@@ -30,9 +32,12 @@ describe('useMatchedActionPolicies', () => {
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, ruleId: 'rule-abc', tags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isLoading).toBe(true);
 
@@ -42,7 +47,7 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.items).toEqual(fakeResponse.items);
     expect(result.current.total).toBe(42);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
@@ -54,9 +59,12 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     http.fetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useMatchedActionPolicies({ http, tags: ['env:prod'] }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, ruleId: 'rule-abc', tags: ['env:prod'] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -89,12 +97,33 @@ describe('useMatchedActionPolicies', () => {
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('fires a request with an empty rule body when no tags are provided', async () => {
+  it('sends tags when provided without a ruleId', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
       items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch-all' }],
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
+
+    const { result } = renderHook(
+      () => useMatchedActionPolicies({ http, name: 'My Rule', tags: ['env:prod'] }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.items).toEqual(fakeResponse.items);
+    expect(http.fetch).toHaveBeenCalledWith(
+      MATCH_PATH,
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ rule: { tags: ['env:prod'] } }),
+      })
+    );
+  });
+
+  it('fetches with an empty rule payload when inputs are absent', async () => {
+    const http = httpServiceMock.createStartContract();
+    http.fetch.mockResolvedValueOnce({ items: [], total: 0 } as any);
 
     const { result } = renderHook(() => useMatchedActionPolicies({ http }), {
       wrapper: createWrapper(),
@@ -102,9 +131,31 @@ describe('useMatchedActionPolicies', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.items).toEqual(fakeResponse.items);
     expect(http.fetch).toHaveBeenCalledWith(
-      '/internal/alerting/v2/action_policies/_match_for_rule',
+      MATCH_PATH,
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ rule: {} }),
+      })
+    );
+  });
+
+  it('fetches when name is an empty string and no tags', async () => {
+    const http = httpServiceMock.createStartContract();
+    http.fetch.mockResolvedValueOnce({
+      items: [{ actionPolicy: { id: 'ap-global' }, category: 'catch-all' }],
+      total: 1,
+    } as any);
+
+    const { result } = renderHook(() => useMatchedActionPolicies({ http, name: '' }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.items).toHaveLength(1);
+    expect(http.fetch).toHaveBeenCalledWith(
+      MATCH_PATH,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ rule: {} }),

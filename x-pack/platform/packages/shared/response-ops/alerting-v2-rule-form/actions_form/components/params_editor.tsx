@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -28,38 +29,57 @@ interface ParamsEditorProps {
   height?: string | number;
 }
 
-export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProps) => (
-  <EuiFormRow
-    label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
-      defaultMessage: 'Parameters',
-    })}
-    helpText={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.helpText', {
-      defaultMessage:
-        'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {episodes}.',
-      values: {
-        syntax: '{{ ... }}',
-        policyId: '{{ inputs.payload.policyId }}',
-        groupKey: '{{ inputs.payload.groupKey }}',
-        episodes: '{{ inputs.payload.episodes }}',
-      },
-    })}
-    fullWidth
-  >
-    <CodeEditor
-      languageId="yaml"
-      value={value}
-      onChange={onChange}
-      height={height}
-      width="100%"
-      suggestionProvider={PAYLOAD_COMPLETION_PROVIDER}
-      options={EDITOR_OPTIONS}
-      dataTestSubj="singleStepWorkflowParamsEditor"
-      aria-label={i18n.translate(
-        'xpack.responseOps.alertingV2RuleForm.actionForm.params.ariaLabel',
-        {
-          defaultMessage: 'Workflow parameters editor',
-        }
-      )}
-    />
-  </EuiFormRow>
-);
+export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
+        defaultMessage: 'Step parameters',
+      })}
+      helpText={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.helpText', {
+        defaultMessage:
+          'Use {syntax} to reference dispatcher payload values: policyId, groupKey, or episodes.',
+        values: {
+          syntax: '{{ ... }}',
+        },
+      })}
+      fullWidth
+    >
+      <div
+        css={css`
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.medium};
+          overflow: hidden;
+
+          /* Monaco mounts leave a white chrome strip unless the editor is transparent. */
+          .monaco-editor,
+          .monaco-editor-background,
+          .margin-view-overlays {
+            background-color: transparent !important;
+          }
+        `}
+        data-test-subj="singleStepWorkflowParamsEditorContainer"
+      >
+        <CodeEditor
+          languageId="yaml"
+          value={value}
+          onChange={onChange}
+          height={height}
+          width="100%"
+          transparentBackground
+          suggestionProvider={PAYLOAD_COMPLETION_PROVIDER}
+          options={EDITOR_OPTIONS}
+          dataTestSubj="singleStepWorkflowParamsEditor"
+          aria-label={i18n.translate(
+            'xpack.responseOps.alertingV2RuleForm.actionForm.params.ariaLabel',
+            {
+              defaultMessage: 'Workflow parameters editor',
+            }
+          )}
+        />
+      </div>
+    </EuiFormRow>
+  );
+};

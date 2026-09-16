@@ -22,9 +22,16 @@ const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const draft = (id: string): InlineWorkflowActionDraft => ({
   id,
   source: 'inline',
-  stepType: 'slack2.sendMessage',
-  connectorId: 'connector-1',
-  params: 'message: hi',
+  workflowName: 'Slack notification',
+  steps: [
+    {
+      id: 'step-1',
+      stepType: 'slack2.sendMessage',
+      stepName: 'notify',
+      connectorId: 'connector-1',
+      params: 'message: hi',
+    },
+  ],
 });
 
 describe('useCreateInlineWorkflows', () => {

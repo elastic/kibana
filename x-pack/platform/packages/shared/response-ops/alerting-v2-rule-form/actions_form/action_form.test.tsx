@@ -151,8 +151,8 @@ describe('ActionForm', () => {
       const emitted: ActionFormValue = onChange.mock.calls[0][0];
       expect(emitted).toHaveLength(1);
       expect(emitted[0].source).toBe('inline');
-      expect((emitted[0] as { stepType: string }).stepType).toBe('email');
-      expect((emitted[0] as { params: string }).params).toContain('to:');
+      expect((emitted[0] as { steps: Array<{ stepType: string; params: string }> }).steps[0].stepType).toBe('email');
+      expect((emitted[0] as { steps: Array<{ stepType: string; params: string }> }).steps[0].params).toContain('to:');
       expect(emitted[0].id).toBeTruthy();
     });
 
@@ -165,9 +165,9 @@ describe('ActionForm', () => {
       const emitted: ActionFormValue = onChange.mock.calls[0][0];
       expect(emitted).toHaveLength(1);
       expect(emitted[0].source).toBe('inline');
-      expect((emitted[0] as { stepType: string }).stepType).toBe('slack2.sendMessage');
-      expect((emitted[0] as { params: string }).params).toContain('channel:');
-      expect((emitted[0] as { params: string }).params).toContain('text:');
+      expect((emitted[0] as { steps: Array<{ stepType: string; params: string }> }).steps[0].stepType).toBe('slack2.sendMessage');
+      expect((emitted[0] as { steps: Array<{ stepType: string; params: string }> }).steps[0].params).toContain('channel:');
+      expect((emitted[0] as { steps: Array<{ stepType: string; params: string }> }).steps[0].params).toContain('text:');
     });
   });
 
@@ -175,17 +175,31 @@ describe('ActionForm', () => {
     const emailAction = {
       id: 'action-1',
       source: 'inline' as const,
-      stepType: 'email' as const,
-      connectorId: 'email-1',
-      params: 'to: ""\n',
+      workflowName: 'Email notification',
+      steps: [
+        {
+          id: 'action-1-step',
+          stepType: 'email' as const,
+          stepName: 'notify',
+          connectorId: 'email-1',
+          params: 'to: ""\n',
+        },
+      ],
     };
 
     const slackV2Action = {
       id: 'action-3',
       source: 'inline' as const,
-      stepType: 'slack2.sendMessage' as const,
-      connectorId: 'slack-2',
-      params: 'channel: ""\ntext: ""\n',
+      workflowName: 'Slack notification',
+      steps: [
+        {
+          id: 'action-3-step',
+          stepType: 'slack2.sendMessage' as const,
+          stepName: 'notify',
+          connectorId: 'slack-2',
+          params: 'channel: ""\ntext: ""\n',
+        },
+      ],
     };
 
     it('renders actions in collapsed state (icon + label visible)', () => {
@@ -253,7 +267,7 @@ describe('ActionForm', () => {
       const emitted: ActionFormValue = onChange.mock.calls[0][0];
       expect(emitted).toHaveLength(2);
       expect(emitted[1].source).toBe('inline');
-      expect((emitted[1] as { stepType: string }).stepType).toBe('slack2.sendMessage');
+      expect((emitted[1] as { steps: Array<{ stepType: string }> }).steps[0].stepType).toBe('slack2.sendMessage');
     });
 
     it('clicking Cancel hides the card picker without adding an action', async () => {
@@ -277,9 +291,16 @@ describe('ActionForm', () => {
       const tenActions: ActionFormValue = Array.from({ length: 10 }, (_, i) => ({
         id: `action-${i}`,
         source: 'inline' as const,
-        stepType: 'email' as const,
-        connectorId: null,
-        params: '',
+        workflowName: 'Email notification',
+        steps: [
+          {
+            id: 'step-1',
+            stepType: 'email' as const,
+            stepName: 'notify',
+            connectorId: null,
+            params: '',
+          },
+        ],
       }));
       renderForm(tenActions);
       expect(screen.queryByTestId('actionFormAddAnother')).not.toBeInTheDocument();
@@ -314,12 +335,19 @@ describe('ActionForm', () => {
     it('shows connector selector and params editor', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const action = {
-        id: 'e1',
-        source: 'inline' as const,
-        stepType: 'email' as const,
-        connectorId: null,
-        params: 'to: ""\n',
-      };
+      id: 'e1',
+      source: 'inline' as const,
+      workflowName: 'Email notification',
+      steps: [
+        {
+          id: 'e1-step',
+          stepType: 'email' as const,
+          stepName: 'notify',
+          connectorId: null,
+          params: 'to: ""\n',
+        },
+      ],
+    };
       renderForm([action]);
 
       await user.click(screen.getByTestId(`actionRowToggle-${action.id}`));
@@ -332,24 +360,38 @@ describe('ActionForm', () => {
   describe('invalid action indicator', () => {
     it('shows an error indicator on an incomplete action when isInvalid is true', () => {
       const action = {
-        id: 'e1',
-        source: 'inline' as const,
-        stepType: 'email' as const,
-        connectorId: null,
-        params: '',
-      };
+      id: 'e1',
+      source: 'inline' as const,
+      workflowName: 'Email notification',
+      steps: [
+        {
+          id: 'e1-step',
+          stepType: 'email' as const,
+          stepName: 'notify',
+          connectorId: null,
+          params: '',
+        },
+      ],
+    };
       renderForm([action], { isInvalid: true });
       expect(screen.getByTestId(`actionRowInvalid-${action.id}`)).toBeInTheDocument();
     });
 
     it('does not show error indicator on a complete action even when isInvalid is true', () => {
       const action = {
-        id: 'e1',
-        source: 'inline' as const,
-        stepType: 'email' as const,
-        connectorId: 'email-1',
-        params: 'to: "user@example.com"\n',
-      };
+      id: 'e1',
+      source: 'inline' as const,
+      workflowName: 'Email notification',
+      steps: [
+        {
+          id: 'e1-step',
+          stepType: 'email' as const,
+          stepName: 'notify',
+          connectorId: 'email-1',
+          params: 'to: "user@example.com"\n',
+        },
+      ],
+    };
       renderForm([action], { isInvalid: true });
       expect(screen.queryByTestId(`actionRowInvalid-${action.id}`)).not.toBeInTheDocument();
     });

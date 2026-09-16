@@ -8,50 +8,138 @@
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
-import { MatcherInput } from './components/matcher_input';
+import { Controller, useFormContext } from 'react-hook-form';
+import { ClassicNotificationControlsSection } from './components/classic_notification_controls_section';
 import { NotificationControlsSection } from './components/notification_controls_section';
-import { NotificationSummary } from './components/notification_summary';
-import { QuickFilters } from './components/quick_filters';
-import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
-import { TagsInput } from './components/tags_input';
+import { PolicyScopeSection } from './components/policy_scope_section';
+import { RuleTagsMatcherInput } from './components/rule_tags_matcher_input';
+import { useActionPolicyPrototypeView } from './components/rule_tags_prototype_toggle';
 import { WorkflowSelector } from './components/workflow_selector';
+import { optionalLabel } from './form_labels';
 import type { ActionPolicyFormState } from './types';
 
-const optionalLabel = (
-  <EuiText color="subdued" size="xs">
-    {i18n.translate('xpack.alertingV2.actionPolicy.form.optionalLabel', {
-      defaultMessage: 'Optional',
-    })}
-  </EuiText>
-);
+export type ActionPolicyFormVariant = 'full' | 'essential';
 
-export const ActionPolicyForm = () => {
+const FormSectionDivider = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        && {
+          margin-block: ${euiTheme.size.xl};
+        }
+      `}
+    >
+      <EuiHorizontalRule margin="none" />
+    </div>
+  );
+};
+
+/** Compact create-from-rule form: name, rule tags (matcher), workflows. */
+const EssentialActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const matcher = useWatch({ control, name: 'matcher' });
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher?.expression ?? undefined);
 
   return (
     <>
+      <Controller
+        name="name"
+        control={control}
+        rules={{
+          required: i18n.translate('xpack.alertingV2.actionPolicy.form.name.required', {
+            defaultMessage: 'Name is required.',
+          }),
+        }}
+        render={({ field: { ref, ...field }, fieldState: { error } }) => (
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.actionPolicy.form.name', {
+              defaultMessage: 'Name',
+            })}
+            fullWidth
+            isInvalid={!!error}
+            error={error?.message}
+          >
+            <EuiFieldText
+              {...field}
+              inputRef={ref}
+              fullWidth
+              isInvalid={!!error}
+              data-test-subj="nameInput"
+              placeholder={i18n.translate('xpack.alertingV2.actionPolicy.form.name.placeholder', {
+                defaultMessage: 'Add policy name',
+              })}
+            />
+          </EuiFormRow>
+        )}
+      />
+
+      <EuiSpacer size="m" />
+
+      <Controller
+        name="matcher"
+        control={control}
+        render={({ field }) => (
+          <RuleTagsMatcherInput matcher={field.value} onChange={field.onChange} />
+        )}
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiText size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.essential.workflowsTitle"
+            defaultMessage="Workflows"
+          />
+        </h3>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.essential.workflowsDescription"
+            defaultMessage="Choose which workflows run when this policy matches."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <WorkflowSelector allowNestedFlyouts={false} allowCreateConnector={false} />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+    </>
+  );
+};
+
+const FullActionPolicyForm = () => {
+  const { control } = useFormContext<ActionPolicyFormState>();
+  const prototypeView = useActionPolicyPrototypeView();
+  const showVisualChart = prototypeView === 'visual_chart';
+
+  return (
+    <EuiForm component="div" fullWidth data-test-subj="actionPolicyForm">
       <EuiDescribedFormGroup
         fullWidth
         title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
-              defaultMessage="Policy details"
-            />
-          </h3>
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
+                defaultMessage="Policy details"
+              />
+            </h3>
+          </EuiTitle>
         }
         description={
           <FormattedMessage
@@ -115,119 +203,52 @@ export const ActionPolicyForm = () => {
             </EuiFormRow>
           )}
         />
-        <Controller
-          name="tags"
-          control={control}
-          render={({ field }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.actionPolicy.form.tags', {
-                defaultMessage: 'Tags',
-              })}
-              labelAppend={optionalLabel}
-              fullWidth
-            >
-              <TagsInput value={field.value} onChange={field.onChange} />
-            </EuiFormRow>
-          )}
-        />
       </EuiDescribedFormGroup>
 
-      <EuiHorizontalRule margin="l" />
+      <FormSectionDivider />
 
-      <EuiDescribedFormGroup
-        fullWidth
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
-              defaultMessage="Policy scope"
-            />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-            defaultMessage="Define which alerts this policy applies to. Tags and expression conditions are combined with AND."
-          />
-        }
-      >
-        <Controller
-          name="matcher"
-          control={control}
-          render={({ field }) => (
-            <>
-              <QuickFilters matcher={field.value} onChange={field.onChange} />
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                  defaultMessage: 'Query',
-                })}
-                labelAppend={optionalLabel}
-                helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
-                  defaultMessage:
-                    'A KQL query combined with the conditions above using AND. Leave all conditions empty to apply the policy to all episodes in the space.',
-                })}
-                fullWidth
-              >
-                <MatcherInput
-                  value={field.value?.expression ?? ''}
-                  onChange={(expr) => field.onChange({ ...field.value, expression: expr || null })}
-                  fullWidth
-                  data-test-subj="matcherInput"
-                  dataFieldNames={dataFieldNames}
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                    {
-                      defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
-                    }
-                  )}
-                />
-              </EuiFormRow>
-            </>
-          )}
-        />
-      </EuiDescribedFormGroup>
+      <PolicyScopeSection prototypeView={prototypeView} />
 
-      <EuiHorizontalRule margin="l" />
+      <FormSectionDivider />
 
-      <EuiDescribedFormGroup
-        fullWidth
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.notificationControls.title"
-              defaultMessage="Notification controls"
-            />
-          </h3>
-        }
-        description={<NotificationSummary />}
-      >
+      {showVisualChart ? (
         <NotificationControlsSection />
-      </EuiDescribedFormGroup>
+      ) : (
+        <ClassicNotificationControlsSection />
+      )}
 
-      <EuiHorizontalRule margin="l" />
+      <FormSectionDivider />
 
       <EuiDescribedFormGroup
         fullWidth
         title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.destination.title"
-              defaultMessage="Destination"
-            />
-          </h3>
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.form.destination.title"
+                defaultMessage="Workflows"
+              />
+            </h3>
+          </EuiTitle>
         }
         description={
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.destination.description"
-            defaultMessage="Select the workflows that run when dispatches are sent."
+            defaultMessage="Choose which workflows run when this policy matches. Attach existing workflows or create a simple workflow here."
           />
         }
       >
         <WorkflowSelector />
-        <EuiSpacer size="m" />
-        <SimpleWorkflowBuilder />
       </EuiDescribedFormGroup>
-    </>
+
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+    </EuiForm>
   );
 };
+
+export const ActionPolicyForm = ({
+  variant = 'full',
+}: {
+  variant?: ActionPolicyFormVariant;
+}) => (variant === 'essential' ? <EssentialActionPolicyForm /> : <FullActionPolicyForm />);

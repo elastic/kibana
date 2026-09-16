@@ -7,10 +7,12 @@
 
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import type { InlineWorkflowEditorProps } from './inline_workflow_editor';
 import { InlineWorkflowEditor } from './inline_workflow_editor';
+import type { InlineWorkflowActionDraft } from '../types';
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -64,21 +66,41 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
+const slackDraft = (): InlineWorkflowActionDraft => ({
+  id: 'wf-1',
+  source: 'inline',
+  workflowName: 'Slack notification',
+  steps: [
+    {
+      id: 'step-1',
+      stepType: 'slack2.sendMessage',
+      stepName: 'notify',
+      connectorId: 'slack-1',
+      params: '',
+    },
+  ],
+});
+
+const emailDraft = (): InlineWorkflowActionDraft => ({
+  id: 'wf-1',
+  source: 'inline',
+  workflowName: 'Email notification',
+  steps: [
+    {
+      id: 'step-1',
+      stepType: 'email',
+      stepName: 'notify',
+      connectorId: 'email-1',
+      params: '',
+    },
+  ],
+});
+
 const renderEditor = (props: Partial<InlineWorkflowEditorProps> = {}) => {
   const onChange = jest.fn();
   const result = render(
     <I18nProvider>
-      <InlineWorkflowEditor
-        value={{
-          id: 'step-1',
-          source: 'inline',
-          stepType: 'slack2.sendMessage',
-          connectorId: 'slack-1',
-          params: '',
-        }}
-        onChange={onChange}
-        {...props}
-      />
+      <InlineWorkflowEditor value={slackDraft()} onChange={onChange} {...props} />
     </I18nProvider>
   );
   return { ...result, onChange };
@@ -91,20 +113,56 @@ describe('InlineWorkflowEditor', () => {
   });
 
   it('does not render the SlackChannelSelector when stepType is not slack2.sendMessage', () => {
-    renderEditor({
-      value: {
-        id: 'step-1',
-        source: 'inline',
-        stepType: 'email',
-        connectorId: 'email-1',
-        params: '',
-      },
-    });
+    renderEditor({ value: emailDraft() });
     expect(screen.queryByTestId('slackChannelSelector')).not.toBeInTheDocument();
   });
 
-  it('always renders the ParamsEditor', () => {
+  it('always renders the ParamsEditor for the expanded step', () => {
     renderEditor();
     expect(screen.getByTestId('mockedCodeEditor')).toBeInTheDocument();
+  });
+
+  it('renders action type and step name fields', () => {
+    renderEditor();
+    expect(screen.getByTestId('inlineWorkflowActionTypeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('inlineWorkflowStepNameInput')).toHaveValue('notify');
+  });
+
+  it('can add another step once the current steps are saved and valid', async () => {
+    const user = userEvent.setup();
+    const { onChange } = renderEditor({
+      value: {
+        id: 'wf-1',
+        source: 'inline',
+        workflowName: 'Email notification',
+        steps: [
+          {
+            id: 'step-1',
+            stepType: 'email',
+            stepName: 'notify',
+            connectorId: 'email-1',
+            params: 'to: "ops@example.com"\nsubject: "Hi"\nmessage: "Body"\n',
+          },
+        ],
+      },
+    });
+
+    // First step starts expanded; Add step appears after saving (collapsing) it.
+    expect(screen.queryByTestId('inlineWorkflowAddStep')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('inlineWorkflowStepDone-step-1'));
+
+    await user.click(screen.getByTestId('inlineWorkflowAddStep'));
+    expect(onChange).toHaveBeenCalled();
+    const next = onChange.mock.calls.at(-1)?.[0] as InlineWorkflowActionDraft;
+    expect(next.steps).toHaveLength(2);
+  });
+
+  it('shows a disabled add step after collapsing an incomplete step', async () => {
+    const user = userEvent.setup();
+    renderEditor({ value: emailDraft() });
+
+    expect(screen.queryByTestId('inlineWorkflowAddStep')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('inlineWorkflowStepCollapse-step-1'));
+    expect(screen.getByTestId('inlineWorkflowAddStep')).toBeDisabled();
   });
 });

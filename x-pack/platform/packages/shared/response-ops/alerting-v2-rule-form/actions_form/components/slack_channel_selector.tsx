@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { parse, stringify } from 'yaml';
 import React, { useState } from 'react';
 import { useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
-import type { InlineWorkflowActionDraft } from '../types';
+import type { InlineWorkflowStepDraft } from '../types';
 
 interface SlackChannelSelectorProps {
   connectorId: string | null;
@@ -93,8 +93,8 @@ export const SlackChannelSelectorWrapper = ({
   value,
   onChange,
 }: {
-  value: InlineWorkflowActionDraft;
-  onChange: (value: InlineWorkflowActionDraft) => void;
+  value: InlineWorkflowStepDraft;
+  onChange: (value: InlineWorkflowStepDraft) => void;
 }) => (
   <SlackChannelSelector
     connectorId={value.connectorId}

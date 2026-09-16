@@ -22,6 +22,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
@@ -323,6 +324,16 @@ const pluginModule = new ContainerModule(({ bind }) => {
       if (!alertingEnabled) {
         disableAlertingManagementUi(alertingSection);
         return;
+      }
+
+      const securityToken = PluginStart('security');
+      if (diContainer.isBound(securityToken)) {
+        const security = diContainer.get(securityToken) as SecurityPluginStart;
+        void import('./components/action_policy/form/components/rule_tags_prototype_toggle').then(
+          ({ registerActionPolicyPrototypeUserMenuLink }) => {
+            registerActionPolicyPrototypeUserMenuLink(security);
+          }
+        );
       }
 
       const agentBuilderToken = PluginStart('agentBuilder');
