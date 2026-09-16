@@ -59,6 +59,10 @@ export const deleteV1ThresholdSourceIndex = async (esClient: EsClient): Promise<
  * Polls observability threshold AAD until the rule engine writes an alert for
  * `ruleId`. `execution_status: ok` is not sufficient — that can mean a
  * successful run with no alerts.
+ *
+ * Once the alert document exists, sets `kibana.alert.workflow_tags` to
+ * `[V1_EPISODE_TAG]` so the classic-source tag aggregation (which reads
+ * workflow tags, not rule tags) includes it in the "Alert tags" filter.
  */
 export const waitForV1RuleAlert = async (esClient: EsClient, ruleId: string): Promise<void> => {
   const timeoutMs = 90_000;
@@ -73,8 +77,17 @@ export const waitForV1RuleAlert = async (esClient: EsClient, ruleId: string): Pr
     );
     const hitCount = 'hits' in result ? result.hits?.hits?.length ?? 0 : 0;
     if (hitCount > 0) {
-      await esClient.indices.refresh(
-        { index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN },
+      await esClient.updateByQuery(
+        {
+          index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          script: {
+            source: 'ctx._source["kibana.alert.workflow_tags"] = params.tags',
+            params: { tags: [V1_EPISODE_TAG] },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        },
         { ignore: [404] }
       );
       return;
