@@ -26,6 +26,7 @@ import {
 import { appContextService } from '../../services';
 
 import { FleetNotFoundError } from '../../errors';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
@@ -138,6 +139,10 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await deletePackageDatastreamAssetsHandler(context, request, response);
     expect(response.ok).toHaveBeenCalledWith({
       body: { success: true },
+    });
+
+    expect(packagePolicyServiceMock.list.mock.calls[0][1]).toMatchObject({
+      perPage: SO_SEARCH_LIMIT,
     });
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).toHaveBeenCalledWith({
