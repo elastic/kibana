@@ -41,7 +41,9 @@ const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatM
               description: conversionCase.description,
               timeField: conversionCase.dataset.timeField,
               esql: conversionCase.expected.esql,
-              columnNames: conversionCase.expected.columnNames,
+              columnNamesMatcher: conversionCase.expected.allowAdditionalColumns
+                ? expect.arrayContaining([...conversionCase.expected.columnNames])
+                : [...conversionCase.expected.columnNames],
             },
           ]
         : []
@@ -82,7 +84,7 @@ apiTest.describe(
           // Generated-string assertions live in the unit consumer of the shared
           // case matrix; this layer pins the same strings in the matrix and
           // verifies execution against real Elasticsearch.
-          const { esql, columnNames, timeField } = queryCase;
+          const { esql, columnNamesMatcher, timeField } = queryCase;
 
           const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
             headers: { ...INTERNAL_HEADERS, ...cookieHeader },
@@ -120,7 +122,7 @@ apiTest.describe(
           const responseColumnNames = response.body.rawResponse.columns.map(
             ({ name }: { name: string }) => name
           );
-          expect(responseColumnNames).toStrictEqual([...columnNames]);
+          expect(responseColumnNames).toStrictEqual(columnNamesMatcher);
           expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
         }
       );

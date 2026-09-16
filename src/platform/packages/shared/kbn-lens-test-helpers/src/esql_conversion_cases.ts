@@ -98,6 +98,16 @@ export interface EsqlConversionSuccess {
    * esAggsIdMap; asserted by unit consumers only (no ES-side semantics).
    */
   readonly expectedFormats?: Readonly<Record<string, unknown>>;
+  /**
+   * Optional per-output-column label expectations for the generated
+   * esAggsIdMap; asserted by unit consumers only.
+   */
+  readonly expectedLabels?: Readonly<Record<string, string>>;
+  /**
+   * EVAL-only queries preserve all source columns. Scout consumers still
+   * require these generated columns, but do not require an exact schema.
+   */
+  readonly allowAdditionalColumns?: true;
 }
 
 export interface EsqlConversionFailure {
@@ -212,6 +222,14 @@ const terms = (
     ...params,
   },
   ...overrides,
+});
+
+const staticValue = (value: string): EsqlConversionColumn => ({
+  operationType: 'static_value',
+  label: `Static value: ${value}`,
+  dataType: 'number',
+  isBucketed: false,
+  params: { value },
 });
 
 const dateHistogram = (
@@ -674,6 +692,87 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
   ];
 
   const staticValueCases: EsqlConversionCase[] = [
+    {
+      group: 'static_value',
+      dataset: ecommerce,
+      description: 'static value converts to EVAL after STATS',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: count(),
+        col3: staticValue('100'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend) | EVAL static_value = 100`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)', 'static_value'],
+      },
+    },
+    {
+      group: 'static_value',
+      dataset: ecommerceWithoutTimeField,
+      description: 'static value without other metrics',
+      columns: { col1: staticValue('50') },
+      columnOrder: ['col1'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | EVAL static_value = 50`,
+        columnNames: ['static_value'],
+        allowAdditionalColumns: true,
+      },
+    },
+    {
+      group: 'static_value',
+      dataset: ecommerceWithoutTimeField,
+      description: 'static value uses semantic role name from column roles',
+      columns: {
+        col1: count(),
+        col2: staticValue('100'),
+      },
+      columnOrder: ['col1', 'col2'],
+      columnRoles: { col2: 'max_value' },
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | STATS COUNT(*) | EVAL static_max_value = 100`,
+        columnNames: ['COUNT(*)', 'static_max_value'],
+      },
+    },
+    {
+      group: 'static_value',
+      dataset: ecommerceWithoutTimeField,
+      description: 'multiple static values use indexed names',
+      columns: {
+        col1: staticValue('100'),
+        col2: staticValue('200'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | EVAL static_value_0 = 100, static_value_1 = 200`,
+        columnNames: ['static_value_0', 'static_value_1'],
+        allowAdditionalColumns: true,
+      },
+    },
+    {
+      group: 'static_value',
+      dataset: ecommerceWithoutTimeField,
+      description: 'filtered max metric with column role gets semantic name and keeps label',
+      columns: {
+        col1: metric('sum', 'taxful_total_price'),
+        col2: metric('max', 'taxful_total_price', {
+          label: 'Maximum of taxful_total_price',
+          filter: { language: 'kuery', query: 'taxful_total_price > 100' },
+        }),
+      },
+      columnOrder: ['col1', 'col2'],
+      columnRoles: { col2: 'max_value' },
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | STATS SUM(taxful_total_price), max_value = MAX(taxful_total_price) WHERE KQL("taxful_total_price > 100")`,
+        columnNames: ['SUM(taxful_total_price)', 'max_value'],
+        expectedLabels: { max_value: 'Maximum of taxful_total_price' },
+      },
+    },
     {
       group: 'static_value',
       dataset: ecommerce,
