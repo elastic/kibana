@@ -33,3 +33,35 @@ export const useScopedImprovements = ({
     [improvements, actions]
   );
 };
+
+/**
+ * Past decisions (applied and rejected) for one panel's actions.
+ *
+ * Fetched lazily: the query only fires when `enabled` is true, so history is not loaded until
+ * the user opens the history accordion. The result is cached by react-query so reopening the
+ * accordion does not re-fetch.
+ */
+export const useScopedImprovementsHistory = ({
+  aiIndexId,
+  actions,
+  enabled,
+}: {
+  aiIndexId: string | undefined;
+  actions: readonly ImprovementAction[];
+  enabled: boolean;
+}): { history: Improvement[]; isLoading: boolean } => {
+  const feedbackLoopEnabled = useFeedbackLoopEnabled();
+  const { improvements, isLoading } = useImprovements({
+    aiIndexId,
+    status: ['applied', 'rejected'],
+    size: 25,
+    enabled: feedbackLoopEnabled && enabled,
+  });
+
+  const history = useMemo(
+    () => improvements.filter(({ action }) => (actions as readonly string[]).includes(action)),
+    [improvements, actions]
+  );
+
+  return { history, isLoading };
+};
