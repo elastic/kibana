@@ -19,22 +19,36 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
+import type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+} from '../../../../common/types/rest_spec/iac_provisioner';
+import {
+  CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { getCloudConnectorRemoteRoleTemplate, getCloudConnectorNameError } from '../utils';
+import { getCloudConnectorNameError } from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
+import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
 
 export interface AwsIdentityFederationSetupProps {
   accountType?: AccountType;
   packageName?: string;
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /** Multi-package render payload; takes precedence over packageName + policyTemplates. */
+  integrations?: RenderIacTemplateIntegration[];
   cloud?: CloudSetupForCloudConnector;
   iacTemplateUrl?: string;
   hasInvalidRequiredVars?: boolean;
@@ -47,6 +61,8 @@ export interface AwsIdentityFederationSetupProps {
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
   accountType = 'single-account',
   packageName,
+  policyTemplates,
+  integrations,
   cloud,
   iacTemplateUrl,
   hasInvalidRequiredVars = false,
@@ -99,13 +115,21 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     onConnectorIdChange?.(selected?.id, selected?.name);
   }, [selected, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
-  const cloudFormationUrl = cloud
-    ? getCloudConnectorRemoteRoleTemplate({
-        cloud,
-        accountType: accountType || 'single-account',
-        iacTemplateUrl,
-      })
-    : undefined;
+  const {
+    launchButtonProps,
+    isDisabled: isLaunchDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
+  } = useCloudConnectorTemplate({
+    cloud,
+    accountType: accountType || 'single-account',
+    iacTemplateUrl,
+    packageName,
+    policyTemplates,
+    integrations,
+  });
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
@@ -124,8 +148,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       vars: {
         role_arn: { value: roleArn, type: 'text' },
       },
+      ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
     });
-  }, [createConnector, connectorName, accountType, roleArn]);
+  }, [createConnector, connectorName, accountType, roleArn, iacConfirm]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
   const isCreateDisabled = !roleArn || !!getCloudConnectorNameError(connectorName);
@@ -175,11 +200,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           </EuiAccordion>
           <EuiSpacer size="l" />
           <EuiButton
-            target="_blank"
             iconSide="left"
             iconType="rocket"
-            href={cloudFormationUrl}
-            isDisabled={!cloudFormationUrl}
+            isLoading={isGeneratingTemplate}
+            isDisabled={isLaunchDisabled}
+            onClick={'onClick' in launchButtonProps ? launchButtonProps.onClick : undefined}
+            href={'href' in launchButtonProps ? launchButtonProps.href : undefined}
+            target={'target' in launchButtonProps ? launchButtonProps.target : undefined}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
           >
             <FormattedMessage
@@ -187,6 +214,28 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>
+          {templateGenerationError && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnDangerCallout
+                announceOnMount
+                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
+                title={templateGenerationError}
+                size="s"
+              />
+            </>
+          )}
+          {templateAlreadyCurrent && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnSuccessCallout
+                announceOnMount
+                data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
+                title={templateAlreadyCurrent}
+                size="s"
+              />
+            </>
+          )}
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {

@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
@@ -18,6 +19,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -28,6 +30,7 @@ import type {
   WorkflowSettings,
 } from '@kbn/workflows';
 import {
+  WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
@@ -50,6 +53,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
@@ -104,7 +108,9 @@ import {
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
 import {
-  getWorkflowGlobalTimeoutResumeTaskId,
+  getWorkflowImmediateResumeTaskId,
+  getWorkflowWakeTaskId,
+  WORKFLOW_WAKE_POLL_INTERVAL_MS,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
@@ -128,6 +134,8 @@ const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
  * after a handler failure - so extra attempts also cover resume work that runs and may throw.
  */
 const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
+
+const WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
@@ -416,6 +424,16 @@ export class WorkflowsExecutionEnginePlugin
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_RUN_TASK_TYPE,
+                  workflowRunId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
@@ -426,7 +444,7 @@ export class WorkflowsExecutionEnginePlugin
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -466,6 +484,10 @@ export class WorkflowsExecutionEnginePlugin
     });
     plugins.taskManager.registerTaskDefinitions({
       [WORKFLOW_RESUME_TASK_TYPE]: {
+        paramsSchema: schema.object({
+          workflowRunId: schema.string(),
+          spaceId: schema.string(),
+        }),
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
         // Set high timeout for long-running workflows.
@@ -528,6 +550,58 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowExecutionRepository, stepExecutionRepository } =
                 this.createScopedRepositories();
 
+              if (taskInstance.id !== getWorkflowWakeTaskId(workflowRunId)) {
+                await new WorkflowTaskManager(pluginsStart.taskManager).ensureWakeTask({
+                  executionId: workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                  runAt: new Date(Date.now() + WORKFLOW_WAKE_POLL_INTERVAL_MS),
+                });
+              }
+
+              if (taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)) {
+                const retainedWake = taskInstance.id === getWorkflowWakeTaskId(workflowRunId);
+                if (retainedWake) {
+                  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+                    workflowRunId,
+                    spaceId
+                  );
+                  if (!execution || isTerminalStatus(execution.status)) return;
+                }
+                const accepted = await new WorkflowTaskManager(
+                  pluginsStart.taskManager
+                ).tryRunImmediateResume({
+                  executionId: workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                });
+                // A request never loads workflow checkpoints or invokes steps. Busy
+                // runners keep their claim; this notification retries durably in TM.
+                if (retainedWake) {
+                  // Retention closes the ensure-vs-delete race, including approvals written mid-claim.
+                  return {
+                    runAt: new Date(
+                      Date.now() + (accepted ? WORKFLOW_WAKE_POLL_INTERVAL_MS : 1000)
+                    ),
+                    state: {},
+                  };
+                }
+                return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
+              }
+
+              const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+                workflowRunId,
+                spaceId
+              );
+              if (
+                currentExecution?.status === ExecutionStatus.RUNNING &&
+                taskInstance.attempts === 1
+              ) {
+                // The initial run can still be executing (including short in-process
+                // waits). Do not load its mutable checkpoint in a second runner.
+                return { runAt: new Date(Date.now() + 1000), state: {} };
+              }
+
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
                 stepExecutionRepository,
@@ -565,7 +639,7 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                const { idleTimeoutResumeAt } = await resumeWorkflow({
+                const { retryAt } = await resumeWorkflow({
                   workflowExecutionRepository,
                   stepExecutionRepository,
                   workflowRunId,
@@ -580,16 +654,7 @@ export class WorkflowsExecutionEnginePlugin
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
 
-                if (
-                  taskInstance.id === getWorkflowGlobalTimeoutResumeTaskId(workflowRunId) &&
-                  idleTimeoutResumeAt
-                ) {
-                  // Task Manager deletes one-shot resume tasks on success unless a future
-                  // runAt is returned. Re-arm this stable waiter when chained HITL leaves the
-                  // execution waiting again (e.g. external resume → second waitForApproval).
-                  // Non-terminal claim end: do not stamp semantic outcome.
-                  return { runAt: idleTimeoutResumeAt, state: {} };
-                }
+                if (retryAt) return { runAt: retryAt, state: {} };
 
                 if (taskAbortController.signal.aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
@@ -618,6 +683,16 @@ export class WorkflowsExecutionEnginePlugin
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_RESUME_TASK_TYPE,
+                  workflowRunId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
@@ -628,7 +703,7 @@ export class WorkflowsExecutionEnginePlugin
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -674,7 +749,7 @@ export class WorkflowsExecutionEnginePlugin
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 3,
+        maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
           const { workflowId, spaceId } = taskInstance.params as {
             workflowId: string;
@@ -1019,7 +1094,18 @@ export class WorkflowsExecutionEnginePlugin
                   `Successfully executed ${scheduleType}-scheduled workflow ${workflow.id}`
                 );
               } catch (error) {
-                if (taskAbortController.signal.aborted) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
+                  workflowId,
+                  workflowRunId: workflowExecutionId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowExecutionId,
                     workflow_id: workflowId,
@@ -1101,7 +1187,7 @@ export class WorkflowsExecutionEnginePlugin
         includeGlobal: true,
       });
       if (!stillEnabled) {
-        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+        throw new WorkflowDisabledError(workflow.id);
       }
     };
 
@@ -1758,23 +1844,12 @@ export class WorkflowsExecutionEnginePlugin
         // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
         // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
         // request cannot be executed by workflow:resume (no fakeRequest at run time).
-        await plugins.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+        await workflowTaskManager.runExistingResumeTask(executionId);
         return;
       }
 
-      await plugins.taskManager
-        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
-        .catch((error: unknown) => {
-          this.logger.warn(
-            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-
-      // scheduleAndRunImmediateResume uses a stable per-execution task id
-      // (removeIfExists + schedule) so only one resume task can exist at a time,
-      // then nudges Task Manager via runSoon without relying on index freshness.
+      // Preserve the immediate runner's claim and durably retry wake-ups that
+      // arrive while it is active.
       await workflowTaskManager.scheduleAndRunImmediateResume({
         executionId,
         spaceId,
