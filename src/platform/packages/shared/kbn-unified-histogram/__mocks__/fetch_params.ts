@@ -48,7 +48,9 @@ export const getFetchParamsMock = (
       };
     } else {
       const dv = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
-      breakdown = { field: breakdownFieldName ? dv?.getFieldByName(breakdownFieldName) : undefined };
+      breakdown = {
+        field: breakdownFieldName ? dv?.getFieldByName(breakdownFieldName) : undefined,
+      };
     }
   }
 
