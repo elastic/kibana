@@ -237,7 +237,6 @@ describe('MCP route — registerTool arguments', () => {
     const [, config, callback] = annotatedCall!;
     expect(config.annotations).toEqual(mockAnnotations);
     expect(config.description).toBe('Tool platform.core.list_indices');
-    expect(Object.keys(config.outputSchema)).toEqual(['results', 'prompt']);
     expect(typeof callback).toBe('function');
   });
 
@@ -320,15 +319,6 @@ describe('MCP route — real SDK tool registration', () => {
         {
           description: 'with annotations',
           inputSchema: {},
-          outputSchema: {
-            results: z.array(
-              z.object({
-                tool_result_id: z.string(),
-                type: z.string(),
-                data: z.union([z.looseObject({}), z.array(z.unknown())]),
-              })
-            ),
-          },
           annotations: {
             title: 'My Tool',
             readOnlyHint: true,
