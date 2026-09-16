@@ -73,6 +73,15 @@ const createFilterExpressions = (
     ])
   );
 
+const createDuplicateEditingFilterExpressions = (
+  expression: FilterExpressionValue,
+  editingFilterId: string
+): ProjectPickerState['filterExpressions'] =>
+  new Map([
+    ...createFilterExpressions([[expression]]),
+    [editingFilterId, { expression, enabled: true }],
+  ]);
+
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const filterExpressions = overrides.filterExpressions ?? new Map();
 
@@ -290,10 +299,10 @@ describe('ProjectPickerFilterForm', () => {
     const user = userEvent.setup();
     renderForm(
       {
-        filterExpressions: new Map([
-          ...createFilterExpressions([[typeSecurityExpression]]),
-          [editingTypeSecurityKey, { expression: typeSecurityExpression, enabled: true }],
-        ]),
+        filterExpressions: createDuplicateEditingFilterExpressions(
+          typeSecurityExpression,
+          editingTypeSecurityKey
+        ),
       },
       { filterId: editingTypeSecurityKey }
     );
