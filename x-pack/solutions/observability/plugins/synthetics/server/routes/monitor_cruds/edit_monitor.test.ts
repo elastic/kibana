@@ -10,6 +10,7 @@ import { SavedObject } from '@kbn/core/server';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
@@ -122,7 +123,7 @@ describe('editSyntheticsMonitorRoute space authorization', () => {
 
     normalizeSpy = jest
       .spyOn(AddEditMonitorAPI.prototype, 'normalizeMonitor')
-      .mockImplementation(async (cfg) => cfg as SyntheticsMonitor);
+      .mockImplementation(async (requestPayload) => requestPayload as unknown as MonitorFields);
   });
 
   afterEach(() => {
