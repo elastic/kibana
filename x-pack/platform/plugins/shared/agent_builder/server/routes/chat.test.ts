@@ -17,7 +17,6 @@ import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   chatPayloadSchema,
-  userMessagePayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
@@ -165,35 +164,17 @@ describe('chatPayloadSchema', () => {
   it('rejects unsupported trigger_mode values', () => {
     expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
   });
-});
 
-describe('userMessagePayloadSchema', () => {
-  it('accepts only user message fields', () => {
+  it('accepts execution options alongside trigger_mode never', () => {
     expect(() =>
-      userMessagePayloadSchema.validate({
+      chatPayloadSchema.validate({
         trigger_mode: 'never',
         conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'context',
-        attachments: [],
+        input: 'hi',
+        connector_id: 'connector-1',
+        read_only: true,
       })
     ).not.toThrow();
-  });
-
-  it('requires conversation_id', () => {
-    expect(() => userMessagePayloadSchema.validate({ trigger_mode: 'never' })).toThrow(
-      /conversation_id/
-    );
-  });
-
-  it.each(['agent_id', 'access_control', 'read_only', 'connector_id'])('rejects %s', (field) => {
-    expect(() =>
-      userMessagePayloadSchema.validate({
-        trigger_mode: 'never',
-        conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'context',
-        [field]: {},
-      })
-    ).toThrow(new RegExp(field));
   });
 });
 

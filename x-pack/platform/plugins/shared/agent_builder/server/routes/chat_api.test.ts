@@ -368,20 +368,56 @@ describe('user message acknowledgements', () => {
     expect(getStartServices).not.toHaveBeenCalled();
   });
 
-  it.each([
-    'agent_id',
-    'access_control',
-    'read_only',
-    'prompts',
-    'action',
-    '_execution_mode',
-    'execution_id',
-    'connector_id',
-    'inference_id',
-    'browser_api_tools',
-    'configuration_overrides',
-    'project_routing',
-  ])('rejects %s before persisting a user message request', async (field) => {
+  it('ignores execution options on a user message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
+    const executeAgent = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ get: async () => conversation }),
+        appendUserMessage,
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validateAttachmentInputs: jest.fn().mockResolvedValue(undefined),
+      },
+      execution: { executeAgent },
+    };
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: () => services,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+          agent_id: 'agent-1',
+          connector_id: 'connector-1',
+          read_only: true,
+          _execution_mode: 'local',
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(200);
+    expect(appendUserMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: '00000000-0000-4000-8000-000000000001' })
+    );
+    expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  it('requires conversation_id before persisting a user message request', async () => {
     const { router, handlers } = captureHandlers();
     const getInternalServices = jest.fn();
 
@@ -396,14 +432,7 @@ describe('user message acknowledgements', () => {
     const response = buildResponse();
     const result = await handlers[`${chatApiPath}/converse`](
       activeContext(true),
-      {
-        body: {
-          trigger_mode: 'never',
-          conversation_id: '00000000-0000-4000-8000-000000000001',
-          input: 'context',
-          [field]: {},
-        },
-      },
+      { body: { trigger_mode: 'never', input: 'context' } },
       response
     );
 

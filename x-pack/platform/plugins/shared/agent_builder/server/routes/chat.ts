@@ -61,86 +61,6 @@ export const promptResponseEntrySchema = schema.oneOf([
   ),
 ]);
 
-const conversationIdSchema = schema.string({
-  maxLength: CONVERSATION_ID_MAX_LENGTH,
-  validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
-  meta: {
-    description: 'Optional existing conversation ID to continue a previous conversation.',
-  },
-});
-
-const inputSchema = schema.maybe(
-  schema.string({
-    meta: { description: 'The user input message to send to the agent.' },
-  })
-);
-
-const attachmentsSchema = schema.maybe(
-  schema.arrayOf(
-    schema.object(
-      {
-        id: schema.maybe(
-          schema.string({
-            meta: { description: 'Optional id for the attachment.' },
-          })
-        ),
-        type: schema.string({
-          meta: { description: 'Type of the attachment.' },
-        }),
-        data: schema.maybe(
-          schema.recordOf(schema.string(), schema.any(), {
-            meta: {
-              description:
-                'Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).',
-            },
-          })
-        ),
-        origin: schema.maybe(
-          schema.string({
-            meta: {
-              description:
-                'Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.',
-            },
-          })
-        ),
-        hidden: schema.maybe(
-          schema.boolean({
-            meta: { description: 'When true, the attachment will not be displayed in the UI.' },
-          })
-        ),
-        description: schema.maybe(
-          schema.string({
-            maxLength: 1024,
-            meta: { description: 'Human-readable label for the attachment.' },
-          })
-        ),
-        group_id: schema.maybe(
-          schema.string({
-            maxLength: 256,
-            meta: {
-              description:
-                'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
-            },
-          })
-        ),
-      },
-      {
-        validate: (attachment) => {
-          if (attachment.data === undefined && attachment.origin === undefined) {
-            return 'Each attachment must include either data or origin (by-reference attachments require origin)';
-          }
-        },
-      }
-    ),
-    {
-      meta: {
-        availability: { stability: 'tech_preview', since: '9.3.0' },
-        description: 'Optional attachments to send with the message.',
-      },
-    }
-  )
-);
-
 export const conversePayloadSchema = schema.object({
   agent_id: schema.string({
     defaultValue: agentBuilderDefaultAgentId,
@@ -177,7 +97,15 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  conversation_id: schema.maybe(conversationIdSchema),
+  conversation_id: schema.maybe(
+    schema.string({
+      maxLength: CONVERSATION_ID_MAX_LENGTH,
+      validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
+      meta: {
+        description: 'Optional existing conversation ID to continue a previous conversation.',
+      },
+    })
+  ),
   execution_id: schema.maybe(
     schema.string({
       validate: (v) => (uuidValidate(v) ? undefined : 'execution_id must be a valid UUID'),
@@ -187,7 +115,11 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  input: inputSchema,
+  input: schema.maybe(
+    schema.string({
+      meta: { description: 'The user input message to send to the agent.' },
+    })
+  ),
   prompts: schema.maybe(
     schema.recordOf(schema.string({ minLength: 1, maxLength: 512 }), promptResponseEntrySchema, {
       meta: {
@@ -196,7 +128,71 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  attachments: attachmentsSchema,
+  attachments: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          id: schema.maybe(
+            schema.string({
+              meta: { description: 'Optional id for the attachment.' },
+            })
+          ),
+          type: schema.string({
+            meta: { description: 'Type of the attachment.' },
+          }),
+          data: schema.maybe(
+            schema.recordOf(schema.string(), schema.any(), {
+              meta: {
+                description:
+                  'Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).',
+              },
+            })
+          ),
+          origin: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.',
+              },
+            })
+          ),
+          hidden: schema.maybe(
+            schema.boolean({
+              meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+            })
+          ),
+          description: schema.maybe(
+            schema.string({
+              maxLength: 1024,
+              meta: { description: 'Human-readable label for the attachment.' },
+            })
+          ),
+          group_id: schema.maybe(
+            schema.string({
+              maxLength: 256,
+              meta: {
+                description:
+                  'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+              },
+            })
+          ),
+        },
+        {
+          validate: (attachment) => {
+            if (attachment.data === undefined && attachment.origin === undefined) {
+              return 'Each attachment must include either data or origin (by-reference attachments require origin)';
+            }
+          },
+        }
+      ),
+      {
+        meta: {
+          availability: { stability: 'tech_preview', since: '9.3.0' },
+          description: 'Optional attachments to send with the message.',
+        },
+      }
+    )
+  ),
   access_control: schema.maybe(
     schema.object(
       {
@@ -327,24 +323,15 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
-export const userMessagePayloadSchema = schema.object({
-  trigger_mode: schema.literal('never'),
-  conversation_id: conversationIdSchema,
-  input: inputSchema,
-  attachments: attachmentsSchema,
-});
-
-const triggerAgentPayloadSchema = conversePayloadSchema.extends({
-  trigger_mode: schema.oneOf([schema.literal('always')], {
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
     defaultValue: 'always',
-    meta: { description: 'Use never to append a user message without executing the agent.' },
+    meta: {
+      description:
+        'Use never to append a user message to an existing conversation without executing the agent. Only conversation_id, input and attachments are read; the execution options are ignored.',
+    },
   }),
 });
-
-export const chatPayloadSchema = schema.oneOf([
-  userMessagePayloadSchema,
-  triggerAgentPayloadSchema,
-]);
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
   execution_idempotency_key: schema.string({

@@ -23,28 +23,27 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { chatPayloadSchema, userMessagePayloadSchema, conversePayloadSchema } from './chat';
+import { chatPayloadSchema, conversePayloadSchema } from './chat';
 
 /**
- * Validates a `trigger_mode: 'never'` chat request, rejecting execution-only options and
- * requests with neither input nor attachments.
+ * Validates a `trigger_mode: 'never'` request and returns the fields it appends to the
+ * conversation. The execution options the payload may also carry are ignored, as nothing
+ * executes.
  */
-const validateUserMessagePayload = (payload: ChatRequestBodyPayload): UserMessagePayload => {
-  let userMessagePayload: UserMessagePayload;
-
-  try {
-    userMessagePayload = userMessagePayloadSchema.validate(payload);
-  } catch (error) {
-    throw createBadRequestError(error instanceof Error ? error.message : String(error));
+const validateUserMessagePayload = ({
+  conversation_id: conversationId,
+  input,
+  attachments,
+}: ChatRequestBodyPayload): UserMessagePayload => {
+  if (!conversationId) {
+    throw createBadRequestError('User message requests require conversation_id');
   }
-
-  const { input, attachments } = userMessagePayload;
 
   if (!input?.trim() && !attachments?.length) {
     throw createBadRequestError('User message requests require input or attachments');
   }
 
-  return userMessagePayload;
+  return { trigger_mode: 'never', conversation_id: conversationId, input, attachments };
 };
 
 /** Events-native chat API */
