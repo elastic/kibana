@@ -92,7 +92,6 @@ export interface SeverityExtension {
   sortRank: number;
   filterDotColor?: string;
 }
-}
 
 export interface EpisodeDataSource {
   id: string;

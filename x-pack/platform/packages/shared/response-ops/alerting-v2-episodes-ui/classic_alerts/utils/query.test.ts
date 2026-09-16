@@ -55,15 +55,10 @@ describe('buildClassicAlertsQuery', () => {
 
   it('maps inactive episode status to recovered and untracked', () => {
     const query = buildClassicAlertsQuery({ status: [ALERT_EPISODE_STATUS.INACTIVE] });
-
     const filters = getFilters(query);
-    const statusFilter = filters.find((f) => f != null && typeof f === 'object' && 'terms' in f) as
-      | { terms: { 'kibana.alert.status': string[] } }
-      | undefined;
-
-    expect(statusFilter?.terms['kibana.alert.status']).toEqual(
-      expect.arrayContaining(['recovered', 'untracked'])
-    );
+    expect(filters).toContainEqual({
+      terms: { 'kibana.alert.status': expect.arrayContaining(['recovered', 'untracked']) },
+    });
   });
 
   it('adds a ruleId filter', () => {
@@ -84,9 +79,52 @@ describe('buildClassicAlertsQuery', () => {
 
   it('adds a severity filter for known values', () => {
     const query = buildClassicAlertsQuery({ severity: ['critical', 'high'] });
+    expect(getFilters(query)).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['critical', 'high'] } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('filters warning to only warning results', () => {
+    const query = buildClassicAlertsQuery({ severity: ['warning'] });
     const filters = getFilters(query);
-    const severityFilter = filters.find((f) => f != null && typeof f === 'object' && 'bool' in f);
-    expect(severityFilter).toBeDefined();
+    expect(filters).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['warning'] } }],
+        minimum_should_match: 1,
+      },
+    });
+    expect(filters).not.toContainEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          should: expect.arrayContaining([
+            { terms: { 'kibana.alert.severity': expect.arrayContaining(['medium']) } },
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('filters medium to only medium results', () => {
+    const query = buildClassicAlertsQuery({ severity: ['medium'] });
+    const filters = getFilters(query);
+    expect(filters).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['medium'] } }],
+        minimum_should_match: 1,
+      },
+    });
+    expect(filters).not.toContainEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          should: expect.arrayContaining([
+            { terms: { 'kibana.alert.severity': expect.arrayContaining(['warning']) } },
+          ]),
+        }),
+      })
+    );
   });
 
   it('returns MATCH_NONE when assigneeUid is set (no classic equivalent)', () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AlertEpisodesSeverityFilter } from './severity_filter';
 import { EpisodeDataSourceProvider } from '../../context/episode_data_source_context';
 import { createTestEpisodeSource } from '../../types/episode_data_source.mock';
@@ -48,5 +48,14 @@ describe('AlertEpisodesSeverityFilter', () => {
     renderFilter({ selectedSeverities: ['high'] });
     const button = screen.getByTestId('test-severity-filter-button');
     expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
+  });
+
+  it('includes extension severity options when data source has severityExtensions', () => {
+    renderFilter({}, true);
+    fireEvent.click(screen.getByTestId('test-severity-filter-button'));
+
+    expect(screen.getByText('Warning')).toBeInTheDocument();
+    expect(screen.getByText('Minor')).toBeInTheDocument();
+    expect(screen.getByText('Major')).toBeInTheDocument();
   });
 });

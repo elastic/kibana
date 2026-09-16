@@ -7,6 +7,11 @@
 
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
+import {
+  EPISODE_SEVERITY_WARNING_LABEL,
+  EPISODE_SEVERITY_MINOR_LABEL,
+  EPISODE_SEVERITY_MAJOR_LABEL,
+} from '../components/severity/translations';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
@@ -20,13 +25,25 @@ export const CLASSIC_EPISODE_SOURCE_ID = 'classic-alerts';
 export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
   {
     value: 'warning',
-    label: 'Warning',
+    label: EPISODE_SEVERITY_WARNING_LABEL,
     color: 'warning',
     sortRank: 1,
     filterDotColor: 'textWarning',
   },
-  { value: 'minor', label: 'Minor', color: '#94D8EB', sortRank: 2, filterDotColor: 'textPrimary' },
-  { value: 'major', label: 'Major', color: 'risk', sortRank: 3, filterDotColor: 'textRisk' },
+  {
+    value: 'minor',
+    label: EPISODE_SEVERITY_MINOR_LABEL,
+    color: '#94D8EB',
+    sortRank: 2,
+    filterDotColor: 'textPrimary',
+  },
+  {
+    value: 'major',
+    label: EPISODE_SEVERITY_MAJOR_LABEL,
+    color: 'risk',
+    sortRank: 3,
+    filterDotColor: 'textRisk',
+  },
 ];
 
 export interface CreateClassicEpisodeSourceOptions {
