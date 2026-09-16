@@ -59,6 +59,7 @@ export {
   findTodosStep,
   carriedOverTodos,
   type ConversationWithoutRounds,
+  type ConversationAttachmentSummary,
   type ConversationPermissions,
   type ConversationWithPermissions,
   type ConversationWithoutRoundsWithPermissions,

@@ -10,6 +10,7 @@ import type {
   ConversationListOptions,
   ConversationSearchOptions,
   ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
   ConversationListResult,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
@@ -37,13 +38,17 @@ export interface ConversationCreatePublicRequest {
 }
 
 /**
- * A conversation client exposing get, list, search, and create operations.
+ * A conversation client exposing get, bulk get, list, search, and create operations.
  */
 export interface ConversationPublicClient {
   /**
    * Retrieve a single conversation by its ID, including all rounds.
    */
   get(conversationId: string): Promise<ConversationWithPermissions>;
+  /**
+   * Retrieve several conversations by ID in one request, without their rounds.
+   */
+  bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
