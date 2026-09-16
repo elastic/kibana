@@ -9,8 +9,6 @@
 
 import { css } from '@emotion/react';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { euiBorderStyles } from '@elastic/eui-theme-common';
 import { layoutVar, layoutLevels } from '../constants';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
@@ -31,9 +29,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
-      // Grid items default to min-width/min-height: auto (content size). Without this the wrapper
-      // grows with the content (e.g. push flyout padding) instead of constraining the scroll
-      // container below.
+      // Grid items default to min-width/min-height: auto; without 0 the wrapper would grow with
+      // the content (e.g. push flyout padding) instead of constraining the scroll container.
       min-width: 0;
       min-height: 0;
 
@@ -48,19 +45,12 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
-        // Pseudo-element frame on the non-scrolling wrapper: doesn't affect layout, doesn't scroll
-        // away with the content, and doesn't collide with focus outlines.
+        // The frame is an outline on this non-scrolling wrapper: it doesn't affect layout, doesn't
+        // scroll away with the content, isn't touched by focus styles (the focusable element is
+        // the scroll container), and sits outside the box where sticky/fixed bars (e.g. console)
+        // can't cover it. This wrapper must never clip (overflow: hidden) or the frame is cut off.
         // borderBaseFloating is transparent in light mode and visible in dark mode.
-        ${euiBorderStyles(useEuiTheme, {
-          side: 'all',
-          borderColor: euiTheme.colors.borderBaseFloating,
-        })}
-
-        // Draw the frame just outside the box, like an outline, so sticky bars and fixed bars
-        // aligned to the application edges (e.g. the console bottom bar) can't cover it.
-        &::after {
-          inset: -${euiTheme.border.width.thin};
-        }
+        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
       `}
       ${!isFramedAppearance &&
       css`
@@ -80,6 +70,13 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
   // only restrict overflow scroll on screen (not print) to allow for full page printing
   @media screen {
     ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
+  }
+
+  // Keyboard focus only (e.g. skip link when the app has no <main> landmark). Kept outside the
+  // box: Chrome clips inset outlines on scroll containers, and EUI's global :focus offsets it -1px.
+  &:focus-visible {
+    outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
+    outline-offset: 0;
   }
 `;
 
