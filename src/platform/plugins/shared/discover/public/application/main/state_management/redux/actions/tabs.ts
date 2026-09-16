@@ -9,8 +9,7 @@
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
-import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -40,6 +39,10 @@ import {
   PROFILE_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
+import {
+  forgetDiscoverSession,
+  rememberDiscoverSession,
+} from '../../../../../services/discover_recently_accessed_service';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
@@ -396,22 +399,28 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
+    const loadPersistedDiscoverSession = async () => {
+      if (!discoverSessionId) {
+        return undefined;
+      }
+      try {
+        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+      } catch (error) {
+        if (error instanceof SavedObjectNotFound) {
+          forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);
+        }
+        throw error;
+      }
+    };
+
     const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
-      discoverSessionId ? services.savedSearch.getDiscoverSession(discoverSessionId) : undefined,
+      loadPersistedDiscoverSession(),
     ]);
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
-      services.chrome.recentlyAccessed.add(
-        getSavedSearchFullPathUrl(persistedDiscoverSession.id),
-        persistedDiscoverSession.title ??
-          i18n.translate('discover.defaultDiscoverSessionTitle', {
-            defaultMessage: 'Untitled Discover session',
-          }),
-        persistedDiscoverSession.id
-      );
-
+      rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
