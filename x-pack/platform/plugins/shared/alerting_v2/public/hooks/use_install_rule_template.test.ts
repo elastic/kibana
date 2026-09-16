@@ -47,6 +47,7 @@ const mockRuleResponse: RuleResponse = {
     revision: 0,
     description: '',
     tags: [],
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },

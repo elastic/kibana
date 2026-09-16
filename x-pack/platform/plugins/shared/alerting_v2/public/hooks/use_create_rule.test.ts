@@ -32,6 +32,7 @@ const mockRuleResponse: RuleResponse = {
     source: { type: 'internal' as const, version: 1 },
     description: '',
     tags: [],
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
