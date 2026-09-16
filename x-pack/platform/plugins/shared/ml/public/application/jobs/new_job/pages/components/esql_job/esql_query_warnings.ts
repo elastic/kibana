@@ -14,6 +14,8 @@ export interface EsqlQueryWarningOptions {
   fallbackTimeField: string;
 }
 
+const TOKEN_DELIMITERS = ',()=<>!+*/-;';
+
 const normalizeIdentifier = (identifier: string) =>
   identifier.replace(/^`|`$/g, '').replace(/``/g, '`').toLowerCase();
 
@@ -103,7 +105,7 @@ const clauseTokens = (clause: string) => {
 
   while (index < clause.length) {
     const character = clause[index];
-    if (/\s/.test(character) || ',()=<>!+*/-'.includes(character)) {
+    if (/\s/.test(character) || TOKEN_DELIMITERS.includes(character)) {
       index++;
       continue;
     }
@@ -121,7 +123,7 @@ const clauseTokens = (clause: string) => {
     while (
       index < clause.length &&
       !/\s/.test(clause[index]) &&
-      !',()=<>!+*/-'.includes(clause[index])
+      !TOKEN_DELIMITERS.includes(clause[index])
     ) {
       index++;
     }
@@ -154,16 +156,16 @@ export const getEsqlQueryWarnings = (
   if (options.query.trim() === '') return [];
 
   const timeFields = configuredTimeFields(options);
-  const warnings: EsqlQueryWarningClause[] = [];
+  const warnings = new Set<EsqlQueryWarningClause>();
 
   splitTopLevelPipelines(withoutComments(options.query)).forEach((clause) => {
     const tokens = clauseTokens(clause);
     const command = tokens[0]?.toLowerCase();
 
-    if (command === 'where' && hasDirectTimeField(tokens, timeFields)) warnings.push('where');
-    if (command === 'sort' && hasDirectTimeField(tokens, timeFields)) warnings.push('sort');
-    if (command === 'limit' && hasNumericLimit(tokens)) warnings.push('limit');
+    if (command === 'where' && hasDirectTimeField(tokens, timeFields)) warnings.add('where');
+    if (command === 'sort' && hasDirectTimeField(tokens, timeFields)) warnings.add('sort');
+    if (command === 'limit' && hasNumericLimit(tokens)) warnings.add('limit');
   });
 
-  return warnings;
+  return [...warnings];
 };

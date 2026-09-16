@@ -207,6 +207,22 @@ describe('EsqlQueryStep', () => {
     expect(screen.getByTestId('mlEsqlQuery')).not.toBeDisabled();
   });
 
+  it('uses localized conjunction formatting for one and two advisory clauses', () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    fireEvent.change(screen.getByTestId('mlEsqlQuery'), {
+      target: { value: 'FROM logs-* | LIMIT 100' },
+    });
+    expect(screen.getByTestId('mlEsqlQueryWarning')).toHaveTextContent('Review row limit');
+
+    fireEvent.change(screen.getByTestId('mlEsqlQuery'), {
+      target: { value: 'FROM logs-* | WHERE @timestamp > now() | LIMIT 100' },
+    });
+    expect(screen.getByTestId('mlEsqlQueryWarning')).toHaveTextContent(
+      'Review time filter and row limit'
+    );
+  });
+
   it('does not update state when an in-flight request resolves after unmount', async () => {
     let resolveRequest: (value: { columns: typeof columns }) => void;
     const request = new Promise<{ columns: typeof columns }>((resolve) => {

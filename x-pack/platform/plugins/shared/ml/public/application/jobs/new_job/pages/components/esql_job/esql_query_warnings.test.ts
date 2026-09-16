@@ -35,6 +35,25 @@ describe('getEsqlQueryWarnings', () => {
     ).toEqual(['where', 'sort', 'limit']);
   });
 
+  it('treats terminal semicolons as delimiters', () => {
+    expect(
+      getEsqlQueryWarnings({
+        query: 'FROM logs | SORT @timestamp; | LIMIT 100;',
+        ...timeFields,
+      })
+    ).toEqual(['sort', 'limit']);
+  });
+
+  it('deduplicates repeated warning kinds in pipeline order', () => {
+    expect(
+      getEsqlQueryWarnings({
+        query:
+          'FROM logs | WHERE @timestamp > now() | WHERE @timestamp < now() | LIMIT 100 | LIMIT 200',
+        ...timeFields,
+      })
+    ).toEqual(['where', 'limit']);
+  });
+
   it('ignores clause-like text in comments and string literals', () => {
     expect(
       getEsqlQueryWarnings({

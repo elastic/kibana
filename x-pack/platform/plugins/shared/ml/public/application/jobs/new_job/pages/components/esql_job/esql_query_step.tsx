@@ -71,10 +71,10 @@ const warningClauseLabels: Record<EsqlQueryWarningClause, string> = {
 };
 
 const formatWarningClauses = (clauses: EsqlQueryWarningClause[]) =>
-  clauses
-    .map((clause) => warningClauseLabels[clause])
-    .join(', ')
-    .replace(/, ([^,]*)$/, ', and $1');
+  i18n.formatList(
+    'conjunction',
+    clauses.map((clause) => warningClauseLabels[clause])
+  );
 
 export interface EsqlQueryStepState {
   query: string;
