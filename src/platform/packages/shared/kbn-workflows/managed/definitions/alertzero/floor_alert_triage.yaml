@@ -1,50 +1,308 @@
 version: "1"
 name: Alert Triage
-description: Watch Floor alert triage worker stub.
+description: >
+  AlertZero Worker that triages alert batches produced by detection rule
+  executions. Classifies each alert as true_positive / false_positive /
+  inconclusive using the Security Alert Analysis workflow, records the
+  reasoning in an Investigation conversation, writes each verdict as an
+  alert tag and note, and — gated by the Worker's autonomy level — closes
+  false positives via a HITL proposal.
 enabled: false
 tags:
   - watch
   - watch-floor
+
+settings:
+  # Must exceed the gate workflow's 72 h timeout. `system-create-investigation-proposal`
+  # parks this Worker run on `waitForApproval` for up to 72 h at Manual autonomy.
+  # The 6 h default would kill the run mid-gate.
+  timeout: '80h'
+
 triggers:
+  - type: alert
   - type: manual
+
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
-steps:
-  - name: triage_alerts
-    type: ai.agent
-    agent-id: alertzero-thin-agent
-    timeout: "10m"
-    create-conversation: true
-    with:
-      configuration_overrides:
-        skill_ids:
-          - alert-analysis
-        tools:
-          - tool_ids:
-              - security.alertzero.actions.list
-      message: >
-        Triage the security alert context below. Prefer
-        recall over precision when unsure. Return a structured
-        classification.
+    # Minimum confidence score for a false_positive verdict to qualify for
+    # proposal / auto-close. Alerts below this floor are tagged and noted
+    # but not proposed for closure (R6).
+    autoCloseConfidenceScoreMinThreshold: __WORKER_AUTO_CLOSE_THRESHOLD__
 
-        Alert / event context:
-        {{ event | json }}
-      schema:
-        type: object
-        properties:
-          classification:
-            type: string
-            enum:
-              - true_positive
-              - false_positive
-              - inconclusive
-            description: Classification of the alert based on analysis
-          confidence_score:
-            type: number
-            minimum: 0
-            maximum: 1
-            description: Confidence from 0.0–1.0
-          rationale:
-            type: string
+# =============================================================================
+# Steps
+# =============================================================================
+#
+# ORDERING IS LOAD-BEARING — do not rearrange.
+#
+# The conclusion metadata-patch, tags, and notes MUST be written before the
+# gate (`workflow.execute system-create-investigation-proposal`). The gate
+# parks this Worker for up to 72 h at Manual autonomy; anything sequenced
+# after it is invisible to the analyst until a decision arrives.
+#
+# Pipeline:
+#   1. create_investigation      — open an Investigation conversation
+#   2. attach_alerts             — attach the alert batch by value
+#   3. collect_fp_candidates     — filter verdicts to FP + threshold
+#   4. classify_alerts           — run the classification sub-workflow
+#   5. compute_fp_candidates     — filter verdicts to FP + threshold
+#   6. set_az_tags               — static AZ classification tags (R5, always)
+#   7. add_verdict_notes         — verdict + investigation ref per alert (R4/R13, always)
+#   8. attach_verdict_summary    — grouped verdict attachment
+#   9. write_conclusion          — deterministic conclusion (D41) ← BEFORE the gate
+#  10. gate_fp_close             — proposal gate (if any FP candidates)
+#  11. close_investigation_no_fp — explicit close when zero FPs (the branch that
+#                                  gets forgotten — must exist, see test)
+
+steps:
+  # ---------------------------------------------------------------------------
+  # 1. Open an Investigation conversation seeded from the `investigation`
+  #    template. Seeds status, severity, and the workflow_execution_id so a
+  #    Worker retry can detect an existing Investigation for this execution.
+  # ---------------------------------------------------------------------------
+  - name: create_investigation
+    type: ai.conversation.create
+    with:
+      template_id: investigation
+      title: "Alert Triage — {{ event.rule.name }}"
+      metadata:
+        status: open
+        severity: "{{ event.rule.severity | default: 'medium' }}"
+        description: >-
+          Automated triage of {{ event.alerts | size }} alert(s) from rule
+          "{{ event.rule.name }}" ({{ event.rule.id }}).
+        workflow_execution_id: "{{ execution.id }}"
+
+  # ---------------------------------------------------------------------------
+  # 2. Attach the analysed alerts to the Investigation. By-value so the
+  #    attachment is self-contained and does not require the caller to resolve
+  #    a live index.
+  # ---------------------------------------------------------------------------
+  - name: attach_alerts
+    type: ai.attachment.add
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      type: security.alerts
+      data:
+        alert_ids: "${{ event.alerts | map: '_id' }}"
+        rule_id: "{{ event.rule.id }}"
+        rule_name: "{{ event.rule.name }}"
+      description: "Alerts analysed in this triage run"
+
+  # ---------------------------------------------------------------------------
+  # 3. Run the Security Alert Analysis sub-workflow.
+  #
+  #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
+  #    every close is a Proposal, so the sub-workflow must not close inline).
+  #
+  #    connectorIdByFeature: alertzero_alert_triage — resolves the model via
+  #    the Model Management feature registry rather than the standalone
+  #    workflow's uiSettings connector, so model choice is an operator-facing
+  #    setting rather than a template value.
+  #
+  #    autoCloseConfidenceScoreMinThreshold is passed through so the
+  #    sub-workflow uses the same floor for tagging/noting (the max threshold
+  #    defaults to 1, collapsing the range to a floor on this path — PR 1).
+  # ---------------------------------------------------------------------------
+  - name: classify_alerts
+    type: workflow.execute
+    with:
+      workflow-id: system-security-alert-analysis
+      inputs:
+        autoCloseEnabled: false
+        autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+        connectorIdByFeature: alertzero_alert_triage
+
+  # ---------------------------------------------------------------------------
+  # 4. Compute the FP candidate list: verdicts classified as false_positive
+  #    at or above the configured confidence floor.
+  # ---------------------------------------------------------------------------
+  - name: compute_fp_candidates
+    type: data.set
+    with:
+      fp_candidate_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | map: 'alert_id' }}
+
+  # ---------------------------------------------------------------------------
+  # 5. Apply static AZ classification tags to every analysed alert (R5).
+  #    Tags are always written — never gated on autonomy level or FP count.
+  #    Replaces any stale AZ classification tag before adding the current one.
+  # ---------------------------------------------------------------------------
+  - name: set_az_tags
+    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
+    type: kibana.SetAlertTags
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      ids:
+        - "{{ foreach.item.alert_id }}"
+      tags:
+        tags_to_remove:
+          - "az:tp"
+          - "az:fp"
+          - "az:inconclusive"
+        tags_to_add:
+          - "az:{{ foreach.item.classification }}"
+
+  # ---------------------------------------------------------------------------
+  # 6. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  #    Always written — never gated on autonomy level.
+  # ---------------------------------------------------------------------------
+  - name: add_verdict_notes
+    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/note"
+      body:
+        note:
+          eventId: "{{ foreach.item.alert_id }}"
+          timelineId: ''
+          note: |
+            🤖 **Alert Triage Worker** — [{{ steps.create_investigation.output.conversation_id }}]({{ steps.create_investigation.output.conversation_id }})
+
+            **Verdict:** {{ foreach.item.classification }}
+            **Confidence:** {{ foreach.item.confidence_score }}
+
+            {{ foreach.item.rationale }}
+      headers:
+        kbn-xsrf: string
+        Content-Type: application/json
+
+  # ---------------------------------------------------------------------------
+  # 7. Attach grouped verdict counts as a typed attachment so the Investigation
+  #    renders the summary inline.
+  # ---------------------------------------------------------------------------
+  - name: attach_verdict_summary
+    type: ai.attachment.add
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      type: security.alert_triage_summary
+      data:
+        verdicts: "${{ steps.classify_alerts.output.verdicts }}"
+        grouped_counts: "${{ steps.classify_alerts.output.grouped_counts }}"
+        rule_name: "{{ event.rule.name }}"
+        rule_id: "{{ event.rule.id }}"
+        fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
+      description: "Grouped verdict counts for rule {{ event.rule.name }}"
+
+  # ---------------------------------------------------------------------------
+  # 8. Write the deterministic conclusion to the Investigation metadata (D41).
+  #
+  #    ⚠️ WRITTEN BEFORE THE GATE — this is visible to the analyst even while
+  #    a Proposal is pending for up to 72 h at Manual autonomy. Do not move
+  #    this step after the gate's workflow.execute.
+  # ---------------------------------------------------------------------------
+  - name: write_conclusion
+    type: ai.conversation.metadata.patch
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        verdict: "{{ steps.classify_alerts.output.verdict_summary }}"
+        summary: "{{ steps.classify_alerts.output.grouped_counts_summary }}"
+
+  # ---------------------------------------------------------------------------
+  # 9. Autonomy gate — create a proposal to close FP alerts if any qualify.
+  #
+  #    Autonomy mapping (per the epic, which overrides D15 and the Triage Watch
+  #    catalog — see PR description for the conflict and why the epic wins):
+  #      manual     → autoApprove: false  (human gate, 72 h queue row)
+  #      supervised → autoApprove: false  (fail-closed for MVP; D37/P17 still open)
+  #      assisted   → autoApprove: true   (auto-closes immediately, no queue row)
+  #
+  #    All three levels go through one gate so the proposal record always exists
+  #    (R11) and there is one mapping site to update when P17 closes.
+  #
+  #    Idempotency: the conversation carries `workflow_execution_id` seeded in
+  #    step 1. A Worker retry re-creates the Investigation (which 409s on a
+  #    duplicate `conversation_id` if one is supplied) rather than re-creating
+  #    a proposal for the same execution. Platform-level idempotency for
+  #    ProposalsService is an open gap (see plan §PR4 non-blocking).
+  # ---------------------------------------------------------------------------
+  - name: gate_fp_close
+    type: if
+    condition: "${{ variables.fp_candidate_ids | size > 0 }}"
+    steps:
+      - name: create_fp_proposal
+        type: workflow.execute
+        # A 72 h gate timeout surfaces as a step failure in the parent
+        # (create_investigation_proposal.yaml: "A gate timeout surfaces as a step
+        # failure rather than a branch"). Patch the Investigation closed so the
+        # analyst sees a legible terminal state rather than a perpetually open one.
+        on-failure:
+          fallback:
+            - name: close_investigation_on_gate_timeout
+              type: ai.conversation.metadata.patch
+              with:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                updates:
+                  status: closed
+                  close_reason: other
+                  summary: >-
+                    No decision received within 72 hours.
+                    {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:fp.
+                    Re-run the Worker to create a new proposal.
+        with:
+          workflow-id: system-create-investigation-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: >-
+              {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}"
+              were classified as false positives at or above the configured confidence floor
+              ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
+              Approving this proposal will close them with workflow_reason=false_positive.
+            actionWorkflowId: system-alertzero-action-close-alerts-fp
+            actionInput:
+              alertIds: "${{ variables.fp_candidate_ids }}"
+              reason: "false_positive"
+            impact: high
+            confidence: high
+            # Autonomy → autoApprove mapping. One site: update here when P17 closes.
+            # supervised is deliberately fail-closed until D37's principal question
+            # and P17's per-level semantics are settled (see plan §PR4, D37, P17).
+            autoApprove: "${{ consts.worker_settings.autonomy == 'assisted' }}"
+
+      # After the gate resolves (human approve or auto-approved), verify the
+      # close landed by comparing the action workflow's output closed_count
+      # against the proposed alert count. A mismatch means alerts stayed open
+      # while nothing notified the analyst — which is the failure D37 says
+      # "logged and shown in the UI" is not good enough for.
+      - name: verify_and_close
+        type: if
+        condition: "${{ steps.create_fp_proposal.output.status == 'succeeded' }}"
+        steps:
+          - name: close_investigation_after_approval
+            type: ai.conversation.metadata.patch
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: false_positive
+
+  # ---------------------------------------------------------------------------
+  # 10. No-FP branch: close the Investigation immediately (D31, D41).
+  #
+  #     This branch MUST be explicit. A batch that classifies nothing as a
+  #     false positive still needs a closed Investigation — it is the branch
+  #     that gets forgotten in tests and in code review.
+  # ---------------------------------------------------------------------------
+  - name: close_investigation_no_fp
+    type: if
+    condition: "${{ variables.fp_candidate_ids | size == 0 }}"
+    steps:
+      - name: close_no_fp
+        type: ai.conversation.metadata.patch
+        with:
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          updates:
+            status: closed

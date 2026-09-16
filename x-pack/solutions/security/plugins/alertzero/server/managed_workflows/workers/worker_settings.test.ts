@@ -7,6 +7,7 @@
 
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
@@ -17,12 +18,20 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const ALERT_TRIAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 
 const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+/** Workers with per-worker settings beyond schedule/autonomy that have dedicated describe blocks. */
+const SPECIAL_CASE_WORKER_IDS: string[] = [ALERT_TRIAGE_WORKER_ID];
 
 /** Every other Worker is alert- or event-triggered and owns no schedule. */
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
   (id) => !SCHEDULED_WORKER_IDS.includes(id)
+);
+
+/** Unscheduled Workers with only the base settingsVersion+autonomy template values. */
+const PLAIN_UNSCHEDULED_WORKER_IDS = UNSCHEDULED_WORKER_IDS.filter(
+  (id) => !SPECIAL_CASE_WORKER_IDS.includes(id)
 );
 
 describe('createWorkerSettingsRegistration', () => {
@@ -165,7 +174,7 @@ describe('createWorkerSettingsRegistration', () => {
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {
-    it.each(UNSCHEDULED_WORKER_IDS)('%s default values are unchanged', (workerId) => {
+    it.each(PLAIN_UNSCHEDULED_WORKER_IDS)('%s default values are unchanged', (workerId) => {
       expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).toEqual({
         settingsVersion: 1,
         autonomyLevel: 'manual',
@@ -187,12 +196,63 @@ describe('createWorkerSettingsRegistration', () => {
       ).toEqual({ rejected: 'a schedule interval' });
     });
 
-    it.each(UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
+    it.each(PLAIN_UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
 
       expect(
         registration.applyPatch(registration.createDefaultValues(), { autonomyLevel: 'assisted' })
       ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'assisted' } });
+    });
+  });
+
+  describe('confidence threshold — alert triage (opted in)', () => {
+    const registration = createWorkerSettingsRegistration(ALERT_TRIAGE_WORKER_ID);
+
+    it('defaults to 0.8 at settings version 2 and omits schedule', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 2,
+        autonomyLevel: 'manual',
+        autoCloseConfidenceScoreMinThreshold: 0.8,
+      });
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: ALERT_TRIAGE_WORKER_ID,
+        autonomy: 'manual',
+        autoCloseConfidenceScoreMinThreshold: 0.8,
+      });
+    });
+
+    it('defaults the threshold for an install that predates the setting', () => {
+      const { values } = registration.migrate({ settingsVersion: 2, autonomyLevel: 'assisted' });
+      expect(values).toEqual({
+        settingsVersion: 2,
+        autonomyLevel: 'assisted',
+        autoCloseConfidenceScoreMinThreshold: 0.8,
+      });
+    });
+
+    it('preserves a persisted threshold', () => {
+      const { values } = registration.migrate({
+        settingsVersion: 2,
+        autonomyLevel: 'manual',
+        autoCloseConfidenceScoreMinThreshold: 0.95,
+      });
+      expect(values).toEqual({
+        settingsVersion: 2,
+        autonomyLevel: 'manual',
+        autoCloseConfidenceScoreMinThreshold: 0.95,
+      });
+    });
+
+    it('still accepts an autonomy patch, preserving the threshold', () => {
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { autonomyLevel: 'assisted' })
+      ).toEqual({
+        values: {
+          settingsVersion: 2,
+          autonomyLevel: 'assisted',
+          autoCloseConfidenceScoreMinThreshold: 0.8,
+        },
+      });
     });
   });
 });

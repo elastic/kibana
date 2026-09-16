@@ -38,3 +38,20 @@ export const renderScheduledWorkerYaml = (
     '__WORKER_SCHEDULE_INTERVAL__',
     values.scheduleInterval
   );
+
+/**
+ * Values for the Alert Triage Worker. Extends the common set with the minimum
+ * confidence threshold that gates FP close proposals.
+ */
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  autoCloseConfidenceScoreMinThreshold: number;
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_THRESHOLD__',
+    String(values.autoCloseConfidenceScoreMinThreshold)
+  );

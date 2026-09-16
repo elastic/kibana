@@ -26,7 +26,7 @@ type RegisteredWorkerId =
 type WorkerTemplateValues = ManagedWorkflowTemplateValuesForId<RegisteredWorkerId>;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 2,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
@@ -45,18 +45,34 @@ const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
 };
 
 /**
+ * Default FP confidence threshold per Worker. Presence opts a Worker into the threshold setting.
+ */
+const WORKER_THRESHOLD_DEFAULTS: Partial<Record<RegisteredWorkerId, number>> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 0.8,
+};
+
+/**
  * Reads the interval back off parsed template values. Needed because the values type is a union
  * over every Worker, so only the schedule-driven members type the field as a string.
  */
 const readScheduleInterval = (values: WorkerTemplateValues): string | undefined =>
   typeof values.scheduleInterval === 'string' ? values.scheduleInterval : undefined;
 
+/**
+ * Reads the threshold back off parsed template values for threshold-owning Workers.
+ */
+const readThreshold = (values: WorkerTemplateValues): number | undefined =>
+  typeof values.autoCloseConfidenceScoreMinThreshold === 'number'
+    ? values.autoCloseConfidenceScoreMinThreshold
+    : undefined;
+
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
 ): WorkerTemplateValues => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval } = raw;
+  const { settingsVersion, autonomyLevel, scheduleInterval, autoCloseConfidenceScoreMinThreshold } =
+    raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -68,18 +84,23 @@ const parseWorkerValues = (
   }
 
   const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-  if (scheduleDefault === undefined) {
-    return {
-      settingsVersion: currentVersion,
-      autonomyLevel: parsedAutonomyLevel.data,
-    };
-  }
+  const thresholdDefault = WORKER_THRESHOLD_DEFAULTS[workerId];
 
-  // Absent means the install predates the setting, so it takes the default.
   return {
     settingsVersion: currentVersion,
     autonomyLevel: parsedAutonomyLevel.data,
-    scheduleInterval: scheduleInterval ?? scheduleDefault,
+    ...(scheduleDefault === undefined
+      ? {}
+      : // Absent means the install predates the setting, so it takes the default.
+        { scheduleInterval: scheduleInterval ?? scheduleDefault }),
+    ...(thresholdDefault === undefined
+      ? {}
+      : {
+          autoCloseConfidenceScoreMinThreshold:
+            typeof autoCloseConfidenceScoreMinThreshold === 'number'
+              ? autoCloseConfidenceScoreMinThreshold
+              : thresholdDefault,
+        }),
   };
 };
 
@@ -88,10 +109,14 @@ export const createWorkerSettingsRegistration = (
 ): WorkerSettingsRegistration => ({
   createDefaultValues: (): WorkerTemplateValues => {
     const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
+    const thresholdDefault = WORKER_THRESHOLD_DEFAULTS[workerId];
     return {
       settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
       autonomyLevel: 'manual',
       ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
+      ...(thresholdDefault === undefined
+        ? {}
+        : { autoCloseConfidenceScoreMinThreshold: thresholdDefault }),
     };
   },
   migrate: (raw: Record<string, unknown>) => {
@@ -119,12 +144,14 @@ export const createWorkerSettingsRegistration = (
   toSettings: (raw): WorkerSettings => {
     const values = parseWorkerValues(workerId, raw);
     const scheduleInterval = readScheduleInterval(values);
+    const threshold = readThreshold(values);
     return {
       workerId,
       autonomy: values.autonomyLevel,
       // Spread rather than assign undefined: the registry test asserts the projection's keys
       // survive WorkerSettings.parse unchanged.
       ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+      ...(threshold === undefined ? {} : { autoCloseConfidenceScoreMinThreshold: threshold }),
     };
   },
 });

@@ -299,6 +299,17 @@ export const WorkerSettings = lazySchema(() =>
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
     ),
+    /**
+     * Minimum confidence score (0–1) an alert classification must reach for the Worker to propose a false-positive close. Omitted for Workers that do not classify alerts.
+     */
+    autoCloseConfidenceScoreMinThreshold: z
+      .number()
+      .min(0)
+      .max(1)
+      .optional()
+      .describe(
+        'Minimum confidence score (0–1) an alert classification must reach for the Worker to propose a false-positive close. Omitted for Workers that do not classify alerts.'
+      ),
   })
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;

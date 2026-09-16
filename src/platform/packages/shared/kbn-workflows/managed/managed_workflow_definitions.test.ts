@@ -23,6 +23,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import ACTION_CLOSE_ALERTS_FP_YAML from './definitions/alertzero/actions/action_close_alerts_false_positive.yaml';
 import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/dark_continuous_threat_hunt.yaml';
 import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
@@ -58,6 +59,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    autoCloseConfidenceScoreMinThreshold: 0.85,
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -151,7 +153,7 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '2:275b444e'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '4:e8bc7059'],
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '2:d13818a0'],
   [
     ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -276,4 +278,187 @@ describe('managedWorkflowDefinitions', () => {
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );
+});
+
+// =============================================================================
+// PR 4: Alert Analysis Worker pipeline structural tests
+//
+// These tests assert YAML structure, not runtime behaviour. A managed workflow
+// cannot be executed inside Jest, so the assertions below encode WHY the
+// structure matters so that a future edit that breaks the invariant fails
+// loudly with a named reason — not silently during a 72 h gate wait.
+// =============================================================================
+
+describe('Alert Triage Worker pipeline (floor_alert_triage.yaml)', () => {
+  let renderedYaml: ReturnType<typeof parse>;
+
+  beforeAll(() => {
+    const definition = managedWorkflowDefinitions.find(
+      ({ id }) => id === ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+    );
+    if (!definition) throw new Error('Alert Triage Worker definition not found in registry');
+    const rendered = renderWorkflowYaml(definition);
+    renderedYaml = parse(rendered);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Test 1: No-FP branch structure
+  //
+  // A batch that classifies nothing as a false positive must still write the
+  // conclusion and close the Investigation. The conclusion step and the no-FP
+  // close step must be siblings of the autonomy gate, not nested inside it.
+  //
+  // Limit: this asserts structure only. Runtime coverage ("given zero FP
+  // classifications, no proposal is created and the Investigation closes") lives
+  // in the manual desk-test and in #290740's Scout API spec.
+  // ---------------------------------------------------------------------------
+  it('conclusion metadata-patch and no-FP close are siblings of the autonomy gate, not nested inside it', () => {
+    const steps: Array<{ name: string; type?: string }> = renderedYaml.steps ?? [];
+    const stepNames = steps.map((s) => s.name);
+
+    // The conclusion must exist at the top level of steps
+    expect(stepNames).toContain('write_conclusion');
+
+    // The no-FP close must exist at the top level of steps
+    expect(stepNames).toContain('close_investigation_no_fp');
+
+    // The gate must also exist at the top level (not nested inside another branch)
+    expect(stepNames).toContain('gate_fp_close');
+
+    // write_conclusion must come BEFORE gate_fp_close (ordering is load-bearing:
+    // the gate parks the Worker for up to 72 h; the conclusion must be visible
+    // to the analyst while the proposal is pending)
+    const conclusionIdx = stepNames.indexOf('write_conclusion');
+    const gateIdx = stepNames.indexOf('gate_fp_close');
+    expect(conclusionIdx).toBeLessThan(gateIdx);
+
+    // close_investigation_no_fp must be a top-level `if` step (not inside gate_fp_close)
+    const noFpStep = steps.find((s) => s.name === 'close_investigation_no_fp');
+    expect(noFpStep?.type).toBe('if');
+
+    // The gate_fp_close condition must reference fp_candidate_ids, proving
+    // the proposal step is guarded by a non-empty FP set
+    const gateStep = steps.find((s) => s.name === 'gate_fp_close') as { condition?: string };
+    expect(gateStep?.condition).toMatch(/fp_candidate_ids/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Test 2: Autonomy → autoApprove mapping
+  //
+  // The mapping must live in exactly one place in the YAML so P17's closure
+  // is a single line change, and so a future editor cannot accidentally
+  // fork the mapping into multiple sites. This test checks the YAML source
+  // (not runtime Liquid evaluation — that requires a full workflow engine).
+  //
+  // Expected mapping per the epic (which overrides D15 / Triage Watch catalog):
+  //   manual     → autoApprove: false  (Liquid: autonomy == 'assisted' is false)
+  //   supervised → autoApprove: false  (fail-closed MVP; D37/P17 still open)
+  //   assisted   → autoApprove: true   (Liquid: autonomy == 'assisted' is true)
+  // ---------------------------------------------------------------------------
+  it('autoApprove expression is present in the gate step and maps assisted → true, all others → false', () => {
+    const gateSteps: Array<{
+      name: string;
+      type?: string;
+      steps?: Array<{ name: string; with?: { inputs?: { autoApprove?: unknown } } }>;
+    }> = renderedYaml.steps ?? [];
+    const gateIfStep = gateSteps.find((s) => s.name === 'gate_fp_close');
+
+    const proposalStep = gateIfStep?.steps?.find((s) => s.name === 'create_fp_proposal');
+    const autoApproveExpr = proposalStep?.with?.inputs?.autoApprove;
+
+    // The expression must exist and reference autonomy
+    expect(String(autoApproveExpr)).toMatch(/autonomy/);
+
+    // The expression must only appear once in the whole YAML (one mapping site)
+    const rendered = renderWorkflowYaml(
+      managedWorkflowDefinitions.find(
+        ({ id }) => id === ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+      )!
+    );
+    const siteCount = (rendered.match(/autonomy == 'assisted'/g) ?? []).length;
+    expect(siteCount).toBe(1);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Test 3: Action workflow contract
+  //
+  // All four requirements from the agentic_investigations README. Every one of
+  // them fails at runtime rather than at type-check, which is why they are
+  // worth a structural test.
+  // ---------------------------------------------------------------------------
+  describe('action_close_alerts_false_positive.yaml contract', () => {
+    let actionYaml: ReturnType<typeof parse>;
+
+    beforeAll(() => {
+      actionYaml = parse(ACTION_CLOSE_ALERTS_FP_YAML);
+    });
+
+    it('carries the action tag (required for catalog discovery)', () => {
+      expect(actionYaml.tags).toContain('action');
+    });
+
+    it('declares consts.actionMetadata (required for proposal rendering)', () => {
+      expect(actionYaml.consts?.actionMetadata).toBeDefined();
+      expect(typeof actionYaml.consts.actionMetadata.name).toBe('string');
+      expect(typeof actionYaml.consts.actionMetadata.category).toBe('string');
+      expect(typeof actionYaml.consts.actionMetadata.impact).toBe('string');
+      expect(typeof actionYaml.consts.actionMetadata.reversible).toBe('boolean');
+    });
+
+    it('takes exactly one top-level actionInput input (not top-level fields)', () => {
+      // The gate passes exactly one key. An action with top-level `alertIds` etc.
+      // receives none of them — the single `actionInput` object is the contract.
+      const trigger = actionYaml.triggers?.[0];
+      const inputProps = trigger?.inputs?.properties ?? {};
+      const inputKeys = Object.keys(inputProps);
+
+      expect(inputKeys).toEqual(['actionInput']);
+      expect(inputProps.actionInput.type).toBe('object');
+      expect(trigger?.inputs?.required).toContain('actionInput');
+    });
+
+    it('ends in workflow.output (required for caller result verification)', () => {
+      const steps: Array<{ name: string; type: string }> = actionYaml.steps ?? [];
+      const lastStep = steps[steps.length - 1];
+
+      expect(lastStep?.type).toBe('workflow.output');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Test 4: Gate timeout fallback
+  //
+  // A 72 h gate timeout surfaces as a step failure in the parent (not a branch).
+  // The Worker must declare an on-failure fallback on the gate's workflow.execute
+  // that patches the Investigation closed so the analyst sees a legible terminal
+  // state rather than a perpetually open Investigation (criterion 11).
+  // ---------------------------------------------------------------------------
+  it('gate workflow.execute declares an on-failure fallback that patches the Investigation closed', () => {
+    const steps: Array<{ name: string; type?: string; steps?: unknown[] }> = renderedYaml.steps;
+    const gateIfStep = steps.find((s) => s.name === 'gate_fp_close') as {
+      steps?: Array<{
+        name: string;
+        type?: string;
+        'on-failure'?: { fallback?: Array<{ name: string; type: string }> };
+      }>;
+    };
+
+    expect(gateIfStep).toBeDefined();
+
+    const proposalStep = gateIfStep?.steps?.find((s) => s.name === 'create_fp_proposal');
+    expect(proposalStep).toBeDefined();
+
+    const fallback = (proposalStep as { 'on-failure'?: { fallback?: unknown[] } })?.['on-failure']
+      ?.fallback;
+    expect(Array.isArray(fallback)).toBe(true);
+    expect((fallback as unknown[]).length).toBeGreaterThan(0);
+
+    // The fallback must patch the Investigation closed so the analyst does not
+    // see an open Investigation with no pending action after a 72 h expiry.
+    const closePatch = (
+      fallback as Array<{ name: string; type: string; with?: { updates?: { status?: string } } }>
+    ).find((step) => step.type === 'ai.conversation.metadata.patch');
+    expect(closePatch).toBeDefined();
+    expect(closePatch?.with?.updates?.status).toBe('closed');
+  });
 });
