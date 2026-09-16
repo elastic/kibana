@@ -51,6 +51,12 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
   const getHistorySnapshotTask = async (kbnClient: ApiWorkerFixtures['kbnClient']) =>
     kbnClient.savedObjects.get({ type: 'task', id: HISTORY_SNAPSHOT_TASK_ID });
 
+  const getGlobalState = async (kbnClient: ApiWorkerFixtures['kbnClient']) =>
+    kbnClient.savedObjects.get({
+      type: 'entity-store-global-state',
+      id: 'entity-store-global-state-default',
+    });
+
   apiTest.afterEach(async ({ apiClient }) => {
     await uninstall(apiClient);
   });
@@ -77,6 +83,9 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
       const disabledTask = await getHistorySnapshotTask(kbnClient);
       expect(disabledTask.attributes?.enabled).toBe(false);
 
+      const disabledGlobalState = await getGlobalState(kbnClient);
+      expect(disabledGlobalState.attributes?.historySnapshot?.status).toBe('stopped');
+
       const enableResponse = await apiClient.put(
         ENTITY_STORE_ROUTES.public.ENABLE_HISTORY_SNAPSHOT,
         {
@@ -90,6 +99,9 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
 
       const enabledTask = await getHistorySnapshotTask(kbnClient);
       expect(enabledTask.attributes?.enabled).toBe(true);
+
+      const enabledGlobalState = await getGlobalState(kbnClient);
+      expect(enabledGlobalState.attributes?.historySnapshot?.status).toBe('started');
     }
   );
 

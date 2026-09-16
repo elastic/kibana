@@ -23,9 +23,7 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
       description: 'Disable the Entity Store history scheduled snapshot task.',
       options: {
         tags: ['oas-tag:Security entity store'],
-        availability: {
-          since: '9.6.0',
-        },
+        availability: { since: '9.6.0' },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -57,7 +55,7 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
             return res.notFound({ body: { message: 'Entity store is not installed' } });
           }
           logger.error(error);
-          throw error;
+          return res.customError({ statusCode: 500, body: { message: error.message } });
         }
 
         return res.ok({ body: { ok: true } });

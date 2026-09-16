@@ -24,8 +24,6 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
-export { getHistorySnapshotTaskId };
-
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
   signal: AbortSignal;

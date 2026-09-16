@@ -11,14 +11,18 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import { EntityStoreNotInstalledError } from '../errors';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 
 jest.mock('../../infra/elasticsearch');
+jest.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
 const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
 const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
   typeof updateByQueryWithScript
+>;
+const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as jest.MockedFunction<
+  typeof resolveLatestEntitiesIndexName
 >;
 
 const mockGlobalStateStarted = {
@@ -71,6 +75,7 @@ describe('HistorySnapshotClient', () => {
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
     mockTaskManager = createMockTaskManager();
+    mockResolveLatestEntitiesIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
     client = createClient();
   });
 
@@ -246,17 +251,17 @@ describe('HistorySnapshotClient', () => {
   });
 
   describe('enable', () => {
-    it('enables the Task Manager task without running it immediately and marks snapshot status started', async () => {
+    it('enables the Task Manager task and runs it immediately and marks snapshot status started', async () => {
       await client.enable(request);
 
       expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.bulkEnable).toHaveBeenCalledWith([taskId], false, { request });
+      expect(mockTaskManager.bulkEnable).toHaveBeenCalledWith([taskId], true, { request });
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { status: 'started', frequency: '24h' },
       });
     });
 
-    it('throws EntityStoreNotInstalledError when the task document is missing', async () => {
+    it('throws when the task document is missing', async () => {
       mockTaskManager.bulkEnable.mockResolvedValue({
         tasks: [],
         errors: [
@@ -268,7 +273,9 @@ describe('HistorySnapshotClient', () => {
         ],
       });
 
-      await expect(client.enable(request)).rejects.toBeInstanceOf(EntityStoreNotInstalledError);
+      await expect(client.enable(request)).rejects.toThrow(
+        'Failed to enable history snapshot task: Not Found'
+      );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
 
@@ -301,7 +308,7 @@ describe('HistorySnapshotClient', () => {
       });
     });
 
-    it('throws EntityStoreNotInstalledError when the task document is missing', async () => {
+    it('throws when the task document is missing', async () => {
       mockTaskManager.bulkDisable.mockResolvedValue({
         tasks: [],
         errors: [
@@ -313,7 +320,9 @@ describe('HistorySnapshotClient', () => {
         ],
       });
 
-      await expect(client.disable(request)).rejects.toBeInstanceOf(EntityStoreNotInstalledError);
+      await expect(client.disable(request)).rejects.toThrow(
+        'Failed to disable history snapshot task: Not Found'
+      );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
   });

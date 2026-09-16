@@ -20,12 +20,10 @@ export function registerEnableHistorySnapshot(router: EntityStorePluginRouter) {
       path: ENTITY_STORE_ROUTES.public.ENABLE_HISTORY_SNAPSHOT,
       access: 'public',
       summary: 'Enable history snapshot task',
-      description: 'Enable the Entity Store history scheduled snapshot task.',
+      description: 'Enables and runs the Entity Store history scheduled snapshot task.',
       options: {
         tags: ['oas-tag:Security entity store'],
-        availability: {
-          since: '9.6.0',
-        },
+        availability: { since: '9.6.0' },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -57,7 +55,7 @@ export function registerEnableHistorySnapshot(router: EntityStorePluginRouter) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });
           }
           logger.error(error);
-          throw error;
+          return res.customError({ statusCode: 500, body: { message: error.message } });
         }
 
         return res.ok({ body: { ok: true } });

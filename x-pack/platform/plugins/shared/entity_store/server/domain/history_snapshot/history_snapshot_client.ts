@@ -6,10 +6,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  BulkUpdateTaskResult,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
@@ -26,7 +23,6 @@ import {
 } from '../asset_manager/history_snapshot_index';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { getHistorySnapshotTaskId } from '../../tasks/config';
-import { EntityStoreNotInstalledError } from '../errors';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 export type RunHistorySnapshotResult =
@@ -51,42 +47,8 @@ export interface HistorySnapshotClientDependencies {
   taskManager: TaskManagerStartContract;
 }
 
-const HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE = false;
-
-function getTaskUpdateErrorStatusCode(
-  result: BulkUpdateTaskResult['errors'][number]
-): number | undefined {
-  const { error, status } = result;
-  if (typeof error === 'object' && error !== null && 'statusCode' in error) {
-    const { statusCode } = error;
-    if (typeof statusCode === 'number') {
-      return statusCode;
-    }
-  }
-  return status;
-}
-
-function getTaskUpdateErrorMessage(result: BulkUpdateTaskResult['errors'][number]): string {
-  const { error } = result;
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    return String(error.message);
-  }
-  return getErrorMessage(error);
-}
-
-function throwIfHistorySnapshotTaskUpdateFailed(
-  result: BulkUpdateTaskResult,
-  action: 'enable' | 'disable'
-): void {
-  const [error] = result.errors;
-  if (!error) {
-    return;
-  }
-  if (getTaskUpdateErrorStatusCode(error) === 404) {
-    throw new EntityStoreNotInstalledError();
-  }
-  throw new Error(`Failed to ${action} history snapshot task: ${getTaskUpdateErrorMessage(error)}`);
-}
+// Whether to run the history snapshot task immediately upon enabling it.
+const HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE = true;
 
 export class HistorySnapshotClient {
   private readonly logger: Logger;
@@ -209,7 +171,11 @@ export class HistorySnapshotClient {
         })
       : await this.taskManager.bulkDisable([taskId], false, { request });
 
-    throwIfHistorySnapshotTaskUpdateFailed(result, action);
+    // Check for errors
+    const error = result?.errors?.[0];
+    if (error) {
+      throw new Error(`Failed to ${action} history snapshot task: ${error?.error?.message}`);
+    }
 
     const status: HistorySnapshotStatus = enabled ? 'started' : 'stopped';
     await this.globalStateClient.update({
