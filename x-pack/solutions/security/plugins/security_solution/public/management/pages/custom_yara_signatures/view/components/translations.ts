@@ -89,3 +89,35 @@ export const SIGNATURE_EDITOR_ARIA_LABEL = i18n.translate(
     defaultMessage: 'YARA signature code',
   }
 );
+
+export const VALIDATION_REQUEST_ERROR = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.validationRequestErrorMessage',
+  {
+    defaultMessage: 'Unable to validate YARA signature. Please try again.',
+  }
+);
+
+/**
+ * @param {number} line Line number of the diagnostic. 0 means no line number.
+ * @param {string} message
+ * @returns
+ */
+export const getValidationDiagnosticMessage = ({
+  line,
+  message,
+}: {
+  line: number;
+  message: string;
+}): string => {
+  if (line > 0) {
+    return i18n.translate(
+      'xpack.securitySolution.customYaraSignatures.form.validationDiagnosticWithLineMessage',
+      {
+        defaultMessage: 'Line {line}: {message}',
+        values: { line, message },
+      }
+    );
+  }
+
+  return message;
+};

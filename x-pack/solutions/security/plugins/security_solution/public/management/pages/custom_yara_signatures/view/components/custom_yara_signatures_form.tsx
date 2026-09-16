@@ -21,6 +21,10 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  useValidateCustomYaraSignature,
+  type UseValidateCustomYaraSignatureResultPayload,
+} from '../../hooks/use_validate_custom_yara_signature';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -41,6 +45,7 @@ import {
   OS_PLACEHOLDER,
   SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
+import { CustomYaraSignatureValidationMessages } from './custom_yara_signature_validation_messages';
 
 interface CustomYaraSignatureEntry {
   field: typeof CUSTOM_YARA_SIGNATURE_FIELD_TYPE;
@@ -71,8 +76,17 @@ const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
   },
 ];
 
-const isItemValid = (nextItem: ArtifactFormComponentProps['item']): boolean =>
-  !!nextItem.name?.trim() && (nextItem.os_types?.length ?? 0) > 0;
+const getYaraRuleValue = (nextItem: ArtifactFormComponentProps['item']): string =>
+  ((nextItem.entries[0] as CustomYaraSignatureEntry | undefined)?.value ?? '').trim();
+
+const isItemValid = (
+  nextItem: ArtifactFormComponentProps['item'],
+  isYaraSyntaxValid: boolean
+): boolean =>
+  !!nextItem.name?.trim() &&
+  (nextItem.os_types?.length ?? 0) > 0 &&
+  getYaraRuleValue(nextItem).length > 0 &&
+  isYaraSyntaxValid;
 
 export const testIdPrefix = 'customYaraSignatures-form';
 
@@ -84,6 +98,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
     const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
+    const [isYaraSyntaxValid, setIsYaraSyntaxValid] = useState(false);
 
     const selectedOsOptions = useMemo(
       () =>
@@ -98,7 +113,10 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     }, [item.entries]);
 
     const notifyOfChange = useCallback(
-      (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
+      (
+        updatedItem?: Partial<ArtifactFormComponentProps['item']>,
+        yaraSyntaxValid: boolean = isYaraSyntaxValid
+      ) => {
         const nextItem = updatedItem
           ? {
               ...item,
@@ -108,11 +126,34 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           item: nextItem,
-          isValid: isItemValid(nextItem),
+          isValid: isItemValid(nextItem, yaraSyntaxValid),
         });
       },
-      [item, onChange]
+      [isYaraSyntaxValid, item, onChange]
     );
+
+    const handleValidationResult = useCallback(
+      ({
+        errors,
+        requestError: validationRequestError,
+      }: UseValidateCustomYaraSignatureResultPayload) => {
+        const yaraSyntaxValid = errors.length === 0 && validationRequestError == null;
+        setIsYaraSyntaxValid(yaraSyntaxValid);
+        notifyOfChange(undefined, yaraSyntaxValid);
+      },
+      [notifyOfChange]
+    );
+
+    const {
+      errors: validationErrors,
+      warnings: validationWarnings,
+      requestError,
+    } = useValidateCustomYaraSignature({
+      yaraRule: yaraEntry.value,
+      osTypes: item.os_types,
+      enabled: !disabled,
+      onValidationResult: handleValidationResult,
+    });
 
     const handleOnChangeName = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,14 +173,18 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const handleOnSignatureChange = useCallback(
       (value: string) => {
-        notifyOfChange({
-          entries: [
-            {
-              ...yaraEntry,
-              value,
-            },
-          ],
-        });
+        setIsYaraSyntaxValid(false);
+        notifyOfChange(
+          {
+            entries: [
+              {
+                ...yaraEntry,
+                value,
+              },
+            ],
+          },
+          false
+        );
       },
       [notifyOfChange, yaraEntry]
     );
@@ -151,7 +196,8 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           .map(({ value }) => value as OperatingSystem);
 
         setHasOsError(osTypes.length === 0);
-        notifyOfChange({ os_types: osTypes });
+        setIsYaraSyntaxValid(false);
+        notifyOfChange({ os_types: osTypes }, false);
       },
       [notifyOfChange]
     );
@@ -336,6 +382,12 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         </EuiText>
         <EuiSpacer size="m" />
         {signatureEditor}
+        <CustomYaraSignatureValidationMessages
+          errors={validationErrors}
+          warnings={validationWarnings}
+          requestError={requestError}
+          data-test-subj={getTestId('validation')}
+        />
         <EuiHorizontalRule />
 
         <EuiFormRow

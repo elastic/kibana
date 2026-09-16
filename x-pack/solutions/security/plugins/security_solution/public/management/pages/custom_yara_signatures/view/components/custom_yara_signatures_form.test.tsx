@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core/public';
@@ -22,7 +22,9 @@ import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { OS_TITLES } from '../../../../common/translations';
+import { VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS } from '../../hooks/use_validate_custom_yara_signature';
 import {
   DEFINITION_DESCRIPTION,
   DEFINITION_TITLE,
@@ -110,6 +112,12 @@ describe('Custom YARA signatures form', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     onChangeSpy = jest.fn();
     mockedContext = createAppRootMockRenderer();
+    mockedContext.coreStart.http.post.mockResolvedValue({
+      errors: [],
+      warnings: [],
+      error_count: 0,
+      warning_count: 0,
+    });
     render = (props = createProps()) =>
       mockedContext.render(<CustomYaraSignaturesForm {...props} />);
   });
@@ -156,7 +164,7 @@ describe('Custom YARA signatures form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(
       createOnChangeArgs({
         item: createItem({ name: 'z' }),
-        isValid: true,
+        isValid: false,
       })
     );
   });
@@ -343,6 +351,202 @@ describe('Custom YARA signatures form', () => {
           isValid: false,
         })
       );
+    });
+  });
+
+  describe('signature validation', () => {
+    const signature = 'rule Example { condition: true }';
+
+    const renderWithSignature = (overrides: Partial<ArtifactFormComponentProps['item']> = {}) =>
+      render(
+        createProps({
+          item: createItem({
+            entries: [createYaraEntry(signature)],
+            ...overrides,
+          }),
+        })
+      );
+
+    const flushValidationDebounce = () => {
+      act(() => {
+        jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
+      });
+    };
+
+    it('should not call the validate API when the editor is empty', () => {
+      render();
+      flushValidationDebounce();
+
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
+        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        expect.anything()
+      );
+    });
+
+    it('should not call the validate API when no operating system is selected', () => {
+      renderWithSignature({ os_types: [] });
+      flushValidationDebounce();
+
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
+        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        expect.anything()
+      );
+    });
+
+    it('should debounce validate API calls until the user finishes typing', async () => {
+      renderWithSignature();
+
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
+        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        expect.anything()
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS - 1);
+      });
+      expect(mockedContext.coreStart.http.post).not.toHaveBeenCalledWith(
+        CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+        expect.anything()
+      );
+
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.http.post).toHaveBeenCalledWith(
+          CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+          expect.objectContaining({
+            version: '1',
+            body: JSON.stringify({
+              yara_rule: signature,
+              os_types: [OperatingSystem.WINDOWS],
+            }),
+          })
+        );
+      });
+    });
+
+    it('should list validation errors and warnings below the editor', async () => {
+      mockedContext.coreStart.http.post.mockResolvedValue({
+        errors: [{ message: 'syntax error', line: 2, severity: 'error' }],
+        warnings: [{ message: 'unused identifier', line: 4, severity: 'warning' }],
+        error_count: 1,
+        warning_count: 1,
+      });
+
+      renderWithSignature();
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('customYaraSignatures-form-validation-error')).toHaveTextContent(
+          'Line 2: syntax error'
+        );
+      });
+      expect(screen.getByTestId('customYaraSignatures-form-validation-warning')).toHaveTextContent(
+        'Line 4: unused identifier'
+      );
+    });
+
+    it('should validate again when operating systems change', async () => {
+      const view = renderWithSignature();
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.http.post).toHaveBeenCalledTimes(1);
+      });
+
+      mockedContext.coreStart.http.post.mockClear();
+      view.rerender(
+        <CustomYaraSignaturesForm
+          {...createProps({
+            item: createItem({
+              entries: [createYaraEntry(signature)],
+              os_types: [OperatingSystem.LINUX],
+            }),
+          })}
+        />
+      );
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.http.post).toHaveBeenCalledWith(
+          CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE,
+          expect.objectContaining({
+            body: JSON.stringify({
+              yara_rule: signature,
+              os_types: [OperatingSystem.LINUX],
+            }),
+          })
+        );
+      });
+    });
+
+    it('should show a request error when validation fails', async () => {
+      mockedContext.coreStart.http.post.mockRejectedValue(new Error('network down'));
+
+      renderWithSignature();
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('customYaraSignatures-form-validation-requestError')
+        ).toHaveTextContent('Unable to validate YARA signature. Please try again.');
+      });
+    });
+
+    it('should set isValid to true when validation succeeds', async () => {
+      renderWithSignature({ name: 'test name' });
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(onChangeSpy).toHaveBeenCalledWith(
+          createOnChangeArgs({
+            item: createItem({
+              name: 'test name',
+              entries: [createYaraEntry(signature)],
+            }),
+            isValid: true,
+          })
+        );
+      });
+    });
+
+    it('should set isValid to false when validation returns errors', async () => {
+      mockedContext.coreStart.http.post.mockResolvedValue({
+        errors: [{ message: 'syntax error', line: 2, severity: 'error' }],
+        warnings: [],
+        error_count: 1,
+        warning_count: 0,
+      });
+
+      renderWithSignature({ name: 'test name' });
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(onChangeSpy).toHaveBeenCalledWith(
+          createOnChangeArgs({
+            item: createItem({
+              name: 'test name',
+              entries: [createYaraEntry(signature)],
+            }),
+            isValid: false,
+          })
+        );
+      });
+    });
+
+    it('should set isValid to false when the validation request fails', async () => {
+      mockedContext.coreStart.http.post.mockRejectedValue(new Error('network down'));
+
+      renderWithSignature({ name: 'test name' });
+      flushValidationDebounce();
+
+      await waitFor(() => {
+        expect(onChangeSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            isValid: false,
+          })
+        );
+      });
     });
   });
 });
