@@ -219,18 +219,18 @@ export const ImprovementRow = ({
         </>
       )}
 
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued" data-test-subj="contextImprovementProvenance">
             <p>
-            {getProvenanceSummary(improvement, (iso) =>
-              new Date(iso).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })
-            )}
-          </p>
+              {getProvenanceSummary(improvement, (iso) =>
+                new Date(iso).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              )}
+            </p>
           </EuiText>
         </EuiFlexItem>
         {onViewProvenance && improvement.provenance.tags?.length ? (
@@ -247,12 +247,8 @@ export const ImprovementRow = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
-      </EuiFlexGroup>
-
-      {isOpen && canDecide && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+        {isOpen && canDecide && (
+          <>
             {onTalkWithAgent && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
@@ -299,9 +295,9 @@ export const ImprovementRow = ({
                     })}
               </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+          </>
+        )}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
