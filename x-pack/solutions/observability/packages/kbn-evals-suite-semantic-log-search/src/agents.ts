@@ -29,10 +29,9 @@ interface CreateAgentParams {
 /**
  * Creates the agent for one arm.
  *
- * The keyword arm gets only `get_logs`. The semantic arm gets both tools; it is
- * deliberately *not* told to use `get_logs_semantic`, because whether the model
- * recognises that a paraphrased question needs the semantic path is the thing
- * being measured.
+ * Each arm receives exactly one tool: the keyword arm gets `get_logs`, the
+ * semantic arm gets `get_logs_semantic`. This isolates the comparison to the
+ * retrieval quality of each tool, without mixing in the model's tool selection.
  */
 export const createArmAgent = async ({
   fetch,
@@ -43,7 +42,7 @@ export const createArmAgent = async ({
   const id = agentIdFor(arm, connectorId);
 
   const toolIds =
-    arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_TOOL_ID, GET_LOGS_SEMANTIC_TOOL_ID];
+    arm === 'keyword' ? [GET_LOGS_TOOL_ID] : [GET_LOGS_SEMANTIC_TOOL_ID];
 
   const instructions = [
     'You are answering a question about application logs.',

@@ -124,7 +124,7 @@ export const sigeventsPostgresTimeout: CorpusProfile = {
   timeRange: { start: 'now-24h', end: 'now' },
 
   setupCommand: `node scripts/synthtrace sigevents \\
-  --target=http://elastic:changeme@localhost:9200 \\
+  --target=http://elastic:changeme@localhost:9220 \\
   --kibana=http://elastic:changeme@localhost:5620 \\
   --scenarioOpts="scenario=postgres_timeout,seed=42" \\
   --from=now-2h --to=now --clean`,
