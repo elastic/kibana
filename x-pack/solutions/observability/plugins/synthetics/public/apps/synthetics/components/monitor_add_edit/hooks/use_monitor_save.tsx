@@ -20,7 +20,13 @@ import type { IHttpSerializedFetchError } from '../../../state';
 import { cleanMonitorListState } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
-export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
+export const useMonitorSave = ({
+  monitorData,
+  preserveMaskedParams = false,
+}: {
+  monitorData?: SyntheticsMonitor;
+  preserveMaskedParams?: boolean;
+}) => {
   const dispatch = useDispatch();
   const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -36,6 +42,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
           id: monitorId,
           spaceId,
           monitor: monitorData,
+          preserveMaskedParams,
         });
       } else {
         return createMonitorAPI({
@@ -46,7 +53,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monitorData]);
+  }, [monitorData, preserveMaskedParams]);
 
   useEffect(() => {
     const { coreStart, toasts } = kibanaService;

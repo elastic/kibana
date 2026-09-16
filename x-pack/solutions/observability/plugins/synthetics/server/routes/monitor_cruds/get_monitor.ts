@@ -14,6 +14,7 @@ import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { maskMonitorParams } from '../../../common/utils/mask_monitor_params';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -26,6 +27,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false),
+        hideParams: queryBoolean.optional().default(false),
       }),
     },
   },
@@ -38,7 +40,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      const { internal } = request.query;
+      const { internal, hideParams } = request.query;
 
       const canSave =
         (
@@ -50,8 +52,19 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+        const normalizedMonitor = hideParams
+          ? {
+              ...monitor.normalizedMonitor,
+              attributes: {
+                ...monitor.normalizedMonitor.attributes,
+                [ConfigKey.PARAMS]: maskMonitorParams(
+                  monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
+                ),
+              },
+            }
+          : monitor.normalizedMonitor;
         return {
-          ...mapSavedObjectToMonitor({ monitor: monitor.normalizedMonitor, internal }),
+          ...mapSavedObjectToMonitor({ monitor: normalizedMonitor, internal }),
           spaceId,
           spaces: monitor.decryptedMonitor.namespaces,
         };

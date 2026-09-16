@@ -253,4 +253,48 @@ describe('editSyntheticsMonitorRoute', () => {
     expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
     expect(spacesArg).toHaveLength(2);
   });
+
+  it('restores masked parameter values before updating the monitor', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { routeContext } = getRouteContextMock();
+    routeContext.request = {
+      params: { monitorId },
+      query: { preserveMaskedParams: true },
+      body: { [ConfigKey.PARAMS]: '{"password":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [
+            { id: 'pl-1', label: 'PL 1', isServiceManaged: false, agentPolicyId: 'ap-1' },
+          ],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(result).toBe(forbidden);
+    expect(mergeSourceMonitor).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ [ConfigKey.PARAMS]: '{"password":"changeme"}' })
+    );
+  });
 });
