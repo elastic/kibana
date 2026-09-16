@@ -10,7 +10,7 @@ import { UserActionTypes } from '../action/v1';
 import {
   AttachmentRequestRtV2,
   AttachmentRequestWithoutRefsRtV2,
-} from '../../../api/attachment/v2';
+} from '../../../api/attachment/v2_union';
 
 export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentRequestRtV2 });
 

@@ -14,6 +14,7 @@ import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
+  ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
@@ -35,6 +36,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
+import { getMergedConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
@@ -50,6 +52,7 @@ import {
 } from '../asset_manager/external_indices_contants';
 import { type LogExtractionConfig } from '../saved_objects';
 import {
+  type EngineDescriptor,
   type EngineDescriptorClient,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
@@ -101,15 +104,29 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode?: ExtractionMode;
 }
 
 export class LogsExtractionClient {
+  /** Maps each extraction mode to the field holding its extraction state. single and priority share
+   * logExtractionState; nonPriority has its own field so the two processes do not overwrite each
+   * other's position. */
+  private static readonly EXTRACTION_STATE_FIELD_BY_MODE: Record<
+    ExtractionMode,
+    keyof EngineDescriptor
+  > = {
+    single: 'logExtractionState',
+    priority: 'logExtractionState',
+    nonPriority: 'nonPriorityLogExtractionState',
+  };
+
   logger: Logger;
   namespace: string;
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode: ExtractionMode;
   constructor({
     logger,
     namespace,
@@ -117,6 +134,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
+    extractionMode,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -124,6 +142,13 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
+    this.extractionMode = extractionMode ?? 'single';
+  }
+
+  private extractionStatePatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
+    return {
+      [LogsExtractionClient.EXTRACTION_STATE_FIELD_BY_MODE[this.extractionMode]]: state,
+    } as Partial<EngineDescriptor>;
   }
 
   private async getLogExtractionConfigAndState(
@@ -133,8 +158,24 @@ export class LogsExtractionClient {
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
-    const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    const engineState =
+      this.extractionMode === 'nonPriority'
+        ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
+        : engineDescriptor.logExtractionState;
+    return {
+      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      engineState,
+    };
+  }
+
+  /** Config in effect for one entity type, without requiring the engine to be started. */
+  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engineDescriptor] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
   }
 
   public async extractLogs(
@@ -188,12 +229,12 @@ export class LogsExtractionClient {
         await this.engineDescriptorClient.update(type, { error: null });
       } else {
         await this.engineDescriptorClient.update(type, {
-          logExtractionState: {
+          ...this.extractionStatePatch({
             checkpointTimestamp: null,
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
             sliceEndTimestamp: null,
-          },
+          }),
           error: null,
         });
       }
@@ -204,7 +245,7 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionInstallParams): Promise<LogExtractionConfig> {
+  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
     return state.logsExtraction;
   }
@@ -769,6 +810,7 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
+        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(
@@ -938,9 +980,10 @@ export class LogsExtractionClient {
     if (opts?.specificWindow) {
       return;
     }
-    await this.engineDescriptorClient.update(type, {
-      logExtractionState: logExtractionState as EngineLogExtractionState,
-    });
+    await this.engineDescriptorClient.update(
+      type,
+      this.extractionStatePatch(logExtractionState as EngineLogExtractionState)
+    );
   }
 
   private async handleError(

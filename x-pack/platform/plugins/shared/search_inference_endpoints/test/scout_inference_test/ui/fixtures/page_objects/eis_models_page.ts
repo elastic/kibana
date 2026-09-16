@@ -39,6 +39,11 @@ export class EisModelsPage {
   readonly addEndpointIdField: Locator;
   readonly addEndpointReasoningToggle: Locator;
 
+  // Restricted regions header badge
+  readonly restrictedRegionsBadge: Locator;
+  readonly restrictedRegionsPopover: Locator;
+  readonly restrictedRegionsEditButton: Locator;
+
   // Manage Region Preferences Modal
   readonly manageRegionsButton: Locator;
   readonly manageRegionsModal: Locator;
@@ -54,17 +59,13 @@ export class EisModelsPage {
   readonly manageRegionsLocationTypeRegions: Locator;
   readonly manageRegionsSelectAllButton: Locator;
   readonly manageRegionsCustomPolicyToggle: Locator;
-  // Confirm Region Change Modal
-  readonly confirmRegionChangeModal: Locator;
-  readonly confirmRegionChangeModalGeoList: Locator;
-  readonly confirmRegionChangeModalRegionList: Locator;
-  readonly confirmRegionChangeSaveButton: Locator;
-  readonly confirmRegionChangeCancelButton: Locator;
   readonly confirmRegionSelectionModal: Locator;
   readonly confirmRegionSelectionGeoList: Locator;
+  readonly confirmRegionSelectionRegionList: Locator;
   readonly confirmRegionSelectionCallout: Locator;
   readonly confirmRegionSelectionIgnoreCheckbox: Locator;
   readonly confirmRegionSelectionSaveButton: Locator;
+  readonly confirmRegionSelectionCancelButton: Locator;
   // Confirm Delete Region Policy Modal
   readonly confirmDeleteRegionPolicyModal: Locator;
   readonly confirmDeleteRegionPolicySaveButton: Locator;
@@ -112,6 +113,10 @@ export class EisModelsPage {
     this.addEndpointIdField = this.page.testSubj.locator('addEndpointIdField');
     this.addEndpointReasoningToggle = this.page.testSubj.locator('addEndpointReasoningToggle');
 
+    this.restrictedRegionsBadge = this.page.testSubj.locator('restrictedRegionsBadge');
+    this.restrictedRegionsPopover = this.page.testSubj.locator('restrictedRegionsPopover');
+    this.restrictedRegionsEditButton = this.page.testSubj.locator('restrictedRegionsEditButton');
+
     // Manage Region Preferences Modal
     this.manageRegionsButton = this.page.testSubj.locator('eisManageRegionsButton');
     this.manageRegionsModal = this.page.testSubj.locator('manageRegionsModal');
@@ -131,19 +136,12 @@ export class EisModelsPage {
     this.manageRegionsCustomPolicyToggle = this.page.testSubj.locator(
       'manageRegionsCustomPolicyToggle'
     );
-    // Confirm Region Change Modal
-    this.confirmRegionChangeModal = this.page.testSubj.locator('confirmRegionChangeModal');
-    this.confirmRegionChangeModalGeoList = this.page.testSubj.locator('confirmModalGeoList');
-    this.confirmRegionChangeModalRegionList = this.page.testSubj.locator('confirmModalRegionList');
-    this.confirmRegionChangeSaveButton = this.confirmRegionChangeModal.locator(
-      '[data-test-subj="confirmModalConfirmButton"]'
-    );
-    this.confirmRegionChangeCancelButton = this.confirmRegionChangeModal.locator(
-      '[data-test-subj="confirmModalCancelButton"]'
-    );
     this.confirmRegionSelectionModal = this.page.testSubj.locator('confirmRegionSelectionModal');
     this.confirmRegionSelectionGeoList = this.page.testSubj.locator(
       'confirmRegionSelectionGeoList'
+    );
+    this.confirmRegionSelectionRegionList = this.page.testSubj.locator(
+      'confirmRegionSelectionRegionList'
     );
     this.confirmRegionSelectionCallout = this.page.testSubj.locator(
       'confirmRegionSelectionCallout'
@@ -153,6 +151,9 @@ export class EisModelsPage {
     );
     this.confirmRegionSelectionSaveButton = this.page.testSubj.locator(
       'confirmRegionSelectionSaveButton'
+    );
+    this.confirmRegionSelectionCancelButton = this.page.testSubj.locator(
+      'confirmRegionSelectionCancelButton'
     );
     // Confirm Delete Region Policy Modal
     this.confirmDeleteRegionPolicyModal = this.page.testSubj.locator(

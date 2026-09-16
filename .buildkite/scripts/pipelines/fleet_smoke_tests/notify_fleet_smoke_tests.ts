@@ -14,6 +14,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { BuildkiteClient } from '#pipeline-utils';
 
@@ -126,7 +127,7 @@ async function main() {
   sendSlackNotification(message);
 }
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);
