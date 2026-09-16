@@ -97,7 +97,11 @@ export {
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
 
-export { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from './domain/resolution_rules/constants';
+export {
+  RESOLUTION_RULE_IDS,
+  RESOLUTION_RULE_KINDS,
+  RETIRED_RESOLUTION_RULE_IDS,
+} from './domain/resolution_rules/constants';
 export type { ResolutionRuleId, ResolutionRuleKind } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {

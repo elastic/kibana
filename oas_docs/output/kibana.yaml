@@ -77562,7 +77562,7 @@ paths:
                         id: email_exact_match
                         kind: same_field
                         managed: true
-                      - description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                      - description: Links local Windows and CrowdStrike endpoint user entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Several `local` entities sharing one domain SID are treated as one account. Disable if well-known SID exclusions are not enough for your environment.
                         enabled: true
                         id: windows_sid_bridge
                         kind: same_field
@@ -77572,13 +77572,8 @@ paths:
                         id: entra_guid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
-                        enabled: true
-                        id: crowdstrike_sid_bridge
-                        kind: same_field
-                        managed: true
-                      - description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
-                        enabled: true
+                      - description: 'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit events that create user entities (`event.kind: asset`) and Entra entity analytics. Disabled by default because those events currently do not create entities; enable if your environment emits them as asset events.'
+                        enabled: false
                         id: upn_cross_field_bridge
                         kind: cross_field
                         managed: true

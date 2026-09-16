@@ -7,7 +7,10 @@
 
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
+import {
+  RESOLUTION_RULE_IDS,
+  RETIRED_RESOLUTION_RULE_IDS,
+} from '../../../../../../common/domain/resolution_rules/constants';
 import {
   AUTOMATED_RESOLUTION_STATE_VERSION,
   type AutomatedResolutionState,
@@ -74,12 +77,23 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
+const RETIRED_RULE_IDS = new Set<string>(Object.values(RETIRED_RESOLUTION_RULE_IDS));
+
+// Version 2 reset the email watermark for case-insensitive matching. Version 3
+// resets the SID watermark so `local` entities created while that rule scanned
+// empty feeder namespaces are not left behind the already-advanced watermark.
+const EMAIL_WATERMARK_RESET_VERSION = 2;
+const SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION = 3;
+
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
     return {};
   }
   const rules: Record<string, PerRuleState> = {};
   for (const [id, rule] of Object.entries(value)) {
+    if (RETIRED_RULE_IDS.has(id)) {
+      continue;
+    }
     rules[id] = sanitizeRule(rule, logger);
   }
   return rules;
@@ -91,7 +105,10 @@ const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleSt
  *
  * In practice there are three real inputs:
  *  - the current `{ version, rules }` shape — passed through when version is current,
- *    which also preserves rule ids this version may not know yet;
+ *    which also preserves rule ids this version may not know yet (retired ids are
+ *    stripped; see `RETIRED_RESOLUTION_RULE_IDS`);
+ *  - `{ version: 2, rules }` — SID watermark is reset so `local` entities created
+ *    while the rule scanned empty `windows`/`system` namespaces are not skipped;
  *  - `{ rules }` without `version` — email watermark is reset so case-insensitive
  *    matching can heal pre-existing case-split groups (one-time);
  *  - the original flat `{ lastProcessedTimestamp, lastRun }` — moved into
@@ -118,6 +135,7 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
 
   const rules = sanitizeRules(source.rules, logger);
   const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+  const sidRuleId = RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE;
 
   // Move the legacy flat state into the email rule slot — unless it was already
   // migrated, in which case keep the newer progress (idempotent / crash-retry safe).
@@ -130,11 +148,22 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  if (storedVersion < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+  if (storedVersion < EMAIL_WATERMARK_RESET_VERSION && Object.hasOwn(rules, emailRuleId)) {
     const emailState = rules[emailRuleId];
     rules[emailRuleId] = {
       lastProcessedTimestamp: null,
       lastRun: sanitizeLastRun(emailState.lastRun),
+    };
+  }
+
+  if (
+    storedVersion < SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION &&
+    Object.hasOwn(rules, sidRuleId)
+  ) {
+    const sidState = rules[sidRuleId];
+    rules[sidRuleId] = {
+      lastProcessedTimestamp: null,
+      lastRun: sanitizeLastRun(sidState.lastRun),
     };
   }
 

@@ -138,6 +138,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
         resolutionClient,
         logger,
         stats,
+        spec,
         ruleId,
         mutatedIds,
       });
@@ -233,11 +234,13 @@ async function resolveMatchGroup(
     resolutionClient: ResolutionClient;
     logger: Logger;
     stats: BucketStats;
+    spec: EsqlMatchSpec;
     ruleId: string;
     mutatedIds: Set<string>;
   }
 ): Promise<void> {
   const { logger, stats, ruleId, resolutionClient, mutatedIds } = deps;
+  const allowedDuplicateNamespaces = deps.spec.allowDuplicateUnresolvedNamespaces ?? [];
   stats.examinedBuckets++;
 
   if (row.groupSize > GROUP_SIZE_CEILING) {
@@ -253,11 +256,20 @@ async function resolveMatchGroup(
     // sharing an email) decline the whole group, including a clear IDP pair
     // sitting next to them. Decline-all is intentional: dropping the doubled
     // namespace can promote a worse target (two ADs + one Okta → Okta wins).
-    stats.skippedAmbiguousBuckets++;
-    logger.warn(
-      `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
+    //
+    // The SID rule opts `local` out of that guard: N `local` entities sharing
+    // a domain SID are one account by construction. Cheap-skip here only when
+    // no opted-out namespace is in the bucket; otherwise re-check after fetch.
+    const extrasCouldBeAllowed = allowedDuplicateNamespaces.some((namespace) =>
+      row.unresolvedNamespaces.includes(namespace)
     );
-    return;
+    if (!extrasCouldBeAllowed) {
+      stats.skippedAmbiguousBuckets++;
+      logger.warn(
+        `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
+      );
+      return;
+    }
   }
 
   if (row.unresolvedIds.length < 2 && row.existingTargetIds.length === 0) {
@@ -283,6 +295,17 @@ async function resolveMatchGroup(
     const existingTargets = row.existingTargetIds
       .map((id) => entities.get(id))
       .filter((entity): entity is FetchedEntity => entity != null);
+
+    if (
+      allowedDuplicateNamespaces.length > 0 &&
+      hasDisallowedNamespaceCollision(unresolved, allowedDuplicateNamespaces)
+    ) {
+      stats.skippedAmbiguousBuckets++;
+      logger.warn(
+        `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
+      );
+      return;
+    }
 
     // Drop mid-chain aliases: cascadeLinkEntities rejects them as a target.
     const linkable = [...unresolved, ...existingTargets.filter((entity) => !entity.resolvedTo)];
@@ -443,6 +466,23 @@ function toTimestamp(value: unknown): string | null {
     return new Date(value).toISOString();
   }
   return null;
+}
+
+function hasDisallowedNamespaceCollision(
+  entities: Array<{ namespace: string }>,
+  allowedDuplicateNamespaces: readonly string[]
+): boolean {
+  const allowed = new Set(allowedDuplicateNamespaces);
+  const counts = new Map<string, number>();
+  for (const entity of entities) {
+    counts.set(entity.namespace, (counts.get(entity.namespace) ?? 0) + 1);
+  }
+  for (const [namespace, count] of counts) {
+    if (count > 1 && !allowed.has(namespace)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function uniqueById<T extends { entityId: string }>(entities: T[]): T[] {

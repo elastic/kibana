@@ -7,7 +7,7 @@
 
 import type { EntityMaintainerState } from '../../../../../tasks/entity_maintainers/types';
 
-export const AUTOMATED_RESOLUTION_STATE_VERSION = 2;
+export const AUTOMATED_RESOLUTION_STATE_VERSION = 3;
 
 export interface PerRuleLastRunStats extends EntityMaintainerState {
   resolutionsCreated: number;
@@ -28,8 +28,11 @@ export interface PerRuleState extends EntityMaintainerState {
 // added without a state migration, and watermarks for rules this version doesn't know
 // (e.g. written by a newer node during a rolling upgrade) pass through untouched.
 //
-// `version` tracks one-time upgrades of this state blob (currently: reset the email
-// rule watermark so case-insensitive matching can heal pre-existing case-split groups).
+// `version` tracks one-time upgrades of this state blob:
+//   2 — reset the email rule watermark so case-insensitive matching can heal
+//       pre-existing case-split groups
+//   3 — reset the SID rule watermark so `local` entities created while that
+//       rule scanned empty `windows`/`system` namespaces are not left behind
 export interface AutomatedResolutionState extends EntityMaintainerState {
   version: number;
   rules: Record<string, PerRuleState>;

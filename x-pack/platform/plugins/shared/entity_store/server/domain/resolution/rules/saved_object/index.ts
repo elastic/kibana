@@ -8,7 +8,11 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../../common';
+import {
+  RESOLUTION_RULE_KINDS,
+  RESOLUTION_RULE_IDS,
+  RETIRED_RESOLUTION_RULE_IDS,
+} from '../../../../../common';
 import { EntityResolutionRuleTypeName } from './constants';
 
 const entityResolutionRuleAttributesSchemaV1 = schema.object({
@@ -29,7 +33,7 @@ const entityResolutionRuleAttributesSchemaV2 = schema.object({
     schema.literal(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
     schema.literal(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE),
     schema.literal(RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE),
-    schema.literal(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE),
+    schema.literal(RETIRED_RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE),
     schema.literal(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE),
     schema.literal(RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION),
   ]),

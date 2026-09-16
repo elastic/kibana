@@ -58,7 +58,6 @@ const MATCHER_RULE_IDS = [
   RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
   RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
   RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE,
-  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
   RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE,
 ] as const;
 
@@ -130,16 +129,19 @@ describe('automatedResolutionMaintainerConfig', () => {
     ).toEqual([...MATCHER_RULE_IDS]);
   });
 
-  it('runs every watermarked matcher rule and skips related_user when disabled', async () => {
+  it('runs every default-enabled matcher rule and skips related_user when disabled', async () => {
     const esClient = createEsClient();
     const result = await runConfig(esClient, {
       version: AUTOMATED_RESOLUTION_STATE_VERSION,
       rules: watermarkedRules,
     });
 
-    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(MATCHER_RULE_IDS.length);
+    const defaultEnabledMatcherCount = RESOLUTION_RULE_CONFIGS.filter(
+      (config) => config.matcher && config.defaultEnabled
+    ).length;
+    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(defaultEnabledMatcherCount);
     expect(runRelatedUserAliasResolution).not.toHaveBeenCalled();
-    expect(esClient.indices.refresh).toHaveBeenCalledTimes(MATCHER_RULE_IDS.length);
+    expect(esClient.indices.refresh).toHaveBeenCalledTimes(defaultEnabledMatcherCount);
     expect(result.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
   });

@@ -9,7 +9,10 @@ import {
   ENTRA_GUID_INCLUSION,
   NT_AUTHORITY_SID_INCLUSION,
   WINDOWS_NON_PERSON_SID_EXCLUSION,
+  RESOLUTION_RULE_CONFIGS,
+  getResolutionRuleConfig,
 } from './rule_registry';
+import { RESOLUTION_RULE_IDS } from '../../../../common/domain/resolution_rules/constants';
 
 /**
  * ES|QL `RLIKE` compiles through Lucene's automaton (`RegExp.ALL`). `^` / `$`
@@ -43,5 +46,26 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
 
   it('matches a GUID as a whole string', () => {
     expect(ENTRA_GUID_INCLUSION).toBe('[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}');
+  });
+});
+
+describe('OOTB SID and UPN rule catalog', () => {
+  it('folds CrowdStrike into the SID rule, allows local duplicates, and disables UPN', () => {
+    const sid = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
+    const upn = getResolutionRuleConfig(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE);
+
+    expect(RESOLUTION_RULE_CONFIGS.map((config) => config.id)).not.toContain(
+      'crowdstrike_sid_bridge'
+    );
+    expect(sid?.matcher?.namespaces).toEqual([
+      'local',
+      'system',
+      'windows',
+      'crowdstrike',
+      'active_directory',
+    ]);
+    expect(sid?.matcher?.inclusionPattern).toBe(NT_AUTHORITY_SID_INCLUSION);
+    expect(sid?.matcher?.allowDuplicateUnresolvedNamespaces).toEqual(['local']);
+    expect(upn?.defaultEnabled).toBe(false);
   });
 });

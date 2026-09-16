@@ -23,7 +23,6 @@ const requireMatch = (id: (typeof RESOLUTION_RULE_IDS)[keyof typeof RESOLUTION_R
 const EMAIL = requireMatch(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH);
 const WINDOWS_SID = requireMatch(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
 const ENTRA_GUID = requireMatch(RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE);
-const CROWDSTRIKE_SID = requireMatch(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE);
 const UPN = requireMatch(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE);
 
 describe('ES|QL matcher query builder', () => {
@@ -32,7 +31,6 @@ describe('ES|QL matcher query builder', () => {
       ['email', EMAIL],
       ['windows SID', WINDOWS_SID],
       ['entra GUID', ENTRA_GUID],
-      ['crowdstrike SID', CROWDSTRIKE_SID],
       ['UPN cross-field', UPN],
     ])('emits a valid query for %s', async (_name, spec) => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec });
@@ -79,6 +77,24 @@ describe('ES|QL matcher query builder', () => {
     it('quotes the latest-entities index name', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
       expect(query).toContain(`FROM "${INDEX}"`);
+    });
+
+    it('gates SID match values on an NT-authority inclusion pattern', () => {
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: WINDOWS_SID });
+      expect(query).toContain('match_value RLIKE "S-1-5-.*"');
+      expect(query).toContain(
+        'entity.namespace IN ("local", "system", "windows", "crowdstrike", "active_directory")'
+      );
+      expect(WINDOWS_SID.inclusionPattern).toBe('S-1-5-.*');
+      expect(WINDOWS_SID.allowDuplicateUnresolvedNamespaces).toEqual(['local']);
+    });
+
+    it('accepts NT-authority SIDs and rejects Linux UIDs', () => {
+      const pattern = new RegExp(`^${WINDOWS_SID.inclusionPattern}$`);
+      expect('S-1-5-21-111-222-333-1104').toMatch(pattern);
+      expect('S-1-5-18').toMatch(pattern);
+      expect('1000').not.toMatch(pattern);
+      expect('jane').not.toMatch(pattern);
     });
 
     it('gates UPN match values on an @-shaped inclusion pattern', () => {
