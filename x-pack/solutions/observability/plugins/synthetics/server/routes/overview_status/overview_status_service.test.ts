@@ -160,6 +160,7 @@ describe('current status route', () => {
           "downConfigs": Object {
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -204,6 +205,7 @@ describe('current status route', () => {
           "upConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -323,6 +325,7 @@ describe('current status route', () => {
           "downConfigs": Object {
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -367,6 +370,7 @@ describe('current status route', () => {
           "upConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -436,6 +440,7 @@ describe('current status route', () => {
           "pendingConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -463,6 +468,7 @@ describe('current status route', () => {
             },
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -2980,6 +2986,7 @@ describe('current status route', () => {
         urls: string;
         type: string;
         updated_at: string;
+        created_at: string;
       }> = {}
     ): any => ({
       configId: id,
@@ -2994,6 +3001,7 @@ describe('current status route', () => {
       locations: [{ id: 'loc1', label: 'Loc 1', status: overrides.overallStatus ?? 'up' }],
       urls: overrides.urls,
       updated_at: overrides.updated_at,
+      created_at: overrides.created_at,
     });
 
     const upConfigs: Record<string, any> = {
@@ -3001,11 +3009,13 @@ describe('current status route', () => {
         name: 'Alpha',
         urls: 'https://alpha.io',
         updated_at: '2025-01-01T00:00:00Z',
+        created_at: '2025-04-01T00:00:00Z',
       }),
       m2: makeMeta('m2', {
         name: 'Beta',
         urls: 'https://beta.io',
         updated_at: '2025-03-01T00:00:00Z',
+        created_at: '2025-05-01T00:00:00Z',
       }),
       m3: makeMeta('m3', { name: 'Gamma', updated_at: '2025-02-01T00:00:00Z' }),
     };
@@ -3015,11 +3025,13 @@ describe('current status route', () => {
         name: 'Delta',
         urls: 'https://delta.io',
         updated_at: '2025-04-01T00:00:00Z',
+        created_at: '2025-01-01T00:00:00Z',
       }),
       m5: makeMeta('m5', {
         overallStatus: 'down',
         name: 'Epsilon',
         updated_at: '2025-05-01T00:00:00Z',
+        created_at: '2025-03-01T00:00:00Z',
       }),
     };
     const pendingConfigs: Record<string, any> = {
@@ -3203,6 +3215,49 @@ describe('current status route', () => {
       // ...and first in descending (most-recent-first) order.
       expect(descNames.indexOf('Zeta')).toBeLessThan(descNames.indexOf('Epsilon'));
       expect(descNames.indexOf('Eta')).toBeLessThan(descNames.indexOf('Epsilon'));
+    });
+
+    it('sorts by created_at ascending, independently of updated_at', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      // created_at deliberately runs in the opposite relative order from
+      // updated_at (Delta earliest, Beta latest) to prove this sorts by
+      // created_at and not by falling through to the updated_at case.
+      expect(names.indexOf('Delta')).toBeLessThan(names.indexOf('Epsilon'));
+      expect(names.indexOf('Epsilon')).toBeLessThan(names.indexOf('Alpha'));
+      expect(names.indexOf('Alpha')).toBeLessThan(names.indexOf('Beta'));
+    });
+
+    it('treats a missing created_at as "now", not epoch 0', () => {
+      // Gamma, Zeta, and Eta have no created_at.
+      const asc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      }).paginateConfigs(allBuckets);
+      const ascNames = asc.configs.map((c: any) => c.name);
+      expect(ascNames.indexOf('Gamma')).toBeGreaterThan(ascNames.indexOf('Beta'));
+      expect(ascNames.indexOf('Zeta')).toBeGreaterThan(ascNames.indexOf('Beta'));
+      expect(ascNames.indexOf('Eta')).toBeGreaterThan(ascNames.indexOf('Beta'));
+
+      const desc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      }).paginateConfigs(allBuckets);
+      const descNames = desc.configs.map((c: any) => c.name);
+      expect(descNames.indexOf('Gamma')).toBeLessThan(descNames.indexOf('Beta'));
+      expect(descNames.indexOf('Zeta')).toBeLessThan(descNames.indexOf('Beta'));
+      expect(descNames.indexOf('Eta')).toBeLessThan(descNames.indexOf('Beta'));
     });
 
     it('sorts by urls with empty urls last', () => {
