@@ -7,6 +7,7 @@
 
 import {
   kiFieldsSchema,
+  kiPartialFieldsSchema,
   MAX_KI_ATTRIBUTES,
   MAX_KI_ATTRIBUTE_ARRAY_VALUES,
   MAX_KI_ATTRIBUTE_VALUE_LENGTH,
@@ -148,6 +149,22 @@ describe('kiFieldsSchema', () => {
       title: 'title',
       expires_at: '2027-01-01T01:00:00+01:00',
     });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a null expires_at on create', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: null,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a null expires_at on update to clear the expiry', () => {
+    const result = kiPartialFieldsSchema.safeParse({ expires_at: null });
 
     expect(result.success).toBe(true);
   });

@@ -116,8 +116,10 @@ export const kiFieldsSchema = z.object({
     .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
 });
 
-/** The subset of KI fields that can be changed by an update. */
-export const kiPartialFieldsSchema = kiFieldsSchema.partial();
+/** The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry. */
+export const kiPartialFieldsSchema = kiFieldsSchema.partial().extend({
+  expires_at: kiFieldsSchema.shape.expires_at.nullable(),
+});
 
 export type KiFields = z.infer<typeof kiFieldsSchema>;
 export type KiPartialFields = z.infer<typeof kiPartialFieldsSchema>;
