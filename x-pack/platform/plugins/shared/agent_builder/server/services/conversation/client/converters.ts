@@ -206,7 +206,6 @@ export const toAttachmentSummaries = (
 ): ConversationAttachmentSummary[] =>
   (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
 
-
 /**
  * Migrates legacy RoundState format.
  * v1 stored a single `node`; current format uses `nodes` (array).

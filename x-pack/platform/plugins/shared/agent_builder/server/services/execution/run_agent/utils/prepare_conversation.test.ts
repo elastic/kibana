@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type {
-  ConversationRound,
-  ConverseInput,
-  RoundInput,
-  TimelineEvent,
-} from '@kbn/agent-builder-common';
+import type { ConversationRound, ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   TimelineEventType,
   ToolResultType,
-  isBadRequestError,
 } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -1138,123 +1132,6 @@ describe('prepareConversation', () => {
         ])
       );
       expect(result.attachmentTypes).toHaveLength(2);
-    });
-  });
-
-  describe('action=regenerate', () => {
-    it('throws a bad request error (400) when conversation has no rounds', async () => {
-      await expect(
-        prepareConversation({
-          previousRounds: [],
-          nextInput: { message: 'ignored' },
-          context: mockContext,
-          action: 'regenerate',
-        })
-      ).rejects.toThrow('Cannot regenerate: conversation has no rounds');
-
-      let thrown: unknown;
-      try {
-        await prepareConversation({
-          previousRounds: [],
-          nextInput: { message: 'ignored' },
-          context: mockContext,
-          action: 'regenerate',
-        });
-      } catch (e) {
-        thrown = e;
-      }
-      expect(isBadRequestError(thrown)).toBe(true);
-    });
-
-    it('uses the last round input and ignores nextInput from request', async () => {
-      const lastRoundInput: RoundInput = {
-        message: 'Original message',
-        attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
-      };
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: lastRoundInput,
-          response: { message: 'Response to regenerate' },
-        }),
-      ];
-
-      const result = await prepareConversation({
-        previousRounds,
-        nextInput: { message: 'ignored by regenerate' },
-        context: mockContext,
-        action: 'regenerate',
-      });
-
-      // Strips the last round from previous rounds
-      expect(result.previousRounds).toHaveLength(0);
-
-      // Uses the last round's input (full spread preserves all fields for downstream)
-      expect(result.nextInput.message).toBe('Original message');
-
-      // The original round's attachment_refs must be preserved (merged), not dropped.
-      // type is undefined because a-1 is not in the state manager for this conversation.
-      expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, actor: 'user', type: undefined },
-      ]);
-    });
-
-    it('preserves a "created" attachment_ref through regenerate even though the reprocessing pass never re-triggers an add() for it', async () => {
-      // Attachment 'a-1' already exists in the state manager (as if created by an
-      // earlier, now-regenerated execution of this same round). Regenerating the round
-      // replays its stored input, which carries no legacy `attachments` payload, so the
-      // merge phase for nextInput has nothing to add/update — attachmentStateManager's
-      // own access tracking alone would report zero refs. If prepare_conversation
-      // replaced (rather than merged) attachment_refs with that fresh, empty tracking
-      // result, the original "created" ref would be silently lost.
-      const existing: VersionedAttachment = {
-        id: 'a-1',
-        type: 'text',
-        active: true,
-        current_version: 1,
-        versions: [
-          {
-            version: 1,
-            data: { content: 'v1' },
-            created_at: '2024-01-01T00:00:00.000Z',
-            content_hash: 'hash-v1',
-            estimated_tokens: 1,
-          },
-        ],
-      };
-      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
-        getTypeDefinition: (type: string) => ({
-          id: type,
-          validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-        }),
-      });
-
-      const lastRoundInput: RoundInput = {
-        message: 'Original message',
-        attachment_refs: [
-          { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' as const },
-        ],
-      };
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: lastRoundInput,
-          response: { message: 'Response to regenerate' },
-        }),
-      ];
-
-      const result = await prepareConversation({
-        previousRounds,
-        nextInput: { message: 'ignored by regenerate' },
-        context: mockContext,
-        action: 'regenerate',
-      });
-
-      // a-1 exists in the state manager with type 'text', so type is set on the ref.
-      expect(result.nextInput.attachment_refs).toEqual([
-        { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user', type: 'text' },
-      ]);
     });
   });
 

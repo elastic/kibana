@@ -72,7 +72,6 @@ import type {
   NormalizedConversation,
   ReplaceRoundEventsRequest,
   ConversationListResult,
-  UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
@@ -87,7 +86,7 @@ import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { composeRoundUpsert, reconcileAttachments } from './round_writes';
+import { reconcileAttachments } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
@@ -129,10 +128,6 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   addAttachmentsToLastRound(
     request: AddAttachmentsToLastRoundRequest,
-    options?: { access: ConversationAccess }
-  ): Promise<Conversation>;
-  upsertRound(
-    request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   appendEvents(
@@ -684,68 +679,6 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
-    return result;
-  }
-
-  async upsertRound(
-    request: UpsertRoundRequest,
-    options: { access: ConversationAccess } = { access: 'converse' }
-  ): Promise<Conversation> {
-    const {
-      id: conversationId,
-      round,
-      replacesRoundId,
-      state,
-      attachments,
-      workspaceId,
-      events: additiveEvents,
-    } = request;
-    const { access } = options;
-
-    // `fields` may run more than once on OCC retry; capture the last-run's newly-appended events.
-    let writtenEvents: TimelineEvent[] = [];
-
-    const result = await this.writeConversation({
-      conversationId,
-      access,
-      fields: (current) => {
-        // When additive events are written, `composeRoundUpsert` returns the fully reconciled
-        // projection (round-derived events for every round, including the upserted one, plus the
-        // additive events) because `updateConversation` takes an explicit `events` update verbatim.
-        // Otherwise `events` is omitted and `updateConversation` reconciles from `rounds` as for
-        // any rounds-path write.
-        const composed = composeRoundUpsert({
-          current,
-          round,
-          replacesRoundId,
-          additiveEvents: additiveEvents ?? [],
-        });
-        writtenEvents = composed.writtenEvents;
-        return {
-          rounds: composed.rounds,
-          status: round.status,
-          ...(composed.events ? { events: composed.events } : {}),
-          ...(state ? { state } : {}),
-          ...(attachments
-            ? {
-                attachments: reconcileAttachments({
-                  snapshot: attachments.snapshot,
-                  stored: current.attachments ?? [],
-                  produced: attachments.produced,
-                  // Guard against the post-upsert rounds: a permanent delete must not orphan a
-                  // reference that the round being written (or a concurrent one) introduced.
-                  storedRounds: composed.rounds,
-                }),
-              }
-            : {}),
-          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-          read_by: [],
-          read: false,
-        };
-      },
-    });
-
-    this.notifyAttachmentEvents(result.id, writtenEvents);
     return result;
   }
 

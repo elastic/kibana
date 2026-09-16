@@ -77,25 +77,6 @@ export interface GetEventsOptions {
   limit?: number;
 }
 
-/**
- * Persists a single completed round as intent, not end state, so it can be merged into
- * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.
- */
-export interface UpsertRoundRequest {
-  id: string;
-  /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
-  round: ConversationRound;
-  /** `action: 'regenerate'` only: id of the round this one supersedes. */
-  replacesRoundId?: string;
-  state?: ConversationInternalState;
-  /** Reconciled into the stored list; `snapshot` is what the round started from. */
-  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
-  /** Applied only when the stored conversation has no workspace yet. */
-  workspaceId?: string;
-  /** Additive timeline events to append in the same write as the round upsert. */
-  events?: TimelineEvent[];
-}
-
 /** Appends timeline events onto a conversation.*/
 export interface AppendEventsRequest {
   id: string;

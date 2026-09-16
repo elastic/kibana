@@ -17,30 +17,6 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
 import { isRoundDerivedEventId, parseExecutionId, roundToEvents } from './rounds_to_events';
 
-/**
- * Places `round` into `rounds` keyed on `round.id`, not on position: appends when
- * absent, replaces in place when present (HITL resume keeps the pending id).
- * `replacesRoundId` drops the round superseded by a regenerate, which mints a new
- * id; the replacement is appended rather than taking the dropped round's slot, so
- * it still sorts after a round that landed concurrently.
- *
- * Idempotent, so a retried write cannot duplicate a round.
- */
-export const upsertRound = (
-  rounds: ConversationRound[],
-  round: ConversationRound,
-  replacesRoundId?: string
-): ConversationRound[] => {
-  const base =
-    replacesRoundId && replacesRoundId !== round.id
-      ? rounds.filter(({ id }) => id !== replacesRoundId)
-      : rounds;
-
-  return base.some(({ id }) => id === round.id)
-    ? base.map((existing) => (existing.id === round.id ? round : existing))
-    : [...base, round];
-};
-
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
 const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
   storedEvents.some((event) => {
@@ -91,45 +67,6 @@ export const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
     }
   }
   return events;
-};
-
-/**
- * Composes the stored state for a round upsert that may also carry additive timeline events
- * (attachment lifecycle events produced at round-complete time).
- *
- * `updateConversation` treats an explicit `events` update as the *full* projection and skips its
- * own `reconcileEvents`, so whenever additive events are written the round-derived events for
- * every round — including the one being upserted — must be regenerated here in the same write.
- * Without this, a round that adds/updates/deletes an attachment would store the round but drop
- * its own `user_message` / `execution_started` / steps / terminal event from `conversation.events`.
- *
- * When no *new* additive events survive dedup, `events` is left undefined so the caller keeps the
- * rounds-only write shape and `updateConversation` reconciles as before.
- */
-export const composeRoundUpsert = ({
-  current,
-  round,
-  replacesRoundId,
-  additiveEvents,
-}: {
-  current: Conversation;
-  round: ConversationRound;
-  replacesRoundId?: string;
-  additiveEvents: TimelineEvent[];
-}): { rounds: ConversationRound[]; events?: TimelineEvent[]; writtenEvents: TimelineEvent[] } => {
-  const rounds = upsertRound(current.rounds, round, replacesRoundId);
-  const currentEvents = current.events ?? [];
-  const existingIds = new Set(currentEvents.map((event) => event.id));
-  const writtenEvents = additiveEvents.filter((event) => !existingIds.has(event.id));
-  if (writtenEvents.length === 0) {
-    return { rounds, writtenEvents };
-  }
-  const events = reconcileEvents({
-    ...current,
-    rounds,
-    events: [...currentEvents, ...writtenEvents],
-  });
-  return { rounds, events, writtenEvents };
 };
 
 /**
