@@ -9,6 +9,7 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { retryTransientEsErrors } from '../../../../../lib/retry_transient_es_errors';
 
 interface CreateIndexOptions {
   esClient: ElasticsearchClient;
@@ -16,6 +17,11 @@ interface CreateIndexOptions {
   mappings: MappingTypeMapping;
   logger: Logger;
 }
+
+/** Scale to 0 replicas on single-node clusters so health can go green. */
+const INDEX_SETTINGS = {
+  auto_expand_replicas: '0-1',
+} as const;
 
 export const createIndexWithMappings = async ({
   esClient,
@@ -35,10 +41,15 @@ export const createIndexWithMappings = async ({
     logger?.debug(`Creating index ${indexName} with mappings`);
 
     // Create the index with proper mappings
-    await esClient.indices.create({
-      index: indexName,
-      mappings,
-    });
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.create({
+          index: indexName,
+          mappings,
+          settings: INDEX_SETTINGS,
+        }),
+      { logger }
+    );
 
     logger?.debug(`Successfully created index ${indexName}`);
   } catch (error) {
@@ -73,7 +84,20 @@ export const createOrUpdateIndex = async ({
         logger,
       });
     } else {
-      // Index exists, check if we need to update mappings
+      try {
+        await retryTransientEsErrors(
+          () =>
+            esClient.indices.putSettings({
+              index: indexName,
+              settings: INDEX_SETTINGS,
+            }),
+          { logger }
+        );
+        logger?.debug(`Updated settings for existing index ${indexName}`);
+      } catch (settingsError) {
+        logger?.warn(`Failed to update settings for index ${indexName}: ${settingsError.message}`);
+      }
+
       try {
         await esClient.indices.putMapping({
           index: indexName,
