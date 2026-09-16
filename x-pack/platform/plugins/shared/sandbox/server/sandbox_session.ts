@@ -81,7 +81,9 @@ export class SandboxSessionImpl implements SandboxSession {
     const gen = this._generation;
     try {
       const result = await fn();
-      this._isReset = false;
+      if (this._generation === gen) {
+        this._isReset = false;
+      }
       return result;
     } catch (err) {
       if ((err as any)?.code === 14 /* UNAVAILABLE */ && this._generation === gen) {

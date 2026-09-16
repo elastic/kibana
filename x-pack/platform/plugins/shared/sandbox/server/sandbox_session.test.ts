@@ -108,6 +108,28 @@ describe('SandboxSessionImpl', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('does not clear isReset when a stale success from an older generation arrives late', async () => {
+    // Call A starts under generation 0. Before it resolves, call B fails with UNAVAILABLE,
+    // bumping the generation to 1 and setting isReset=true.
+    // A's late success must not clear the isReset that generation 1 installed.
+    const callA = defer<typeof okResult>();
+    runCommand.mockReturnValueOnce(callA.promise);
+
+    const resultA = run();
+
+    // B fails UNAVAILABLE → generation bumped to 1, isReset=true.
+    runCommand.mockRejectedValueOnce(unavailable());
+    await expect(run()).rejects.toMatchObject({ code: 14 });
+    expect(session.isReset).toBe(true);
+
+    // A's stale success (started in generation 0) arrives now.
+    callA.resolve(okResult);
+    await resultA;
+
+    // isReset must still be true — a stale success from the old pod must not win.
+    expect(session.isReset).toBe(true);
+  });
+
   it('does not set isReset=true when a stale UNAVAILABLE from an older generation arrives late', async () => {
     // Call A and call B both run and fail with UNAVAILABLE (generation 0).
     const callB = defer<never>();
