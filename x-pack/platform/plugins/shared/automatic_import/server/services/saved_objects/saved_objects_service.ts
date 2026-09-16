@@ -30,6 +30,11 @@ import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
 import type { DataStreamPhase } from '../../../common';
 
+export interface IntegrationName {
+  integrationId: string;
+  title: string;
+}
+
 export interface FieldMappingEntry {
   name: string;
   type: string;
@@ -195,6 +200,45 @@ export class AutomaticImportSavedObjectService {
         return [];
       }
       this.logger.error(`Failed to get all integrations: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch only the ID and title of every integration, for name-collision checks.
+   * Projects away `metadata.logo`, which holds a base64 SVG, and never loads data
+   * streams, so this stays cheap regardless of how many integrations exist.
+   */
+  public async getAllIntegrationNames(): Promise<IntegrationName[]> {
+    try {
+      this.logger.debug('Getting all integration names');
+      const names: IntegrationName[] = [];
+      const finder = this.savedObjectsClient.createPointInTimeFinder<IntegrationAttributes>({
+        type: INTEGRATION_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+        fields: ['integration_id', 'metadata.title'],
+      });
+
+      try {
+        for await (const { saved_objects: savedObjects } of finder.find()) {
+          for (const { attributes } of savedObjects) {
+            names.push({
+              integrationId: attributes.integration_id,
+              title: attributes.metadata.title,
+            });
+          }
+        }
+      } finally {
+        await finder.close();
+      }
+
+      return names;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        this.logger.debug('No integrations index found, returning empty array');
+        return [];
+      }
+      this.logger.error(`Failed to get all integration names: ${error}`);
       throw error;
     }
   }
