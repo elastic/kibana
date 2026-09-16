@@ -42,6 +42,7 @@ describe('mapClassicAlertToEpisode', () => {
     'kibana.alert.status': 'active',
     'kibana.alert.rule.uuid': 'rule-uuid-1',
     'kibana.alert.rule.name': 'My Rule',
+    'kibana.alert.rule.category': 'Test',
     'kibana.alert.workflow_tags': ['tag-a', 'tag-b'],
     'kibana.alert.workflow_status': 'open',
     'kibana.alert.duration.us': 7_200_000_000,
@@ -84,6 +85,7 @@ describe('mapClassicAlertToEpisode', () => {
       alertUuid: 'alert-uuid-1',
       instanceId: 'instance-1',
       ruleId: 'rule-uuid-1',
+      ruleCategory: 'Test',
       workflowStatus: 'open',
       workflowTags: ['tag-a', 'tag-b'],
     });

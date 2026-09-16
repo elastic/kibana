@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SourceRuleData } from '@kbn/alerting-v2-episodes-ui/types/source_rule_data';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useResolveSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_resolve_source_rule';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
@@ -171,7 +172,7 @@ describe('RuleSummaryFlyoutContainer', () => {
     it('skips the v2 fetch and resolves via the data source', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
       mockUseResolveSourceRule.mockReturnValue({
-        rule: { id: 'rule-1', metadata: { name: 'Classic rule' } },
+        rule: { id: 'rule-1', metadata: { name: 'Classic rule' } } as unknown as RuleResponse,
         ruleDetailsHref: '/base/app/management/insightsAndAlerting/triggersActions/rule/rule-1',
         isLoading: false,
         isError: false,

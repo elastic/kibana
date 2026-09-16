@@ -300,7 +300,7 @@ describe('EpisodeRuleCell', () => {
     it('calls back with the rule id and prevents navigation on a plain click', () => {
       // fireEvent returns false when the handler called preventDefault
       expect(fireEvent.click(renderRuleNameLink())).toBe(false);
-      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1');
+      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1', false, undefined);
     });
 
     it('lets a modified click follow the link', () => {

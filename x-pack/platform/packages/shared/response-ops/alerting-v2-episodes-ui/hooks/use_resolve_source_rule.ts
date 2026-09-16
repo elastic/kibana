@@ -7,8 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
-import type { SourceRuleData } from '../types/source_rule_data';
 import { queryKeys } from '../query_keys';
 
 export interface UseResolveSourceRuleOptions {
@@ -17,7 +17,7 @@ export interface UseResolveSourceRuleOptions {
 }
 
 export interface UseResolveSourceRuleResult {
-  rule: SourceRuleData | undefined;
+  rule: RuleResponse | undefined;
   ruleDetailsHref: string | null;
   isLoading: boolean;
   isError: boolean;
@@ -45,9 +45,7 @@ export const useResolveSourceRule = ({
   const canResolve = hasResolver && Boolean(ruleId);
 
   const ruleDetailsHref =
-    ruleId && dataSource?.getRuleDetailsHref
-      ? dataSource.getRuleDetailsHref(ruleId)
-      : null;
+    ruleId && dataSource?.getRuleDetailsHref ? dataSource.getRuleDetailsHref(ruleId) : null;
 
   const preparedHref = ruleDetailsHref ? http.basePath.prepend(ruleDetailsHref) : null;
 
