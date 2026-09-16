@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
 describe('classify — unknown row_count', () => {
   const base = (returned: { columns?: string[]; row_count?: number }) =>
@@ -20,7 +26,7 @@ describe('classify — unknown row_count', () => {
         duration_ms: 1,
         round_signals: { esql_count: 1, raw_query_count: 0, ki_retrieval_count: 1 },
       },
-    }) as any;
+    } as any);
 
   it('does not tag empty_retrieval when row_count is unknown (undefined)', () => {
     expect(classify(base({ row_count: undefined } as any))).toEqual([]);
@@ -34,13 +40,6 @@ describe('classify — unknown row_count', () => {
     expect(classify(base({ columns: ['a'], row_count: 3 }))).toEqual([]);
   });
 });
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { classify } from './classify';
 import type { EsqlToolCallSignal } from '../../common/http_api/signals';
