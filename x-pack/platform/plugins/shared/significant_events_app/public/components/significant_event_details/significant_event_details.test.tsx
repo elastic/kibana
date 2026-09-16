@@ -6,22 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
-import { appendLimitToQuery, getESQLResults } from '@kbn/esql-utils';
 import { SignificantEventDetails } from './significant_event_details';
 
-jest.mock('@kbn/esql-datagrid/public', () => ({
-  ESQLDataGrid: () => <div data-test-subj="esqlDataGrid" />,
-}));
-
-jest.mock('@kbn/esql-utils', () => ({
-  appendLimitToQuery: jest.fn((query, limit) => `${query} | LIMIT ${limit}`),
-  formatESQLColumns: jest.fn(() => []),
-  getESQLAdHocDataview: jest.fn(() => Promise.resolve({})),
-  getESQLResults: jest.fn(() => Promise.resolve({ response: { values: [], columns: [] } })),
-}));
+const DISCOVER_HREF = '/app/discover#sig-event-query';
+const mockGetRedirectUrl = jest.fn(
+  (_params: DiscoverAppLocatorParams): string | undefined => DISCOVER_HREF
+);
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
@@ -29,9 +23,12 @@ jest.mock('../../hooks/use_kibana', () => ({
     services: {},
     dependencies: {
       start: {
-        data: {
-          dataViews: {},
-          search: { search: jest.fn() },
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
         },
       },
     },
@@ -41,6 +38,10 @@ jest.mock('../../hooks/use_kibana', () => ({
 const ESQL_QUERY =
   'FROM logs.checkout | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= "2026-06-11T15:10:00.000Z"';
 const LEGACY_ESQL_QUERY = `${ESQL_QUERY} | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1`;
+const TIME_RANGE = {
+  from: '2026-06-11T15:03:00.000Z',
+  to: '2026-06-11T15:10:00.000Z',
+};
 
 const baseEvent: SignificantEvent = {
   '@timestamp': '2026-06-11T15:03:00.000Z',
@@ -66,6 +67,7 @@ const detectionSignal: SignalEntry = {
   evidence: {
     esql_query: ESQL_QUERY,
     result: 'found',
+    time_range: TIME_RANGE,
   },
   metadata: {
     rule_name: 'Connection refused in checkout',
@@ -84,83 +86,96 @@ const renderDetails = (event: SignificantEvent) =>
   );
 
 describe('SignificantEventDetails', () => {
-  const appendLimitMock = jest.mocked(appendLimitToQuery);
-  const getResultsMock = jest.mocked(getESQLResults);
-
-  const toggleSignal = () => {
-    fireEvent.click(screen.getByRole('button', { name: /Connection refused/ }));
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetRedirectUrl.mockReturnValue(DISCOVER_HREF);
   });
 
-  it('renders the ES|QL code block when evidence.esql_query is present', () => {
+  it('renders the ES|QL code block and Open in Discover link when evidence has a query and absolute time range', () => {
     renderDetails({ ...baseEvent, signals: [detectionSignal] });
-    expect(screen.getByText(ESQL_QUERY)).toBeInTheDocument();
+
+    expect(screen.getByText(/FROM logs.checkout/)).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventDetailsOpenInDiscoverLink')).toHaveAttribute(
+      'href',
+      DISCOVER_HREF
+    );
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: TIME_RANGE,
+        interval: 'auto',
+      })
+    );
   });
 
-  it('does not render the code block when evidence is null', () => {
+  it('does not render the code block or Discover link when evidence is null', () => {
     const signalNoEvidence = { ...detectionSignal, evidence: null };
     renderDetails({ ...baseEvent, signals: [signalNoEvidence] });
-    expect(screen.queryByText(ESQL_QUERY)).not.toBeInTheDocument();
+
+    expect(screen.queryByText(/FROM logs.checkout/)).not.toBeInTheDocument();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+    expect(
+      screen.queryByTestId('significantEventDetailsOpenInDiscoverLink')
+    ).not.toBeInTheDocument();
   });
 
   it('does not render the code block when there are no signals', () => {
     renderDetails(baseEvent);
-    expect(screen.queryByText(ESQL_QUERY)).not.toBeInTheDocument();
+    expect(screen.queryByText(/FROM logs.checkout/)).not.toBeInTheDocument();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
   });
 
-  it('shows loading state and renders the fetched grid', async () => {
-    let resolveResults!: (value: unknown) => void;
-    const pendingResults = new Promise((resolve) => {
-      resolveResults = resolve;
-    });
-    getResultsMock.mockReturnValueOnce(pendingResults as ReturnType<typeof getESQLResults>);
-
-    renderDetails({ ...baseEvent, signals: [detectionSignal] });
-    toggleSignal();
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    resolveResults({ response: { values: [], columns: [] } });
-    expect(await screen.findByTestId('esqlDataGrid')).toBeInTheDocument();
-    expect(appendLimitMock).toHaveBeenCalledWith(ESQL_QUERY, 5);
-  });
-
-  it('replaces a legacy query LIMIT and KEEP while retaining its SORT', async () => {
+  it('opens Discover with a last-hour fallback when evidence has no time_range', () => {
     renderDetails({
       ...baseEvent,
       signals: [
         {
           ...detectionSignal,
-          evidence: { ...detectionSignal.evidence, esql_query: LEGACY_ESQL_QUERY, result: 'found' },
+          evidence: { esql_query: ESQL_QUERY, result: 'found' },
         },
       ],
     });
-    toggleSignal();
 
-    expect(await screen.findByTestId('esqlDataGrid')).toBeInTheDocument();
-    const [queryWithoutLimit, limit] = appendLimitMock.mock.calls[0];
-    expect(queryWithoutLimit).toContain('SORT @timestamp ASC');
-    expect(queryWithoutLimit).not.toContain('LIMIT');
-    expect(queryWithoutLimit).not.toContain('KEEP');
-    expect(limit).toBe(5);
+    expect(screen.getByText(/FROM logs.checkout/)).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventDetailsOpenInDiscoverLink')).toBeInTheDocument();
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: { from: 'now-1h', to: 'now' },
+        interval: 'auto',
+      })
+    );
   });
 
-  it('shows fetch errors and retries when the signal is reopened', async () => {
-    getResultsMock.mockRejectedValueOnce(new Error('request failed')).mockResolvedValueOnce({
-      response: { values: [], columns: [] },
-      params: { query: ESQL_QUERY },
+  it('replaces a legacy query LIMIT and KEEP while retaining its SORT', () => {
+    renderDetails({
+      ...baseEvent,
+      signals: [
+        {
+          ...detectionSignal,
+          evidence: {
+            esql_query: LEGACY_ESQL_QUERY,
+            result: 'found',
+            time_range: TIME_RANGE,
+          },
+        },
+      ],
     });
 
-    renderDetails({ ...baseEvent, signals: [detectionSignal] });
-    toggleSignal();
-    expect(await screen.findByText('request failed')).toBeInTheDocument();
+    const query = mockGetRedirectUrl.mock.calls[0]?.[0].query;
+    if (!query || !('esql' in query)) {
+      throw new Error('expected ES|QL Discover params');
+    }
+    expect(query.esql).toContain('SORT');
+    expect(query.esql).not.toMatch(/\bLIMIT\b/i);
+    expect(query.esql).not.toMatch(/\bKEEP\b/i);
+  });
 
-    toggleSignal();
-    toggleSignal();
-    await waitFor(() => expect(getResultsMock).toHaveBeenCalledTimes(2));
-    expect(await screen.findByTestId('esqlDataGrid')).toBeInTheDocument();
+  it('omits Discover when getRedirectUrl returns undefined', () => {
+    mockGetRedirectUrl.mockReturnValueOnce(undefined);
+    renderDetails({ ...baseEvent, signals: [detectionSignal] });
+
+    expect(screen.getByText(/FROM logs.checkout/)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('significantEventDetailsOpenInDiscoverLink')
+    ).not.toBeInTheDocument();
   });
 });

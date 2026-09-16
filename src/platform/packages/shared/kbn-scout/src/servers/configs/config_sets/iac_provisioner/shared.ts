@@ -10,11 +10,11 @@
 /**
  * Server arguments that turn on the Fleet IaC Provisioner render flow.
  *
- * The render route is triple-gated: it is only registered when
- * `xpack.fleet.iacProvisioner.enabled` is true, and the handler additionally
- * requires an agentless-capable (cloud/serverless) deployment. Serverless
- * satisfies the cloud gate on its own, so enabling agentless + the
- * iacProvisioner flag here is enough to exercise the route.
+ * The render route is always registered. The handler requires an
+ * agentless-capable (cloud/serverless) deployment and the
+ * `fleet.enableIacProvisioner` LaunchDarkly flag (set in the spec via
+ * `feature_flags.overrides`). Serverless satisfies the cloud gate on its own,
+ * so enabling agentless here is enough for the environment check.
  *
  * No `iacProvisioner.api.url` is configured on purpose: the assertable tests
  * (schema 400s, unknown-package 404, privilege 403) never reach the outbound
@@ -22,7 +22,6 @@
  */
 export const iacProvisionerServerArgs = [
   '--xpack.fleet.agentless.enabled=true',
-  '--xpack.fleet.iacProvisioner.enabled=true',
   `--logging.loggers=${JSON.stringify([
     { name: 'plugins.fleet.IacProvisionerService', level: 'debug' },
   ])}`,

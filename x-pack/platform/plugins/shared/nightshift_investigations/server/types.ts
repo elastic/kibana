@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -22,7 +23,15 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
-export type NightshiftInvestigationsServerSetup = void;
+export interface InvestigationQuotaResult {
+  allowed: boolean;
+}
+
+export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
+
+export interface NightshiftInvestigationsServerSetup {
+  registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
+}
 
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
@@ -37,6 +46,7 @@ export interface NightshiftInvestigationsSetupDeps {
 }
 
 export interface NightshiftInvestigationsStartDeps {
+  actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;

@@ -25,6 +25,7 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+const mockGetRuleDetailsHref = jest.fn((ruleId: string) => `/host-aware/rules/${ruleId}`);
 
 const mockRule = createMockRule();
 
@@ -51,7 +52,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -59,6 +64,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     expect(
       await screen.findByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
     ).toBeInTheDocument();
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith(mockRule.id);
+    expect(screen.getByTestId('alertingV2EpisodeDetailsViewRuleDetailsButton')).toHaveAttribute(
+      'href',
+      `/host-aware/rules/${mockRule.id}`
+    );
   });
 
   it('renders a loading spinner while data is loading', () => {
@@ -66,7 +76,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -95,7 +109,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -122,7 +140,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -154,7 +176,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );

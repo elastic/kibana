@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -70,10 +70,15 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
-import { getWorkflowGlobalTimeoutResumeTaskId } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  getWorkflowImmediateResumeTaskId,
+  getWorkflowWakeTaskId,
+} from './workflow_task_manager/workflow_task_manager';
 
 describe('workflow:resume task runner event fields', () => {
   let taskDefinitions: Record<string, TaskRegisterDefinition>;
+  let taskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
 
   const setupPlugin = () => {
     taskDefinitions = {};
@@ -84,10 +89,11 @@ describe('workflow:resume task runner event fields', () => {
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
+    taskManagerStart = taskManagerMock.createStart();
     coreSetup.getStartServices.mockResolvedValue([
       coreStart,
       {
-        taskManager: taskManagerMock.createStart(),
+        taskManager: taskManagerStart,
         actions: {} as never,
         workflowsExtensions: {} as never,
         licensing: licensingMock.createStart(),
@@ -116,19 +122,127 @@ describe('workflow:resume task runner event fields', () => {
     mockGetWorkflowExecutionById.mockResolvedValue(null);
   });
 
-  it('does not stamp semantic outcome when idle-timeout resume re-arms runAt', async () => {
+  it('defers an immediate resume while the initial execution is still running', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'running' });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId('exec-initial'),
+          params: { workflowRunId: 'exec-initial', spaceId: 'default' },
+          attempts: 1,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    expect(mockResolveInterruptedWorkflowResumeTask).not.toHaveBeenCalled();
+  });
+
+  it('lets interrupted resume claims reach recovery even when execution is running', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'running' });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId('exec-interrupted'),
+          params: { workflowRunId: 'exec-interrupted', spaceId: 'default' },
+          attempts: 2,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    await runner.run();
+    expect(mockResolveInterruptedWorkflowResumeTask).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowRunId: 'exec-interrupted', taskAttempts: 2 })
+    );
+  });
+
+  it('retains the stable wake task after dispatch and deletes it only after terminal state', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'waiting_for_input' });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowWakeTaskId('retained'),
+          params: { workflowRunId: 'retained', spaceId: 'default' },
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    // A new caller may ensure this same task while the current dispatch finishes.
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
+    expect(await runner.run()).toBeUndefined();
+  });
+
+  it('dispatches a timeout task through the same immediate runner', async () => {
+    setupPlugin();
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowGlobalTimeoutResumeTaskId('exec-timer'),
+          params: { workflowRunId: 'exec-timer', spaceId: 'default' },
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    await runner.run();
+    expect(taskManagerStart.runSoon).toHaveBeenCalledWith(
+      getWorkflowImmediateResumeTaskId('exec-timer')
+    );
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: getWorkflowWakeTaskId('exec-timer') }),
+      expect.objectContaining({ cloneApiKey: true })
+    );
+    expect(taskManagerStart.ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManagerStart.runSoon.mock.invocationCallOrder[0]
+    );
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('retries a busy notification without entering workflow recovery or executing steps', async () => {
+    setupPlugin();
+    taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('active'));
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          params: { workflowRunId: 'exec-notify', spaceId: 'default' },
+          attempts: 2,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    expect(mockResolveInterruptedWorkflowResumeTask).not.toHaveBeenCalled();
+    taskManagerStart.runSoon.mockResolvedValue({ id: 'active', forced: false });
+    expect(await runner.run()).toBeUndefined();
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('does not stamp semantic outcome when an early wake-up defers to the wait deadline', async () => {
     setupPlugin();
 
     const workflowRunId = 'exec-rearm';
     const spaceId = 'default';
     const idleTimeoutResumeAt = new Date('2024-01-01T11:00:00Z');
-    mockResumeWorkflow.mockResolvedValue({ idleTimeoutResumeAt });
+    mockResumeWorkflow.mockResolvedValue({ retryAt: idleTimeoutResumeAt });
 
     const setCustomTaskRunEventFields = jest.fn();
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: getWorkflowGlobalTimeoutResumeTaskId(workflowRunId),
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId },
           state: {},
@@ -170,7 +284,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId },
           state: {},
@@ -216,7 +330,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId: 'default' },
           state: {},
@@ -258,7 +372,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId: 'default' },
           state: {},
@@ -300,7 +414,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId: 'default' },
           state: {},
@@ -341,7 +455,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId: 'default' },
           state: {},
@@ -383,7 +497,7 @@ describe('workflow:resume task runner event fields', () => {
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
-          id: `workflow:${workflowRunId}:resume`,
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: { workflowRunId, spaceId },
           state: {},
