@@ -8,9 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   spaceTest,
+  createNonLogsDiscoverSession,
   LOGS,
   LOGS_EXPERIENCE_TAGS,
   setupLogsExperience,
@@ -70,27 +70,18 @@ spaceTest.describe(
       async ({ page, apiServices, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
-        const sessionId = await apiServices.discover.create(
-          {
-            title: `non-logs-no-recommended-${discoverScoutSpace.id}`,
-            tabs: [
-              {
-                id: 'main',
-                label: 'Untitled',
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: LOGS.NON_LOGS_DATA_VIEW,
-                  time_field: '@timestamp',
-                  name: LOGS.NON_LOGS_DATA_VIEW,
-                },
-              },
-            ],
-          } satisfies DiscoverSessionApiDataInput,
-          discoverScoutSpace.id
+        const sessionId = await createNonLogsDiscoverSession(
+          apiServices,
+          discoverScoutSpace.id,
+          'non-logs-no-recommended'
         );
 
         await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
         await discover.waitUntilTabIsLoaded();
+
+        await expect(
+          page.testSubj.locator(unifiedFieldList.getSidebarSectionSelector('available'))
+        ).toBeVisible();
 
         // Assert the seeded data actually resolved into fields first. The available group
         // renders even when empty, so without this the assertion below would also pass for an

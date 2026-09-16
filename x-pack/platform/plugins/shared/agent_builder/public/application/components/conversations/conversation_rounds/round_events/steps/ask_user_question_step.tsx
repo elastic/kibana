@@ -45,7 +45,7 @@ export const AskUserQuestionStepEvent: React.FC<AskUserQuestionStepEventProps> =
               <EuiIcon type="if" size="m" color="inherit" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText color="inherit">
+              <EuiText color="inherit" size="s">
                 <p>{labelText}</p>
               </EuiText>
             </EuiFlexItem>

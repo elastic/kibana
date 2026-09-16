@@ -1,5 +1,5 @@
 {
-  "sha1": "b6c5f0bdf92d9e7ef7f29f9079dc06be7363442c",
+  "sha1": "12b414c03fb2a44af2b16040794c23b0e34105ea",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 58,
-        "column": 24
+        "line": 56,
+        "column": 23
       }
     },
     {
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 8
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 138,
+        "line": 141,
         "column": 5
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 150,
+        "line": 153,
         "column": 54
       }
     },
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 163,
+        "line": 166,
         "column": 23
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 183,
+        "line": 186,
         "column": 21
       }
     },
@@ -143,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 194,
+        "line": 198,
         "column": 71
       }
     },
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 200,
+        "line": 204,
         "column": 93
       }
     },
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 208,
+        "line": 212,
         "column": 91
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 214,
+        "line": 218,
         "column": 92
       }
     },
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_bar.spec.ts",
-        "line": 219,
+        "line": 223,
         "column": 3
       }
     },

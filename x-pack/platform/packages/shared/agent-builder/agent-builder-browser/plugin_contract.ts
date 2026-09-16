@@ -27,6 +27,11 @@ import type { ConversationTemplateServiceStartContract } from './templates';
  */
 export interface EmbeddableConversationProps {
   /**
+   * Called when the user submits a prompt, immediately before the conversation starts streaming.
+   */
+  onSubmit?: () => void;
+
+  /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
    * @default false
@@ -142,6 +147,18 @@ export interface PublicEmbeddableConversationInputProps {
  * Options passed when opening or toggling the conversation sidebar.
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
+  onClose?: () => void;
+  /**
+   * Conversation id to restore when the sidebar opens.
+   */
+  conversationId?: string;
+}
+
+/**
+ * Options passed when opening conversation details.
+ */
+export interface OpenConversationDetailsOptions {
+  conversationId: string;
   onClose?: () => void;
 }
 
@@ -297,4 +314,5 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

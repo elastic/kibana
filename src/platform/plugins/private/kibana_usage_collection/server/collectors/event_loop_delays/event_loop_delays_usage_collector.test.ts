@@ -57,8 +57,8 @@ describe('registerEventLoopDelaysCollector', () => {
   });
 
   it('registers savedObjectType "event_loop_delays_daily"', () => {
-    expect(mockRegisterType).toBeCalledTimes(1);
-    expect(mockRegisterType).toBeCalledWith(
+    expect(mockRegisterType).toHaveBeenCalledTimes(1);
+    expect(mockRegisterType).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'event_loop_delays_daily',
       })
@@ -81,7 +81,7 @@ describe('registerEventLoopDelaysCollector', () => {
         ],
       }
     `);
-    expect(mockFind).toBeCalledTimes(1);
+    expect(mockFind).toHaveBeenCalledTimes(1);
     expect(mockFind.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {

@@ -44,8 +44,8 @@ const getExecutionHistoryTabs = ({
   },
   {
     id: POLICIES_TAB_ID,
-    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-      defaultMessage: 'Policies',
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.actionPoliciesLabel', {
+      defaultMessage: 'Action policies',
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),
@@ -59,7 +59,12 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -116,6 +121,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

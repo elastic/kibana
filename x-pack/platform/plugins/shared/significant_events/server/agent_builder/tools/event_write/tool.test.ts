@@ -82,7 +82,7 @@ describe('events_write tool', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
 
-  it('rejects duplicate detection rules across event items', () => {
+  it('rejects duplicate detection rules anywhere in a write', () => {
     const signal = {
       type: 'detection' as const,
       stream_name: 'logs.test',
@@ -97,19 +97,24 @@ describe('events_write tool', () => {
       },
     };
 
-    const result = eventsWriteSchema.safeParse({
+    const duplicateAcrossItems = eventsWriteSchema.safeParse({
       items: [
         { ...input, signals: [signal] },
         { ...input, signals: [signal] },
       ],
     });
+    const duplicateWithinItem = eventsWriteSchema.safeParse({
+      items: [{ ...input, signals: [signal, signal] }],
+    });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.at(-1)?.message).toBe(
-        'Each detection rule UUID may appear in only one event item per write'
-      );
-    }
+    [duplicateAcrossItems, duplicateWithinItem].forEach((result) => {
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toBe(
+          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.'
+        );
+      }
+    });
   });
 
   describe('open high-severity confirms invariant', () => {
@@ -221,6 +226,21 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
+  it('accepts 40-medium for known-ongoing events', () => {
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, severity: '40-medium' }],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts only discovery as the optional caller source', () => {
+    expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
+    expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
+      false
+    );
+  });
+
   it('enriches causal features from their Knowledge Indicators', async () => {
     getFeatures.mockImplementation((_streams, options) => {
       const hits =
@@ -258,6 +278,7 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
+        source: 'discovery',
         items: [
           {
             ...input,
@@ -294,6 +315,7 @@ describe('events_write tool', () => {
     });
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
       eventClient: {},
+      source: 'discovery',
       inputs: [
         expect.objectContaining({
           causal_features: [
@@ -343,14 +365,18 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [
-        expect.objectContaining({
-          causal_features: [expect.objectContaining({ type: 'technology', subtype: 'web_server' })],
-        }),
-      ],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+            ],
+          }),
+        ],
+      })
+    );
   });
 
   it('writes unenriched causal features when the lookup fails', async () => {
@@ -366,10 +392,12 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [expect.objectContaining({ causal_features: causalFeatures })],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+      })
+    );
   });
 
   it('returns aligned results and tracks each item', async () => {

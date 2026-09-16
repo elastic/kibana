@@ -6,7 +6,13 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { apiTest, tags } from '@kbn/scout-security';
+import {
+  apiTest,
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  INTERNAL_API_HEADERS,
+  PUBLIC_API_HEADERS,
+  tags,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import type {
@@ -38,8 +44,8 @@ const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
 
 const INTERNAL_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'Kibana',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
 const buildUrl = (entityEuid: string, entityType: 'user' | 'host'): string =>
@@ -89,7 +95,7 @@ apiTest.describe(
 
       log.debug(`Installing entity store...`);
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+        headers: { ...defaultHeaders, ...PUBLIC_API_HEADERS },
         responseType: 'json',
         body: {},
       });
@@ -127,38 +133,129 @@ apiTest.describe(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
-      // The pad-ml module registers asynchronously after the PAD integration install, so retry
-      // until it is recognized instead of firing a setup that fails silently before it exists.
-      const setupMlModuleWithRetry = async (
-        module: string,
-        body: Record<string, unknown>
-      ): Promise<void> => {
-        const maxAttempts = 10;
+      // The pad-ml module is registered asynchronously by the PAD integration install above, so it
+      // may not exist yet when we reach module setup. Rather than re-posting the setup *action* in a
+      // fixed window — which raced the install and gave up before it finished on real serverless
+      // projects — poll the module-registration read signal (`getModule`, the same module
+      // definitions `getSecurityMlJobIds` reads) until the module is present, then set it up once.
+      // security_auth is a built-in module and resolves on the first poll.
+      // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
+      // `waitForDatafeedReady` below for why we still have to wait after this returns.
+      const waitForModuleRegistered = async (module: string): Promise<void> => {
+        const maxAttempts = 40;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
-            headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          const response = await apiClient.get(`/internal/ml/modules/get_module/${module}`, {
+            headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
             responseType: 'json',
-            body,
           });
-          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
-            response.body?.jobs ?? [];
-          const succeeded =
-            response.statusCode === 200 &&
-            jobs.length > 0 &&
-            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-          if (succeeded) {
+          if (response.statusCode === 200 && (response.body?.jobs?.length ?? 0) > 0) {
             return;
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
           }
         }
-        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
+        throw new Error(`ML module "${module}" was not registered in time`);
+      };
+
+      const setupMlModule = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
+        await waitForModuleRegistered(module);
+        const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body,
+        });
+        const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.jobs ?? [];
+        const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.datafeeds ?? [];
+
+        const jobsCreated =
+          jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+        const datafeedsCreated =
+          datafeeds.length > 0 &&
+          datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
+
+        if (response.statusCode !== 200 || !jobsCreated || !datafeedsCreated) {
+          throw new Error(
+            `Failed to set up ML module "${module}" (status ${
+              response.statusCode
+            }): ${JSON.stringify(response.body)}`
+          );
+        }
+        return {
+          jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
+          datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
+        };
+      };
+
+      // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
+      // actually running. Elasticsearch can accept the start request while ML compute is
+      // still scaling up from zero — normal on a project without a currently-running ML
+      // node, which is exactly the state a serverless project's ML tier starts in (ML node
+      // autoscaling is always-on there; see
+      // https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection/anomaly-detection-scale).
+      // Until the datafeed is actually assigned, the job's live `datafeed_config` (what
+      // get_job_config.ts reads to build `sourceIndex` for baseline enrichment) stays empty,
+      // and enrichment silently returns the anomaly unenriched — no error, just
+      // `baselineValues: []`. Re-posting module setup doesn't help at that point (starting an
+      // already-started datafeed 409s), so poll the live job/datafeed state directly instead
+      // of trusting the setup response alone.
+      const waitForDatafeedReady = async (
+        jobIds: string[],
+        datafeedIds: string[]
+      ): Promise<void> => {
+        const maxAttempts = 30;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const jobsRes = await esClient.ml.getJobs({ job_id: jobIds.join(',') });
+          const jobsById = new Map((jobsRes.jobs ?? []).map((job) => [job.job_id, job]));
+          const notReady = jobIds.filter(
+            (id) => (jobsById.get(id)?.datafeed_config?.indices ?? []).length === 0
+          );
+
+          if (notReady.length === 0) {
+            return;
+          }
+
+          // DIAGNOSTIC: log the live datafeed state/assignment on every attempt, so a future
+          // MKI failure shows exactly what ML is doing instead of a bare
+          // `datafeed_config: undefined`.
+          try {
+            const statsRes = await esClient.ml.getDatafeedStats({
+              datafeed_id: datafeedIds.join(','),
+            });
+            log.info(
+              `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
+                `not ready: ${notReady.join(', ')}): ` +
+                `${JSON.stringify(
+                  (statsRes.datafeeds ?? []).map((df) => ({
+                    datafeed_id: df.datafeed_id,
+                    state: df.state,
+                    // Not populated on Elastic Cloud Serverless, but useful on stateful.
+                    node: df.node?.name,
+                    assignment_explanation: df.assignment_explanation,
+                  }))
+                )}`
+            );
+          } catch (err) {
+            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
+          }
+
+          if (attempt < maxAttempts) {
+            await setTimeoutAsync(5000);
+          }
+        }
+        throw new Error(
+          `ML job(s) ${jobIds.join(', ')} did not receive an assigned datafeed_config in time`
+        );
       };
 
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      await setupMlModuleWithRetry('pad-ml', {
+      const padSetup = await setupMlModule('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -166,37 +263,46 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(padSetup.jobIds, padSetup.datafeedIds);
 
       // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // In MKI the job config has been theorised to be empty, which would cause baseline
-      // enrichment to silently fail.
+      // `waitForDatafeedReady` above already guarantees `datafeed_config` is populated by
+      // this point — if this ever logs "missing entirely" or an empty `indices` again, the
+      // wait itself (not just this one-off check) has a gap worth investigating.
       try {
         const padJobRes = await esClient.ml.getJobs({
           job_id: 'pad_windows_rare_region_name_by_user_ea',
         });
         const padJob = padJobRes.jobs?.[0];
         if (!padJob) {
-          log.debug(`[DIAG] PAD job not found — job config is missing entirely`);
+          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
         } else {
           const analysisConfig = padJob.analysis_config;
           const detectorCount = analysisConfig?.detectors?.length ?? 0;
-          log.debug(
+          log.info(
             `[DIAG] PAD job config: detectors=${detectorCount}, ` +
               `analysisConfig=${JSON.stringify(analysisConfig)}`
           );
           if (detectorCount === 0) {
-            log.debug(
+            log.info(
               `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
             );
           }
+          // Log the datafeed query so we can see exactly which events it includes.
+          // If the datafeed excludes event codes 4672/4673 (privilege events), the
+          // New York baseline events would not be found, producing baselineValues=[].
+          log.info(
+            `[DIAG] PAD datafeed: indices=${JSON.stringify(padJob.datafeed_config?.indices)}, ` +
+              `query=${JSON.stringify(padJob.datafeed_config?.query)}`
+          );
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to fetch PAD job config: ${err}`);
+        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
       }
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      await setupMlModuleWithRetry('security_auth', {
+      const authSetup = await setupMlModule('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
@@ -204,6 +310,7 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(authSetup.jobIds, authSetup.datafeedIds);
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
@@ -240,17 +347,17 @@ apiTest.describe(
             | Record<string, unknown>
             | undefined;
           const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
-          log.debug(
+          log.info(
             `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
           );
           if (regionNameType !== 'keyword' && regionNameType !== undefined) {
-            log.debug(
+            log.info(
               `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
             );
           }
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to fetch source index mappings: ${err}`);
+        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
       }
 
       // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
@@ -270,17 +377,17 @@ apiTest.describe(
           size: 10,
         });
         const hits = searchRes.hits?.hits ?? [];
-        log.debug(
+        log.info(
           `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
             `docs=${JSON.stringify(hits.map((h) => h._source))}`
         );
         if (hits.length === 0) {
-          log.debug(
+          log.info(
             `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
           );
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to search source events: ${err}`);
+        log.info(`[DIAG] Failed to search source events: ${err}`);
       }
 
       // Index anomaly records for the test entities.
@@ -355,7 +462,7 @@ apiTest.describe(
       // Uninstall the entity store
       await apiClient
         .post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-          headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+          headers: { ...defaultHeaders, ...PUBLIC_API_HEADERS },
           responseType: 'json',
           body: {},
         })
@@ -366,7 +473,7 @@ apiTest.describe(
       'Anomaly summary API: returns anomalies for an entity with anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -410,7 +517,7 @@ apiTest.describe(
       'Anomaly summary API: returns correct jobName and threat fields for suspicious_login_activity_ea',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -432,7 +539,7 @@ apiTest.describe(
       'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -449,7 +556,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: twoYearsAgoMs },
         });
@@ -464,7 +571,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: thirtyDaysAgoMs },
         });
@@ -475,7 +582,7 @@ apiTest.describe(
 
     apiTest('Anomaly summary API: filters anomalies by jobIds', async ({ apiClient }) => {
       const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { job_ids: ['auth_high_count_logon_events_ea'] },
       });
@@ -488,7 +595,7 @@ apiTest.describe(
 
     apiTest('Anomaly summary API: respects pageSize and page', async ({ apiClient }) => {
       const page1Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { page_size: 1, page: 1 },
       });
@@ -500,7 +607,7 @@ apiTest.describe(
       expect(page1Body.page_size).toBe(1);
 
       const page2Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { page_size: 1, page: 2 },
       });
@@ -518,7 +625,7 @@ apiTest.describe(
       'Anomaly summary API: sorts anomalies by record_score descending',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { sort: [{ field: 'record_score', order: 'desc' }] },
         });
@@ -532,15 +639,17 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient }) => {
+      async ({ apiClient, log }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
+
+        log.info(`anomaly summary response body: ${JSON.stringify(body)}`);
 
         const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'
@@ -568,7 +677,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 should exclude 5.65.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 10 }] },
         });
@@ -585,7 +694,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 should exclude 31.06.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
@@ -602,7 +711,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // Carol has scores 24.37 and 25.44. Range [24, 25] includes only 24.37.
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 24, max_score: 25 }] },
         });
@@ -622,7 +731,7 @@ apiTest.describe(
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
         const response = await apiClient.post(buildUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
         });
@@ -639,7 +748,7 @@ apiTest.describe(
       'Anomaly summary API: score_ranges that exclude all anomalies returns empty results',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50 }] },
         });
@@ -655,7 +764,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: -1 }] },
         });
@@ -668,7 +777,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
@@ -681,7 +790,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
@@ -697,7 +806,7 @@ apiTest.describe(
       'Anomaly overview API: returns expected response for entity with anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -745,7 +854,7 @@ apiTest.describe(
         // WIN_APP01 has 2 suspicious_login_activity_ea records with scores 5.65 and 31.06.
         // Both have the same timestamp so they land in the same bucket; max should be ~31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -765,7 +874,7 @@ apiTest.describe(
       'Anomaly overview API: returns empty anomalies for entity with no anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -784,7 +893,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: twoYearsAgoMs },
         });
@@ -799,7 +908,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: thirtyDaysAgoMs },
         });
@@ -814,7 +923,7 @@ apiTest.describe(
         const fromMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const toMs = Date.now();
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: fromMs, to: toMs },
         });
@@ -833,7 +942,7 @@ apiTest.describe(
         // ['Credential Access']. Filtering by 'Initial Access' excludes that job, so no
         // anomalies are returned for this entity.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { threat_tactics: ['Initial Access'] },
         });
@@ -850,7 +959,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 excludes 5.65.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 10 }] },
         });
@@ -870,7 +979,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 excludes 31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
@@ -891,7 +1000,7 @@ apiTest.describe(
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
         const response = await apiClient.post(buildOverviewUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
         });
@@ -906,7 +1015,7 @@ apiTest.describe(
       'Anomaly overview API: score_ranges that exclude all anomalies returns empty response',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50 }] },
         });
@@ -923,7 +1032,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: -1 }] },
         });
@@ -936,7 +1045,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
@@ -949,7 +1058,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
@@ -965,7 +1074,7 @@ apiTest.describe(
       'Anomaly summary API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(UNKNOWN_ENTITY_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -978,7 +1087,7 @@ apiTest.describe(
       'Anomaly overview API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(UNKNOWN_ENTITY_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -991,7 +1100,7 @@ apiTest.describe(
       'Anomaly summary API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -1005,7 +1114,7 @@ apiTest.describe(
       'Anomaly overview API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -1019,7 +1128,7 @@ apiTest.describe(
       'Anomaly summary API: returns error for user without entity store access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -1033,7 +1142,7 @@ apiTest.describe(
       'Anomaly overview API: returns error for user without entity store access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -1047,7 +1156,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required false for user without .ml-anomlies* access',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 
@@ -1060,7 +1169,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required true for admin with ML index access',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 
@@ -1074,7 +1183,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required false for user without ML Kibana feature privilege',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 

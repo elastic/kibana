@@ -5,6 +5,7 @@
     "strictNullChecks": false
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     "public/**/*",
     "test/scout/**/*",
@@ -48,9 +49,12 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/es-types",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/scout",
     "@kbn/presentation-util",
+    "@kbn/zod",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",

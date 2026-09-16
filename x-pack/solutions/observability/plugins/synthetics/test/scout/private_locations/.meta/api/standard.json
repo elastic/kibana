@@ -1,5 +1,5 @@
 {
-  "sha1": "9be47e1dc29f10a44338bcc88e81a91cba8855f3",
+  "sha1": "06f359c9d6a82e57506ad29d15938993b1b5a123",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -71,6 +71,20 @@
       }
     },
     {
+      "id": "22912baa484e96f-8f09e233a3b358a",
+      "title": "ClassicPrivateLocationNoCondition never stamps a condition on a classic private location, on create or edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/classic_private_location_no_condition.spec.ts",
+        "line": 45,
+        "column": 25
+      }
+    },
+    {
       "id": "a5c3f83be276d2a-6771baf1db2b03d",
       "title": "CleanUpExtraPackagePolicies cleans up orphaned package policies",
       "expectedStatus": "passed",
@@ -96,6 +110,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
         "line": 84,
         "column": 51
+      }
+    },
+    {
+      "id": "a56530651b7f21f-596439d3ed034eb",
+      "title": "DisableScalablePrivateLocation disabling sharding clears a leftover agent pin before the location is persisted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/disable_scalable_private_location.spec.ts",
+        "line": 45,
+        "column": 23
       }
     },
     {
@@ -584,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 116,
-        "column": 60
+        "line": 142,
+        "column": 25
       }
     },
     {
@@ -598,8 +626,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 136,
-        "column": 90
+        "line": 165,
+        "column": 86
       }
     },
     {
@@ -612,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 171,
-        "column": 20
+        "line": 202,
+        "column": 19
       }
     },
     {
@@ -626,8 +654,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 209,
-        "column": 9
+        "line": 251,
+        "column": 17
       }
     },
     {
@@ -640,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 247,
-        "column": 6
+        "line": 292,
+        "column": 15
       }
     },
     {
@@ -654,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 214,
-        "column": 27
+        "line": 333,
+        "column": 17
       }
     },
     {
@@ -668,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 275,
-        "column": 20
+        "line": 359,
+        "column": 11
       }
     },
     {
@@ -827,6 +855,32 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
         "line": 59,
         "column": 28
+      }
+    },
+    {
+      "id": "98be7930df3264d-2f00ed353422bcc",
+      "title": "ScalablePrivateLocationPlacement places proportionally more monitors on the higher-capacity agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
+        "line": 81,
+        "column": 51
+      }
+    },
+    {
+      "id": "6faf871c5041796-a511d209d7cca3e",
+      "title": "ScalablePrivateLocationRebalance moves a stale agent’s monitors to the survivor with no drops and a revision bump",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_rebalance.spec.ts",
+        "line": 80,
+        "column": 38
       }
     }
   ]

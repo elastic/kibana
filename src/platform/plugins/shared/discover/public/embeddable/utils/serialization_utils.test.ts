@@ -20,7 +20,7 @@ import type {
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type {
   SearchEmbeddableByReferenceState,
@@ -290,6 +290,58 @@ describe('Serialization utils', () => {
       // For a valid tab, dashboard overrides should win on top of tab-2 attributes
       expect(deserializedState.columns).toEqual(['custom-col']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
+    });
+
+    test('by reference - partial jsonModeSettings override deep-merges with the source', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        overrides: { wrap_lines: false },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // jsonModeSettings partial-merges: wrap_lines is overridden while hide_nulls is preserved
+      // from the source (a shallow replace dropped it).
+      expect(deserializedState.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
+    });
+
+    test('by reference - grid override replaces wholesale so removed columns are not resurrected', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', {
+          grid: { columns: { A: { width: 100 }, B: { width: 200 } } },
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        // Column B's width was reset, so the stored override only carries A.
+        overrides: { column_settings: { A: { width: 100 } } },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      // Unlike jsonModeSettings, grid must replace wholesale: B stays dropped, not merged back in.
+      expect(deserializedState.grid).toEqual({ columns: { A: { width: 100 } } });
     });
   });
 

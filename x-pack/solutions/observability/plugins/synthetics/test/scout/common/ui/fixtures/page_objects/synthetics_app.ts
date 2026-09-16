@@ -10,11 +10,9 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
-  public readonly ruleMonitorCountButton: Locator;
+  public readonly ruleMonitorCount: Locator;
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.ruleMonitorCountButton = page.testSubj.locator(
-      'syntheticsStatusRuleVizMonitorQueryIDsButton'
-    );
+    this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
   }
 
   async navigateToMonitorManagement() {
@@ -62,23 +60,6 @@ export class SyntheticsAppPage {
   async navigateToAddMonitor() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/add-monitor'));
     await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName', { timeout: 30_000 });
-  }
-
-  async navigateToStepDetails({
-    configId,
-    stepIndex,
-    checkGroup,
-    locationId,
-  }: {
-    checkGroup: string;
-    configId: string;
-    stepIndex: number;
-    locationId?: string;
-  }) {
-    const locationQuery = locationId ? `?locationId=${locationId}` : '';
-    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}${locationQuery}`;
-    await this.page.goto(this.kbnUrl.get(stepDetailsPath));
-    await this.page.testSubj.waitForSelector('synth-step-metrics');
   }
 
   async waitForMonitorManagementLoadingToFinish() {
@@ -224,6 +205,23 @@ export class SyntheticsAppPage {
     }
   }
 
+  async createBasicAPIMonitorDetails({
+    name,
+    inlineScript,
+    apmServiceName,
+    locations,
+  }: {
+    name: string;
+    inlineScript: string;
+    apmServiceName: string;
+    locations: string[];
+  }) {
+    await this.selectMonitorType('syntheticsMonitorTypeAPI');
+    await this.createBasicMonitorDetails({ name, apmServiceName, locations });
+    await this.page.testSubj.click('syntheticsSourceTab__inline');
+    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+  }
+
   async createMonitor({
     monitorConfig,
     monitorType,
@@ -243,6 +241,9 @@ export class SyntheticsAppPage {
         break;
       case FormMonitorType.MULTISTEP:
         await this.createBasicBrowserMonitorDetails(monitorConfig as any);
+        break;
+      case FormMonitorType.API:
+        await this.createBasicAPIMonitorDetails(monitorConfig as any);
         break;
       default:
         break;
@@ -317,7 +318,8 @@ export class SyntheticsAppPage {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
       if (selector.includes('codeEditorContainer')) {
-        await expect(this.page.locator(selector)).toHaveText(expected);
+        // Monaco innerText includes the gutter line number and may wrap tokens.
+        await expect(this.page.locator(selector)).toContainText(expected);
       } else {
         await expect(this.page.locator(selector)).toHaveValue(expected);
       }

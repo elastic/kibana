@@ -67,4 +67,48 @@ describe('useStepMetrics', () => {
       expect.any(Object)
     );
   });
+
+  it('formats transfer size, FCP, and LCP from Elasticsearch aggregations', () => {
+    mockUseReduxEsSearch.mockImplementation(
+      (_params: unknown, _deps: unknown, options: { name: string }) => {
+        if (options.name.startsWith('stepMetricsFromNetworkInfos')) {
+          return {
+            data: { aggregations: { transferSize: { value: 558 * 1024 } } },
+            loading: false,
+          };
+        }
+
+        return {
+          data: {
+            aggregations: {
+              fcp: { value: 402_000 },
+              lcp: { value: 521_000 },
+              cls: { value: 0 },
+              dcl: { value: 0 },
+              totalDuration: { value: 0 },
+            },
+          },
+          loading: false,
+        };
+      }
+    );
+
+    const { result } = renderHook(() => useStepMetrics());
+    const metricsByTestSubj = Object.fromEntries(
+      result.current.metrics.map((metric) => [metric.dataTestSubj, metric])
+    );
+
+    expect(metricsByTestSubj['synth-step-metric-transfer-size']?.formatted).toBe('558 KB');
+    expect(metricsByTestSubj['synth-step-metric-fcp']?.formatted).toBe('402 ms');
+    expect(metricsByTestSubj['synth-step-metric-lcp']?.formatted).toBe('521 ms');
+  });
+
+  it('formats transfer size as 0 Bytes when network aggregations are missing', () => {
+    const { result } = renderHook(() => useStepMetrics());
+    const transferSize = result.current.metrics.find(
+      (metric) => metric.dataTestSubj === 'synth-step-metric-transfer-size'
+    );
+
+    expect(transferSize?.formatted).toBe('0 Bytes');
+  });
 });

@@ -15,11 +15,13 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import {
   agentBuilderDefaultAgentId,
+  CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { ChatTriggerMode } from '../../common/http_api/chat';
 import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
@@ -31,7 +33,11 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-import { getConverseHelpers, type ResolvedExecutionOptions } from './converse_helpers';
+import {
+  filterLegacyApiEvents,
+  getConverseHelpers,
+  type ResolvedExecutionOptions,
+} from './converse_helpers';
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -94,6 +100,7 @@ export const conversePayloadSchema = schema.object({
   ),
   conversation_id: schema.maybe(
     schema.string({
+      maxLength: CONVERSATION_ID_MAX_LENGTH,
       validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
       meta: {
         description: 'Optional existing conversation ID to continue a previous conversation.',
@@ -220,26 +227,6 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  capabilities: schema.maybe(
-    schema.object(
-      {
-        visualizations: schema.maybe(
-          schema.boolean({
-            meta: {
-              description:
-                'When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.',
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description:
-            'Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.',
-        },
-      }
-    )
-  ),
   browser_api_tools: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -308,6 +295,25 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
+  reasoning_level: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('none'),
+        schema.literal('minimal'),
+        schema.literal('low'),
+        schema.literal('medium'),
+        schema.literal('high'),
+        schema.literal('xhigh'),
+      ],
+      {
+        meta: {
+          availability: { stability: 'experimental', since: '9.6.0' },
+          description:
+            'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.',
+        },
+      }
+    )
+  ),
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {
@@ -315,6 +321,19 @@ export const conversePayloadSchema = schema.object({
         description: 'define how to execute the agent (local execution or via task_manager)',
       },
     })
+  ),
+});
+
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf(
+    [schema.literal(ChatTriggerMode.Always), schema.literal(ChatTriggerMode.Never)],
+    {
+      defaultValue: ChatTriggerMode.Always,
+      meta: {
+        description:
+          'Use never to append a user message to an existing conversation without executing the agent. Only conversation_id, input and attachments are read; the execution options are ignored.',
+      },
+    }
   ),
 });
 
@@ -502,10 +521,12 @@ export function registerChatRoutes({
           executionService,
         });
 
+        const legacyEvents$ = chatEvents$.pipe(filterLegacyApiEvents());
+
         return response.ok({
           headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(
-            chatEvents$ as unknown as Observable<ServerSentEvent>,
+            legacyEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
               flushThrottleMs: 100,

@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import type {
-  AgentCapabilities,
   AgentExecutionMode,
   ChatEvent,
   ConverseInput,
@@ -20,10 +19,14 @@ import type {
   ConversationRoundAuthor,
   ExecutionStatus,
   InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -33,8 +36,6 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /** Capabilities to use for this execution. */
-  capabilities?: AgentCapabilities;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -55,6 +56,10 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
 }
 
@@ -205,7 +210,7 @@ interface ExecuteAgentBaseParams {
   /**
    * Interactivity configuration for this execution.
    */
-  interactive?: InteractivityConfig;
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

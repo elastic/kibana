@@ -75,7 +75,8 @@ describe('manageRuleTool', () => {
   it('describes operations from the schema helpers', () => {
     expect(tool.description).toContain('Use `set_metadata`');
     expect(tool.description).toContain('Use `set_dashboards`');
-    expect(tool.description).toContain('data: { dashboardId }');
+    expect(tool.description).toContain('Use `set_runbook`');
+    expect(tool.description).toContain('data: { dashboard_id }');
     expect(tool.description).not.toMatch(/1\. set_metadata/);
   });
 
@@ -276,14 +277,14 @@ describe('manageRuleTool', () => {
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
         data: {
-          artifacts?: Array<{ id: string; type: string; data: { dashboardId?: string } }>;
+          artifacts?: Array<{ id: string; type: string; data: { dashboard_id?: string } }>;
         };
       };
       expect(addCall.data.artifacts).toEqual([
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-abc' },
+          data: { dashboard_id: 'dash-abc' },
         },
       ]);
 
@@ -295,6 +296,42 @@ describe('manageRuleTool', () => {
       };
       expect(results[0].type).toBe(ToolResultType.other);
       expect(results[0].data?.ruleAttachment?.dashboards).toEqual(['dash-abc']);
+    });
+
+    it('stores set_runbook markdown as a runbook artifact on the rule attachment', async () => {
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Runbook Rule' },
+            { operation: 'set_runbook', content: '# Restart the service' },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: {
+          artifacts?: Array<{ id: string; type: string; data: { content?: string } }>;
+        };
+      };
+      expect(addCall.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^runbook-/),
+          type: 'runbook',
+          data: { content: '# Restart the service' },
+        },
+      ]);
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: { ruleAttachment?: { runbookAttached?: boolean } };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.ruleAttachment?.runbookAttached).toBe(true);
     });
 
     it('returns an error result when a dashboard ID does not exist', async () => {

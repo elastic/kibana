@@ -19,6 +19,8 @@ import {
   ensureStreamsEnabled,
   deleteTemporaryReplayIndices,
   canonicalDetectionsFromGroundTruth,
+  resetMemoryPages,
+  replayIntoMemoryPages,
   shiftSnapshotTimestamp,
   type ReplayShift,
 } from '../../src/data_generators/replay';
@@ -183,6 +185,7 @@ evaluate.describe(
             executorClient,
             evaluators,
             esClient,
+            kbnClient,
             agentBuilderClient,
             apiServices,
             log,
@@ -195,28 +198,48 @@ evaluate.describe(
             const detectionsByScenario = new Map(
               collectedExamples.map(({ scenario, detections, snapshotKey }) => [
                 scenario.input.scenario_id,
-                { detections, snapshotKey },
+                { detections, snapshotKey, memoryPages: scenario.memoryPages },
               ])
+            );
+            const discoveryExamples = collectedExamples.filter(
+              ({ scenario }) => !scenario.memoryPages?.length
+            );
+            const memoryExamples = collectedExamples.filter(
+              ({ scenario }) => scenario.memoryPages?.length
             );
 
             await executorClient.runExperiment(
               {
                 datasets: [
-                  {
-                    name: `sigevents: Discovery (${dataset.id})`,
-                    description: `[${dataset.id}] discovery agent across scenarios`,
-                    examples: collectedExamples.flatMap(({ scenario }) => [
-                      {
+                  ...[
+                    {
+                      name: `sigevents: Discovery (${dataset.id})`,
+                      description: `[${dataset.id}] discovery agent across scenarios`,
+                      examples: discoveryExamples,
+                    },
+                    {
+                      name: `sigevents: Discovery memory (${dataset.id})`,
+                      description: `[${dataset.id}] discovery agent memory-aware scenarios`,
+                      examples: memoryExamples,
+                    },
+                  ]
+                    .filter(({ examples }) => examples.length > 0)
+                    .map(({ name, description, examples }) => ({
+                      name,
+                      description,
+                      examples: examples.map(({ scenario }) => ({
                         id: scenario.input.scenario_id,
-                        input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
+                        input: {
+                          ...scenario.input,
+                          snapshot_source: scenario.snapshot_source,
+                        },
                         output: { ...scenario.output, criteria: scenario.output.criteria },
                         metadata: {
                           ...scenario.metadata,
                           test_index: MANAGED_STREAM_SEARCH_PATTERN,
                         },
-                      },
-                    ]),
-                  },
+                      })),
+                    })),
                 ],
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
@@ -226,7 +249,7 @@ evaluate.describe(
                     throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                   }
 
-                  const { detections, snapshotKey } = data;
+                  const { detections, snapshotKey, memoryPages } = data;
                   const snapshotSource = snapshotSources.get(input.scenario_id);
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
@@ -235,6 +258,18 @@ evaluate.describe(
                   // Each scenario must start with an empty events index. Scenarios that share a
                   // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
                   await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
+                  // Memory must be hermetic per scenario: prior scenarios may have seeded pages or
+                  // the agent may have created first-sight chronic pages — either would leak a
+                  // severity cap (or its absence) into this scenario's grading.
+                  await resetMemoryPages({ esClient, log });
+                  if (memoryPages && memoryPages.length > 0) {
+                    await replayIntoMemoryPages({
+                      log,
+                      kbnClient,
+                      memoryPages,
+                    });
+                  }
 
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
@@ -372,6 +407,7 @@ evaluate.describe(
               // establishing + one gradable follow-up).
               const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
                 if (detections.length === 0) return [];
+                if (scenario.memoryPages?.length) return [];
                 // Chronic-seeded scenarios grade the rate gate only; continuation policy for
                 // known-chronic patterns is owned by the memory-usage work.
                 if (scenario.input.chronic_seed) return [];
@@ -468,6 +504,10 @@ evaluate.describe(
                     // Continuation examples must not inherit events from a previous path.
                     // The cycles within this task still share state.
                     await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
+                    // Wipe memory pages so first-sight chronic pages created by earlier runs do
+                    // not cap this run's severity reasoning.
+                    await resetMemoryPages({ esClient, log });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
@@ -640,6 +680,7 @@ evaluate.describe(
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
+          await resetMemoryPages({ esClient, log });
         });
       });
     }

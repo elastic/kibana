@@ -13,11 +13,7 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ConversationAction,
-  ConversationRoundStep,
-  Conversation,
-} from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, Conversation } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, isConversationCreatedEvent } from '@kbn/agent-builder-common';
 import type {
   Attachment,
@@ -48,8 +44,7 @@ const optimisticConversationListTitle = i18n.translate(
 );
 
 export interface SendMessageVars {
-  message?: string;
-  action?: ConversationAction;
+  message: string;
   conversationId: string;
   agentId: string;
   connectorId?: string;
@@ -57,7 +52,7 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  onResetToNewConversation?: (message: string) => void;
+  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
@@ -127,7 +122,7 @@ const withScreenContextAttachment = async ({
 };
 
 /**
- * Send and regenerate-round mutation. Lives in the lifted StreamingProvider so streaming
+ * Send-message mutation. Lives in the lifted StreamingProvider so streaming
  * state is visible to the whole app (sidebar included).
  *
  * Single-scope `mutationFn` (setup → try → catch → finally) — no `onMutate` / `onSettled`
@@ -159,10 +154,8 @@ export const useSendMessageMutation = ({
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: async (vars: SendMessageVars) => {
-      const isRegenerate = vars.action === 'regenerate';
-
       // Clear any previous error for this conversation before starting the new mutation.
-      // Covers retry, fresh-send-after-error, and regenerate-after-error uniformly —
+      // Covers retry and fresh-send-after-error uniformly —
       // otherwise `useConversationRounds` would render the stale error round alongside
       // the new optimistic round.
       clearError(vars.conversationId);
@@ -189,61 +182,45 @@ export const useSendMessageMutation = ({
       const executionId = uuidv4();
       controllersRef.current.set(vars.conversationId, { controller, executionId });
 
-      let hasInsertedOptimisticListRow = false;
-      if (isRegenerate) {
-        // Clear the existing response immediately so UI shows empty state.
-        streamActions.clearLastRoundResponse();
-      } else {
-        if (!vars.message) {
-          throw new Error('Message is required');
-        }
-        setPendingMessage(vars.conversationId, vars.message);
-        hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
-          queryClient,
-          conversationsService,
-          agentId: vars.agentId,
-          conversationId: vars.conversationId,
-          title: optimisticConversationListTitle,
-        });
-        await streamActions.addOptimisticRound({
-          userMessage: vars.message,
-          attachments: flattenAttachments(vars.attachments ?? []),
-          agentId: vars.agentId,
-        });
+      if (!vars.message) {
+        throw new Error('Message is required');
       }
+      setPendingMessage(vars.conversationId, vars.message);
+      const hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId: vars.agentId,
+        conversationId: vars.conversationId,
+        title: optimisticConversationListTitle,
+      });
+      await streamActions.addOptimisticRound({
+        userMessage: vars.message,
+        attachments: flattenAttachments(vars.attachments ?? []),
+        agentId: vars.agentId,
+      });
 
       let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
         const projectRouting = services.plugins.cps?.cpsManager?.getProjectRouting();
 
-        const rawEvents$ = isRegenerate
-          ? chatService.regenerate({
-              signal: controller.signal,
-              executionId,
-              conversationId: vars.conversationId,
-              agentId: vars.agentId,
-              connectorId: vars.connectorId,
-              browserApiTools: browserApiToolsMetadata,
-              projectRouting,
-            })
-          : chatService.chat({
-              signal: controller.signal,
-              executionId,
-              input: vars.message!,
-              conversationId: vars.conversationId,
-              agentId: vars.agentId,
-              connectorId: vars.connectorId,
-              attachments: [
-                ...flattenAttachments(vars.attachments ?? []),
-                ...(await withScreenContextAttachment({
-                  services,
-                  conversationAttachments: vars.conversationAttachments,
-                })),
-              ],
-              browserApiTools: browserApiToolsMetadata,
-              projectRouting,
-            });
+        const rawEvents$ = chatService.chat({
+          signal: controller.signal,
+          executionId,
+          input: vars.message,
+          conversationId: vars.conversationId,
+          agentId: vars.agentId,
+          connectorId: vars.connectorId,
+          attachments: [
+            ...flattenAttachments(vars.attachments ?? []),
+            ...(await withScreenContextAttachment({
+              services,
+              conversationAttachments: vars.conversationAttachments,
+            })),
+          ],
+          browserApiTools: browserApiToolsMetadata,
+          projectRouting,
+        });
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
@@ -261,7 +238,8 @@ export const useSendMessageMutation = ({
           isAborted: () => controller.signal.aborted,
         });
 
-        if (!isRegenerate) {
+        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
+        if (!controller.signal.aborted) {
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();
         }
@@ -276,11 +254,9 @@ export const useSendMessageMutation = ({
         );
         const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
         setError(vars.conversationId, err, inProgressSteps);
-        if (!isRegenerate) {
-          // Remove the optimistic round immediately so the error round and the optimistic
-          // round are not both visible.
-          streamActions.removeOptimisticRound();
-        }
+        // Remove the optimistic round immediately so the error round and the optimistic
+        // round are not both visible.
+        streamActions.removeOptimisticRound();
         throw err;
       } finally {
         // Only invalidate on success. On error: refetching a fresh conversation that
@@ -298,7 +274,6 @@ export const useSendMessageMutation = ({
           controller.signal.aborted &&
           isNewConversation &&
           !conversationPersisted &&
-          !isRegenerate &&
           Boolean(vars.onResetToNewConversation);
 
         if (abortedNewUnpersisted) {
@@ -313,7 +288,7 @@ export const useSendMessageMutation = ({
             });
           }
           clearPendingMessage(vars.conversationId);
-          vars.onResetToNewConversation!(vars.message!);
+          vars.onResetToNewConversation!(vars.message, vars.attachments);
         } else {
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();

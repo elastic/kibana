@@ -117,6 +117,11 @@ export interface GetWorkflowExecutionsParams {
   startedAfter?: string;
   /** Datemath upper bound for filtering executions by startedAt. */
   startedBefore?: string;
+  /**
+   * Opaque cursor from a prior response's `searchAfter` (JSON-encoded sort values).
+   * Prefer over `page` for deep infinite scroll.
+   */
+  searchAfter?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -165,6 +170,8 @@ export interface WorkflowExecutionLogsResponse {
 
 export interface ResumeExecutionParams {
   input: Record<string, unknown>;
+  /** HITL step execution to claim. When omitted, the server looks up the waiting step. */
+  stepExecutionId?: string;
 }
 
 export interface WorkflowsConfig {

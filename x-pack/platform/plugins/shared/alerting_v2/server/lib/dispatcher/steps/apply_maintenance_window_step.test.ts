@@ -89,9 +89,9 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.dispatchable).toHaveLength(0);
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ rule_id: ep.rule_id, reason: 'maintenance_window:mw-1' })
     );
   });
@@ -130,8 +130,8 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
   });
 
   it('keeps episodes where the episode-data KQL filter does not match', async () => {
@@ -177,7 +177,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-matching' })
     );
   });
@@ -218,8 +218,8 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(2);
-    expect(result.data?.suppressed?.[0]).toEqual(previouslySuppressed);
+    expect(result.data?.triage?.suppressed).toHaveLength(2);
+    expect(result.data?.triage?.suppressed[0]).toEqual(previouslySuppressed);
   });
 
   it('suppresses an episode whose timestamp is inside an MW window that has already closed by now', async () => {
@@ -238,8 +238,8 @@ describe('ApplyMaintenanceWindowStep', () => {
     const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-closed' })
     );
   });
@@ -277,9 +277,9 @@ describe('ApplyMaintenanceWindowStep', () => {
       const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
-      expect(result.data?.dispatchable).toHaveLength(0);
-      expect(result.data?.suppressed).toHaveLength(1);
-      expect(result.data?.suppressed?.[0]).toEqual(
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
     });
@@ -327,9 +327,9 @@ describe('ApplyMaintenanceWindowStep', () => {
       const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
-      expect(result.data?.dispatchable).toHaveLength(0);
-      expect(result.data?.suppressed).toHaveLength(1);
-      expect(result.data?.suppressed?.[0]).toEqual(
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
     });

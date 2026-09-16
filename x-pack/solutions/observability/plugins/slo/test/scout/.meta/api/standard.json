@@ -1,5 +1,5 @@
 {
-  "sha1": "284fba844fd04b27eca5b1050193afd0c2bf2090",
+  "sha1": "e989b071ba1aada9d391cf30da40ddb7e365ff64",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -322,6 +322,214 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
         "line": 88,
         "column": 15
+      }
+    },
+    {
+      "id": "da625884041568a-865ce304c77001d",
+      "title": "SLO CRUD request validation create: returns 400 on an invalid time window duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 29,
+        "column": 84
+      }
+    },
+    {
+      "id": "da625884041568a-c3a479f5d6a1602",
+      "title": "SLO CRUD request validation create: returns 400 on an invalid custom id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 38,
+        "column": 69
+      }
+    },
+    {
+      "id": "da625884041568a-419e71911058f85",
+      "title": "SLO CRUD request validation create: returns 400 on a missing required field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 47,
+        "column": 16
+      }
+    },
+    {
+      "id": "da625884041568a-733a4ae23521f86",
+      "title": "SLO CRUD request validation create: returns 400 on an unknown body key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "da625884041568a-6e4f5605ea3897d",
+      "title": "SLO CRUD request validation update: returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "da625884041568a-3ef2c4b2a634ead",
+      "title": "SLO CRUD request validation update: returns 400 on an unknown body key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 69,
+        "column": 59
+      }
+    },
+    {
+      "id": "da625884041568a-11fa8bf87e2cae3",
+      "title": "SLO CRUD request validation get returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 79,
+        "column": 15
+      }
+    },
+    {
+      "id": "da625884041568a-13411521a623a35",
+      "title": "SLO CRUD request validation delete returns 400 on an invalid path id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 86,
+        "column": 13
+      }
+    },
+    {
+      "id": "da625884041568a-9f1b0fa42a251ea",
+      "title": "SLO CRUD request validation find: returns 400 on an invalid searchAfter value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 90,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-5a4a542d3be3501",
+      "title": "SLO CRUD request validation find: returns 400 on an unknown sortBy value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 99,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-0cf8447298faf1d",
+      "title": "SLO CRUD request validation find: returns 400 on an unknown query key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 108,
+        "column": 23
+      }
+    },
+    {
+      "id": "da625884041568a-bd264a5ad4189a0",
+      "title": "SLO CRUD request validation find: accepts hideStale as a boolean string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "da625884041568a-ad198b6cb7dde00",
+      "title": "SLO CRUD request validation find: accepts a valid searchAfter JSON array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_validation.spec.ts",
+        "line": 123,
+        "column": 86
       }
     },
     {

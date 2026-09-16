@@ -17,6 +17,8 @@ import {
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import {
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
@@ -90,7 +92,12 @@ export const deliverCallbackEvents = ({
 
     events$
       .pipe(
-        filter((event) => !isMessageChunkEvent(event)),
+        filter(
+          (event) =>
+            !isMessageChunkEvent(event) &&
+            !isExecutionStartedEvent(event) &&
+            !isExecutionTerminatedEvent(event)
+        ),
         concatMap((event) => {
           // Hold the terminal event back until the stream completes (persistence succeeded).
           if (isRoundCompleteEvent(event)) {
