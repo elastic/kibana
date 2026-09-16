@@ -8,7 +8,7 @@
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ActionPoliciesArtifactsSubsection } from '../../rule_details/overview/artifacts/action_policies_artifacts_subsection';
+import { ActionPoliciesArtifactsSubsection } from '../../../rule_details/overview/artifacts/action_policies_artifacts_subsection';
 
 export const RuleSummaryActionPoliciesSection: React.FC = () => (
   <FlyoutAccordion

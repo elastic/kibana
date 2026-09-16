@@ -8,8 +8,8 @@
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DashboardArtifactsSubsection } from '../../rule_details/overview/artifacts/dashboard_artifacts_subsection';
-import type { RuleSummarySectionProps } from './types';
+import { DashboardArtifactsSubsection } from '../../../rule_details/overview/artifacts/dashboard_artifacts_subsection';
+import type { RuleSummarySectionProps } from '../../rule_summary';
 
 export const RuleSummaryArtifactsSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const hasDashboards = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'dashboard'));

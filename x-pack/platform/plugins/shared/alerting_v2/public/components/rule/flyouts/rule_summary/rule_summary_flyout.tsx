@@ -21,11 +21,9 @@ import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { RuleProvider } from '../../../rule_details/rule_context';
-import {
-  RuleSummaryActionPoliciesSection,
-  RuleSummaryArtifactsSection,
-  RuleSummaryBody,
-} from '../../rule_summary';
+import { RuleSummaryBody } from '../../rule_summary';
+import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
+import { RuleSummaryArtifactsSection } from './rule_summary_artifacts_section';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
@@ -160,7 +158,7 @@ export const RuleSummaryFlyout = ({
             label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
               defaultMessage: 'Take action',
             })}
-            iconType="chevronSingleDown"
+            iconType={isTakeActionOpen ? 'chevronSingleDown' : 'chevronSingleUp'}
             onClick={() => setIsTakeActionOpen((open) => !open)}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />

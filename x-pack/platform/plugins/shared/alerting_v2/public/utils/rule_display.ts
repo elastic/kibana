@@ -6,10 +6,9 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import type { NoDataStrategy, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import type { RuleApiResponse } from '../../services/rules_api';
 
 export const EMPTY_VALUE = '-';
 
@@ -93,7 +92,7 @@ const recoveryLabel = (n: number) =>
     values: { n },
   });
 
-export function formatAlertDelay(stateTransition: RuleApiResponse['state_transition']): string {
+export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
   if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
     return EMPTY_VALUE;
   }
@@ -110,7 +109,9 @@ export function formatAlertDelay(stateTransition: RuleApiResponse['state_transit
   });
 }
 
-export function formatRecoveryDelay(stateTransition: RuleApiResponse['state_transition']): string {
+export function formatRecoveryDelay(
+  stateTransition: RuleAttachmentData['state_transition']
+): string {
   if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
     return EMPTY_VALUE;
   }
@@ -147,7 +148,7 @@ export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
   return NO_DATA_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
 }
 
-export function getRecoverEsqlSegment(
+export function getDisplayRecoveryCondition(
   query: Query,
   strategy?: RecoveryStrategy
 ): string | undefined {

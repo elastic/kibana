@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EMPTY_VALUE } from '../../rule_details/utils';
+import { EMPTY_VALUE } from '../../../utils/rule_display';
 import type { RuleSummarySectionProps } from './types';
 
 export const RuleSummaryAboutCard: React.FC<RuleSummarySectionProps> = ({ rule }) => {

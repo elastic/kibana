@@ -20,8 +20,8 @@ import {
   formatRecoveryStrategy,
   getDisplayQueryParts,
   getQueryOverflowHeight,
-  getRecoverEsqlSegment,
-} from '../../rule_details/utils';
+  getDisplayRecoveryCondition,
+} from '../../../utils/rule_display';
 import { RuleDetailsTable } from './rule_details_table';
 import type { RuleSummaryData } from './types';
 
@@ -64,7 +64,7 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
-  const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
+  const recoveryCondition = getDisplayRecoveryCondition(rule.query, rule.recovery_strategy);
   const { baseQuery, alertCondition } = getDisplayQueryParts(rule.query);
 
   const conditionItems = [

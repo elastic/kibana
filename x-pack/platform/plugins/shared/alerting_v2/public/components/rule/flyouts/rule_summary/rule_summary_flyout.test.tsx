@@ -193,6 +193,21 @@ describe('RuleSummaryFlyout', () => {
   describe('Take action menu', () => {
     const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
+    it('points the chevron down while the menu is open and up while it is closed', () => {
+      renderFlyout();
+      const button = screen.getByTestId('ruleSummaryFlyoutTakeActionButton');
+
+      expect(button.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+
+      openMenu();
+
+      expect(button.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+
+      openMenu();
+
+      expect(button.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+    });
+
     it('opens the View details item with a locator-built rule details href', () => {
       const { rulesLocators } = mockLocators;
       renderFlyout();
