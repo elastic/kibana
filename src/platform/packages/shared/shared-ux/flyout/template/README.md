@@ -139,7 +139,7 @@ const AlertDetails = ({ onClose }) => {
 core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
 ```
 
-The component is a real React boundary, so it may use hooks and re-render. `onClose` is the only root prop it sets — it stays required so a `FlyoutTemplate` can never be rendered without a way to dismiss it — and it arrives as a prop on the content component. Every other root prop comes from the options argument; props passed here are ignored and warn in development. See `@kbn/core-overlays-browser` for the full signature.
+The component is a real React boundary, so it may use hooks and re-render. `onClose` is the only root prop it sets — it stays required so a `FlyoutTemplate` can never be rendered without a way to dismiss it — and it arrives as a prop on the content component. Every other root prop comes from `FlyoutTemplateManagedProvider` (fed by the options argument) regardless of what the content component passes to `FlyoutTemplate`; extra root props on the element are ignored and warn in development. See `@kbn/core-overlays-browser` for the full signature.
 
 Wrapping `onClose` is fine; declining to call it does not keep the flyout open. EUI's flyout manager routes the close button, history navigation, and cascade closes through that prop and has already removed the flyout by the time a handler runs, so the template tears down regardless. `useFlyoutClose` is available for content nested too deeply to receive the prop.
 
