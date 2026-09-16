@@ -6,22 +6,22 @@
  */
 
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
-import { EisModelStatus } from '../../common/types';
-import type { EisInferenceEndpoint } from '../../common/types';
+import { EisModelStatus, type CspRegion, type EisInferenceEndpoint } from '../../common/types';
 import {
   getModelEOLDate,
   getModelStatus,
   isModelDeprecated,
   isModelEndOfLifeReached,
   getGeoDisplayName,
+  getRegionDisplayName,
+  getRegionPlaceName,
   getAvailableRegions,
+  getAvailableGeos,
   getRegionZoneCounts,
+  getZoneGroups,
 } from './eis_utils';
 
-const makeEndpoint = (
-  modelId: string,
-  regions: Array<{ csp: string; region: string; geo?: string }>
-): EisInferenceEndpoint =>
+const makeEndpoint = (modelId: string, regions: CspRegion[]): EisInferenceEndpoint =>
   ({
     inference_id: `.${modelId}`,
     task_type: 'text_embedding',
@@ -177,6 +177,70 @@ describe('getGeoDisplayName', () => {
   });
 });
 
+describe('getRegionPlaceName', () => {
+  it('returns region_display_name when present', () => {
+    expect(
+      getRegionPlaceName({
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      })
+    ).toBe('EU West (Ireland)');
+  });
+
+  it('falls back to the region id when region_display_name is missing', () => {
+    expect(getRegionPlaceName({ csp: 'aws', region: 'eu-west-1', geo: 'eu' })).toBe('eu-west-1');
+  });
+
+  it('falls back to the region id when region_display_name is empty', () => {
+    expect(
+      getRegionPlaceName({ csp: 'aws', region: 'eu-west-1', geo: 'eu', region_display_name: '' })
+    ).toBe('eu-west-1');
+  });
+});
+
+describe('getRegionDisplayName', () => {
+  it('appends the uppercase CSP to region_display_name', () => {
+    expect(
+      getRegionDisplayName({
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      })
+    ).toBe('EU West (Ireland) - AWS');
+  });
+
+  it('falls back to the raw region code when region_display_name is missing', () => {
+    expect(getRegionDisplayName({ csp: 'aws', region: 'eu-west-1', geo: 'eu' })).toBe(
+      'eu-west-1 - AWS'
+    );
+  });
+
+  it('falls back to the raw region code when region_display_name is empty', () => {
+    expect(
+      getRegionDisplayName({
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: '',
+      })
+    ).toBe('eu-west-1 - AWS');
+  });
+
+  it('uppercases the CSP label', () => {
+    expect(
+      getRegionDisplayName({
+        csp: 'gcp',
+        region: 'europe-west1',
+        geo: 'eu',
+        region_display_name: 'EU West (Belgium)',
+      })
+    ).toMatch(/ - GCP$/);
+  });
+});
+
 describe('getAvailableRegions', () => {
   it('returns an empty array when no endpoints are provided', () => {
     expect(getAvailableRegions([])).toEqual([]);
@@ -203,11 +267,62 @@ describe('getAvailableRegions', () => {
   it('deduplicates regions that appear across multiple endpoints', () => {
     const ep1 = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
     const ep2 = makeEndpoint('e5-small', [
-      { csp: 'aws', region: 'us-east-1', geo: 'us' }, // duplicate
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
       { csp: 'gcp', region: 'europe-west1', geo: 'eu' },
     ]);
     const result = getAvailableRegions([ep1, ep2]);
     expect(result).toHaveLength(2);
+  });
+
+  it('keeps the copy with region_display_name when the first occurrence is unnamed', () => {
+    const unnamed = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'eu-west-1', geo: 'eu' }]);
+    const named = makeEndpoint('e5-small', [
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+    const result = getAvailableRegions([unnamed, named]);
+    expect(result).toEqual([
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+  });
+
+  it('replaces an empty region_display_name with a later named copy', () => {
+    const emptyName = makeEndpoint('elser-v2', [
+      { csp: 'aws', region: 'eu-west-1', geo: 'eu', region_display_name: '' },
+    ]);
+    const named = makeEndpoint('e5-small', [
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+    const result = getAvailableRegions([emptyName, named]);
+    expect(result[0].region_display_name).toBe('EU West (Ireland)');
+  });
+
+  it('keeps the first named copy when a later occurrence is unnamed', () => {
+    const named = makeEndpoint('elser-v2', [
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+    const unnamed = makeEndpoint('e5-small', [{ csp: 'aws', region: 'eu-west-1', geo: 'eu' }]);
+    const result = getAvailableRegions([named, unnamed]);
+    expect(result[0].region_display_name).toBe('EU West (Ireland)');
   });
 
   it('sorts results alphabetically by csp then region', () => {
@@ -305,12 +420,155 @@ describe('getRegionZoneCounts', () => {
   });
 
   it('deduplicates regions within a zone across multiple endpoints for the same model', () => {
-    // Same region listed on two different endpoints for the same model
     const ep1 = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
     const ep2 = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
     const result = getRegionZoneCounts([ep1, ep2], [ep1, ep2]);
     const us = result.find((r) => r.geo === 'us');
     expect(us?.modelCount).toBe(1);
     expect(us?.totalCount).toBe(1);
+  });
+
+  it('keeps region_display_name on the deduplicated modelRegions entry', () => {
+    const unnamed = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'eu-west-1', geo: 'eu' }]);
+    const named = makeEndpoint('elser-v2', [
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+    const result = getRegionZoneCounts([unnamed, named], [unnamed, named]);
+    const eu = result.find((r) => r.geo === 'eu');
+    expect(eu?.modelRegions).toEqual([
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+  });
+
+  it('keeps region_display_name when a later unnamed copy appears in the same zone', () => {
+    const named = makeEndpoint('elser-v2', [
+      {
+        csp: 'aws',
+        region: 'eu-west-1',
+        geo: 'eu',
+        region_display_name: 'EU West (Ireland)',
+      },
+    ]);
+    const unnamed = makeEndpoint('elser-v2', [{ csp: 'aws', region: 'eu-west-1', geo: 'eu' }]);
+    const result = getRegionZoneCounts([named, unnamed], [named, unnamed]);
+    const eu = result.find((r) => r.geo === 'eu');
+    expect(eu?.modelRegions[0].region_display_name).toBe('EU West (Ireland)');
+  });
+});
+
+describe('getAvailableGeos', () => {
+  it('returns an empty array when there are no endpoints', () => {
+    expect(getAvailableGeos([])).toEqual([]);
+  });
+
+  it('collects unique geo codes from CspRegion entries', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'gcp', region: 'europe-west1', geo: 'eu' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    expect(result).toContain('us');
+    expect(result).toContain('eu');
+  });
+
+  it('deduplicates geo codes across regions and endpoints', () => {
+    const ep1 = makeEndpoint('model-a', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'gcp', region: 'us-central1', geo: 'us' },
+    ]);
+    const ep2 = makeEndpoint('model-b', [{ csp: 'aws', region: 'us-west-2', geo: 'us' }]);
+    const result = getAvailableGeos([ep1, ep2]);
+    expect(result.filter((g) => g === 'us')).toHaveLength(1);
+  });
+
+  it('orders known geos by GEO_ORDER and appends unknown geos alphabetically', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+      { csp: 'aws', region: 'ap-southeast-1', geo: 'apac' },
+      { csp: 'aws', region: 'me-central-1', geo: 'mea' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    // GEO_ORDER: apac, eu, us, other → present geos: apac, eu, us (in GEO_ORDER order)
+    // unknown: mea (appended alphabetically)
+    expect(result).toEqual(['apac', 'eu', 'us', 'mea']);
+  });
+
+  it('places multiple unknown geos in alphabetical order after known geos', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'za-north-1', geo: 'ssa' },
+      { csp: 'aws', region: 'me-central-1', geo: 'mea' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    expect(result).toEqual(['us', 'mea', 'ssa']);
+  });
+
+  it('returns an empty array when no endpoints have metadata', () => {
+    const bare = {
+      inference_id: '.bare',
+      task_type: 'text_embedding',
+      service: 'elastic',
+      service_settings: { model_id: 'bare' },
+    } as unknown as EisInferenceEndpoint;
+    expect(getAvailableGeos([bare])).toEqual([]);
+  });
+});
+
+describe('getZoneGroups', () => {
+  it('returns an empty array when no regions are provided', () => {
+    expect(getZoneGroups([])).toEqual([]);
+  });
+
+  it('groups regions by their geo code', () => {
+    const regions = [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+      { csp: 'gcp', region: 'us-central1', geo: 'us' },
+    ];
+    const groups = getZoneGroups(regions);
+    const geos = groups.map((g) => g.geo);
+    expect(geos).toContain('us');
+    expect(geos).toContain('eu');
+    const usGroup = groups.find((g) => g.geo === 'us');
+    expect(usGroup?.regions).toHaveLength(2);
+  });
+
+  it('orders groups by GEO_ORDER: known geos first in order, then unknowns alphabetically', () => {
+    const regions = [
+      { csp: 'aws', region: 'ap-southeast-1', geo: 'apac' },
+      { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'me-south-1', geo: 'mea' },
+    ];
+    const groups = getZoneGroups(regions);
+    const geos = groups.map((g) => g.geo);
+    // GEO_ORDER = ['apac', 'eu', 'us', 'other'] — 'mea' is unknown, appended last
+    expect(geos.indexOf('apac')).toBeLessThan(geos.indexOf('eu'));
+    expect(geos.indexOf('eu')).toBeLessThan(geos.indexOf('us'));
+    expect(geos[geos.length - 1]).toBe('mea');
+  });
+
+  it('falls back to "other" for regions without a geo', () => {
+    const regions = [{ csp: 'aws', region: 'unknown-1' }];
+    const groups = getZoneGroups(regions);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].geo).toBe('other');
+  });
+
+  it('sets the displayName via getGeoDisplayName', () => {
+    const regions = [{ csp: 'aws', region: 'us-east-1', geo: 'us' }];
+    const groups = getZoneGroups(regions);
+    expect(groups[0].displayName).toBe('North America');
   });
 });

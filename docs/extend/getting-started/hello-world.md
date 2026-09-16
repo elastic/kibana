@@ -23,7 +23,7 @@ From the Kibana repo root:
 node scripts/generate_plugin --name hello_world
 ```
 
-You'll be prompted for a description, ownership, and whether to generate UI and/or server code.
+You'll be prompted for a description, ownership, and whether to generate UI or server code.
 
 When it finishes, your plugin is at `plugins/hello_world/` with:
 

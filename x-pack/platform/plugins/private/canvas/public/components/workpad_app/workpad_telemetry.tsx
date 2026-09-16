@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux-v7';
 import deepEqual from 'react-fast-compare';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { getElementCounts } from '../../state/selectors/workpad';

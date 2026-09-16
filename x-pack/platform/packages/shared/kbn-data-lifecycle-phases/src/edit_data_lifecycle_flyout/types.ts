@@ -75,4 +75,6 @@ export interface IlmPolicyForFlyout {
   };
   /** Full serialized policy — provide to enable the inspect flyout. */
   serializedPolicy?: SerializedPolicy;
+  /** When true, this policy is preconfigured and managed by Elastic. */
+  isManaged?: boolean;
 }

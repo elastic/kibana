@@ -37,7 +37,8 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
   record.episode_id ?? 'episode-1',
   record.episode_status === undefined ? 'active' : record.episode_status,
   record.episode_status_count === undefined ? null : record.episode_status_count,
-  record.rule_id ?? 'test-rule-id',
+  // Use explicit undefined-check so callers can pass null to simulate a missing rule_id
+  record.rule_id === undefined ? 'test-rule-id' : record.rule_id,
   record.rule_version ?? 1,
   record.space_id ?? 'default',
   record.status ?? 'breached',
@@ -51,10 +52,12 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
  * (`RawAlertEventRow`). One function covers every alert-event loader in
  * the client:
  *
- * - Single-route path (`loadLastAlertEventOrThrow`): pass one record (or
- *   omit the argument to accept defaults).
- * - Batched paths (`loadLatestAlertEvents`, `bulkLoadLatestAlertEvents`):
- *   pass an array — one entry per returned row.
+ * - Single-route paths (`loadLastSeriesAlertEventOrThrow`,
+ *   `loadLastEpisodeAlertEventOrThrow`): pass one record (or omit the
+ *   argument to accept defaults).
+ * - Batched paths (`loadLatestAlertEventsByGroupHash`,
+ *   `loadLatestAlertEventsByEpisodeId`): pass an array — one entry per
+ *   returned row.
  * - "No matches" case: pass an empty array.
  */
 export const getAlertEventESQLResponse = (

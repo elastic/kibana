@@ -88,11 +88,16 @@ export const buildTemplateYaml = (
 
     const refEntry: Record<string, unknown> = { $ref: refName };
 
-    if (cf.value !== null && cf.value !== undefined) {
-      if (cf.type === CustomFieldTypes.TEXT || cf.type === CustomFieldTypes.NUMBER) {
-        refEntry.metadata = { default: cf.value };
-      } else if (cf.type === CustomFieldTypes.TOGGLE) {
-        refEntry.metadata = { default: String(cf.value) };
+    if (cf.type === CustomFieldTypes.TEXT || cf.type === CustomFieldTypes.NUMBER) {
+      // A legacy template stores an explicitly-cleared field as `value: null`. In v1 that meant the
+      // field was empty for cases created from the template (the global default was NOT re-applied).
+      // In v2 an omitted `$ref` override inherits the field-library default, so to preserve the v1
+      // intent we emit an explicit `default: null` — "clear, do not inherit the library default".
+      refEntry.metadata = { default: cf.value ?? null };
+    } else if (cf.type === CustomFieldTypes.TOGGLE) {
+      // Legacy toggles are always a concrete boolean, never null — carry the value straight across.
+      if (cf.value !== null && cf.value !== undefined) {
+        refEntry.metadata = { default: Boolean(cf.value) };
       }
     }
 

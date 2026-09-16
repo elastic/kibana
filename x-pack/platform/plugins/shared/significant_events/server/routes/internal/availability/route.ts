@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { getSignificantEventsAvailability } from '../../utils/assert_significant_events_access';
 
@@ -17,11 +17,11 @@ const availabilityRoute = createServerRoute({
     access: 'internal',
     summary: 'Get significant events availability',
     description:
-      'Returns whether significant events is available given the current pricing tier, license, settings and required plugins.',
+      'Returns whether significant events is available given the Technical Preview rollout flag, pricing tier, license, and required plugins.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -30,9 +30,9 @@ const availabilityRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsAvailabilityResponse> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing } = await getScopedClients({ request });
 
-    return getSignificantEventsAvailability({ server, licensing, uiSettingsClient });
+    return getSignificantEventsAvailability({ server, licensing });
   },
 });
 

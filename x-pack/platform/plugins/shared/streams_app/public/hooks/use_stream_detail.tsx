@@ -29,7 +29,9 @@ export interface StreamDetailContextValue {
   refresh: () => void;
 }
 
-const StreamDetailContext = React.createContext<StreamDetailContextValue | undefined>(undefined);
+export const StreamDetailContext = React.createContext<StreamDetailContextValue | undefined>(
+  undefined
+);
 
 /**
  * Handles a strict (DeepStrict) Zod schema validation failure for a stream

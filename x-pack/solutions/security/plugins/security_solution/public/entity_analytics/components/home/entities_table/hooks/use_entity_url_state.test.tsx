@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { PropsWithChildren } from 'react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { act, renderHook } from '@testing-library/react';
 import { Observable, Subject } from 'rxjs';
 

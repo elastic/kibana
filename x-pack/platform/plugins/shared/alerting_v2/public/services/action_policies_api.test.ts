@@ -7,7 +7,6 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ActionPoliciesApi } from './action_policies_api';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 describe('ActionPoliciesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -26,7 +25,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.upsertActionPolicy('policy-1', payload);
 
-      expect(http.put).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`, {
+      expect(http.put).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
         body: JSON.stringify(payload),
       });
     });
@@ -39,7 +38,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.createActionPolicy(payload);
 
-      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_API_PATH, {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
         body: JSON.stringify(payload),
       });
     });
@@ -52,7 +51,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.updateActionPolicy('policy-1', payload);
 
-      expect(http.patch).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`, {
+      expect(http.patch).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
         body: JSON.stringify(payload),
       });
     });
@@ -64,7 +63,7 @@ describe('ActionPoliciesApi', () => {
 
       await api.getActionPolicy('policy-1');
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`);
+      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
     });
   });
 
@@ -74,31 +73,18 @@ describe('ActionPoliciesApi', () => {
 
       await api.deleteActionPolicy('policy-1');
 
-      expect(http.delete).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`);
+      expect(http.delete).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
     });
   });
 
-  describe('matchActionPoliciesForRule', () => {
-    it('sends a POST request', async () => {
-      http.post.mockResolvedValue({ items: [] });
-
-      await api.matchActionPoliciesForRule('rule-1');
-
-      expect(http.post).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`,
-        { body: JSON.stringify({ rule: { id: 'rule-1' } }) }
-      );
-    });
-  });
-
-  describe('fetchDataFields', () => {
+  describe('fetchRuleEventFields', () => {
     it('omits the query param entirely when no matcher is provided', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields();
+      await api.fetchRuleEventFields();
 
       expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+        '/internal/alerting/v2/suggestions/rule_event_fields',
         {}
       );
     });
@@ -106,23 +92,20 @@ describe('ActionPoliciesApi', () => {
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields('  rule.id : "abc"  ');
+      await api.fetchRuleEventFields('  rule.id : "abc"  ');
 
-      expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
-        {
-          query: { matcher: 'rule.id : "abc"' },
-        }
-      );
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
+        query: { matcher: 'rule.id : "abc"' },
+      });
     });
 
     it('omits the query param when matcher is empty or whitespace', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchDataFields('   ');
+      await api.fetchRuleEventFields('   ');
 
       expect(http.get).toHaveBeenCalledWith(
-        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+        '/internal/alerting/v2/suggestions/rule_event_fields',
         {}
       );
     });
@@ -130,9 +113,32 @@ describe('ActionPoliciesApi', () => {
     it('returns the response payload from the HTTP layer', async () => {
       http.get.mockResolvedValue(['data.host.name', 'data.count']);
 
-      const result = await api.fetchDataFields();
+      const result = await api.fetchRuleEventFields();
 
       expect(result).toEqual(['data.host.name', 'data.count']);
+    });
+  });
+
+  describe('fetchTags', () => {
+    it('GET /action_policies/tags with wrapped response', async () => {
+      http.get.mockResolvedValue({ tags: ['production', 'staging'] });
+
+      const result = await api.fetchTags();
+
+      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
+        query: { search: undefined },
+      });
+      expect(result).toEqual({ tags: ['production', 'staging'] });
+    });
+
+    it('forwards search param in the query', async () => {
+      http.get.mockResolvedValue({ tags: ['production'] });
+
+      await api.fetchTags({ search: 'prod' });
+
+      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
+        query: { search: 'prod' },
+      });
     });
   });
 });

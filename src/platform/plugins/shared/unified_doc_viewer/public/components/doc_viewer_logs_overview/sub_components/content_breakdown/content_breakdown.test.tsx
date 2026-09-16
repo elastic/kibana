@@ -142,7 +142,7 @@ describe('ContentBreakdown', () => {
       // Mock the formatter to return React nodes with highlighted content
       mockConvertToReact.mockImplementationOnce(() => (
         <>
-          OTel log message with <mark className="ffSearch__highlight">search</mark> term
+          OTel log message with <mark>search</mark> term
         </>
       ));
 
@@ -163,7 +163,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });
@@ -196,7 +196,7 @@ describe('ContentBreakdown', () => {
       // Mock the formatter to return React nodes with highlighted content
       mockConvertToReact.mockImplementationOnce(() => (
         <>
-          log message with <mark className="ffSearch__highlight">search</mark> term
+          log message with <mark>search</mark> term
         </>
       ));
 
@@ -216,7 +216,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });

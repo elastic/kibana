@@ -59,7 +59,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
         <EuiFlexItem grow={true}>
           {actionTypeName && actionTypeMessage ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center" wrap>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">

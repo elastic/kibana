@@ -54,6 +54,7 @@ describe('buildIndexAttachment', () => {
     expect(callArgs.spaces).toEqual(['space-1']);
     expect(callArgs.esClient).toBe(deps.esInternalClient);
     expect(callArgs.savedObjectsClient).toBe(deps.soClient);
+    expect(callArgs.clientHasSpacesExtension).toBe(true);
   });
 
   it('falls back to the default space when no spaces service and no spaceId are provided', async () => {
@@ -93,7 +94,7 @@ describe('buildIndexAttachment', () => {
 });
 
 describe('buildDeleteAttachment', () => {
-  it('forwards ingestionMethod when provided', async () => {
+  it('forwards ingestionMethod and spaces when provided', async () => {
     const deps = buildDeps({ spaceFromRequest: 'space-1' });
     const deleteAttachment = buildDeleteAttachment(deps);
 
@@ -112,5 +113,35 @@ describe('buildDeleteAttachment', () => {
 
     const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
     expect('ingestionMethod' in callArgs).toBe(false);
+  });
+
+  it('derives space from spaces service and passes as spaces array', async () => {
+    const deps = buildDeps({ spaceFromRequest: 'space-1' });
+    const deleteAttachment = buildDeleteAttachment(deps);
+
+    await deleteAttachment(baseParams);
+
+    const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
+    expect(callArgs.spaces).toEqual(['space-1']);
+  });
+
+  it('falls back to "default" space when no spaces service and no spaceId are provided', async () => {
+    const deps = buildDeps();
+    const deleteAttachment = buildDeleteAttachment(deps);
+
+    await deleteAttachment(baseParams);
+
+    const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
+    expect(callArgs.spaces).toEqual(['default']);
+  });
+
+  it('uses explicit spaceId over the spaces service', async () => {
+    const deps = buildDeps({ spaceFromRequest: 'auto-space' });
+    const deleteAttachment = buildDeleteAttachment(deps);
+
+    await deleteAttachment({ ...baseParams, spaceId: 'explicit-space' });
+
+    const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
+    expect(callArgs.spaces).toEqual(['explicit-space']);
   });
 });

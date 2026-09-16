@@ -5,13 +5,11 @@
  * 2.0.
  */
 import { listSourceMapsRoute } from './list_source_maps';
-import { uploadSourceMapRoute } from './upload_source_map';
 import { deleteSourceMapRoute } from './delete_source_map';
 import { migrateFleetArtifactsRoute } from './migrate_fleet_artifacts';
 
 export const sourceMapsRouteDefinitions = {
   list: listSourceMapsRoute,
-  upload: uploadSourceMapRoute,
   delete: deleteSourceMapRoute,
   migrateFleetArtifacts: migrateFleetArtifactsRoute,
 };

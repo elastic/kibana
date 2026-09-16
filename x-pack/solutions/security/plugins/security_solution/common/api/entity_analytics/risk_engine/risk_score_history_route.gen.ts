@@ -37,11 +37,17 @@ export const RiskScoreHistoryEntry = lazySchema(() =>
     /**
      * Present only when requested with `include_contributions=true`.
      */
-    inputs: z.array(RiskScoreInput).optional(),
+    inputs: z
+      .array(RiskScoreInput)
+      .optional()
+      .describe('Present only when requested with `include_contributions=true`.'),
     /**
      * Present only when requested with `include_contributions=true`.
      */
-    modifiers: z.array(RiskScoreModifier).optional(),
+    modifiers: z
+      .array(RiskScoreModifier)
+      .optional()
+      .describe('Present only when requested with `include_contributions=true`.'),
     category_2_score: z.number().optional(),
     category_2_count: z.number().int().optional(),
     criticality_level: AssetCriticalityLevel.optional(),
@@ -53,6 +59,15 @@ export const RiskScoreHistoryResponse = lazySchema(() =>
   z.object({
     entity_id: z.string().max(1000),
     entity_type: IdentifierType,
+    /**
+     * The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+     */
+    interval: z
+      .string()
+      .max(10)
+      .describe(
+        'The effective Elasticsearch `date_histogram` interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.'
+      ),
     entries: z.array(RiskScoreHistoryEntry),
   })
 );
@@ -63,31 +78,49 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
     /**
      * The type of entity to retrieve history for.
      */
-    entity_type: IdentifierType,
+    entity_type: IdentifierType.describe('The type of entity to retrieve history for.'),
     /**
      * The identifier of the entity to retrieve history for.
      */
-    entity_id: z.string().max(1000),
+    entity_id: z
+      .string()
+      .max(1000)
+      .describe('The identifier of the entity to retrieve history for.'),
     /**
      * Start of the time range, in date-math syntax. Defaults to 90 days ago.
      */
-    from: z.string().max(100).optional().default('now-90d'),
+    from: z
+      .string()
+      .max(100)
+      .optional()
+      .default('now-90d')
+      .describe('Start of the time range, in date-math syntax. Defaults to 90 days ago.'),
     /**
      * End of the time range, in date-math syntax. Defaults to now.
      */
-    to: z.string().max(100).optional().default('now'),
+    to: z
+      .string()
+      .max(100)
+      .optional()
+      .default('now')
+      .describe('End of the time range, in date-math syntax. Defaults to now.'),
     /**
      * Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
      */
-    score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
-    /**
-     * Maximum number of history entries to return per request.
-     */
-    page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
+    score_type: z
+      .enum(['base', 'propagated', 'resolution'])
+      .optional()
+      .describe(
+        'Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).'
+      ),
     /**
      * When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
      */
-    include_contributions: BooleanFromString.optional().default(false),
+    include_contributions: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.'
+      ),
   })
 );
 export type GetRiskScoreHistoryRequestQuery = z.infer<typeof GetRiskScoreHistoryRequestQuery>;

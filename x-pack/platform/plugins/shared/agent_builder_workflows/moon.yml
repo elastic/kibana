@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_workflows
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/config-schema'
@@ -29,7 +30,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-tools-base'
-  - '@kbn/management-settings-ids'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/workflows-ui'
   - '@kbn/code-editor'

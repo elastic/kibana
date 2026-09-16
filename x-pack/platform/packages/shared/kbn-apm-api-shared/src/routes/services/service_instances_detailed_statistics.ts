@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Coordinate } from '@kbn/apm-types';
 import { latencyAggregationTypeSchema } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
@@ -43,18 +43,20 @@ export const serviceInstancesDetailedStatisticsRoute =
   defineRoute<ServiceInstancesDetailedStatisticsResponse>()({
     endpoint:
       'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-    params: z.object({
-      path: z.object({ serviceName: z.string() }),
-      query: z
-        .object({
-          latencyAggregationType: latencyAggregationTypeSchema,
-          transactionType: z.string(),
-          serviceNodeIds: serviceNodeIdsSchema,
-          numBuckets: z.coerce.number(),
-        })
-        .merge(environmentSchema)
-        .merge(kuerySchema)
-        .merge(rangeSchema)
-        .merge(offsetSchema),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        path: z.object({ serviceName: z.string() }),
+        query: z
+          .object({
+            latencyAggregationType: latencyAggregationTypeSchema,
+            transactionType: z.string(),
+            serviceNodeIds: serviceNodeIdsSchema,
+            numBuckets: z.coerce.number(),
+          })
+          .merge(environmentSchema)
+          .merge(kuerySchema)
+          .merge(rangeSchema)
+          .merge(offsetSchema),
+      })
+    ),
   });

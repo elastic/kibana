@@ -69,7 +69,7 @@ export interface ExtendedDiscoverStateContainer {
     setAppState: typeof internalStateActions.setAppState;
     updateGlobalState: typeof internalStateActions.updateGlobalState;
     updateAppStateAndReplaceUrl: typeof internalStateActions.updateAppStateAndReplaceUrl;
-    resetAppState: typeof internalStateActions.resetAppState;
+    initializeTabState: typeof internalStateActions.initializeTabState;
     initializeAndSync: typeof internalStateActions.initializeAndSync;
     stopSyncing: typeof internalStateActions.stopSyncing;
     openDiscoverSession: typeof internalStateActions.openDiscoverSession;

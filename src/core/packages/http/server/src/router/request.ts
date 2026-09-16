@@ -35,6 +35,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
   access: 'internal' | 'public';
   security?: InternalRouteSecurity;
   excludeFromRateLimiter?: boolean;
+  httpResponseLogLevel?: 'info';
 }
 
 /**

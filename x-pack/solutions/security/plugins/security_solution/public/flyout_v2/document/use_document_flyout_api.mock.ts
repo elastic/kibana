@@ -16,7 +16,6 @@ export const createDocumentFlyoutApiMock = (): jest.Mocked<DocumentFlyoutApi> =>
   openDocumentFlyoutFromIndex: jest.fn(),
   openDocumentFlyoutFromIndexAsChild: jest.fn(),
   openDocumentFlyoutFromPattern: jest.fn(),
-  openNotes: jest.fn(),
   openAnalyzer: jest.fn(),
   openSessionView: jest.fn(),
   openDocumentEntities: jest.fn(),

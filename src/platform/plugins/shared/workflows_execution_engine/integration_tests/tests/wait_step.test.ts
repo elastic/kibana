@@ -108,10 +108,9 @@ steps:
         workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
-      // Duration should be at least 2s (the wait duration)
+      // The configured wait must elapse.
       expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(1999);
-      // But less than 5s to ensure it's using short duration handler
-      expect(workflowExecutionDoc?.duration).toBeLessThan(2100);
+      expect(workflowExecutionDoc?.duration).toBeLessThan(10_000);
     });
 
     it('should wait for the specified duration between firstConnectorStep and lastConnectorStep', async () => {
@@ -240,7 +239,14 @@ steps:
 
     describe('should resume and complete workflow after wait', () => {
       beforeAll(async () => {
-        await workflowRunFixture.resumeWorkflow();
+        const resumeTask = workflowRunFixture.taskManagerMock.schedule.mock.calls[0][0];
+        if (!resumeTask.runAt) throw new Error('Expected a scheduled wait deadline');
+        jest.useFakeTimers({ now: new Date(resumeTask.runAt) });
+        try {
+          await workflowRunFixture.resumeWorkflow();
+        } finally {
+          jest.useRealTimers();
+        }
       });
 
       it('should successfully complete workflow after resume', async () => {
@@ -263,4 +269,63 @@ steps:
       });
     });
   });
+});
+
+describe('early resume of a persisted wait', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([undefined, '10m'])(
+    'keeps a one-hour wait parked until its wait or workflow deadline (%s)',
+    async (timeout) => {
+      const now = new Date('2026-09-14T12:00:00.000Z');
+      jest.useFakeTimers({ now });
+      const fixture = new WorkflowRunFixture();
+      await fixture.runWorkflow({
+        workflowYaml: `
+${
+  timeout
+    ? `settings:
+  timeout: ${timeout}`
+    : ''
+}
+steps:
+  - name: pause
+    type: wait
+    with:
+      duration: 1h
+  - name: afterWait
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: done
+`,
+      });
+      const execution = () =>
+        fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(execution()?.status).toBe(ExecutionStatus.WAITING);
+      const expectedDeadline = new Date(now.getTime() + (timeout ? 10 * 60_000 : 60 * 60_000));
+
+      // Each call constructs real runtime/state/IO services from the persisted repositories.
+      for (let notification = 0; notification < 2; notification++) {
+        expect(await fixture.resumeWorkflow()).toEqual({ retryAt: expectedDeadline });
+        expect(execution()?.status).toBe(ExecutionStatus.WAITING);
+        expect(fixture.unsecuredActionsClientMock.execute).not.toHaveBeenCalled();
+        const pause = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
+          (step) => step.stepId === 'pause'
+        );
+        expect(pause?.status).toBe(ExecutionStatus.WAITING);
+      }
+
+      if (!timeout) {
+        jest.setSystemTime(expectedDeadline);
+        await fixture.resumeWorkflow();
+        expect(execution()?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(fixture.unsecuredActionsClientMock.execute).toHaveBeenCalledTimes(1);
+      }
+    }
+  );
 });

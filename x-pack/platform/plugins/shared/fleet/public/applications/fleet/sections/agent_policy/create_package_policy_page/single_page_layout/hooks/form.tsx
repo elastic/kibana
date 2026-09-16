@@ -77,6 +77,7 @@ import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensu
 import { useYaml } from '../../../../../../../services';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
+import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
 const DEFAULT_AGENTLESS_LIMIT = 50;
 
@@ -272,6 +273,8 @@ export function useOnSubmit({
   defaultPolicyData?: Partial<NewPackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
+  const { reportCredentialsAdded, reportDeployClicked, reportEnrollmentSucceeded } =
+    useAwsOnboardingTelemetry({ pkgName: packageInfo?.name });
   const { spaceId } = useFleetStatus();
   const yaml = useYaml();
   const confirmForceInstall = useConfirmForceInstall();
@@ -605,6 +608,18 @@ export function useOnSubmit({
         return;
       }
 
+      // AWS onboarding funnel telemetry — fire only when coming from the AWS quickstart.
+      // Credentials are guaranteed valid at this point (validation gate above already returned if not).
+      // Both events are emitted together here because "credentials added" is a prerequisite for
+      // reaching Save and doesn't have its own discrete UI commit action.
+      if (isAgentlessSelected) {
+        const enabledInputTypes = (packagePolicy.inputs ?? [])
+          .filter((input) => input.enabled)
+          .map((input) => input.type);
+        reportCredentialsAdded();
+        reportDeployClicked('agentless', enabledInputTypes);
+      }
+
       let createdPolicy = overrideCreatedAgentPolicy;
       if (!overrideCreatedAgentPolicy) {
         try {
@@ -788,6 +803,7 @@ export function useOnSubmit({
           }
 
           if (isAgentlessConfigured) {
+            reportEnrollmentSucceeded();
             onSaveNavigate(savedPolicyResult, ['openEnrollmentFlyout']);
           } else {
             onSaveNavigate(savedPolicyResult);
@@ -839,6 +855,7 @@ export function useOnSubmit({
       getAgentlessStatusForPackage,
       packageInfo,
       isAgentlessAgentPolicy,
+      isAgentlessSelected,
       packagePolicy,
       newAgentPolicy,
       withSysMonitoring,
@@ -851,6 +868,9 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       createDatasetTemplates,
+      reportCredentialsAdded,
+      reportDeployClicked,
+      reportEnrollmentSucceeded,
     ]
   );
 

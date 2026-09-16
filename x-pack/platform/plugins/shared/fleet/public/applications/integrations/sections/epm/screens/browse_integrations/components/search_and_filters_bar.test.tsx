@@ -29,6 +29,12 @@ jest.mock('../hooks/url_categories', () => ({
 
 jest.mock('../../../../../hooks', () => ({}));
 
+const mockUseAgentless = jest.fn();
+jest.mock(
+  '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
+  () => ({ useAgentless: () => mockUseAgentless() })
+);
+
 import { SearchAndFiltersBar } from './search_and_filters_bar';
 
 describe('SearchAndFiltersBar', () => {
@@ -48,6 +54,7 @@ describe('SearchAndFiltersBar', () => {
     });
     mockUseSetUrlCategory.mockReturnValue(jest.fn());
     mockUseUrlDefaultCategories.mockReturnValue([]);
+    mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
   });
 
   function renderSearchAndFiltersBar() {
@@ -60,45 +67,54 @@ describe('SearchAndFiltersBar', () => {
     );
   }
 
-  describe('Status Filter', () => {
-    it('renders the status filter button', () => {
+  describe('More Filter', () => {
+    it('renders the more filter button', () => {
       const { getByTestId } = renderSearchAndFiltersBar();
-      expect(getByTestId('browseIntegrations.searchBar.statusBtn')).toBeInTheDocument();
+      expect(getByTestId('browseIntegrations.searchBar.moreBtn')).toBeInTheDocument();
     });
 
-    it('shows active filter indicator when deprecated is selected', () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: ['deprecated'],
-      });
-
+    it('shows both options active by default (deprecated and content packs hidden)', () => {
       const { getByTestId } = renderSearchAndFiltersBar();
-      const button = getByTestId('browseIntegrations.searchBar.statusBtn');
+      const button = getByTestId('browseIntegrations.searchBar.moreBtn');
 
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
       const badge = button.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('2');
+    });
+
+    it('shows only one active option when deprecated integrations are shown', () => {
+      mockUseUrlFilters.mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: ['deprecated'],
+      });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+      const button = getByTestId('browseIntegrations.searchBar.moreBtn');
+
+      const badge = button.querySelector('.euiNotificationBadge');
       expect(badge).toHaveTextContent('1');
     });
 
-    it('calls addUrlFilters when deprecated option is toggled', async () => {
+    it('calls addUrlFilters with status: ["deprecated"] when hide-deprecated is unchecked', async () => {
       const { getByTestId } = renderSearchAndFiltersBar();
 
-      fireEvent.click(getByTestId('browseIntegrations.searchBar.statusBtn'));
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.moreBtn'));
 
-      const deprecatedOption = getByTestId('browseIntegrations.searchBar.statusDeprecatedOption');
+      const deprecatedOption = getByTestId('browseIntegrations.searchBar.moreHideDeprecatedOption');
       fireEvent.click(deprecatedOption);
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
           status: ['deprecated'],
+          showContent: undefined,
         });
       });
     });
 
-    it('removes filter from URL when option is unchecked', async () => {
+    it('calls addUrlFilters with status: undefined when hide-deprecated is re-checked', async () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
@@ -107,14 +123,53 @@ describe('SearchAndFiltersBar', () => {
 
       const { getByTestId } = renderSearchAndFiltersBar();
 
-      fireEvent.click(getByTestId('browseIntegrations.searchBar.statusBtn'));
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.moreBtn'));
 
-      const deprecatedOption = getByTestId('browseIntegrations.searchBar.statusDeprecatedOption');
+      const deprecatedOption = getByTestId('browseIntegrations.searchBar.moreHideDeprecatedOption');
       fireEvent.click(deprecatedOption);
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
           status: undefined,
+          showContent: undefined,
+        });
+      });
+    });
+
+    it('calls addUrlFilters with showContent: true when hide-content-packs is unchecked', async () => {
+      const { getByTestId } = renderSearchAndFiltersBar();
+
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.moreBtn'));
+
+      const contentOption = getByTestId('browseIntegrations.searchBar.moreHideContentPacksOption');
+      fireEvent.click(contentOption);
+
+      await waitFor(() => {
+        expect(mockAddUrlFilters).toHaveBeenCalledWith({
+          status: undefined,
+          showContent: true,
+        });
+      });
+    });
+
+    it('calls addUrlFilters with showContent: undefined when hide-content-packs is re-checked', async () => {
+      mockUseUrlFilters.mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        showContent: true,
+      });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.moreBtn'));
+
+      const contentOption = getByTestId('browseIntegrations.searchBar.moreHideContentPacksOption');
+      fireEvent.click(contentOption);
+
+      await waitFor(() => {
+        expect(mockAddUrlFilters).toHaveBeenCalledWith({
+          status: undefined,
+          showContent: undefined,
         });
       });
     });
@@ -160,75 +215,19 @@ describe('SearchAndFiltersBar', () => {
     });
   });
 
-  describe('Content Filter', () => {
-    it('renders the content filter button', () => {
+  describe('Setup Method (Ingestion Method) Filter', () => {
+    it('renders the ingestion method filter button when agentless is enabled', () => {
+      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
+
       const { getByTestId } = renderSearchAndFiltersBar();
-      expect(getByTestId('browseIntegrations.searchBar.contentBtn')).toBeInTheDocument();
+      expect(getByTestId('browseIntegrations.searchBar.setupMethodBtn')).toBeInTheDocument();
     });
 
-    it('does not show active filter indicator when showContent is not set', () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: undefined,
-        showContent: undefined,
-      });
+    it('does not render the ingestion method filter button when agentless is disabled', () => {
+      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: false });
 
-      const { getByTestId } = renderSearchAndFiltersBar();
-      const button = getByTestId('browseIntegrations.searchBar.contentBtn');
-
-      expect(button).not.toHaveClass('euiFilterButton-hasActiveFilters');
-    });
-
-    it('shows active filter indicator when showContent is true', () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: undefined,
-        showContent: true,
-      });
-
-      const { getByTestId } = renderSearchAndFiltersBar();
-      const button = getByTestId('browseIntegrations.searchBar.contentBtn');
-
-      expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
-
-      const badge = button.querySelector('.euiNotificationBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('1');
-    });
-
-    it('calls addUrlFilters with showContent: true when option is checked', async () => {
-      const { getByTestId } = renderSearchAndFiltersBar();
-
-      fireEvent.click(getByTestId('browseIntegrations.searchBar.contentBtn'));
-
-      const showOption = getByTestId('browseIntegrations.searchBar.contentShowContentPacksOption');
-      fireEvent.click(showOption);
-
-      await waitFor(() => {
-        expect(mockAddUrlFilters).toHaveBeenCalledWith({ showContent: true });
-      });
-    });
-
-    it('calls addUrlFilters with showContent: undefined when option is unchecked', async () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: undefined,
-        showContent: true,
-      });
-
-      const { getByTestId } = renderSearchAndFiltersBar();
-
-      fireEvent.click(getByTestId('browseIntegrations.searchBar.contentBtn'));
-
-      const showOption = getByTestId('browseIntegrations.searchBar.contentShowContentPacksOption');
-      fireEvent.click(showOption);
-
-      await waitFor(() => {
-        expect(mockAddUrlFilters).toHaveBeenCalledWith({ showContent: undefined });
-      });
+      const { queryByTestId } = renderSearchAndFiltersBar();
+      expect(queryByTestId('browseIntegrations.searchBar.setupMethodBtn')).not.toBeInTheDocument();
     });
   });
 
@@ -246,10 +245,10 @@ describe('SearchAndFiltersBar', () => {
       const searchInput = getByTestId('epmList.searchBar') as HTMLInputElement;
       expect(searchInput.value).toBe('apache');
 
-      // Status filter should show count
-      const statusButton = getByTestId('browseIntegrations.searchBar.statusBtn');
-      expect(statusButton).toHaveClass('euiFilterButton-hasActiveFilters');
-      const badge = statusButton.querySelector('.euiNotificationBadge');
+      // More filter should show count (content packs still hidden by default)
+      const moreButton = getByTestId('browseIntegrations.searchBar.moreBtn');
+      expect(moreButton).toHaveClass('euiFilterButton-hasActiveFilters');
+      const badge = moreButton.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
 

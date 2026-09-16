@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
 import type { z } from '@kbn/zod/v4';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 
-// TODO: is it possible to get rid of `any`?
-export type SettingValidation = t.Type<any, string, unknown>;
-
 /**
- * zod equivalent of `SettingValidation`, additive (io-ts -> zod migration,
- * elastic/kibana#243355). Used to build the zod agent-config intake schema
- * without disturbing the io-ts `validation` field the UI form still relies on.
- * `ZodTypeAny` (not `ZodType<string>`) so enum-output schemas assign cleanly;
- * every validator here still only accepts and returns strings.
+ * zod validation for a setting. `ZodTypeAny` (not `ZodType<string>`) so
+ * enum-output schemas assign cleanly; every validator here still only accepts
+ * and returns strings.
  */
-export type SettingZodValidation = z.ZodTypeAny;
+export type SettingValidation = z.ZodTypeAny;
 
 interface BaseSetting {
   /**
@@ -67,14 +61,12 @@ interface BaseSetting {
 interface TextSetting extends BaseSetting {
   type: 'text';
   validation?: SettingValidation;
-  zodValidation?: SettingZodValidation;
 }
 
 interface SelectSetting extends BaseSetting {
   type: 'select';
   options: Array<{ text: string; value: string }>;
   validation?: SettingValidation;
-  zodValidation?: SettingZodValidation;
 }
 
 interface BooleanSetting extends BaseSetting {
@@ -127,9 +119,4 @@ export type SettingDefinition = RawSettingDefinition & {
    * runtime validation of input
    */
   validation: SettingValidation;
-
-  /**
-   * zod equivalent of `validation`, additive (io-ts -> zod migration).
-   */
-  zodValidation: SettingZodValidation;
 };

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-api-shared'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/apm-api-shared'
   description: Moon project for @kbn/apm-api-shared
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-apm-api-shared
 dependsOn:
   - '@kbn/server-route-repository-utils'
@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/es-types'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/fleet-plugin'
   - '@kbn/profiling-utils'
   - '@kbn/slo-schema'
   - '@kbn/elastic-agent-utils'

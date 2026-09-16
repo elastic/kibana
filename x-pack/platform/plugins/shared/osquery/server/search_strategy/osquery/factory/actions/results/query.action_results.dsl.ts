@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
-import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../../../../../utils/build_index_name_with_namespace';
 import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
@@ -33,10 +33,7 @@ export const buildActionResultsQuery = ({
   integrationNamespaces,
   spaceId,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
-  let filter = `action_id: ${actionId}`;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
@@ -72,7 +69,8 @@ export const buildActionResultsQuery = ({
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
-    getQueryFilter({ filter }),
+    { term: { action_id: actionId } },
+    ...kueryFilter,
   ];
 
   let baseIndex: string;
@@ -84,16 +82,10 @@ export const buildActionResultsQuery = ({
     baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
 
-  let index: string;
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
@@ -108,7 +100,7 @@ export const buildActionResultsQuery = ({
               bool: {
                 must: [
                   {
-                    match: {
+                    term: {
                       action_id: actionId,
                     },
                   },

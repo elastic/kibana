@@ -73,15 +73,39 @@ describe('DirectorService', () => {
   const rule = createRuleResponse();
 
   describe('run', () => {
-    it('returns empty array when no alert events provided', async () => {
+    it('returns empty array and zero stats when no alert events provided', async () => {
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [],
       });
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('preserves the incoming alert event type — it never rewrites `type`', async () => {
+      // The director's SRP is episode tracking. `type` is stamped at creation
+      // time by CreateAlertEventsStep from `rule.kind`, so the director must
+      // leave it untouched. This test pins that invariant.
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        type: 'alert',
+        episode: undefined,
+      });
+
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result.alertEvents[0].type).toBe('alert');
     });
 
     it('sets alerts to pending if there is no previous alert event state', async () => {
@@ -94,17 +118,18 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result).toHaveLength(1);
-
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('sets alerts to pending if the previous alert event state has no episode status', async () => {
@@ -128,17 +153,18 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result).toHaveLength(1);
-
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('transitions from inactive to pending', async () => {
@@ -162,15 +188,17 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('transitions from pending to active', async () => {
@@ -194,15 +222,17 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('transitions from active to recovering ', async () => {
@@ -226,15 +256,17 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('transitions from recovering to inactive', async () => {
@@ -258,15 +290,17 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it("sets the episode status to active on a no_data event when no_data_strategy is 'emit'", async () => {
@@ -291,12 +325,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithEmit,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
@@ -324,12 +359,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithLastKnown,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
@@ -363,22 +399,22 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
       });
 
-      expect(result).toHaveLength(2);
-
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents).toHaveLength(2);
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
-
-      expect(result[1].episode).toEqual({
+      expect(result.alertEvents[1].episode).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
       });
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('generates new episode ID when transitioning from inactive', async () => {
@@ -402,13 +438,14 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      // Should generate new UUID, not use old episode
-      expect(result[0].episode?.id).toBe('mocked-uuid');
+      expect(result.alertEvents[0].episode?.id).toBe('mocked-uuid');
+      expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
     it('preserves episode ID when not transitioning from inactive', async () => {
@@ -432,12 +469,14 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode?.id).toBe('existing-episode');
+      expect(result.alertEvents[0].episode?.id).toBe('existing-episode');
+      expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
     it('throws when execution context is already aborted before processing', async () => {
@@ -449,6 +488,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: abortedContext,
           alertEvents: [alertEvent],
@@ -464,6 +504,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -496,12 +537,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
@@ -533,15 +575,55 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result[0].episode).toEqual({
+      expect(result.alertEvents[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
+    });
+
+    it('aggregates newEpisodeCount only for fresh episodes across a mixed batch', async () => {
+      const alertEvents = [
+        createAlertEvent({ group_hash: 'hash-new', status: 'breached', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-existing', status: 'breached', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-inactive', status: 'breached', episode: undefined }),
+      ];
+
+      mockEsClient.esql.query.mockResolvedValue(
+        createLatestAlertEventStateResponse([
+          {
+            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_status: 'breached',
+            last_episode_id: 'existing-episode',
+            last_episode_status: 'active',
+            last_episode_status_count: null,
+            group_hash: 'hash-existing',
+          },
+          {
+            last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+            last_status: 'recovered',
+            last_episode_id: 'old-episode',
+            last_episode_status: 'inactive',
+            last_episode_status_count: null,
+            group_hash: 'hash-inactive',
+          },
+        ])
+      );
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents,
+      });
+
+      expect(result.alertEvents).toHaveLength(3);
+      expect(result.stats.newEpisodeIds).toHaveLength(2);
     });
 
     // A group is "user-locked" when its most recent lifecycle action in
@@ -576,14 +658,15 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result).toHaveLength(1);
-        expect(result[0].status).toBe('recovered');
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents).toHaveLength(1);
+        expect(result.alertEvents[0].status).toBe('recovered');
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -614,13 +697,14 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result[0].status).toBe('breached');
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].status).toBe('breached');
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -656,16 +740,17 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule: ruleWithTransition,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result[0].episode?.status_count).toBeUndefined();
+        expect(result.alertEvents[0].episode?.status_count).toBeUndefined();
       });
 
       it('does not lock when the last lifecycle action is deactivate — strategy owns transitions', async () => {
@@ -695,12 +780,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -731,12 +817,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });
@@ -768,12 +855,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -815,16 +903,17 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents,
         });
 
-        expect(result[0].episode).toEqual({
+        expect(result.alertEvents[0].episode).toEqual({
           id: 'locked-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result[1].episode).toEqual({
+        expect(result.alertEvents[1].episode).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });

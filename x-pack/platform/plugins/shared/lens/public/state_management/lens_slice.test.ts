@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EnhancedStore } from '@reduxjs/toolkit';
+import type { EnhancedStore } from 'redux-toolkit-v1';
 import type { Query } from '@kbn/es-query';
 import type { LensRootStore } from '.';
 import {

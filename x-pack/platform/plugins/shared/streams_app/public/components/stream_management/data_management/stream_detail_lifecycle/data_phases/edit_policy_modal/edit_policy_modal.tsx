@@ -94,13 +94,13 @@ export function EditPolicyModal({
     isManaged && isInUse ? (
       <FormattedMessage
         id="xpack.streams.editPolicyModal.managedAndInUseDescription"
-        defaultMessage="ILM policy {policyName} is managed by Elastic and currently used in {usageLabel}. Consider saving as a new ILM policy to avoid unintended changes."
+        defaultMessage="ILM policy {policyName} is managed by Elastic and is already being used in {usageLabel} in addition to this stream. Consider saving as a new ILM policy to avoid unintended changes."
         values={{ policyName: policyNameNode, usageLabel }}
       />
     ) : isInUse ? (
       <FormattedMessage
         id="xpack.streams.editPolicyModal.inUseDescription"
-        defaultMessage="ILM policy {policyName} is currently used in {usageLabel}. Consider saving as a new ILM policy to avoid unintended changes."
+        defaultMessage="ILM policy {policyName} is already being used in {usageLabel} in addition to this stream. Consider saving as a new ILM policy to avoid unintended changes."
         values={{ policyName: policyNameNode, usageLabel }}
       />
     ) : (

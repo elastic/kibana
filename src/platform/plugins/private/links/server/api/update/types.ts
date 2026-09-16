@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 
-export type LinksUpdateRequestBody = TypeOf<typeof updateRequestBodySchema>;
-export type LinksUpdateResponseBody = TypeOf<typeof updateResponseBodySchema>;
+export type LinksUpdateRequestBody = z.output<typeof updateRequestBodySchema>;
+export type LinksUpdateResponseBody = z.output<typeof updateResponseBodySchema>;

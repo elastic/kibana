@@ -57,8 +57,15 @@ export function createFeatureKnowledgeIndicatorTool({
       Use this tool when the conversation discovers a new stream behavior pattern and it should be
       saved as a feature KI for future investigations.
     `,
+    annotations: {
+      title: 'Create Feature Knowledge Indicator',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createFeatureKISchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {
@@ -80,12 +87,11 @@ export function createFeatureKnowledgeIndicatorTool({
     },
     availability: {
       cacheMode: 'space',
-      handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
+      handler: async (): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({
             server,
             licensing: server.licensing,
-            uiSettingsClient: uiSettings,
           });
           return { status: 'available' };
         } catch (error) {
@@ -116,7 +122,6 @@ export function createFeatureKnowledgeIndicatorTool({
         await assertSignificantEventsAccess({
           server,
           licensing: scopedClients.licensing,
-          uiSettingsClient: scopedClients.uiSettingsClient,
         });
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);

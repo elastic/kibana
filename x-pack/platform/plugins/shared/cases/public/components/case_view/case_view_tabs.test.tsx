@@ -79,7 +79,7 @@ describe('CaseViewTabs', () => {
   it('should render CaseViewTabs', async () => {
     const props = { activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY, caseData };
     renderWithTestingProviders(<CaseViewTabs {...props} />, {
-      wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      wrapperProps: { license: basicLicense },
     });
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();

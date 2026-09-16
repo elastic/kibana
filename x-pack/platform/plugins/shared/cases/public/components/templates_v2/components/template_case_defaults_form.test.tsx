@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseSeverity } from '../../../../common/types/domain';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
 import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
@@ -57,13 +58,31 @@ describe('TemplateCaseDefaultsForm', () => {
     fields: [],
   };
 
-  it('renders only canonical severity options (no empty "none" option)', () => {
-    render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
+  it('renders the case-default description in a markdown editor populated with the template markdown', () => {
+    const markdownDescription = '# Runbook\n\n1. Review the **source** host';
+
+    renderWithTestingProviders(
+      <TemplateCaseDefaultsForm
+        parsedTemplate={{ ...baseTemplate, description: markdownDescription }}
+      />
+    );
+
+    // EuiMarkdownEditor renders a real textarea inside its container, confirming the default
+    // description is an editable markdown field rather than a plain textarea.
+    const editorContainer = screen.getByTestId('caseDefaultsDescriptionInput');
+    const textarea = within(editorContainer).getByRole('textbox');
+    expect(textarea.tagName).toBe('TEXTAREA');
+    expect(textarea).toHaveValue(markdownDescription);
+  });
+
+  it('renders only the canonical severities — no empty / "null" option', () => {
+    renderWithTestingProviders(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
 
     const severitySelect = screen.getByTestId('caseDefaultsSeverityInput');
     const options = within(severitySelect).getAllByRole('option');
     const optionValues = options.map((option) => option.getAttribute('value'));
 
+    // Severity always has a concrete value: only the real severities, no empty/"null" option.
     expect(optionValues).toEqual([
       CaseSeverity.LOW,
       CaseSeverity.MEDIUM,
@@ -71,13 +90,22 @@ describe('TemplateCaseDefaultsForm', () => {
       CaseSeverity.CRITICAL,
     ]);
     expect(optionValues).not.toContain('');
+    expect(optionValues).not.toContain('null');
+  });
+
+  it('defaults severity to "low" when the template does not specify one', () => {
+    renderWithTestingProviders(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
+
+    expect(screen.getByTestId('caseDefaultsSeverityInput')).toHaveValue(CaseSeverity.LOW);
   });
 
   it('propagates severity changes from the select input', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
-    render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} onChange={onChange} />);
+    renderWithTestingProviders(
+      <TemplateCaseDefaultsForm parsedTemplate={baseTemplate} onChange={onChange} />
+    );
 
     await user.selectOptions(screen.getByTestId('caseDefaultsSeverityInput'), CaseSeverity.HIGH);
 

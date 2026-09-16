@@ -11,10 +11,10 @@ import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import { truncate, unit } from '@kbn/apm-common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,
   getTimeSeriesColor,

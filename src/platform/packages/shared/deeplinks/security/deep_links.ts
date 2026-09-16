@@ -92,6 +92,7 @@ export enum SecurityPageName {
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   trustedDevices = 'trusted_devices',
+  customYaraSignatures = 'custom_yara_signatures',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
@@ -131,4 +132,24 @@ export enum SecurityPageName {
    * Ingest Hub Onboarding
    */
   onboarding = 'onboarding',
+
+  /**
+   * AlertZero pages.
+   *
+   * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
+   * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
+   * name is the same concept, and the app prefix is what distinguishes the two links.
+   */
+  alertZeroChats = 'chats',
+  alertZeroRecords = 'records',
+  alertZeroThreatHunt = 'threat_hunt',
+  alertZeroStreams = 'streams',
+  alertZeroWatches = 'watches',
+  alertZeroWatchesWorkers = 'watches_workers',
+  alertZeroWatchesSkills = 'watches_skills',
+  alertZeroWatchFloor = 'watch_floor',
+  alertZeroWatchOfficer = 'watch_officer',
+  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchDeep = 'watch_deep',
+  alertZeroWatchDetection = 'watch_detection',
 }

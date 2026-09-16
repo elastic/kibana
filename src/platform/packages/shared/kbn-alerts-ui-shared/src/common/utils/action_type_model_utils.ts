@@ -11,6 +11,7 @@ import { lazy, useMemo } from 'react';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
+import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
@@ -110,12 +111,15 @@ export function transformSpecToActionTypeModel(
   docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
+  const registeredSpec = getConnectorSpec(spec.metadata.id);
+
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
+    isTestable: spec.isTestable,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
     docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>
@@ -153,6 +157,7 @@ export function transformSpecToActionTypeModel(
       deserializer: createConnectorFormDeserializer() as unknown as NonNullable<
         ActionTypeModel['connectorForm']
       >['deserializer'],
+      hideSettingsTitle: registeredSpec !== undefined && isInboundOnlyConnectorSpec(registeredSpec),
     },
   };
 }

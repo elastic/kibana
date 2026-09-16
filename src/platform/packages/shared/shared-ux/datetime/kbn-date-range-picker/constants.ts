@@ -40,6 +40,9 @@ export const DATE_RANGE_INPUT_DELIMITER = 'to';
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';
 
+/** Feature flag key controlling adoption of the new date range picker. */
+export const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+
 /**
  * Maps date-math units to their display abbreviations.
  * Most units use the datemath symbol as-is; month uses "mo" instead of "M".
@@ -67,18 +70,27 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   y: 'year',
 };
 
+/** One date-math operation: an offset (`+3M`, `-1y`) or a rounding (`/y`, `/ms`). */
+const DATE_MATH_OP = '(?:[+-]\\d*(?:ms|[smhdwMy])|\\/(?:ms|[smhdwMy]))';
+
+/**
+ * Chained Elasticsearch date math: optional `now` plus one or more operations.
+ * e.g. `now/y+3M`, `now-3M/y+3M`, `-1y/y+3M`, `now/d`.
+ */
+export const CHAINED_DATE_MATH_RE = new RegExp(`^(now)?(${DATE_MATH_OP}+)$`);
+
 /**
  * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
  *
- * Sub-day units promote one step up (`ms→s`, `s→m`, `m→h`), except `h→h`
- * which keeps the hour boundary. Day-and-above units all normalise to `/d`.
+ * Minutes up to a week round to the next finer unit.
+ * Seconds and milliseconds round to `/s`, while months and years normalise to `/d`.
  */
 export const ROUND_UNIT_MAP: Record<string, string> = {
   ms: 's',
-  s: 'm',
-  m: 'm',
-  h: 'h',
-  d: 'd',
+  s: 's',
+  m: 's',
+  h: 'm',
+  d: 'h',
   w: 'd',
   M: 'd',
   y: 'd',

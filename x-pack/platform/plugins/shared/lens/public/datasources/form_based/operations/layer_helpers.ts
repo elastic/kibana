@@ -28,6 +28,7 @@ import type {
   BaseIndexPatternColumn,
   DatasourceFixAction,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -43,7 +44,6 @@ import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
 import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import { documentField } from '../document_field';
-import { isColumnOfType } from './definitions/helpers';
 import type { DataType, OperationMetadata } from '../../..';
 
 export interface ColumnAdvancedParams {

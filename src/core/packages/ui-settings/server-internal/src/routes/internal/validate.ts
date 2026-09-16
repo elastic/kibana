@@ -63,7 +63,7 @@ export function registerInternalValidateRoute(router: InternalUiSettingsRouter) 
       },
       validate: {
         params: schema.object({
-          key: schema.string(),
+          key: schema.string({ minLength: 1, maxLength: 1024 }),
         }),
         body: schema.object({
           value: schema.any(),

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
@@ -25,17 +25,19 @@ export interface CrashMainStatisticsRouteResponse {
 
 export const crashMainStatisticsRoute = defineRoute<CrashMainStatisticsRouteResponse>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
-  params: z.object({
-    path: z.object({
-      serviceName: z.string(),
-    }),
-    query: z
-      .object({
-        sortField: z.string().optional(),
-        sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-      })
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        serviceName: z.string(),
+      }),
+      query: z
+        .object({
+          sortField: z.string().optional(),
+          sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

@@ -7,18 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
-import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
-export const asCodeResponseSchema = schema.object({
-  id: schema.string({ maxLength: 1000 }),
-  data: savedDataViewSpecSchema,
-  meta: asCodeMetaSchema.extends({
-    namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
+const dataViewsMetaSchema = asCodeMetaSchema.extend({
+  namespaces: z.array(z.string().max(1000)).max(100).optional(),
+});
+
+export const asCodeResponseSchema = z
+  .object({
+    id: z.string().max(1000),
+    data: savedDataViewSpecSchema,
+    meta: dataViewsMetaSchema,
+  })
+  .strict();
+
+export const asCodeMinimalResponseSchema = z.object({
+  id: z.string().max(1000),
+  data: savedDataViewSpecSchema.pick({
+    name: true,
+    index_pattern: true,
+    time_field: true,
   }),
+  meta: dataViewsMetaSchema,
 });
 
-export const savedDataViewSpecSchemaWithoutId = savedDataViewSpecSchema.extends({
-  id: schema.never(),
+export const asCodePaginatedResponseSchema = z.object({
+  data: z.array(asCodeMinimalResponseSchema).max(PAGINATION_MAX_SIZE),
+  meta: asCodePaginationResponseMetaSchema,
 });
+
+export const savedDataViewSpecSchemaWithoutId = savedDataViewSpecSchema.omit({ id: true });

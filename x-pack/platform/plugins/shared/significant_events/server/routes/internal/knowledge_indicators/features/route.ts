@@ -14,16 +14,16 @@ import {
   featureUpsertSchema,
   type Feature,
 } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/errors/status_error';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
 
-export const upsertFeatureRoute = createServerRoute({
+const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
   options: {
     access: 'internal',
@@ -32,7 +32,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -46,9 +46,9 @@ export const upsertFeatureRoute = createServerRoute({
     server,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -82,7 +82,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
 });
 
-export const deleteFeatureRoute = createServerRoute({
+const deleteFeatureRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
@@ -91,7 +91,7 @@ export const deleteFeatureRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -108,9 +108,9 @@ export const deleteFeatureRoute = createServerRoute({
     logger,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -131,7 +131,7 @@ export const deleteFeatureRoute = createServerRoute({
   },
 });
 
-export const listFeaturesRoute = createServerRoute({
+const listFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features',
   options: {
     access: 'internal',
@@ -140,7 +140,7 @@ export const listFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -160,9 +160,9 @@ export const listFeaturesRoute = createServerRoute({
     server,
   }): Promise<{ features: Feature[] }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -188,7 +188,7 @@ export const listAllFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -217,7 +217,6 @@ export const listAllFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({
       server,
       licensing: scopedClients.licensing,
-      uiSettingsClient: scopedClients.uiSettingsClient,
     });
 
     const streams = await scopedClients.streamsClient.listStreams();
@@ -237,7 +236,7 @@ export const listAllFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkFeaturesRoute = createServerRoute({
+const bulkFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_bulk',
   options: {
     access: 'internal',
@@ -246,7 +245,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -288,9 +287,9 @@ export const bulkFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name },
@@ -323,7 +322,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
+const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/features/_bulk',
   options: {
     access: 'internal',
@@ -333,7 +332,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -359,9 +358,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

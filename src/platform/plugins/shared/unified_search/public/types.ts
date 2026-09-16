@@ -14,6 +14,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -52,6 +53,7 @@ export interface UnifiedSearchStartDependencies {
   cps: CPSPluginStart;
   kql: KqlPluginStart;
   esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
@@ -113,4 +115,5 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   cps: CPSPluginStart;
   esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
 }

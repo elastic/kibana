@@ -12,9 +12,9 @@ import { orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ValuesType } from 'utility-types';
 import type { APIReturnType } from '@kbn/apm-api-shared';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
 type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/service-group/services'>;
 type Items = ServiceListAPIResponse['items'];

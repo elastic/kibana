@@ -1,0 +1,18 @@
+{
+  "10.1.0": [
+    {
+      "source_id": "elastic-artifacts",
+      "name": "Elastic Artifacts",
+      "is_default": true,
+      "host": "https://artifacts.elastic.co/downloads/"
+    }
+  ],
+  "10.2.0": [
+    {
+      "source_id": "elastic-artifacts",
+      "name": "Elastic Artifacts",
+      "is_default": true,
+      "host": "https://artifacts.elastic.co/downloads/"
+    }
+  ]
+}

@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
@@ -18,7 +19,7 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { RuleImportErrorObject } from '../import/errors';
+import type { ImportRulesResult } from './methods/import_rules';
 import type {
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
@@ -27,7 +28,6 @@ import type {
   DeleteRuleArgs,
   GetHistoryForRuleArgs,
   IDetectionRulesClient,
-  ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
   RestoreRuleFromHistoryArgs,
@@ -41,7 +41,6 @@ import { createRule } from './methods/create_rule';
 import { bulkCreatePrebuiltRules } from './methods/bulk_create_prebuilt_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
-import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
@@ -56,14 +55,15 @@ import {
 } from './restore_telemetry';
 import { sendRuleLifecycleTelemetryEvent } from './rule_lifecycle_telemetry';
 import {
-  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_REVERT_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_INSTALL_EVENT,
 } from '../../../../telemetry/event_based/events';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
+  userProfile: UserProfileServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
@@ -76,6 +76,7 @@ interface DetectionRulesClientParams {
 export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
+  userProfile,
   mlAuthz,
   rulesAuthz,
   savedObjectsClient,
@@ -237,38 +238,43 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-        const rule = await importRule({
-          actionsClient,
-          rulesClient,
-          importRulePayload: args,
-          mlAuthz,
-          prebuiltRuleAssetClient,
-          changeTracking: args.changeTracking,
+    async importRules(args: ImportRulesArgs): Promise<ImportRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.importRules', async () => {
+        const result = await importRules({
+          rules: args.rules,
+          options: {
+            overwriteRules: args.overwriteRules,
+            allowMissingConnectorSecrets: args.allowMissingConnectorSecrets,
+            changeTracking: args.changeTracking,
+            batchSize: args.batchSize,
+          },
+          deps: {
+            actionsClient,
+            rulesClient,
+            savedObjectsClient,
+            prebuiltRuleAssetClient,
+            mlAuthz,
+          },
         });
 
         if (analytics) {
-          sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_IMPORT_EVENT, rule, logger);
+          for (const { telemetry } of result.successes) {
+            sendRuleLifecycleTelemetryEvent(
+              analytics,
+              DETECTION_RULE_IMPORT_EVENT,
+              telemetry,
+              logger
+            );
+          }
         }
 
-        return rule;
-      });
-    },
-
-    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
-      return withSecuritySpan('DetectionRulesClient.importRules', async () => {
-        return importRules({
-          ...args,
-          detectionRulesClient: this,
-          savedObjectsClient,
-        });
+        return result;
       });
     },
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, ...args });
+        return getHistoryForRule({ rulesClient, userProfileService: userProfile, logger, ...args });
       });
     },
 

@@ -11,12 +11,14 @@ import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { of } from 'rxjs';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useConsoleManager } from '../../../management/components/console/components/console_manager';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { flyoutProviders } from './flyout_provider';
 
 jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
@@ -171,5 +173,40 @@ describe('flyoutProviders', () => {
     );
 
     expect(screen.getByTestId('console-manager-probe')).toHaveTextContent('function');
+  });
+
+  describe('TimeRangeSync', () => {
+    const absoluteRangeAction = setAbsoluteRangeDatePicker({
+      id: InputsModelId.global,
+      from: '2024-01-01',
+      to: '2024-01-02',
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, '', '/');
+    });
+
+    it('does NOT seed the global time range when on a Security app path', () => {
+      window.history.pushState({}, '', '/app/security/alerts');
+      const store = createStore(() => ({}));
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      render(flyoutProviders({ services, store, children: <div /> }));
+
+      const seeded = dispatchSpy.mock.calls.some(
+        ([action]) => (action as { type?: string })?.type === absoluteRangeAction.type
+      );
+      expect(seeded).toBe(false);
+    });
+
+    it('seeds the global time range from the timefilter when NOT on a Security app path', () => {
+      window.history.pushState({}, '', '/app/discover');
+      const store = createStore(() => ({}));
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      render(flyoutProviders({ services, store, children: <div /> }));
+
+      expect(dispatchSpy).toHaveBeenCalledWith(absoluteRangeAction);
+    });
   });
 });

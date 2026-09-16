@@ -17,6 +17,7 @@ import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { useTabs } from '../../shared/hooks/use_tabs';
+import { FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { getTabsDisplayed, type RightPanelPaths, validTabIds } from './tabs';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 
@@ -57,6 +58,7 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions })
   const { selectedTabId, setSelectedTabId } = useTabs<RightPanelPaths>({
     validTabIds,
     storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    flyoutType: FLYOUT_TYPE.IOC,
   });
 
   const onViewAllFieldsInTable = useCallback(() => {

@@ -23,6 +23,12 @@ export const STAT_EVALUATOR_MODEL = i18n.translate(
   }
 );
 
+export const getEvaluatorModelsDifferLabel = (count: number) =>
+  i18n.translate('xpack.evals.experimentDetail.stat.evaluatorModelsDiffer', {
+    defaultMessage: '{count} models',
+    values: { count },
+  });
+
 export const STAT_REPETITIONS = i18n.translate('xpack.evals.experimentDetail.stat.repetitions', {
   defaultMessage: 'Repetitions',
 });
@@ -50,6 +56,13 @@ export const PR_LINK = i18n.translate('xpack.evals.experimentDetail.prLink', {
 export const SECTION_DATASETS = i18n.translate('xpack.evals.experimentDetail.section.datasets', {
   defaultMessage: 'Datasets',
 });
+
+export const SECTION_RUN_PROGRESS = i18n.translate(
+  'xpack.evals.experimentDetail.section.runProgress',
+  {
+    defaultMessage: 'Run progress',
+  }
+);
 
 export const DELETED_DATASET_SUFFIX = i18n.translate(
   'xpack.evals.experimentDetail.deletedDatasetSuffix',
@@ -81,6 +94,27 @@ export const SECTION_EXAMPLE_SCORES = i18n.translate(
 export const COLUMN_EVALUATOR = i18n.translate('xpack.evals.experimentDetail.columns.evaluator', {
   defaultMessage: 'Evaluator',
 });
+
+export const COLUMN_EVALUATOR_MODEL = i18n.translate(
+  'xpack.evals.experimentDetail.columns.evaluatorModel',
+  {
+    defaultMessage: 'Judge model',
+  }
+);
+
+export const EVALUATOR_MODEL_NOT_APPLICABLE = i18n.translate(
+  'xpack.evals.experimentDetail.evaluatorModelNotApplicable',
+  {
+    defaultMessage: 'n/a',
+  }
+);
+
+export const EVALUATOR_MODEL_NOT_APPLICABLE_TOOLTIP = i18n.translate(
+  'xpack.evals.experimentDetail.evaluatorModelNotApplicableTooltip',
+  {
+    defaultMessage: 'This evaluator is computed in code and does not use a model.',
+  }
+);
 
 export const COLUMN_MEAN = i18n.translate('xpack.evals.experimentDetail.columns.mean', {
   defaultMessage: 'Mean',
@@ -149,6 +183,50 @@ export const EXPERIMENT_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.evals.experimentDetail.experimentLoadErrorTitle',
   {
     defaultMessage: 'Unable to load experiment',
+  }
+);
+
+export const EXPERIMENT_PREPARING_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentPreparingTitle',
+  {
+    defaultMessage: 'Preparing experiment…',
+  }
+);
+
+export const EXPERIMENT_PREPARING_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentPreparingBody',
+  {
+    defaultMessage:
+      'The run is launching. This page will update automatically once the experiment starts producing results.',
+  }
+);
+
+export const EXPERIMENT_LOADING_RESULTS_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentLoadingResultsTitle',
+  {
+    defaultMessage: 'Loading results…',
+  }
+);
+
+export const EXPERIMENT_LOADING_RESULTS_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentLoadingResultsBody',
+  {
+    defaultMessage: 'Scores have been ingested. Fetching the experiment report…',
+  }
+);
+
+export const EXPERIMENT_NO_RESULTS_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentNoResultsTitle',
+  {
+    defaultMessage: 'Run finished — no results',
+  }
+);
+
+export const EXPERIMENT_NO_RESULTS_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentNoResultsBody',
+  {
+    defaultMessage:
+      'The run completed without ingesting any scores, so there is nothing to display. Check the run progress above for step errors, and confirm the selected dataset has examples and that your evaluators (plus any judge connector) are configured correctly.',
   }
 );
 

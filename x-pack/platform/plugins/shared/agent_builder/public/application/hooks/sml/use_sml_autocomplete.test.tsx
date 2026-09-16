@@ -71,6 +71,39 @@ describe('useSmlAutocomplete', () => {
     });
   });
 
+  it('keeps showing the previous results while a newer query is still loading', async () => {
+    const firstResults = [{ id: 'wd-1', type: 'connector', title: 'workday' }];
+    const secondResults = [{ id: 'wd-2', type: 'connector', title: 'workday_2' }];
+    let resolveSecond: (value: { results: typeof secondResults }) => void = () => {};
+    const secondPromise = new Promise<{ results: typeof secondResults }>((resolve) => {
+      resolveSecond = resolve;
+    });
+
+    mockAutocomplete
+      .mockResolvedValueOnce({ results: firstResults })
+      .mockImplementationOnce(() => secondPromise);
+
+    const { result, rerender } = renderHook(({ query }) => useSmlAutocomplete(query), {
+      wrapper: createWrapper(),
+      initialProps: { query: 'workda' },
+    });
+
+    await waitFor(() => {
+      expect(result.current.results).toEqual(firstResults);
+    });
+
+    rerender({ query: 'workday' });
+
+    // Second query still in flight; results must not flash to `[]`.
+    expect(result.current.results).toEqual(firstResults);
+
+    resolveSecond({ results: secondResults });
+
+    await waitFor(() => {
+      expect(result.current.results).toEqual(secondResults);
+    });
+  });
+
   it('surfaces failures via notifications.toasts.addError', async () => {
     const networkError = new Error('network');
     mockAutocomplete.mockRejectedValue(networkError);

@@ -11,16 +11,17 @@
 export const NOTIFICATION_ID_SEPARATOR = ':';
 
 /**
- * Inputs for a static-state notification id: `<producer>:<entity>:<state>`.
+ * Inputs for a `state` notification id: `<namespace>:<type>:<entity>:<state>`.
  *
- * Use when a notification represents the *current state* of an entity. Re-push
- * with the same `(producer, entity, state)` is a no-op via query-time collapse;
- * a new `state` produces a new id (the previous state's notification ages out
- * under its retention TTL).
+ * Use when a notification represents the *current state* of an entity.
+ * Submitting a notification with the same `(namespace, type, entity, state)`
+ * is valid behavior and users will not see duplicates.
  */
-export interface StaticStateNotificationIdParts {
-  /** Producing application/plugin, e.g. `inference`. */
-  producer: string;
+export interface StateNotificationIdParts {
+  /** Registry namespace that owns the notification, e.g. `inference`. */
+  namespace: string;
+  /** Registry type within the namespace, e.g. `modelStatus`. */
+  type: string;
   /** Stable id of the entity the notification is about, e.g. an inference endpoint id. */
   entity: string;
   /** Current state of the entity, e.g. `deprecated`. */
@@ -28,14 +29,16 @@ export interface StaticStateNotificationIdParts {
 }
 
 /**
- * Inputs for a per-event notification id: `<producer>:<event>:<epochMs>`.
+ * Inputs for a `timeseries` notification id: `<namespace>:<type>:<event>:<epochMs>`.
  *
- * Use when each occurrence is distinct and should not collapse. The `epochMs`
- * segment makes every push unique and avoids colon collisions with ISO 8601.
+ * Use when each occurrence is distinct and should create new notifications for users. The `epochMs`
+ * segment makes every push unique.
  */
-export interface EventNotificationIdParts {
-  /** Producing application/plugin, e.g. `autoOps`. */
-  producer: string;
+export interface TimeseriesNotificationIdParts {
+  /** Registry namespace that owns the notification, e.g. `inference`. */
+  namespace: string;
+  /** Registry type within the namespace, e.g. `modelStatus`. */
+  type: string;
   /** Event name, e.g. `memoryLimit`. */
   event: string;
   /** Unix timestamp in milliseconds that makes this occurrence unique. */
@@ -43,26 +46,28 @@ export interface EventNotificationIdParts {
 }
 
 /**
- * Build a static-state notification id (`<producer>:<entity>:<state>`).
+ * Build a `state` notification id (`<namespace>:<type>:<entity>:<state>`).
  */
-export const buildStaticStateNotificationId: (parts: StaticStateNotificationIdParts) => string = ({
-  producer,
+export const buildStateNotificationId: (parts: StateNotificationIdParts) => string = ({
+  namespace,
+  type,
   entity,
   state,
-}) => joinNotificationIdSegments([producer, entity, state]);
+}) => joinNotificationIdSegments([namespace, type, entity, state]);
 
 /**
- * Build a per-event notification id (`<producer>:<event>:<epochMs>`).
+ * Build a `timeseries` notification id (`<namespace>:<type>:<event>:<epochMs>`).
  */
-export const buildEventNotificationId: (parts: EventNotificationIdParts) => string = ({
-  producer,
+export const buildTimeseriesNotificationId: (parts: TimeseriesNotificationIdParts) => string = ({
+  namespace,
+  type,
   event,
   epochMs,
 }) => {
   if (!Number.isFinite(epochMs)) {
     throw new Error('notification_id epochMs must be a finite number');
   }
-  return joinNotificationIdSegments([producer, event, String(epochMs)]);
+  return joinNotificationIdSegments([namespace, type, event, String(epochMs)]);
 };
 
 const joinNotificationIdSegments = (segments: string[]): string => {

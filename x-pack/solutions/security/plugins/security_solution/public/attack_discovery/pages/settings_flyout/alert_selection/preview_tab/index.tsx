@@ -17,16 +17,13 @@ import {
 import { css } from '@emotion/react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
 
-import { PageScope } from '../../../../../data_view_manager/constants';
 import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { sourcererActions } from '../../../../../sourcerer/store';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
@@ -98,7 +95,6 @@ const PreviewTabComponent = ({
   const {
     euiTheme: { font },
   } = useEuiTheme();
-  const dispatch = useDispatch();
 
   const { signalIndexName } = useSignalIndex();
 
@@ -178,23 +174,6 @@ const PreviewTabComponent = ({
       ) : null,
     [actions, body, tableStackBy0]
   );
-
-  useEffect(() => {
-    if (signalIndexName != null) {
-      // Limit the fields in the StackByComboBox to the fields in the signal index.
-      // NOTE: The page containing this component must also be a member of
-      // `detectionsPaths` in `sourcerer/containers/sourcerer_paths.ts` for this
-      // action to have any effect.
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: PageScope.alerts,
-          selectedDataViewId: signalIndexName,
-          selectedPatterns: [signalIndexName],
-          shouldValidateSelectedPatterns: false,
-        })
-      );
-    }
-  }, [dispatch, signalIndexName]);
 
   if (signalIndexName == null) {
     return null;

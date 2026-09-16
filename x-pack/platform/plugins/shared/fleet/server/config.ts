@@ -23,6 +23,7 @@ import {
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
   PreconfiguredSpaceSettingsSchema,
+  PreconfiguredDownloadSourcesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
@@ -266,6 +267,29 @@ export const config: PluginConfigDescriptor = {
               interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
+          // Routes agentless policies through the managed `_bulk` endpoint instead of
+          // writing directly to Elasticsearch.
+          managedBulk: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+            })
+          ),
+        })
+      ),
+      iacProvisioner: schema.maybe(
+        schema.object({
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,
@@ -274,6 +298,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
+      binaryDownloadSource: PreconfiguredDownloadSourcesSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
       eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(
@@ -361,6 +386,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Test/development escape hatch that skips all package upload validation, e.g. for
+        // uploading packages whose names exist in EPR or as bundled packages.
+        skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),

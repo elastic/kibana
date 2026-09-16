@@ -361,6 +361,21 @@ describe('Artifact', () => {
       });
     });
 
+    describe('with a transient server error', () => {
+      it('retries the manifest fetch on a 500 response and succeeds', async () => {
+        fetch
+          .mockReturnValueOnce(
+            Promise.resolve(new Response('', { status: 500, statusText: 'Internal Server Error' }))
+          )
+          .mockReturnValueOnce(Promise.resolve(new Response(JSON.stringify(MOCKS.valid))));
+
+        const artifact = await Artifact.getSnapshot('default', MOCK_VERSION, log);
+
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(artifact.spec.url).toEqual(MOCK_URL + '/default');
+      });
+    });
+
     describe('with latest unverified snapshot', () => {
       beforeEach(() => {
         process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = '1';

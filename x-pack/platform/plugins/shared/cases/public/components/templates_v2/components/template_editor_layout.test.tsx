@@ -139,21 +139,33 @@ describe('TemplateEditorLayout', () => {
     expect(screen.getByTestId('mockTemplatePreview')).toBeInTheDocument();
   });
 
-  it('shows a required-name indicator on the Configuration tab when the name is invalid', () => {
+  it('does not put a required-name indicator on the Configuration tab', () => {
     renderWithTestingProviders(
       <TemplateEditorLayout
         {...defaultProps}
-        metadata={{ name: '', description: '', tags: [] }}
         metadataErrors={{ name: 'Template name is required.' }}
       />
     );
 
-    expect(screen.getByTestId('templateConfigTabRequiredIndicator')).toBeInTheDocument();
+    // The name lives in the always-visible page title now, so the tab has nothing mandatory to flag.
+    expect(screen.queryByTestId('templateConfigTabRequiredIndicator')).not.toBeInTheDocument();
   });
 
   it('does not show the required-name indicator when the name is valid', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
     expect(screen.queryByTestId('templateConfigTabRequiredIndicator')).not.toBeInTheDocument();
+  });
+
+  it('shows an error indicator on the Fields tab when the fields definition is invalid', () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} fieldsHaveErrors={true} />);
+
+    expect(screen.getByTestId('templateFieldsTabErrorIndicator')).toBeInTheDocument();
+  });
+
+  it('does not show the Fields tab error indicator when the fields definition is valid', () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} fieldsHaveErrors={false} />);
+
+    expect(screen.queryByTestId('templateFieldsTabErrorIndicator')).not.toBeInTheDocument();
   });
 });

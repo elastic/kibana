@@ -23,6 +23,8 @@ import { useNetworkFlyoutApi } from './network/use_network_flyout_api';
 import { createNetworkFlyoutApiMock } from './network/use_network_flyout_api.mock';
 import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
 import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
+import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_api';
+import { createSharedToolsFlyoutApiMock } from './shared/tools/use_shared_tools_flyout_api.mock';
 import { useFlyoutApi } from './use_flyout_api';
 
 jest.mock('./attack/use_attack_flyout_api');
@@ -32,13 +34,14 @@ jest.mock('./entity/use_entity_flyout_api');
 jest.mock('./ioc/use_ioc_flyout_api');
 jest.mock('./network/use_network_flyout_api');
 jest.mock('./rule/use_rule_flyout_api');
+jest.mock('./shared/tools/use_shared_tools_flyout_api');
 
 describe('useFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('exposes document, attack, CSP, entity, IOC, network, and rule methods from composed hooks', () => {
+  it('exposes document, attack, CSP, entity, IOC, network, rule and shared-tools methods from composed hooks', () => {
     const documentApi = createDocumentFlyoutApiMock();
     const attackApi = createAttackFlyoutApiMock();
     const cspApi = createCspFlyoutApiMock();
@@ -46,6 +49,7 @@ describe('useFlyoutApi', () => {
     const iocApi = createIocFlyoutApiMock();
     const networkApi = createNetworkFlyoutApiMock();
     const ruleApi = createRuleFlyoutApiMock();
+    const sharedToolsApi = createSharedToolsFlyoutApiMock();
     jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
     jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
     jest.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
@@ -53,6 +57,7 @@ describe('useFlyoutApi', () => {
     jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
     jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
     jest.mocked(useRuleFlyoutApi).mockReturnValue(ruleApi);
+    jest.mocked(useSharedToolsFlyoutApi).mockReturnValue(sharedToolsApi);
 
     const { result } = renderHook(() => useFlyoutApi());
 
@@ -95,7 +100,7 @@ describe('useFlyoutApi', () => {
 
     expect(documentApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(fromIndexParams);
     expect(documentApi.openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledWith(fromIndexParams);
-    expect(documentApi.openNotes).toHaveBeenCalledWith({ hit });
+    expect(sharedToolsApi.openNotes).toHaveBeenCalledWith({ hit });
     expect(attackApi.openAttackFlyout).toHaveBeenCalledWith(attackParams);
     expect(attackApi.openAttackFlyoutAsChild).toHaveBeenCalledWith(attackParams);
     expect(cspApi.openMisconfigurationFinding).toHaveBeenCalledWith(misconfigurationParams);

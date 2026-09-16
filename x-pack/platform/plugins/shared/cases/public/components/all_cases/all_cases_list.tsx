@@ -16,7 +16,10 @@ import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
 import { useCasesColumns } from './use_cases_columns';
+import { getUserPickerUidsFromCase } from './extended_field_columns';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from './table';
@@ -26,6 +29,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
@@ -72,6 +76,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       getAttachments,
     });
 
+    const { templatesEnabled } = useCasesConfig();
+    const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
+    const userPickerFields = useMemo(
+      () => globalInlineFields.filter((field) => field.control === FieldType.USER_PICKER),
+      [globalInlineFields]
+    );
+
     const assigneesFromCases = useMemo(() => {
       return data.cases.reduce<Set<string>>((acc, caseInfo) => {
         if (!caseInfo) {
@@ -81,9 +92,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         for (const assignee of caseInfo.assignees) {
           acc.add(assignee.uid);
         }
+
+        // Global user-picker fields render avatars too; fold their uids into the same bulk
+        // fetch as assignees so the table pays for one profile request, not two.
+        for (const uid of getUserPickerUidsFromCase(caseInfo, userPickerFields)) {
+          acc.add(uid);
+        }
         return acc;
       }, new Set());
-    }, [data.cases]);
+    }, [data.cases, userPickerFields]);
 
     const { data: userProfiles } = useBulkGetUserProfiles({
       uids: Array.from(assigneesFromCases),

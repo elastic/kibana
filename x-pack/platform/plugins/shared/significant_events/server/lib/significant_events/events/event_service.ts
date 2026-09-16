@@ -9,9 +9,18 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient } from '@kbn/data-streams';
 import { EventClient } from './event_client';
 import { eventsDataStream, type StoredEvent, type eventsMappings } from './data_stream';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 export class EventService {
-  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): EventClient {
+  getClient({
+    esClient,
+    space,
+    triggerEmitter,
+  }: {
+    esClient: ElasticsearchClient;
+    space: string;
+    triggerEmitter?: TriggerEmitter;
+  }): EventClient {
     const dataStreamClient = DataStreamClient.fromDefinition<typeof eventsMappings, StoredEvent>({
       dataStream: eventsDataStream,
       elasticsearchClient: esClient,
@@ -21,6 +30,7 @@ export class EventService {
       dataStreamClient,
       esClient,
       space,
+      triggerEmitter,
     });
   }
 }

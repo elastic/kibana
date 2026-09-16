@@ -18,8 +18,14 @@ import {
   handleExecutionDelay,
 } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
+import {
+  createMockWorkflowExecutionCursor,
+  type MockWorkflowExecutionCursorOptions,
+} from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
+const makeParams = (
+  cursorOptions: MockWorkflowExecutionCursorOptions = {}
+): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
     workflowRuntime: {
       getWorkflowExecution: jest.fn().mockReturnValue({
@@ -29,6 +35,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
       }),
       getCurrentNode: jest.fn().mockReturnValue(undefined),
     },
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(cursorOptions),
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
@@ -201,14 +208,8 @@ describe('handleExecutionDelay', () => {
         jest.useFakeTimers();
         try {
           jest.setSystemTime(new Date(nowIso));
-          const params = makeParams();
-          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
-            workflowLevelTimeout
-          );
-          (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
-            id: 'exec-parent',
-            startedAt: '2025-06-01T12:00:00.000Z',
-            scopeStack: [
+          const params = makeParams({
+            currentStackFrames: [
               {
                 stepId: 'timedParent',
                 nestedScopes: [
@@ -220,6 +221,9 @@ describe('handleExecutionDelay', () => {
               },
             ],
           });
+          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
+            workflowLevelTimeout
+          );
           (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation(
             (nodeId: string) => {
               if (nodeId === 'enterTimeoutZone_timedParent') {
@@ -352,7 +356,7 @@ describe('handleExecutionDelay', () => {
       jest.useRealTimers();
     });
 
-    it('sleeps in-process and sets RUNNING without TM task', async () => {
+    it('sleeps in-process without changing workflow status, flushing, or parking on TM', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 100).toISOString();
       const stepRuntime = makeStepRuntime({
@@ -368,9 +372,9 @@ describe('handleExecutionDelay', () => {
       await delayPromise;
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
+      expect(params.stepIoService.flush).not.toHaveBeenCalled();
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(params.workflowExecutionCursor.stop).not.toHaveBeenCalled();
     });
 
     it('workflow.executeAsync uses short in-process path like other steps', async () => {
@@ -389,14 +393,13 @@ describe('handleExecutionDelay', () => {
       await delayPromise;
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(params.workflowExecutionCursor.stop).not.toHaveBeenCalled();
     });
   });
 
   describe('short wait — abort during in-process sleep (real timers)', () => {
-    it('on step abort during sleep sets RUNNING and returns (cancel / interrupt path)', async () => {
+    it('on step abort during sleep does not change workflow status (cancel / interrupt path)', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 3000).toISOString();
       const ac = new AbortController();
@@ -414,9 +417,8 @@ describe('handleExecutionDelay', () => {
       await handleExecutionDelay(params, stepRuntime);
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(params.workflowExecutionCursor.stop).not.toHaveBeenCalled();
     });
   });
 
@@ -435,7 +437,7 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
-      expect(params.stepIoService.flush).toHaveBeenCalled();
+      expect(params.stepIoService.flush).not.toHaveBeenCalled();
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
       expect(call.workflowExecution).toEqual(expect.objectContaining({ id: 'exec-parent' }));
@@ -443,6 +445,7 @@ describe('handleExecutionDelay', () => {
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         status: ExecutionStatus.WAITING,
       });
+      expect(params.workflowExecutionCursor.stop).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -461,9 +464,7 @@ describe('handleExecutionDelay', () => {
       await handleExecutionDelay(params, stepRuntime);
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 
@@ -485,12 +486,36 @@ describe('handleExecutionDelay', () => {
         await handleExecutionDelay(params, stepRuntime);
 
         expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
+        expect(params.stepIoService.flush).not.toHaveBeenCalled();
         expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
           status: ExecutionStatus.WAITING,
         });
+        expect(params.workflowExecutionCursor.stop).toHaveBeenCalledTimes(1);
       } finally {
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('forceTaskSchedule parks on TM even for short remaining delay', () => {
+    it('schedules resume and sets WAITING when forceTaskSchedule is set', async () => {
+      const params = makeParams();
+      const resumeAtDate = new Date(Date.now() + 500);
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: 'wait' } as any,
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt: resumeAtDate.toISOString(), forceTaskSchedule: true },
+        } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING,
+      });
+      expect(params.workflowExecutionCursor.stop).toHaveBeenCalledTimes(1);
     });
   });
 

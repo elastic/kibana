@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { findRuleTemplates } from './find_rule_templates';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
@@ -25,6 +26,7 @@ const rulesClientContext = {
   unsecuredSavedObjectsClient,
   authorization: authorization as unknown as AlertingAuthorization,
   logger: loggingSystemMock.create().get(),
+  spaceId: 'default',
 } as unknown as RulesClientContext;
 
 const rulesClientContextWithAuditLogger = {
@@ -87,13 +89,33 @@ describe('findRuleTemplates', () => {
     references: [],
   };
 
+  const searchResponse = (
+    ...templates: Array<{ id: string; attributes: Record<string, unknown> }>
+  ): Awaited<ReturnType<SavedObjectsClientContract['search']>> => ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, failed: 0 },
+    hits: {
+      total: { value: templates.length, relation: 'eq' },
+      hits: templates.map((template) => ({
+        _index: '.kibana',
+        _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${template.id}`,
+        _source: {
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: template.attributes,
+          references: [],
+        },
+      })),
+    },
+  });
+
+  const lastSearchQuery = () =>
+    JSON.stringify(unsecuredSavedObjectsClient.search.mock.calls[0][0].query);
+
   test('finds rule templates with proper parameters', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1, mockTemplate2],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(
+      searchResponse(mockTemplate1, mockTemplate2)
+    );
 
     const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -135,22 +157,17 @@ describe('findRuleTemplates', () => {
       ],
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: 10,
-      search: undefined,
-      searchFields: ['name', 'tags', 'description'],
-      defaultSearchOperator: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-      filter: expect.any(Object),
-    });
-
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        namespaces: ['default'],
+        from: 0,
+        size: 10,
+      })
     );
+    expect(lastSearchQuery()).toContain('alerting_rule_template.ruleTypeId');
+    expect(lastSearchQuery()).toContain('alerting_rule_template.engine');
+    expect(lastSearchQuery()).not.toContain('.attributes.');
 
     expect(authorization.getByRuleTypeAuthorizationFilter).toHaveBeenCalledWith({
       authorizationEntity: 'rule',
@@ -165,12 +182,7 @@ describe('findRuleTemplates', () => {
   });
 
   test('filters by specific rule type', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
     const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -181,20 +193,11 @@ describe('findRuleTemplates', () => {
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expect(lastSearchQuery()).toContain('custom.rule.type');
   });
 
   test('filters by tags', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
     const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -206,20 +209,13 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0].tags).toContain('tag1');
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.tags: tag1 AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expect(lastSearchQuery()).toContain('tag1');
   });
 
   test('filters by multiple tags', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1, mockTemplate2],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(
+      searchResponse(mockTemplate1, mockTemplate2)
+    );
 
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -227,21 +223,12 @@ describe('findRuleTemplates', () => {
       tags: ['tag1', 'tag2'],
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.tags: tag1 OR ' +
-        'alerting_rule_template.attributes.tags: tag2) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expect(lastSearchQuery()).toContain('tag1');
+    expect(lastSearchQuery()).toContain('tag2');
   });
 
   test('combines ruleTypeId and tags filters', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -250,74 +237,32 @@ describe('findRuleTemplates', () => {
       tags: ['tag1'],
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
-        'alerting_rule_template.attributes.tags: tag1) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expect(lastSearchQuery()).toContain('custom.rule.type');
+    expect(lastSearchQuery()).toContain('tag1');
   });
 
-  test('applies search and sort parameters', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 5,
-      page: 2,
-      saved_objects: [mockTemplate1],
-    });
-
-    await findRuleTemplates(rulesClientContext, {
-      perPage: 5,
-      page: 2,
-      search: 'my template',
-      defaultSearchOperator: 'AND',
-      sortField: 'name',
-      sortOrder: 'desc',
-    });
-
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      page: 2,
-      perPage: 5,
-      search: 'my template',
-      searchFields: ['name', 'tags', 'description'],
-      defaultSearchOperator: 'AND',
-      sortField: 'name.keyword',
-      sortOrder: 'desc',
-      filter: expect.any(Object),
-    });
-  });
-
-  test('applies OR search operator', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+  test('empty search omits the wildcard must clause', async () => {
+    unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse(mockTemplate1));
 
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
       page: 1,
-      search: 'template',
-      defaultSearchOperator: 'OR',
+      search: '   ',
     });
+    expect(lastSearchQuery()).not.toContain('wildcard');
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        search: 'template',
-        defaultSearchOperator: 'OR',
-      })
+    await findRuleTemplates(rulesClientContext, {
+      perPage: 10,
+      page: 1,
+      search: 'kub',
+    });
+    expect(JSON.stringify(unsecuredSavedObjectsClient.search.mock.calls[1][0].query)).toContain(
+      '*kub*'
     );
   });
 
   test('applies ascending sort order', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -326,17 +271,16 @@ describe('findRuleTemplates', () => {
       sortOrder: 'asc',
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
+        sort: [{ 'alerting_rule_template.name.keyword': { order: 'asc' } }],
       })
     );
   });
 
   test('handles errors from saved objects client', async () => {
     const error = new Error('Something went wrong');
-    unsecuredSavedObjectsClient.find.mockRejectedValueOnce(error);
+    unsecuredSavedObjectsClient.search.mockRejectedValueOnce(error);
 
     await expect(
       findRuleTemplates(rulesClientContext, {
@@ -347,12 +291,7 @@ describe('findRuleTemplates', () => {
   });
 
   test('returns empty results when no templates found', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 0,
-      per_page: 10,
-      page: 1,
-      saved_objects: [],
-    });
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse());
 
     const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -370,7 +309,7 @@ describe('findRuleTemplates', () => {
   describe('authorization', () => {
     test('throws 403 when user has no access to any rule types', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -382,10 +321,10 @@ describe('findRuleTemplates', () => {
         output: {
           statusCode: 403,
         },
-        message: 'Unauthorized to find rules for any rule types',
+        message: 'Unauthorized to find rules for any rule types.',
       });
 
-      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
     });
 
     test('filters templates to only authorized rule types', async () => {
@@ -394,12 +333,7 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized: jest.fn(),
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate1],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
       const result = await findRuleTemplates(rulesClientContext, {
         perPage: 10,
@@ -409,8 +343,7 @@ describe('findRuleTemplates', () => {
       expect(result.data).toHaveLength(1);
       expect(result.data[0].ruleTypeId).toBe('test.rule.type');
 
-      const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
-      expect(findCall.filter).toBeDefined();
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
     });
 
     test('throws 403 if unauthorized template slips through filter', async () => {
@@ -427,12 +360,7 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized,
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate2],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate2));
 
       await expect(
         findRuleTemplates(rulesClientContext, {
@@ -453,12 +381,7 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized: jest.fn(),
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate1],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate1));
 
       await findRuleTemplates(rulesClientContext, {
         perPage: 10,
@@ -467,8 +390,7 @@ describe('findRuleTemplates', () => {
         tags: ['tag1'],
       });
 
-      const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
-      expect(findCall.filter).toBeDefined();
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
     });
 
     test('verifies all returned templates are authorized', async () => {
@@ -478,12 +400,9 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized,
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 2,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate1, mockTemplate2],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(
+        searchResponse(mockTemplate1, mockTemplate2)
+      );
 
       const result = await findRuleTemplates(rulesClientContext, {
         perPage: 10,
@@ -506,12 +425,9 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized,
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 2,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate1, mockTemplate2],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(
+        searchResponse(mockTemplate1, mockTemplate2)
+      );
 
       await findRuleTemplates(rulesClientContextWithAuditLogger, {
         perPage: 10,
@@ -553,7 +469,7 @@ describe('findRuleTemplates', () => {
 
     test('throws on authorization failure without audit logging', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -561,7 +477,7 @@ describe('findRuleTemplates', () => {
           perPage: 10,
           page: 1,
         })
-      ).rejects.toThrow('Unauthorized to find rules for any rule types');
+      ).rejects.toThrow('Unauthorized to find rules for any rule types.');
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
@@ -580,12 +496,7 @@ describe('findRuleTemplates', () => {
         ensureRuleTypeIsAuthorized,
       });
 
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [mockTemplate2],
-      });
+      unsecuredSavedObjectsClient.search.mockResolvedValueOnce(searchResponse(mockTemplate2));
 
       await expect(
         findRuleTemplates(rulesClientContextWithAuditLogger, {

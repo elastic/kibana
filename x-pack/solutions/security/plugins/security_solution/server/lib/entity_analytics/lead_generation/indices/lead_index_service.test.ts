@@ -7,7 +7,10 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createLeadIndexService } from './lead_index_service';
-import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation';
+import {
+  getLeadsIndexName,
+  getLegacyLeadsIndexNames,
+} from '../../../../../common/entity_analytics/lead_generation';
 
 const mockCreateOrUpdateIndex = jest.fn();
 jest.mock('../../utils/create_or_update_index', () => ({
@@ -19,8 +22,8 @@ describe('LeadIndexService', () => {
   const logger = loggingSystemMock.createLogger();
   const spaceId = 'default';
 
-  const adhocIndex = getLeadsIndexName(spaceId, 'adhoc');
-  const scheduledIndex = getLeadsIndexName(spaceId, 'scheduled');
+  const indexName = getLeadsIndexName(spaceId);
+  const legacyIndexNames = getLegacyLeadsIndexNames(spaceId);
 
   let service: ReturnType<typeof createLeadIndexService>;
 
@@ -29,22 +32,17 @@ describe('LeadIndexService', () => {
     service = createLeadIndexService({ esClient, logger, spaceId });
   });
 
-  describe('createIndices', () => {
-    it('creates both indices with correct mappings and settings', async () => {
+  describe('createIndex', () => {
+    it('creates the index with correct mappings and settings', async () => {
       mockCreateOrUpdateIndex.mockResolvedValue(undefined);
 
-      await service.createIndices();
+      await service.createIndex();
 
-      expect(mockCreateOrUpdateIndex).toHaveBeenCalledTimes(2);
-
-      const indexNames = mockCreateOrUpdateIndex.mock.calls.map(
-        ([{ options }]: [{ options: { index: string } }]) => options.index
-      );
-      expect(indexNames).toContain(adhocIndex);
-      expect(indexNames).toContain(scheduledIndex);
+      expect(mockCreateOrUpdateIndex).toHaveBeenCalledTimes(1);
 
       const [{ options }] = mockCreateOrUpdateIndex.mock.calls[0];
-      expect(options.settings).toEqual({ hidden: true });
+      expect(options.index).toBe(indexName);
+      expect(options.settings).toEqual({ auto_expand_replicas: '0-1', hidden: true });
       expect(options.mappings.properties).toHaveProperty('id');
       expect(options.mappings.properties).toHaveProperty('observations');
     });
@@ -53,33 +51,54 @@ describe('LeadIndexService', () => {
   describe('doesIndexExist', () => {
     it('returns true when the index exists', async () => {
       esClient.indices.exists.mockResolvedValueOnce(true);
-      expect(await service.doesIndexExist('adhoc')).toBe(true);
+      expect(await service.doesIndexExist()).toBe(true);
     });
 
     it('returns false when the index does not exist', async () => {
       esClient.indices.exists.mockResolvedValueOnce(false);
-      expect(await service.doesIndexExist('adhoc')).toBe(false);
+      expect(await service.doesIndexExist()).toBe(false);
     });
 
     it('returns false on Elasticsearch error', async () => {
       esClient.indices.exists.mockRejectedValueOnce(new Error('connection failed'));
-      expect(await service.doesIndexExist('adhoc')).toBe(false);
+      expect(await service.doesIndexExist()).toBe(false);
     });
   });
 
-  describe('deleteIndices', () => {
-    it('deletes both indices when they exist', async () => {
+  describe('deleteIndex', () => {
+    it('deletes the index when it exists', async () => {
       esClient.indices.exists.mockResolvedValue(true);
       esClient.indices.delete.mockResolvedValue({ acknowledged: true });
 
-      await service.deleteIndices();
+      await service.deleteIndex();
 
-      expect(esClient.indices.delete).toHaveBeenCalledTimes(2);
+      expect(esClient.indices.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: indexName })
+      );
     });
 
-    it('skips deletion for non-existent indices', async () => {
+    it('deletes legacy adhoc and scheduled indices when they exist', async () => {
+      esClient.indices.exists.mockImplementation(async ({ index }) =>
+        [...legacyIndexNames, indexName].includes(index as string)
+      );
+      esClient.indices.delete.mockResolvedValue({ acknowledged: true });
+
+      await service.deleteIndex();
+
+      expect(esClient.indices.delete).toHaveBeenCalledTimes(legacyIndexNames.length + 1);
+      for (const name of legacyIndexNames) {
+        expect(esClient.indices.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ index: name })
+        );
+      }
+      expect(esClient.indices.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: indexName })
+      );
+    });
+
+    it('skips deletion when the index does not exist', async () => {
       esClient.indices.exists.mockResolvedValue(false);
-      await service.deleteIndices();
+      await service.deleteIndex();
       expect(esClient.indices.delete).not.toHaveBeenCalled();
     });
 
@@ -87,7 +106,7 @@ describe('LeadIndexService', () => {
       esClient.indices.exists.mockResolvedValue(true);
       esClient.indices.delete.mockRejectedValue(new Error('deletion denied'));
 
-      await service.deleteIndices();
+      await service.deleteIndex();
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to delete lead index')

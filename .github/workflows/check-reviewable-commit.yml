@@ -1,0 +1,36 @@
+name: Check reviewable commit
+
+on:
+  workflow_call:
+    outputs:
+      should_review:
+        description: Whether the triggering commit should start a review.
+        value: ${{ jobs.check_reviewable_commit.outputs.should_review }}
+
+jobs:
+  check_reviewable_commit:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    outputs:
+      should_review: ${{ steps.check_commit.outputs.should_review }}
+    steps:
+      - name: Skip merge commits
+        id: check_commit
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            if (context.payload.action !== 'synchronize') {
+              core.setOutput('should_review', 'true');
+              return;
+            }
+
+            const head = context.payload.pull_request.head;
+            const { data: commit } = await github.rest.repos.getCommit({
+              owner: head.repo.owner.login,
+              repo: head.repo.name,
+              ref: head.sha,
+            });
+            const shouldReview = commit.parents.length <= 1;
+            core.info(shouldReview ? 'Reviewing code push.' : 'Skipping merge commit.');
+            core.setOutput('should_review', String(shouldReview));

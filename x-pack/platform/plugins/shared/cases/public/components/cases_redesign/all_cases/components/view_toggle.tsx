@@ -19,7 +19,7 @@ import type { ViewToggleId } from '../constants';
 
 const VIEW_TOGGLE_OPTIONS: EuiButtonGroupOptionProps[] = [
   { id: VIEW_TOGGLE_LIST_ID, iconType: 'listBullet', label: VIEW_TOGGLE_LIST_LABEL },
-  { id: VIEW_TOGGLE_TABLE_ID, iconType: 'tableDensityNormal', label: VIEW_TOGGLE_TABLE_LABEL },
+  { id: VIEW_TOGGLE_TABLE_ID, iconType: 'table', label: VIEW_TOGGLE_TABLE_LABEL },
 ];
 
 interface ViewToggleProps {
@@ -38,6 +38,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({ idSelected, onChange }) 
       onChange={handleChange}
       buttonSize="m"
       isIconOnly
+      data-test-subj="cases-view-toggle"
     />
   );
 };

@@ -14,35 +14,12 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
   DetectionScanProps,
-  EndpointLatencyProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
-  AgentToolDiscoveryWriteProps,
   AgentToolEventSearchProps,
 } from './types';
-
-const endpointLatencySchema: RootSchema<EndpointLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  endpoint: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Streams endpoint',
-    },
-  },
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
@@ -92,6 +69,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
       type: 'keyword',
       _meta: {
         description: 'The name of the Stream',
+      },
+    },
+    external_content_tool_continuations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Reasoning turns that contained external content and pending task tools and were correctly continued',
       },
     },
     tool_usage: {
@@ -180,6 +164,12 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
       type: 'long',
       _meta: {
         description: 'Existing features updated in this iteration',
+      },
+    },
+    features_remapped: {
+      type: 'long',
+      _meta: {
+        description: 'Features remapped to a previously known id in this iteration',
       },
     },
     input_tokens_used: {
@@ -369,7 +359,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
       description: 'Whether the event status update succeeded',
     },
   },
-  event_id: {
+  event_uuid: {
     type: 'keyword',
     _meta: {
       description: 'The identifier of the updated significant event',
@@ -456,29 +446,34 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
         'Wall-clock duration (ms) of the change-point scan read, including transport and parsing',
     },
   },
+  rules_requested: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed queries requested for the scan (all analysis profiles)',
+    },
+  },
   rules_scanned: {
     type: 'long',
     _meta: {
-      description: 'Number of distinct rules covered by the change-point scan',
+      description: 'Distinct rules that returned a change-point series bucket',
     },
   },
   critical_rule_count: {
     type: 'long',
     _meta: {
-      description: 'Rule-backed query count using the critical 1m cadence',
+      description: 'Rule-backed query count on the critical analysis profile',
     },
   },
   default_rule_count: {
     type: 'long',
     _meta: {
-      description: 'Rule-backed query count using the default 5m cadence',
+      description: 'Rule-backed query count on the default analysis profile',
     },
   },
   alerting_engine: {
     type: 'keyword',
     _meta: {
-      description:
-        'Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`',
+      description: 'Alerting engine backing the read; Significant Events always uses v2',
     },
   },
   alerts_source_index: {
@@ -490,13 +485,25 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   lookback: {
     type: 'keyword',
     _meta: {
-      description: 'The scan lookback window (e.g. `now-30m`)',
+      description: 'Critical analysis lookback duration (e.g. `now-40m`)',
     },
   },
   bucket_interval: {
     type: 'keyword',
     _meta: {
-      description: 'The change-point bucket interval (e.g. `30s`)',
+      description: 'Critical analysis outer bucket interval (e.g. `1m`)',
+    },
+  },
+  default_lookback: {
+    type: 'keyword',
+    _meta: {
+      description: 'Default analysis lookback duration (e.g. `now-125m`)',
+    },
+  },
+  default_bucket_interval: {
+    type: 'keyword',
+    _meta: {
+      description: 'Default analysis outer bucket interval (e.g. `5m`)',
     },
   },
   space_id: {
@@ -555,7 +562,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         description: 'Whether the investigation attachment succeeded',
       },
     },
-    event_id: {
+    event_uuid: {
       type: 'keyword',
       _meta: {
         description: 'The identifier of the significant event the investigation was attached to',
@@ -583,10 +590,10 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       description: 'Whether the workflow event write succeeded',
     },
   },
-  discovery_slug: {
+  event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The discovery episode slug associated with the written event',
+      description: 'The stable event id associated with the written event',
     },
   },
   status: {
@@ -647,11 +654,23 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       description: 'Whether the search included a stream_names filter',
     },
   },
-  state_filter: {
+  status_filter: {
     type: 'keyword',
     _meta: {
       description: 'The state filter applied to the search (open or closed)',
       optional: true,
+    },
+  },
+  view: {
+    type: 'keyword',
+    _meta: {
+      description: 'The requested event response view (compact or full)',
+    },
+  },
+  page: {
+    type: 'long',
+    _meta: {
+      description: 'The requested event search page',
     },
   },
   error_message: {
@@ -663,42 +682,8 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
-const agentToolDiscoveryWriteSchema: RootSchema<AgentToolDiscoveryWriteProps> = {
-  success: {
-    type: 'boolean',
-    _meta: { description: 'Whether the discovery write succeeded' },
-  },
-  kind: {
-    type: 'keyword',
-    _meta: {
-      description: 'The kind of discovery document written: discovery, clearance, or handled',
-    },
-  },
-  discovery_slug: {
-    type: 'keyword',
-    _meta: { description: 'The discovery episode slug' },
-  },
-  stream_names: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'A stream name' },
-    },
-    _meta: { description: 'The streams associated with the discovery' },
-  },
-  written: {
-    type: 'boolean',
-    _meta: { description: 'Whether a document was actually written (false when deduplicated)' },
-  },
-  error_message: {
-    type: 'text',
-    _meta: { description: 'Error message when the discovery write fails', optional: true },
-  },
-};
-
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
-  agentToolDiscoveryWriteSchema,
   agentToolEventCreateSchema,
   agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
@@ -708,7 +693,6 @@ export {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
-  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

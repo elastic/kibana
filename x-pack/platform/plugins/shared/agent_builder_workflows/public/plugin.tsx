@@ -6,8 +6,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { first } from 'rxjs';
 import type {
   AgentBuilderWorkflowsPluginSetup,
   AgentBuilderWorkflowsPluginStart,
@@ -28,23 +26,21 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    coreSetup.uiSettings
-      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-      .pipe(first((enabled) => enabled))
-      .subscribe(async () => {
-        const [[coreStart, depsStart], { registerWorkflowAttachmentRenderers }] = await Promise.all(
-          [coreSetup.getStartServices(), import('./attachment_types')]
-        );
-        const [telemetry, queryClient] = await Promise.all([
-          depsStart.workflowsManagement.getTelemetry(),
-          depsStart.workflowsManagement.getQueryClient(),
-        ]);
-        registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
-          core: coreStart,
-          telemetry,
-          queryClient,
-        });
+    void (async () => {
+      const [[coreStart, depsStart], { registerWorkflowAttachmentRenderers }] = await Promise.all([
+        coreSetup.getStartServices(),
+        import('./attachment_types'),
+      ]);
+      const [telemetry, queryClient] = await Promise.all([
+        depsStart.workflowsManagement.getTelemetry(),
+        depsStart.workflowsManagement.getQueryClient(),
+      ]);
+      registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
+        core: coreStart,
+        telemetry,
+        queryClient,
       });
+    })();
 
     return {};
   }

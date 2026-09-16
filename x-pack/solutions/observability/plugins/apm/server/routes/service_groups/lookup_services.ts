@@ -6,8 +6,9 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { LookupServicesResponse } from '@kbn/apm-api-shared';
+import type { ApmDataSourceWithSummary } from '@kbn/apm-types';
+import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -18,21 +19,23 @@ export async function lookupServices({
   start,
   end,
   maxNumberOfServices,
+  sources,
 }: {
   apmEventClient: APMEventClient;
   kuery: string;
   start: number;
   end: number;
   maxNumberOfServices: number;
+  sources: ApmDataSourceWithSummary[];
 }): Promise<LookupServicesResponse> {
+  const { source } = getPreferredBucketSizeAndDataSource({
+    sources,
+    bucketSizeInSeconds: (end - start) / 1000,
+  });
+  const { documentType, rollupInterval } = source;
   const response = await apmEventClient.search('lookup_services', {
     apm: {
-      events: [
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-        ProcessorEvent.span,
-        ProcessorEvent.error,
-      ],
+      sources: [{ documentType, rollupInterval }],
     },
     track_total_hits: false,
     size: 0,

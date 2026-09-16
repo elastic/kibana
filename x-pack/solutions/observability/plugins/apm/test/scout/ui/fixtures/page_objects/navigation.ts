@@ -15,7 +15,7 @@ export class NavigationPage {
   async gotoHome() {
     await this.page.goto(this.kbnUrl.app('home'));
     await this.globalSearchInput
-      .or(this.globalSearchRevealButton)
+      .or(this.globalSearchButton)
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
@@ -37,35 +37,26 @@ export class NavigationPage {
     return this.page.getByTestId('nav-search-input');
   }
 
-  // In serverless (project chrome style) the search input starts collapsed
-  // behind a reveal button and is only rendered once clicked. In classic
-  // chrome style the input is always rendered, so this button never appears.
-  public get globalSearchRevealButton() {
-    return this.page.getByTestId('nav-search-reveal');
+  public get globalSearchButton() {
+    return this.page.getByTestId('chromeNextGlobalHeaderSearchButton');
   }
 
   async searchGlobalNav(keyword: string) {
-    // The input and reveal button are mutually exclusive, so at most one of
-    // them is rendered at any given time.
-    await this.globalSearchInput
-      .or(this.globalSearchRevealButton)
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-
-    if (await this.globalSearchRevealButton.isVisible()) {
-      await this.globalSearchRevealButton.click();
+    if (!(await this.globalSearchInput.isVisible())) {
+      await this.globalSearchButton.click();
+      await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     }
 
-    await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.globalSearchInput.fill(keyword);
     await this.waitForSearchResults();
   }
 
   private get virtualizedSearchList() {
-    return this.page.locator('.navSearch__panel .euiSelectableList__list');
+    return this.page.locator('[data-test-subj="chromeNextSearchModal"] .euiSelectableList__list');
   }
 
   private get searchPanel() {
-    return this.page.locator('.navSearch__panel');
+    return this.page.locator('[data-test-subj="chromeNextSearchModal"]');
   }
 
   private async waitForSearchResults() {

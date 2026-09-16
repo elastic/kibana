@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import type { CasesPublicSetupDependencies } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../client/attachment_framework/unified_attachment_registry';
 import { registerCasesTriggerDefinitions } from './triggers';
@@ -13,7 +12,8 @@ import { registerCasesTriggerDefinitions } from './triggers';
 export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions'],
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
-  isCasesAttachmentsEnabled: boolean
+  isCasesAttachmentsEnabled: boolean,
+  isTemplatesEnabled: boolean
 ) {
   if (!workflowsExtensions) {
     return;
@@ -146,6 +146,14 @@ export function registerCasesSteps(
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
   );
+
+  // Docs-only public definition, gated on the same templates feature flag that gates the server
+  // handler's registration — the extended_fields surface only exists when the feature is on.
+  if (isTemplatesEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./simple_steps').then((m) => m.setExtendedFieldsStepDefinition)
+    );
+  }
 }
 
 export function registerCasesWorkflowTriggers(

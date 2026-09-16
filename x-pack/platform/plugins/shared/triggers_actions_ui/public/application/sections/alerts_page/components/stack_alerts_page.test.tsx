@@ -19,11 +19,17 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 
 jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const mockLoadRuleTypes = jest
   .mocked(getRuleTypes)
   .mockResolvedValue(Array.from(ruleTypesIndex.values()));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+const mockLoadInternalRuleTypes = jest
+  .mocked(getInternalRuleTypes)
+  .mockResolvedValue(Array.from(ruleTypesIndex.values()) as never);
 
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: [] });
@@ -73,6 +79,12 @@ describe('StackAlertsPage', () => {
     additionalServices: {},
   });
 
+  beforeEach(() => {
+    // Reset to the full list so tests that only override the external rule types
+    // API still receive the alert-authorized list from the internal endpoint.
+    mockLoadInternalRuleTypes.mockResolvedValue(Array.from(ruleTypesIndex.values()) as never);
+  });
+
   afterEach(() => {
     appMockRender.queryClient.clear();
     alertsTableQueryClient.clear();
@@ -89,9 +101,29 @@ describe('StackAlertsPage', () => {
 
   it('shows the missing permission prompt if the user is not allowed to read any rules', async () => {
     mockLoadRuleTypes.mockResolvedValue([]);
+    mockLoadInternalRuleTypes.mockResolvedValue([] as never);
     appMockRender.render(<StackAlertsPage />);
 
     expect(await screen.findByTestId('noPermissionPrompt')).toBeInTheDocument();
+  });
+
+  it('sources rule type ids from the internal endpoint for alerts-only users', async () => {
+    // The rule types API (rule-read) returns nothing, but the internal endpoint
+    // returns the alert-authorized rule types.
+    mockLoadRuleTypes.mockResolvedValue([]);
+    const core = coreMock.createStart();
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true },
+    };
+    const renderer = createAppMockRenderer({
+      additionalServices: { application: core.application },
+    });
+    renderer.render(<StackAlertsPage />);
+
+    const table = await screen.findByTestId('alertsTable');
+    const ruleTypeIds = JSON.parse(table.getAttribute('data-rule-type-ids') ?? '[]');
+    expect(ruleTypeIds.length).toBeGreaterThan(0);
   });
 
   it('renders the page when the user only has the Stack Alerts read capability', async () => {
@@ -126,5 +158,61 @@ describe('StackAlertsPage', () => {
     expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();
+  });
+
+  describe('alert details navigation based on observability access', () => {
+    // Independent of the observability-access gate under test: keep the page's own
+    // "authorized to read any rules" check satisfied so the alerts table renders.
+    beforeEach(() => {
+      mockLoadRuleTypes.mockResolvedValue(Array.from(ruleTypesIndex.values()));
+    });
+
+    const noObservabilityAccessCapabilities = (core: ReturnType<typeof coreMock.createStart>) => ({
+      ...core.application.capabilities,
+      navLinks: {
+        ...core.application.capabilities.navLinks,
+        apm: false,
+        metrics: false,
+        uptime: false,
+        synthetics: false,
+        slo: false,
+      },
+      logs: { show: false },
+      [STACK_ALERTS_ONLY_FEATURE_ID]: { show: false },
+      [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: false },
+    });
+
+    it('does not set alertDetailsNavigation when the user has no observability capabilities', async () => {
+      const core = coreMock.createStart();
+      core.application.capabilities = noObservabilityAccessCapabilities(core);
+      const renderer = createAppMockRenderer({
+        additionalServices: { application: core.application },
+      });
+      renderer.render(<StackAlertsPage />);
+
+      expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({ alertDetailsNavigation: undefined })
+      );
+    });
+
+    it('sets alertDetailsNavigation when the user has the observabilityAlerts capability', async () => {
+      const core = coreMock.createStart();
+      core.application.capabilities = {
+        ...noObservabilityAccessCapabilities(core),
+        [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: true },
+      };
+      const renderer = createAppMockRenderer({
+        additionalServices: { application: core.application },
+      });
+      renderer.render(<StackAlertsPage />);
+
+      expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+      expect(mockAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertDetailsNavigation: expect.objectContaining({ appId: 'observability' }),
+        })
+      );
+    });
   });
 });

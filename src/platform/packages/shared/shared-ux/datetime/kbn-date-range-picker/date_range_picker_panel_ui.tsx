@@ -294,7 +294,7 @@ export const PanelNavItem = ({
           {icon && <EuiIcon type={icon} size="m" aria-hidden="true" />}
           {children}
         </span>
-        <EuiIcon type="arrowRight" size="m" color="subdued" aria-hidden="true" />
+        <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
       </button>
     </li>
   );

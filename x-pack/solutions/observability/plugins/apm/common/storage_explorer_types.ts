@@ -8,6 +8,5 @@
 export {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
-  indexLifecyclePhaseRt,
   indexLifecyclePhaseSchema,
 } from '@kbn/apm-types';
