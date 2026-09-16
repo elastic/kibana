@@ -45,6 +45,7 @@ const makeCtx = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   config: { host: 'db.example.com', port: 3306, database: 'testdb' },
   networkSettings: makeNetworkSettings(),
   credential: makeCredential('tester', 'secret'),
+  platform: { resolveSrvHosts: jest.fn(), buildTlsOptions: jest.fn() },
   ...overrides,
 });
 
