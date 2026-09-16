@@ -696,13 +696,45 @@ describe('config validation', () => {
       expect(result.relay?.uiam).toEqual({ enabled: false });
     });
 
-    test('can be enabled on serverless', () => {
+    test('can be enabled on serverless when mTLS is configured', () => {
       const result = configSchema.validate(
-        { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+        {
+          relay: {
+            url: 'https://relay.test',
+            ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            uiam: { enabled: true },
+          },
+        },
         { serverless: true }
       );
 
       expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('rejects being enabled without mTLS configured', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: true }
+        )
+      ).toThrow(
+        '[relay]: must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set'
+      );
+    });
+
+    test('rejects being enabled with only a certificate configured', () => {
+      expect(() =>
+        configSchema.validate(
+          {
+            relay: {
+              url: 'https://relay.test',
+              ssl: { certificate: '/path/to/cert.pem' },
+              uiam: { enabled: true },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
     });
 
     test('is rejected outside serverless', () => {
