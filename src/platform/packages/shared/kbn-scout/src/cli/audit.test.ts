@@ -12,6 +12,7 @@ import Path from 'path';
 import { findPackageForPath } from '@kbn/repo-packages';
 import {
   extractPageObjectKeys,
+  extractPageObjectKeysOrThrow,
   fileConsumesKey,
   findScoutTestFiles,
   censusPageObjectConsumers,
@@ -34,6 +35,14 @@ describe('extractPageObjectKeys', () => {
 
   it('returns an empty array when the function is not found', () => {
     expect(extractPageObjectKeys('export const foo = 1;')).toEqual([]);
+  });
+});
+
+describe('extractPageObjectKeysOrThrow', () => {
+  it('throws instead of silently reporting zero keys', () => {
+    expect(() => extractPageObjectKeysOrThrow('export const foo = 1;', 'index.ts')).toThrow(
+      /found no 'key: createLazyPageObject/
+    );
   });
 });
 
@@ -86,7 +95,7 @@ describe('fileConsumesKey', () => {
 });
 
 describe('findScoutTestFiles', () => {
-  it('finds .ts files under test/scout* dirs, excluding node_modules and target', () => {
+  it('finds .ts files under test/scout* dirs and solution package src/playwright, excluding node_modules and target', () => {
     const files = findScoutTestFiles(FAKE_REPO_ROOT)
       .map((f) => Path.relative(FAKE_REPO_ROOT, f).split(Path.sep).join('/'))
       .sort();
@@ -95,6 +104,7 @@ describe('findScoutTestFiles', () => {
       [
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/spec_using_property.ts',
         'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/spec_using_destructure.ts',
+        'x-pack/solutions/fake/packages/kbn-scout-fake/src/playwright/page_objects/uses_core.ts',
       ].sort()
     );
   });
@@ -113,6 +123,7 @@ describe('censusPageObjectConsumers', () => {
     (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
+      if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
       return undefined;
     });
   });
@@ -123,7 +134,7 @@ describe('censusPageObjectConsumers', () => {
 
     expect(census).toEqual([
       { key: 'dashboard', fileCount: 2, modules: ['fake-plugin-a', 'fake-plugin-b'] },
-      { key: 'lens', fileCount: 1, modules: ['fake-plugin-b'] },
+      { key: 'lens', fileCount: 2, modules: ['@kbn/scout-fake', 'fake-plugin-b'] },
     ]);
   });
 });
@@ -133,6 +144,7 @@ describe('runAudit', () => {
     (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
+      if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
       return undefined;
     });
   });
@@ -141,7 +153,7 @@ describe('runAudit', () => {
     const census = runAudit(FAKE_REPO_ROOT, FAKE_PAGE_OBJECTS_INDEX);
     expect(census).toEqual([
       { key: 'dashboard', fileCount: 2, modules: ['fake-plugin-a', 'fake-plugin-b'] },
-      { key: 'lens', fileCount: 1, modules: ['fake-plugin-b'] },
+      { key: 'lens', fileCount: 2, modules: ['@kbn/scout-fake', 'fake-plugin-b'] },
     ]);
   });
 });

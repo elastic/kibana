@@ -35,6 +35,22 @@ export function extractPageObjectKeys(indexTsSource: string): string[] {
 }
 
 /**
+ * Same as `extractPageObjectKeys` but fails loudly when nothing matches, so a
+ * reshaped `createCorePageObjects` cannot make the audit silently report an
+ * empty census with exit code 0.
+ */
+export function extractPageObjectKeysOrThrow(indexTsSource: string, indexPath: string): string[] {
+  const keys = extractPageObjectKeys(indexTsSource);
+  if (keys.length === 0) {
+    throw new Error(
+      `scout audit: found no 'key: createLazyPageObject(...)' entries in ${indexPath}. ` +
+        `The regex in extractPageObjectKeys no longer matches createCorePageObjects; update it.`
+    );
+  }
+  return keys;
+}
+
+/**
  * A page object's fixture key is reached two ways in Scout specs/fixtures:
  * property access (`pageObjects.key`) and destructuring
  * (`const { key } = pageObjects`, including other keys alongside it). Both
@@ -44,11 +60,12 @@ export function extractPageObjectKeys(indexTsSource: string): string[] {
  * rather than `[^{}]` / `[^=]`): JS character classes match newlines, so an
  * unconstrained version spans the whole file and reports the word `dashboard`
  * inside a string literal as a consumer because `pageObjects` appears a few
- * hundred characters later. Counts feed promote/demote decisions, so
- * over-counting is worse than the known limitation this creates: a
- * destructure split across lines is missed. Forwarded-parameter access and
- * type-only references are likewise not covered; both are follow-up work on
- * the audit tracking issue.
+ * hundred characters later. A destructure split across lines is therefore
+ * missed. As of writing there are zero such destructures in the repo (347
+ * single-line ones), so this is a theoretical gap, not a measured one.
+ * Forwarded `pageObjects` parameters are caught because the callee still
+ * reads `pageObjects.<key>`. Type-only `PageObjects['key']` references are
+ * not counted.
  */
 export function fileConsumesKey(fileContent: string, key: string): boolean {
   const propertyAccess = new RegExp(`pageObjects\\.${key}\\b`);
@@ -58,7 +75,12 @@ export function fileConsumesKey(fileContent: string, key: string): boolean {
   return propertyAccess.test(fileContent) || destructure.test(fileContent);
 }
 
-const SCOUT_TEST_DIR_PATTERN = /(^|\/)test\/scout[^/]*(\/|$)/;
+// Consumers live in plugin suites (`test/scout*`) and in the solution Scout
+// packages (`kbn-scout-<solution>/src/playwright`), whose fixtures and page
+// objects call core page objects too. The core package itself
+// (`kbn-scout/src/playwright`) is not a consumer of its own keys and is
+// deliberately not matched.
+const SCOUT_TEST_DIR_PATTERN = /(^|\/)(test\/scout[^/]*|kbn-scout-[^/]+\/src\/playwright)(\/|$)/;
 // `__fixtures__` holds this command's own synthetic `test/scout*` tree, which
 // would otherwise be walked and counted as real consumers when the audit runs
 // on the repo root. `@kbn/repo-packages` skips `__fixtures__` when building the
@@ -66,9 +88,9 @@ const SCOUT_TEST_DIR_PATTERN = /(^|\/)test\/scout[^/]*(\/|$)/;
 const IGNORED_DIR_NAMES = new Set(['node_modules', 'target', '__fixtures__', '.git']);
 
 /**
- * Recursively lists every `.ts`/`.tsx` file under a `test/scout*` directory
- * anywhere below `rootDir`, skipping `node_modules`, `target`, `__fixtures__`
- * and `.git`.
+ * Recursively lists every `.ts`/`.tsx` file under a `test/scout*` directory or
+ * a solution Scout package's `src/playwright` anywhere below `rootDir`,
+ * skipping `node_modules`, `target`, `__fixtures__` and `.git`.
  */
 export function findScoutTestFiles(rootDir: string): string[] {
   const results: string[] = [];
@@ -151,7 +173,7 @@ export function censusPageObjectConsumers(
 
 export function runAudit(repoRoot: string, pageObjectsIndexPath: string) {
   const indexSource = Fs.readFileSync(pageObjectsIndexPath, 'utf8');
-  const pageObjectKeys = extractPageObjectKeys(indexSource);
+  const pageObjectKeys = extractPageObjectKeysOrThrow(indexSource, pageObjectsIndexPath);
   const scoutTestFiles = findScoutTestFiles(repoRoot);
   return censusPageObjectConsumers(repoRoot, scoutTestFiles, pageObjectKeys);
 }
@@ -162,8 +184,7 @@ export function runAudit(repoRoot: string, pageObjectsIndexPath: string) {
  * This is the first slice of the kbn-scout quality audit (a fixture-key
  * consumer census for `pageObjects.<key>`). It is deterministic fact-gathering
  * only: it does not judge whether a low or high count means an object should
- * move, merge, or stay. See the audit tracking issue for the planned
- * additions (duplicate class names, `page.components`/`apiServices` census).
+ * move, merge, or stay.
  *
  * Meant to be run by hand on a cadence, not in CI, so there is no check mode
  * and no baseline file: it reports and exits 0.
@@ -176,8 +197,9 @@ export const auditCmd: Command<void> = {
   Page objects are reached via the 'pageObjects' fixture, not via imports, so
   import-graph tools report every page object as unused. This command instead
   greps each page object's fixture key (property access and destructuring)
-  across every 'test/scout*' directory in the repo and attributes each
-  consuming file to its owning module.
+  across every 'test/scout*' directory and every solution Scout package's
+  'src/playwright' in the repo and attributes each consuming file to its
+  owning module.
 
   This is fact-gathering only. It reports counts; it does not decide whether
   an object should move, merge, or stay — see the kbn-scout placement policy
