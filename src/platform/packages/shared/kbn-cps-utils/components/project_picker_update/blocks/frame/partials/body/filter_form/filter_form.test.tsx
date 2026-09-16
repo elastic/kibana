@@ -21,8 +21,6 @@ import {
   type FilterExpressionValue,
 } from '../../../../../utils/filter_input_codec';
 
-jest.setTimeout(20000);
-
 const securityProject: CPSProject = {
   _id: 'project-security',
   _alias: 'Security',
@@ -53,6 +51,7 @@ const envStagingExpression = {
 
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
+const editingTypeSecurityKey = 'editing-type-security';
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -289,11 +288,15 @@ describe('ProjectPickerFilterForm', () => {
 
   it('clears a submit validation error when a field changes', async () => {
     const user = userEvent.setup();
-    renderForm({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    await fillFilterForm(user, { tagName: '_type', tagValue: 'security' });
+    renderForm(
+      {
+        filterExpressions: new Map([
+          ...createFilterExpressions([[typeSecurityExpression]]),
+          [editingTypeSecurityKey, { expression: typeSecurityExpression, enabled: true }],
+        ]),
+      },
+      { filterId: editingTypeSecurityKey }
+    );
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
