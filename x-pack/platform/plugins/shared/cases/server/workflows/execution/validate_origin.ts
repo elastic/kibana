@@ -26,7 +26,8 @@ interface AlertPair {
 }
 
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds`.
+ * Reads the (id, index) pairs from `inputs.event.alertIds` and rejects query-based alert
+ * selections, which cannot be proven to belong to the case before trigger preprocessing.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
  * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
@@ -35,7 +36,13 @@ interface AlertPair {
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
 export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
-  const { alertIds } = getRecord(inputs.event) ?? {};
+  const { alertIds, querySelection, triggerType } = getRecord(inputs.event) ?? {};
+
+  if (triggerType === 'alert' && querySelection != null) {
+    throw Boom.badRequest(
+      'Query-based alert selections are not supported when running workflows from cases.'
+    );
+  }
 
   if (alertIds === undefined || alertIds === null) {
     return [];

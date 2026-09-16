@@ -9,6 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { MAX_TRIGGER_EVENT_BYTES } from './fetch_event_documents';
 import { preprocessTriggerInputs } from './preprocess_trigger_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
@@ -155,12 +156,15 @@ describe('preprocessTriggerInputs', () => {
 
       const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
-      expect(mockEsClient.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'alert-1', _index: '.alerts-test-default' },
-          { _id: 'alert-2', _index: '.alerts-test-default' },
-        ],
-      });
+      expect(mockEsClient.mget).toHaveBeenCalledWith(
+        {
+          docs: [
+            { _id: 'alert-1', _index: '.alerts-test-default' },
+            { _id: 'alert-2', _index: '.alerts-test-default' },
+          ],
+        },
+        { maxResponseSize: MAX_TRIGGER_EVENT_BYTES }
+      );
 
       // Verify the transformed event structure
       expect(result.event).toBeDefined();

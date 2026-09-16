@@ -28,6 +28,8 @@ export interface FetchByQueryParams {
   index: string | string[];
   /** Upper bound on how many documents to expand. Defaults to `MAX_TRIGGER_EVENT_DOCS`. */
   maxDocs?: number;
+  /** Upper bound on accumulated document source bytes. Defaults to `MAX_TRIGGER_EVENT_BYTES`. */
+  maxBytes?: number;
   /** Number of documents to request per page. Defaults to `SEARCH_PAGE_SIZE`. */
   pageSize?: number;
 }
@@ -46,9 +48,16 @@ export interface FetchByQueryResult {
  * `@kbn/workflows` constant so the enforced limit and the UI's "first N" message stay in sync.
  */
 export const MAX_TRIGGER_EVENT_DOCS = MAX_RUN_WORKFLOW_DOCS;
+export const MAX_TRIGGER_EVENT_BYTES = 10 * 1024 * 1024;
 
 const SEARCH_PAGE_SIZE = 1000;
 const PIT_KEEP_ALIVE = '1m';
+
+const getDocumentSourceBytes = (source: Record<string, unknown>): number =>
+  Buffer.byteLength(JSON.stringify(source), 'utf8');
+
+const createSizeLimitError = (maxBytes: number): Error =>
+  new Error(`Trigger event document sources exceed the ${maxBytes} byte limit`);
 
 /**
  * Fetches full document sources for an explicit id selection via a single `mget`.
@@ -63,10 +72,19 @@ export async function fetchDocumentsByIds(
     return [];
   }
 
+  if (ids.length > MAX_TRIGGER_EVENT_DOCS) {
+    throw new Error(
+      `Trigger event selection cannot contain more than ${MAX_TRIGGER_EVENT_DOCS} document IDs`
+    );
+  }
+
   try {
-    const response = await esClient.mget<Record<string, unknown>>({
-      docs: ids.map(({ _id, _index }) => ({ _id, _index })),
-    });
+    const response = await esClient.mget<Record<string, unknown>>(
+      {
+        docs: ids.map(({ _id, _index }) => ({ _id, _index })),
+      },
+      { maxResponseSize: MAX_TRIGGER_EVENT_BYTES }
+    );
 
     const hits: RawDocumentHit[] = [];
     for (let i = 0; i < response.docs.length; i++) {
@@ -103,8 +121,11 @@ export async function fetchDocumentsByQuery(
 ): Promise<FetchByQueryResult> {
   const { query, index } = params;
   const maxDocs = params.maxDocs ?? MAX_TRIGGER_EVENT_DOCS;
+  const maxBytes = params.maxBytes ?? MAX_TRIGGER_EVENT_BYTES;
   const maxPageSize = params.pageSize ?? SEARCH_PAGE_SIZE;
   const hits: RawDocumentHit[] = [];
+  let sourceBytes = 0;
+  let scannedHits = 0;
   let total = 0;
   let pitId: string | undefined;
 
@@ -113,23 +134,41 @@ export async function fetchDocumentsByQuery(
     pitId = pitResponse.id;
 
     let searchAfter: SortResults | undefined;
-    while (hits.length < maxDocs) {
+    while (scannedHits < maxDocs) {
       if (!pitId) {
         break;
       }
-      const pageSize = Math.min(maxPageSize, maxDocs - hits.length);
+      const pageSize = Math.min(maxPageSize, maxDocs - scannedHits);
       const response: SearchResponse<Record<string, unknown>> = await esClient.search<
         Record<string, unknown>
-      >({
-        query,
-        size: pageSize,
-        track_total_hits: true,
-        // Newest first, so a capped selection keeps the most recent docs. `_shard_doc` is a
-        // stable tiebreaker only available with a point in time.
-        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _shard_doc: 'asc' }],
-        pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
-        ...(searchAfter ? { search_after: searchAfter } : {}),
-      });
+      >(
+        {
+          query,
+          size: pageSize,
+          allow_partial_search_results: false,
+          track_total_hits: searchAfter === undefined,
+          // Newest first, so a capped selection keeps the most recent docs. `_shard_doc` is a
+          // stable tiebreaker only available with a point in time.
+          sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _shard_doc: 'asc' }],
+          pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        },
+        { maxResponseSize: maxBytes }
+      );
+
+      // A point-in-time ID may change between requests; use the freshest one, including when
+      // rejecting an incomplete response, so the finally block closes the active context.
+      if (response.pit_id) {
+        pitId = response.pit_id;
+      }
+
+      if (response.timed_out || (response._shards?.failed ?? 0) > 0) {
+        throw new Error(
+          `Incomplete document query response (timed_out=${
+            response.timed_out ?? false
+          }, shards_failed=${response._shards?.failed ?? 0})`
+        );
+      }
 
       const totalHits = response.hits.total;
       total = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? total;
@@ -140,18 +179,19 @@ export async function fetchDocumentsByQuery(
       }
 
       for (const hit of pageHits) {
+        scannedHits++;
         if (hit._source) {
+          const hitSourceBytes = getDocumentSourceBytes(hit._source);
+          if (sourceBytes + hitSourceBytes > maxBytes) {
+            throw createSizeLimitError(maxBytes);
+          }
+          sourceBytes += hitSourceBytes;
           hits.push({
             _id: hit._id as string,
             _index: hit._index,
             _source: hit._source as Record<string, unknown>,
           });
         }
-      }
-
-      // A point-in-time ID may change between requests; use the freshest one.
-      if (response.pit_id) {
-        pitId = response.pit_id;
       }
 
       const lastHit = pageHits[pageHits.length - 1];
@@ -161,7 +201,7 @@ export async function fetchDocumentsByQuery(
       }
     }
 
-    return { hits, total, truncated: total > hits.length };
+    return { hits, total, truncated: total > scannedHits };
   } catch (error) {
     logger.error(
       `Failed to fetch documents by query: ${
