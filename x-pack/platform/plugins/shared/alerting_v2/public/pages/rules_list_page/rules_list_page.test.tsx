@@ -150,6 +150,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     enabled: true,
     metadata: {
       name: 'Rule One',
+      signature_id: 'test-sig-id',
       description: 'Monitors log errors',
       tags: ['prod'],
     },
@@ -168,7 +169,7 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[] },
+    metadata: { name: 'Rule Two', signature_id: 'test-sig-id', tags: [] as string[] },
     schedule: { every: '5m' },
     query: { base: 'FROM metrics-*' },
   }),
@@ -896,11 +897,11 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[] },
+          metadata: { name: 'Rule Three', signature_id: 'test-sig-id', tags: [] as string[] },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[] },
+          metadata: { name: 'Rule Four', signature_id: 'test-sig-id', tags: [] as string[] },
         }),
       ];
 

@@ -14,6 +14,7 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV5 } 
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV6 } from './v6';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV7 } from './v7';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV8 } from './v8';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV9 } from './v9';
 
 /** Attributes as stored up to model version 3, where artifacts carried `value: string`. */
 export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
@@ -27,8 +28,8 @@ export type RuleSavedObjectAttributesV4 = TypeOf<typeof ruleSavedObjectAttribute
 /** Introduced by model version 7. */
 export type RuleSavedObjectAttributesV5 = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
 
-/** Latest attributes shape, introduced by model version 10. */
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV8>;
+/** Latest attributes shape, introduced by model version 11. */
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV9>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
@@ -39,6 +40,7 @@ export {
   ruleSavedObjectAttributesSchemaV6,
   ruleSavedObjectAttributesSchemaV7,
   ruleSavedObjectAttributesSchemaV8,
+  ruleSavedObjectAttributesSchemaV9,
 };
 
 /**
@@ -46,10 +48,9 @@ export {
  *
  * `fromBuilderManifest` uses this to build the forward-compatibility schema for
  * every fold line. Update this alias whenever a new versioned attributes schema
- * is created (e.g. v5 for identity/source/ownership fields), so that all
- * existing and future fold lines pick up the new schema automatically without
- * needing individual call-site updates.
+ * is created, so that all existing and future fold lines pick up the new schema
+ * automatically without needing individual call-site updates.
  *
  * Ref: rule-data-migration.md "Rollback behavior"
  */
-export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV4;
+export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV9;
