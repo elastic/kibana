@@ -6,220 +6,160 @@
  */
 
 import {
+  EuiDescribedFormGroup,
   EuiFieldText,
+  EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSpacer,
-  EuiSplitPanel,
-  EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
-import { DispatchSection } from './components/dispatch_section';
-import { MatcherInput } from './components/matcher_input';
-import { QuickFilters } from './components/quick_filters';
-import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
-import { TagsInput } from './components/tags_input';
+import React, { useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { ClassicNotificationControlsSection } from './components/classic_notification_controls_section';
+import { NotificationControlsSection } from './components/notification_controls_section';
+import { PolicyScopeSection } from './components/policy_scope_section';
+import {
+  ActionPolicyPrototypeToggle,
+  type ActionPolicyPrototypeView,
+} from './components/rule_tags_prototype_toggle';
 import { WorkflowSelector } from './components/workflow_selector';
+import { optionalLabel } from './form_labels';
 import type { ActionPolicyFormState } from './types';
 
-const optionalLabel = (
-  <EuiText color="subdued" size="xs">
-    {i18n.translate('xpack.alertingV2.actionPolicy.form.optionalLabel', {
-      defaultMessage: 'Optional',
-    })}
-  </EuiText>
-);
+const FormSectionDivider = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        && {
+          margin-block: ${euiTheme.size.xl};
+        }
+      `}
+    >
+      <EuiHorizontalRule margin="none" />
+    </div>
+  );
+};
 
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const matcher = useWatch({ control, name: 'matcher' });
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
+  const [prototypeView, setPrototypeView] = useState<ActionPolicyPrototypeView>('with_tags');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const handlePrototypeViewChange = (view: ActionPolicyPrototypeView) => {
+    setPrototypeView(view);
+    if (view === 'empty') {
+      setSelectedTags([]);
+    }
+  };
+
+  const showEnhancedNotificationControls = prototypeView === 'notification_controls';
 
   return (
-    <>
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
+    <EuiForm component="div" fullWidth data-test-subj="actionPolicyForm">
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
-                defaultMessage="Policy name and description"
+                defaultMessage="Policy details"
               />
             </h3>
           </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.basicInfo.description"
-              defaultMessage="Define the name and description for this policy"
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <Controller
-            name="name"
-            control={control}
-            rules={{
-              required: i18n.translate('xpack.alertingV2.actionPolicy.form.name.required', {
-                defaultMessage: 'Name is required.',
-              }),
-            }}
-            render={({ field: { ref, ...field }, fieldState: { error } }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.name', {
-                  defaultMessage: 'Name',
-                })}
+        }
+        description={
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.basicInfo.description"
+            defaultMessage="Name and describe this policy."
+          />
+        }
+      >
+        <Controller
+          name="name"
+          control={control}
+          rules={{
+            required: i18n.translate('xpack.alertingV2.actionPolicy.form.name.required', {
+              defaultMessage: 'Name is required.',
+            }),
+          }}
+          render={({ field: { ref, ...field }, fieldState: { error } }) => (
+            <EuiFormRow
+              label={i18n.translate('xpack.alertingV2.actionPolicy.form.name', {
+                defaultMessage: 'Name',
+              })}
+              fullWidth
+              isInvalid={!!error}
+              error={error?.message}
+            >
+              <EuiFieldText
+                {...field}
+                inputRef={ref}
                 fullWidth
                 isInvalid={!!error}
-                error={error?.message}
-              >
-                <EuiFieldText
-                  {...field}
-                  inputRef={ref}
-                  fullWidth
-                  isInvalid={!!error}
-                  data-test-subj="nameInput"
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.name.placeholder',
-                    { defaultMessage: 'Add policy name' }
-                  )}
-                />
-              </EuiFormRow>
-            )}
-          />
-          <Controller
-            name="description"
-            control={control}
-            render={({ field: { ref, ...field } }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.description', {
-                  defaultMessage: 'Description',
+                data-test-subj="nameInput"
+                placeholder={i18n.translate('xpack.alertingV2.actionPolicy.form.name.placeholder', {
+                  defaultMessage: 'Add policy name',
                 })}
-                labelAppend={optionalLabel}
-                fullWidth
-              >
-                <EuiTextArea
-                  {...field}
-                  inputRef={ref}
-                  fullWidth
-                  data-test-subj="descriptionInput"
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.description.placeholder',
-                    { defaultMessage: 'Add policy description' }
-                  )}
-                  rows={3}
-                />
-              </EuiFormRow>
-            )}
-          />
-          <Controller
-            name="tags"
-            control={control}
-            render={({ field }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.tags', {
-                  defaultMessage: 'Tags',
-                })}
-                labelAppend={optionalLabel}
-                fullWidth
-              >
-                <TagsInput value={field.value} onChange={field.onChange} />
-              </EuiFormRow>
-            )}
-          />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-
-      <EuiSpacer size="m" />
-
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
-                defaultMessage="Policy scope"
               />
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-              defaultMessage="Define which alerts this policy applies to."
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <Controller
-            name="matcher"
-            control={control}
-            render={({ field }) => (
-              <>
-                <QuickFilters matcher={field.value} onChange={field.onChange} />
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                    defaultMessage: 'Match conditions',
-                  })}
-                  labelAppend={optionalLabel}
-                  helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
-                    defaultMessage:
-                      'A KQL expression that defines which alert episodes meet the conditions for this policy. Leave empty to apply the policy to all episodes in the space.',
-                  })}
-                  fullWidth
-                >
-                  <MatcherInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    fullWidth
-                    data-test-subj="matcherInput"
-                    dataFieldNames={dataFieldNames}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                      {
-                        defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
-                      }
-                    )}
-                  />
-                </EuiFormRow>
-              </>
-            )}
-          />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-
-      <EuiSpacer size="m" />
-
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.form.dispatch.title"
-                defaultMessage="Notification controls"
+            </EuiFormRow>
+          )}
+        />
+        <Controller
+          name="description"
+          control={control}
+          render={({ field: { ref, ...field } }) => (
+            <EuiFormRow
+              label={i18n.translate('xpack.alertingV2.actionPolicy.form.description', {
+                defaultMessage: 'Description',
+              })}
+              labelAppend={optionalLabel}
+              fullWidth
+            >
+              <EuiTextArea
+                {...field}
+                inputRef={ref}
+                fullWidth
+                data-test-subj="descriptionInput"
+                placeholder={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.form.description.placeholder',
+                  { defaultMessage: 'Add policy description' }
+                )}
+                rows={3}
               />
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.dispatch.description"
-              defaultMessage="Controls how matching episodes are grouped and how often notifications are sent."
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <DispatchSection />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
+            </EuiFormRow>
+          )}
+        />
+      </EuiDescribedFormGroup>
 
-      <EuiSpacer size="m" />
+      <FormSectionDivider />
 
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
+      <PolicyScopeSection
+        selectedTags={selectedTags}
+        onChangeTags={setSelectedTags}
+        prototypeView={prototypeView}
+      />
+
+      <FormSectionDivider />
+
+      {showEnhancedNotificationControls ? (
+        <NotificationControlsSection />
+      ) : (
+        <ClassicNotificationControlsSection />
+      )}
+
+      <FormSectionDivider />
+
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
@@ -228,19 +168,23 @@ export const ActionPolicyForm = () => {
               />
             </h3>
           </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.destination.description"
-              defaultMessage="Select the workflows that should be triggered when dispatches are sent."
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <WorkflowSelector />
-          <EuiSpacer size="m" />
-          <SimpleWorkflowBuilder />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-    </>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.destination.description"
+            defaultMessage="Select the workflows that run when dispatches are sent."
+          />
+        }
+      >
+        <WorkflowSelector />
+      </EuiDescribedFormGroup>
+
+      <EuiSpacer size="xxl" />
+
+      <ActionPolicyPrototypeToggle
+        selectedView={prototypeView}
+        onChange={handlePrototypeViewChange}
+      />
+    </EuiForm>
   );
 };

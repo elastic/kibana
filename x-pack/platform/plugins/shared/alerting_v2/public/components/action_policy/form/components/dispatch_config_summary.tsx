@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { GROUPING_MODE_HELP_TEXT } from '../constants';
+import { FormSectionSummary } from './form_section_summary';
 
 interface DispatchConfigSummaryProps {
   groupingMode: GroupingMode;
@@ -51,48 +54,58 @@ const formatInterval = (raw: string): string => {
   }
 };
 
+const renderFieldList = (fields: string[]) => (
+  <>
+    {fields.map((field, index) => (
+      <React.Fragment key={field}>
+        {index > 0 ? ', ' : null}
+        <EuiCode>{field}</EuiCode>
+      </React.Fragment>
+    ))}
+  </>
+);
+
 const getDispatchSummary = ({
   groupingMode,
   groupBy,
   throttleStrategy,
   throttleInterval,
-}: DispatchConfigSummaryProps): string => {
+}: DispatchConfigSummaryProps): React.ReactNode => {
   const interval = formatInterval(throttleInterval);
-  const fields = groupBy.join(', ');
+  const fields = renderFieldList(groupBy);
 
   if (groupingMode === 'per_episode') {
     switch (throttleStrategy) {
       case 'on_status_change':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChange',
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.perAlert.statusChange',
           {
-            defaultMessage:
-              'Sends one notification when an episode opens and one when it recovers.',
+            defaultMessage: 'Sends alert data when each alert opens and when it recovers.',
           }
         );
       case 'per_status_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeNoInterval',
+            'xpack.alertingV2.actionPolicy.form.dispatchSummary.perAlert.statusChangeNoInterval',
             {
-              defaultMessage: 'Sends a notification on status change.',
+              defaultMessage: 'Sends alert data on status change, then repeats while active.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeRepeat',
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.perAlert.statusChangeRepeat',
           {
             defaultMessage:
-              'Sends a notification on status change and repeats every {interval} while the episode remains active.',
+              'Sends alert data on status change, then every {interval} while the alert stays active.',
             values: { interval },
           }
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.perAlert.everyEvaluation',
           {
             defaultMessage:
-              'Sends a notification for every rule evaluation. No limit on notification frequency.',
+              'Sends alert data on every rule evaluation. Use sparingly, with no frequency limit.',
           }
         );
     }
@@ -100,34 +113,36 @@ const getDispatchSummary = ({
 
   if (groupingMode === 'per_field') {
     if (groupBy.length === 0) {
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.noFields', {
-        defaultMessage: 'Select a field in Group by to configure group notifications.',
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.noFields', {
+        defaultMessage: 'Add a field below to finish this combined send setup.',
       });
     }
 
     switch (throttleStrategy) {
       case 'time_interval':
         if (!interval) {
-          return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttleNoInterval',
-            {
-              defaultMessage: 'Sends a notification for each group sharing values in {fields}.',
-              values: { fields },
-            }
+          return (
+            <FormattedMessage
+              id="xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.groupNoInterval"
+              defaultMessage="Combines alerts that share {fields} into one send per unique value."
+              values={{ fields }}
+            />
           );
         }
-        return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttle', {
-          defaultMessage:
-            'Sends at most one notification every {interval} for each group sharing values in {fields}.',
-          values: { fields, interval },
-        });
+        return (
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.groupThrottle"
+            defaultMessage="Combines alerts that share {fields} into one send per unique value, at most every {interval}."
+            values={{ fields, interval }}
+          />
+        );
       case 'every_time':
-        return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.everyEvaluation',
-          {
-            defaultMessage:
-              'Sends a notification for each group on every rule evaluation. No limit on notification frequency.',
-          }
+        return (
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.groupEveryEvaluation"
+            defaultMessage="Combines alerts that share {fields} into one send per unique value on every rule evaluation."
+            values={{ fields }}
+          />
         );
     }
   }
@@ -137,57 +152,48 @@ const getDispatchSummary = ({
       case 'time_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttleNoInterval',
+            'xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.allNoInterval',
             {
-              defaultMessage: 'Combines all matching episodes into one notification.',
+              defaultMessage: 'Combines matching alerts into a single send.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle',
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.allThrottle',
           {
-            defaultMessage:
-              'Combines all matching episodes into one notification at most every {interval}.',
+            defaultMessage: 'Combines matching alerts into a single send at most every {interval}.',
             values: { interval },
           }
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.combined.allEveryEvaluation',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
+              'Combines matching alerts into a single send on every rule evaluation.',
           }
         );
     }
   }
 
-  return '';
+  return null;
 };
 
 export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
   const summary = getDispatchSummary(props);
+  const modeHelp = GROUPING_MODE_HELP_TEXT[props.groupingMode];
 
-  if (!summary) return null;
+  if (!summary && !modeHelp) return null;
 
   return (
-    <EuiPanel
-      color="subdued"
-      paddingSize="m"
-      hasBorder={false}
+    <FormSectionSummary
+      preamble={
+        modeHelp ? <span data-test-subj="dispatchConfigModeHelp">{modeHelp}</span> : undefined
+      }
       data-test-subj="dispatchConfigCallout"
+      textTestSubj="dispatchConfigSummaryText"
     >
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.title', {
-            defaultMessage: 'Notification summary',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued" data-test-subj="dispatchConfigSummaryText">
-        {summary}
-      </EuiText>
-    </EuiPanel>
+      {summary}
+    </FormSectionSummary>
   );
 };

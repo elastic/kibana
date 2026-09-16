@@ -26,10 +26,34 @@ const renderSummary = (overrides: {
   );
 
 describe('DispatchConfigSummary', () => {
-  it('renders the title', () => {
+  it('renders without a section title', () => {
     renderSummary({});
 
-    expect(screen.getByText('Notification summary')).toBeDefined();
+    expect(screen.queryByText('What happens')).toBeNull();
+  });
+
+  it('includes demoted mode help for Per alert', () => {
+    renderSummary({ groupingMode: 'per_episode' });
+
+    expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
+      'Per alert. Best when you need visibility into each alert separately.'
+    );
+  });
+
+  it('includes demoted mode help for Combined with group-by', () => {
+    renderSummary({ groupingMode: 'per_field', throttleStrategy: 'time_interval' });
+
+    expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
+      'Combined. Best when many related alerts should share one send per field value, for example per host or service.'
+    );
+  });
+
+  it('includes demoted mode help for Combined without group-by', () => {
+    renderSummary({ groupingMode: 'all', throttleStrategy: 'time_interval' });
+
+    expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
+      'Combined. Best for periodic roll-ups when individual alerts are not needed.'
+    );
   });
 
   describe('per_episode mode', () => {
@@ -37,7 +61,7 @@ describe('DispatchConfigSummary', () => {
       renderSummary({ groupingMode: 'per_episode', throttleStrategy: 'on_status_change' });
 
       expect(
-        screen.getByText('Sends one notification when an episode opens and one when it recovers.')
+        screen.getByText('Sends alert data when each alert opens and when it recovers.')
       ).toBeDefined();
     });
 
@@ -50,7 +74,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Sends a notification on status change and repeats every 5 minutes while the episode remains active.'
+          'Sends alert data on status change, then every 5 minutes while the alert stays active.'
         )
       ).toBeDefined();
     });
@@ -62,7 +86,9 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(screen.getByText('Sends a notification on status change.')).toBeDefined();
+      expect(
+        screen.getByText('Sends alert data on status change, then repeats while active.')
+      ).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
@@ -70,13 +96,13 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Sends a notification for every rule evaluation. No limit on notification frequency.'
+          'Sends alert data on every rule evaluation. Use sparingly, with no frequency limit.'
         )
       ).toBeDefined();
     });
   });
 
-  describe('per_field (group) mode', () => {
+  describe('per_field (combined group) mode', () => {
     it('shows prompt when no group-by fields are set', () => {
       renderSummary({
         groupingMode: 'per_field',
@@ -85,11 +111,11 @@ describe('DispatchConfigSummary', () => {
       });
 
       expect(
-        screen.getByText('Select a field in Group by to configure group notifications.')
+        screen.getByText('Add a field below to finish this combined send setup.')
       ).toBeDefined();
     });
 
-    it('shows throttle summary with fields', () => {
+    it('shows throttle summary with fields in code', () => {
       renderSummary({
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
@@ -97,11 +123,11 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '10m',
       });
 
-      expect(
-        screen.getByText(
-          'Sends at most one notification every 10 minutes for each group sharing values in host.name, service.name.'
-        )
-      ).toBeDefined();
+      expect(screen.getByTestId('dispatchConfigSummaryText')).toHaveTextContent(
+        'Combines alerts that share host.name, service.name into one send per unique value, at most every 10 minutes.'
+      );
+      expect(screen.getByText('host.name').closest('code')).toBeTruthy();
+      expect(screen.getByText('service.name').closest('code')).toBeTruthy();
     });
 
     it('shows throttle summary without interval when empty', () => {
@@ -112,9 +138,9 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(
-        screen.getByText('Sends a notification for each group sharing values in host.name.')
-      ).toBeDefined();
+      expect(screen.getByTestId('dispatchConfigSummaryText')).toHaveTextContent(
+        'Combines alerts that share host.name into one send per unique value.'
+      );
     });
 
     it('shows every evaluation summary with fields', () => {
@@ -124,15 +150,13 @@ describe('DispatchConfigSummary', () => {
         throttleStrategy: 'every_time',
       });
 
-      expect(
-        screen.getByText(
-          'Sends a notification for each group on every rule evaluation. No limit on notification frequency.'
-        )
-      ).toBeDefined();
+      expect(screen.getByTestId('dispatchConfigSummaryText')).toHaveTextContent(
+        'Combines alerts that share host.name into one send per unique value on every rule evaluation.'
+      );
     });
   });
 
-  describe('all (digest) mode', () => {
+  describe('all (combined) mode', () => {
     it('shows throttle summary', () => {
       renderSummary({
         groupingMode: 'all',
@@ -141,9 +165,7 @@ describe('DispatchConfigSummary', () => {
       });
 
       expect(
-        screen.getByText(
-          'Combines all matching episodes into one notification at most every 1 hour.'
-        )
+        screen.getByText('Combines matching alerts into a single send at most every 1 hour.')
       ).toBeDefined();
     });
 
@@ -154,9 +176,7 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(
-        screen.getByText('Combines all matching episodes into one notification.')
-      ).toBeDefined();
+      expect(screen.getByText('Combines matching alerts into a single send.')).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
@@ -164,7 +184,7 @@ describe('DispatchConfigSummary', () => {
 
       expect(
         screen.getByText(
-          'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.'
+          'Combines matching alerts into a single send on every rule evaluation.'
         )
       ).toBeDefined();
     });
@@ -179,7 +199,7 @@ describe('DispatchConfigSummary', () => {
 
     expect(
       screen.getByText(
-        'Sends a notification on status change and repeats every 30 seconds while the episode remains active.'
+        'Sends alert data on status change, then every 30 seconds while the alert stays active.'
       )
     ).toBeDefined();
   });

@@ -8,16 +8,16 @@
 import { getGroupingModeLabel, getThrottleStrategyLabel } from './labels';
 
 describe('getGroupingModeLabel', () => {
-  it('returns the Episode label for per_episode', () => {
-    expect(getGroupingModeLabel('per_episode')).toBe('Episode');
+  it('returns the Per alert label for per_episode', () => {
+    expect(getGroupingModeLabel('per_episode')).toBe('Per alert');
   });
 
-  it('returns the Group label for per_field', () => {
-    expect(getGroupingModeLabel('per_field')).toBe('Group');
+  it('returns the Combined label for per_field', () => {
+    expect(getGroupingModeLabel('per_field')).toBe('Combined');
   });
 
-  it('returns the Digest label for all', () => {
-    expect(getGroupingModeLabel('all')).toBe('Digest');
+  it('returns the Combined label for all', () => {
+    expect(getGroupingModeLabel('all')).toBe('Combined');
   });
 
   it('returns the fallback for null or undefined', () => {
@@ -33,16 +33,16 @@ describe('getThrottleStrategyLabel', () => {
 
   it('returns the per-episode label for per_status_interval when mode is per_episode', () => {
     expect(getThrottleStrategyLabel('per_status_interval', 'per_episode')).toBe(
-      'On status change + repeat at interval'
+      'On change, then repeat'
     );
   });
 
   it('returns the aggregate label for time_interval when mode is all', () => {
-    expect(getThrottleStrategyLabel('time_interval', 'all')).toBe('At most once every...');
+    expect(getThrottleStrategyLabel('time_interval', 'all')).toBe('At most once every');
   });
 
   it('returns the aggregate label for time_interval when mode is per_field', () => {
-    expect(getThrottleStrategyLabel('time_interval', 'per_field')).toBe('At most once every...');
+    expect(getThrottleStrategyLabel('time_interval', 'per_field')).toBe('At most once every');
   });
 
   it('returns the per-episode every-time label when mode is per_episode', () => {

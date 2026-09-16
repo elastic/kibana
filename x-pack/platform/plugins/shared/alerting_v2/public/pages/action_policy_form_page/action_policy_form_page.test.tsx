@@ -34,6 +34,53 @@ jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
+jest.mock('@kbn/app-header', () => ({
+  APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle', back: 'appHeaderBack' },
+  AppHeader: ({
+    title,
+    menu,
+    back,
+  }: {
+    title: string;
+    menu?: {
+      primaryActionItem?: {
+        label: string;
+        testId?: string;
+        run?: () => void;
+        disableButton?: boolean;
+      };
+    };
+    back?: {
+      label: string;
+      href: string;
+      onClick?: (event: { preventDefault: () => void }) => void;
+    };
+  }) => (
+    <>
+      <h1 data-test-subj="appHeaderTitle">{title}</h1>
+      {back ? (
+        <a
+          href={back.href}
+          data-test-subj="appHeaderBack"
+          onClick={(event) => back.onClick?.(event)}
+        >
+          {back.label}
+        </a>
+      ) : null}
+      {menu?.primaryActionItem ? (
+        <button
+          type="button"
+          data-test-subj={menu.primaryActionItem.testId ?? 'submitButton'}
+          onClick={menu.primaryActionItem.run}
+          disabled={menu.primaryActionItem.disableButton}
+        >
+          {menu.primaryActionItem.label}
+        </button>
+      ) : null}
+    </>
+  ),
+}));
+
 jest.mock('@kbn/core-di-browser', () => {
   return {
     useService: jest.fn((token: unknown) => {
@@ -185,8 +232,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: 'pageTitle',
-  cancelButton: 'cancelButton',
+  pageTitle: 'appHeaderTitle',
+  cancelButton: 'appHeaderBack',
   submitButton: 'submitButton',
   nameInput: 'nameInput',
   descriptionInput: 'descriptionInput',

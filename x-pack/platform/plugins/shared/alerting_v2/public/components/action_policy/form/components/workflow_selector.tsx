@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
-import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchWorkflows } from '../../../../hooks/use_fetch_workflows';
 import type { ActionPolicyFormState } from '../types';
 
@@ -21,6 +32,108 @@ interface SelectedWorkflow {
   id: string;
   name: string;
 }
+
+const WORKFLOW_OPTION_ROW_HEIGHT = 64;
+
+const getPrototypeIcons = (
+  workflow: WorkflowListItemDto
+): { triggers: string[]; steps: string[] } => {
+  const triggersFromDefinition =
+    workflow.definition?.triggers
+      ?.map((trigger) => {
+        if (trigger.type === 'manual') return 'play';
+        if (trigger.type === 'scheduled') return 'clock';
+        return 'bolt';
+      })
+      .filter(Boolean) ?? [];
+
+  const stepsFromDefinition =
+    workflow.definition?.steps
+      ?.map((step) => {
+        const type = 'type' in step ? String(step.type) : '';
+        if (type.includes('email')) return 'email';
+        if (type.includes('slack')) return 'logoSlack';
+        if (type.includes('webhook') || type.includes('http')) return 'link';
+        return 'gear';
+      })
+      .filter(Boolean) ?? [];
+
+  if (triggersFromDefinition.length > 0 || stepsFromDefinition.length > 0) {
+    return {
+      triggers: triggersFromDefinition.slice(0, 3),
+      steps: stepsFromDefinition.slice(0, 4),
+    };
+  }
+
+  // Prototype fallback when list payloads omit definition details.
+  const name = workflow.name.toLowerCase();
+  return {
+    triggers: ['bolt'],
+    steps: name.includes('slack')
+      ? ['logoSlack']
+      : name.includes('email')
+      ? ['email']
+      : name.includes('pager')
+      ? ['bell']
+      : ['gear', 'logoSlack'],
+  };
+};
+
+const WorkflowOptionContent = ({ workflow }: { workflow: WorkflowListItemDto }) => {
+  const { triggers, steps } = getPrototypeIcons(workflow);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>{workflow.name}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      {workflow.description ? (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {workflow.description}
+          </EuiText>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          {triggers.map((icon, index) => (
+            <EuiFlexItem grow={false} key={`trigger-${icon}-${index}`}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.form.destination.workflowTriggerIcon',
+                  { defaultMessage: 'Trigger' }
+                )}
+              >
+                <EuiIcon type={icon} size="m" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ))}
+          {triggers.length > 0 && steps.length > 0 ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                |
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+          {steps.map((icon, index) => (
+            <EuiFlexItem grow={false} key={`step-${icon}-${index}`}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.form.destination.workflowStepIcon',
+                  { defaultMessage: 'Step' }
+                )}
+              >
+                <EuiIcon type={icon} size="m" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const WorkflowSelector = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
@@ -50,10 +163,14 @@ export const WorkflowSelector = () => {
     );
   }, [destinations, workflowsData, selectedWorkflows.length]);
 
-  const workflowOptions = (workflowsData?.results ?? []).map((w) => ({
-    label: w.name,
-    value: w.id,
-  }));
+  const workflowComboOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
+    return (workflowsData?.results ?? []).map((workflow) => ({
+      label: workflow.name,
+      value: workflow.id,
+      'data-test-subj': `workflowOption-${workflow.id}`,
+      dropdownDisplay: <WorkflowOptionContent workflow={workflow} />,
+    }));
+  }, [workflowsData?.results]);
 
   if (!isWorkflowsEnabled) {
     const settingsUrl = application.getUrlForApp('management', {
@@ -90,8 +207,6 @@ export const WorkflowSelector = () => {
     );
   }
 
-  const createWorkflowUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path: '/create' });
-
   return (
     <Controller
       name="destinations"
@@ -112,18 +227,6 @@ export const WorkflowSelector = () => {
           fullWidth
           isInvalid={!!error}
           error={error?.message}
-          labelAppend={
-            <EuiLink
-              href={createWorkflowUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-test-subj="createWorkflowLink"
-            >
-              {i18n.translate('xpack.alertingV2.actionPolicy.form.destination.createWorkflow', {
-                defaultMessage: 'Create a workflow',
-              })}
-            </EuiLink>
-          }
         >
           <EuiComboBox
             fullWidth
@@ -143,7 +246,8 @@ export const WorkflowSelector = () => {
                 options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
               );
             }}
-            options={workflowOptions}
+            options={workflowComboOptions}
+            rowHeight={WORKFLOW_OPTION_ROW_HEIGHT}
           />
         </EuiFormRow>
       )}
