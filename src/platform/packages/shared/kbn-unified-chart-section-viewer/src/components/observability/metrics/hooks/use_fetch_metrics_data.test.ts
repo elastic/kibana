@@ -79,7 +79,10 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
-import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE, METRICS_PROFILE_TELEMETRY_NAME } from '../telemetry/constants';
+import {
+  METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+  METRICS_PROFILE_TELEMETRY_NAME,
+} from '../telemetry/constants';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
