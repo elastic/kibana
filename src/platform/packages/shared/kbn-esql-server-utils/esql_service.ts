@@ -29,6 +29,14 @@ export interface EsqlServiceOptions {
   client: ElasticsearchClient;
 }
 
+const appendColumnsProbeLimit = (esqlQuery: string): string => {
+  const query = esqlQuery.trim();
+  if (query.length === 0) {
+    return query;
+  }
+  return /\|\s*LIMIT\s+0\s*$/i.test(query) ? query : `${query} | LIMIT 0`;
+};
+
 export class EsqlService {
   constructor(public readonly options: EsqlServiceOptions) {}
 
@@ -308,7 +316,7 @@ export class EsqlService {
     const { client } = this.options;
 
     const response = await client.esql.query({
-      query: `${esqlQuery} | LIMIT 0`,
+      query: appendColumnsProbeLimit(esqlQuery),
       format: 'json',
     });
 

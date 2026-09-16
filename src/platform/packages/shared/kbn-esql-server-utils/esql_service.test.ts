@@ -114,3 +114,50 @@ describe('EsqlService.getAllIndices', () => {
     });
   });
 });
+
+describe('EsqlService.getColumns', () => {
+  it('appends one LIMIT 0 suffix and returns normalized column metadata', async () => {
+    const query = jest.fn().mockResolvedValue({
+      columns: [
+        { name: 'bucket', type: 'date' },
+        { name: 'doc_count', type: 'long' },
+      ],
+      values: [[0, 1]],
+    });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+
+    await expect(service.getColumns('  FROM logs-* | STATS count = COUNT(*)  ')).resolves.toEqual([
+      { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
+      { name: 'doc_count', type: 'long', hasConflict: false, userDefined: false },
+    ]);
+
+    expect(query).toHaveBeenCalledWith({
+      query: 'FROM logs-* | STATS count = COUNT(*) | LIMIT 0',
+      format: 'json',
+    });
+  });
+
+  it('does not append a duplicate LIMIT 0 suffix', async () => {
+    const query = jest.fn().mockResolvedValue({ columns: [] });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+
+    await service.getColumns('FROM logs-* | LIMIT 0');
+
+    expect(query).toHaveBeenCalledWith({ query: 'FROM logs-* | LIMIT 0', format: 'json' });
+  });
+
+  it('does not append a probe suffix to a blank query', async () => {
+    const query = jest.fn().mockResolvedValue({ columns: [] });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+
+    await service.getColumns('  ');
+
+    expect(query).toHaveBeenCalledWith({ query: '', format: 'json' });
+  });
+});

@@ -10,6 +10,7 @@ import type { Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 
 import { chunk, isNumber } from 'lodash';
 import type { MlNodeCount, MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
@@ -85,6 +86,10 @@ export interface GetModelSnapshotsResponse {
 
 export interface DeleteForecastResponse {
   acknowledged: boolean;
+}
+
+export interface GetEsqlQueryColumnsResponse {
+  columns: ESQLFieldWithMetadata[];
 }
 
 export function mlApiProvider(httpService: HttpService) {
@@ -206,6 +211,15 @@ export function mlApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/validate/datafeed_preview`,
         method: 'POST',
         body,
+        version: '1',
+      });
+    },
+
+    getEsqlQueryColumns({ query }: { query: string }): Promise<GetEsqlQueryColumnsResponse> {
+      return httpService.http<GetEsqlQueryColumnsResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/esql/columns`,
+        method: 'POST',
+        body: JSON.stringify({ query }),
         version: '1',
       });
     },
