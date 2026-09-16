@@ -26,9 +26,9 @@ const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): stri
   ].join(', ');
 
 const headerSection = ({ id, description, dest }: AiIndexHttpItem): string[] => [
-  `AI index: ${id}`,
+  `AI-index registry ID: ${id}`,
   ...(description ? [description] : []),
-  `Query with ES|QL against: ${dest.value}`,
+  `Backing Elasticsearch target (use only in ES|QL queries): ${dest.value}`,
 ];
 
 const fieldsSection = (fields: AiIndexField[], omittedFieldCount: number): string[] => {
