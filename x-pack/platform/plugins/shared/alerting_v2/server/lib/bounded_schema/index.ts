@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { assertBoundedSchema } from './assert_bounded_schema';
+export { assertBoundedSchema, computeWorstCaseBytes } from './assert_bounded_schema';
 export type { BoundedSchemaLimits, BoundedSchemaSubject } from './assert_bounded_schema';
