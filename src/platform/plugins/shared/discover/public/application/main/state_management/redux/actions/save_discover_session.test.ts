@@ -15,7 +15,8 @@ import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { internalStateActions } from '..';
+import { internalStateActions, selectHasUnsavedChanges } from '..';
+import { createSessionService, type DiscoverSessionClient } from '../../../../../session';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
@@ -47,7 +48,7 @@ const setup = async ({
 } = {}) => {
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
+    .spyOn(services.sessionService, 'save')
     .mockImplementation((discoverSession) =>
       Promise.resolve({
         ...discoverSession,
@@ -215,25 +216,63 @@ describe('saveDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
 
-  it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
-      'resetOnSavedSearchChange'
-    );
-    const { toolkit, saveDiscoverSessionSpy } = await setup();
-    const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+  it.each([
+    { action: 'Save', copyOnSave: false, method: 'upsert' as const },
+    { action: 'Save As', copyOnSave: true, method: 'create' as const },
+  ])(
+    'should propagate HTTP $action errors without resetting the session or pending changes',
+    async ({ copyOnSave, method }) => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+      const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+      const tabId = toolkit.getCurrentTab().id;
+      const resetOnSavedSearchChangeSpy = jest.spyOn(
+        internalStateSlice.actions,
+        'resetOnSavedSearchChange'
+      );
+      const apiClient: jest.Mocked<DiscoverSessionClient> = {
+        get: jest.fn(),
+        create: jest.fn(),
+        upsert: jest.fn(),
+      };
+      const saveError = new Error('Save failed');
+      apiClient[method].mockRejectedValueOnce(saveError);
+      const sessionService = createSessionService({
+        apiClient,
+        legacyClient: services.savedSearch,
+        useHttpApi: true,
+      });
+      saveDiscoverSessionSpy.mockImplementation(sessionService.save);
 
-    saveDiscoverSessionSpy.mockRejectedValueOnce(new Error('boom'));
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { columns: ['message'] } })
+      );
+      const expectedChanges = { hasUnsavedChanges: true, unsavedTabIds: [tabId] };
+      const comparisonContext = { runtimeStateManager: toolkit.runtimeStateManager, services };
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
 
-    await expect(
-      toolkit.internalState
-        .dispatch(internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams()))
-        .unwrap()
-    ).rejects.toHaveProperty('message', 'boom');
+      await expect(
+        toolkit.internalState
+          .dispatch(
+            internalStateActions.saveDiscoverSession(
+              getSaveDiscoverSessionParams({ newCopyOnSave: copyOnSave })
+            )
+          )
+          .unwrap()
+      ).rejects.toHaveProperty('message', saveError.message);
 
-    expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
-    expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
-  });
+      expect(apiClient[method]).toHaveBeenCalledTimes(1);
+      expect(apiClient.get).not.toHaveBeenCalled();
+      expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
+      expect(toolkit.getCurrentTab().id).toBe(tabId);
+      expect(toolkit.getCurrentTab().appState.columns).toEqual(['message']);
+      expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
+    }
+  );
 
   describe('timeRestore, timeRange, and refreshInterval handling', () => {
     const TIME_RANGE_30M = { from: 'now-30m', to: 'now' };

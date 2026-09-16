@@ -9,3 +9,4 @@
 
 export { createDiscoverSessionClient, type DiscoverSessionClient } from './api_client';
 export { createSessionService, type SessionService } from './session_service';
+export { showSessionWarnings } from './show_session_warnings';
