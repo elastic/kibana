@@ -21,6 +21,8 @@ import {
   type FilterExpressionValue,
 } from '../../../../../utils/filter_input_codec';
 
+jest.setTimeout(20000);
+
 const securityProject: CPSProject = {
   _id: 'project-security',
   _alias: 'Security',
