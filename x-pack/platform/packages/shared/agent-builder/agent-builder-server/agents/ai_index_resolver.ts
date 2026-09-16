@@ -19,8 +19,9 @@ export interface AiIndexDetail {
 }
 
 /**
- * Resolves AI Index ids to details for the requesting user. Must omit ids the caller may not see
- * or cannot read in the request space. Callers gate on whether Context Engine is enabled.
+ * Resolves AI Index ids to details for the requesting user. Must omit ids that are not registered
+ * in the request space or whose backing index the caller cannot read. Callers gate on whether
+ * Context Engine is enabled.
  */
 export type AiIndexResolver = (params: {
   ids: string[];

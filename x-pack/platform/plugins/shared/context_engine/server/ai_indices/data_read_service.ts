@@ -15,12 +15,9 @@ import type {
 } from '../../common/http_api/ai_indices';
 import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
 import { describeAiIndex } from './describe';
-import { resolveAiIndexVisibility, type AiIndexVisibility } from './list_visible';
+import { filterReadableAiIndices } from './filter_readable_ai_indices';
 import { queryAiIndices } from './query';
 import type { AiIndexService } from './service';
-
-/** `empty` is listed so a freshly registered index still appears. */
-const LISTED_VISIBILITIES: ReadonlySet<AiIndexVisibility> = new Set(['visible', 'empty']);
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
@@ -28,10 +25,9 @@ export interface AiIndexDataReadServiceApi {
   /** Throws `AiIndexNotFoundError` for an unknown id. */
   describe(id: string): Promise<DescribeAiIndexResponse>;
   /**
-   * The AI Indices the caller can use in this space: those that are empty, or hold at least one
-   * document the caller can see here. Left out when the caller cannot read the backing index,
-   * when every document belongs to another space, or when the check itself failed. `ids` limits
-   * which registry entries are checked.
+   * The AI Indices registered in this space whose backing index the caller can read. An empty
+   * backing index still counts. Left out when the caller cannot read it, or when the check itself
+   * failed. `ids` limits which entries are checked.
    */
   list(ids?: string[]): Promise<AiIndexHttpItem[]>;
 }
@@ -78,11 +74,9 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
       const registry = await aiIndexService.list(spaceId);
       const requested = ids && new Set(ids);
       const aiIndices = requested ? registry.filter(({ id }) => requested.has(id)) : registry;
-      const results = await resolveAiIndexVisibility({ esClient, aiIndices, spaceId, logger });
+      const readable = await filterReadableAiIndices({ esClient, aiIndices, logger });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
-      return results
-        .filter(({ visibility }) => LISTED_VISIBILITIES.has(visibility))
-        .map(({ aiIndex }) => aiIndex);
+      return readable;
     } catch (error) {
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
       throw error;

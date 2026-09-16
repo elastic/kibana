@@ -1010,9 +1010,9 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /api/context_engine/ai_index', () => {
-    it('lists the AI Indices visible to the current user through the read service', async () => {
-      const visible = [{ id: 'a' }];
-      readService.list.mockResolvedValue(visible as never);
+    it('lists the AI Indices readable by the current user through the read service', async () => {
+      const readable = [{ id: 'a' }];
+      readService.list.mockResolvedValue(readable as never);
       const request = httpServerMock.createKibanaRequest();
 
       await getRoute('GET', aiIndexPath).handler(createContext(), request, response);
@@ -1021,7 +1021,7 @@ describe('ai indices routes', () => {
       expect(readServiceParams[0].request).toBe(request);
       expect(readServiceParams[0].esClient).toMatchObject({ search: esSearch, get: esGet });
       expect(aiIndexService.list).not.toHaveBeenCalled();
-      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: visible } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: readable } });
     });
 
     it('passes Elasticsearch 4xx errors through with their status', async () => {

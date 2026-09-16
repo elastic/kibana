@@ -90,7 +90,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     };
   };
 
-  it('reads visible AI Indices as the requesting user through the data read service', async () => {
+  it('reads readable AI Indices as the requesting user through the data read service', async () => {
     const { resolver, getAiIndexDataReadService, asScoped, asCurrentUser } = setup({
       aiIndices: [],
     });

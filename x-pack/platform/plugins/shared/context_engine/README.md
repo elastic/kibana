@@ -48,23 +48,23 @@ Notes:
 ## Listing AI Indices
 
 `GET /api/context_engine/ai_index` returns the AI Indices the caller can use
-in the current space, not the whole registry. An AI Index is listed when its
-backing index is empty (or does not exist yet), or when it holds at least one
-document the caller can see in this space. It is not listed when the caller
-lacks `read` on the backing index, or when every document in it belongs to
-another space.
+in the current space. AI Index records are stored per space, so the list
+starts from the entries registered in the request's space (from the URL:
+`/s/{spaceId}/api/...`, default space otherwise). An entry is then listed
+when the caller can read its backing index, including when that index is
+empty or does not exist yet. It is not listed when the caller lacks `read` on
+the backing index.
 
-To decide, Kibana runs two small searches per AI Index as the current user,
-in a single `msearch`: one for any document at all, one for any document in
-this space. Any error, timeout or failed shard on either search hides the
-entry. The searches deliberately do not set `ignore_unavailable`: with it, an
-index the caller cannot read would look empty and be listed anyway. The agent
-prompt's AI-index catalog uses the same rule.
+To decide, Kibana runs one small search per AI Index as the current user, in
+a single `msearch`. Any error, timeout or failed shard on that search hides
+the entry. The search deliberately does not set `ignore_unavailable`: with it,
+an index the caller cannot read would look empty and be listed anyway. The
+agent prompt's AI-index catalog uses the same rule.
 
 Two things follow. An AI Index that is not listed can still be fetched,
 updated or deleted by id. And a wildcard `dest.value` that matches no index
 the caller can read looks the same as an index that does not exist yet
-(Elasticsearch returns 404, not 403), so it is listed as empty.
+(Elasticsearch returns 404, not 403), so it is listed.
 
 ## Querying AI Indices
 

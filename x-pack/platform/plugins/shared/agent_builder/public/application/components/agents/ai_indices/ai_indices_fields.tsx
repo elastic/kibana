@@ -112,7 +112,7 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
     [aiIndices, inheritedIdSet]
   );
 
-  // Configured but not listed for this user: deleted, unreadable, or hidden in this space.
+  // Configured but not listed for this user: deleted, unreadable, or not registered in this space.
   const unavailable = useMemo(() => {
     if (isLoading || error) {
       return { inherited: [], assigned: [] };

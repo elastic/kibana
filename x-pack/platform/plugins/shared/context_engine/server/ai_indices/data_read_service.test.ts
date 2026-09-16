@@ -13,13 +13,13 @@ import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError } from './errors';
-import { resolveAiIndexVisibility, type AiIndexVisibility } from './list_visible';
+import { filterReadableAiIndices } from './filter_readable_ai_indices';
 
 jest.mock('./describe');
-jest.mock('./list_visible');
+jest.mock('./filter_readable_ai_indices');
 
 const describeAiIndexMock = jest.mocked(describeAiIndex);
-const resolveAiIndexVisibilityMock = jest.mocked(resolveAiIndexVisibility);
+const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
@@ -53,7 +53,7 @@ describe('AiIndexDataReadService', () => {
     aiIndexService.get.mockReset();
     aiIndexService.list.mockReset();
     describeAiIndexMock.mockReset();
-    resolveAiIndexVisibilityMock.mockReset();
+    filterReadableAiIndicesMock.mockReset();
   });
 
   describe('query', () => {
@@ -144,23 +144,21 @@ describe('AiIndexDataReadService', () => {
 
   describe('list', () => {
     const withId = (id: string): AiIndexHttpItem => ({ ...aiIndex, id });
-    const registry = ['visible', 'empty', 'hidden', 'unknown'].map(withId);
+    const registry = ['readable', 'forbidden'].map(withId);
 
-    it('keeps visible and empty entries, drops hidden and unknown, and audit-logs success', async () => {
+    it('lists the space registry filtered to readable entries and audit-logs success', async () => {
       aiIndexService.list.mockResolvedValue(registry);
-      resolveAiIndexVisibilityMock.mockResolvedValue(
-        registry.map((entry) => ({ aiIndex: entry, visibility: entry.id as AiIndexVisibility }))
-      );
+      filterReadableAiIndicesMock.mockResolvedValue([registry[0]]);
 
       const result = await service.list();
 
-      expect(resolveAiIndexVisibilityMock).toHaveBeenCalledWith({
+      expect(aiIndexService.list).toHaveBeenCalledWith('marketing');
+      expect(filterReadableAiIndicesMock).toHaveBeenCalledWith({
         esClient,
         aiIndices: registry,
-        spaceId: 'marketing',
         logger,
       });
-      expect(result.map(({ id }) => id)).toEqual(['visible', 'empty']);
+      expect(result.map(({ id }) => id)).toEqual(['readable']);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -175,16 +173,14 @@ describe('AiIndexDataReadService', () => {
 
     it('narrows the registry to the requested ids before probing', async () => {
       aiIndexService.list.mockResolvedValue(registry);
-      resolveAiIndexVisibilityMock.mockResolvedValue([
-        { aiIndex: registry[0], visibility: 'visible' },
-      ]);
+      filterReadableAiIndicesMock.mockResolvedValue([registry[0]]);
 
-      const result = await service.list(['visible', 'not-registered']);
+      const result = await service.list(['readable', 'not-registered']);
 
-      expect(resolveAiIndexVisibilityMock).toHaveBeenCalledWith(
+      expect(filterReadableAiIndicesMock).toHaveBeenCalledWith(
         expect.objectContaining({ aiIndices: [registry[0]] })
       );
-      expect(result.map(({ id }) => id)).toEqual(['visible']);
+      expect(result.map(({ id }) => id)).toEqual(['readable']);
     });
 
     it('audit-logs failure and rethrows', async () => {
@@ -192,7 +188,7 @@ describe('AiIndexDataReadService', () => {
 
       await expect(service.list()).rejects.toThrow('boom');
 
-      expect(resolveAiIndexVisibilityMock).not.toHaveBeenCalled();
+      expect(filterReadableAiIndicesMock).not.toHaveBeenCalled();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),

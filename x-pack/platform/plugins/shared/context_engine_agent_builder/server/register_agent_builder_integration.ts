@@ -46,7 +46,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       return [];
     }
 
-    // Same visibility rule as the list route; only requested ids are probed.
+    // Same rule as the list route; only requested ids are probed.
     const aiIndices = await contextEngine
       .getAiIndexDataReadService({
         esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
