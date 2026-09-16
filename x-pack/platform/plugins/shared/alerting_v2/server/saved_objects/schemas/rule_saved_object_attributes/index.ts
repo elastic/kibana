@@ -15,11 +15,12 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV6 } 
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV7 } from './v7';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV8 } from './v8';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV9 } from './v9';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV10 } from './v10';
 
 export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
 
 /** Latest attributes shape. */
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV9>;
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV10>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
@@ -31,6 +32,7 @@ export {
   ruleSavedObjectAttributesSchemaV7,
   ruleSavedObjectAttributesSchemaV8,
   ruleSavedObjectAttributesSchemaV9,
+  ruleSavedObjectAttributesSchemaV10,
 };
 
 /**
@@ -43,4 +45,4 @@ export {
  *
  * Ref: rule-data-migration.md "Rollback behavior"
  */
-export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV9;
+export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV10;
