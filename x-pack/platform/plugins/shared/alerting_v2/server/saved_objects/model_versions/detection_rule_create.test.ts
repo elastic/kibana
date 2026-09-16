@@ -49,9 +49,21 @@ jest.mock('../../lib/rule_executor/schedule', () => ({
 
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
-it('ruleModelVersions contains both detection-type fold entries', () => {
-  expect(Object.keys(ruleModelVersions)).toContain('7'); // security.detection.query fold
-  expect(Object.keys(ruleModelVersions)).toContain('8'); // security.detection.threshold fold
+// The POC's five model versions ('7'–'11') were squashed into a single '7';
+// both detection-type folds are part of that squashed entry.
+it('ruleModelVersions carries both detection-type fold contributions in the squashed entry', () => {
+  const v7 = ruleModelVersions['7'] as {
+    changes: Array<{ type: string; addedMappings?: unknown }>;
+  };
+  expect(v7).toBeDefined();
+  // Two mappings_additions come from the manifest folds (query + threshold);
+  // each has addedMappings.metadata.properties.builder_fields.properties.
+  const manifestFoldChanges = v7.changes.filter(
+    (c) =>
+      c.type === 'mappings_addition' &&
+      (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
+  );
+  expect(manifestFoldChanges.length).toBe(2); // one per detection builder type
 });
 
 // ---------------------------------------------------------------------------
