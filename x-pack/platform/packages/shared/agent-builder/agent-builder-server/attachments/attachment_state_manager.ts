@@ -393,7 +393,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     this.attachments.set(id, attachment);
     this.dirty = true;
-    this.changes.push({
+    this.recordChange(attachment, {
       kind: 'added',
       attachment_id: id,
       attachment_type: attachment.type,
@@ -458,7 +458,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
         attachment.versions.push(newVersion);
         attachment.current_version = newVersionNum;
         this.dirty = true;
-        this.changes.push({
+        this.recordChange(attachment, {
           kind: 'updated',
           attachment_id: id,
           attachment_type: attachment.type,
@@ -488,7 +488,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.active = false;
     this.dirty = true;
-    this.changes.push({
+    this.recordChange(attachment, {
       kind: 'deleted',
       attachment_id: id,
       attachment_type: attachment.type,
@@ -528,7 +528,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     this.attachments.delete(id);
     this.dirty = true;
     if (wasActive) {
-      this.changes.push({
+      this.recordChange(attachment, {
         kind: 'deleted',
         attachment_id: id,
         attachment_type: attachment.type,
@@ -584,6 +584,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   clearChanges(): void {
     this.changes = [];
+  }
+
+  /**
+   * Records a change unless the attachment is `hidden`. Hidden attachments are internal artefacts
+   * (e.g. `screen_context`) that users never see, so their lifecycle must not surface as
+   * user-visible timeline events or fire workflow triggers.
+   */
+  private recordChange(attachment: VersionedAttachment, change: AttachmentChange): void {
+    if (attachment.hidden) {
+      return;
+    }
+    this.changes.push(change);
   }
 
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[] {

@@ -906,6 +906,38 @@ describe('AttachmentStateManager', () => {
       manager.delete(a.id);
       expect(manager.drainChanges().map((c) => c.kind)).toEqual(['added', 'updated', 'deleted']);
     });
+
+    it('records nothing for hidden attachments (add / update / soft delete / permanentDelete)', async () => {
+      const hidden = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      expect(manager.drainChanges()).toEqual([]);
+
+      await manager.update(hidden.id, { data: { content: 'b' } });
+      expect(manager.drainChanges()).toEqual([]);
+
+      manager.delete(hidden.id);
+      expect(manager.drainChanges()).toEqual([]);
+
+      // Re-create and try permanentDelete on an active hidden attachment.
+      const hidden2 = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      manager.clearChanges();
+      manager.permanentDelete(hidden2.id);
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records a change if the update also unhides the attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      manager.clearChanges();
+      await manager.update(created.id, { hidden: false, data: { content: 'b' } });
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
+      ]);
+    });
   });
 
   describe('evaluateStalenessForActiveAttachments()', () => {
