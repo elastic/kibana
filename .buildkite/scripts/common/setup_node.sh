@@ -8,7 +8,7 @@ echo "--- Setup Node"
 
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
-export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+export NODE_DIR="$NODE_CACHE_DIR/node/$NODE_VERSION"
 export NODE_BIN_DIR="$NODE_DIR/bin"
 
 ## Install node for whatever the current os/arch are
@@ -62,3 +62,12 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
+
+echo " -- node: version=$(node --version)"
+
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+corepack enable
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+echo " -- pnpm: version=$(pnpm --version)"

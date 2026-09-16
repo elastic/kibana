@@ -50,7 +50,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
+  git diff --exit-code --quiet $GIT_SCOPE
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -82,6 +82,9 @@ main () {
   git checkout -b "$BRANCH_NAME"
 
   git add $GIT_SCOPE
+  if [ "$VERSION_BUMPED" == "true" ]; then
+    git add package.json pnpm-lock.yaml
+  fi
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."

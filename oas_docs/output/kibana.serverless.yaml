@@ -44177,6 +44177,7 @@ paths:
                           - '*'
                     required:
                       - base
+                  maxItems: 1000
                   type: array
                 metadata:
                   additionalProperties: {}
@@ -44373,6 +44374,7 @@ paths:
                                 - '*'
                           required:
                             - base
+                        maxItems: 1000
                         type: array
                       metadata:
                         additionalProperties: {}
