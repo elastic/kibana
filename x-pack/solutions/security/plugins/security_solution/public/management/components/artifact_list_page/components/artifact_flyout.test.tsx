@@ -12,7 +12,10 @@ import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  DISABLED_ARTIFACT_TAG,
+} from '../../../../../common/endpoint/service/artifacts';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
@@ -73,6 +76,12 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await render();
 
     expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+  });
+
+  it('should not show create-without-enabling submit button by default', async () => {
+    await render();
+
+    expect(renderResult.queryByTestId('testPage-flyout-submitWithoutEnablingButton')).toBeNull();
   });
 
   it.each([
@@ -164,6 +173,59 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       await render();
 
       expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+    });
+
+    describe('and create enabled/disabled submit buttons are shown', () => {
+      const renderWithEnabledColumn = async () =>
+        render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+      it('should show two submit buttons in create mode', async () => {
+        await renderWithEnabledColumn();
+
+        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
+        expect(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        ).toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+        expect(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        ).toHaveTextContent('Create without enabling');
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).toHaveTextContent(
+          'Create and enable'
+        );
+      });
+
+      it('should create without a disabled tag when create and enable is clicked', async () => {
+        await renderWithEnabledColumn();
+
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).not.toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should add the disabled tag when create without enabling is clicked', async () => {
+        await renderWithEnabledColumn();
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
     });
 
     describe('and user clicks submit', () => {
@@ -385,6 +447,51 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           'cancel'
         );
       });
+
+      it('should add the disabled tag when create without enabling is confirmed', async () => {
+        await render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should remove the disabled tag when create and enable is clicked after cancelling create without enabling', async () => {
+        await render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-cancelButton'));
+
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).not.toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
     });
   });
 
@@ -494,6 +601,20 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expect(getByTestId('formMock')).toBeTruthy();
         expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
       });
+    });
+
+    it('should keep a single submit button when canCreateArtifactAsDisabled is enabled', async () => {
+      const { getByTestId, queryByTestId } = await render({
+        showAsSimpleTable: true,
+        showEnabledColumn: true,
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+      });
+
+      expect(getByTestId('testPage-flyout-submitButton')).toBeInTheDocument();
+      expect(queryByTestId('testPage-flyout-submitWithoutEnablingButton')).toBeNull();
     });
   });
 });

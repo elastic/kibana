@@ -456,6 +456,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             size={flyoutSize}
             submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+            canCreateArtifactAsDisabled={showEnabledColumn}
           />
         )}
 
