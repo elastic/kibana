@@ -67,9 +67,11 @@ export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
     const { allowedMonitorTypes, spaces } = request.body;
     const repository = buildMultiSpaceSettingsRepository(server, request);
 
-    // Preserve any co-located settings (e.g. CCS remote clusters) on the shared object.
-    const { spaces: _currentSpaces, ...currentAttributes } = await repository.get();
-    const saved = await repository.save({ ...currentAttributes, allowedMonitorTypes }, spaces);
+    // Send only the field we're changing; the repository merges over the stored object,
+    // preserving co-located settings (e.g. CCS remote clusters). Reading first would be
+    // wrong here — a space-scoped read can miss the globally-shared object and return
+    // defaults that would then overwrite the real stored values.
+    const saved = await repository.save({ allowedMonitorTypes }, spaces);
 
     return { allowedMonitorTypes: saved.allowedMonitorTypes ?? [], spaces: saved.spaces };
   },
