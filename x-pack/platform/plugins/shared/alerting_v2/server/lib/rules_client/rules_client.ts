@@ -432,6 +432,7 @@ export class RulesClient {
     nowIso,
     version,
     template,
+    signatureId,
     validateBuilderFields = true,
   }: {
     data: CreateRuleData;
@@ -441,6 +442,7 @@ export class RulesClient {
     nowIso: string;
     version: number;
     template?: RuleSavedObjectAttributes['metadata']['template'];
+    signatureId: string;
     validateBuilderFields?: boolean;
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
@@ -485,8 +487,7 @@ export class RulesClient {
       updatedAt: nowIso,
       version,
       template,
-      // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
-      signatureId: data.metadata?.signature_id ?? uuidv4(),
+      signatureId,
       // Resolve source: use the caller-supplied value or default to internal.
       // Ref: rule-source.md "Who writes the source"
       source: data.metadata?.source ?? { type: 'internal', version: 1 },
@@ -781,6 +782,13 @@ export class RulesClient {
     // Ref: rule-crud-api.md "Create a rule" (initial-enabled option)
     const enabled = params.options?.enabled ?? true;
 
+    // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
+    const signatureId = parsed.metadata?.signature_id ?? uuidv4();
+
+    // Space-scoped uniqueness check. Application-level, shares the read-then-write
+    // race v1 has always had (documented and accepted by the design).
+    await this.assertSignatureIdUniqueInSpace(signatureId);
+
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
@@ -789,12 +797,9 @@ export class RulesClient {
       nowIso,
       version: this.getNextVersion(),
       template: params.options?.template,
+      signatureId,
       validateBuilderFields: params.options?.validateBuilderFields ?? true,
     });
-
-    // Space-scoped uniqueness check. Application-level, shares the read-then-write
-    // race v1 has always had (documented and accepted by the design).
-    await this.assertSignatureIdUniqueInSpace(prepared.attrs.metadata.signature_id);
 
     // Only count enabled rules towards the schedule limit, mirroring the
     // conditioning that updateRule and enableRule already apply.
@@ -835,16 +840,19 @@ export class RulesClient {
     for (const item of parsed.items) {
       const { id, enabled, ...data } = item;
       try {
-        const preparedItem = this.prepareRuleForCreate({
-          data,
-          id,
-          enabled,
-          actor,
-          nowIso,
-          version: ruleVersion,
-        });
-        await this.assertSignatureIdUniqueInSpace(preparedItem.attrs.metadata.signature_id);
-        prepared.push(preparedItem);
+        const signatureId = data.metadata?.signature_id ?? uuidv4();
+        await this.assertSignatureIdUniqueInSpace(signatureId);
+        prepared.push(
+          this.prepareRuleForCreate({
+            data,
+            id,
+            enabled,
+            actor,
+            nowIso,
+            version: ruleVersion,
+            signatureId,
+          })
+        );
       } catch (e) {
         if (Boom.isBoom(e)) {
           errors.push(toPerItemBoomError(id ?? SavedObjectsUtils.generateId(), e));
