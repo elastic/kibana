@@ -23,15 +23,7 @@ interface ChangesPanelProps {
   version: number;
 }
 
-const DiffLine = ({
-  color,
-  prefix,
-  text,
-}: {
-  color: string;
-  prefix: string;
-  text: string;
-}) => (
+const DiffLine = ({ color, prefix, text }: { color: string; prefix: string; text: string }) => (
   <EuiText size="s">
     <EuiBadge color={color}>{prefix}</EuiBadge> {text}
   </EuiText>

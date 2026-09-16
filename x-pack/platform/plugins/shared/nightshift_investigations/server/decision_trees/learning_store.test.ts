@@ -31,9 +31,7 @@ describe('record', () => {
       content: 'Checkout writes through a shared connection pool.',
     });
 
-    expect(record).toEqual(
-      expect.objectContaining({ kind: 'system', category: 'architecture' })
-    );
+    expect(record).toEqual(expect.objectContaining({ kind: 'system', category: 'architecture' }));
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
         index: DECISION_TREE_AI_INDEX_DEST,

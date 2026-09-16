@@ -7,7 +7,11 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { diffDecisionTrees, parseMermaidDecisionTree, symptomTreeId } from '@kbn/nightshift-decision-trees';
+import {
+  diffDecisionTrees,
+  parseMermaidDecisionTree,
+  symptomTreeId,
+} from '@kbn/nightshift-decision-trees';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { DecisionTreeVersionDetail } from '../../common/decision_trees';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';

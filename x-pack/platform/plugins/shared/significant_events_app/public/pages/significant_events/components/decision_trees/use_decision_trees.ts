@@ -78,7 +78,10 @@ export const useDecisionTreeVersions = (symptom: string | undefined) => {
   });
 };
 
-export const useDecisionTreeVersion = (symptom: string | undefined, version: number | undefined) => {
+export const useDecisionTreeVersion = (
+  symptom: string | undefined,
+  version: number | undefined
+) => {
   const { core } = useKibana();
 
   return useQuery({
