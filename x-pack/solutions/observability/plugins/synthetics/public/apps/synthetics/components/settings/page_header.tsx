@@ -21,7 +21,6 @@ export type SettingsTabId =
   | 'private-locations'
   | 'api-keys'
   | 'advanced'
-  | 'monitor-types'
   | 'remote-clusters';
 
 export const getSettingsPageHeader = (
@@ -89,13 +88,6 @@ export const getSettingsPageHeader = (
         }),
         isSelected: tabId === 'advanced',
         href: replaceTab('advanced'),
-      },
-      {
-        label: i18n.translate('xpack.synthetics.settingsTabs.monitorTypes', {
-          defaultMessage: 'Monitor Types',
-        }),
-        isSelected: tabId === 'monitor-types',
-        href: replaceTab('monitor-types'),
       },
       ...(!isServerless && isCCSEnabled
         ? [

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import type { SettingsTabId } from './page_header';
@@ -42,15 +42,15 @@ export const SettingsPage = () => {
         );
       case 'advanced':
         return (
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <AdvancedSettingsForm />
-          </EuiPanel>
-        );
-      case 'monitor-types':
-        return (
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <MonitorTypesForm />
-          </EuiPanel>
+          <>
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <AdvancedSettingsForm />
+            </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <MonitorTypesForm />
+            </EuiPanel>
+          </>
         );
       case 'remote-clusters':
         return (
