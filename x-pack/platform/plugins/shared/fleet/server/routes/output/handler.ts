@@ -72,11 +72,19 @@ export const putOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
+    const { id: bodyId, ...updateBody } = request.body as UpdateOutput & { id?: string };
+    if (bodyId !== undefined && bodyId !== request.params.outputId) {
+      return response.badRequest({
+        body: {
+          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
+        },
+      });
+    }
     await outputService.update(
       soClient,
       esClient,
       request.params.outputId,
-      request.body as UpdateOutput
+      updateBody as UpdateOutput
     );
     const output = await outputService.get(request.params.outputId);
     await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {

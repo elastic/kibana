@@ -59,6 +59,7 @@ import { registerConversationWorkflowEventBridge } from './workflows/triggers/ev
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
+import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 
 export class AgentBuilderPlugin
   implements
@@ -166,6 +167,14 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+    // External Deductive execution path (agent + Advanced Settings). Self-contained in the
+    // deductive module so the whole temporary integration can be removed by deleting it.
+    registerDeductiveAgent({
+      coreSetup,
+      uiSettings: coreSetup.uiSettings,
+      agents: serviceSetups.agents,
+      register: this.config.deductive?.register ?? false,
+    });
 
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -297,6 +306,9 @@ export class AgentBuilderPlugin
       renderers: {
         register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
+      conversationEvents: {
+        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
@@ -360,6 +372,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      deductiveRegister: this.config.deductive?.register ?? false,
       conversationEventBus: this.conversationEventBus,
     });
 
