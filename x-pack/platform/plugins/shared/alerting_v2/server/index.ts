@@ -67,3 +67,4 @@ export type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
  */
 export { ALERTING_ERROR_CODES } from './lib/errors/error_codes';
 export type { AlertingV2ErrorCode } from './lib/errors/error_codes';
+export { deriveErrorCodeFromStatus } from './routes/derive_error_code';
