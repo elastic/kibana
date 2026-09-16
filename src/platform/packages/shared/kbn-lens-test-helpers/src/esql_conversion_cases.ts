@@ -120,6 +120,11 @@ export interface EsqlConversionCase {
   readonly columnOrder: readonly string[];
   /** Optional columnId → semantic role name mapping (visualization-derived in the UI). */
   readonly columnRoles?: Readonly<Record<string, string>>;
+  /**
+   * When true, unit consumers call generateEsqlQuery without a date range
+   * (models a detached time picker; auto date histograms fall back to 1h).
+   */
+  readonly omitDateRange?: true;
   readonly expected: EsqlConversionSuccess | EsqlConversionFailure;
 }
 
@@ -477,6 +482,67 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
         success: true,
         esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY BUCKET(order_date, 1 hour)`,
         columnNames: ['AVG(taxful_total_price)', 'BUCKET(order_date, 1 hour)'],
+      },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
+      description: 'date histogram falls back to auto when interval param is missing',
+      columns: {
+        col1: dateHistogram('order_date', {}),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+      },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
+      description: 'date histogram (auto interval) falls back to 1 hour without a date range',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      omitDateRange: true,
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 1 hour)`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 1 hour)'],
+      },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
+      description: 'date histogram (fixed 30m interval) with count',
+      columns: {
+        col1: dateHistogram('order_date', { interval: '30m' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 30 minutes)'],
+      },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
+      description: 'date histogram (fixed 1d interval) with count',
+      columns: {
+        col1: dateHistogram('order_date', { interval: '1d' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 1 day)`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 1 day)'],
       },
     },
     {

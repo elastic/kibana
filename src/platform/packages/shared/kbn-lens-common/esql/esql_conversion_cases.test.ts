@@ -15,7 +15,7 @@ import {
   ESQL_CONVERSION_NOW,
   type EsqlConversionCase,
 } from '@kbn/lens-test-helpers';
-import type { IndexPattern } from '../types';
+import type { DateRange, IndexPattern } from '../types';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { generateEsqlQuery } from './generate_esql_query';
 
@@ -35,12 +35,18 @@ const runCase = (conversionCase: EsqlConversionCase) => {
   } as unknown as FormBasedLayer;
   const esAggEntries = conversionCase.columnOrder.map((colId) => [colId, columns[colId]] as const);
 
+  // omitDateRange models a detached time picker (auto date histograms fall
+  // back to a 1h fixed interval).
+  const dateRange = conversionCase.omitDateRange
+    ? ({ fromDate: undefined, toDate: undefined } as unknown as DateRange)
+    : ESQL_CONVERSION_DATE_RANGE;
+
   const result = generateEsqlQuery(
     esAggEntries,
     layer,
     indexPattern,
     uiSettings,
-    ESQL_CONVERSION_DATE_RANGE,
+    dateRange,
     ESQL_CONVERSION_NOW,
     conversionCase.columnRoles ? { ...conversionCase.columnRoles } : undefined
   );
