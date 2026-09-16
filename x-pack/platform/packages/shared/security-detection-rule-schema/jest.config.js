@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { assertBoundedSchema, computeWorstCaseBytes } from './assert_bounded_schema';
-export type { BoundedSchemaLimits, BoundedSchemaSubject } from './assert_bounded_schema';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/security-detection-rule-schema'],
+};
