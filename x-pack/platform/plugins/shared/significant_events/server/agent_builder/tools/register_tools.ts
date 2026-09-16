@@ -17,7 +17,7 @@ import { createSearchKnowledgeIndicatorsTool } from './search_knowledge_indicato
 import { createSearchEventsTool } from './event_search/tool';
 import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
-import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
+import { createEventInvestigationAttachTool } from './event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,

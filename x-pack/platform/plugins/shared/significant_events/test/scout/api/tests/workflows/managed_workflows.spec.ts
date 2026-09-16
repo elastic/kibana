@@ -16,17 +16,12 @@ import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 const MANAGED_WORKFLOW_IDS = [
   // Base significant events workflows (installed when significant events is available)
   'system-significant-events-discovery',
-  // Memory workflows (installed when the memory feature flag is enabled)
-  'system-significant-events-memory-synthesis',
-  'system-significant-events-memory-consolidation',
-  'system-significant-events-memory-conversation-scraper',
 ];
 
 /**
  * Verifies that managed workflows are installed and marked as valid. Significant events
- * availability is enabled in global setup; memory workflows additionally require the
- * memory feature flag. Installation is asynchronous (triggered by a reactive observable
- * in plugin start), so each check polls until the workflow appears as valid.
+ * availability is enabled in global setup. Installation is asynchronous (triggered by a
+ * reactive observable in plugin start), so each check polls until the workflow appears as valid.
  */
 apiTest.describe(
   'Managed workflows',

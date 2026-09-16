@@ -31,8 +31,6 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
-import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
-import { createMemoryDiscoveryTools } from './memory_discovery_tools';
 import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
@@ -114,15 +112,6 @@ export async function generateKIQueries(
     isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
   ]);
 
-  const memoryTools = significantEventsAvailable
-    ? createMemoryDiscoveryTools({
-        memoryService: new MemoryServiceImpl({
-          logger: logger.get('memory'),
-          esClient,
-        }),
-      })
-    : undefined;
-
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
   const isCodeGroundingActive = useSemanticCodeSearchGrounding && Boolean(agentBuilderTools);
@@ -168,7 +157,6 @@ export async function generateKIQueries(
       kiClient,
       logger: logger.get('significant_events_generation'),
       signal,
-      memoryTools,
       kiExtractionContextTools,
       semanticCodeSearchTools,
     }

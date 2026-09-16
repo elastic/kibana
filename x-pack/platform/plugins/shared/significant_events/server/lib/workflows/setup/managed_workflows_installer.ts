@@ -11,7 +11,7 @@ import { installWorkflows } from './install_workflows';
 
 export interface ManagedWorkflowsInstaller {
   /**
-   * Installs the full managed-workflow set (base and memory workflows) and closes the
+   * Installs the full managed-workflow set and closes the
    * reconciliation window exactly once. Resolves when this install completes and rejects if it
    * fails.
    */

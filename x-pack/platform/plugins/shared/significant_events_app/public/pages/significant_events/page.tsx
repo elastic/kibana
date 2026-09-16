@@ -32,7 +32,6 @@ import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
-import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -43,7 +42,6 @@ const significantEventsTabs = [
   'queries',
   'detections',
   'significant_events',
-  'memory',
   'settings',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
@@ -66,9 +64,6 @@ export function SignificantEventsPage() {
       },
       chrome,
       notifications: { toasts },
-    },
-    dependencies: {
-      start: { agentBuilder },
     },
   } = useKibana();
 
@@ -100,53 +95,20 @@ export function SignificantEventsPage() {
     defaultMessage: 'Nightshift',
   });
 
-  const systemOnboardingLabel = i18n.translate(
-    'xpack.significantEventsApp.systemOnboardingButton',
-    { defaultMessage: 'Tell us about your system' }
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'nightshift',
+          order: 1,
+          label: nightshiftLabel,
+          iconType: 'moon',
+          href: getUrlForApp(NIGHTSHIFT_APP_ID),
+        },
+      ],
+    }),
+    [getUrlForApp, nightshiftLabel]
   );
-
-  const handleOpenSystemOnboarding = useCallback(() => {
-    agentBuilder?.openChat({
-      newConversation: true,
-      initialMessage: i18n.translate('xpack.significantEventsApp.onboardingInitialMessage', {
-        defaultMessage:
-          'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
-      }),
-      autoSendInitialMessage: true,
-    });
-  }, [agentBuilder]);
-
-  const menu = useMemo<AppHeaderMenu>(() => {
-    const items: NonNullable<AppHeaderMenu['items']> = [
-      {
-        id: 'nightshift',
-        order: 1,
-        label: nightshiftLabel,
-        iconType: 'moon',
-        href: getUrlForApp(NIGHTSHIFT_APP_ID),
-      },
-    ];
-
-    if (agentBuilder && canManage) {
-      items.push({
-        id: 'significantEventsSystemOnboarding',
-        order: 2,
-        label: systemOnboardingLabel,
-        iconType: 'sparkles',
-        run: handleOpenSystemOnboarding,
-        testId: 'significantEventsSystemOnboardingButton',
-      });
-    }
-
-    return { items };
-  }, [
-    agentBuilder,
-    canManage,
-    getUrlForApp,
-    handleOpenSystemOnboarding,
-    nightshiftLabel,
-    systemOnboardingLabel,
-  ]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -200,14 +162,6 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
-      },
-      {
-        id: 'memory',
-        label: i18n.translate('xpack.significantEventsApp.memoryTab', {
-          defaultMessage: 'Memory',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'memory' } }),
-        isSelected: tab === 'memory',
       },
       {
         id: 'settings',
@@ -321,11 +275,11 @@ export function SignificantEventsPage() {
                   {canManage && canConfigure
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                       })
                     : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
                       })}
                 </p>
                 {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
@@ -358,7 +312,6 @@ export function SignificantEventsPage() {
               {tab === 'streams' && <StreamsView />}
               {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
               {tab === 'queries' && <QueriesTable />}
-              {tab === 'memory' && <MemoryTab />}
             </KiGenerationProvider>
           )}
           {tab === 'detections' && <DetectionsTab />}

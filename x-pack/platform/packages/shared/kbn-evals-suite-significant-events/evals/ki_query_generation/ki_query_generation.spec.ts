@@ -12,10 +12,6 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
 } from '@kbn/nightshift-ai';
-import {
-  createMemoryDiscoveryTools,
-  MemoryServiceImpl,
-} from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { connectorToInference, getConnectorDefaultModel } from '@kbn/inference-common';
@@ -272,12 +268,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ])
             );
 
-            // Exercise the same grounding tools that production query generation
-            // wires in, so the eval covers the memory + prior-SigEvents code paths.
-            const memoryTools = createMemoryDiscoveryTools({
-              memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
-            });
-
             const executeAgentBuilderTool = async (
               toolId: string,
               toolParams: Record<string, unknown>
@@ -396,7 +386,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
                 const promptSnippet = [
                   groundingTools?.promptSnippet,
-                  memoryTools.promptSnippet,
                   eventSearchTool.promptSnippet,
                 ]
                   .filter(Boolean)
@@ -420,12 +409,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                           )
                       ),
                     additionalTools: {
-                      ...memoryTools.tools,
                       ...eventSearchTool.tools,
                       ...groundingTools?.additionalTools,
                     },
                     additionalToolCallbacks: {
-                      ...memoryTools.callbacks,
                       ...eventSearchTool.callbacks,
                       ...groundingTools?.additionalToolCallbacks,
                     },

@@ -199,7 +199,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Streams
   'streams-management',
-  'significant-events-memory',
   'significant-events-management',
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
@@ -208,11 +207,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',
-  'streams-memory-synthesis',
-  'streams-memory-consolidation',
-  'streams-conversation-scraper',
-  'significant-events-onboarding',
-  'streams-gap-detection',
 
   // Platform – Context Engine
   'ki-retrieval',
