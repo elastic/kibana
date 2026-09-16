@@ -303,6 +303,25 @@ describe('useConversation polling', () => {
     queryClient.clear();
   });
 
+  it('does not poll a shared conversation while this client streams into it', async () => {
+    setStreaming();
+    mockGet.mockResolvedValue(createFetchedConversation(publicAcl));
+    const { queryClient, Wrapper } = createWrapper();
+    queryClient.setQueryData(
+      queryKeys.conversations.byId(conversationId),
+      createFetchedConversation(publicAcl)
+    );
+
+    renderHook(() => useConversation(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    await advance(10_000);
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+
+    queryClient.clear();
+  });
+
   it('does not poll while the last round is awaiting a prompt', async () => {
     const { queryClient, Wrapper } = createWrapper();
     queryClient.setQueryData(queryKeys.conversations.byId(conversationId), {
