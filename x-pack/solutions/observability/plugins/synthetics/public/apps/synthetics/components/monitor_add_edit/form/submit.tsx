@@ -22,6 +22,7 @@ import type { SyntheticsMonitor } from '../types';
 import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
+import { useParameterValues } from './parameter_values_context';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
@@ -46,7 +47,11 @@ export const ActionBar = ({
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
-  const { status, loading, isEdit } = useMonitorSave({ monitorData });
+  const { parametersAreMasked } = useParameterValues();
+  const { status, loading, isEdit } = useMonitorSave({
+    monitorData,
+    preserveMaskedParams: parametersAreMasked,
+  });
 
   const canEditSynthetics = useCanEditSynthetics();
 
