@@ -28,3 +28,13 @@ export function extractForeachItemsFromInput(input: unknown): unknown[] | undefi
   const { items } = input as { items?: unknown };
   return Array.isArray(items) ? items : undefined;
 }
+
+/** Foreach expression persisted on older executions that never stored `items`. */
+export function extractForeachExpressionFromInput(input: unknown): string | undefined {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return undefined;
+  }
+
+  const { foreach: expression } = input as { foreach?: unknown };
+  return typeof expression === 'string' ? expression : undefined;
+}

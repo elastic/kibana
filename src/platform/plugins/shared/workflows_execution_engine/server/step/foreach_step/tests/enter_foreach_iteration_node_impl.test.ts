@@ -53,6 +53,10 @@ describe('EnterForeachIterationNodeImpl', () => {
           items: ['item0', 'item1', 'item2'],
         },
       }),
+      contextManager: {
+        evaluateExpressionInContext: jest.fn(),
+        renderValueAccordingToContext: jest.fn(),
+      },
     } as unknown as StepExecutionRuntime;
 
     stepExecutionRuntimeFactory = {
@@ -87,6 +91,8 @@ describe('EnterForeachIterationNodeImpl', () => {
 
     expect(foreachStepRuntime.getCurrentStepResult).toHaveBeenCalled();
     expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({ item: 'item1' });
+    expect(foreachStepRuntime.contextManager.evaluateExpressionInContext).not.toHaveBeenCalled();
+    expect(foreachStepRuntime.contextManager.renderValueAccordingToContext).not.toHaveBeenCalled();
   });
 
   it('should go to the next node', () => {
@@ -95,9 +101,44 @@ describe('EnterForeachIterationNodeImpl', () => {
     expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
   });
 
-  it('should throw if the foreach step has no items', () => {
+  it('should re-evaluate the foreach expression when input has no items', () => {
     (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
       input: { foreach: '{{ consts.items }}' },
+    });
+    (foreachStepRuntime.contextManager.evaluateExpressionInContext as jest.Mock).mockReturnValue([
+      'legacy0',
+      'legacy1',
+      'legacy2',
+    ]);
+
+    underTest.run();
+
+    expect(foreachStepRuntime.contextManager.evaluateExpressionInContext).toHaveBeenCalledWith(
+      '{{ consts.items }}'
+    );
+    expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({ item: 'legacy1' });
+    expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+  });
+
+  it('should parse a rendered JSON list when input has no items', () => {
+    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+      input: { foreach: '["a", "b", "c"]' },
+    });
+    (foreachStepRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
+      '["a", "b", "c"]'
+    );
+
+    underTest.run();
+
+    expect(foreachStepRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+      '["a", "b", "c"]'
+    );
+    expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({ item: 'b' });
+  });
+
+  it('should throw if the foreach step has no items and no expression to re-evaluate', () => {
+    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+      input: {},
     });
 
     expect(() => underTest.run()).toThrow('Foreach step "loop" has no items in its input.');

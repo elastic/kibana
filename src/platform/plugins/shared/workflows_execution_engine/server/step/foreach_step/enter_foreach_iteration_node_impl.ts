@@ -8,7 +8,12 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { extractForeachItemsFromInput, indexFromIterationStepId } from './utils';
+import {
+  extractForeachExpressionFromInput,
+  extractForeachItemsFromInput,
+  indexFromIterationStepId,
+} from './utils';
+import { isTemplateExpression } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -26,7 +31,9 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
     this.stepExecutionRuntime.startStep();
 
     const foreachStepRuntime = this.getEnclosingForeachStepRuntime();
-    const items = extractForeachItemsFromInput(foreachStepRuntime.getCurrentStepResult()?.input);
+    const input = foreachStepRuntime.getCurrentStepResult()?.input;
+    const items =
+      extractForeachItemsFromInput(input) ?? this.evaluateForeachItems(foreachStepRuntime, input);
     const index = indexFromIterationStepId(this.node.stepId);
 
     if (!items) {
@@ -43,6 +50,32 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
 
     this.stepExecutionRuntime.setInput({ item: items[index] });
     this.wfExecutionRuntimeManager.navigateToNextNode();
+  }
+
+  /** Older executions stored only `input.foreach`; re-evaluate that expression. */
+  private evaluateForeachItems(
+    foreachStepRuntime: StepExecutionRuntime,
+    input: unknown
+  ): unknown[] | undefined {
+    const expression = extractForeachExpressionFromInput(input);
+    if (expression == null) {
+      return undefined;
+    }
+
+    const { contextManager } = foreachStepRuntime;
+    let resolvedValue: unknown = isTemplateExpression(expression)
+      ? contextManager.evaluateExpressionInContext(expression)
+      : contextManager.renderValueAccordingToContext(expression);
+
+    if (typeof resolvedValue === 'string') {
+      try {
+        resolvedValue = JSON.parse(resolvedValue);
+      } catch {
+        throw new Error(`Unable to parse rendered value: ${resolvedValue}`);
+      }
+    }
+
+    return Array.isArray(resolvedValue) ? resolvedValue : undefined;
   }
 
   private getEnclosingForeachStepRuntime(): StepExecutionRuntime {
