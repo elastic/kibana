@@ -3125,6 +3125,9 @@ importers:
       '@kbn/security-detection-rule-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/security-detection-rule-schema
+      '@kbn/security-detections-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/plugins/security_detections
       '@kbn/security-form-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/security/form_components
@@ -9572,6 +9575,8 @@ importers:
   x-pack/solutions/security/plugins/lists: {}
 
   x-pack/solutions/security/plugins/mitre_attack: {}
+
+  x-pack/solutions/security/plugins/security_detections: {}
 
   x-pack/solutions/security/plugins/security_solution: {}
 
