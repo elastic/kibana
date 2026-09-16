@@ -109,5 +109,58 @@ test.describe(
         subject: { type: 'alert', id: alertId },
       });
     });
+
+    test('views a completed investigation from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
+
+      const requestPromise = page.waitForRequest((request) => {
+        const url = new URL(request.url());
+        return (
+          request.method() === 'GET' &&
+          url.pathname.endsWith('/internal/nightshift/investigations') &&
+          url.searchParams.get('size') === '20'
+        );
+      });
+      await pageObjects.alertsTablePage.openActionsMenuForRow(0);
+      await pageObjects.alertsTablePage.clickViewInvestigation();
+
+      const requestUrl = new URL((await requestPromise).url());
+      expect(page.url()).toContain(`/app/nightshift?alertId=${alertId}`);
+      expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
+      expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+    });
+
+    test('views a completed investigation from the alert detail action menu', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertPage.goto(alertId);
+      await pageObjects.alertPage.openActionsMenu();
+
+      const requestPromise = page.waitForRequest((request) => {
+        const url = new URL(request.url());
+        return (
+          request.method() === 'GET' &&
+          url.pathname.endsWith('/internal/nightshift/investigations') &&
+          url.searchParams.get('size') === '20'
+        );
+      });
+      await pageObjects.alertPage.clickViewInvestigation();
+
+      const requestUrl = new URL((await requestPromise).url());
+      expect(page.url()).toContain(`/app/nightshift?alertId=${alertId}`);
+      expect(requestUrl.searchParams.get('concurrency_key')).toBe(alertId);
+      expect(requestUrl.searchParams.getAll('subject_types')).toStrictEqual(['alert']);
+    });
   }
 );

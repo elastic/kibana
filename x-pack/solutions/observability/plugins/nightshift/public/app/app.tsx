@@ -39,6 +39,7 @@ import { InvestigationSeverityTiles } from '../investigation/investigation_sever
 import {
   clearNightshiftInvestigationIdParam,
   clearNightshiftSeverityParam,
+  getNightshiftAlertIdFromSearch,
   getNightshiftInvestigationIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
@@ -67,6 +68,7 @@ export function NightshiftApp(): React.ReactElement {
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  const alertId = useMemo(() => getNightshiftAlertIdFromSearch(search), [search]);
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -84,12 +86,13 @@ export function NightshiftApp(): React.ReactElement {
     size: INVESTIGATION_LIST_PAGE_SIZE,
     query: searchQuery,
     severities,
+    alertId,
   });
   const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
   // Separate request: the counts are independent of page, sort and the selected severity, so
   // they resolve on their own and the list does not wait on the aggregation.
-  const { data: countsData } = useFetchSeverityCounts({ query: searchQuery });
+  const { data: countsData } = useFetchSeverityCounts({ query: searchQuery, alertId });
 
   const investigations = useMemo(() => data?.results ?? [], [data]);
   const severityCounts = useMemo(

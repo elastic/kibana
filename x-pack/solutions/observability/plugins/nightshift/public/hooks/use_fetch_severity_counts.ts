@@ -14,6 +14,7 @@ export const NIGHTSHIFT_SEVERITY_COUNTS_QUERY_KEY = ['nightshift.severityCounts'
 
 export interface FetchSeverityCountsParams {
   query?: string;
+  alertId?: string;
 }
 
 /**
@@ -24,14 +25,14 @@ export interface FetchSeverityCountsParams {
  * query key means paging through the list reuses the cached counts, and the list renders without
  * waiting on the aggregation.
  */
-export const useFetchSeverityCounts = ({ query }: FetchSeverityCountsParams = {}): UseQueryResult<
-  SeverityCountsResponse,
-  Error
-> => {
+export const useFetchSeverityCounts = ({
+  query,
+  alertId,
+}: FetchSeverityCountsParams = {}): UseQueryResult<SeverityCountsResponse, Error> => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return useQuery<SeverityCountsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_SEVERITY_COUNTS_QUERY_KEY, query],
+    queryKey: [...NIGHTSHIFT_SEVERITY_COUNTS_QUERY_KEY, query, alertId],
     // investigationsClient is undefined when the plugin is unavailable (optional dep)
     enabled: investigationsClient != null,
     queryFn: async ({ signal }) => {
@@ -42,7 +43,12 @@ export const useFetchSeverityCounts = ({ query }: FetchSeverityCountsParams = {}
       return investigationsClient.fetch(
         'GET /internal/nightshift/investigations/_severity_counts',
         {
-          params: { query: { ...(query ? { query } : {}) } },
+          params: {
+            query: {
+              ...(query ? { query } : {}),
+              ...(alertId ? { concurrency_key: alertId, subject_types: ['alert'] as const } : {}),
+            },
+          },
           signal: signal ?? null,
         }
       );

@@ -38,22 +38,41 @@ function InvestigateAlertActionItem({
   alertId?: string;
   onActionExecuted: () => void;
 }) {
-  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
-    useInvestigateAlert({
-      alertId,
-      onInvestigate: onActionExecuted,
-    });
+  const {
+    showInvestigateAction,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+  } = useInvestigateAlert({
+    alertId,
+    onInvestigate: onActionExecuted,
+  });
 
-  if (!showInvestigateAction) return null;
+  if (!showInvestigateAction && !viewInvestigationUrl) return null;
 
   return (
-    <EuiContextMenuItem
-      data-test-subj="investigateAlert"
-      disabled={isInvestigating}
-      onClick={handleInvestigate}
-    >
-      {investigateActionLabel}
-    </EuiContextMenuItem>
+    <>
+      {viewInvestigationUrl && (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertInvestigation"
+          href={viewInvestigationUrl}
+          onClick={onActionExecuted}
+        >
+          {viewInvestigationActionLabel}
+        </EuiContextMenuItem>
+      )}
+      {showInvestigateAction && (
+        <EuiContextMenuItem
+          data-test-subj="investigateAlert"
+          disabled={isInvestigating}
+          onClick={handleInvestigate}
+        >
+          {investigateActionLabel}
+        </EuiContextMenuItem>
+      )}
+    </>
   );
 }
 

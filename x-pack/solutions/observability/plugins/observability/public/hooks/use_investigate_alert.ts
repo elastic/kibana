@@ -7,15 +7,18 @@
 
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
 
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
+  statuses: ['pending', 'running', 'completed'] as const,
+  subject_types: ['alert'] as const,
   sort_field: 'created_at' as const,
   sort_order: 'desc' as const,
-  size: 1,
+  size: 2,
 });
 
 export const useInvestigateAlert = ({
@@ -25,7 +28,7 @@ export const useInvestigateAlert = ({
   alertId?: string;
   onInvestigate?: () => void;
 }) => {
-  const { http, notifications } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const investigationsClient = getInvestigationsClient();
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
   const queryClient = useQueryClient();
@@ -47,10 +50,10 @@ export const useInvestigateAlert = ({
         signal: signal ?? null,
         params: { query: getStatusQuery(alertId ?? '') },
       }),
-    enabled: canInvestigate && availability?.available === true,
+    enabled: canInvestigate,
     retry: false,
     refetchInterval: (data) =>
-      data?.results[0]?.status === 'pending' || data?.results[0]?.status === 'running'
+      data?.results.some(({ status }) => status === 'pending' || status === 'running')
         ? 5_000
         : false,
   });
@@ -59,6 +62,18 @@ export const useInvestigateAlert = ({
   const hasOngoingInvestigation = latestStatus === 'pending' || latestStatus === 'running';
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
+  const viewInvestigationUrl =
+    alertId && investigations?.results.some(({ status }) => status === 'completed')
+      ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+          path: `?${new URLSearchParams({ alertId }).toString()}`,
+        })
+      : undefined;
+  const viewInvestigationActionLabel = i18n.translate(
+    'xpack.observability.alerts.viewInvestigationButtonLabel',
+    {
+      defaultMessage: 'View investigation',
+    }
+  );
   const investigateActionLabel = isInvestigating
     ? i18n.translate('xpack.observability.alerts.investigating', {
         defaultMessage: 'Investigating',
@@ -101,5 +116,12 @@ export const useInvestigateAlert = ({
     }
   };
 
-  return { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel };
+  return {
+    showInvestigateAction,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+  };
 };

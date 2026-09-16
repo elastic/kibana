@@ -172,11 +172,17 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
-  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
-    useInvestigateAlert({
-      alertId,
-      onInvestigate: () => setIsPopoverOpen(false),
-    });
+  const {
+    showInvestigateAction,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+  } = useInvestigateAlert({
+    alertId,
+    onInvestigate: () => setIsPopoverOpen(false),
+  });
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
@@ -244,6 +250,19 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {viewInvestigationUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        iconType="eye"
+                        href={viewInvestigationUrl}
+                        onClick={handleClosePopover}
+                        data-test-subj="alertDetailsViewInvestigation"
+                      >
+                        <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     {showInvestigateAction && (
                       <EuiButtonEmpty
