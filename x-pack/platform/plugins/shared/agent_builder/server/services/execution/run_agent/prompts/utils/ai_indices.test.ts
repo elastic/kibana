@@ -65,7 +65,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('renders each catalog entry with its ES|QL target and description', () => {
+  it('renders each catalog entry with its registry ID, ES|QL target, and description', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: defaultCatalog,
@@ -74,7 +74,7 @@ describe('getAiIndicesInstructions', () => {
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `sml-main` — Summaries of Kibana resources such as dashboards and connectors.'
+      '- Registry ID: `elastic`; ES|QL target: `sml-main` — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 
@@ -88,8 +88,10 @@ describe('getAiIndicesInstructions', () => {
       spaceId: 'default',
     });
 
-    expect(instructions).toContain('- `sml-main`');
-    expect(instructions).toContain('- `ai-index-idx-custom` — Support tickets.');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: `sml-main`');
+    expect(instructions).toContain(
+      '- Registry ID: `my-custom`; ES|QL target: `ai-index-idx-custom` — Support tickets.'
+    );
   });
 
   it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
@@ -100,7 +102,7 @@ describe('getAiIndicesInstructions', () => {
     });
 
     expect(instructions).toContain('Available to this agent:');
-    expect(instructions).toContain('- `sml-main`');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: `sml-main`');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
@@ -117,15 +119,15 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('unresolved-custom');
   });
 
-  it('renders a target-only line for an entry without a description', () => {
+  it('renders both identifiers for an entry without a description', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: [{ id: 'bare-id', esqlTarget: 'bare-id' }],
       spaceId: 'default',
     });
 
-    expect(instructions).toContain('- `bare-id`');
-    expect(instructions).not.toContain('- `bare-id` —');
+    expect(instructions).toContain('- Registry ID: `bare-id`; ES|QL target: `bare-id`');
+    expect(instructions).not.toContain('`bare-id` —');
   });
 
   it('names no SML tool, so the section survives their replacement by ES|QL', () => {

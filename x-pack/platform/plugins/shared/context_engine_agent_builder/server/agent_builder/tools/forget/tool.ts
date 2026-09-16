@@ -26,7 +26,9 @@ import {
 } from '../memory_document';
 
 const forgetSchema = z.object({
-  aiIndexId: aiIndexIdFieldSchema.describe('The Context Engine AI index containing the memory'),
+  aiIndexId: aiIndexIdFieldSchema.describe(
+    'The Context Engine AI-index registry ID containing the memory. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
+  ),
   id: z.string().min(1).max(MAX_KI_ID_LENGTH).describe('The id of the memory to remove'),
 });
 

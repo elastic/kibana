@@ -95,6 +95,9 @@ describe('remember tool', () => {
     expect(tool.id).toBe(CONTEXT_ENGINE_REMEMBER_TOOL_ID);
     expect(tool.schema.safeParse(params).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, type: 'document' }).success).toBe(false);
+    expect(tool.schema.shape.aiIndexId.description).toContain(
+      'not the backing Elasticsearch index or data stream name'
+    );
     expect(
       kiFieldsSchema.shape.attributes.safeParse({ 'memory.session_id': 'conversation-1' }).success
     ).toBe(true);
