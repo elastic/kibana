@@ -22,6 +22,8 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { EventActor } from '@kbn/agent-builder-common';
+import { EventActorType } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -59,8 +61,13 @@ import type {
   ModelProvider,
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentChange,
+  AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from '../../../conversation/client/rounds_to_events';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
@@ -94,6 +101,45 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
   );
 };
 
+/** Actor for `chat_input` attachment events: mirrors `userMessageActor` from the round's author/origin. */
+const chatInputActor = (round: ConversationRound): EventActor => ({
+  type: round.origin ? EventActorType.external : EventActorType.user,
+  id: round.author?.id ?? 'unknown',
+  ...(round.author?.username ? { username: round.author.username } : {}),
+  ...(round.author?.full_name ? { full_name: round.author.full_name } : {}),
+  ...(round.origin ? { origin: round.origin } : {}),
+});
+
+const buildAttachmentEvents = ({
+  round,
+  chatInputChanges,
+  executionChanges,
+  agentId,
+  createdAt,
+}: {
+  round: ConversationRound;
+  chatInputChanges: AttachmentChange[];
+  executionChanges: AttachmentChange[];
+  agentId: string;
+  createdAt: string;
+}) => {
+  const executionId = `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`;
+  return [
+    ...attachmentChangesToEvents(chatInputChanges, {
+      source: 'chat_input',
+      actor: chatInputActor(round),
+      execution_id: executionId,
+      created_at: createdAt,
+    }),
+    ...attachmentChangesToEvents(executionChanges, {
+      source: 'execution',
+      actor: { type: EventActorType.agent, id: agentId },
+      execution_id: executionId,
+      created_at: createdAt,
+    }),
+  ];
+};
+
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
@@ -112,6 +158,8 @@ export const addRoundCompleteEvent = ({
   initialTodos,
   relevantSkillsSelection,
   getWorkspaceId,
+  chatInputChanges,
+  agentId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -147,6 +195,13 @@ export const addRoundCompleteEvent = ({
   relevantSkillsSelection?: RelevantSkillSelection;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
+  /**
+   * Attachment changes caused by the incoming message (drained from the state manager right after
+   * `prepareConversation`). Emitted as `chat_input` attachment events.
+   */
+  chatInputChanges: AttachmentChange[];
+  /** Agent running this round; actor of the `execution` attachment events. */
+  agentId: string;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(shareReplay());
@@ -214,6 +269,14 @@ export const addRoundCompleteEvent = ({
             }
           }
 
+          const attachmentEvents = buildAttachmentEvents({
+            round,
+            chatInputChanges,
+            executionChanges: attachmentStateManager.drainChanges(),
+            agentId,
+            createdAt: (endTime ?? new Date()).toISOString(),
+          });
+
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -223,6 +286,7 @@ export const addRoundCompleteEvent = ({
               ...(resumeExecution ? { resume_execution: resumeExecution } : {}),
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
               ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };

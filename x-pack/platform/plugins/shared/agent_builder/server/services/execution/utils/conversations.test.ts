@@ -8,6 +8,7 @@
 import { lastValueFrom, of, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type {
+  AttachmentTimelineEvent,
   ChatEvent,
   Conversation,
   ConversationRoundAuthor,
@@ -39,6 +40,21 @@ import {
   persistRoundInput,
   updateConversation$,
 } from './conversations';
+
+const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
+  id,
+  type: TimelineEventType.attachmentAdded,
+  created_at: '2024-01-01T00:00:10.000Z',
+  actor: { type: 'user', id: 'u1' } as never,
+  execution_id: 'round-1::execution',
+  data: {
+    attachment_id: 'att-1',
+    attachment_type: 'text',
+    current_version: 1,
+    render_inline: false,
+    source: 'chat_input',
+  },
+});
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
@@ -278,6 +294,46 @@ describe('conversations utils', () => {
       });
     };
 
+    it('appends attachment_events after the rounds-path upsert', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ id: 'conv-1', rounds: [] });
+      const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
+      const attachmentEvent = attachmentAddedEvent();
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await runUpdate({
+        conversationClient,
+        conversation,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false, attachment_events: [attachmentEvent] },
+        },
+      });
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledWith(
+        { id: 'conv-1', events: [attachmentEvent] },
+        { access: 'converse' }
+      );
+      // ordering: the round is upserted before the events are appended
+      expect(conversationClient.upsertRound.mock.invocationCallOrder[0]).toBeLessThan(
+        conversationClient.appendEvents.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not call appendEvents when the round produced no attachment events', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ rounds: [] });
+      await runUpdate({
+        conversationClient,
+        conversation,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({ id: 'r' }), resumed: false },
+        },
+      });
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
     describe('action parameter', () => {
       it('names the superseded round when action=regenerate', async () => {
         const conversationClient = createConversationClientMock();
@@ -451,6 +507,29 @@ describe('conversations utils', () => {
   });
 
   describe('createConversation$', () => {
+    it('writes attachment_events into the created conversation events', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ id: 'conv-1' });
+      const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
+      conversationClient.create.mockResolvedValue(conversation);
+      const attachmentEvent = attachmentAddedEvent();
+
+      await lastValueFrom(
+        createConversation$({
+          conversation,
+          conversationClient,
+          title$: of('t'),
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false, attachment_events: [attachmentEvent] },
+          }),
+        }).pipe(toArray())
+      );
+
+      const [args] = conversationClient.create.mock.calls[0];
+      expect(args.events).toEqual([attachmentEvent]);
+    });
+
     it('emits execution_terminated before conversation_created (legacy fallback for a doc without schema_version)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = createEmptyConversation({ id: 'conv-1' });
@@ -630,6 +709,28 @@ describe('conversations utils', () => {
         }).pipe(toArray())
       );
     };
+
+    it('appends attachment_events after the projected round events in the same write', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      const round = createRound({ id: 'round-1', status: ConversationRoundStatus.completed });
+      const attachmentEvent = attachmentAddedEvent();
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false, attachment_events: [attachmentEvent] },
+        },
+      });
+
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      const ids = args.events.map((e: { id: string }) => e.id);
+      expect(ids[ids.length - 1]).toBe('att-evt-1');
+      expect(ids).toContain('round-1::execution_terminated');
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
 
     it('replaces the round events with the full canonical projection and folds title + status into the same write for CREATE', async () => {
       const conversationClient = createConversationClientMock();
@@ -944,6 +1045,27 @@ describe('conversations utils', () => {
           input: { prompts: { 'tools.my_tool.confirmation': { allow: true } } },
         }).pipe(toArray())
       );
+
+    it('appends attachment_events re-stamped with the resume execution id', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = pausedConversation();
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      const attachmentEvent = attachmentAddedEvent();
+
+      await run(conversation, conversationClient, {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+          resumed: true,
+          resume_execution: { follow_up_round: followUpRound() },
+          attachment_events: [attachmentEvent],
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      const last = args.events[args.events.length - 1];
+      expect(last).toEqual({ ...attachmentEvent, execution_id: 'round-1::execution::1' });
+    });
 
     it('appends a prompt_response + a new exec_1 without touching exec_0', async () => {
       const conversationClient = createConversationClientMock();

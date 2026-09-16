@@ -169,6 +169,9 @@ export const prepareConversation = async ({
   }
 
   attachmentStateManager.clearAccessTracking();
+  // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
+  // only the next input's attachments surface as chat_input attachment events.
+  attachmentStateManager.clearChanges();
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
   await mergeAttachmentInputs({
     stateManager: attachmentStateManager,

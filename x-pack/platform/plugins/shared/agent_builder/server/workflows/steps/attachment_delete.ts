@@ -34,6 +34,7 @@ export const deleteAttachmentStepDefinition = ({
           conversationId: input.conversation_id,
           attachmentId: input.attachment_id,
           permanent: input.permanent,
+          source: 'workflow',
         });
 
         return {

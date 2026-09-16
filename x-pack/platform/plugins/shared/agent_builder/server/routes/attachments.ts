@@ -317,6 +317,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Whether the attachment should be hidden from the user.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -339,7 +346,11 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          const attachment = await client.create({ conversationId, ...request.body });
+          const attachment = await client.create({
+            conversationId,
+            source: 'http_api',
+            ...request.body,
+          });
           return response.ok<CreateAttachmentResponse>({ body: { attachment } });
         } catch (e) {
           if (isAgentBuilderError(e)) {
@@ -396,6 +407,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Optional new description for the attachment.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -421,6 +439,7 @@ export function registerAttachmentRoutes({
           const updated = await client.update({
             conversationId,
             attachmentId,
+            source: 'http_api',
             ...request.body,
           });
           return response.ok<UpdateAttachmentResponse>({
@@ -504,7 +523,7 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          await client.delete({ conversationId, attachmentId, permanent });
+          await client.delete({ conversationId, attachmentId, permanent, source: 'http_api' });
           return response.ok<DeleteAttachmentResponse>({
             body: { success: true, permanent: permanent ?? false },
           });

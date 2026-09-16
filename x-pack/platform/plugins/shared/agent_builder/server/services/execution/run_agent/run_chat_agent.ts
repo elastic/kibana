@@ -207,6 +207,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
   });
+  // Everything in the log at this point came from the incoming message's attachments; anything
+  // recorded from here on is made by tools during the round.
+  const chatInputChanges = context.attachmentStateManager.drainChanges();
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
@@ -483,6 +486,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       initialTodos,
       relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+      chatInputChanges,
+      agentId: agentId ?? conversation?.agent_id ?? 'unknown',
     }),
     evictInternalEvents(),
     shareReplay()

@@ -40,6 +40,9 @@ export const upsertRound = (
  *
  * Compared structurally, not by `current_version`: `description`, `hidden`,
  * `readonly` and soft deletes all mutate an attachment without bumping it.
+ *
+ * Entries in `snapshot` that `produced` no longer carries were permanently deleted by the
+ * producer and are dropped.
  */
 export const reconcileAttachments = ({
   snapshot,
@@ -51,7 +54,15 @@ export const reconcileAttachments = ({
   produced: VersionedAttachment[];
 }): VersionedAttachment[] => {
   const before = new Map(snapshot.map((attachment) => [attachment.id, attachment]));
+  const producedIds = new Set(produced.map(({ id }) => id));
   const reconciled = new Map(stored.map((attachment) => [attachment.id, attachment]));
+
+  // the producer started from it and no longer carries it: a permanent delete
+  for (const id of before.keys()) {
+    if (!producedIds.has(id)) {
+      reconciled.delete(id);
+    }
+  }
 
   for (const attachment of produced) {
     // unequal means created or changed; untouched entries defer to `stored`

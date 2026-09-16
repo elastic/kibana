@@ -1257,4 +1257,125 @@ describe('prepareConversation', () => {
       ]);
     });
   });
+
+  describe('attachment change log (chat_input drain)', () => {
+    it('leaves no changes behind for legacy attachments re-migrated from previous rounds', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: {
+            message: 'Previous message',
+            attachments: [{ id: 'legacy-1', type: 'text', data: { content: 'old' } }],
+          },
+        }),
+      ];
+
+      const result = await prepareConversation({
+        previousRounds,
+        nextInput: { message: 'New message' },
+        context: mockContext,
+      });
+
+      // The legacy attachment was promoted into the state manager...
+      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toEqual(['legacy-1']);
+      // ...but re-migration of history must never surface as an attachment event.
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('leaves no changes behind for legacy attachments on standalone user messages', async () => {
+      const standaloneUserMessage = {
+        id: 'standalone-message-1',
+        type: 'user_message',
+        created_at: '2024-01-02T00:00:00.000Z',
+        actor: { type: 'user', id: 'u1' },
+        data: {
+          message: 'posted without agent',
+          attachments: [{ id: 'standalone-1', type: 'text', data: { content: 'x' } }],
+        },
+      } as unknown as TimelineEvent;
+
+      const result = await prepareConversationFromTimeline({
+        timeline: [
+          ...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]),
+          standaloneUserMessage,
+        ],
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain('standalone-1');
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('surfaces only the next input attachments as changes', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: {
+            message: 'Previous message',
+            attachments: [{ id: 'legacy-1', type: 'text', data: { content: 'old' } }],
+          },
+        }),
+      ];
+
+      const result = await prepareConversation({
+        previousRounds,
+        nextInput: {
+          message: 'Hello',
+          attachments: [{ id: 'fresh-1', type: 'text', data: { content: 'new' } }],
+        },
+        context: mockContext,
+      });
+
+      expect(result.attachmentStateManager.drainChanges()).toEqual([
+        { kind: 'added', attachment_id: 'fresh-1', attachment_type: 'text', current_version: 1 },
+      ]);
+      // drain is destructive
+      expect(result.attachmentStateManager.drainChanges()).toEqual([]);
+    });
+
+    it('records an updated change when the next input re-sends an existing id with new content', async () => {
+      const existing: VersionedAttachment = {
+        id: 'a-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: { content: 'v1' },
+            created_at: '2024-01-01T00:00:00.000Z',
+            content_hash: 'hash-v1',
+            estimated_tokens: 1,
+          },
+        ],
+      };
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
+        },
+        context: mockContext,
+      });
+
+      expect(result.attachmentStateManager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: 'a-1',
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
+      ]);
+    });
+  });
 });

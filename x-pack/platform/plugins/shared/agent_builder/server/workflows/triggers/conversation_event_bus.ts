@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 
 export interface ConversationMetadataPatchedPayload {
   conversationId: string;
@@ -14,18 +15,30 @@ export interface ConversationMetadataPatchedPayload {
   changedFields: string[];
 }
 
+export interface ConversationAttachmentEventsPayload {
+  conversationId: string;
+  events: AttachmentTimelineEvent[];
+}
+
 type MetadataPatchedListener = (
   request: KibanaRequest,
   payload: ConversationMetadataPatchedPayload
 ) => void;
 
+type AttachmentEventsListener = (
+  request: KibanaRequest,
+  payload: ConversationAttachmentEventsPayload
+) => void;
+
 /**
  * Lightweight event bus for conversation lifecycle events.
- * Listeners registered here are called after a successful metadata write.
+ * Listeners registered here are called after a successful conversation write.
  */
 export interface ConversationEventBus {
   onMetadataPatched(listener: MetadataPatchedListener): void;
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
+  onAttachmentEvents(listener: AttachmentEventsListener): void;
+  emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
 }
 
 export const createConversationEventBus = (): ConversationEventBus =>
@@ -33,6 +46,7 @@ export const createConversationEventBus = (): ConversationEventBus =>
 
 class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
+  private readonly attachmentEventsListeners: AttachmentEventsListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -40,6 +54,16 @@ class ConversationEventBusImpl implements ConversationEventBus {
 
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void {
     for (const listener of this.metadataPatchedListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onAttachmentEvents(listener: AttachmentEventsListener): void {
+    this.attachmentEventsListeners.push(listener);
+  }
+
+  emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void {
+    for (const listener of this.attachmentEventsListeners) {
       listener(request, payload);
     }
   }

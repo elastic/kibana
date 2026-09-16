@@ -170,6 +170,7 @@ export type {
 } from './plugin_contract';
 export type {
   AttachmentPublicClient,
+  AttachmentPublicClientSource,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,

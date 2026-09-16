@@ -40,6 +40,7 @@ import {
   resumeExecutionToEvents,
   executionTerminatedEventId,
   nextResumeIndex,
+  resumeExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -148,6 +149,9 @@ export const createConversation$ = ({
         state: roundCompletedEvent.data.conversation_state,
         status: round.status,
         rounds: [round],
+        ...(roundCompletedEvent.data.attachment_events?.length
+          ? { events: roundCompletedEvent.data.attachment_events }
+          : {}),
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
         ...(conversation.parent_conversation
           ? { parent_conversation: conversation.parent_conversation }
@@ -206,24 +210,36 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      const roundUpserted$ = conversationClient.upsertRound(
-        {
-          id: conversation.id,
-          round,
-          replacesRoundId,
-          state: conversation_state,
-          ...(roundCompletedEvent.data.attachments
-            ? {
-                attachments: {
-                  snapshot: conversation.attachments ?? [],
-                  produced: roundCompletedEvent.data.attachments,
-                },
-              }
-            : {}),
-          workspaceId: roundCompletedEvent.data.workspace_id,
-        },
-        { access: 'converse' }
-      );
+      const attachmentEvents = roundCompletedEvent.data.attachment_events ?? [];
+      const roundUpserted$ = conversationClient
+        .upsertRound(
+          {
+            id: conversation.id,
+            round,
+            replacesRoundId,
+            state: conversation_state,
+            ...(roundCompletedEvent.data.attachments
+              ? {
+                  attachments: {
+                    snapshot: conversation.attachments ?? [],
+                    produced: roundCompletedEvent.data.attachments,
+                  },
+                }
+              : {}),
+            workspaceId: roundCompletedEvent.data.workspace_id,
+          },
+          { access: 'converse' }
+        )
+        .then((upserted) =>
+          // Rounds-path writes carry no events; attachment events are additive so a follow-up
+          // append is safe (append-only timeline, ids are uuids and never round-derived).
+          attachmentEvents.length > 0
+            ? conversationClient.appendEvents(
+                { id: conversation.id, events: attachmentEvents },
+                { access: 'converse' }
+              )
+            : upserted
+        );
 
       const persisted$: Observable<Conversation> = title$
         ? forkJoin({ updated: from(roundUpserted$), title: title$ }).pipe(
@@ -344,7 +360,10 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          const events: TimelineEvent[] = roundToEvents(round, conversation);
+          const events: TimelineEvent[] = [
+            ...roundToEvents(round, conversation),
+            ...(roundCompletedEvent.data.attachment_events ?? []),
+          ];
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
@@ -459,12 +478,18 @@ export const appendResumeExecution$ = ({
             conversation,
           });
 
+          // Attachment events were stamped with the initial execution id at round-complete time;
+          // for a resume they belong to exec_k.
+          const attachmentEvents = (roundCompletedEvent.data.attachment_events ?? []).map(
+            (event) => ({ ...event, execution_id: resumeExecutionId(round.id, resumeIndex) })
+          );
+
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
           const persisted = await conversationClient.appendEvents(
             {
               id: conversation.id,
-              events: [promptResponse, ...executionEvents],
+              events: [promptResponse, ...executionEvents, ...attachmentEvents],
               status: round.status,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               ...(conversationState ? { state: conversationState } : {}),

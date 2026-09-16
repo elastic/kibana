@@ -172,6 +172,28 @@ describe('reconcileAttachments', () => {
     ).toEqual([]);
   });
 
+  it('removes an attachment the producer started from and dropped (permanent delete)', () => {
+    const kept = attachment('kept');
+    const purged = attachment('purged');
+
+    expect(
+      reconcileAttachments({
+        snapshot: [kept, purged],
+        stored: [kept, purged],
+        produced: [kept],
+      })
+    ).toEqual([kept]);
+  });
+
+  it('keeps a stored attachment the producer never saw (concurrent add)', () => {
+    const kept = attachment('kept');
+    const concurrent = attachment('concurrent');
+
+    expect(
+      reconcileAttachments({ snapshot: [kept], stored: [kept, concurrent], produced: [kept] })
+    ).toEqual([kept, concurrent]);
+  });
+
   it('keeps both an operation edit and a concurrent edit to different attachments', () => {
     const untouched = attachment('untouched', { description: 'before' });
     const concurrentlyRenamed = attachment('untouched', { description: 'after' });

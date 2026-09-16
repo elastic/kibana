@@ -43,6 +43,7 @@ const buildDeps = () => {
   const conversationClient = {
     get: jest.fn(),
     update: jest.fn().mockResolvedValue(undefined),
+    appendEvents: jest.fn().mockResolvedValue(undefined),
   };
   const conversationsService = {
     getScopedClient: jest.fn().mockResolvedValue(conversationClient),
@@ -143,25 +144,58 @@ describe('createAttachmentPublicClient', () => {
   });
 
   describe('create', () => {
-    it('adds the attachment, persists the conversation and returns the record', async () => {
+    it('adds the attachment and persists it with an attachment_added event in one write', async () => {
       const deps = buildDeps();
-      deps.conversationClient.get.mockResolvedValue({
-        id: 'c1',
-        attachments: [],
-        rounds: [],
-      });
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
 
       const client = deps.build();
       const created = await client.create({
         conversationId: 'c1',
         type: 'text',
         data: { text: 'hello' },
+        source: 'workflow',
+        render_inline: true,
       });
 
       expect(created.type).toBe('text');
-      expect(deps.conversationClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'c1' })
-      );
+      expect(deps.conversationClient.update).not.toHaveBeenCalled();
+      expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'owner' });
+      expect(request.id).toBe('c1');
+      expect(request.attachments).toEqual({
+        snapshot: [],
+        produced: [expect.objectContaining({ id: created.id })],
+      });
+      expect(request.events).toEqual([
+        expect.objectContaining({
+          type: 'attachment_added',
+          actor: { type: 'system', id: 'system' },
+          data: {
+            attachment_id: created.id,
+            attachment_type: 'text',
+            current_version: 1,
+            render_inline: true,
+            source: 'workflow',
+          },
+        }),
+      ]);
+    });
+
+    it('defaults render_inline to false', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      await client.create({
+        conversationId: 'c1',
+        type: 'text',
+        data: { text: 'hello' },
+        source: 'http_api',
+      });
+
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events[0].data).toMatchObject({ render_inline: false, source: 'http_api' });
     });
 
     it('throws AttachmentConflictError when the id already exists', async () => {
@@ -176,7 +210,13 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.create({ conversationId: 'c1', id: 'a1', type: 'text', data: { text: 'x' } })
+        client.create({
+          conversationId: 'c1',
+          id: 'a1',
+          type: 'text',
+          data: { text: 'x' },
+          source: 'http_api',
+        })
       ).rejects.toMatchObject({ code: 'attachmentAlreadyExists' });
     });
 
@@ -196,13 +236,18 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.create({ conversationId: 'c1', type: 'text', data: { wrong: true } })
+        client.create({
+          conversationId: 'c1',
+          type: 'text',
+          data: { wrong: true },
+          source: 'http_api',
+        })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
   });
 
   describe('update', () => {
-    it('updates and returns the attachment', async () => {
+    it('persists a content change with an attachment_updated event', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -215,12 +260,48 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         attachmentId: 'a1',
         data: { text: 'new' },
+        source: 'http_api',
       });
 
       expect(updated.id).toBe('a1');
-      expect(deps.conversationClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'c1' })
-      );
+      expect(deps.conversationClient.update).not.toHaveBeenCalled();
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events).toEqual([
+        expect.objectContaining({
+          type: 'attachment_updated',
+          data: {
+            attachment_id: 'a1',
+            attachment_type: 'text',
+            previous_version: 1,
+            current_version: 2,
+            render_inline: false,
+            source: 'http_api',
+          },
+        }),
+      ]);
+    });
+
+    it('persists a description-only change without any event', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1' })],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      await client.update({
+        conversationId: 'c1',
+        attachmentId: 'a1',
+        description: 'renamed',
+        source: 'http_api',
+      });
+
+      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(deps.conversationClient.update).toHaveBeenCalledWith({
+        id: 'c1',
+        attachments: [expect.objectContaining({ id: 'a1', description: 'renamed' })],
+      });
     });
 
     it('throws AttachmentNotFoundError when the attachment is missing', async () => {
@@ -238,6 +319,7 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           attachmentId: 'missing',
           data: { text: 'x' },
+          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
@@ -257,13 +339,14 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           attachmentId: 'a1',
           data: { text: 'x' },
+          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
   });
 
   describe('delete', () => {
-    it('soft-deletes and persists when no options are passed', async () => {
+    it('soft-deletes and emits attachment_deleted with hard_delete=false', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -272,11 +355,24 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      await client.delete({ conversationId: 'c1', attachmentId: 'a1' });
+      await client.delete({ conversationId: 'c1', attachmentId: 'a1', source: 'http_api' });
 
-      expect(deps.conversationClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'c1' })
-      );
+      expect(deps.conversationClient.update).not.toHaveBeenCalled();
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.attachments.produced).toEqual([
+        expect.objectContaining({ id: 'a1', active: false }),
+      ]);
+      expect(request.events).toEqual([
+        expect.objectContaining({
+          type: 'attachment_deleted',
+          data: {
+            attachment_id: 'a1',
+            attachment_type: 'text',
+            hard_delete: false,
+            source: 'http_api',
+          },
+        }),
+      ]);
     });
 
     it('throws AttachmentNotFoundError when the attachment is missing', async () => {
@@ -290,7 +386,7 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.delete({ conversationId: 'c1', attachmentId: 'missing' })
+        client.delete({ conversationId: 'c1', attachmentId: 'missing', source: 'http_api' })
       ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
 
@@ -305,11 +401,11 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.delete({ conversationId: 'c1', attachmentId: 'sc' })
+        client.delete({ conversationId: 'c1', attachmentId: 'sc', source: 'http_api' })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
 
-    it('permanent delete succeeds when unreferenced and no client_id', async () => {
+    it('permanent delete drops the record and emits hard_delete=true', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -318,9 +414,44 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      await client.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true });
+      await client.delete({
+        conversationId: 'c1',
+        attachmentId: 'a1',
+        permanent: true,
+        source: 'workflow',
+      });
 
-      expect(deps.conversationClient.update).toHaveBeenCalled();
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.attachments).toEqual({
+        snapshot: [expect.objectContaining({ id: 'a1' })],
+        produced: [],
+      });
+      expect(request.events[0].data).toEqual({
+        attachment_id: 'a1',
+        attachment_type: 'text',
+        hard_delete: true,
+        source: 'workflow',
+      });
+    });
+
+    it('permanent delete of an already soft-deleted attachment persists without an event', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1', active: false })],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      await client.delete({
+        conversationId: 'c1',
+        attachmentId: 'a1',
+        permanent: true,
+        source: 'http_api',
+      });
+
+      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(deps.conversationClient.update).toHaveBeenCalledWith({ id: 'c1', attachments: [] });
     });
 
     it('permanent delete throws attachmentPermanentDeleteBlocked when attachment has client_id', async () => {
@@ -334,7 +465,12 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true })
+        client.delete({
+          conversationId: 'c1',
+          attachmentId: 'a1',
+          permanent: true,
+          source: 'http_api',
+        })
       ).rejects.toMatchObject({
         code: 'attachmentPermanentDeleteBlocked',
         meta: { reason: 'client_id' },

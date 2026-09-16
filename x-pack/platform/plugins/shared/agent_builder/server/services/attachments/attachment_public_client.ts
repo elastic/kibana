@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import {
@@ -16,9 +17,18 @@ import {
   createAttachmentPermanentDeleteBlockedError,
   createAttachmentInvalidError,
 } from '@kbn/agent-builder-common';
-import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { ConversationService } from '../conversation';
+import type {
+  AttachmentPublicClient,
+  AttachmentPublicClientSource,
+  ListAttachmentsResult,
+} from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import {
+  attachmentChangesToEvents,
+  createAttachmentStateManager,
+  systemEventActor,
+} from '@kbn/agent-builder-server/attachments';
+import type { ConversationClient, ConversationService } from '../conversation';
 import type { AttachmentServiceStart } from './types';
 import { hasClientId, isAttachmentReferencedInRounds } from './attachment_guards';
 
@@ -46,6 +56,46 @@ export const createAttachmentPublicClient = ({
     return { conversation, conversationClient, stateManager };
   };
 
+  /**
+   * Persists the state manager's attachments and, when something was created, versioned or
+   * deleted, the matching attachment events in the same write. Metadata-only changes have no
+   * event and fall back to a plain attachments update.
+   */
+  const persist = async ({
+    conversation,
+    conversationClient,
+    stateManager,
+    source,
+    renderInline = false,
+  }: {
+    conversation: Conversation;
+    conversationClient: ConversationClient;
+    stateManager: AttachmentStateManager;
+    source: AttachmentPublicClientSource;
+    renderInline?: boolean;
+  }) => {
+    const changes = stateManager.drainChanges();
+    if (changes.length === 0) {
+      await conversationClient.update({ id: conversation.id, attachments: stateManager.getAll() });
+      return;
+    }
+    const events = attachmentChangesToEvents(changes, {
+      source,
+      actor: systemEventActor,
+      render_inline: renderInline,
+    });
+    // `appendEvents` defaults to `converse` access; `owner` keeps the permission check identical
+    // to the `update` call it replaces.
+    await conversationClient.appendEvents(
+      {
+        id: conversation.id,
+        events,
+        attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
+      },
+      { access: 'owner' }
+    );
+  };
+
   return {
     async list({ conversationId, includeDeleted }): Promise<ListAttachmentsResult> {
       const { stateManager } = await loadState(conversationId);
@@ -65,8 +115,18 @@ export const createAttachmentPublicClient = ({
       return record;
     },
 
-    async create({ conversationId, id, type, data, origin, description, hidden }) {
-      const { conversationClient, stateManager } = await loadState(conversationId);
+    async create({
+      conversationId,
+      id,
+      type,
+      data,
+      origin,
+      description,
+      hidden,
+      source,
+      render_inline: renderInline,
+    }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
 
       if (id && stateManager.getAttachmentRecord(id)) {
         throw createAttachmentAlreadyExistsError({ attachmentId: id });
@@ -91,16 +151,20 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError((e as Error).message);
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager, source, renderInline });
 
       return attachment;
     },
 
-    async update({ conversationId, attachmentId, data, description }) {
-      const { conversationClient, stateManager } = await loadState(conversationId);
+    async update({
+      conversationId,
+      attachmentId,
+      data,
+      description,
+      source,
+      render_inline: renderInline,
+    }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
       if (!existing) {
@@ -128,15 +192,12 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError(`Failed to update attachment '${attachmentId}'`);
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager, source, renderInline });
 
       return updated;
     },
 
-    async delete({ conversationId, attachmentId, permanent }) {
+    async delete({ conversationId, attachmentId, permanent, source }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -177,10 +238,7 @@ export const createAttachmentPublicClient = ({
         }
       }
 
-      await conversationClient.update({
-        id: conversationId,
-        attachments: stateManager.getAll(),
-      });
+      await persist({ conversation, conversationClient, stateManager, source });
     },
   };
 };

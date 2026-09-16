@@ -807,6 +807,107 @@ describe('AttachmentStateManager', () => {
     });
   });
 
+  describe('change log', () => {
+    it('records added with current_version 1 on add()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'added', attachment_id: created.id, attachment_type: 'text', current_version: 1 },
+      ]);
+    });
+
+    it('drainChanges() clears the log', async () => {
+      await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.drainChanges();
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('clearChanges() discards recorded changes', async () => {
+      await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records updated with previous/current version when content changes', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'b' } });
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
+      ]);
+    });
+
+    it('records nothing on update() with identical content', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'a' } });
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records nothing on metadata-only update()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { description: 'renamed', hidden: true, readonly: true });
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records deleted with hard_delete false on soft delete()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'deleted', attachment_id: created.id, attachment_type: 'text', hard_delete: false },
+      ]);
+    });
+
+    it('records nothing when delete() targets an already inactive attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records deleted with hard_delete true on permanentDelete() of an active attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      manager.permanentDelete(created.id);
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'deleted', attachment_id: created.id, attachment_type: 'text', hard_delete: true },
+      ]);
+    });
+
+    it('records nothing on permanentDelete() of a tombstone', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.permanentDelete(created.id);
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records nothing on restore(), rename() and updateOrigin()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.restore(created.id);
+      manager.rename(created.id, 'new name');
+      await manager.updateOrigin(created.id, 'origin-1');
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('preserves insertion order across mixed mutations', async () => {
+      const a = await manager.add({ type: 'text', data: { content: 'a' } });
+      await manager.update(a.id, { data: { content: 'b' } });
+      manager.delete(a.id);
+      expect(manager.drainChanges().map((c) => c.kind)).toEqual(['added', 'updated', 'deleted']);
+    });
+  });
+
   describe('evaluateStalenessForActiveAttachments()', () => {
     beforeEach(() => {
       isStaleResult = false;

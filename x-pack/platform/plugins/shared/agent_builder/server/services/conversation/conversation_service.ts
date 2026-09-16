@@ -21,6 +21,7 @@ import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-co
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -101,6 +102,9 @@ export class ConversationServiceImpl implements ConversationService {
       onMetadataPatched: eventBus
         ? (payload) => eventBus.emitMetadataPatched(request, payload)
         : undefined,
+      onAttachmentEvents: eventBus
+        ? (payload) => eventBus.emitAttachmentEvents(request, payload)
+        : undefined,
     });
   }
 
@@ -129,6 +133,14 @@ export class ConversationServiceImpl implements ConversationService {
 
     const user = await this.getCurrentUser({ request });
     const author = await this.getConversationRoundAuthor({ request });
+    const actor = userMessageActor({ ...conversation, user }, { author });
+    const createdAt = new Date().toISOString();
+
+    const attachmentEvents = attachmentChangesToEvents(stateManager.drainChanges(), {
+      source: 'chat_input',
+      actor,
+      created_at: createdAt,
+    });
 
     await client.appendEvents({
       id: conversationId,
@@ -136,10 +148,11 @@ export class ConversationServiceImpl implements ConversationService {
         {
           id: uuidv4(),
           type: TimelineEventType.userMessage,
-          created_at: new Date().toISOString(),
-          actor: userMessageActor({ ...conversation, user }, { author }),
+          created_at: createdAt,
+          actor,
           data: { message: message.trim(), attachment_refs: stateManager.getAccessedRefs() },
         },
+        ...attachmentEvents,
       ],
       attachments: { snapshot, produced: stateManager.getAll() },
     });

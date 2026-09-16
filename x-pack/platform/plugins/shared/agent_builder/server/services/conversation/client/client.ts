@@ -37,9 +37,14 @@ import {
   createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
+  isAttachmentEvent,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  SerializedMetadataValue,
+  MetadataFieldValue,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
@@ -97,7 +102,10 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+import type {
+  ConversationAttachmentEventsPayload,
+  ConversationMetadataPatchedPayload,
+} from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -206,6 +214,7 @@ export const createClient = ({
   user,
   agentRegistry,
   onMetadataPatched,
+  onAttachmentEvents,
 }: {
   space: string;
   logger: Logger;
@@ -213,6 +222,7 @@ export const createClient = ({
   user: CurrentUser;
   agentRegistry: AgentRegistry;
   onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -223,6 +233,7 @@ export const createClient = ({
     agentRegistry,
     logger,
     onMetadataPatched,
+    onAttachmentEvents,
   });
 };
 
@@ -234,6 +245,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
   private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+  private readonly onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
 
   constructor({
     storage,
@@ -243,6 +255,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry,
     logger,
     onMetadataPatched,
+    onAttachmentEvents,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -251,6 +264,7 @@ class ConversationClientImpl implements ConversationClient {
     agentRegistry: AgentRegistry;
     logger: Logger;
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
+    onAttachmentEvents?: (payload: ConversationAttachmentEventsPayload) => void;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -259,6 +273,28 @@ class ConversationClientImpl implements ConversationClient {
     this.agentRegistry = agentRegistry;
     this.logger = logger;
     this.onMetadataPatched = onMetadataPatched;
+    this.onAttachmentEvents = onAttachmentEvents;
+  }
+
+  /**
+   * Notifies the attachment-events listener with the attachment events that were just persisted.
+   * Best-effort: listener failures are logged and never fail the write.
+   */
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: TimelineEvent[]): void {
+    if (!this.onAttachmentEvents) {
+      return;
+    }
+    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    if (attachmentEvents.length === 0) {
+      return;
+    }
+    try {
+      this.onAttachmentEvents({ conversationId, events: attachmentEvents });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify attachment events for conversation "${conversationId}": ${error}`
+      );
+    }
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
@@ -555,6 +591,8 @@ class ConversationClientImpl implements ConversationClient {
       throw error;
     }
 
+    this.notifyAttachmentEvents(id, conversation.events ?? []);
+
     return this.get(id);
   }
 
@@ -645,13 +683,17 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
     const { access } = options;
 
-    return this.writeConversation({
+    // `fields` may run more than once on OCC retry; the last run is the one that was written.
+    let writtenEvents: TimelineEvent[] = [];
+
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
+        writtenEvents = newEvents;
         const appended = [...currentEvents, ...newEvents];
         return {
           events: appended,
@@ -674,6 +716,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, writtenEvents);
+    return result;
   }
 
   async replaceRoundEvents(
@@ -693,7 +738,7 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    return this.writeConversation({
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
@@ -721,6 +766,9 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+
+    this.notifyAttachmentEvents(result.id, events);
+    return result;
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {

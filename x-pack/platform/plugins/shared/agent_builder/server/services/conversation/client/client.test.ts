@@ -2736,6 +2736,155 @@ describe.skip('ConversationClient', () => {
     });
   });
 
+  describe('onAttachmentEvents callback', () => {
+    const attachmentAddedEvent = (id: string): TimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2026-09-16T10:00:00.000Z',
+        actor: { type: EventActorType.system, id: 'system' },
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'http_api',
+        },
+      } as TimelineEvent);
+
+    const userMessageEvent = (id: string): TimelineEvent => ({
+      id,
+      type: TimelineEventType.userMessage,
+      created_at: '2026-09-16T10:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+      data: { message: 'hello' },
+    });
+
+    let onAttachmentEvents: jest.Mock;
+    let clientWithCb: ConversationClient;
+
+    beforeEach(() => {
+      onAttachmentEvents = jest.fn();
+      clientWithCb = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onAttachmentEvents,
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('appendEvents fires with only the attachment events after the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-1');
+
+      await clientWithCb.appendEvents({
+        id: 'conversation-1',
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(onAttachmentEvents).toHaveBeenCalledTimes(1);
+      expect(onAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('appendEvents does not fire for an event id that was already stored (dedup)', async () => {
+      const added = attachmentAddedEvent('evt-att-1');
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [added] }));
+
+      await clientWithCb.appendEvents({ id: 'conversation-1', events: [added] });
+
+      expect(onAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('appendEvents does not fire when there are no attachment events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.appendEvents({
+        id: 'conversation-1',
+        events: [userMessageEvent('r1::user_message')],
+      });
+
+      expect(onAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('replaceRoundEvents fires with the attachment events of the new batch', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const added = attachmentAddedEvent('evt-att-2');
+
+      await clientWithCb.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'r1',
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(onAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('create fires with the attachment events of the initial batch', async () => {
+      mockEsClient.index.mockResolvedValue({ result: 'created' });
+      mockGetDocumentResponse(createConversationDocument());
+      const added = attachmentAddedEvent('evt-att-3');
+
+      await clientWithCb.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        events: [userMessageEvent('r1::user_message'), added],
+      });
+
+      expect(onAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [added],
+      });
+    });
+
+    it('update never fires', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update({ id: 'conversation-1', title: 'renamed' });
+
+      expect(onAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('does not fire when the write fails', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+      await expect(
+        clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [attachmentAddedEvent('evt-att-4')],
+        })
+      ).rejects.toThrow('disk full');
+
+      expect(onAttachmentEvents).not.toHaveBeenCalled();
+    });
+
+    it('a throwing callback does not fail the write', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      onAttachmentEvents.mockImplementation(() => {
+        throw new Error('listener exploded');
+      });
+
+      await expect(
+        clientWithCb.appendEvents({
+          id: 'conversation-1',
+          events: [attachmentAddedEvent('evt-att-5')],
+        })
+      ).resolves.toBeDefined();
+    });
+  });
+
   describe('events persistence', () => {
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });

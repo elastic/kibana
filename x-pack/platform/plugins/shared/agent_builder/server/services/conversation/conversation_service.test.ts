@@ -32,7 +32,8 @@ const asInternalUser = { name: 'as-internal-user' } as never;
 const createService = ({
   agents = {},
   attachments = { getTypeDefinition: jest.fn() },
-}: { agents?: object; attachments?: object } = {}) => {
+  eventBus,
+}: { agents?: object; attachments?: object; eventBus?: object } = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
@@ -43,6 +44,7 @@ const createService = ({
     } as never,
     agents: agents as never,
     attachments: attachments as never,
+    ...(eventBus ? { eventBus: eventBus as never } : {}),
   });
 };
 
@@ -54,6 +56,23 @@ describe('ConversationServiceImpl', () => {
 
   describe('getScopedClient', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
+
+    it('wires onAttachmentEvents to the event bus with the scoped request', async () => {
+      const eventBus = { emitMetadataPatched: jest.fn(), emitAttachmentEvents: jest.fn() };
+      await createService({ agents, eventBus }).getScopedClient({ request });
+
+      const { onAttachmentEvents } = createClientMock.mock.calls[0][0];
+      const payload = { conversationId: 'conv-1', events: [] };
+      onAttachmentEvents!(payload);
+
+      expect(eventBus.emitAttachmentEvents).toHaveBeenCalledWith(request, payload);
+    });
+
+    it('leaves onAttachmentEvents undefined without an event bus', async () => {
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(createClientMock.mock.calls[0][0].onAttachmentEvents).toBeUndefined();
+    });
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
       const user = { id: 'profile-1', username: 'jane', isAdmin };
@@ -137,6 +156,7 @@ describe('ConversationServiceImpl', () => {
     const accessedRefs = [{ attachment_id: 'a1', version: 1 }];
     let appendEvents: jest.Mock;
     let mergeAttachmentInputs: jest.Mock;
+    let drainChanges: jest.Mock;
 
     const appendedEvent = () => appendEvents.mock.calls[0][0].events[0];
 
@@ -145,7 +165,11 @@ describe('ConversationServiceImpl', () => {
         agents: { getRegistry: jest.fn() },
         attachments: {
           getTypeDefinition: jest.fn(),
-          createStateManager: () => ({ getAccessedRefs: () => accessedRefs, getAll: () => [] }),
+          createStateManager: () => ({
+            getAccessedRefs: () => accessedRefs,
+            getAll: () => [],
+            drainChanges,
+          }),
           mergeAttachmentInputs,
         },
       }).appendUserMessage({ request, conversationId: 'conversation-1', ...options });
@@ -153,10 +177,37 @@ describe('ConversationServiceImpl', () => {
     beforeEach(() => {
       appendEvents = jest.fn();
       mergeAttachmentInputs = jest.fn();
+      drainChanges = jest.fn().mockReturnValue([]);
       createClientMock.mockReturnValue({
         get: jest.fn().mockImplementation(async () => conversation),
         appendEvents,
       } as never);
+    });
+
+    it('appends chat_input attachment events after the user message when attachments changed', async () => {
+      drainChanges.mockReturnValue([
+        { kind: 'added', attachment_id: 'a1', attachment_type: 'text', current_version: 1 },
+      ]);
+
+      await appendUserMessage({ message: 'hello' });
+
+      const { events } = appendEvents.mock.calls[0][0];
+      expect(events).toHaveLength(2);
+      expect(events[0].type).toBe(TimelineEventType.userMessage);
+      expect(events[1]).toEqual({
+        id: expect.stringMatching(/^[0-9a-f-]{36}$/),
+        type: TimelineEventType.attachmentAdded,
+        created_at: events[0].created_at,
+        actor: { type: 'user', id: 'profile-1', username: 'jane' },
+        data: {
+          attachment_id: 'a1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      });
+      expect(events[1].execution_id).toBeUndefined();
     });
 
     it('appends one user message event carrying the accessed attachment refs', async () => {
