@@ -76,6 +76,7 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
@@ -85,6 +86,7 @@ export interface AiIndexProperties {
 export interface AiIndexHttpItem extends AiIndexProperties {
   id: string;
   managed: boolean;
+  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
 }
