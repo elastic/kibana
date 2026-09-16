@@ -246,7 +246,9 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     expect(result.current.data).toHaveLength(3);
     expect(result.current.data![0]['episode.id']).toBe('source-episode-1');
+    expect(result.current.data![0].source_id).toBe('test-source');
     expect(result.current.data![0].supports_actions).toBe(false);
+    expect(result.current.data![1].source_id).toBeUndefined();
     expect(result.current.sourceErrors).toEqual([]);
   });
 
@@ -320,7 +322,9 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toEqual(sourceEpisodes);
+    expect(result.current.data).toEqual(
+      sourceEpisodes.map((episode) => ({ ...episode, source_id: 'test-source' }))
+    );
     expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
 });

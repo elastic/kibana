@@ -54,25 +54,10 @@ const assertEpisodesManagementHappyPath = async ({
 };
 
 /*
- * Covers privilege gating on the Alerts (episodes) management page. The
- * management mount uses the default v2 privilege gate (no solution-scoped
- * override), so only users with alerting_v2_alerts capabilities can access it.
- *
- * v1-only users (stackAlerts, logs) are blocked at the Kibana application
- * level — the management section is not even rendered for them — so they are
- * not tested here. The observability alerting plugin's solution-scoped mount
- * covers the v1 privilege path.
- *
- * Each privileged test asserts the full page structure: KPI panels, histogram
- * chart, episodes table item count, and tags filter all render.
- *
- * A recent active episode plus a tag action are seeded so the table toolbar
- * and tags filter mount. The `alerting_v2` Scout config set already pins
- * `alerting:v2:enabled`.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
+ * Privilege gating for the Alerts management page (default v2 gate).
+ * v1-only users never reach this mount; they are covered by the observability
+ * plugin. Tagged @local-stateful-classic because custom-role auth is not on
+ * Elastic Cloud Hosted yet.
  */
 test.describe(
   'Alerts management page - privilege-based access',
@@ -80,8 +65,8 @@ test.describe(
   () => {
     test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
       const now = new Date().toISOString();
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -107,8 +92,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
     });
 
     test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {

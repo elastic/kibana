@@ -87,14 +87,16 @@ export const useFetchAlertingEpisodesQuery = ({
           }),
         source: additionalEpisodesDataSource,
         fromSource: (source) =>
-          source.fetchEpisodes({
-            services,
-            abortSignal,
-            pageSize,
-            filterState,
-            sortState,
-            timeRange,
-          }),
+          source
+            .fetchEpisodes({
+              services,
+              abortSignal,
+              pageSize,
+              filterState,
+              sortState,
+              timeRange,
+            })
+            .then((episodes) => episodes.map((episode) => ({ ...episode, source_id: source.id }))),
       });
 
       const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({
