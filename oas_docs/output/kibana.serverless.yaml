@@ -90148,6 +90148,8 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
         download_source_ids:
@@ -107115,6 +107117,8 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
         download_source_ids:
@@ -115170,6 +115174,8 @@ components:
         description:
           type: string
         download_source_id:
+          deprecated: true
+          description: Use `download_source_ids` instead
           nullable: true
           type: string
         download_source_ids:
