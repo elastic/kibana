@@ -44,6 +44,7 @@ const TITLE_CASE_GLOSSARY = [
   'Ingest and Integrations',
   'API keys',
   'Detection rules (SIEM)',
+  'Detection rules (SIEM) v2',
   'SLOs',
   'TLS certificates',
   'Cloud Connect',
