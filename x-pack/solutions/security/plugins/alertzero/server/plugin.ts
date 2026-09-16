@@ -197,14 +197,26 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
-    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
-        : undefined,
-      agentBuilder: plugins.agentBuilder,
-      agentTypes: [agentType],
-    });
+    this.workersService = new WorkersService(
+      management,
+      managedWorkflows,
+      this.logger,
+      {
+        ensureAgentForSpace: plugins.agentBuilder
+          ? (spaceId) =>
+              ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+          : undefined,
+        agentBuilder: plugins.agentBuilder,
+        agentTypes: [agentType],
+      },
+      {
+        alertTriageWorkerEnabled: this.config.featureFlags.alertTriageWorkerEnabled,
+        getAttachmentService:
+          plugins.securitySolution?.getAlertAnalysisWorkflowRuleAttachmentService.bind(
+            plugins.securitySolution
+          ),
+      }
+    );
 
     return {};
   }
