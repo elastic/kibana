@@ -17,7 +17,7 @@ import {
 } from '../proposal';
 import { optionalStepInput } from './optional_step_input';
 
-export const CreateProposalStepId = 'investigations.createProposal' as const;
+export const CreateProposalStepId = 'proposals.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
@@ -90,7 +90,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
     ),
     examples: [
       `- name: create_proposal
-  type: investigations.createProposal
+  type: proposals.createProposal
   with:
     conversationId: "{{ inputs.conversationId }}"
     comment: "Tune the noisy rule that produced this alert"

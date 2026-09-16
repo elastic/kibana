@@ -87,11 +87,11 @@ const VALID_STATUSES: Record<string, readonly string[]> = {
   approved: ['no_action', 'executing', 'succeeded', 'failed'],
 };
 
-/** Every `investigations.updateProposal` step anywhere in the definition. */
+/** Every `proposals.updateProposal` step anywhere in the definition. */
 const updateProposalSteps = (): WorkflowStep[] => {
   const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
     steps.flatMap((step) => [
-      ...(step.type === 'investigations.updateProposal' ? [step] : []),
+      ...(step.type === 'proposals.updateProposal' ? [step] : []),
       ...collect(step.steps ?? []),
     ]);
 
@@ -293,7 +293,7 @@ describe('create-investigation-proposal workflow', () => {
   describe('privilege check', () => {
     it('checks the resumer after the gate and before any write', () => {
       const body = (loop().steps ?? []).map(({ name }) => name);
-      const checkIndex = body.indexOf('check_privileges');
+      const checkIndex = body.indexOf('authorize_decision');
 
       expect(checkIndex).toBeGreaterThan(body.indexOf('gate_branch'));
       // If a write came first and threw instead, the gate would already be
@@ -301,6 +301,15 @@ describe('create-investigation-proposal workflow', () => {
       for (const branch of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
         expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
       }
+    });
+
+    it('only checks when a human answered, since the auto path has no decider', () => {
+      // On the autonomy path the principal is the Worker, which necessarily
+      // holds the privilege — it created the proposal — so the check could
+      // only ever pass, at the cost of a round trip per iteration.
+      expect(findStep(workflow.steps, 'authorize_decision')?.condition).toContain(
+        'variables.needs_gate == true'
+      );
     });
 
     it('re-parks on a denial and writes nothing', () => {
@@ -330,7 +339,7 @@ describe('create-investigation-proposal workflow', () => {
       const body = (loop().steps ?? []).map(({ name }) => name);
 
       expect(body.indexOf('recompute_remaining')).toBeGreaterThan(body.indexOf('gate_branch'));
-      expect(body.indexOf('recompute_remaining')).toBeLessThan(body.indexOf('check_privileges'));
+      expect(body.indexOf('recompute_remaining')).toBeLessThan(body.indexOf('authorize_decision'));
     });
 
     it('settles a late decision as expired and breaks', () => {
@@ -350,17 +359,13 @@ describe('create-investigation-proposal workflow', () => {
   });
 
   describe('gate failures', () => {
-    it('lets the gate continue on failure so a timeout re-parks', () => {
-      // Without this the workflow-level handler would settle the proposal on
-      // the first gate timeout, with time still left on the deadline.
-      expect(gate()['on-failure']?.continue).toBe(true);
-    });
-
-    it('re-parks after a gate failure instead of deciding on an absent response', () => {
-      const retry = findStep(workflow.steps, 'retry_after_gate_failure');
-
-      expect(retry?.condition).toContain('variables.gate_failed');
-      expect(retry?.steps?.map(({ type }) => type)).toEqual(['loop.continue']);
+    it('declares no step-level on-failure, which the schema would silently strip', () => {
+      // HITL steps are the only ones whose schema does not merge
+      // `StepWithOnFailureSchema`, so zod drops the key and the engine never
+      // sees it (elastic/security-team#19315). Declaring one here would read as
+      // a re-park that does not happen; the workflow-level handler settles a
+      // gate timeout instead. Revisit when #19315 lands.
+      expect(gate()['on-failure']).toBeUndefined();
     });
   });
 
@@ -380,11 +385,12 @@ describe('create-investigation-proposal workflow', () => {
       expect(findStep(workflow.steps, 'break_dismissed')?.type).toBe('loop.break');
     });
 
-    it('adopts a successor when the proposal was superseded under the parked gate', () => {
-      const adopt = findStep(workflow.steps, 'adopt_superseded');
-
-      expect(adopt?.condition).toContain('steps.read_proposal.output.supersededBy');
-      expect(collectNames(adopt?.steps ?? [])).toContain('park_on_successor');
+    it('does not read the proposal back, since nothing in the loop adopts a successor', () => {
+      // `cloneProposal` writes `supersededBy` onto a proposal that already
+      // failed, never one awaiting a decision, so there is nothing to adopt
+      // until the tune route lands.
+      expect(findStep(workflow.steps, 'read_proposal')).toBeUndefined();
+      expect(findStep(workflow.steps, 'adopt_superseded')).toBeUndefined();
     });
   });
 
@@ -436,7 +442,7 @@ describe('create-investigation-proposal workflow', () => {
       // the proposal and stop, making the clone branch unreachable.
       expect(findStep(workflow.steps, 'execute_action')?.['on-failure']?.continue).toBe(true);
       expect(findStep(workflow.steps, 'record_action_failure')?.with?.status).toBe('failed');
-      expect(findStep(workflow.steps, 'clone_proposal')?.type).toBe('investigations.cloneProposal');
+      expect(findStep(workflow.steps, 'clone_proposal')?.type).toBe('proposals.cloneProposal');
     });
 
     it('advances the carried id inside the branch that produced the clone', () => {
@@ -470,7 +476,7 @@ describe('create-investigation-proposal workflow', () => {
     it('records a failure from the workflow-level on-failure, since HITL steps take none', () => {
       const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
 
-      expect(fallback.map(({ type }) => type)).toContain('investigations.updateProposal');
+      expect(fallback.map(({ type }) => type)).toContain('proposals.updateProposal');
     });
 
     it('settles from the carried id, not the create step output that a clone invalidates', () => {
@@ -494,7 +500,7 @@ describe('create-investigation-proposal workflow', () => {
       // `ExecutionError` carries nothing else to tell them apart.
       const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
       const afterDecision = fallback.find(({ name }) => name === 'record_failure_after_decision');
-      const beforeDecision = fallback.find(({ name }) => name === 'record_failure_before_decision');
+      const beforeDecision = fallback.find(({ name }) => name === 'record_expiry_before_decision');
 
       expect(afterDecision?.if).toContain(
         'steps.read_proposal_on_failure.output.decision != blank'

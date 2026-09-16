@@ -8,7 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   checkDecidePrivilegesStepCommonDefinition,
-  EXTERNAL_RESUME_PRINCIPAL_PREFIX,
+  isExternalResumePrincipal,
 } from '../../../common/proposals/step_types/check_decide_privileges_step';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import { toStepError } from './to_step_error';
@@ -35,7 +35,7 @@ export const getCheckDecidePrivilegesStepDefinition = ({
         // Refused without consulting the privilege service at all: on this path
         // the execution identity is the workflow runner, so a check would
         // authorize the Worker rather than the person who clicked the link.
-        if (respondedBy?.startsWith(EXTERNAL_RESUME_PRINCIPAL_PREFIX)) {
+        if (isExternalResumePrincipal(respondedBy)) {
           context.logger.warn(
             `Proposal ${proposalId} cannot be decided through an external resume, whose execution identity is the workflow runner rather than the responder`
           );

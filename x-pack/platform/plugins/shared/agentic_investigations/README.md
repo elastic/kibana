@@ -50,7 +50,7 @@ Conflating these is how proposal authorization goes wrong, so each is enforced s
 | Question | Principal | Enforced by | On refusal |
 | --- | --- | --- | --- |
 | May this HTTP caller decide? | The request | `requiredPrivileges` on the route | Synchronous `403` — the only place a human can be told |
-| May this resumer decide *this* proposal? | The approver, which post-gate is the execution identity | `investigations.checkDecidePrivileges`, **after the gate and before any write** | Returns `false`; the gate workflow re-parks for someone who can |
+| May this resumer decide *this* proposal? | The approver, which post-gate is the execution identity | `proposals.checkDecidePrivileges`, **after the gate and before any write** | Returns `false`; the gate workflow re-parks for someone who can |
 | May this execution write proposals at all? | The Worker running the step | An assert **inside each writing step** | Fails the step; a Worker without the privilege is a misconfiguration, not something to retry |
 
 **Ordering is load-bearing.** The boolean check must precede every write inside the decision loop. If a write came first and failed instead, the gate would already be claimed and spent, the workflow would fail, and the proposal would strand with no way for a privileged approver to retry.
@@ -61,7 +61,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 
 **The principal differs by surface, and one of them cannot be checked.** An authenticated resume runs the post-gate steps under a clone of the resumer's API key, so the check evaluates the human. An **external-token resume carries no request**, so the engine wakes the pre-scheduled task under the *workflow runner's* key instead — and that identity necessarily holds `manage_proposals`, because it had to in order to create the proposal. Checking it would therefore authorize every click on a magic link, as the Worker, and record the Worker as the decider.
 
-`hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `investigations.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
+`hitlExternalResume.enabled` defaults to `true` and `external_resume_service.ts` handles `waitForApproval` explicitly, so this is reachable rather than theoretical. `proposals.checkDecidePrivileges` therefore takes the gate's own `respondedBy` and refuses any principal prefixed `external_resume:` outright, without consulting the privilege service — there is nothing it could usefully ask. The loop re-parks, so an authenticated approver can still decide. Enabling external channels for proposal gates needs the platform to propagate the responder's identity, not just their answer.
 
 ## Proposals
 
@@ -124,7 +124,7 @@ flowchart TB
     end
 
     subgraph proposals["agenticInvestigations (this plugin)"]
-        steps["investigations.createProposal<br/>investigations.updateProposal<br/>investigations.checkDecidePrivileges<br/>investigations.getProposal<br/>investigations.cloneProposal"]
+        steps["proposals.createProposal<br/>proposals.updateProposal<br/>proposals.checkDecidePrivileges<br/>proposals.getProposal<br/>proposals.cloneProposal"]
         api["Internal HTTP API<br/>/internal/investigations/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
         gate["system-create-investigation-proposal<br/><i>managed gate workflow</i>"]
@@ -170,7 +170,7 @@ sequenceDiagram
     participant AW as Action workflow
 
     W->>G: workflow.execute(conversationId, actionWorkflowId, actionInput)
-    G->>S: investigations.createProposal
+    G->>S: proposals.createProposal
     S->>I: pending proposal (+ this execution id)
     S-->>G: proposalId, expiresAt
     G->>G: waitForApproval — parked
@@ -179,14 +179,14 @@ sequenceDiagram
     Note over S,I: Writes nothing but the rationale.<br/>Nothing durable, so nothing to roll back.
     S->>G: resume(approved: true), as the analyst
 
-    G->>S: investigations.checkDecidePrivileges
+    G->>S: proposals.checkDecidePrivileges
     Note over G,S: Before any write. A denial re-parks<br/>rather than spending the gate.
-    G->>S: investigations.updateProposal(approved + executing)
+    G->>S: proposals.updateProposal(approved + executing)
     S->>I: decision=approved, decidedBy=<analyst>
     G->>AW: workflow.execute(actionInput)
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
     AW-->>G: output
-    G->>S: investigations.updateProposal(succeeded)
+    G->>S: proposals.updateProposal(succeeded)
 ```
 
 Dismissal follows the same shape down the gate's negative branch, so no action runs, and settles at `dismissed` + `no_action`.
@@ -199,7 +199,7 @@ The gate sits inside a `while` loop, because releasing a gate is not the same th
 
 1. **Recompute the remaining time** from the proposal's fixed `expiresAt`, so a failed attempt never extends the deadline. Two `data.set` steps, because Liquid cannot read a variable written by the same step.
 2. **Settle and break** if the deadline has passed (`expired`) or the attempt budget is spent.
-3. **Park on the gate**, which carries `on-failure: continue: true` so a gate timeout re-parks instead of settling with time still on the clock. That also takes the gate out of the workflow-level handler, which would otherwise end the run on the first timeout.
+3. **Park on the gate.** Note what the gate deliberately does *not* carry: a step-level `on-failure`. The HITL schemas are the only ones that do not merge `StepWithOnFailureSchema`, so zod strips the key and the engine never sees it ([#19315](https://github.com/elastic/security-team/issues/19315)). A gate failure therefore lands on the workflow-level handler, which settles the record — the right outcome for a timeout, just not a re-park. Re-parking on a *transient* gate error is what that costs us, and it returns when #19315 lands.
 4. **Copy the gate output into variables immediately**, inside the iteration that produced it — `waitForApproval` is not exempt from output eviction, and a step output resolves to its latest execution, so a later iteration that skipped the gate would read this pass's values.
 5. **Re-read the clock** and settle `expired` if the deadline passed while parked. The check in step 1 ran before a park that may have lasted days, and only the HTTP routes refuse an expired decision — so without this a resume through the platform resume API or the Inbox would be recorded and run its action past the deadline the analyst was shown.
 6. **Check the resumer's privilege**, and `loop.continue` when denied. Nothing has been written at this point.
@@ -218,11 +218,11 @@ Conditions use a single `and` or a single comparison throughout. Liquid has no o
 
 | Step | Privilege | On refusal |
 | --- | --- | --- |
-| `investigations.createProposal` | manage | Fails the step |
-| `investigations.updateProposal` | manage | Fails the step |
-| `investigations.getProposal` | read | Fails the step |
-| `investigations.cloneProposal` | manage | Fails the step |
-| `investigations.checkDecidePrivileges` | manage | **Returns `false`** |
+| `proposals.createProposal` | manage | Fails the step |
+| `proposals.updateProposal` | manage | Fails the step |
+| `proposals.getProposal` | read | Fails the step |
+| `proposals.cloneProposal` | manage | Fails the step |
+| `proposals.checkDecidePrivileges` | manage | **Returns `false`** |
 
 Each failure mode gets its own `ExecutionError.type` (`PermissionError`, `ConflictError`, `ExpiredError`, `NotFoundError`, `ValidationError`, `ApiError`), because the type is the only part of an error a workflow can branch on — `ExecutionError` carries just `{ type, message, details? }`, and all three timeout sources already share `TimeoutError`.
 
@@ -260,7 +260,7 @@ The input contract:
 
 You get back `proposalId` and `status`.
 
-**The decision deadline is a fixed 72h, not a caller input.** The workflow engine does not template-render a step's `timeout`; it hands the raw string to the duration parser, so `timeout: "{{ inputs.expiresIn }}"` fails at execution time ([#290258](https://github.com/elastic/kibana/issues/290258)). Until that lands, the gate `timeout`, `settings.timeout` and the `expiresIn` recorded on the proposal are all the same literal — one number rather than three each needing its own justification. See "Known limitations" for what that costs. The `investigations.createProposal` step still accepts `expiresIn`, so a caller driving that step directly can set its own deadline; only this gate workflow is pinned.
+**The decision deadline is a fixed 72h, not a caller input.** The workflow engine does not template-render a step's `timeout`; it hands the raw string to the duration parser, so `timeout: "{{ inputs.expiresIn }}"` fails at execution time ([#290258](https://github.com/elastic/kibana/issues/290258)). Until that lands, the gate `timeout`, `settings.timeout` and the `expiresIn` recorded on the proposal are all the same literal — one number rather than three each needing its own justification. See "Known limitations" for what that costs. The `proposals.createProposal` step still accepts `expiresIn`, so a caller driving that step directly can set its own deadline; only this gate workflow is pinned.
 
 **`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset. It applies only to action proposals: a proposal with no `actionWorkflowId` is always gated regardless of the flag.
 
@@ -360,7 +360,7 @@ Three layers, because no single one reaches the whole thing.
 node scripts/jest_integration --config x-pack/platform/plugins/shared/agentic_investigations/integration_tests/jest.integration.config.js
 ```
 
-It uses `WorkflowRunFixture` from `@kbn/workflows-execution-engine/test_helpers`, which drives `runWorkflow`/`resumeWorkflow` against mocked repositories — real graph builder, real node implementations, real Liquid, no stack, a few seconds. Custom steps are injected by stubbing `hasStepDefinition` **and** `getStepDefinition` on the extensions mock; stubbing only the getter makes `nodes_factory` skip the branch and read `investigations.createProposal` as a connector.
+It uses `WorkflowRunFixture` from `@kbn/workflows-execution-engine/test_helpers`, which drives `runWorkflow`/`resumeWorkflow` against mocked repositories — real graph builder, real node implementations, real Liquid, no stack, a few seconds. Custom steps are injected by stubbing `hasStepDefinition` **and** `getStepDefinition` on the extensions mock; stubbing only the getter makes `nodes_factory` skip the branch and read `proposals.createProposal` as a connector.
 
 This is the layer that covers what a shape test cannot see: that the gate re-parks on a *new* step execution so a second answer can be claimed, that a privilege denial writes nothing, that `data.set` variables survive a park and resume, that an action failure clones with an inherited deadline and re-parks, and — the bug class that actually bit during development — that every decision/status pair the workflow writes is one the service accepts.
 
@@ -368,7 +368,9 @@ Keeping the real `ProposalsService` rather than a stub is deliberate: the valid-
 
 **Real stack** — Scout API coverage for the HTTP surface is still to come ([#19347](https://github.com/elastic/security-team/issues/19347)): the `403` for a reader, the `409` on a concurrent decision, the asynchronous decision the UI has to refetch for, and the identity assertion that a created rule's `created_by` is the approver. Until then the runbook below covers those by hand.
 
-Deliberately uncovered: the real deadline timing (see "Known limitations"), and `adopt_superseded`, which is unreachable until the tune route lands.
+Deliberately uncovered: the real deadline timing, see "Known limitations".
+
+One blind spot worth knowing about, since it hid a real bug. Both layers read the YAML *raw* — the shape tests with `yaml.parse`, and `WorkflowRunFixture` with `YAML.parseDocument(...).toJSON()` — so neither sees what `WorkflowSchema` would strip. Production stores the schema-parsed form (`workflow_prepare.ts` keeps `validation.parsedWorkflow`), which is how a step-level `on-failure` on the gate looked present in tests while being silently dropped at runtime.
 
 ## Manual verification
 
@@ -407,6 +409,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 ## Known limitations
 
+- **A HITL step cannot declare its own `on-failure`** ([#19315](https://github.com/elastic/security-team/issues/19315)). The HITL schemas are the only ones that omit `StepWithOnFailureSchema`, and zod strips unknown keys rather than erroring, so declaring one on the gate looks fine and does nothing. Until it lands, a gate failure is caught only by the workflow-level handler, which settles the record instead of re-parking — correct for a timeout, but it means a transient gate error cannot be retried.
 - **An unanswered proposal is not settled yet.** Every timeout in the gate workflow is the same literal (`72h`) until a templated HITL `timeout` lands ([#290258](https://github.com/elastic/kibana/issues/290258)). Because the workflow starts just before the gate parks, the workflow ceiling is always reached first — and a ceiling timeout runs no handler at all: `EnterWorkflowTimeoutZoneNodeImpl.monitor()` marks the execution `TIMED_OUT` and `catchError` returns early. So a proposal nobody answers is left reading `pending` rather than being settled as `expired`. The loop already computes `remaining_seconds` from the fixed deadline and settles on it, so this resolves to a one-line change (`timeout: '{{ variables.remaining_seconds }}s'`) once #290258 lands and the three timeouts can be sized independently.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.

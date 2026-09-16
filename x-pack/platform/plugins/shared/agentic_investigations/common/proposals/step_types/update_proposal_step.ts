@@ -12,7 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { dismissReasonSchema, proposalDecisionSchema, proposalStatusSchema } from '../proposal';
 import { optionalStepInput } from './optional_step_input';
 
-export const UpdateProposalStepId = 'investigations.updateProposal' as const;
+export const UpdateProposalStepId = 'proposals.updateProposal' as const;
 
 export const updateProposalStepInputSchema = z.object({
   proposalId: z.string().describe('Proposal to update.'),
@@ -70,14 +70,14 @@ export const updateProposalStepCommonDefinition: BaseStepDefinition<
       // The status belongs in the same call: `approved` on its own would leave
       // the record at `pending`, which is not a pair the service accepts.
       `- name: record_approval
-  type: investigations.updateProposal
+  type: proposals.updateProposal
   with:
     proposalId: "{{ variables.current_proposal_id }}"
     decision: approved
     decidedBy: "{{ variables.decided_by }}"
     status: executing`,
       `- name: record_success
-  type: investigations.updateProposal
+  type: proposals.updateProposal
   with:
     proposalId: "{{ variables.current_proposal_id }}"
     status: succeeded`,

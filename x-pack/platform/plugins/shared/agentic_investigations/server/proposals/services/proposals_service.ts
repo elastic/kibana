@@ -134,17 +134,11 @@ export class ProposalsService {
       ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
       : undefined;
 
-    // Caller first, for the same reason as impact below, and because it is the
-    // only way a proposal with no action gets a category at all — consumers
-    // group the queue by it. Still absent when neither supplies one: the
-    // vocabulary belongs to the solution that authored the action, so there is
-    // no default to invent.
+    // Caller first in both: it knows the situation the proposal came out of,
+    // which the action's own metadata cannot. A category can end up absent —
+    // the vocabulary belongs to the solution that authored the action — but
+    // impact cannot, because it is the queue's primary sort key.
     const category = params.category ?? metadata?.category;
-    // A caller that bothered to state the impact knows the situation the
-    // proposal came out of, which the action's own metadata cannot; the action
-    // only supplies it when the caller said nothing. `low` last, so the queue's
-    // primary sort key is always populated even for a non-action proposal whose
-    // caller supplied nothing.
     const impact = params.impact ?? metadata?.impact ?? 'low';
 
     const document: ProposalDocument = {

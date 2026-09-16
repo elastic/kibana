@@ -56,10 +56,10 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
-    stepType: 'investigations.createProposal',
+    stepType: 'proposals.createProposal',
   } as unknown as StepHandlerContext<never, never>);
 
-describe('investigations.createProposal input schema', () => {
+describe('proposals.createProposal input schema', () => {
   // Liquid renders a template for an absent workflow input as `''`, so the
   // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
@@ -134,7 +134,7 @@ describe('investigations.createProposal input schema', () => {
   });
 });
 
-describe('investigations.updateProposal input schema', () => {
+describe('proposals.updateProposal input schema', () => {
   it.each(['', null])('should treat %p as absent across every optional input', (blank) => {
     const parsed = updateProposalStepInputSchema.parse({
       proposalId: 'proposal-1',
@@ -183,7 +183,7 @@ describe('investigations.updateProposal input schema', () => {
   });
 });
 
-describe('investigations.createProposal step', () => {
+describe('proposals.createProposal step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -313,7 +313,7 @@ describe('investigations.createProposal step', () => {
   });
 });
 
-describe('investigations.updateProposal step', () => {
+describe('proposals.updateProposal step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -445,7 +445,7 @@ describe('investigations.updateProposal step', () => {
   });
 });
 
-describe('investigations.checkDecidePrivileges step', () => {
+describe('proposals.checkDecidePrivileges step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -512,7 +512,7 @@ describe('investigations.checkDecidePrivileges step', () => {
   });
 });
 
-describe('investigations.getProposal step', () => {
+describe('proposals.getProposal step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -568,7 +568,7 @@ describe('investigations.getProposal step', () => {
   });
 });
 
-describe('investigations.cloneProposal step', () => {
+describe('proposals.cloneProposal step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

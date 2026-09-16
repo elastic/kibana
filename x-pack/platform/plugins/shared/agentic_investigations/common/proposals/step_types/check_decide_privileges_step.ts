@@ -11,7 +11,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
-export const CheckDecidePrivilegesStepId = 'investigations.checkDecidePrivileges' as const;
+export const CheckDecidePrivilegesStepId = 'proposals.checkDecidePrivileges' as const;
 
 /**
  * Marks a principal the execution's own credentials cannot speak for.
@@ -22,7 +22,16 @@ export const CheckDecidePrivilegesStepId = 'investigations.checkDecidePrivileges
  * `manage_proposals` — it had to, to create the proposal — so checking it would
  * authorize every external click.
  */
-export const EXTERNAL_RESUME_PRINCIPAL_PREFIX = 'external_resume:' as const;
+const EXTERNAL_RESUME_PRINCIPAL_PREFIX = 'external_resume:' as const;
+
+/**
+ * Whether the gate was released through an external token link rather than by a
+ * person. `hitl.respondedBy` is stamped as `external_resume:<stepExecutionId>`
+ * on that path, and it is the only signal available: the request the step sees
+ * belongs to the workflow runner either way.
+ */
+export const isExternalResumePrincipal = (respondedBy: string | undefined): boolean =>
+  respondedBy?.startsWith(EXTERNAL_RESUME_PRINCIPAL_PREFIX) ?? false;
 
 export const checkDecidePrivilegesStepInputSchema = z.object({
   proposalId: z.string().describe('Proposal the decision would apply to.'),
@@ -65,7 +74,7 @@ export const checkDecidePrivilegesStepCommonDefinition: BaseStepDefinition<
     ),
     examples: [
       `- name: check_privileges
-  type: investigations.checkDecidePrivileges
+  type: proposals.checkDecidePrivileges
   with:
     proposalId: "{{ variables.current_proposal_id }}"
     respondedBy: "{{ variables.decided_by }}"`,

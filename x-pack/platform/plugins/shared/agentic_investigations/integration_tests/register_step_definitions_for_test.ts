@@ -49,7 +49,7 @@ export const registerStepDefinitionsForTest = ({
 
   // Both, because `nodes_factory` guards the lookup on `hasStepDefinition`.
   // With only the getter stubbed the branch is skipped and the engine falls
-  // through to the connector path, where `investigations.createProposal` reads
+  // through to the connector path, where `proposals.createProposal` reads
   // as a connector in an `investigations` namespace.
   engine.dependencies.workflowsExtensions.hasStepDefinition = jest.fn((stepType: string) =>
     byId.has(stepType)

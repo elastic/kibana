@@ -82,13 +82,21 @@ export interface ProposalGateFixture {
   /** The only proposal, asserting there is exactly one. */
   onlyProposal: () => Proposal & { id: string };
   executionStatus: () => ExecutionStatus | undefined;
-  /** Step executions for a step id, oldest first. */
-  stepExecutions: (stepId: string) => Array<{ status: string; output?: unknown }>;
+  /**
+   * Step executions for a step id, oldest first. Pass `stepType` to exclude the
+   * wrapper executions the engine records under the same id — a step covered by
+   * an `on-failure` handler gets a `fallback` try-block execution alongside its
+   * own.
+   */
+  stepExecutions: (
+    stepId: string,
+    stepType?: string
+  ) => Array<{ status: string; stepType?: string; output?: unknown }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
-  /** Flips what `investigations.checkDecidePrivileges` reports. */
+  /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
 }
 
@@ -143,9 +151,10 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     executionStatus: () =>
       engine.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
         ?.status,
-    stepExecutions: (stepId) =>
+    stepExecutions: (stepId, stepType) =>
       [...engine.stepExecutionRepositoryMock.stepExecutions.values()]
         .filter((step) => step.stepId === stepId)
+        .filter((step) => stepType === undefined || step.stepType === stepType)
         .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0)),
     start: async (inputs = {}) => {
       await engine.runWorkflow({

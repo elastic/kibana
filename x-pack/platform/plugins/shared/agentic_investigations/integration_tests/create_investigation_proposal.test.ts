@@ -109,7 +109,7 @@ describe('create-investigation-proposal workflow execution', () => {
 
       await fixture.resume(true);
 
-      const gates = fixture.stepExecutions('await_decision');
+      const gates = fixture.stepExecutions('await_decision', 'waitForApproval');
       expect(gates).toHaveLength(2);
       expect(gates[0].status).toBe(ExecutionStatus.COMPLETED);
       expect(gates[1].status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
@@ -256,7 +256,7 @@ describe('create-investigation-proposal workflow execution', () => {
       // action failed, so it was re-offered — this time gated.
       const [first] = fixture.proposals();
       expect(first.decision).toBe('approved');
-      expect(fixture.stepExecutions('await_decision')).toHaveLength(1);
+      expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(1);
       expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     });
 

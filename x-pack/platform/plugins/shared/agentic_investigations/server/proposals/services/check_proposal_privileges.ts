@@ -55,7 +55,7 @@ export const createProposalPrivilegesChecker = ({
     return hasAllRequested;
   };
 
-  const assert = async (
+  const assertPrivileges = async (
     request: KibanaRequest,
     privileges: string[],
     operation: string
@@ -68,8 +68,9 @@ export const createProposalPrivilegesChecker = ({
   };
 
   return {
-    assertCanManage: (request) => assert(request, [PROPOSALS_API_PRIVILEGE_MANAGE], 'write'),
-    assertCanRead: (request) => assert(request, [PROPOSALS_API_PRIVILEGE_READ], 'read'),
+    assertCanManage: (request) =>
+      assertPrivileges(request, [PROPOSALS_API_PRIVILEGE_MANAGE], 'write'),
+    assertCanRead: (request) => assertPrivileges(request, [PROPOSALS_API_PRIVILEGE_READ], 'read'),
     canManage: (request) => hasPrivileges(request, [PROPOSALS_API_PRIVILEGE_MANAGE]),
   };
 };

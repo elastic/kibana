@@ -11,7 +11,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { proposalDecisionSchema, proposalStatusSchema } from '../proposal';
 
-export const GetProposalStepId = 'investigations.getProposal' as const;
+export const GetProposalStepId = 'proposals.getProposal' as const;
 
 export const getProposalStepInputSchema = z.object({
   proposalId: z.string().describe('Proposal to read.'),
@@ -49,7 +49,7 @@ export const getProposalStepCommonDefinition: BaseStepDefinition<
     }),
     examples: [
       `- name: read_proposal
-  type: investigations.getProposal
+  type: proposals.getProposal
   with:
     proposalId: "{{ variables.current_proposal_id }}"`,
     ],

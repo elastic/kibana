@@ -11,7 +11,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
-export const CloneProposalStepId = 'investigations.cloneProposal' as const;
+export const CloneProposalStepId = 'proposals.cloneProposal' as const;
 
 export const cloneProposalStepInputSchema = z.object({
   proposalId: z.string().describe('Proposal to supersede.'),
@@ -50,7 +50,7 @@ export const cloneProposalStepCommonDefinition: BaseStepDefinition<
     ),
     examples: [
       `- name: clone_proposal
-  type: investigations.cloneProposal
+  type: proposals.cloneProposal
   with:
     proposalId: "{{ variables.current_proposal_id }}"
     executionError: "{{ steps.execute_action.error.message }}"`,

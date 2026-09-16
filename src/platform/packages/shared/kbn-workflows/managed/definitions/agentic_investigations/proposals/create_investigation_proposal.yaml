@@ -42,14 +42,15 @@ settings:
     # remaining steps are skipped — which is what makes this safe to use for
     # settling the record.
     #
-    # The gate and the action step opt out with their own step-level
-    # `on-failure`, because their failures are recoverable inside the loop.
+    # This is also what catches a gate timeout, since a HITL step cannot opt out
+    # with an `on-failure` of its own (elastic/security-team#19315). The action
+    # step does opt out, because its failure is recoverable inside the loop.
     fallback:
       # `variables.current_proposal_id` rather than the create step's output:
       # a clone moves the id, and data.set variables survive both the loop and
       # a HITL park, whereas a loop-body step output does not.
       - name: read_proposal_on_failure
-        type: investigations.getProposal
+        type: proposals.getProposal
         # Skipped when creation itself failed: there is nothing to settle, and
         # the template would resolve to an empty id.
         if: '${{ variables.current_proposal_id != blank }}'
@@ -61,7 +62,7 @@ settings:
       # carries nothing else to tell them apart, so the record is the only
       # reliable signal for what state the proposal was actually in.
       - name: record_failure_after_decision
-        type: investigations.updateProposal
+        type: proposals.updateProposal
         if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision != blank }}'
         with:
           proposalId: '{{ variables.current_proposal_id }}'
@@ -70,9 +71,10 @@ settings:
 
       # `expired` is the only terminal status an undecided proposal has: the
       # execution states all require an approval, so a malfunction before
-      # anyone decided settles as "no decision was reached".
-      - name: record_failure_before_decision
-        type: investigations.updateProposal
+      # anyone decided settles as "no decision was reached" rather than as a
+      # failure — which is why this is an expiry and not a `record_failure`.
+      - name: record_expiry_before_decision
+        type: proposals.updateProposal
         if: '${{ variables.current_proposal_id != blank and steps.read_proposal_on_failure.output.decision == blank }}'
         with:
           proposalId: '{{ variables.current_proposal_id }}'
@@ -143,7 +145,7 @@ outputs:
 
 steps:
   - name: create_proposal
-    type: investigations.createProposal
+    type: proposals.createProposal
     with:
       conversationId: '{{ inputs.conversationId }}'
       comment: '{{ inputs.comment }}'
@@ -215,7 +217,7 @@ steps:
         condition: '${{ variables.has_deadline == true and variables.remaining_seconds <= 0 }}'
         steps:
           - name: record_expiry
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               status: expired
@@ -232,7 +234,7 @@ steps:
         condition: '${{ variables.attempts_left <= 0 }}'
         steps:
           - name: record_exhaustion
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               status: expired
@@ -256,13 +258,13 @@ steps:
             # step's `timeout`. Today it hands the raw string to the duration
             # parser, so a template here fails at execution time.
             timeout: '72h'
-            on-failure:
-              # A gate failure is recoverable: the loop re-parks, and the
-              # deadline guard above is what eventually settles the record.
-              # This also takes the gate out of the workflow-level handler,
-              # which would otherwise settle the proposal on the first timeout
-              # with time still left on the clock.
-              continue: true
+            # No step-level `on-failure` here, and not for want of trying: the
+            # HITL schemas are the only ones that do not merge
+            # `StepWithOnFailureSchema`, so zod silently strips it and the
+            # engine never sees it (elastic/security-team#19315). A gate
+            # failure therefore lands on the workflow-level handler, which
+            # settles the record — the right outcome for a timeout, just not a
+            # re-park. Revisit once #19315 lands.
             with:
               message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
               approveLabel: Approve
@@ -275,7 +277,6 @@ steps:
           - name: resolve_gate
             type: data.set
             with:
-              gate_failed: '${{ steps.await_decision.error != blank }}'
               gate_approved: '${{ steps.await_decision.output.response.approved == true }}'
               decided_by: '{{ steps.await_decision.output.respondedBy }}'
 
@@ -288,16 +289,8 @@ steps:
           - name: resolve_auto
             type: data.set
             with:
-              gate_failed: false
               gate_approved: true
               decided_by: ''
-
-      - name: retry_after_gate_failure
-        type: if
-        condition: '${{ variables.gate_failed == true }}'
-        steps:
-          - name: park_again
-            type: loop.continue
 
       # The clock is re-read after the gate, not only before it. The deadline
       # check at the top of the iteration was evaluated before the park, which
@@ -320,7 +313,7 @@ steps:
         condition: '${{ variables.has_deadline == true and variables.remaining_seconds <= 0 }}'
         steps:
           - name: record_late_expiry
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               status: expired
@@ -333,56 +326,50 @@ steps:
           - name: break_late_expiry
             type: loop.break
 
-      # Ordering is load-bearing: this runs after the gate and before any
-      # write. If a write came first and threw instead, the gate would already
-      # be claimed and spent, and the proposal would strand with no way for a
-      # privileged approver to retry.
-      - name: check_privileges
-        type: investigations.checkDecidePrivileges
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-          # An external resume carries no request, so the execution wakes under
-          # the workflow runner's own key — which always holds the privilege,
-          # having created the proposal. The gate's `respondedBy` is the only
-          # thing that distinguishes that from a human, so the step needs it to
-          # avoid authorizing every external click as the Worker.
-          respondedBy: '{{ variables.decided_by }}'
-
-      - name: reject_unprivileged
+      # Only when a human answered. On the autonomy path the principal is the
+      # Worker, which necessarily holds the privilege — it had to, to create the
+      # proposal — so the check could only ever pass, at the cost of a round
+      # trip per iteration. The writes below assert the privilege inside each
+      # step regardless; what is skipped here is the *decide* check, and there
+      # is no decider to check.
+      - name: authorize_decision
         type: if
-        condition: '${{ steps.check_privileges.output.canDecide != true }}'
+        condition: '${{ variables.needs_gate == true }}'
         steps:
-          # Nothing has been written, so re-parking leaves the proposal exactly
-          # as a privileged approver will find it.
-          - name: park_for_privileged
-            type: loop.continue
+          # Ordering is load-bearing: this runs after the gate and before any
+          # write. If a write came first and threw instead, the gate would
+          # already be claimed and spent, and the proposal would strand with no
+          # way for a privileged approver to retry.
+          - name: check_privileges
+            type: proposals.checkDecidePrivileges
+            with:
+              proposalId: '{{ variables.current_proposal_id }}'
+              # An external resume carries no request, so the execution wakes
+              # under the workflow runner's own key — which always holds the
+              # privilege. The gate's `respondedBy` is the only thing that
+              # distinguishes that from a human, so the step needs it to avoid
+              # authorizing every external click as the Worker.
+              respondedBy: '{{ variables.decided_by }}'
+
+          - name: reject_unprivileged
+            type: if
+            condition: '${{ steps.check_privileges.output.canDecide != true }}'
+            steps:
+              # Nothing has been written, so re-parking leaves the proposal
+              # exactly as a privileged approver will find it.
+              - name: park_for_privileged
+                type: loop.continue
 
       - name: handle_dismissal
         type: if
         condition: '${{ variables.gate_approved != true }}'
         steps:
-          - name: read_proposal
-            type: investigations.getProposal
-            with:
-              proposalId: '{{ variables.current_proposal_id }}'
-
-          # Dead code until the tune route lands: only `cloneProposal` writes
-          # `supersededBy` today, and it writes it onto a proposal that already
-          # failed rather than one awaiting a decision. Built now because the
-          # loop is being written once.
-          - name: adopt_superseded
-            type: if
-            condition: '${{ steps.read_proposal.output.supersededBy != blank }}'
-            steps:
-              - name: follow_supersession
-                type: data.set
-                with:
-                  current_proposal_id: '{{ steps.read_proposal.output.supersededBy }}'
-              - name: park_on_successor
-                type: loop.continue
-
+          # Adopting a `supersededBy` successor belongs here and lands with the
+          # tune route, which is the only thing that will write that field onto
+          # a proposal still awaiting a decision. `cloneProposal` writes it onto
+          # one that already failed, so there is nothing to adopt today.
           - name: record_dismissal
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               decision: dismissed
@@ -416,7 +403,7 @@ steps:
         condition: '${{ variables.gate_approved == true and variables.action_workflow_id == blank }}'
         steps:
           - name: record_approval_no_action
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               decision: approved
@@ -436,7 +423,7 @@ steps:
         condition: '${{ variables.gate_approved == true and variables.action_workflow_id != blank }}'
         steps:
           - name: record_approval_executing
-            type: investigations.updateProposal
+            type: proposals.updateProposal
             with:
               proposalId: '{{ variables.current_proposal_id }}'
               decision: approved
@@ -463,7 +450,7 @@ steps:
             condition: '${{ steps.execute_action.error == blank }}'
             steps:
               - name: record_success
-                type: investigations.updateProposal
+                type: proposals.updateProposal
                 with:
                   proposalId: '{{ variables.current_proposal_id }}'
                   status: succeeded
@@ -481,7 +468,7 @@ steps:
             condition: '${{ steps.execute_action.error != blank }}'
             steps:
               - name: record_action_failure
-                type: investigations.updateProposal
+                type: proposals.updateProposal
                 with:
                   proposalId: '{{ variables.current_proposal_id }}'
                   status: failed
@@ -492,7 +479,7 @@ steps:
               # and creation time are inherited, so a chain of failures cannot
               # outlive the deadline the queue showed.
               - name: clone_proposal
-                type: investigations.cloneProposal
+                type: proposals.cloneProposal
                 with:
                   proposalId: '{{ variables.current_proposal_id }}'
 
