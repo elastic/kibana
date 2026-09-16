@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Test-only shared Lens attribute normalizers used across chart types.
- */
-
-import { orderBy } from 'lodash';
+import { isNil, omitBy, orderBy } from 'lodash';
 
 import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
@@ -331,6 +327,21 @@ function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
   if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
     delete dv.fieldAttrs;
   }
+
+  const normalizedFieldFormats = dv.fieldFormats ?? {};
+  for (const [key, value] of Object.entries(normalizedFieldFormats)) {
+    if (value.id === 'url') {
+      // Clean null params + parsedUrl key
+      normalizedFieldFormats[key].params = omitBy(value.params, isNil);
+      normalizedFieldFormats[key].params.parsedUrl = undefined;
+    }
+
+    if (Object.keys(value.params ?? {}).length === 0) {
+      delete normalizedFieldFormats[key].params;
+    }
+  }
+
+  dv.fieldFormats = normalizedFieldFormats;
   if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
     delete dv.fieldFormats;
   }
@@ -1492,9 +1503,10 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
  *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
- * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
- *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
- *   the transform always derives.
+ * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
+ *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
+ *   multi-stop to the effective `rangeMax` when closed, and default missing `rangeType` /
+ *   `params.name` the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
@@ -1532,40 +1544,36 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           return;
         }
 
-        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
-        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
-        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        // Continuity drives open/closed bounds in `fromColorByValueLensStateToAPI` (falling back
+        // to `getContinuity(rangeMin, rangeMax)` when omitted). Open above drops `lte` on the
+        // last API step, so API→SO reconstructs `rangeMax` and the last multi-stop as `null`.
+        // Open below nulls `rangeMin` the same way. Closed upper bounds keep `lte: rangeMax`, so
+        // the last multi-stop becomes `rangeMax`.
         //
-        // For single stop palettes: the transform's `i === 0` branch emits a closed
-        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
-        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
-        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
-        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
-        // leaving the original `lt` (the stop value) intact.
+        // Single-stop open-above is left untouched: the transform appends a trailing same-color
+        // continuation step and merges it back, so the lone stop value round-trips unchanged.
+        const continuity = palette.params.continuity ?? getContinuity(rangeMin, rangeMax);
+        const isOpenBelow = continuity === 'below' || continuity === 'all';
+        const isOpenAbove = continuity === 'above' || continuity === 'all';
+
+        palette.params.continuity = continuity;
+        palette.params.rangeMin = (isOpenBelow ? null : rangeMin) as unknown as number;
+        palette.params.rangeMax = (isOpenAbove ? null : rangeMax) as unknown as number;
+
         if (palette.params.stops && palette.params.stops.length > 1) {
           const lastStop = palette.params.stops.at(-1);
-          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+          if (lastStop) {
+            lastStop.stop = (isOpenAbove ? null : rangeMax) as unknown as number;
+          }
         }
 
         if (!palette.params.rangeType) {
           palette.params.rangeType = 'percent';
         }
 
-        if (!palette.params.continuity) {
-          palette.params.continuity = getContinuity(rangeMin, rangeMax);
-        }
-
         // Legacy SOs may omit params.name, but the transform always sets it from the root name
         if (palette.params.name === undefined && palette.name) {
           palette.params.name = palette.name;
-        }
-
-        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-        if (!('rangeMin' in palette.params)) {
-          palette.params.rangeMin = null as unknown as number;
-        }
-        if (!('rangeMax' in palette.params)) {
-          palette.params.rangeMax = null as unknown as number;
         }
       });
 

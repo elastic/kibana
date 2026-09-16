@@ -41,6 +41,15 @@ export const ALERTZERO_INVESTIGATION_URL_TEMPLATE = `${ALERTZERO_INVESTIGATIONS_
 export const buildInvestigationUrl = (id: string) =>
   `${ALERTZERO_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
+/** Proposals grouped by category — AlertZero landing page. */
+export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+
+/** Action catalog — category-scoped discovery of installed action workflows. */
+export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+
+/** Agent Builder builtin tool wrapping the action catalog API. */
+export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
+
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
  * Can expand this to multiple scoped thin agents in the future if needed.
