@@ -1188,6 +1188,55 @@ describe('Both modes', () => {
       });
     });
 
+    describe('Hover-only lists', () => {
+      /**
+       * GIVEN a primary item has hover `popoverSections` and an href
+       * WHEN I hover it, click it, and stay hovered
+       * THEN the popover must not reopen on the click's focus
+       * AND hovering again after leaving still opens it
+       */
+      it('should not reopen the hover popover after clicking the parent while still hovering', async () => {
+        const recentsNav = {
+          primaryItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+              popoverSections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'dash-1', label: 'One', href: '/dashboards/1' }],
+                },
+              ],
+            },
+          ],
+          footerItems: [],
+        };
+
+        render(<TestComponent items={recentsNav} />);
+
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
+
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(popoverId('Dashboards'))).toBeInTheDocument();
+
+        await user.click(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(screen.queryByTestId(popoverId('Dashboards'))).not.toBeInTheDocument();
+
+        await user.unhover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
+
+        expect(await screen.findByTestId(popoverId('Dashboards'))).toBeInTheDocument();
+      });
+    });
+
     describe('Hover-only lists in More', () => {
       /**
        * GIVEN an overflow item has hover `popoverSections` but no tree `sections`

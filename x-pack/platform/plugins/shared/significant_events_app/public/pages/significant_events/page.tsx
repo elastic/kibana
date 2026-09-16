@@ -9,6 +9,7 @@ import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eu
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
@@ -61,7 +62,7 @@ export function SignificantEventsPage() {
     core: {
       application: {
         getUrlForApp,
-        capabilities: { streams },
+        capabilities: { nightshift },
       },
       chrome,
       notifications: { toasts },
@@ -71,7 +72,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const canManageStreams = streams?.manage === true;
+  const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -126,7 +127,7 @@ export function SignificantEventsPage() {
       },
     ];
 
-    if (agentBuilder) {
+    if (agentBuilder && canManage) {
       items.push({
         id: 'significantEventsSystemOnboarding',
         order: 2,
@@ -140,6 +141,7 @@ export function SignificantEventsPage() {
     return { items };
   }, [
     agentBuilder,
+    canManage,
     getUrlForApp,
     handleOpenSystemOnboarding,
     nightshiftLabel,
@@ -156,7 +158,7 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  const tabs = useMemo(
+  const allTabs = useMemo(
     () => [
       {
         id: 'streams',
@@ -218,6 +220,10 @@ export function SignificantEventsPage() {
     ],
     [tab, router]
   );
+  const tabs = useMemo(
+    () => allTabs.filter((item) => item.id !== 'settings' || canConfigure),
+    [allTabs, canConfigure]
+  );
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -238,128 +244,128 @@ export function SignificantEventsPage() {
     return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }
 
-  if (!isValidSignificantEventsTab(tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />;
+  if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
   }
 
   return (
     <>
       <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
-      <KiGenerationProvider onFailed={onOnboardingFailed}>
-        <SignificantEventsPageProvider>
-          <SignificantEventsAppPageTemplate.Body grow>
-            {showMaintenanceBanners && isMaintenanceStatusLoading && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="primary"
-                  iconType="clock"
-                  data-test-subj="significantEventsStatusLoadingBanner"
-                  title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
-                    defaultMessage: 'Checking Significant Events activity status',
+      <SignificantEventsPageProvider>
+        <SignificantEventsAppPageTemplate.Body grow>
+          {showMaintenanceBanners && isMaintenanceStatusLoading && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                color="primary"
+                iconType="clock"
+                data-test-subj="significantEventsStatusLoadingBanner"
+                title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
+                  defaultMessage: 'Checking Significant Events activity status',
+                })}
+              >
+                <p>
+                  {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
+                    defaultMessage: 'Manual triggers stay disabled until activity status is known.',
                   })}
-                >
-                  <p>
-                    {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
-                      defaultMessage:
-                        'Manual triggers stay disabled until activity status is known.',
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {showMaintenanceBanners && isMaintenanceStatusError && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                iconType="error"
+                data-test-subj="significantEventsStatusErrorBanner"
+                title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
+                  defaultMessage: 'Could not load Significant Events activity status',
+                })}
+              >
+                <p>
+                  {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
+                    defaultMessage:
+                      'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                  })}
+                </p>
+                {canManage && canConfigure && (
+                  <EuiButton
+                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    color="danger"
+                    size="s"
+                    data-test-subj="significantEventsStatusErrorBannerSettingsLink"
+                  >
+                    {i18n.translate('xpack.significantEventsApp.statusErrorBannerSettingsButton', {
+                      defaultMessage: 'Go to Settings',
                     })}
-                  </p>
-                </EuiCallOut>
-                <EuiSpacer />
-              </>
-            )}
-            {showMaintenanceBanners && isMaintenanceStatusError && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="danger"
-                  iconType="error"
-                  data-test-subj="significantEventsStatusErrorBanner"
-                  title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
-                    defaultMessage: 'Could not load Significant Events activity status',
-                  })}
-                >
-                  <p>
-                    {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
-                      defaultMessage:
-                        'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
-                    })}
-                  </p>
-                  {canManageStreams && (
-                    <EuiButton
-                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
-                      color="danger"
-                      size="s"
-                      data-test-subj="significantEventsStatusErrorBannerSettingsLink"
-                    >
-                      {i18n.translate(
-                        'xpack.significantEventsApp.statusErrorBannerSettingsButton',
-                        { defaultMessage: 'Go to Settings' }
-                      )}
-                    </EuiButton>
-                  )}
-                </EuiCallOut>
-                <EuiSpacer />
-              </>
-            )}
-            {showMaintenanceBanners && isBlocked && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="pause"
-                  data-test-subj="significantEventsPausedBanner"
-                  title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
-                    defaultMessage: 'Significant Events activity is paused',
-                  })}
-                >
-                  <p>
-                    {canManageStreams
-                      ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
-                          defaultMessage:
-                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                        })
-                      : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
-                          defaultMessage:
-                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
-                        })}
-                  </p>
-                  {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
-                    <p>
-                      {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+                  </EuiButton>
+                )}
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {showMaintenanceBanners && isBlocked && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                iconType="pause"
+                data-test-subj="significantEventsPausedBanner"
+                title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
+                  defaultMessage: 'Significant Events activity is paused',
+                })}
+              >
+                <p>
+                  {canManage && canConfigure
+                    ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
-                          'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                      })
+                    : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
+                        defaultMessage:
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
                       })}
-                    </p>
-                  )}
-                  {canManageStreams && (
-                    <EuiButton
-                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
-                      color="warning"
-                      size="s"
-                      data-test-subj="significantEventsPausedBannerSettingsLink"
-                    >
-                      {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
-                        defaultMessage: 'Go to Settings',
-                      })}
-                    </EuiButton>
-                  )}
-                </EuiCallOut>
-                <EuiSpacer />
-              </>
-            )}
-            {showMaintenanceBanners && <RunLimitsBanner />}
-            {tab === 'streams' && <StreamsView />}
-            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-            {tab === 'queries' && <QueriesTable />}
-            {tab === 'detections' && <DetectionsTab />}
-            {tab === 'significant_events' && <SignificantEventsTab />}
-            {tab === 'memory' && <MemoryTab />}
-            {tab === 'settings' && <SettingsTab />}
-          </SignificantEventsAppPageTemplate.Body>
-        </SignificantEventsPageProvider>
-      </KiGenerationProvider>
+                </p>
+                {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
+                  <p>
+                    {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+                      defaultMessage:
+                        'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+                    })}
+                  </p>
+                )}
+                {canManage && canConfigure && (
+                  <EuiButton
+                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    color="warning"
+                    size="s"
+                    data-test-subj="significantEventsPausedBannerSettingsLink"
+                  >
+                    {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
+                      defaultMessage: 'Go to Settings',
+                    })}
+                  </EuiButton>
+                )}
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {showMaintenanceBanners && <RunLimitsBanner />}
+          {canShow && (
+            <KiGenerationProvider onFailed={onOnboardingFailed}>
+              {tab === 'streams' && <StreamsView />}
+              {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+              {tab === 'queries' && <QueriesTable />}
+              {tab === 'memory' && <MemoryTab />}
+            </KiGenerationProvider>
+          )}
+          {tab === 'detections' && <DetectionsTab />}
+          {tab === 'significant_events' && <SignificantEventsTab />}
+          {tab === 'settings' && canConfigure && <SettingsTab />}
+        </SignificantEventsAppPageTemplate.Body>
+      </SignificantEventsPageProvider>
     </>
   );
 }
