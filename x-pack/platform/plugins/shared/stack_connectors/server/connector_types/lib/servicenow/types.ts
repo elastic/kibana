@@ -37,7 +37,8 @@ export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
   | GetCommonFieldsResponse
-  | GetChoicesResponse;
+  | GetChoicesResponse
+  | ServiceNowIncident;
 
 export interface CreateCommentRequest {
   [key: string]: string;

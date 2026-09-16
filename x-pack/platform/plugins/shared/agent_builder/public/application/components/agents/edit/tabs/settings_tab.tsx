@@ -743,13 +743,24 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.common.optional}
                   </EuiText>
                 }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.workflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure pre-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
                 isInvalid={!!formState.errors.configuration?.workflow_ids}
                 error={formState.errors.configuration?.workflow_ids?.message}
               >
                 <WorkflowPicker
                   name="configuration.workflow_ids"
                   singleSelection={false}
-                  isDisabled={isFormDisabled}
+                  isDisabled={isFormDisabled || !isAdmin}
                 />
               </EuiFormRow>
             </EuiFlexItem>
