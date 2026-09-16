@@ -239,7 +239,7 @@ const mockRulesFetchResult = (
 };
 
 const switchToPoliciesTab = async () => {
-  await userEvent.click(screen.getByRole('tab', { name: /policies/i }));
+  await userEvent.click(screen.getByRole('tab', { name: /action policies/i }));
 };
 
 describe('ExecutionHistoryPage', () => {
@@ -257,6 +257,7 @@ describe('ExecutionHistoryPage', () => {
       screen.getByRole('heading', { level: 1, name: /execution history/i })
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /rules/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
   });
 
   it('renders the experimental badge in the page header', () => {
@@ -323,7 +324,7 @@ describe('ExecutionHistoryPage', () => {
     });
   });
 
-  describe('Policies tab', () => {
+  describe('Action policies tab', () => {
     beforeEach(() => {
       mockRulesFetchResult();
     });
@@ -345,7 +346,7 @@ describe('ExecutionHistoryPage', () => {
       await switchToPoliciesTab();
 
       expect(
-        screen.getByText(/No policy execution activity in the last 24 hours/i)
+        screen.getByText(/No action policy execution activity in the last 24 hours/i)
       ).toBeInTheDocument();
     });
 
@@ -567,7 +568,7 @@ describe('ExecutionHistoryPage', () => {
 
       expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
       expect(
-        screen.queryByText(/No policy execution activity in the last 24 hours/i)
+        screen.queryByText(/No action policy execution activity in the last 24 hours/i)
       ).not.toBeInTheDocument();
     });
 
