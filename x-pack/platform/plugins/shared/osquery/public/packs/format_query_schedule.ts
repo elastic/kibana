@@ -75,6 +75,20 @@ const formatInterval = (interval: number): string =>
     values: { n: interval },
   });
 
+/**
+ * Shown when no honest schedule text can be derived: an rrule-mode query whose
+ * rule is unparseable or carries a frequency this formatter does not render,
+ * and which has no interval to fall back on. Rendering `formatInterval(0)`
+ * here would read as "runs every zero seconds" — a falsehood of the same kind
+ * this formatter exists to avoid.
+ */
+const UNKNOWN_SCHEDULE_TEXT = i18n.translate(
+  'xpack.osquery.pack.queriesTable.scheduleUnknownText',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
 const DAILY_TEXT = i18n.translate('xpack.osquery.pack.queriesTable.scheduleDailyText', {
   defaultMessage: 'Daily',
 });
@@ -217,8 +231,11 @@ const formatWeekly = (interval: number, weekdays: string[]): string => {
  * - `FREQ=HOURLY` / `MINUTELY` → `"Hourly"` / `"Every minute"`, or
  *   `"Every N hours/minutes"` when `INTERVAL > 1`
  *
- * Falls back to interval text when the schedule is interval mode, the rrule
- * string is missing, or it cannot be parsed.
+ * Falls back to interval text when the schedule is interval mode or the rrule
+ * string is missing. An rrule that cannot be parsed — or that carries a
+ * frequency not listed above — renders `"Unknown"` unless the row also stores
+ * an interval to fall back on, since an rrule-mode row has no interval and
+ * `"0s"` would read as "every zero seconds".
  *
  * This reads the **parsed RRULE fields** rather than the form-facing recurrence
  * projection (`rruleFieldsToRecurrence`). That projection is lossy on purpose —
@@ -285,12 +302,20 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
 
         default:
           // An unrecognized frequency (e.g. SECONDLY) has no honest label —
-          // fall through to interval text rather than assert a wrong one.
+          // fall through rather than assert a wrong one.
           break;
       }
     } catch {
-      // Fall through to interval text on an unparseable rrule string.
+      // Fall through on an unparseable rrule string.
     }
+
+    // Both fall-throughs above land here. An rrule-mode query carries no
+    // interval of its own, so there is usually nothing to fall back to — and
+    // `formatInterval(0)` would render "0s", i.e. "every zero seconds". Only
+    // claim an interval when one is actually stored.
+    return schedule.interval === undefined
+      ? UNKNOWN_SCHEDULE_TEXT
+      : formatInterval(schedule.interval);
   }
 
   return formatInterval(schedule.interval ?? 0);

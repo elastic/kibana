@@ -102,6 +102,36 @@ describe('formatQuerySchedule', () => {
         })
       ).toBe('90s');
     });
+
+    // An rrule-mode row carries no interval of its own, so there is nothing to
+    // fall back to. Rendering `formatInterval(0)` here would read as "runs
+    // every zero seconds" — the same class of display falsehood this formatter
+    // exists to prevent.
+    describe('with no interval to fall back on', () => {
+      const formatRrule = (rrule: string) =>
+        formatQuerySchedule({
+          schedule_type: 'rrule',
+          rrule_schedule: { rrule, start_date: startDate },
+        });
+
+      it('should render "Unknown" for an unparseable rrule string', () => {
+        expect(formatRrule('NOT_A_VALID_RRULE')).toBe('Unknown');
+      });
+
+      // An empty rrule string is falsy, so it is treated as "no rrule stored"
+      // and takes the interval-mode path rather than the unknown-rule path.
+      it('should treat an empty rrule string as a missing rrule', () => {
+        expect(formatRrule('')).toBe('0s');
+      });
+
+      it('should render "Unknown" for a frequency this formatter does not render', () => {
+        expect(formatRrule('FREQ=SECONDLY')).toBe('Unknown');
+      });
+
+      it('should render "Unknown" when INTERVAL is not a positive integer', () => {
+        expect(formatRrule('FREQ=MONTHLY;INTERVAL=0')).toBe('Unknown');
+      });
+    });
   });
 
   // Regression coverage for the frequency-coverage defect: the formatter used
