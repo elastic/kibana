@@ -83,18 +83,34 @@ const OPTIONAL_TRACE_DETAIL_COLUMNS = new Set([
   'attributes.gen_ai.tool.call.result',
 ]);
 
-const UNKNOWN_COLUMN_PATTERN = /Unknown column \[([^\]]+)\]/g;
+const PROBLEM_LIST_HEADER = /^Found (\d+) problems?$/;
+const UNKNOWN_COLUMN_PROBLEM = /^line \d+:\d+: Unknown column \[([^\]]+)\]$/;
 
 /**
- * ES|QL reports a missing column as a 400 `verification_exception` whose reason
- * contains `Unknown column [<name>]` — the column-level counterpart to
- * `isEsqlUnknownIndexError` from `@kbn/storage-adapter`.
+ * ES|QL reports a missing column as a 400 `verification_exception` whose `reason`
+ * is a problem list — the column-level counterpart to `isEsqlUnknownIndexError`
+ * from `@kbn/storage-adapter`. The shape ES actually emits is:
  *
- * Returns true only when EVERY `Unknown column [...]` mentioned in the reason
- * is one of `OPTIONAL_TRACE_DETAIL_COLUMNS`. If the reason names an unknown
- * column outside that set (e.g. a typo'd `trace_id` or `@timestamp`), this
- * returns false so the caller treats it as a real error rather than an empty
- * batch.
+ *     Found 2 problems
+ *     line 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]
+ *     line 6:147: Unknown column [attributes.gen_ai.tool.call.result]
+ *
+ * Returns true only when the reason is a well-formed problem list in which EVERY
+ * declared problem is one of `OPTIONAL_TRACE_DETAIL_COLUMNS`. Deliberately strict
+ * on three axes, because `runEsqlQuery` is shared by the execute-tool,
+ * invoke-agent, and self-analysis queries, and a swallowed regression here means
+ * the hourly task reports success forever while reading nothing:
+ *
+ *  1. The declared `Found <n> problem(s)` count must match the number of problem
+ *     lines actually present — a truncated or reworded reason is not forgiven.
+ *  2. Every problem line must be an `Unknown column [...]` of an allowed name; a
+ *     non-column verifier problem (e.g. a type-resolution failure) rejects the
+ *     whole error even when an allowed missing column is also reported.
+ *  3. A problem line must match the `line <l>:<c>: ` prefix exactly, so a
+ *     non-`Unknown column` message can never be mistaken for one.
+ *
+ * Fails closed: an unrecognised reason shape counts as a real error, which costs
+ * a task retry — the safe direction, versus silently reading an empty batch.
  */
 export const isEsqlUnknownColumnError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError)) return false;
@@ -103,14 +119,26 @@ export const isEsqlUnknownColumnError = (error: unknown): boolean => {
     return false;
   }
   const reason = body?.error?.reason;
-  if (typeof reason !== 'string' || !reason.includes('Unknown column')) {
+  if (typeof reason !== 'string') {
     return false;
   }
-  const unknownColumns = [...reason.matchAll(UNKNOWN_COLUMN_PATTERN)].map((match) => match[1]);
-  return (
-    unknownColumns.length > 0 &&
-    unknownColumns.every((column) => OPTIONAL_TRACE_DETAIL_COLUMNS.has(column))
-  );
+
+  const [header, ...problemLines] = reason
+    .split('\n')
+    .filter((line) => line.trim().length > 0);
+  const declared = header?.match(PROBLEM_LIST_HEADER);
+  if (!declared) {
+    return false;
+  }
+  // A reason that under-reports its own problems is malformed; do not forgive it.
+  if (problemLines.length !== Number(declared[1])) {
+    return false;
+  }
+
+  return problemLines.every((line) => {
+    const column = line.match(UNKNOWN_COLUMN_PROBLEM)?.[1];
+    return column !== undefined && OPTIONAL_TRACE_DETAIL_COLUMNS.has(column);
+  });
 };
 
 const esqlRowsToObjects = <TRow>(response: ESQLSearchResponse): TRow[] => {

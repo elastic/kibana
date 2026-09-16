@@ -79,7 +79,7 @@ describe('isEsqlUnknownColumnError', () => {
         responseError(
           400,
           'verification_exception',
-          'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]'
+          'Found 1 problem\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]'
         )
       )
     ).toBe(true);
@@ -143,6 +143,68 @@ describe('isEsqlUnknownColumnError', () => {
           'verification_exception',
           'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 7:1: Unknown column [@timestamp]'
         )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match when an allowed missing column is reported alongside a non-column problem', () => {
+    // The exact case the second review flagged: ES reports `Found 2 problems`, one of
+    // which is a tolerable missing optional column, while the other is a genuine
+    // verifier failure. Extracting only `Unknown column [...]` entries would check the
+    // allowed name, ignore the type error, and swallow the whole regression into an
+    // empty batch. (Wording taken from a live ES|QL run against the VP cluster.)
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\n' +
+            'line 1:31: Unknown column [attributes.gen_ai.tool.call.arguments]\n' +
+            'line 1:35: second argument of [n + "str"] must be [date_nanos, datetime, numeric or dense_vector], found value ["str"] type [keyword]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match a non-column verifier problem even with no unknown column at all', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 1:35: second argument of [n + "str"] must be [date_nanos, datetime, numeric or dense_vector], found value ["str"] type [keyword]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('fails closed when the declared problem count does not match the reported lines', () => {
+    // A truncated or reworded reason must not be forgiven: it may be hiding a
+    // problem line this matcher cannot see.
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]'
+        )
+      )
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 6:147: Unknown column [attributes.gen_ai.tool.call.result]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match a reason that is not a problem list at all', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(400, 'verification_exception', 'Unknown column [attributes.gen_ai.tool.call.arguments]')
       )
     ).toBe(false);
   });
