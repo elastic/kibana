@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CustomTaskInstance, SyncTaskRunResult } from './sync_private_locations_monitors_task';
+import type {
+  CustomTaskInstance,
+  SyncTaskRunResult,
+  SyncTaskState,
+} from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
@@ -1000,7 +1004,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1', 'monitor1-loc1-stores'];
         })()
       );
-      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
+      const state: Partial<SyncTaskState> = {
+        hasAlreadyDoneCleanup: true,
+        maxCleanUpRetries: 3,
+      };
       const result = await cleanUpDuplicatedPackagePolicies(
         mockServerSetup as any,
         mockSoClient as any,
@@ -1064,7 +1071,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1', 'monitor1-loc1-stores'];
         })()
       );
-      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 0 };
+      const state: Partial<SyncTaskState> = {
+        hasAlreadyDoneCleanup: true,
+        maxCleanUpRetries: 0,
+      };
       const result = await cleanUpDuplicatedPackagePolicies(
         mockServerSetup as any,
         mockSoClient as any,

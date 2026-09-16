@@ -214,7 +214,11 @@ describe('clean_up_package_policies_task', () => {
   });
 
   it('schedules a per-location sync after leftover deletes', async () => {
-    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({ performCleanupSync: true });
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: true,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+    });
     getPrivateLocationsMock.mockResolvedValue([{ id: 'pl-1' }, { id: 'pl-2' }] as any);
 
     const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
@@ -232,7 +236,11 @@ describe('clean_up_package_policies_task', () => {
   });
 
   it('does not schedule per-location sync when leftover scan finds nothing to recreate', async () => {
-    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({ performCleanupSync: false });
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: false,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+    });
 
     await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
 
