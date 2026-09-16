@@ -2156,6 +2156,11 @@ paths:
                       total: 128
                     results:
                       - agent_id: elastic-ai-agent
+                        attachments:
+                          - id: 6f1c0f1e-6c2a-4a0a-9a1e-2f2b1c7d4e11
+                            type: text
+                          - id: 2b9d7c53-0b8e-4a77-9f0c-91a5d6c3b208
+                            type: esql
                         created_at: '2025-09-19T17:45:39.554Z'
                         id: bcc176c5-38f6-40be-be0c-898e34fa1480
                         permissions:
