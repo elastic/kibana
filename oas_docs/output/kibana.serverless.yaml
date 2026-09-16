@@ -139364,7 +139364,7 @@ components:
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -139708,7 +139708,7 @@ components:
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
@@ -139776,7 +139776,7 @@ components:
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -140368,7 +140368,7 @@ components:
                 type: string
               type: array
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
@@ -140459,7 +140459,7 @@ components:
               name:
                 $ref: '#/components/schemas/Security_Osquery_API_PackName'
               platform:
-                $ref: '#/components/schemas/Security_Osquery_API_Platform'
+                $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
               policy_ids:
                 $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
               queries:
@@ -140939,6 +140939,7 @@ components:
       description: Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
       example: 5.10.0
       maxLength: 64
+      minLength: 1
       type: string
     Security_Osquery_API_MinOsqueryVersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
@@ -141006,6 +141007,15 @@ components:
       description: The pack name.
       example: my_pack
       type: string
+    Security_Osquery_API_PackPlatform:
+      description: Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.
+      example: linux,darwin
+      maxLength: 256
+      minLength: 1
+      type: string
+    Security_Osquery_API_PackPlatformOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
+      nullable: true
     Security_Osquery_API_PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -141019,7 +141029,6 @@ components:
     Security_Osquery_API_Platform:
       description: Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
       example: linux,darwin
-      maxLength: 256
       type: string
     Security_Osquery_API_PlatformOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Platform'
@@ -141043,9 +141052,6 @@ components:
       description: Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.
       example: true
       type: boolean
-    Security_Osquery_API_QueryEnabledOrUndefined:
-      $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
-      nullable: true
     Security_Osquery_API_QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334
@@ -141320,7 +141326,7 @@ components:
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
@@ -141385,7 +141391,7 @@ components:
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
