@@ -21,8 +21,11 @@ import {
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
+  RuleTuningWorkerExtras,
+  UpdateWorkerRequestBody,
   Worker,
   WorkerSettings,
+  WorkerSettingsWrite,
 } from '.';
 
 describe('AlertZero schema smoke tests', () => {
@@ -72,6 +75,55 @@ describe('AlertZero schema smoke tests', () => {
       workerId: 'system-security-hunt-continuous-threat-hunt',
       autonomy: 'manual',
     });
+  });
+
+  it('rejects unknown top-level settings keys but leaves extras open on the wire', () => {
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-dark-continuous-threat-hunt',
+        autonomy: 'manual',
+        unknownField: true,
+      }).success
+    ).toBe(false);
+    expect(WorkerSettingsWrite.safeParse({ analysisWindowDays: 7 }).success).toBe(false);
+
+    // Per-Worker strictness is applied by the complete schema, not the generic wire schema.
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 14 },
+      }).success
+    ).toBe(true);
+    expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
+  });
+
+  it('closes the Detection-owned Rule Tuning extras', () => {
+    expect(RuleTuningWorkerExtras.safeParse({}).success).toBe(false);
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14, extra: 1 }).success).toBe(
+      false
+    );
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14 }).success).toBe(true);
+  });
+
+  it.each([7.5, 0, 31])('rejects analysisWindowDays %s', (analysisWindowDays) => {
+    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays }).success).toBe(false);
+  });
+
+  it('rejects leftover top-level settings fields on the update body', () => {
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        autonomyLevel: 'assisted',
+      }).success
+    ).toBe(false);
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        settings: { autonomy: 'assisted' },
+      }).success
+    ).toBe(true);
   });
 
   it('parses seed skills through WatchSkill', () => {
