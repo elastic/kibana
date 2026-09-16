@@ -59,6 +59,8 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
     // this synthetic draft that never gets serialised back to the server directly.
     signature_id: template.rule.metadata.signature_id ?? '',
     version: 1,
+    revision: 0,
+    source: template.rule.metadata.source ?? { type: 'internal' as const, version: 1 },
   },
 });
 
