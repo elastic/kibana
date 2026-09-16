@@ -6,80 +6,155 @@
  */
 
 import React, { useMemo } from 'react';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   EuiBadge,
-  EuiDescriptionList,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiText,
-  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { InfoPanel } from '../info_panel';
+import type {
+  SignalEntry,
+  SignificantEvent,
+  SignificantEventResponse,
+} from '@kbn/significant-events-schema';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { buildDiscoverParams } from '../../util/discover_helpers';
 import { formatTimestamp } from '../../util/formatters';
+import { InfoPanel } from '../info_panel';
+import { useKibana } from '../../hooks/use_kibana';
 
 const DESCRIPTION_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.descriptionTitle',
-  {
-    defaultMessage: 'Description',
-  }
+  { defaultMessage: 'Description' }
 );
-const GENERAL_INFORMATION_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.generalInformationTitle',
-  {
-    defaultMessage: 'General information',
-  }
-);
-const CREATED_AT_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.createdAtLabel',
-  {
-    defaultMessage: 'Created at',
-  }
-);
-const CAUSAL_FEATURES_LABEL = i18n.translate(
+
+const CAUSAL_FEATURES_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.causalFeatures',
-  {
-    defaultMessage: 'Causal features',
-  }
+  { defaultMessage: 'Causal features' }
 );
-const STREAMS_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.streams',
+
+const SIGNALS_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.signalsTitle',
   {
-    defaultMessage: 'Streams',
-  }
-);
-const EMPTY_VALUE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.emptyValue',
-  {
-    defaultMessage: '—',
+    defaultMessage: 'Signals',
   }
 );
 
-const signalPanelCss = css`
-  margin-bottom: 4px;
-`;
-
-const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
-  if (items.length === 0) {
-    return (
-      <EuiText size="s" color="subdued">
-        {EMPTY_VALUE}
-      </EuiText>
-    );
+const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventDetails.openInDiscoverLabel',
+  {
+    defaultMessage: 'Open in Discover',
   }
+);
+
+interface DetectionSignalRowProps {
+  signal: Extract<SignalEntry, { type: 'detection' }>;
+}
+
+const replaceESQLLimit = (query: string) => {
+  const { root } = Parser.parse(query);
+  const queryWithoutLimit = BasicPrettyPrinter.print({
+    ...root,
+    commands: root.commands.filter(
+      (command) => command.name !== 'limit' && command.name !== 'keep'
+    ),
+  });
+
+  return queryWithoutLimit;
+};
+
+const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
+  const { dependencies } = useKibana();
+  const { share } = dependencies.start;
+  const { euiTheme } = useEuiTheme();
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+  const esqlQuery = signal.evidence?.esql_query;
+  const normalizedQuery = useMemo(
+    () => (esqlQuery ? replaceESQLLimit(esqlQuery) : undefined),
+    [esqlQuery]
+  );
+  const timeRange = useMemo(
+    () => signal.evidence?.time_range ?? { from: 'now-1h', to: 'now' },
+    [signal.evidence?.time_range]
+  );
+  const queryHref = useMemo(() => {
+    if (!normalizedQuery || !discoverLocator) {
+      return undefined;
+    }
+
+    return discoverLocator.getRedirectUrl(buildDiscoverParams(normalizedQuery, timeRange));
+  }, [normalizedQuery, timeRange, discoverLocator]);
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {items.map((item, idx) => (
-        <EuiFlexItem grow={false} key={`${item}-${idx}`}>
-          <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
+    <EuiFlexGroup
+      gutterSize="xs"
+      responsive={false}
+      css={{ padding: `${euiTheme.size.m} ${euiTheme.size.m}` }}
+      wrap
+    >
+      {signal.metadata?.rule_name && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" textAlign="left">
+            <strong>{signal.metadata.rule_name}</strong>
+          </EuiText>
+          {signal.collected_at && (
+            <EuiText size="xs" color="subdued">
+              {formatTimestamp(signal.collected_at)}
+            </EuiText>
+          )}
         </EuiFlexItem>
-      ))}
+      )}
+
+      {signal.description && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {signal.description}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+
+      {normalizedQuery && (
+        <EuiFlexItem grow={false}>
+          <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
+            {normalizedQuery}
+          </EuiCodeBlock>
+        </EuiFlexItem>
+      )}
+
+      {queryHref && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="discoverApp"
+            href={queryHref}
+            target="_blank"
+            data-test-subj="significantEventDetailsOpenInDiscoverLink"
+          >
+            {OPEN_IN_DISCOVER_LABEL}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
+  );
+};
+
+const SignalListPanel = ({ children }: { children: React.ReactNode[] }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      {React.Children.map(children, (child, index) => (
+        <div css={index < children.length - 1 ? { borderBottom: euiTheme.border.thin } : undefined}>
+          {child}
+        </div>
+      ))}
+    </EuiPanel>
   );
 };
 
@@ -88,33 +163,8 @@ interface SignificantEventDetailsProps {
 }
 
 export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps) => {
-  const signals = event.signals ?? [];
-  const detectionSignals = signals.filter((s) => s.type === 'detection');
-  const createdAt = 'created_at' in event ? event.created_at : event['@timestamp'];
-
-  const generalInfoItems = useMemo(
-    () => [
-      {
-        title: CREATED_AT_LABEL,
-        description: <EuiText size="s">{formatTimestamp(createdAt)}</EuiText>,
-      },
-      {
-        title: STREAMS_LABEL,
-        description: <BadgeRow items={event.stream_names ?? []} color="hollow" />,
-      },
-      {
-        title: CAUSAL_FEATURES_LABEL,
-        description: (
-          <BadgeRow
-            items={(event.causal_features ?? []).map(
-              (f) => `${f.name || '-'}${f.stream_name ? ` (${f.stream_name})` : ''}`
-            )}
-          />
-        ),
-      },
-    ],
-    [createdAt, event.stream_names, event.causal_features]
-  );
+  const signals = useMemo(() => event.signals ?? [], [event.signals]);
+  const detectionSignals = useMemo(() => signals.filter((s) => s.type === 'detection'), [signals]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -126,61 +176,35 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
         </InfoPanel>
       )}
 
-      <InfoPanel title={GENERAL_INFORMATION_TITLE}>
-        {generalInfoItems.map((listItem, index) => (
-          <React.Fragment key={listItem.title}>
-            <EuiDescriptionList
-              type="column"
-              columnWidths={[1, 2]}
-              compressed
-              listItems={[listItem]}
-            />
-            {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
-          </React.Fragment>
-        ))}
-      </InfoPanel>
+      {event.causal_features && event.causal_features.length > 0 && (
+        <InfoPanel title={CAUSAL_FEATURES_TITLE}>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {event.causal_features.map((feature) => (
+              <EuiFlexItem grow={false} key={feature.feature_id}>
+                <EuiBadge>{feature.name}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </InfoPanel>
+      )}
 
       {detectionSignals.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.signals', {
-                defaultMessage: 'Signals ({count})',
-                values: { count: detectionSignals.length },
-              })}
-            </h3>
-          </EuiTitle>
-          {detectionSignals.map((signal, idx) => (
-            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={signalPanelCss}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                {signal.metadata?.rule_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{signal.metadata.rule_name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-                {signal.stream_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{signal.stream_name}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {signal.evidence?.result && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={signal.evidence.result === 'empty' ? 'hollow' : 'warning'}>
-                      {signal.evidence.result}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              {signal.description && (
-                <EuiText size="xs" color="subdued">
-                  {signal.description}
-                </EuiText>
-              )}
-            </EuiPanel>
-          ))}
-        </EuiFlexGroup>
+        <InfoPanel
+          title={
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{SIGNALS_TITLE}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{detectionSignals.length}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <SignalListPanel>
+            {detectionSignals.map((signal, idx) => {
+              return <DetectionSignalRow key={idx} signal={signal} />;
+            })}
+          </SignalListPanel>
+        </InfoPanel>
       )}
     </EuiFlexGroup>
   );

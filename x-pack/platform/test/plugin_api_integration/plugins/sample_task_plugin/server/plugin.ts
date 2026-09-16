@@ -204,6 +204,59 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleTaskAuthenticatingWithItsOwnCredential: {
+        title: 'Sample Task Authenticating With Its Own Credential',
+        description:
+          'Calls Elasticsearch through a client scoped to the task fake request, i.e. with the credential Task Manager persisted for the task, and records whether it authenticated. Used to verify end-to-end that stored task API keys (ES or UIAM, granted or provisioned) are presented in a shape Elasticsearch accepts.',
+        timeout: '1m',
+        maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              authenticated: schema.maybe(schema.boolean()),
+              username: schema.maybe(schema.nullable(schema.string())),
+              /** Id of the API key Elasticsearch authenticated the call with, when it was one. */
+              apiKeyId: schema.maybe(schema.nullable(schema.string())),
+              error: schema.maybe(schema.nullable(schema.string())),
+              ran: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => ({
+          async run() {
+            const [{ elasticsearch }] = await core.getStartServices();
+
+            let authenticated = false;
+            let username: string | null = null;
+            let apiKeyId: string | null = null;
+            let error: string | null = null;
+
+            if (!fakeRequest) {
+              error = 'No fake request was provided to the task runner';
+            } else {
+              try {
+                // `_authenticate` isolates authentication from authorization: any authenticated
+                // credential can call it, so a failure here means the credential itself was
+                // rejected. Its response also names the API key that was used, which tells the
+                // test which of the task's credentials actually authenticated.
+                const response = await elasticsearch.client
+                  .asScoped(fakeRequest)
+                  .asCurrentUser.security.authenticate();
+                authenticated = true;
+                username = response.username;
+                apiKeyId = response.api_key?.id ?? null;
+              } catch (e) {
+                error = e.message;
+              }
+            }
+
+            // Errors are captured rather than rethrown so the outcome is always observable in
+            // task state instead of only as a task failure.
+            return { state: { authenticated, username, apiKeyId, error, ran: true } };
+          },
+        }),
+      },
       sampleRecurringTask: {
         timeout: '1m',
         title: 'Sample Recurring Task',
@@ -534,7 +587,7 @@ export class SampleTaskManagerFixturePlugin
       },
       lowPriorityTask: {
         title: 'Task used for testing priority claiming',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async run() {
             const { state, schedule } = taskInstance;
@@ -564,7 +617,7 @@ export class SampleTaskManagerFixturePlugin
       },
       normalLongRunningPriorityTask: {
         title: 'Task used for testing long running priority claiming',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async run() {
             const { state, schedule } = taskInstance;
@@ -578,6 +631,36 @@ export class SampleTaskManagerFixturePlugin
               body: {
                 type: 'task',
                 taskType: 'normalLongRunningPriorityTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
+        }),
+      },
+      userInteractivePriorityTask: {
+        title: 'Task used for testing user interactive priority claiming',
+        priority: TaskPriority.UserInteractive,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'userInteractivePriorityTask',
                 taskId: taskInstance.id,
                 state: JSON.stringify(state),
                 ranAt: new Date(),

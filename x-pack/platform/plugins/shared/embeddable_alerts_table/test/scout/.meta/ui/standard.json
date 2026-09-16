@@ -1,8 +1,7 @@
 {
   "sha1": "dd1af19ad62171069e1df2b4a73faf503d4ce4b0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/add_alerts_panel.spec.ts",
-        "line": 56,
-        "column": 11
+        "line": 50,
+        "column": 39
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/add_alerts_panel.spec.ts",
-        "line": 56,
-        "column": 11
+        "line": 50,
+        "column": 39
       }
     },
     {
@@ -45,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -61,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -77,8 +76,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 103,
-        "column": 13
+        "line": 94,
+        "column": 20
       }
     },
     {
@@ -93,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -109,8 +108,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -125,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/embeddable_alerts_table/test/scout/ui/tests/consumer_visibility.spec.ts",
-        "line": 103,
-        "column": 13
+        "line": 94,
+        "column": 20
       }
     }
   ]

@@ -8,8 +8,13 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import moment from 'moment';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
+import {
+  AppMenu,
+  KibanaCodeEditorWrapper,
+  type EuiDataGridObject,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
@@ -65,12 +70,16 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  public readonly canvasEmptyState;
   // Streams layout
-  public readonly streamsLayoutSourcesPlaceholder;
-  public readonly streamsLayoutPipelinesPlaceholder;
-  public readonly streamsLayoutDestinationsPlaceholder;
+  public readonly streamsSourcesTable;
+  public readonly streamsAddSourceButton;
+  public readonly streamsDestinationsTable;
+  public readonly streamsDestinationsSearch;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
@@ -128,16 +137,12 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     // Streams layout locators
-    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutSourcesPlaceholder'
-    );
-    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutPipelinesPlaceholder'
-    );
-    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutDestinationsPlaceholder'
-    );
+    this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
+    this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
+    this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
+    this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }
 
   async goto() {
@@ -215,8 +220,22 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  /**
+   * Click near the top of a node card so the floating toolbar (bottom-center)
+   * cannot intercept the pointer when a node sits toward the bottom of the pane.
+   */
+  async clickCanvasNode(
+    node: Locator,
+    options: { button?: 'left' | 'right'; modifiers?: Array<'Shift'> } = {}
+  ) {
+    await node.click({
+      position: { x: 24, y: 16 },
+      ...options,
+    });
+  }
+
   async rightClickCanvasNode(node: Locator) {
-    await node.click({ button: 'right' });
+    await this.clickCanvasNode(node, { button: 'right' });
   }
 
   async openCanvasPaneContextMenu() {
@@ -609,33 +628,15 @@ export class StreamsApp {
 
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
-    // Focus source item and activate DnD
-    await this.page.getByTestId(`routingRuleDragHandle-${sourceStream}`).focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components.draggable(`routingRuleDragHandle-${sourceStream}`).reorder(steps);
   }
 
   async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
-    // Focus source item and activate DnD
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[processorPos];
-    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components
+      .draggable('streamsAppProcessorDragHandle', targetProcessor)
+      .reorder(steps);
   }
 
   // Expectation utility methods
@@ -1452,8 +1453,7 @@ export class StreamsApp {
   }
 
   async openStreamsSettings() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('streamsAppSettingsButton').click();
+    await this.appMenu.clickItem('streamsAppSettingsButton');
   }
 
   async clickCreateQueryStreamButton() {
@@ -1490,8 +1490,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('streamsDeleteStreamButton');
+    await this.appMenu.clickItem('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

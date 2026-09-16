@@ -77,6 +77,7 @@ describe('generateExecutorFunction', () => {
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
     testAction: {
       isTool: true,
+      scope: 'read',
       input: {} as never,
       handler,
     },
@@ -130,6 +131,48 @@ describe('generateExecutorFunction', () => {
         }),
         {}
       );
+    });
+
+    it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'relay', tenantKey: 'tenant-A' } });
+
+      expect(mockHandler).toHaveBeenCalledWith(expect.objectContaining({ relay }), {});
+    });
+
+    it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'bearer', token: 'secret' } });
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
+    it('leaves the Relay client undefined when no Relay is configured', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
     });
 
     it('returns empty object as data when handler returns null', async () => {
@@ -218,6 +261,7 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read',
             input: {} as never,
             handler: jest.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
@@ -253,6 +297,7 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read',
             input: {} as never,
             handler: jest.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
@@ -304,6 +349,7 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read',
             input: {} as never,
             handler: jest.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
@@ -347,6 +393,7 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read',
             input: {} as never,
             handler: jest.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
@@ -391,7 +438,7 @@ describe('generateExecutorFunction', () => {
 
       const pool = new LeasePool<unknown>();
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -455,7 +502,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -487,7 +534,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -531,7 +578,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -574,7 +621,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -626,7 +673,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -658,7 +705,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -757,7 +804,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -794,7 +841,7 @@ describe('generateExecutorFunction', () => {
       });
 
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -845,7 +892,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -879,7 +926,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -907,7 +954,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
@@ -940,7 +987,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
@@ -975,7 +1022,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
@@ -1013,7 +1060,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
@@ -1104,6 +1151,7 @@ describe('generateExecutorFunction', () => {
         actions: {
           testAction: {
             isTool: true,
+            scope: 'read' as const,
             input: {} as never,
             responseSizeHeader: 'x-resource-size',
             handler: mockHandler,
@@ -1224,6 +1272,7 @@ describe('generateExecutorFunction', () => {
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
+          scope: 'read',
           input: {} as never,
           handler: testHandler,
         },
@@ -1253,6 +1302,7 @@ describe('generateExecutorFunction', () => {
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
+          scope: 'read',
           input: {} as never,
           handler: testHandler,
         },
@@ -1284,8 +1334,8 @@ describe('generateExecutorFunction', () => {
       const handler2 = jest.fn().mockResolvedValue({ from: 'action2' });
 
       const actions: ConnectorSpec['actions'] = {
-        action1: { isTool: true, input: {} as never, handler: handler1 },
-        action2: { isTool: true, input: {} as never, handler: handler2 },
+        action1: { isTool: true, scope: 'read', input: {} as never, handler: handler1 },
+        action2: { isTool: true, scope: 'read', input: {} as never, handler: handler2 },
       };
 
       const executor = generateExecutorFunction({

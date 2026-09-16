@@ -184,7 +184,6 @@ module.exports = {
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
-          '@typescript-eslint/no-undef': 'off',
           'no-undef': 'off',
 
           '@typescript-eslint/triple-slash-reference': [

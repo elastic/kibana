@@ -12,7 +12,12 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
-import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './formatting_utils';
+import {
+  arrayFormatter,
+  objectFormatter,
+  omitDefaultFormatter,
+  stringToObjectFormatter,
+} from './formatting_utils';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -39,8 +44,10 @@ export const browserFormatters: BrowserFormatMap = {
   ...commonFormatters,
   ...tlsFormatters,
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.SCREENSHOTS]: null,
+  // 'on' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayFormatter,
   [ConfigKey.TEXT_ASSERTION]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,

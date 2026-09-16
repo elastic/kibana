@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React, { Fragment } from 'react';
 import type { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
 
@@ -21,15 +22,14 @@ interface Props {
 export const ESTransformsTargetCallout = ({ deprecation }: Props) => {
   return (
     <Fragment>
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate(
           'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.calloutTitle',
           { defaultMessage: 'Transforms detected' }
         )}
         data-test-subj="esTransformsGuidance"
-      >
-        {deprecation.details}
-      </EuiCallOut>
+        text={deprecation.details}
+      />
       <EuiSpacer size="m" />
     </Fragment>
   );

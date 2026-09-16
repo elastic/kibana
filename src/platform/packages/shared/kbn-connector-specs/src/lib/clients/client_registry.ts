@@ -8,10 +8,12 @@
  */
 
 import type { McpClient } from '@kbn/mcp-client';
+import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import type { ClientTypeSpec } from './client_type_spec';
 
 export interface ClientRegistry {
   mcp: McpClient;
+  mysql: Mysql2Pool;
 }
 
 export type ClientTypeId = keyof ClientRegistry;

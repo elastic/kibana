@@ -38,7 +38,7 @@ describe('getFullFieldNameNode', function () {
 
   test('should throw an error if a path is provided for a non-nested field', () => {
     const nameNode = nodeTypes.literal.buildNode('os');
-    expect(() => getFullFieldNameNode(nameNode, indexPattern, 'machine')).toThrowError(
+    expect(() => getFullFieldNameNode(nameNode, indexPattern, 'machine')).toThrow(
       /machine.os is not a nested field but is in nested group "machine" in the KQL expression/
     );
   });
@@ -46,7 +46,7 @@ describe('getFullFieldNameNode', function () {
   test('should throw an error if a nested field is not passed with a path', () => {
     const nameNode = nodeTypes.literal.buildNode('nestedField.child');
 
-    expect(() => getFullFieldNameNode(nameNode, indexPattern)).toThrowError(
+    expect(() => getFullFieldNameNode(nameNode, indexPattern)).toThrow(
       /nestedField.child is a nested field, but is not in a nested group in the KQL expression./
     );
   });
@@ -54,7 +54,7 @@ describe('getFullFieldNameNode', function () {
   test('should throw an error if a nested field is passed with the wrong path', () => {
     const nameNode = nodeTypes.literal.buildNode('nestedChild.doublyNestedChild');
 
-    expect(() => getFullFieldNameNode(nameNode, indexPattern, 'nestedField')).toThrowError(
+    expect(() => getFullFieldNameNode(nameNode, indexPattern, 'nestedField')).toThrow(
       /Nested field nestedField.nestedChild.doublyNestedChild is being queried with the incorrect nested path. The correct path is nestedField.nestedChild/
     );
   });
@@ -68,7 +68,7 @@ describe('getFullFieldNameNode', function () {
 
   test('should skip error checking if no index pattern is passed in', () => {
     const nameNode = nodeTypes.literal.buildNode('os');
-    expect(() => getFullFieldNameNode(nameNode, undefined, 'machine')).not.toThrowError();
+    expect(() => getFullFieldNameNode(nameNode, undefined, 'machine')).not.toThrow();
 
     const result = getFullFieldNameNode(nameNode, undefined, 'machine');
     expect(result).toEqual(nodeTypes.literal.buildNode('machine.os'));

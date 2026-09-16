@@ -1,8 +1,7 @@
 {
-  "sha1": "61801c75fa620110ca6506c08a54695cfa1e4d9d",
+  "sha1": "c3c56e4d4a683ab2180c7fac830deef4c86d75e5",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -11,12 +10,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_api_keys.spec.ts",
-        "line": 13,
-        "column": 14
+        "line": 17,
+        "column": 10
       }
     },
     {

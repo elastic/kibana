@@ -68,9 +68,17 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
           getCanSaveSync: jest.fn(),
           hasData: {
             hasESData: jest.fn(),
-            hasUserDataView: jest.fn(),
             hasDataView: jest.fn(),
           },
+        },
+      },
+      // Required plugins, read unconditionally by the unified results table.
+      uiActions: {
+        getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => null,
         },
       },
       notifications: {

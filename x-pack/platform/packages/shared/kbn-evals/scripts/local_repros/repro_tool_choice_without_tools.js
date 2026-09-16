@@ -6,11 +6,11 @@
  * 2.0.
  */
 /*
- * Local repro: trigger the LiteLLM/Anthropic error when `tool_choice` is sent without `tools`.
+ * Local repro: trigger the gateway/Anthropic error when `tool_choice` is sent without `tools`.
  *
  * Usage (after starting Kibana + setting KIBANA_TESTING_AI_CONNECTORS):
  *   node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/repro_tool_choice_without_tools.js \
- *     --connector-id litellm-llm-gateway-claude-opus-4-5 \
+ *     --connector-id openrouter-anthropic-claude-opus-4-5 \
  *     --kibana-url http://localhost:5620
  *
  * Notes:

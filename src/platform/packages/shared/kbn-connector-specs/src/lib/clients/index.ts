@@ -9,6 +9,7 @@
 
 import { createMcpClientType } from '../mcp/client/client_type';
 import type { ClientTypeSpecs } from './client_registry';
+import { mysqlClientType } from './mysql';
 
 export type {
   ClientTypeSpec,
@@ -22,4 +23,5 @@ export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_reg
 
 export const clientTypes: ClientTypeSpecs = {
   mcp: createMcpClientType(),
+  mysql: mysqlClientType,
 };

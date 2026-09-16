@@ -1,0 +1,276 @@
+version: "1"
+# Index/Table Metadata strategy — one `index_metadata` KI describing a whole index.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+#
+# To adapt it:
+#   1. Set every value in `consts`.
+#   2. Add grounding aggregations for the fields that actually matter in your corpus, next to
+#      `esql_category_counts` below, and reference each new step in the prompt. Grounding is what
+#      stops the model inventing distributions, so a field the KI will make claims about needs an
+#      aggregation here.
+#   3. Replace the italicised corpus description in the prompt with what your data really is.
+#
+# Leave the shape alone: the ai.prompt schema, the assemble/verify/gate sequence and the
+# `attributes.esql` wiring are what make the KI retrievable and verified.
+name: Index metadata KI automation
+description: >
+  Profiles one index (mapping + random sample + grounding aggregations) into a single
+  index_metadata Knowledge Indicator carrying verified, parameterized ES|QL access patterns.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: my-ai-index
+  # The index being profiled. Also the index every generated ES|QL reads FROM.
+  source_index: my-source-index
+  # A keyword field whose distribution grounds the profile. Pick the one an analyst would
+  # group by first.
+  category_field: my_category_field
+
+tags:
+  - index-metadata
+
+triggers:
+  - type: manual
+
+steps:
+  - name: fetch_mapping
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.source_index }}/_mapping
+
+  # `random_score` rather than a plain match_all: repeated runs then see different records
+  # instead of always the first-ingested ones.
+  - name: sample_documents
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.source_index }}"
+      size: 20
+      query:
+        function_score:
+          query:
+            match_all: {}
+          random_score: {}
+
+  - name: esql_category_counts
+    type: elasticsearch.esql.query
+    with:
+      format: json
+      query: "FROM {{ consts.source_index }} | STATS count = COUNT(*) BY {{ consts.category_field }} | SORT count DESC | LIMIT 50"
+
+  - name: esql_totals
+    type: elasticsearch.esql.query
+    with:
+      format: json
+      query: "FROM {{ consts.source_index }} | STATS total = COUNT(*), distinct_categories = COUNT_DISTINCT({{ consts.category_field }})"
+
+  - name: generate_index_profile
+    type: ai.prompt
+    with:
+      prompt: |
+        You are documenting an Elasticsearch index for an AI Context Engine knowledge base.
+
+        Index name: {{ consts.source_index }}
+
+        Elasticsearch mapping:
+        {{ steps.fetch_mapping.output | json }}
+
+        Sample of ~20 random documents from the index:
+        {{ steps.sample_documents.output.hits.hits | json }}
+
+        Grounding aggregation — document count by {{ consts.category_field }}:
+        {{ steps.esql_category_counts.output | json }}
+
+        Grounding totals — total document count and distinct {{ consts.category_field }} count:
+        {{ steps.esql_totals.output | json }}
+
+        Using ONLY the information above, produce a structured index profile describing this index
+        end to end for someone who needs to know how and when to query it. Never state a number
+        that does not appear in the grounding data above.
+
+        Populate:
+        - display_name: a short human-friendly name for this index.
+        - purpose: what this index holds and what it is for.
+        - does_not_contain: notable things this index does NOT have, so an agent does not
+          mis-route a question to it.
+        - key_fields: the important fields in the mapping, each with its meaning based on the
+          mapping and the sample documents observed above.
+        - joins: indices this is commonly correlated with, as "field -> target_index". Empty when
+          it stands alone.
+        - when_to_use: guidance on when an analyst or agent should query this index.
+        - answers_questions: example natural-language questions this index can answer.
+        - access_patterns: an array (at least 1 entry) of the common query patterns for this
+          index, one per question class an analyst would actually ask. For each entry provide:
+            - question_type: short label for the pattern.
+            - esql_template: a parameterized ES|QL query using named `?param` placeholders where
+              filters would go. Start with FROM {{ consts.source_index }}.
+            - esql_example: the same query with real example values substituted in place of the
+              placeholders, including a small LIMIT so it is cheap to run.
+            - params: list of the template's parameters, each with name/type/example.
+            - returns: short description of what the query returns.
+
+        ES|QL correctness rules for esql_template and esql_example — both are executed by the
+        verifier, so both must be valid and runnable:
+        - Start with `FROM {{ consts.source_index }}`; use `|` between commands; use real field
+          names only, taken from the mapping above.
+        - Quote string literals with double quotes; do not quote numbers or booleans.
+        - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
+          which fail at runtime on a boolean. For a rate, divide that count by the total with
+          `EVAL rate = TO_DOUBLE(count_true) / total`.
+        - Only use AVG()/SUM() on genuinely numeric fields.
+        - Give each ?param a correct type (keyword, long, double, date, boolean) with a matching
+          example value. Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
+        - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
+      schema:
+        type: object
+        properties:
+          display_name:
+            type: string
+          purpose:
+            type: string
+          does_not_contain:
+            type: array
+            items:
+              type: string
+          key_fields:
+            type: array
+            items:
+              type: object
+              properties:
+                field:
+                  type: string
+                meaning:
+                  type: string
+              required:
+                - field
+                - meaning
+          joins:
+            type: array
+            items:
+              type: string
+          when_to_use:
+            type: string
+          answers_questions:
+            type: array
+            items:
+              type: string
+          access_patterns:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              properties:
+                question_type:
+                  type: string
+                esql_template:
+                  type: string
+                esql_example:
+                  type: string
+                params:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      type:
+                        type: string
+                      example:
+                        type: string
+                    required:
+                      - name
+                      - type
+                      - example
+                returns:
+                  type: string
+              required:
+                - question_type
+                - esql_template
+                - esql_example
+                - params
+                - returns
+        required:
+          - display_name
+          - purpose
+          - does_not_contain
+          - key_fields
+          - joins
+          - when_to_use
+          - answers_questions
+          - access_patterns
+
+  # Built once so verify_ki and create_ki see exactly the same document.
+  - name: assemble_ki
+    type: data.set
+    with:
+      ki:
+        type: index_metadata
+        title: "{{ steps.generate_index_profile.output.content.display_name }}"
+        description: "{{ steps.generate_index_profile.output.content.purpose }}"
+        content: |
+          Purpose:
+          {{ steps.generate_index_profile.output.content.purpose }}
+
+          Key fields:
+          {%- for kf in steps.generate_index_profile.output.content.key_fields %}
+          - {{ kf.field }}: {{ kf.meaning }}
+          {%- endfor %}
+
+          Does not contain:
+          {%- for item in steps.generate_index_profile.output.content.does_not_contain %}
+          - {{ item }}
+          {%- endfor %}
+
+          When to use:
+          {{ steps.generate_index_profile.output.content.when_to_use }}
+
+          Answers questions:
+          {%- for q in steps.generate_index_profile.output.content.answers_questions %}
+          - {{ q }}
+          {%- endfor %}
+
+          Access patterns:
+          {%- for ap in steps.generate_index_profile.output.content.access_patterns %}
+          - {{ ap.question_type }}: {{ ap.returns }}
+            Template: {{ ap.esql_template }}
+            Example: {{ ap.esql_example }}
+          {%- endfor %}
+        tags:
+          - "{{ consts.source_index }}"
+          - index_metadata
+        attributes:
+          # Every ES|QL the KI carries goes here, which is what the verifiers check.
+          esql: "${{ steps.generate_index_profile.output.content.access_patterns | map: 'esql_example' }}"
+          key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
+          when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
+
+  - name: verify_ki
+    type: context-engine.verifyKi
+    with:
+      verifiers:
+        - esql-valid-syntax
+        - esql-valid-runtime
+      ki: "${{ steps.assemble_ki.output.ki }}"
+
+  - name: check_verification
+    type: if
+    condition: "steps.verify_ki.output.passed : true"
+    steps:
+      # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
+      # second copy. Omit `ki_id` entirely on a data-stream destination, which rejects it.
+      - name: create_ki
+        type: context-engine.createKi
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ consts.source_index }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
+    else:
+      - name: log_verification_failure
+        type: console
+        with:
+          message: |
+            KI verification failed for {{ consts.source_index }}.
+            Results: {{ steps.verify_ki.output.results | json }}
