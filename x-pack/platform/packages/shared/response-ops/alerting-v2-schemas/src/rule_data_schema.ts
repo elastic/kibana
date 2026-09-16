@@ -1576,6 +1576,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
     createRuleDataBaseSchema.extend({
+      // Builder-authored rules omit `query`, exactly as single create allows.
+      query: querySchema.optional(),
       id: ruleIdSchema
         .optional()
         .describe(
