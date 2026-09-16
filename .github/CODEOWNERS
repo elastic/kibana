@@ -3164,8 +3164,6 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_f
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_floor.yaml @elastic/security-solution
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.ts @elastic/security-solution
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_dark.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_dark.yaml @elastic/security-solution
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.ts @elastic/security-solution
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.yaml @elastic/security-solution
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_detection.ts @elastic/security-solution
