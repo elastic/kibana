@@ -128,7 +128,6 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   query
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
                        snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       last_tags          = LAST(tags, @timestamp)        WHERE action_type == "tag",
                        first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
           BY group_hash`;
 };
@@ -141,7 +140,8 @@ const addEpisodeIdActionStats = (query: ComposerQuery) => {
   query
     .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
     .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
-                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
+                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
+                       last_tags            = LAST(tags,         @timestamp) WHERE action_type == "tag"
           BY episode_id`;
 };
 

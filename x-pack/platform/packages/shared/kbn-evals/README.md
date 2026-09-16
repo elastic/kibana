@@ -392,7 +392,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Correctness` -- checks factual accuracy against expected output
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
-- **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
+- **IR (information retrieval)** -- `createIrEvaluators` (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K)
 - **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.

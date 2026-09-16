@@ -17,7 +17,7 @@ import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
@@ -77,7 +77,7 @@ export const addFile = async (
       fileMetadata: createdFile.toJSON(),
     });
 
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: commentReq,
       unifiedAttachmentTypeRegistry,
     });
