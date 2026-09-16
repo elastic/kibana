@@ -74,7 +74,7 @@ export function createRuleResponse(
     updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
-    metadata: { name: 'test-rule', ...metadata },
+    metadata: { name: 'test-rule', signature_id: 'test-rule-id', ...metadata },
   };
 }
 
@@ -86,7 +86,7 @@ export function createRuleSoAttributes(
 ): RuleSavedObjectAttributes {
   return {
     kind: 'alert',
-    metadata: { name: 'test-rule' },
+    metadata: { name: 'test-rule', signature_id: 'test-signature-id' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     query: { base: 'FROM logs-* | LIMIT 10' },
