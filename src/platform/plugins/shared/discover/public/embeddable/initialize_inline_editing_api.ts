@@ -75,6 +75,7 @@ export const initializeInlineEditingApi = ({
   const overrideHoverActions$ = isInlineEditing$;
 
   let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
+  let stateNeedsRestore = false;
 
   const setFocusedPanelId = (panelId?: string) => {
     if (apiCanFocusPanel(parentApi)) {
@@ -82,13 +83,11 @@ export const initializeInlineEditingApi = ({
     }
   };
 
-  const switchTab = async (tabId: string): Promise<boolean> => {
-    const tab = tabs.find((t) => t.id === tabId);
-
-    if (!tab) return false;
+  const applyState = async (state: SearchEmbeddableSerializedAttributes): Promise<boolean> => {
+    setSearchError(undefined);
 
     try {
-      await searchEmbeddable.reinitializeState(tab);
+      await searchEmbeddable.reinitializeState(state);
 
       return true;
     } catch (error) {
@@ -99,12 +98,26 @@ export const initializeInlineEditingApi = ({
     }
   };
 
+  const switchTab = async (tabId: string): Promise<boolean> => {
+    const tab = tabs.find((t) => t.id === tabId);
+
+    if (!tab) return false;
+
+    // Tracks divergence from the snapshot, which inlineEditDirty$ does not: that only marks a
+    // committable change, while reinitializeState empties rows before it can reject, so a failed
+    // switch mutates applied state and still has to be restored when editing stops
+    stateNeedsRestore = true;
+
+    return applyState(tab);
+  };
+
   const stopInlineEditing = () => {
     isInlineEditing$.next(false);
     inlineEditDirty$.next(false);
     draftSelectedTabId$.next(selectedTabId$.getValue());
 
     inlineEditStateSnapshot = undefined;
+    stateNeedsRestore = false;
 
     setFocusedPanelId();
   };
@@ -162,6 +175,11 @@ export const initializeInlineEditingApi = ({
     const committedTabId = selectedTabId$.getValue();
 
     if (!draftTabId || draftTabId === committedTabId) {
+      // Nothing to commit, so this is a discard: restore for the same reason cancel does
+      if (stateNeedsRestore && inlineEditStateSnapshot) {
+        await applyState(inlineEditStateSnapshot);
+      }
+
       stopInlineEditing();
       return;
     }
@@ -186,13 +204,8 @@ export const initializeInlineEditingApi = ({
   const cancelInlineTabSelection = async () => {
     if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
 
-    if (inlineEditDirty$.getValue()) {
-      try {
-        await searchEmbeddable.reinitializeState(inlineEditStateSnapshot);
-      } catch (error) {
-        setSearchError(error as Error);
-        dataLoading$.next(false);
-      }
+    if (stateNeedsRestore) {
+      await applyState(inlineEditStateSnapshot);
     }
 
     stopInlineEditing();
