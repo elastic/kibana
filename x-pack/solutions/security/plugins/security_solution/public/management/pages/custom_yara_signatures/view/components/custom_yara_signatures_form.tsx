@@ -11,6 +11,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -19,6 +20,8 @@ import {
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
@@ -112,6 +115,13 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
         setHasOsError(osTypes.length === 0);
         notifyOfChange({ os_types: osTypes });
+      },
+      [notifyOfChange]
+    );
+
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        notifyOfChange(updatedItem);
       },
       [notifyOfChange]
     );
@@ -249,6 +259,20 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         {nameInput}
         {osInput}
         {descriptionInput}
+        <EuiHorizontalRule />
+
+        <EuiFormRow
+          fullWidth={true}
+          data-test-subj={'effectedPolicies-container'}
+          isDisabled={disabled}
+        >
+          <EffectedPolicySelect
+            item={item}
+            onChange={handleEffectedPolicyOnChange}
+            data-test-subj={getTestId('effectedPolicies')}
+            disabled={disabled}
+          />
+        </EuiFormRow>
       </EuiForm>
     );
   }

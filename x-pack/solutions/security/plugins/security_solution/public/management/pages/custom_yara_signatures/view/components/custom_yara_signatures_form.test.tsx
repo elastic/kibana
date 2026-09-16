@@ -19,6 +19,7 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { OS_TITLES } from '../../../../common/translations';
 import {
   DETAILS_DESCRIPTION,
@@ -27,6 +28,8 @@ import {
   OPTIONAL_LABEL,
   OS_ERROR,
 } from './translations';
+
+jest.mock('../../../../../common/components/user_privileges');
 
 describe('Custom YARA signatures form', () => {
   let user: UserEvent;
@@ -44,6 +47,7 @@ describe('Custom YARA signatures form', () => {
       entries: [],
       type: 'simple',
       os_types: [OperatingSystem.WINDOWS],
+      tags: [GLOBAL_ARTIFACT_TAG],
     };
     return {
       ...defaults,
@@ -168,6 +172,15 @@ describe('Custom YARA signatures form', () => {
     render(createProps({ error: new Error(message) as IHttpFetchError }));
 
     expect(screen.getByTestId('customYaraSignatures-form-submitError')).toHaveTextContent(message);
+  });
+
+  it('should select the global policy by default', () => {
+    render();
+    expect(
+      screen
+        .getByTestId('customYaraSignatures-form-effectedPolicies-global')
+        .classList.contains('euiButtonGroupButton-isSelected')
+    ).toBe(true);
   });
 
   describe('operating system selector', () => {
