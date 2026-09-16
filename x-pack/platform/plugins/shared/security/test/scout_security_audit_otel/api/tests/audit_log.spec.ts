@@ -8,6 +8,7 @@
 import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import { opAt, parseOtelStringifiedDiff } from '../lib/otel_diff';
 import {
   type FlatAttributes,
   getLogAttributes,
@@ -19,26 +20,6 @@ const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
 // Allow-listed on the Serverless OTel config (see security_audit_so_diff/shared.ts).
 const DIFF_TYPE = 'index-pattern';
-
-/**
- * The OTel SDK drops array-of-object attributes. applyAuditOtelFieldMap must
- * reassemble kibana.diff.* into one JSON string before the record is exported.
- */
-const parseOtelDiff = (e: FlatAttributes) => {
-  expect(e['kibana.diff.ops']).toBeUndefined();
-  expect(e['kibana.diff.format']).toBeUndefined();
-  expect(e['kibana.diff.noOps']).toBeUndefined();
-  expect(typeof e['kibana.diff']).toBe('string');
-  return JSON.parse(e['kibana.diff'] as string) as {
-    format: string;
-    ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }>;
-  };
-};
-
-const opAt = (
-  diff: { ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }> },
-  path: string
-) => diff.ops.find((op) => op.path === path);
 
 const receiver = new OtlpLogReceiver();
 
@@ -377,7 +358,7 @@ apiTest.describe(
         expectOtelEnvelope(e);
         expect(e['event.outcome']).toBe('success');
 
-        const diff = parseOtelDiff(e);
+        const diff = parseOtelStringifiedDiff(e);
         expect(diff.format).toBe('json_patch_extended');
         expect(opAt(diff, '/title')).toStrictEqual({
           op: 'add',
@@ -419,7 +400,7 @@ apiTest.describe(
         expectOtelEnvelope(e);
         expect(e['event.outcome']).toBe('success');
 
-        const diff = parseOtelDiff(e);
+        const diff = parseOtelStringifiedDiff(e);
         expect(opAt(diff, '/title')).toStrictEqual({
           op: 'replace',
           path: '/title',

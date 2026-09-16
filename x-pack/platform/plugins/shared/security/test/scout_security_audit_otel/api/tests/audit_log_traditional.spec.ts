@@ -8,6 +8,7 @@
 import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import { opAt, parseOtelStringifiedDiff } from '../lib/otel_diff';
 import {
   type FlatAttributes,
   getLogAttributes,
@@ -192,16 +193,9 @@ apiTest.describe(
         expect(e['event.outcome']).toBe('success');
 
         // The diff is serialized on every flavor; the flattened keys must not leak through.
-        expect(e['kibana.diff.ops']).toBeUndefined();
-        expect(e['kibana.diff.format']).toBeUndefined();
-        expect(e['kibana.diff.noOps']).toBeUndefined();
-        expect(typeof e['kibana.diff']).toBe('string');
-        const diff = JSON.parse(e['kibana.diff'] as string) as {
-          format: string;
-          ops: Array<{ op: string; path: string; value?: unknown; oldValue?: unknown }>;
-        };
+        const diff = parseOtelStringifiedDiff(e);
         expect(diff.format).toBe('json_patch_extended');
-        expect(diff.ops.find((op) => op.path === '/title')).toStrictEqual({
+        expect(opAt(diff, '/title')).toStrictEqual({
           op: 'replace',
           path: '/title',
           value: 'new',
