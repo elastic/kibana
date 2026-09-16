@@ -15,7 +15,6 @@ import type { FileAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/co
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
-import { OtelAppender } from './otel/otel_appender';
 import { RewriteAppender } from './rewrite/rewrite_appender';
 import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
@@ -28,16 +27,14 @@ import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
-  OtelAppender.configSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.configSchema,
 ]);
 
-/** @internal {@link appendersSchema}, but the file and OTel appenders use their runtime schemas. */
+/** @internal {@link appendersSchema}, but the file and rolling-file appenders use their runtime schemas. */
 export const pluginAppendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.runtimeConfigSchema,
-  OtelAppender.runtimeConfigSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.runtimeConfigSchema,
 ]);
@@ -63,8 +60,6 @@ export class Appenders {
           fileConfig.onWriteError
         );
       }
-      case 'otel':
-        return new OtelAppender(config);
       case 'rewrite':
         return new RewriteAppender(config);
       case 'rolling-file':

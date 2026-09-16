@@ -29,11 +29,6 @@ import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-p
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { httpRequestEvent } from './audit_events';
-import {
-  applyAuditOtelFieldMap,
-  AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-  AUDIT_OTEL_RESOURCE_ATTRIBUTES,
-} from './audit_otel_transform';
 import type { AuditLogWriteAccess } from './audit_write_access';
 import { getAuditLogPath, getAuditStatus$, probeAuditLogWriteAccess } from './audit_write_access';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
@@ -52,10 +47,6 @@ interface AuditServiceSetupParams {
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
   // Used to report the plugin as degraded while the audit log cannot be written.
   status: Pick<StatusServiceSetup, 'set' | 'derivedStatus$'>;
-  // The OTel audit field transforms target Serverless log-delivery requirements only. On other
-  // build flavors the OTel appender is left untouched (full resource, raw ECS field names).
-  // Defaults to `false` (no transforms) when omitted; the plugin always passes it explicitly.
-  isServerless?: boolean;
 
   getCurrentUser(
     request: KibanaRequest
@@ -84,7 +75,6 @@ export class AuditService {
     logging,
     http,
     status,
-    isServerless = false,
     getCurrentUser,
     getSID,
     getSpaceId,
@@ -139,7 +129,7 @@ export class AuditService {
     logging.configure(
       state$.pipe(
         map(({ features, writeAccess }) =>
-          createLoggingConfig(config, isServerless, writeAccess, onWriteError)(features)
+          createLoggingConfig(config, writeAccess, onWriteError)(features)
         )
       )
     );
@@ -147,14 +137,6 @@ export class AuditService {
     // Record feature usage at a regular interval if enabled and license allows
     const enabled = !!(config.enabled && config.appender);
     const includeSavedObjectNames = config.include_saved_object_names;
-
-    // Serverless OTel delivery expects the authentication realm in user.domain. This one field is
-    // resolved on the way in rather than in the OTel transform because no event except user_login
-    // carries the realm in the record — it is only reachable from the authenticated user here. The
-    // regular (ECS) audit log is deliberately left unchanged.
-    // We are excluding this from non-OTel appenders because we want to use the actual ES Security domain for this value,
-    // but it is not yet available to us in the authenticate response.
-    const includeUserDomain = isServerless && config.appender?.type === 'otel';
 
     if (enabled) {
       license.features$.subscribe((features) => {
@@ -199,11 +181,6 @@ export class AuditService {
             (user && {
               id: user.profile_uid,
               name: user.username,
-              ...(user.email ? { email: user.email } : {}),
-              ...(user.full_name ? { full_name: user.full_name } : {}),
-              ...(includeUserDomain && user.authentication_realm?.name
-                ? { domain: user.authentication_realm.name }
-                : {}),
               roles: user.roles as string[],
             }) ||
             event.user,
@@ -252,7 +229,6 @@ export class AuditService {
 export const createLoggingConfig =
   (
     config: ConfigType['audit'],
-    isServerless = false,
     writeAccess?: AuditLogWriteAccess,
     onWriteError?: LogFileWriteErrorHandler
   ) =>
@@ -271,33 +247,13 @@ export const createLoggingConfig =
       };
     }
 
-    const baseAppender = config.appender ?? {
+    const appender = config.appender ?? {
       type: 'console' as const,
       layout: {
         type: 'pattern' as const,
         highlight: true,
       },
     };
-    // On Serverless, when the configured appender is OTel, inject the audit-specific attribute
-    // transform callback (renames, drops, defaults, additions) to satisfy Serverless audit log
-    // field requirements at the output layer — without touching the upstream AuditEvent type — and
-    // slim the resource to the minimal audit attributes. These transforms are Serverless-only: on
-    // other build flavors the OTel appender is left untouched (full resource, raw ECS field names).
-    const appender =
-      isServerless && baseAppender.type === 'otel'
-        ? {
-            ...baseAppender,
-            transformAttributes: applyAuditOtelFieldMap,
-            // Only service identity belongs in the resource. Promotion captures project.id and
-            // other configured keys before filtering, so they remain available on each record.
-            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
-            promoteResourceAttributes: [
-              ...(baseAppender.promoteResourceAttributes ?? []),
-              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            ],
-            attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
-          }
-        : baseAppender;
 
     const auditTrailAppender =
       onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
