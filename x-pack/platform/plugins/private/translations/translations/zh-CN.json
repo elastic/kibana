@@ -51796,7 +51796,6 @@
     "xpack.slo.sloEdit.sliType.histogram.toTooltip": "“to”值不具有包容性。",
     "xpack.slo.sloEdit.sliType.histogram.valueCountLabel": "值计数",
     "xpack.slo.sloEdit.sliType.sourceTitle": "源",
-    "xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage": "Synthetics 可用性指标要求将预算编制方法设置为“发生次数”。",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel": "添加指标",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricLabel": "添加指标",
     "xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder": "选择聚合",
