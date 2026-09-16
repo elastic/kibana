@@ -193,7 +193,9 @@ export function toStoredSearchEmbeddableByValue(
           attributes: {
             ...tabAttributes,
             ...(apiTab.type === DiscoverTabType.Metrics && {
-              tabTypeState: toStoredMetricsTabTypeState(apiTab),
+              tabTypeState: toStoredMetricsTabTypeState(
+                apiTab as DiscoverSessionApiMetricsTabTypeState
+              ),
             }),
           },
         },
