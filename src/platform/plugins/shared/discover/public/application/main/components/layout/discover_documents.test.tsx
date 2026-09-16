@@ -90,9 +90,7 @@ async function mountComponent({
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     ...(isEsqlMode
       ? {
-          esqlQueryColumns: [
-            { id: 'message', name: 'message', meta: { type: 'string' as const } },
-          ],
+          esqlQueryColumns: [{ id: 'message', name: 'message', meta: { type: 'string' as const } }],
         }
       : {}),
   };

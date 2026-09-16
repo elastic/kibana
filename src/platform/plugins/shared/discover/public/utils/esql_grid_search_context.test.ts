@@ -65,9 +65,7 @@ describe('getGridRequestId', () => {
 
 describe('getEsqlDatatableFromDocuments', () => {
   it('supplies a table from a completed ES|QL result', () => {
-    const columns: DatatableColumn[] = [
-      { id: 'bucket', name: 'bucket', meta: { type: 'date' } },
-    ];
+    const columns: DatatableColumn[] = [{ id: 'bucket', name: 'bucket', meta: { type: 'date' } }];
     const result = [asEsqlRow('1', { bucket: '2023-11-15T00:00:00.000Z' })];
 
     const { table } = getEsqlDatatableFromDocuments({
