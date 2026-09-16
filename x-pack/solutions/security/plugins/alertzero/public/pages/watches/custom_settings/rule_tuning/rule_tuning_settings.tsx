@@ -13,8 +13,8 @@ import {
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { AnalysisWindowDaysField } from './analysis_window_days_field';
-import * as i18n from './detection_translations';
-import type { WorkerCustomSettingsComponent } from './types';
+import * as i18n from './translations';
+import type { WorkerCustomSettingsComponent } from '../types';
 
 /** The server projects complete extras; fall back to the defaults rather than crash a render. */
 const readRuleTuningExtras = (settings: WorkerSettings): RuleTuningWorkerExtras => {
