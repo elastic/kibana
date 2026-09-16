@@ -164,6 +164,63 @@ describe('createModelProvider', () => {
       );
     });
 
+    describe('AGENT_BUILDER_INFERENCE_TIMEOUT_MS', () => {
+      const originalTimeout = process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS;
+
+      afterEach(() => {
+        if (originalTimeout === undefined) {
+          delete process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS;
+        } else {
+          process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS = originalTimeout;
+        }
+      });
+
+      it('omits timeout from chatModelOptions when the env var is unset', async () => {
+        delete process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS;
+        const deps = setupDeps();
+        setupChatAndClient(deps.inference);
+
+        const provider = createModelProvider(deps);
+        await provider.getDefaultModel();
+
+        expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chatModelOptions: expect.not.objectContaining({ timeout: expect.anything() }),
+          })
+        );
+      });
+
+      it('omits timeout from chatModelOptions when the env var is not a number', async () => {
+        process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS = 'not-a-number';
+        const deps = setupDeps();
+        setupChatAndClient(deps.inference);
+
+        const provider = createModelProvider(deps);
+        await provider.getDefaultModel();
+
+        expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chatModelOptions: expect.not.objectContaining({ timeout: expect.anything() }),
+          })
+        );
+      });
+
+      it('passes the parsed timeout to the chat model options when the env var is set', async () => {
+        process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS = '600000';
+        const deps = setupDeps();
+        setupChatAndClient(deps.inference);
+
+        const provider = createModelProvider(deps);
+        await provider.getDefaultModel();
+
+        expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chatModelOptions: expect.objectContaining({ timeout: 600000 }),
+          })
+        );
+      });
+    });
+
     it('throws when no connector can be resolved', async () => {
       resolveSelectedConnectorIdMock.mockResolvedValue(undefined);
       const deps = setupDeps();
