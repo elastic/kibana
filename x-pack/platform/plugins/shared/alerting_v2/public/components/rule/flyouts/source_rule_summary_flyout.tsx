@@ -335,6 +335,10 @@ export const SourceRuleSummaryFlyout = ({
                 closePopover={closeActions}
                 anchorPosition="upRight"
                 panelPaddingSize="none"
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.sourceRuleSummaryFlyout.takeActionAriaLabel',
+                  { defaultMessage: 'Rule actions' }
+                )}
                 button={<TakeActionButton onClick={toggleActions} />}
               >
                 <EuiContextMenuPanel
