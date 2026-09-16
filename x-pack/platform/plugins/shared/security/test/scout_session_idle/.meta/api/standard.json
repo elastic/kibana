@@ -1,5 +1,5 @@
 {
-  "sha1": "fbefe46fb16dc5a7aba67731b7e3c55998cad972",
+  "sha1": "57331a62deb19d163ddcd1bf7b4f826017096c30",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_cleanup.spec.ts",
-        "line": 30,
-        "column": 89
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_cleanup.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 18
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_cleanup.spec.ts",
-        "line": 98,
+        "line": 97,
         "column": 19
       }
     },
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_expired.spec.ts",
-        "line": 24,
-        "column": 11
+        "line": 23,
+        "column": 47
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_extension.spec.ts",
-        "line": 30,
-        "column": 18
+        "line": 29,
+        "column": 62
       }
     },
     {
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_extension.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 12
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_extension.spec.ts",
-        "line": 52,
+        "line": 53,
         "column": 16
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_idle_extension.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 75
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_idle/api/tests/session_shard_missing.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 11
       }
     }
