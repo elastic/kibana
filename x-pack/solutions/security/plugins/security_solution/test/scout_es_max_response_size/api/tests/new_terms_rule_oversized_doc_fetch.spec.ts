@@ -13,14 +13,11 @@ import {
   ALERT_SUPPRESSION_START,
 } from '@kbn/rule-data-utils';
 import type { KbnClient } from '@kbn/scout-security';
+import { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { apiTest, tags } from '../fixtures';
-import {
-  ALERTS_INDEX,
-  ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES,
-  PUBLIC_HEADERS,
-} from '../fixtures/constants';
+import { ALERTS_INDEX, PUBLIC_HEADERS } from '../fixtures/constants';
 
 /**
  * The New Terms rule fetches the source document of every new term in a single request per batch of terms.

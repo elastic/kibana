@@ -14,10 +14,4 @@ export const PUBLIC_HEADERS = {
   ...PUBLIC_API_HEADERS,
 };
 
-/**
- * Must match the `elasticsearch.maxResponseSize` value of the `es_max_response_size` Scout server config set
- * (`@kbn/scout` `src/servers/configs/config_sets/es_max_response_size/shared.ts`).
- */
-export const ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES = 10 * 1024 * 1024;
-
 export const ALERTS_INDEX = '.alerts-security.alerts-default';
