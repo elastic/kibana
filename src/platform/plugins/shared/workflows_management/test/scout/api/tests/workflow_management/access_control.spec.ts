@@ -311,6 +311,97 @@ steps:
     }
   );
 
+  for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
+    for (const isTestRun of [false, true]) {
+      apiTest(
+        `Executor ${
+          isTestRun ? 'tests' : 'runs'
+        } a saved parent and private child with ${stepType}`,
+        async ({ apiClient }) => {
+          const createdIds: string[] = [];
+          const createSharedWorkflow = async (workflowYaml: string) => {
+            const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
+              headers: ownerHeaders,
+              body: { yaml: workflowYaml },
+            });
+            expect(created).toHaveStatusCode(200);
+            const id: string = created.body.id;
+            createdIds.push(id);
+            expect(
+              await apiClient.put(`s/${spaceId}/internal/workflows/${id}/access_control`, {
+                headers: ownerHeaders,
+                body: {
+                  access_mode: 'private',
+                  entries: [{ type: 'user', id: readerProfileId, role: 'executor' }],
+                },
+              })
+            ).toHaveStatusCode(200);
+            return id;
+          };
+          try {
+            const childId = await createSharedWorkflow(yaml);
+            const parentId = await createSharedWorkflow(`name: Private parent
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: child
+    type: ${stepType}
+    with:
+      workflow-id: ${childId}
+      inputs: {}
+`);
+            const result = await apiClient.post(
+              isTestRun
+                ? `s/${spaceId}/api/workflows/test`
+                : `s/${spaceId}/api/workflows/workflow/${parentId}/run`,
+              {
+                headers: readerHeaders,
+                body: isTestRun ? { workflowId: parentId, inputs: {} } : { inputs: {} },
+              }
+            );
+            expect(result).toHaveStatusCode(200);
+            await expect
+              .poll(
+                async () => {
+                  const parent = await apiClient.get(
+                    `s/${spaceId}/api/workflows/executions/${result.body.workflowExecutionId}`,
+                    { headers: readerHeaders }
+                  );
+                  expect(parent).toHaveStatusCode(200);
+                  const children = await apiClient.get(
+                    `s/${spaceId}/api/workflows/workflow/${childId}/executions`,
+                    { headers: readerHeaders }
+                  );
+                  expect(children).toHaveStatusCode(200);
+                  return {
+                    parent: parent.body.status,
+                    children: children.body.results.map((execution: WorkflowExecutionDto) => ({
+                      status: execution.status,
+                      isTestRun: execution.isTestRun,
+                    })),
+                  };
+                },
+                { timeout: 60000 }
+              )
+              .toStrictEqual({
+                parent: 'completed',
+                children: [{ status: 'completed', isTestRun }],
+              });
+          } finally {
+            for (const id of createdIds.reverse()) {
+              expect(
+                await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${id}`, {
+                  headers: ownerHeaders,
+                })
+              ).toHaveStatusCode(200);
+            }
+          }
+        }
+      );
+    }
+  }
+
   apiTest(
     'runs a private workflow on its schedule using the stored API key',
     async ({ apiClient }) => {

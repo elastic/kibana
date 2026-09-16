@@ -82,6 +82,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         id: 'child-workflow-id',
         name: 'Child Workflow',
         isTestRun: false,
+        isEphemeral: false,
       }),
       expect.objectContaining({
         spaceId: 'default',
@@ -137,7 +138,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
     expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ isTestRun: true }),
+      expect.objectContaining({ isTestRun: true, isEphemeral: false }),
       expect.any(Object),
       mockRequest
     );
