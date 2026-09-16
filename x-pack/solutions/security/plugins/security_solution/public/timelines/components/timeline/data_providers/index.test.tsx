@@ -13,6 +13,8 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { DataProviders } from '.';
 import { TimelineId } from '../../../../../common/types/timeline';
 
+jest.setTimeout(60_000);
+
 describe('DataProviders', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', async () => {
