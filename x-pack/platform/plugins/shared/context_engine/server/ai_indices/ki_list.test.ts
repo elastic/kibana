@@ -117,8 +117,11 @@ describe('ki_list', () => {
     expect(queryText(0)).toContain('| INLINE STATS latest_doc = MAX(_id) BY id\n');
   });
 
-  it('quotes each expression of a comma-separated dest separately', async () => {
+  it('probes each expression of a comma-separated dest and quotes them separately', async () => {
+    query.mockReset();
     query
+      .mockResolvedValueOnce(probeResponse(ALL_FIELDS))
+      .mockResolvedValueOnce(probeResponse(ALL_FIELDS))
       .mockResolvedValueOnce(rowsResponse([]))
       .mockResolvedValueOnce(totalsResponse(0))
       .mockResolvedValueOnce(bucketsResponse([]));
@@ -128,7 +131,32 @@ describe('ki_list', () => {
       size: 25,
     });
 
-    expect(queryText(0)).toContain('FROM "ai-index-idx-a", "ai-index-idx-b*" METADATA _id, _index');
+    expect(query.mock.calls[0][0].query).toBe(
+      'FROM "ai-index-idx-a" METADATA _id, _index\n| LIMIT 0'
+    );
+    expect(query.mock.calls[1][0].query).toBe(
+      'FROM "ai-index-idx-b*" METADATA _id, _index\n| LIMIT 0'
+    );
+    expect(query.mock.calls[2][0].query).toContain(
+      'FROM "ai-index-idx-a", "ai-index-idx-b*" METADATA _id, _index'
+    );
+  });
+
+  it('lists the expressions that exist when another one is missing', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse(ALL_FIELDS))
+      .mockRejectedValueOnce(unknownIndexError())
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, {
+      dest: { type: 'index', value: 'ai-index-idx-a,ai-index-idx-missing' },
+      size: 25,
+    });
+
+    expect(query.mock.calls[2][0].query).toContain('FROM "ai-index-idx-a" METADATA _id, _index');
   });
 
   it('filters rows and the total by type but keeps unfiltered type counts', async () => {

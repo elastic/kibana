@@ -45,12 +45,34 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   };
 };
 
-/** A dest value may be a comma-separated list of index expressions; each is quoted on its own. */
-const fromSources = (destValue: string): string =>
+/** A dest value may be a comma-separated list of index expressions. */
+const destExpressions = (destValue: string): string[] =>
   destValue
     .split(',')
-    .map((expression) => JSON.stringify(expression.trim()))
-    .join(', ');
+    .map((expression) => expression.trim())
+    .filter((expression) => expression.length > 0);
+
+const fromSources = (expressions: string[]): string =>
+  expressions.map((expression) => JSON.stringify(expression)).join(', ');
+
+const probeQuery = (expression: string): string =>
+  `FROM ${JSON.stringify(expression)} METADATA _id, _index\n| LIMIT 0`;
+
+/** The mapped columns of one index expression, or undefined when it resolves to nothing. */
+const probeColumns = async (
+  esClient: ElasticsearchClient,
+  expression: string
+): Promise<string[] | undefined> => {
+  try {
+    const probe = await esClient.esql.query({ query: probeQuery(expression) });
+    return (probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name);
+  } catch (error) {
+    if (isEsqlUnknownIndexError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+};
 
 /**
  * One row per KI: the latest revision by `@timestamp` for each logical id,
@@ -58,10 +80,14 @@ const fromSources = (destValue: string): string =>
  * id may exist in several backing indices, so those are distinct KIs.
  * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
-const currentKisQuery = (dest: AiIndexDest, has: (field: KiListField) => boolean): string => {
+const currentKisQuery = (
+  dest: AiIndexDest,
+  sources: string[],
+  has: (field: KiListField) => boolean
+): string => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   return [
-    `FROM ${fromSources(dest.value)} METADATA _id, _index`,
+    `FROM ${fromSources(sources)} METADATA _id, _index`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
@@ -84,21 +110,26 @@ export const getKis = async (
   esClient: ElasticsearchClient,
   { dest, size, type }: GetKisOptions
 ): Promise<ListKisResponse> => {
-  // A zero-row query resolves the mapped columns under the caller's own read privilege.
-  let columns: Set<string>;
-  try {
-    const probe = await esClient.esql.query({
-      query: `FROM ${fromSources(dest.value)} METADATA _id, _index\n| LIMIT 0`,
-    });
-    columns = new Set((probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name));
-  } catch (error) {
-    if (isEsqlUnknownIndexError(error)) {
-      return EMPTY;
-    }
-    throw error;
+  // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
+  // expression that resolves to nothing is left out so the rest of the dest still lists.
+  const expressions = destExpressions(dest.value);
+  const probes = await Promise.all(
+    expressions.map(async (expression) => ({
+      expression,
+      columns: await probeColumns(esClient, expression),
+    }))
+  );
+  const sources = probes.filter(({ columns }) => columns !== undefined);
+  if (sources.length === 0) {
+    return EMPTY;
   }
+  const columns = new Set(sources.flatMap(({ columns: names }) => names ?? []));
   const has = (field: KiListField) => columns.has(field);
-  const base = currentKisQuery(dest, has);
+  const base = currentKisQuery(
+    dest,
+    sources.map(({ expression }) => expression),
+    has
+  );
   const typeParams = type !== undefined ? { params: [{ type }] } : {};
 
   const rowsQuery = [
