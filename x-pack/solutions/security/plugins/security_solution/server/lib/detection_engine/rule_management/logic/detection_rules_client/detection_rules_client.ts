@@ -48,6 +48,7 @@ import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { getHistoryForRule } from './methods/get_history_for_rule';
 import { restoreRuleFromHistory } from './methods/restore_rule_from_history';
+import { RULE_IMPORT_BATCH_SIZE } from '../../api/constants';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 import {
   sendRuleRestoreTelemetryEvent,
@@ -246,7 +247,7 @@ export const createDetectionRulesClient = ({
             overwriteRules: args.overwriteRules,
             allowMissingConnectorSecrets: args.allowMissingConnectorSecrets,
             changeTracking: args.changeTracking,
-            batchSize: args.batchSize,
+            batchSize: args.batchSize ?? RULE_IMPORT_BATCH_SIZE,
           },
           deps: {
             actionsClient,

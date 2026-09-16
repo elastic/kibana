@@ -6,6 +6,7 @@
  */
 
 import { getImportRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { RULE_IMPORT_BATCH_SIZE } from '../../constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
 import { configMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
@@ -144,6 +145,7 @@ describe('Import rules route', () => {
       },
       overwriteRules: true,
       allowMissingConnectorSecrets: false,
+      batchSize: RULE_IMPORT_BATCH_SIZE,
     });
     expect(response.body).toEqual({
       success: true,
@@ -213,6 +215,41 @@ describe('Import rules route', () => {
       { rule_id: 'rule-1', error: { status_code: 400, message: 'missing action' } },
       { rule_id: 'rule-1', error: { status_code: 400, message: 'bad response action' } },
     ]);
+  });
+
+  it('chunks at RULE_IMPORT_BATCH_SIZE and keeps leftover batchSize at 200', async () => {
+    const total = RULE_IMPORT_BATCH_SIZE + 1;
+    const rules = Array.from({ length: total }, (_, i) =>
+      getImportRulesSchemaMock({ rule_id: `rule-${i}` })
+    );
+    actions.mockResolvedValue({ validatedActionRules: rules, missingActionErrors: [] });
+    responseActions.mockResolvedValue({ valid: rules, errors: [] });
+    clients.detectionRulesClient.importRules.mockResolvedValue({
+      successes: [],
+      errors: [],
+    });
+
+    await inject();
+
+    expect(clients.detectionRulesClient.importRules).toHaveBeenCalledTimes(2);
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].rules).toHaveLength(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].rules).toHaveLength(1);
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].batchSize).toBe(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].batchSize).toBe(
+      RULE_IMPORT_BATCH_SIZE
+    );
+    expect(clients.detectionRulesClient.importRules.mock.calls[0][0].changeTracking).toEqual({
+      action: SecurityRuleChangeTrackingAction.ruleImport,
+      metadata: { bulkCount: total },
+    });
+    expect(clients.detectionRulesClient.importRules.mock.calls[1][0].changeTracking).toEqual({
+      action: SecurityRuleChangeTrackingAction.ruleImport,
+      metadata: { bulkCount: total },
+    });
   });
 
   it('maps mixed import successes and errors to success_count plus 400/409', async () => {
