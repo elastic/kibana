@@ -8,17 +8,24 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 
 /**
  * The display mode of a system flyout: `overlay` renders on top of the page,
  * `push` displaces the page content to sit next to it.
- * Mirrors EUI's `EuiFlyoutProps['type']`.
+ *
+ * Derived from EUI's `EuiFlyoutProps['type']` (rather than hand-copied) so it
+ * cannot drift from the values EUI actually accepts.
+ *
+ * @public
  */
-export type SystemFlyoutType = 'overlay' | 'push';
+export type SystemFlyoutType = NonNullable<EuiFlyoutProps['type']>;
 
 /**
  * Value exposed by {@link SystemFlyoutTypeContext} so content rendered inside a
  * system flyout can read and reactively change the flyout's push/overlay type.
+ *
+ * @public
  */
 export interface SystemFlyoutTypeContextValue {
   /** The current push/overlay type of the enclosing flyout. */
@@ -34,6 +41,8 @@ export interface SystemFlyoutTypeContextValue {
  * flyout instead of only taking effect on the next open.
  *
  * `undefined` when consumed outside of a system flyout.
+ *
+ * @public
  */
 export const SystemFlyoutTypeContext = createContext<SystemFlyoutTypeContextValue | undefined>(
   undefined
@@ -43,6 +52,8 @@ export const SystemFlyoutTypeContext = createContext<SystemFlyoutTypeContextValu
  * Read (and change) the push/overlay type of the system flyout that encloses
  * the calling component. Returns `undefined` when not rendered inside a system
  * flyout.
+ *
+ * @public
  */
 export const useSystemFlyoutType = (): SystemFlyoutTypeContextValue | undefined =>
   useContext(SystemFlyoutTypeContext);

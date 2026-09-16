@@ -89,6 +89,9 @@ export class SystemFlyoutService {
   }: SystemFlyoutStartDeps): OverlaySystemFlyoutStart {
     this.targetDomElement = targetDomElement;
 
+    // Workaround for https://github.com/elastic/eui/issues/9788 — EUI's per-flyout cleanup can
+    // restore stale padding and leave the push offset stranded. Remove once fixed upstream.
+    //
     // A `type="push"` flyout makes EUI write inline offset padding onto its container element (or
     // `document.body`). Each system flyout renders in its own React root, so EUI's per-flyout
     // cleanup of that padding can race across roots and strand the offset on the container when the
@@ -185,6 +188,9 @@ export class SystemFlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
+            {/* `OverlaySystemFlyoutOpenOptions` is built from `Omit<EuiFlyoutProps |
+                EuiFlyoutResizableProps, …>`; omitting over that union widens `type`, so narrow it
+                back to `SystemFlyoutType` to seed the controller. */}
             <SystemFlyoutTypeController initialType={options.type as SystemFlyoutType | undefined}>
               {(type) => (
                 <EuiFlyout
