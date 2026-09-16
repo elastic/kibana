@@ -96,6 +96,11 @@ export const SequenceBuilderPage: React.FC = () => {
   const uiState = useSequenceBuilderState(parsedSeqValues);
   const { setSeqValues: setCanvasSeqValues } = uiState;
 
+  const hasMissingRules = useMemo(
+    () => uiState.seqValues.steps.some((step) => step.rules.some((r) => r.isMissing)),
+    [uiState.seqValues.steps]
+  );
+
   const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(DEFAULT_RECOVERY_CONFIG);
 
   const hasSyncedRecoveryConfigRef = useRef(false);
@@ -203,6 +208,7 @@ export const SequenceBuilderPage: React.FC = () => {
               sidebarOpen={uiState.sidebarOpen}
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
+              ruleFetchError={hasMissingRules}
               rulesListHref={rulesListHref}
               onStepChange={handleStepChange}
               onToggleDetails={() => uiState.setSidebarOpen((open) => !open)}
@@ -224,6 +230,7 @@ export const SequenceBuilderPage: React.FC = () => {
               ruleId={ruleId}
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
+              ruleFetchError={hasMissingRules}
               onCloseSidebar={() => uiState.setSidebarOpen(false)}
               onSave={handleSave}
             />

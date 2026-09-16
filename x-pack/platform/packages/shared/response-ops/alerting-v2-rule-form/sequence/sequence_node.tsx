@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiText,
   EuiToolTip,
   euiShadow,
@@ -33,7 +34,7 @@ export const getNodeHeight = (rulesCount: number): number => {
 
 export interface SequenceNodeData extends Record<string, unknown> {
   stepId: string;
-  rules: Array<{ ruleId: string; ruleName: string }>;
+  rules: Array<{ ruleId: string; ruleName: string; isMissing?: boolean }>;
   operator: 'and' | 'or';
   stageIndex: number;
   onRemoveRule: (stepId: string, ruleId: string) => void;
@@ -161,6 +162,18 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
                 gutterSize="xs"
                 responsive={false}
               >
+                {rule.isMissing && (
+                  <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                    <EuiIconTip
+                      type="warning"
+                      color="danger"
+                      size="s"
+                      content={i18n.translate('xpack.alertingV2.sequenceBuilder.node.ruleMissing', {
+                        defaultMessage: 'Rule not found or inaccessible',
+                      })}
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem css={{ minWidth: 0 }}>
                   <div
                     css={{
@@ -170,6 +183,7 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       lineHeight: `${RULE_ROW_HEIGHT}px`,
+                      color: rule.isMissing ? euiTheme.colors.danger : undefined,
                     }}
                     title={rule.ruleName}
                   >

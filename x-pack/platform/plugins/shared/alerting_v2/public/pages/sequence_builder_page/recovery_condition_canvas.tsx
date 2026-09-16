@@ -228,7 +228,11 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
     () =>
       seqValues.steps.map((step) => ({
         stepId: step.id,
-        rules: step.rules.map((r) => ({ ruleId: r.ruleId, ruleName: r.ruleName ?? r.ruleId })),
+        rules: step.rules.map((r) => ({
+          ruleId: r.ruleId,
+          ruleName: r.ruleName ?? r.ruleId,
+          isMissing: r.isMissing,
+        })),
         operator: step.operator,
       })),
     [seqValues.steps]

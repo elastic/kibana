@@ -54,6 +54,7 @@ interface SidebarContentProps {
   ruleId: string | undefined;
   seqValues: SequenceFormValues;
   isSaving: boolean;
+  ruleFetchError?: boolean;
   onClose: () => void;
   onSave: () => void;
 }
@@ -62,6 +63,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   ruleId,
   seqValues,
   isSaving,
+  ruleFetchError,
   onClose,
   onSave,
 }) => {
@@ -149,7 +151,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
               fill
               onClick={onSave}
               isLoading={isSaving}
-              isDisabled={!canSave}
+              isDisabled={!canSave || ruleFetchError}
               data-test-subj="sequenceBuilderSidebarSave"
             >
               <FormattedMessage
@@ -170,6 +172,7 @@ export interface SequenceBuilderDetailsSidebarProps {
   ruleId: string | undefined;
   seqValues: SequenceFormValues;
   isSaving: boolean;
+  ruleFetchError?: boolean;
   onCloseSidebar: () => void;
   onSave: () => void;
 }
@@ -180,6 +183,7 @@ export const SequenceBuilderDetailsSidebar: React.FC<SequenceBuilderDetailsSideb
   ruleId,
   seqValues,
   isSaving,
+  ruleFetchError,
   onCloseSidebar,
   onSave,
 }) => {
@@ -205,6 +209,7 @@ export const SequenceBuilderDetailsSidebar: React.FC<SequenceBuilderDetailsSideb
             ruleId={ruleId}
             seqValues={seqValues}
             isSaving={isSaving}
+            ruleFetchError={ruleFetchError}
             onClose={onCloseSidebar}
             onSave={onSave}
           />
