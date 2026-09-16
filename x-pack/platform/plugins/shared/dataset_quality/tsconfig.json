@@ -67,6 +67,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
+    "@kbn/data-source",
     "@kbn/unified-histogram",
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",

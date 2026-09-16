@@ -54,6 +54,9 @@ export const getFetchParamsMock = (
     }
   }
 
+  // Exclude fields we compute ourselves so there are no duplicate keys in the literal
+  const { query: _q, dataSource: _ds, breakdownField: _bf, ...restParams } = partialParams ?? {};
+
   return {
     dataSource,
     searchSessionId: 'id',
@@ -69,13 +72,7 @@ export const getFetchParamsMock = (
     columnsMap: undefined,
     breakdown,
     timeInterval: 'auto',
-    ...partialParams,
-    // Re-apply computed values after spread so partialParams can't corrupt them
-    query,
-    isESQLQuery,
-    isTimeBased,
-    dataSource,
-    breakdown,
+    ...restParams,
   };
 };
 

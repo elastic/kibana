@@ -17,6 +17,7 @@ import {
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import {
   discoverAriaText,
   openInDiscoverText,
@@ -91,7 +92,7 @@ export default function DocumentTrends({
         <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
             <UnifiedBreakdownFieldSelector
-              dataView={dataView!}
+              dataSource={new DataViewSource(dataView!)}
               breakdown={{
                 field:
                   breakdown.dataViewField && breakdown.fieldSupportsBreakdown
