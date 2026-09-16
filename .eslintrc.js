@@ -1489,7 +1489,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1538,7 +1537,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1590,7 +1588,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1697,7 +1694,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1847,7 +1843,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1888,11 +1883,9 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
@@ -2283,11 +2276,8 @@ module.exports = {
         // react
         'react/no-did-mount-set-state': 'error',
         'react/no-did-update-set-state': 'error',
-        'react/no-multi-comp': ['error', { ignoreStateless: true }],
-        'react/self-closing-comp': 'error',
         'react/sort-comp': 'error',
         'react/jsx-boolean-value': 'error',
-        'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
           'error',
           {
@@ -2387,6 +2377,19 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'no-cond-assign': 'off',
+        'no-debugger': 'off',
+        'no-empty': 'off',
+        'no-unused-labels': 'off',
+        'use-isnan': 'off',
+        'react/jsx-no-undef': 'off',
+        'react/no-is-mounted': 'off',
+        'react/no-unescaped-entities': 'off',
+        'react/no-unknown-property': 'off',
+        '@typescript-eslint/no-extra-non-null-assertion': 'off',
+        '@typescript-eslint/no-misused-new': 'off',
+        '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-empty-object-type': 'off',
         '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -2416,8 +2419,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
@@ -2479,8 +2480,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
@@ -2579,7 +2578,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -2631,7 +2629,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -2649,7 +2646,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -2778,18 +2774,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -3161,6 +3161,7 @@ module.exports = {
               '!@kbn/ui-chrome-layout',
               '!@kbn/ui-app-menu',
               '!@kbn/ui-favorite-button',
+              '!@kbn/ui-ai-components',
             ],
           },
         ],

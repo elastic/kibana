@@ -31,6 +31,8 @@ describe(
   },
   () => {
     before(() => {
+      // Clear residual alerts so the fixed-ID `useCreate` load can't collide on an in-place spec retry
+      deleteAlertsAndRules();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });

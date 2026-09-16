@@ -1,5 +1,5 @@
 {
-  "sha1": "01ec7a642876d3003dcbf82659f0ee3a1434235c",
+  "sha1": "ca4f3a88b856d2846a3c4a856757b4da5d31ea4d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-cefaa0e86801e0f",
+      "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 23,
+        "column": 35
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-0d2d13699cc210b",
+      "title": "ES|QL Discover session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 38,
+        "column": 25
       }
     },
     {
@@ -208,6 +234,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_formatting.spec.ts",
         "line": 42,
         "column": 48
+      }
+    },
+    {
+      "id": "d5d6fefb1a43799-3ee7ecfb7a5fe79",
+      "title": "Discover ES|QL starred queries stars a query, persists it across reload, and runs it from Starred",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_starred.spec.ts",
+        "line": 34,
+        "column": 93
       }
     },
     {

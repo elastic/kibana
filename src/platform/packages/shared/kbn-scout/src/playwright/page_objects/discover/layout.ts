@@ -51,6 +51,10 @@ export abstract class LayoutMixin extends SaveMixin {
     await dataViewSwitch.click();
   }
 
+  private async getDataViewSwitchName(dataViewSwitch: Locator): Promise<string> {
+    return (await dataViewSwitch.getByTestId('fullText').innerText()).trim();
+  }
+
   async selectDataView(
     name: string,
     {
@@ -59,7 +63,7 @@ export abstract class LayoutMixin extends SaveMixin {
     }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    const currentValue = await dataViewSwitch.innerText();
+    const currentValue = await this.getDataViewSwitchName(dataViewSwitch);
     if (currentValue === name) {
       return;
     }
@@ -94,7 +98,7 @@ export abstract class LayoutMixin extends SaveMixin {
    * Returns the trimmed display name of the currently selected data view.
    */
   async getSelectedDataViewName(): Promise<string> {
-    return (await this.getSelectedDataView().innerText()).trim();
+    return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
@@ -115,18 +119,10 @@ export abstract class LayoutMixin extends SaveMixin {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // Retry: title validation can race its debounced index lookup and get stuck
-    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
-    // Re-submitting also covers serverless, where the form's submission re-validation can
-    // transiently report "no matching indices" even though the matching sources panel already
-    // shows results, leaving the flyout open with its submit buttons disabled.
-    const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const isLastAttempt = attempt === maxAttempts;
+    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
-      if (attempt > 1) {
-        await titleInput.fill(''); // force a real value change to re-trigger validation
-      }
+    await expect(async () => {
+      await titleInput.fill('');
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
       await form
@@ -147,30 +143,16 @@ export abstract class LayoutMixin extends SaveMixin {
             }
             return (await timestampCombo.getSelectedOptions()).length > 0;
           },
-          { timeout: 30_000, intervals: [200] }
+          { timeout: 15_000, intervals: [200] }
         )
         .toBe(true);
 
-      if (adHoc) {
-        await this.page.testSubj.click('exploreIndexPatternButton');
-      } else {
-        await this.page.testSubj.click('saveIndexPatternButton');
-      }
+      await this.page.testSubj.click(
+        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+      );
 
-      const flyoutClosed = await flyout
-        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
-        .then(() => true)
-        .catch(() => false);
-
-      if (flyoutClosed) {
-        break;
-      }
-      if (isLastAttempt) {
-        throw new Error(
-          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
-        );
-      }
-    }
+      await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
+    }).toPass({ timeout: 45_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -210,12 +192,7 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   async isCurrentDataViewAdHoc(): Promise<boolean> {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    const dataViewTitle = await dataViewSwitch.getAttribute('title');
-
-    if (!dataViewTitle) {
-      throw new Error('Current data view switch is missing a title attribute');
-    }
+    const dataViewTitle = await this.getSelectedDataViewName();
 
     await this.openDataViewSwitcher();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
@@ -746,19 +723,17 @@ export abstract class LayoutMixin extends SaveMixin {
    * `value` is the selectable item value when it differs from the visible label.
    */
   async chooseBreakdownField(field: string, value = field) {
+    const selectable = this.page.testSubj.locator('unifiedHistogramBreakdownSelectorSelectable');
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'visible',
-    });
+    await selectable.waitFor({ state: 'visible' });
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
-    await this.page
-      .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
-      )
-      .click();
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'hidden',
+    // The list is virtualised; clicking while EUI is still filtering misses the option
+    // and leaves the popover open.
+    await selectable.and(this.page.locator('[data-is-searching="false"]')).waitFor({
+      state: 'attached',
     });
+    await selectable.locator(`.euiSelectableListItem[value="${value}"]`).click();
+    await selectable.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -785,17 +760,23 @@ export abstract class LayoutMixin extends SaveMixin {
 
   async showChart() {
     const showButton = this.page.testSubj.locator('dscShowHistogramButton');
+    const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    // The toggle renders as exactly one of these; wait for it to mount before
+    // probing so a slow post-navigation render can't make the guard silently no-op.
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await showButton.isVisible()) {
       await showButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeVisible();
     }
   }
 
   async hideChart() {
+    const showButton = this.page.testSubj.locator('dscShowHistogramButton');
     const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await hideButton.isVisible()) {
       await hideButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeHidden();
     }
   }
 
