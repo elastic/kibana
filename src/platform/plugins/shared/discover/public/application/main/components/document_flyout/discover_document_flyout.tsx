@@ -91,6 +91,7 @@ export const DiscoverDocumentFlyout = memo(
     const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
       linkability: expandedDocLinkability,
+      query,
     });
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
       () =>

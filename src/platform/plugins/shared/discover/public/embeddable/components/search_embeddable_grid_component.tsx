@@ -222,6 +222,7 @@ export function SearchEmbeddableGridComponent({
   const shareDirectLinkActions = useShareDirectLinkAction({
     copyLink: copyExpandedDocLink,
     linkability: expandedDocLinkability,
+    query: savedSearchQuery,
   });
   const canShareExpandedDocLink =
     Boolean(discoverServices.capabilities.discover_v2.show) ||
