@@ -1385,7 +1385,7 @@ x-pack/solutions/security/packages/data-table @elastic/security-investigations
 x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps
 x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-investigations
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-investigations
-x-pack/solutions/security/packages/features @elastic/security-pds-deployment
+x-pack/solutions/security/packages/features @elastic/security-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
@@ -1424,9 +1424,9 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
-x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
+x-pack/solutions/security/packages/navigation @elastic/security-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
-x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
+x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
@@ -3034,19 +3034,19 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
-## Security Solution sub teams - Platform Delivery And Success
+## Security Solution sub teams - Security Investigations
 
-/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/test/scout/reports/ @elastic/security-pds-deployment
-/x-pack/solutions/security/plugins/security_solution/test/scout_ai_value_report/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout/reports/ @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout_ai_value_report/ @elastic/security-investigations
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-investigations
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-investigations
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-investigations
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-investigations
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-investigations
 
 ## Security Solution sub teams - Cloud Security Posture
 
