@@ -1456,9 +1456,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 6.5).getTime());
     });
 
-    test('stops the interval and cancels the task if there is 409 error updating retryAt for long running tasks', async () => {
+    test('stops the interval and cancels the task if the retryAt conflict is caused by a reclaim by another Kibana', async () => {
       let wasCancelled = false;
-      const { runner, store, logger } = await readyToRunStageSetup({
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1485,8 +1485,11 @@ describe('TaskManagerRunner', () => {
       store.partialUpdate.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
       );
+      // The doc was reclaimed by another Kibana (ownerId changed).
+      store.get.mockResolvedValue({ ...instance, ownerId: 'another-kibana-node' });
       await runner.run();
 
+      expect(store.get).toHaveBeenCalledWith('foo');
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
@@ -1495,6 +1498,68 @@ describe('TaskManagerRunner', () => {
         }
       );
       expect(wasCancelled).toBeTruthy();
+    });
+
+    test('does not revert a schedule that was updated while the task was running', async () => {
+      let wasCancelled = false;
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1h' },
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+
+      // Another writer (e.g. bulkUpdateSchedules with includeRunningTasks) changed the schedule
+      // to 3h and bumped the version while the task was running.
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ version: 'WzEsMV0=', retryAt: expect.any(Date) }),
+        expect.anything()
+      );
+      expect(store.get).toHaveBeenCalledWith('foo');
+      expect(wasCancelled).toBe(false);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
+        expect.anything()
+      );
+      // Completion persists the externally-updated 3h schedule, not the runner's stale 1h schedule.
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({ schedule: { interval: '3h' } }),
+        expect.objectContaining({ validate: expect.any(Boolean) })
+      );
     });
 
     test('does not run heartbeat updates while processing recurring task result', async () => {

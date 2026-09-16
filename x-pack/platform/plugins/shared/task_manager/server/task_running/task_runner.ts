@@ -17,7 +17,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
@@ -51,7 +50,11 @@ import type {
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
-import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
+import {
+  getTaskReclaimReason,
+  isVersionConflictError,
+  resolveTaskDocumentConflicts,
+} from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -790,11 +793,7 @@ export class TaskManagerRunner implements TaskRunner {
             })
           );
         } catch (error) {
-          const isVersionConflict =
-            SavedObjectsErrorHelpers.isConflictError(error) ||
-            error.status === 409 ||
-            error.statusCode === 409 ||
-            error.error?.type === 'version_conflict_engine_exception';
+          const isVersionConflict = isVersionConflictError(error);
 
           if ((this.isExpired || this.isCancelled) && isVersionConflict) {
             this.logger.warn(
@@ -981,6 +980,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     const updateRetryAt = async () => {
       if (!stopped) {
+        const taskInstance = this.instance.task;
         try {
           // Set retryAt to now + 5m
           const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -992,26 +992,45 @@ export class TaskManagerRunner implements TaskRunner {
               tags: [this.id, this.taskType],
             }
           );
-          const taskInstance = this.instance.task;
           this.instance = asReadyToRun(
             (await this.bufferedTaskStore.partialUpdate(
               {
                 id: taskInstance.id,
+                version: taskInstance.version,
                 retryAt: updatedRetryAt,
               },
               { validate: false, doc: taskInstance }
             )) as ConcreteTaskInstanceWithStartedAt
           );
         } catch (error) {
-          // If there is a 409 conflict error, stop the timer and try to cancel the task
-          // as this task may have been picked up by another Kibana node.
-          if (SavedObjectsErrorHelpers.isConflictError(error)) {
-            stop();
-            this.logger.warn(
-              `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
-              { tags: [this.id, this.taskType] }
-            );
-            await this.cancel();
+          if (isVersionConflictError(error)) {
+            let currentTask: ConcreteTaskInstance | undefined;
+            try {
+              currentTask = await this.bufferedTaskStore.get(this.id);
+            } catch (e) {
+              this.logger.warn(
+                `Unable to update retryAt for long running task: ${this.id} - could not re-read current task after conflict: ${e.message}`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
+
+            const reclaimReason = currentTask && getTaskReclaimReason(currentTask, taskInstance);
+            if (reclaimReason) {
+              // The task was reclaimed by another Kibana node, stop the timer and cancel the task.
+              stop();
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
+                { tags: [this.id, this.taskType] }
+              );
+              await this.cancel();
+            } else if (currentTask) {
+              // Update to the current task, and retryAt on the next interval.
+              this.instance = asReadyToRun(currentTask as ConcreteTaskInstanceWithStartedAt);
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task: ${this.id} - updated to the current task document, will retry on the next interval`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
           } else {
             this.logger.warn(
               `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,

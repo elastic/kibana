@@ -309,6 +309,7 @@ export function initRoutes(
             }),
           ]),
           regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -318,11 +319,12 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { taskIds, schedule, regenerateApiKey } = req.body;
+      const { taskIds, schedule, regenerateApiKey, includeRunningTasks } = req.body;
 
       const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
         request: req,
         regenerateApiKey,
+        includeRunningTasks,
       });
 
       return res.ok({ body: taskResult });

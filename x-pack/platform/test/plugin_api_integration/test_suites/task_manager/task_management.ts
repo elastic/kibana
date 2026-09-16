@@ -213,12 +213,13 @@ export default function ({ getService }: FtrProviderContext) {
               tzid: string;
             };
           },
-      regenerateApiKey: boolean = false
+      regenerateApiKey: boolean = false,
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule, regenerateApiKey })
+        .send({ taskIds, schedule, regenerateApiKey, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -1926,10 +1927,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should bulk update schedules for task in running status when includeRunningTasks is true', async () => {
-      // this task should be in running status for 60s until it will be time outed
+    it('should bulk update schedules for a running task and have the update survive completion when includeRunningTasks is true', async () => {
       const longRunningTask = await scheduleTask(supertest, {
-        taskType: 'sampleRecurringTaskWhichHangs',
+        taskType: 'sampleLongRunningRecurringTask',
         schedule: { interval: '1h' },
         params: {},
       });
@@ -1946,17 +1946,26 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' }, true);
 
-        // running task is now updated because includeRunningTasks is true
         expect(updates.tasks.length).to.be(1);
         expect(updates.errors.length).to.be(0);
       });
 
-      // the running task's schedule is updated in place, and it stays running (only its next
-      // schedule/runAt changed)
+      // the running task's schedule is updated in place while it is still running
+      let runningRunAt: number;
       await retry.try(async () => {
         const task = await currentTask(longRunningTask.id);
 
+        expect(task.status).to.be('running');
         expect(task.schedule).to.eql({ interval: '3h' });
+        runningRunAt = Date.parse(task.runAt);
+      });
+
+      await retry.tryForTime(150000, async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.status).to.be('idle');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expectReschedule(runningRunAt, task, 3 * 60 * 60 * 1000);
       });
     });
 
