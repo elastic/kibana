@@ -465,7 +465,9 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
-        expect(dismissed.if).toContain('steps.record_decision.output.dismissed == true');
+        expect(dismissed.if).toContain(
+          'steps.record_proposal_action_decision.output.dismissed == true'
+        );
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
@@ -481,12 +483,8 @@ describe('detection rule workflows', () => {
         expect(acknowledged.if).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
         );
-        expect(acknowledged.if).toContain(
-          "steps.diagnose_rule.output.structured_output.change_type == 'query'"
-        );
-        expect(acknowledged.if).toContain(
-          'steps.can_preview_query_change.output.supported == false'
-        );
+        expect(acknowledged.if).toContain("steps.propose_manual.output.status == 'approved'");
+        expect(acknowledged.if).not.toContain('review_tuning');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.acknowledged_tag }}',
@@ -501,7 +499,9 @@ describe('detection rule workflows', () => {
       // proposal, `dismissed` otherwise. A run that never proposed matches none of
       // them, so its alerts stay untagged and a later sweep can retry them.
       it('derives every decision flag from the gate status', () => {
-        const decision = reviewSteps.find(({ name }) => name === 'record_decision')!;
+        const decision = reviewSteps.find(
+          ({ name }) => name === 'record_proposal_action_decision'
+        )!;
         const flags = decision.with as Record<string, string>;
 
         expect(String(flags.applied)).toContain(
@@ -524,7 +524,7 @@ describe('detection rule workflows', () => {
         // the query path is applied by the gate's action, the others in-run.
         const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
         expect(String(applyResults.with?.query_applied)).toContain(
-          'steps.record_decision.output.applied == true'
+          'steps.record_proposal_action_decision.output.applied == true'
         );
         expect(String(applyResults.with?.query_applied)).not.toContain('apply_query_tuning');
         const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
@@ -533,6 +533,14 @@ describe('detection rule workflows', () => {
             `steps.record_apply_results.output.${flag} == true`
           );
         }
+
+        // The sweep reads `approved` from both gates: the proposal gate for query and
+        // manual, the interim in-run gate for exception and risk score.
+        const emit = reviewSteps.find(({ name }) => name === 'emit_result')!;
+        const approved = String((emit.with as Record<string, string>).approved);
+        expect(approved).toContain('steps.record_proposal_action_decision.output.approved == true');
+        expect(approved).toContain('steps.review_tuning.output.response.approved == true');
+        expect(approved).not.toContain(' and ');
 
         // The review never patches a query itself; only the risk score path patches in-run.
         expect(reviewSteps.some(({ name }) => name === 'apply_query_tuning')).toBe(false);
@@ -603,7 +611,9 @@ describe('detection rule workflows', () => {
         for (const fetch of fetches) {
           expect(String(fetch.with?.path)).toContain('?id={{ inputs.rule_uuid | url_encode }}');
         }
-        expect(refetch.if).toContain('steps.record_decision.output.applied == true');
+        expect(refetch.if).toContain(
+          'steps.record_proposal_action_decision.output.applied == true'
+        );
         expect(refresh.if).toContain('steps.refetch_rule.output.id != null');
         expect(JSON.stringify(refresh.with)).toContain('steps.refetch_rule.output | json');
       });
@@ -664,7 +674,7 @@ describe('detection rule workflows', () => {
           expect(
             createWorkflowLiquidEngine().evalValueSync(expression, {
               steps: {
-                record_decision: { output: { applied } },
+                record_proposal_action_decision: { output: { applied } },
                 diagnose_rule: { output: { structured_output: { change_type: changeType } } },
               },
             })

@@ -651,7 +651,7 @@ steps:
   # proposal, `dismissed` otherwise. Spelled out per outcome rather than derived
   # from a single flag so a run that never proposed (no diagnosis) matches none of
   # them and leaves the alerts untagged.
-  - name: record_decision
+  - name: record_proposal_action_decision
     type: data.set
     with:
       applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
@@ -706,7 +706,7 @@ steps:
   # rule to refresh the attachment with the query that actually landed.
   - name: refetch_rule
     type: kibana.request
-    if: "${{ steps.record_decision.output.applied == true }}"
+    if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
@@ -743,7 +743,7 @@ steps:
     type: data.set
     with:
       query_applied: >-
-        ${{ steps.record_decision.output.applied == true and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
+        ${{ steps.record_proposal_action_decision.output.applied == true and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
       exception_applied: >-
         ${{ steps.review_tuning.output.response.approved == true
           and steps.diagnose_rule.output.structured_output.change_type == 'exception'
@@ -765,7 +765,7 @@ steps:
 
   - name: mark_alerts_dismissed
     type: security.setAlertTags
-    if: "${{ steps.record_decision.output.dismissed == true }}"
+    if: "${{ steps.record_proposal_action_decision.output.dismissed == true }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
@@ -786,17 +786,13 @@ steps:
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
   # the rule returns once new false positives accumulate past the watermark. The
-  # auto-apply path stays untagged when its apply fell through (failed backtest,
-  # stale edit), so a later sweep can retry with current data.
+  # auto-apply path stays untagged when its apply fell through, so a later sweep can retry with current data.
   # Liquid evaluates right-to-left: approved gates both the manual path and the
   # unsupported-query path without needing parentheses.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'manual'
-        or steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.can_preview_query_change.output.supported == false }}
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.status == 'approved' }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
@@ -810,7 +806,7 @@ steps:
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_decision.output.approved == true }}
+        and steps.record_proposal_action_decision.output.approved == true }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
@@ -824,7 +820,7 @@ steps:
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_decision.output.dismissed == true }}
+        and steps.record_proposal_action_decision.output.dismissed == true }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
@@ -839,5 +835,10 @@ steps:
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
-      approved: "${{ steps.review_tuning.output.response.approved == true }}"
+      # Two approval sources: the proposal gate (query, manual) and the interim
+      # in-run gate (exception, risk_score). A plain or-chain, since Liquid has no
+      # parentheses.
+      approved: >-
+        ${{ steps.record_proposal_action_decision.output.approved == true
+          or steps.review_tuning.output.response.approved == true }}
       applied: "${{ steps.record_outcome.output.rule_patched == true }}"
