@@ -22,10 +22,12 @@ const toQueryType = (esqlQuery: string): MetricsEsqlQueryType => {
 };
 
 /**
- * Builds the `metrics_esql_query_failure` payload for a landed ES|QL failure,
- * or returns undefined for failures that must not be counted: cancelled
- * refetches (`AbortError`) and non-Error rejections. Mirrors the suppression
- * rules the APM reporter applies so both signals count the same failures.
+ * Builds the {@link METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} payload for a landed
+ * ES|QL failure, or returns undefined for failures that must not be counted:
+ * cancelled refetches (`AbortError`) and non-Error rejections. Mirrors the
+ * suppression rules the APM reporter applies so both signals count the same
+ * failures. Optional Elasticsearch metadata is omitted when unset, matching
+ * the APM reporter.
  */
 export const buildEsqlQueryFailureEvent = ({
   error,
@@ -41,9 +43,9 @@ export const buildEsqlQueryFailureEvent = ({
   const { type, status } = getChartSectionErrorMeta(error);
 
   return {
-    error_type: type,
+    ...(type ? { error_type: type } : {}),
     error_category: classifyChartSectionError(error),
-    status_code: status,
+    ...(status != null ? { status_code: status } : {}),
     query_type: toQueryType(esqlQuery),
     profile: METRICS_PROFILE_TELEMETRY_NAME,
   };

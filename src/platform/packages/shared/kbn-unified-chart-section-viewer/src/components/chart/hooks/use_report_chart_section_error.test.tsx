@@ -506,6 +506,31 @@ describe('useReportChartSectionError', () => {
       });
     });
 
+    it('classifies a circuit breaker as a resource limit', () => {
+      const reportError = renderReporter();
+      const circuitBreakerError = new EsqlResponseError(
+        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { status: 429 }
+      );
+
+      reportError({
+        error: circuitBreakerError,
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(circuitBreakerError, {
+        labels: {
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
+          chart_section_source: 'useFetchMetricsData',
+          esql_error_type: 'circuit_breaking_exception',
+          esql_status: '429',
+          error_category: ERROR_CATEGORY.RESOURCE_LIMIT,
+          profile_id: PROFILE_ID,
+        },
+      });
+    });
+
     it('labels an error raised by the search interceptor', () => {
       // A request that Elasticsearch rejects outright surfaces as `EsError`
       // rather than `EsqlResponseError`, and `EsError` keeps the cause on

@@ -62,9 +62,7 @@ describe('buildEsqlQueryFailureEvent', () => {
     expect(
       buildEsqlQueryFailureEvent({ error: new Error('network blew up'), esqlQuery: TS_QUERY })
     ).toEqual({
-      error_type: undefined,
       error_category: 'unknown',
-      status_code: undefined,
       query_type: 'TS',
       profile: METRICS_PROFILE_TELEMETRY_NAME,
     });

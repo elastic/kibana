@@ -46,9 +46,9 @@ const USER_INPUT_ERROR_TYPES: readonly string[] = ['parsing_exception', 'verific
 
 /**
  * Elasticsearch error types that mean the cluster ran out of a budget rather
- * than that anything is broken. Matched anywhere in the cause chain and ahead
- * of the status check, since these arrive with a 429 that would otherwise read
- * as an application failure.
+ * than that anything is broken. Matched anywhere in the cause chain, after
+ * user-input statuses (400/404) and before the generic status fallback, since
+ * these arrive with a 429 that would otherwise read as an application failure.
  */
 const RESOURCE_LIMIT_ERROR_TYPES: readonly string[] = ['circuit_breaking_exception'];
 

@@ -9,7 +9,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { createUnifiedChartSectionViewerTelemetry } from './report_unified_chart_section_viewer_data_summary';
-import { METRICS_PROFILE_TELEMETRY_NAME } from '../components/observability/metrics/telemetry';
+import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE, METRICS_PROFILE_TELEMETRY_NAME } from '../components/observability/metrics/telemetry';
 
 describe('createUnifiedChartSectionViewerTelemetry', () => {
   it('reports metric aggregation configuration changes', () => {
@@ -48,7 +48,7 @@ describe('createUnifiedChartSectionViewerTelemetry', () => {
       profile: METRICS_PROFILE_TELEMETRY_NAME,
     });
 
-    expect(analytics.reportEvent).toHaveBeenCalledWith('metrics_esql_query_failure', {
+    expect(analytics.reportEvent).toHaveBeenCalledWith(METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE, {
       error_type: 'circuit_breaking_exception',
       error_category: 'resource_limit',
       status_code: 429,

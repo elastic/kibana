@@ -79,7 +79,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
-import { METRICS_PROFILE_TELEMETRY_NAME } from '../telemetry/constants';
+import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE, METRICS_PROFILE_TELEMETRY_NAME } from '../telemetry/constants';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
@@ -585,7 +585,7 @@ describe('useFetchMetricsData', () => {
       });
     });
 
-    it('emits metrics_esql_query_failure for a circuit breaker reported on HTTP 200', async () => {
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a circuit breaker reported on HTTP 200`, async () => {
       // The scenario behind elastic/elasticsearch#154978: a `TS metrics-*`
       // query trips the request circuit breaker, and Elasticsearch returns the
       // failure embedded in a 200 body rather than as an HTTP error.
@@ -615,7 +615,7 @@ describe('useFetchMetricsData', () => {
       });
     });
 
-    it('emits metrics_esql_query_failure for a rejected HTTP request', async () => {
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a rejected HTTP request`, async () => {
       const requestError = Object.assign(new Error('Bad Request'), {
         attributes: {
           error: { type: 'verification_exception', reason: 'Unknown column [x]' },
@@ -640,7 +640,7 @@ describe('useFetchMetricsData', () => {
       });
     });
 
-    it('does not emit metrics_esql_query_failure for a cancelled refetch', async () => {
+    it(`does not emit ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a cancelled refetch`, async () => {
       const abortError = new Error('aborted');
       abortError.name = 'AbortError';
       mockExecuteEsqlQuery.mockRejectedValue(abortError);
@@ -657,8 +657,8 @@ describe('useFetchMetricsData', () => {
 
     it('does not re-fire on re-renders that preserve the error reference', async () => {
       // `useAsyncFn` exposes a stable error reference for a given failed run,
-      // so the reporter useEffect (deps: [error, profileId]) does not re-fire
-      // on identity-preserving re-renders. Repeat failures with fresh Error
+      // so the reporter useEffect keyed on `error` does not re-fire on
+      // identity-preserving re-renders. Repeat failures with fresh Error
       // instances do produce fresh reports - exercised by the sibling test.
       const fetchError = new Error('re-render test');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);

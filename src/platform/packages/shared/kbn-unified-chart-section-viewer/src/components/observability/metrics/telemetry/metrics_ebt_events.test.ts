@@ -8,6 +8,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE } from './constants';
 import { registerMetricsEbtEvents } from './metrics_ebt_events';
 
 describe('registerMetricsEbtEvents', () => {
@@ -53,7 +54,7 @@ describe('registerMetricsEbtEvents', () => {
     const analytics = registerEvents();
 
     expect(analytics.registerEventType).toHaveBeenCalledWith({
-      eventType: 'metrics_esql_query_failure',
+      eventType: METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
       schema: {
         error_type: {
           type: 'keyword',
