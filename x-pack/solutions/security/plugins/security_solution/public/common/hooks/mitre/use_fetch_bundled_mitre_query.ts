@@ -29,7 +29,7 @@ const DEFAULT_OPTIONS = {
  */
 export const useFetchLegacyMitreQuery = (
   types?: MitreEntityType[],
-  options?: Pick<UseQueryOptions<MitreEntitySummaryBuckets>, 'enabled' | 'onError'>
+  options?: Pick<UseQueryOptions<MitreEntitySummaryBuckets>, 'enabled'>
 ) => {
   return useQuery<MitreEntitySummaryBuckets>(
     LEGACY_BUNDLED_MITRE_QUERY_KEY(types),

@@ -202,6 +202,44 @@ describe('ThreatEuiFlexGroup', () => {
     expect(screen.queryByTestId('threatUnsupportedMitreIdWarning-T1548')).not.toBeInTheDocument();
   });
 
+  it('does not show warnings when the hook returns empty data with isLoading:false and isError:false (managed source not yet populated)', async () => {
+    // Simulate the managed source returning empty arrays with isLoading:false, isError:false —
+    // ensureInitialized() is false so the server returns a 200 with no entities yet.
+    mockUseMitreConfiguration.mockReturnValue({
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+      frameworkVersion: undefined,
+      isLoading: false,
+      isError: false,
+    });
+
+    const threat: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [
+          {
+            id: 'T1548',
+            name: 'Abuse Elevation Control Mechanism',
+            reference: 'https://attack.mitre.org/techniques/T1548/',
+          },
+        ],
+      },
+    ];
+
+    const { container } = renderThreat(threat);
+
+    // tactics.length is 0, so showUnsupportedWarnings is false — no warnings should render.
+    expect(
+      container.querySelector('[data-test-subj^="threatUnsupportedMitreIdWarning-"]')
+    ).toBeNull();
+  });
+
   it('does not show false-positive warnings before the MITRE dataset has loaded', async () => {
     // Simulate loading state: hook returns empty arrays with isLoading true.
     mockUseMitreConfiguration.mockReturnValue({

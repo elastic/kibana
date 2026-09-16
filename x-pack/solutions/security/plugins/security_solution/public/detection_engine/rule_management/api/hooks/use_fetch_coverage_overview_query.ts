@@ -72,7 +72,12 @@ export const useFetchCoverageOverviewQuery = (
 
   return {
     ...queryResult,
-    isLoading: mitreConfig.isLoading || queryResult.isLoading,
+    // react-query v4: a disabled query (mitreReady=false) still reports isLoading:true when
+    // it has no cached data, so `queryResult.isLoading` would keep the spinner up forever when
+    // MITRE fails. `isInitialLoading` (= isLoading && isFetching) is false for a disabled query,
+    // so using it here ensures the spinner resolves correctly even when the coverage fetch is
+    // disabled because MITRE errored out.
+    isLoading: mitreConfig.isLoading || queryResult.isInitialLoading,
     isMitreError: mitreConfig.isError,
   };
 };

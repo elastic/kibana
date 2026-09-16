@@ -39,13 +39,6 @@ export {
 
 export { buildSoId, getMitreEntityDisplayName } from './src/utils';
 
-export {
-  buildMockMitreTacticSummary,
-  buildMockMitreTechniqueSummary,
-  buildMockMitreSubtechniqueSummary,
-  buildMockMitreEntitySummaryBuckets,
-} from './src/mitre_entity_builders';
-
 export { GetMitreEntitiesRequestQuery } from './src/api';
 
 export type {

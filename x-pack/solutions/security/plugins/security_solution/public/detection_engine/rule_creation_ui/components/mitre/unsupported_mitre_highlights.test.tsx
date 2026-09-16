@@ -12,7 +12,7 @@ import {
   buildMockMitreTacticSummary,
   buildMockMitreTechniqueSummary,
   buildMockMitreSubtechniqueSummary,
-} from '@kbn/security-mitre-attack-common';
+} from '../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
 import type { MitreTechniqueSummary } from '@kbn/security-mitre-attack-common';
 
 import { AddMitreAttackThreat } from '.';

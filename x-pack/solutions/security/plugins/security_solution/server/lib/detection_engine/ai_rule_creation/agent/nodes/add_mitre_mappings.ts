@@ -12,6 +12,7 @@ import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
+import { resolveMitreBuckets } from '../../../mitre/resolve_mitre_buckets';
 import type {
   Threat,
   ThreatTechnique,
@@ -31,25 +32,6 @@ interface AddMitreMappingsNodeParams {
   /** Resolved managed MITRE data client. Absent when xpack.mitreAttack.managedSourceEnabled is off. */
   mitreDataClient?: MitreAttackDataClient;
 }
-
-/** Retrieves MITRE buckets from the managed client when available, else adapts the static blob. */
-const getMitreBuckets = async (
-  mitreDataClient: MitreAttackDataClient | undefined
-): Promise<MitreEntitySummaryBuckets> => {
-  if (mitreDataClient) {
-    return mitreDataClient.list();
-  }
-
-  // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
-  // Remove once the managed source is the default and the blob is deleted.
-  const { tactics, techniques, subtechniques } = await import(
-    '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-  const { transformLegacyMitreData } = await import(
-    '../../../../../../common/detection_engine/mitre/mitre_data_adapter'
-  );
-  return transformLegacyMitreData({ tactics, techniques, subtechniques });
-};
 
 /**
  * Validates and formats the MITRE mapping response according to the Threat schema.
@@ -157,7 +139,7 @@ export const addMitreMappingsNode = ({
         esql_query: state?.rule?.query || '',
         rule_tags: ruleTags,
       });
-      const mitreBuckets = await getMitreBuckets(mitreDataClient);
+      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
 
       const threatMappings = formatMitreMapping(mitreSelectionResult, mitreBuckets);
 

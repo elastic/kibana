@@ -25,6 +25,7 @@ import {
   buildValidMitreIdsFromBuckets,
 } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
 import type { ValidMitreIdSets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import { resolveMitreBuckets } from '../../../../mitre/resolve_mitre_buckets';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -38,27 +39,6 @@ interface HandleCoverageOverviewRequestArgs {
   params: CoverageOverviewRequestBody;
   deps: CoverageOverviewRouteDependencies;
 }
-
-/** Resolves the set of valid MITRE IDs from the managed client when available, else the static blob. */
-const buildValidMitreIds = async (
-  mitreDataClient: MitreAttackDataClient | undefined
-): Promise<ValidMitreIdSets> => {
-  if (mitreDataClient) {
-    return buildValidMitreIdsFromBuckets(await mitreDataClient.list());
-  }
-
-  // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
-  // Remove once the managed source is the default and the blob is deleted.
-  const { tactics, techniques, subtechniques } = await import(
-    '../../../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-  const { transformLegacyMitreData } = await import(
-    '../../../../../../../common/detection_engine/mitre/mitre_data_adapter'
-  );
-  return buildValidMitreIdsFromBuckets(
-    transformLegacyMitreData({ tactics, techniques, subtechniques })
-  );
-};
 
 export async function handleCoverageOverviewRequest({
   params: { filter },
@@ -86,7 +66,7 @@ export async function handleCoverageOverviewRequest({
     sortOrder: undefined,
   });
 
-  const validIds = await buildValidMitreIds(mitreDataClient);
+  const validIds = buildValidMitreIdsFromBuckets(await resolveMitreBuckets(mitreDataClient));
 
   return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIds), {
     coverage: {},

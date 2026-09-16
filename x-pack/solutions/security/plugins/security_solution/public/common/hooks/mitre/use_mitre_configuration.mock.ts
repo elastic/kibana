@@ -10,7 +10,7 @@ import {
   buildMockMitreTechniqueSummary,
   buildMockMitreSubtechniqueSummary,
   buildMockMitreEntitySummaryBuckets,
-} from '@kbn/security-mitre-attack-common';
+} from '../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
 import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import type { MitreConfiguration } from './use_mitre_configuration';
 

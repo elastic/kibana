@@ -12,9 +12,8 @@ import type {
 } from '@kbn/security-mitre-attack-common';
 import { useFetchMitreEntitiesQuery } from '@kbn/mitre-attack-plugin/public';
 import { useKibana } from '../../lib/kibana';
-import { useAppToasts } from '../use_app_toasts';
 import { useFetchLegacyMitreQuery } from './use_fetch_bundled_mitre_query';
-import * as i18n from './translations';
+import { LEGACY_FRAMEWORK_VERSION } from '../../../../common/detection_engine/mitre/mitre_data_adapter';
 
 export interface MitreConfiguration extends MitreEntitySummaryCollection {
   isLoading: boolean;
@@ -32,28 +31,22 @@ export const useMitreConfiguration = (
 ): MitreConfiguration => {
   const { services } = useKibana();
   // Feature flag from the mitreAttack plugin start contract: true → use managed API.
-  const isEnabled = services.mitreAttack?.isEnabled ?? false;
-  const { addError } = useAppToasts();
+  const isManagedSourceEnabled = services.mitreAttack?.isEnabled ?? false;
 
   // Exactly one of the two queries below is enabled at a time.
   // Both produce the same MitreEntitySummaryBuckets shape, so consumers never branch.
+  // Errors surface via isError — consumers render inline callouts; no toast here.
   const managedQuery = useFetchMitreEntitiesQuery(params ?? {}, {
-    enabled: isEnabled,
-    onError: (error) => {
-      addError(error, { title: i18n.MITRE_CONFIGURATION_FETCH_ERROR });
-    },
+    enabled: isManagedSourceEnabled,
   });
 
   // Legacy path: loads the bundled blob via lazy import. Goes away when the blob is removed.
   // Only `types` is meaningful here; the blob is one framework/version with no revoked/deprecated data.
   const legacyQuery = useFetchLegacyMitreQuery(params?.types, {
-    enabled: !isEnabled,
-    onError: (error) => {
-      addError(error, { title: i18n.MITRE_CONFIGURATION_FETCH_ERROR });
-    },
+    enabled: !isManagedSourceEnabled,
   });
 
-  const activeQuery = isEnabled ? managedQuery : legacyQuery;
+  const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
 
   if (activeQuery.isError || !activeQuery.data) {
     return {
@@ -68,7 +61,10 @@ export const useMitreConfiguration = (
     tactics: activeQuery.data.tactics,
     techniques: activeQuery.data.techniques,
     subtechniques: activeQuery.data.subtechniques,
-    frameworkVersion: isEnabled ? managedQuery.data?.framework_version : undefined,
+    // Both paths expose the same frameworkVersion shape so callers never need to branch.
+    frameworkVersion: isManagedSourceEnabled
+      ? managedQuery.data?.framework_version
+      : LEGACY_FRAMEWORK_VERSION,
     isLoading: activeQuery.isLoading,
     isError: activeQuery.isError,
   };

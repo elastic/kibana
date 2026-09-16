@@ -10,11 +10,7 @@ import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import {
-  tactics as mitreTactics,
-  techniques as mitreTechniques,
-  subtechniques as mitreSubtechniques,
-} from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import { resolveMitreBuckets } from '../../detection_engine/mitre/resolve_mitre_buckets';
 
 export interface JobConfig {
   sourceIndex: string[];
@@ -33,11 +29,6 @@ interface JobCustomSettings {
   threat_techniques?: string[];
 }
 
-interface MitreMaps {
-  tacticNameById: Map<string, string>;
-  techniqueNameById: Map<string, string>;
-}
-
 interface GetJobConfigOpts {
   jobIds: string[];
   logger: Logger;
@@ -46,52 +37,6 @@ interface GetJobConfigOpts {
   soClient: SavedObjectsClientContract;
   mitreDataClient?: MitreAttackDataClient;
 }
-
-const tacticNameById = new Map(mitreTactics.map(({ id, name }) => [id, name]));
-const techniqueNameById = new Map(
-  [...mitreTechniques, ...mitreSubtechniques].map(({ id, name }) => [id, name])
-);
-
-// Module-level cache for the managed MITRE maps. MITRE reference data is static per process,
-// so there is no need to call list() on every request. An empty result (SO population not yet
-// complete) is never cached so the next request retries. Promise is stored before the first
-// await so concurrent callers share the same in-flight request.
-let managedMitreMapsCachePromise: Promise<MitreMaps> | null = null;
-
-const buildMaps = (collection: Awaited<ReturnType<MitreAttackDataClient['list']>>): MitreMaps => ({
-  tacticNameById: new Map(collection.tactics.map(({ id, name }) => [id, name])),
-  techniqueNameById: new Map(
-    [...collection.techniques, ...collection.subtechniques].map(({ id, name }) => [id, name])
-  ),
-});
-
-const getMitreMaps = async (
-  mitreDataClient: MitreAttackDataClient | undefined
-): Promise<MitreMaps> => {
-  if (mitreDataClient) {
-    if (!managedMitreMapsCachePromise) {
-      // Assign the Promise before any await so concurrent calls share the same in-flight request.
-      managedMitreMapsCachePromise = mitreDataClient.list().then(
-        (collection) => {
-          const maps = buildMaps(collection);
-          // Guard: do not retain an empty result — SO population may not yet be complete.
-          if (collection.tactics.length === 0 && collection.techniques.length === 0) {
-            managedMitreMapsCachePromise = null;
-          }
-          return maps;
-        },
-        (err) => {
-          managedMitreMapsCachePromise = null;
-          throw err;
-        }
-      );
-    }
-    return managedMitreMapsCachePromise;
-  }
-  // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
-  // Remove once the managed source is the default and the blob is deleted.
-  return { tacticNameById, techniqueNameById };
-};
 
 /**
  * Live jobs keep whatever custom_settings they were created with, since job setup
@@ -130,11 +75,6 @@ const getModuleCustomSettingsByJobId = async ({
   return result;
 };
 
-/** Clears the managed MITRE maps cache. Exported for test isolation only. */
-export const resetManagedMitreMapsCache = () => {
-  managedMitreMapsCachePromise = null;
-};
-
 export const getJobConfig = async ({
   jobIds,
   logger,
@@ -155,7 +95,11 @@ export const getJobConfig = async ({
           .then((resp) => resp.jobs ?? [])
       )
     );
-    const mitreMaps = await getMitreMaps(mitreDataClient);
+    const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+    const tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
+    const techniqueNameById = new Map(
+      [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [id, name])
+    );
 
     const jobs = jobsSettled.flatMap((r) => {
       if (r.status === 'rejected') {
@@ -204,9 +148,9 @@ export const getJobConfig = async ({
         detectors: job.analysis_config?.detectors ?? [],
         bucketSpanMs,
         jobName: customSettings.security_app_display_name ?? null,
-        threatTactics: threatTactics.map((id) => mitreMaps.tacticNameById.get(id) ?? id),
+        threatTactics: threatTactics.map((id) => tacticNameById.get(id) ?? id),
         threatTechniques: (customSettings.threat_techniques ?? []).map(
-          (id) => mitreMaps.techniqueNameById.get(id) ?? id
+          (id) => techniqueNameById.get(id) ?? id
         ),
         hasThreatTactics: Array.isArray(customSettings.threat_tactics),
       });

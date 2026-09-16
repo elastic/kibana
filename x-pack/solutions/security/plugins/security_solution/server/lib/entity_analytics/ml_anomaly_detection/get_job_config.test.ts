@@ -8,7 +8,8 @@
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import { getJobConfig, resetManagedMitreMapsCache } from './get_job_config';
+import { getJobConfig } from './get_job_config';
+import { resetResolveMitreBucketsCache } from '../../detection_engine/mitre/resolve_mitre_buckets';
 
 const soClient = savedObjectsClientMock.create();
 const request = httpServerMock.createKibanaRequest();
@@ -38,7 +39,7 @@ const makeModuleJob = (id: string, customSettings: Record<string, unknown>) => (
 
 beforeEach(() => {
   jest.clearAllMocks();
-  resetManagedMitreMapsCache();
+  resetResolveMitreBucketsCache();
   logger = loggingSystemMock.createLogger();
   mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJob()] });
   mockListModulesFn = jest.fn().mockResolvedValue([]);
@@ -471,7 +472,7 @@ describe('managed MITRE list caching', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetManagedMitreMapsCache();
+    resetResolveMitreBucketsCache();
     logger = loggingSystemMock.createLogger();
     mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
     mockListModulesFn = jest.fn().mockResolvedValue([]);

@@ -10,7 +10,7 @@ import type {
   MitreTechniqueSummary,
   MitreSubtechniqueSummary,
   MitreEntitySummaryBuckets,
-} from './types';
+} from '@kbn/security-mitre-attack-common';
 
 export const buildMockMitreTacticSummary = (
   overrides?: Partial<MitreTacticSummary>

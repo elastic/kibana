@@ -68,9 +68,13 @@ export const ThreatEuiFlexGroup = ({
   );
 
   // Wait for the MITRE dataset before deciding an id is unsupported, otherwise
-  // every entry would briefly render a false-positive warning on mount. Also gated
-  // on the feature flag so we don't surface any warnings when it's disabled.
-  const showUnsupportedWarnings = isMitreAttackUpdatesUIEnabled && !isLoading && !isError;
+  // every entry would briefly render a false-positive warning on mount. The `tactics.length > 0`
+  // guard handles the case where the managed source hasn't finished populating yet:
+  // `ensureInitialized()` may be false, returning an empty 200 with isLoading:false and
+  // isError:false. Also gated on the feature flag so we don't surface any warnings when
+  // it's disabled.
+  const showUnsupportedWarnings =
+    isMitreAttackUpdatesUIEnabled && !isLoading && !isError && tactics.length > 0;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>

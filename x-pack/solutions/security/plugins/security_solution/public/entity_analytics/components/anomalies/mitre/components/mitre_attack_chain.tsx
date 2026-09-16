@@ -30,7 +30,7 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
   showPersistentFirstTacticBadge = false,
   alignLastDotToEnd = false,
 }) => {
-  const { tactics } = useMitreConfiguration({ types: ['tactic'] });
+  const { tactics, isLoading: isMitreLoading } = useMitreConfiguration({ types: ['tactic'] });
   const tacticNames = useMemo(
     () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
     [tactics]
@@ -69,6 +69,12 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
       return prev === tactic ? null : prev;
     });
   }, []);
+
+  // Tactic names used to be available synchronously; now they're async. Render nothing while
+  // MITRE data is loading so the chain doesn't pop in with zero dots on the first paint.
+  if (isMitreLoading) {
+    return null;
+  }
 
   return (
     <div

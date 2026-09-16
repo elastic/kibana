@@ -10,6 +10,7 @@ import { useKibana } from '../../lib/kibana';
 import { useMitreConfiguration } from './use_mitre_configuration';
 import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import { mockMitreEntitySummaryBuckets } from './use_mitre_configuration.mock';
+import { LEGACY_FRAMEWORK_VERSION } from '../../../../common/detection_engine/mitre/mitre_data_adapter';
 
 jest.mock('../../lib/kibana');
 
@@ -85,7 +86,7 @@ describe('useMitreConfiguration', () => {
       );
     });
 
-    it('returns legacy-sourced data without a frameworkVersion', () => {
+    it('returns legacy-sourced data with the normalized frameworkVersion', () => {
       setupKibanaMock(false);
       mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
 
@@ -94,7 +95,7 @@ describe('useMitreConfiguration', () => {
       expect(result.current.tactics).toEqual(mockLegacyData.tactics);
       expect(result.current.techniques).toEqual(mockLegacyData.techniques);
       expect(result.current.subtechniques).toEqual(mockLegacyData.subtechniques);
-      expect(result.current.frameworkVersion).toBeUndefined();
+      expect(result.current.frameworkVersion).toBe(LEGACY_FRAMEWORK_VERSION);
       expect(result.current.isLoading).toBe(false);
       expect(result.current.isError).toBe(false);
     });
@@ -258,6 +259,25 @@ describe('useMitreConfiguration', () => {
       expect(hasRequiredKeys(managedResult.current.tactics[0] as Record<string, unknown>)).toBe(
         true
       );
+    });
+
+    it('both paths expose a defined frameworkVersion string in the same format', () => {
+      // Legacy path
+      setupKibanaMock(false);
+      mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
+      const { result: legacyResult } = renderHook(() => useMitreConfiguration());
+      expect(typeof legacyResult.current.frameworkVersion).toBe('string');
+      // Normalized version should not start with 'v'
+      expect(legacyResult.current.frameworkVersion).not.toMatch(/^v/);
+
+      // Managed path
+      jest.clearAllMocks();
+      setupKibanaMock(true);
+      mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
+      mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(undefined));
+      const { result: managedResult } = renderHook(() => useMitreConfiguration());
+      expect(typeof managedResult.current.frameworkVersion).toBe('string');
+      expect(managedResult.current.frameworkVersion).not.toMatch(/^v/);
     });
   });
 });

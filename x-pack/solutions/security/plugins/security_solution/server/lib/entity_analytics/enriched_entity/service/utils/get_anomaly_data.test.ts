@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { Entity } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { AnomalySummaryEntry } from '../../../../../../common/api/entity_analytics/anomaly_summary';
 import { getAnomalyData } from './get_anomaly_data';
@@ -190,7 +191,7 @@ describe('getAnomalyData', () => {
     it('forwards mitreDataClient to getEntityAnomalies when provided', async () => {
       jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
 
-      const mockMitreDataClient = { getMitreData: jest.fn() } as never;
+      const mockMitreDataClient: MitreAttackDataClient = { list: jest.fn(), getById: jest.fn() };
 
       await getAnomalyData({
         ...baseOptions,

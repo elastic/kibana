@@ -20,6 +20,13 @@ import { tacticOrder } from './mitre_tactics_order';
 const normalizeVersion = (version: string): string =>
   version.startsWith('v') ? version.slice(1) : version;
 
+/**
+ * Normalized MITRE ATT&CK framework version for the bundled legacy dataset (e.g. '19.1').
+ * Both query paths in `useMitreConfiguration` expose this same value so callers see an
+ * identical shape regardless of which source is active.
+ */
+export const LEGACY_FRAMEWORK_VERSION = normalizeVersion(MITRE_ATTACK_VERSION);
+
 /** Builds a map of kebab-case tactic name → tactic id from the legacy tactics array. */
 const buildTacticNameToIdMap = (tactics: MitreTactic[]): Map<string, string> => {
   const map = new Map<string, string>();

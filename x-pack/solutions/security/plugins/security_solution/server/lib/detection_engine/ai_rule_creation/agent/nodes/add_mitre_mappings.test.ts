@@ -12,7 +12,8 @@ import {
   buildMockMitreTechniqueSummary,
   buildMockMitreSubtechniqueSummary,
   buildMockMitreEntitySummaryBuckets,
-} from '@kbn/security-mitre-attack-common';
+} from '../../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
+import { resetResolveMitreBucketsCache } from '../../../mitre/resolve_mitre_buckets';
 
 // Mock the prompt so the LangChain chain doesn't need real models or prompt templates.
 jest.mock('./prompts', () => ({
@@ -159,6 +160,7 @@ describe('formatMitreMapping', () => {
 describe('addMitreMappingsNode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetResolveMitreBucketsCache();
   });
 
   it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {

@@ -12,6 +12,7 @@ import { handleCoverageOverviewRequest } from './handle_coverage_overview_reques
 import type { ValidMitreIdSets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
 import { buildValidMitreIdsFromBuckets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { resetResolveMitreBucketsCache } from '../../../../mitre/resolve_mitre_buckets';
 
 jest.mock('../../../logic/search/find_rules');
 
@@ -30,6 +31,7 @@ const makeManagedBuckets = (validIds: ValidMitreIdSets) => ({
 describe('handleCoverageOverviewRequest', () => {
   beforeEach(() => {
     (findRules as jest.Mock).mockReset();
+    resetResolveMitreBucketsCache();
   });
 
   it('does not request more than 10k rules', async () => {

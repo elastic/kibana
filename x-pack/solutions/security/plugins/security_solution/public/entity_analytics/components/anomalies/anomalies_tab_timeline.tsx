@@ -61,7 +61,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   isEmpty = false,
   isLoading = false,
 }) => {
-  const { tactics } = useMitreConfiguration({ types: ['tactic'] });
+  const { tactics, isLoading: isMitreLoading } = useMitreConfiguration({ types: ['tactic'] });
   const tacticNames = useMemo(
     () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
     [tactics]
@@ -69,7 +69,9 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
 
   const { bands } = useAnomalyBands();
   const styling = getAnomalyChartStyling(true);
-  const showPlaceholderPanel = isEmpty || isLoading;
+  // Gate on MITRE loading so the chart doesn't render with zero tactic rows on first paint
+  // while tactic names are being fetched asynchronously.
+  const showPlaceholderPanel = isEmpty || isLoading || isMitreLoading;
 
   const mitreTacticNames = useMemo(() => {
     if (selectedTactic && tacticNames.includes(selectedTactic)) {
@@ -127,7 +129,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
         {showPlaceholderPanel ? (
           <AnomaliesBorderedVisPanel>
             <MitreAttackChainPlaceholder>
-              {isLoading ? (
+              {isLoading || isMitreLoading ? (
                 <EuiLoadingChart size="l" />
               ) : (
                 <EmptyPlaceholder icon={IconChartHeatmap} />

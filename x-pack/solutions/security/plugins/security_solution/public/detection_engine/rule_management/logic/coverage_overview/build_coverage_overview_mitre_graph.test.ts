@@ -8,7 +8,7 @@
 import {
   buildMockMitreTacticSummary,
   buildMockMitreTechniqueSummary,
-} from '@kbn/security-mitre-attack-common';
+} from '../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
 import {
   getMockCoverageOverviewTactics,
   getMockCoverageOverviewTechniques,
