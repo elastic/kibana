@@ -49,7 +49,7 @@ export const datafeedConfigSchema = schema.object({
   indices: schema.maybe(schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 })),
   indexes: schema.maybe(schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 })),
   job_id: schema.maybe(schema.string({ maxLength: 10000 })),
-  esql_query: schema.maybe(schema.string({ maxLength: 10000 })),
+  esql_query: schema.maybe(schema.string({ maxLength: 1000000 })),
   source_time_field: schema.maybe(schema.string({ maxLength: 10000 })),
   grouping_interval: schema.maybe(schema.string({ maxLength: 10000 })),
   query: schema.maybe(schema.any()),

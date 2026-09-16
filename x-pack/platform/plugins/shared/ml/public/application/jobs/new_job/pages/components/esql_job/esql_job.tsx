@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../../components/ml_app_header';
 import { EsqlQueryStep } from './esql_query_step';
 import { EsqlTimeRangeStep } from './esql_time_range_step';
+import { EsqlPreviewPanel } from './esql_preview_panel';
 import { EsqlWizardProvider } from './esql_wizard_context';
 
 export const Page: FC = () => {
@@ -27,6 +28,7 @@ export const Page: FC = () => {
       <EsqlWizardProvider>
         <EsqlQueryStep />
         <EsqlTimeRangeStep />
+        <EsqlPreviewPanel />
       </EsqlWizardProvider>
     </div>
   );

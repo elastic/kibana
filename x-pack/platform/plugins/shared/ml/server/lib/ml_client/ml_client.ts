@@ -21,6 +21,7 @@ import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';
 import type {
+  InlineDatafeedPreviewRequest,
   MlClient,
   MlClientParams,
   MlGetADParams,
@@ -30,6 +31,11 @@ import type {
 } from './types';
 import type { MlAuditLogger } from './ml_audit_logger';
 import type { ServerlessInfo } from '../../types';
+
+const isInlineDatafeedPreviewRequest = (
+  payload: Parameters<MlClient['previewDatafeed']>[0]
+): payload is InlineDatafeedPreviewRequest =>
+  isPopulatedObject(payload) && isPopulatedObject(payload.body);
 
 export function getMlClient(
   client: IScopedClusterClient,
@@ -682,7 +688,12 @@ export function getMlClient(
     },
     async previewDatafeed(...p: Parameters<MlClient['previewDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClientWithSecondaryAuth().previewDatafeed(...p);
+      const [payload, options] = p;
+      const request = isInlineDatafeedPreviewRequest(payload)
+        ? { ...payload, body: JSON.stringify(payload.body) }
+        : payload;
+
+      return mlClientWithSecondaryAuth().previewDatafeed(request, options);
     },
     async putCalendar(...p: Parameters<MlClient['putCalendar']>) {
       return auditLogger.wrapTask(() => mlClient.putCalendar(...p), 'ml_put_calendar', p);

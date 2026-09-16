@@ -30,6 +30,10 @@ jest.mock('./esql_time_range_step', () => ({
   EsqlTimeRangeStep: () => <div data-test-subj="mlEsqlTimeRangeStep" />,
 }));
 
+jest.mock('./esql_preview_panel', () => ({
+  EsqlPreviewPanel: () => <div data-test-subj="mlEsqlPreviewPanel" />,
+}));
+
 describe('ES|QL job page', () => {
   it('renders without a data source context', () => {
     renderWithI18n(<Page />);
@@ -38,5 +42,6 @@ describe('ES|QL job page', () => {
     expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('ES|QL');
     expect(screen.getByTestId('mlEsqlQueryStep')).toBeInTheDocument();
     expect(screen.getByTestId('mlEsqlTimeRangeStep')).toBeInTheDocument();
+    expect(screen.getByTestId('mlEsqlPreviewPanel')).toBeInTheDocument();
   });
 });
