@@ -83,8 +83,8 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
 
   // Omitted entirely when the definition carries no gate, so a single-process definition renders
   // the same clause it always has.
-  const extractionGateFilter = entityDefinition.priorityExtractionGate
-    ? `\n      AND (${conditionToESQL(entityDefinition.priorityExtractionGate)})`
+  const extractionGateFilter = entityDefinition.extractionGate
+    ? `\n      AND (${conditionToESQL(entityDefinition.extractionGate)})`
     : '';
 
   const baseWhere = `FROM ${indexPatterns.join(', ')}

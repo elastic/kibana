@@ -78,8 +78,8 @@ export function getEntityDefinition(
  * Resolves an entity definition for an extraction mode. The default `'single'` mode returns the
  * registered definition untouched, which is what every consumer outside log extraction reads.
  *
- * The process modes overwrite `priorityExtractionGate` with the resolved gate for that mode
- * (complement for non-priority), so both cannot drift out of being exact opposites.
+ * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
+ * gates come from that one declaration, so they cannot drift out of being complements.
  */
 export function getEntityDefinitionWithoutId(
   type: EntityType,
@@ -91,11 +91,8 @@ export function getEntityDefinitionWithoutId(
     `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
-  const priorityExtractionGate = resolveExtractionGate(
-    definition.priorityExtractionGate,
-    extractionMode
-  );
-  if (!priorityExtractionGate) return definition;
+  const extractionGate = resolveExtractionGate(definition.priorityExtractionGate, extractionMode);
+  if (!extractionGate) return definition;
 
-  return { ...definition, priorityExtractionGate };
+  return { ...definition, extractionGate };
 }

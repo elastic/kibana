@@ -58,8 +58,8 @@ describe('getEntityDefinitionWithoutId', () => {
     '%s: defaults to single mode, returning the registered definition ungated',
     (type) => {
       expect(getEntityDefinitionWithoutId(type)).toBe(getEntityDefinitionWithoutId(type, 'single'));
-      // `priorityExtractionGate` is resolved on lookup; single mode leaves it absent.
-      expect(getEntityDefinitionWithoutId(type).priorityExtractionGate).toBeUndefined();
+      // `extractionGate` is resolved on lookup; the type forbids a definition from authoring one.
+      expect(getEntityDefinitionWithoutId(type).extractionGate).toBeUndefined();
     }
   );
 
@@ -98,12 +98,9 @@ describe('user extraction modes share identity logic', () => {
   it.each([
     ['priority', priority],
     ['nonPriority', nonPriority],
-  ])(
-    '%s is the registered definition with only priorityExtractionGate overwritten',
-    (_name, resolved) => {
-      expect(keysDifferingFromSingle(resolved)).toEqual(['priorityExtractionGate']);
-    }
-  );
+  ])('%s is the registered definition with only extractionGate added', (_name, resolved) => {
+    expect(keysDifferingFromSingle(resolved)).toEqual(['extractionGate']);
+  });
 
   it.each([
     ['priority', priority],
@@ -113,8 +110,8 @@ describe('user extraction modes share identity logic', () => {
   });
 
   it('gates priority on the declared gate and nonPriority on its complement', () => {
-    expect(priority.priorityExtractionGate).toBe(single.priorityExtractionGate);
-    expect(nonPriority.priorityExtractionGate).toEqual({
+    expect(priority.extractionGate).toBe(single.priorityExtractionGate);
+    expect(nonPriority.extractionGate).toEqual({
       or: [{ field: 'event.kind', exists: false }, { not: single.priorityExtractionGate }],
     });
   });
