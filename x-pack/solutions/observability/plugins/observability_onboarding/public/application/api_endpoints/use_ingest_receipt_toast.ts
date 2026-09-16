@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
@@ -46,27 +46,47 @@ export function useIngestReceiptToast(apiKeyIds: Partial<Record<ApiEndpointId, s
   const isEnabled = featureFlags.getBooleanValue(IS_INGEST_RECEIPTS_ENABLED, false);
   const startedAtRef = useRef<Partial<Record<PollSessionId, number>>>({});
   const inFlightRef = useRef<Partial<Record<PollSessionId, boolean>>>({});
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const abortControllersRef = useRef<Partial<Record<PollSessionId, AbortController>>>({});
+  const apiKeyIdsRef = useRef(apiKeyIds);
+  apiKeyIdsRef.current = apiKeyIds;
   const [settledSessionIds, setSettledSessionIds] = useState<
     Partial<Record<PollSessionId, boolean>>
   >({});
 
+  const currentSessions = useMemo(
+    () =>
+      VERIFIABLE_ENDPOINT_IDS.flatMap((endpointId) => {
+        const apiKeyId = apiKeyIds[endpointId];
+        return apiKeyId
+          ? [{ endpointId, apiKeyId, sessionId: toPollSessionId(endpointId, apiKeyId) }]
+          : [];
+      }),
+    [apiKeyIds]
+  );
+
+  // A replaced key must not toast for the key the page no longer shows, so its in flight
+  // request is aborted as soon as the replacement arrives.
+  useEffect(() => {
+    const currentSessionIds = new Set<string>(currentSessions.map(({ sessionId }) => sessionId));
+    Object.entries(abortControllersRef.current).forEach(([sessionId, controller]) => {
+      if (!currentSessionIds.has(sessionId)) {
+        controller?.abort();
+        delete abortControllersRef.current[sessionId as PollSessionId];
+      }
+    });
+  }, [currentSessions]);
+
   // A response that lands after the page is gone must not raise a toast over whatever the
   // user navigated to.
-  useEffect(() => {
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    return () => controller.abort();
-  }, []);
+  useEffect(
+    () => () => {
+      Object.values(abortControllersRef.current).forEach((controller) => controller?.abort());
+    },
+    []
+  );
 
   const pendingSessions = isEnabled
-    ? VERIFIABLE_ENDPOINT_IDS.flatMap((endpointId) => {
-        const apiKeyId = apiKeyIds[endpointId];
-        if (!apiKeyId || settledSessionIds[toPollSessionId(endpointId, apiKeyId)]) {
-          return [];
-        }
-        return [{ endpointId, apiKeyId }];
-      })
+    ? currentSessions.filter(({ sessionId }) => !settledSessionIds[sessionId])
     : [];
 
   const settle = (sessionId: PollSessionId) =>
@@ -83,15 +103,14 @@ export function useIngestReceiptToast(apiKeyIds: Partial<Record<ApiEndpointId, s
       return;
     }
     inFlightRef.current[sessionId] = true;
+    const controller = (abortControllersRef.current[sessionId] ??= new AbortController());
     try {
       const { received } = await callObservabilityOnboardingApi(
         'GET /internal/observability_onboarding/api_endpoints/verification',
-        {
-          signal: abortControllerRef.current?.signal ?? null,
-          params: { query: { apiKeyId, endpointId } },
-        }
+        { signal: controller.signal, params: { query: { apiKeyId, endpointId } } }
       );
-      if (!received) {
+      // The answer can still land after the key changed, in a slow browser and in tests that ignore the signal.
+      if (!received || apiKeyIdsRef.current[endpointId] !== apiKeyId) {
         return;
       }
       settle(sessionId);

@@ -174,6 +174,45 @@ describe('useIngestReceiptToast', () => {
     expect(addSuccess).toHaveBeenCalledTimes(2);
   });
 
+  it('aborts and ignores a pending answer for a key that has been replaced', async () => {
+    let resolveFirst: (value: { received: boolean }) => void = () => {};
+    mockCallApi
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          })
+      )
+      .mockResolvedValue({ received: false });
+
+    const { rerender } = renderHook(
+      ({ apiKeyIds }: { apiKeyIds: Partial<Record<ApiEndpointId, string>> }) =>
+        useIngestReceiptToast(apiKeyIds),
+      { initialProps: { apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'first-key-id' } } }
+    );
+    await advanceBy(POLL_INTERVAL_MS);
+
+    const { signal } = mockCallApi.mock.calls[0][1];
+    expect(signal.aborted).toBe(false);
+
+    rerender({ apiKeyIds: { [ApiEndpointId.OpenTelemetry]: 'second-key-id' } });
+    expect(signal.aborted).toBe(true);
+
+    await act(async () => {
+      resolveFirst({ received: true });
+    });
+    expect(addSuccess).not.toHaveBeenCalled();
+
+    await advanceBy(POLL_INTERVAL_MS);
+    expect(mockCallApi).toHaveBeenLastCalledWith(
+      'GET /internal/observability_onboarding/api_endpoints/verification',
+      expect.objectContaining({
+        params: { query: { apiKeyId: 'second-key-id', endpointId: ApiEndpointId.OpenTelemetry } },
+      })
+    );
+    expect(addSuccess).not.toHaveBeenCalled();
+  });
+
   it('gives a replacement key its own thirty minute window', async () => {
     mockCallApi.mockResolvedValue({ received: false });
 
