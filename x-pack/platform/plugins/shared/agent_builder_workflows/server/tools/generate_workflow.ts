@@ -93,7 +93,8 @@ And you should **not**:
 ## Usage notes
 
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
-— The tool returns the generated workflow YAML. Any presentation instructions are returned with the result, not assumed here.
+— Called by an Agent Builder, the tool returns workflow attachment references plus the instructions for presenting them.
+— Called via MCP server, the tool returns the generated workflow YAML.
 
 ## Alert-triggered workflows
 
@@ -197,20 +198,20 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
           isCreation: !sourceAttachment,
         });
 
-        // Only the in-conversation agent loop can resolve attachment IDs and render
-        // attachment tags. Every other caller (MCP clients, the public
-        // `tools/_execute` API, the CLI) gets the YAML itself.
-        const isChatCall = toolContext.callContext.callSource === 'agent';
+        // Only an Agent Builder agent can resolve attachment IDs and render attachment
+        // tags. Every other caller (MCP clients, the public `tools/_execute` API, the
+        // CLI) gets the YAML itself.
+        const isAgentBuilderCall = toolContext.callContext.callSource === 'agent';
 
         return {
           results: [
             otherResult({
               comment: generationComment,
               success: true,
-              ...(isChatCall
+              ...(isAgentBuilderCall
                 ? {
-                    // In chat the YAML lives in the attachment, so keep it out of the
-                    // model context — only the IDs needed to reference it are returned.
+                    // In Agent Builder the YAML lives in the attachment, so keep it out
+                    // of the model context — only the IDs to reference it are returned.
                     attachment_id: workflowAttachmentId,
                     attachment_version: attachmentVersion,
                     proposal_id: proposalId,
