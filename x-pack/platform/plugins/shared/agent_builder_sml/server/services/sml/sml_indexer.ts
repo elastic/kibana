@@ -247,6 +247,15 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
+    // The id, `type`, and origin reference all derive from the type; a writer that returns another
+    // type would produce a document whose origin cannot be reconstructed from its id.
+    if (smlEntry.type !== attachmentType) {
+      this.logger.warn(
+        `SML indexer: type '${attachmentType}' returned an entry of type '${smlEntry.type}' for origin '${originId}' — skipping (fail closed), existing entry left intact`
+      );
+      return;
+    }
+
     const entryId = smlEntryId(attachmentType, originId);
     const creation = await this.readCreation({ entryId, esClient });
     await this.deleteEntry({ originUri, esClient });

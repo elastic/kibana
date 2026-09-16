@@ -285,6 +285,29 @@ describe('createSmlIndexer', () => {
       });
     });
 
+    it('skips an entry whose type differs from the attachment type', async () => {
+      const getSmlEntry = jest.fn().mockResolvedValue({ type: 'Lens', title: 'Viz', content: 'c' });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-2',
+          attachmentType: 'lens',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(bulkMock).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("returned an entry of type 'Lens' for origin 'att-2'")
+      );
+    });
+
     it('re-indexing keeps the original creation time and creator', async () => {
       const smlEntry = { type: 'lens', title: 'My Viz', content: 'v2' };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
