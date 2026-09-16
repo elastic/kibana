@@ -118,6 +118,7 @@ plugins:
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
     - links # Not yet registered for CI; added to unblock flaky test runner pipelines
+    - security_detections # Not yet registered for CI; POC suite
 
 packages:
   enabled:
