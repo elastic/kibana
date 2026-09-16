@@ -143,6 +143,10 @@ export type {
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
 export type {
+  ConversationEventTypeDefinition,
+  ConversationEventPayloadOf,
+} from './conversation_events';
+export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   TopSnippetsConfig,
@@ -150,6 +154,7 @@ export type {
   ToolsStart,
   AttachmentsSetup,
   RenderersSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -180,3 +185,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';
