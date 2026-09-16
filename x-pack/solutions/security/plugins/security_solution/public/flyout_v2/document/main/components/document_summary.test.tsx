@@ -120,12 +120,13 @@ describe('DocumentSummary', () => {
     render(<DocumentSummary {...defaultProps} />);
 
     expect(
-      screen.getByText(
-        'Create AI summary of the alert to better understand its key characteristics and see recommended actions.'
-      )
+      screen.getByText('Get a quick summary of this alert and suggested next steps.')
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID));
+    const generateButton = screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID);
+    expect(generateButton.querySelector('[data-euiicon-type="productAgent"]')).toBeInTheDocument();
+
+    fireEvent.click(generateButton);
     expect(fetchAISummary).toHaveBeenCalled();
   });
 

@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/flyout-info-blocks",
     "@kbn/flyout-meta-blocks",
+    "@kbn/flyout-sections",
     "@kbn/i18n",
     "@kbn/shared-ux-error-boundary",
     "@kbn/ui-react-assembly",

@@ -13,7 +13,7 @@ import {
   DEFAULT_INFERENCE_DOCUMENT_LIMITS,
   formatRawDocument,
   type InferenceDocument,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
@@ -53,7 +53,9 @@ export interface PrepareInferredSamplingResult {
   };
 }
 
-const compactDocuments = (hits: Array<SearchHit<Record<string, unknown>>>): InferenceDocument[] => {
+export const compactInferenceDocuments = (
+  hits: Array<SearchHit<Record<string, unknown>>>
+): InferenceDocument[] => {
   const documents: InferenceDocument[] = [];
   let serializedBytes = 2;
 
@@ -129,7 +131,7 @@ export const prepareInferredSampling = async ({
     iteration,
     samplingTimeoutMs,
   });
-  const documents = compactDocuments(sampledDocuments);
+  const documents = compactInferenceDocuments(sampledDocuments);
 
   return {
     hasDocuments: documents.length > 0,
