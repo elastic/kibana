@@ -337,9 +337,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured parameters for the rule builder identified by \`builder_type\`. The server generates the rule query from these fields.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "builder_type": Object {
                   "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
                   "maxLength": 64,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "description": Object {
@@ -525,7 +536,11 @@ describe('rule template create-rule schema coupling', () => {
               "description": "How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery_strategy": Object {
               "anyOf": Array [
@@ -615,7 +630,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },
