@@ -15,6 +15,7 @@ import { createRulesSavedObjectService } from '../services/rules_saved_object_se
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import { BuilderTypeRegistry } from '../builder_types';
 import { RulesClient } from './rules_client';
 import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 
@@ -31,6 +32,7 @@ export function createRulesClient(): {
   const { loggerService } = createLoggerService();
   const artifactTypeRegistry = new ArtifactTypeRegistry();
   registerBuiltinArtifactTypes(artifactTypeRegistry);
+  const builderTypeRegistry = new BuilderTypeRegistry();
 
   const config = {
     enabled: true,
@@ -49,7 +51,8 @@ export function createRulesClient(): {
     ruleEventPublisher,
     loggerService,
     artifactTypeRegistry,
-    { actor: 'user', options: {} }
+    { actor: 'user', options: {} },
+    builderTypeRegistry
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
