@@ -5,6 +5,30 @@
  * 2.0.
  */
 
+/**
+ * `@kbn/sandbox-plugin` — server-side public API.
+ *
+ * The sandbox plugin exposes gVisor sandbox pods to other Kibana plugins via a
+ * simple session abstraction. Declare `sandbox` as an optional plugin in your
+ * `kibana.jsonc` and consume {@link SandboxPluginStart} from your `start` deps.
+ *
+ * **Configuration** (`kibana.yml` / `kibana.dev.yml`):
+ * ```yaml
+ * xpack.sandbox:
+ *   enabled: true
+ *   host: <sandbox-api-host>
+ *   port: 9090          # gRPC port (default)
+ *   api_key: <key>
+ *   ssl:
+ *     certificate_authorities: <PEM>   # optional CA for server cert verification
+ *     certificate: <PEM>               # client cert (mTLS)
+ *     key: <PEM>                       # client key  (mTLS)
+ * ```
+ *
+ * When `enabled` is `false` (the default), or when `api_key`/`ssl` are absent,
+ * `SandboxPluginStart.getSession` returns `undefined` for every call.
+ */
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';

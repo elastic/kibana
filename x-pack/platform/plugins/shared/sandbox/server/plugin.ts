@@ -17,8 +17,40 @@ import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 import type { SandboxSession } from './sandbox_session';
 
+/**
+ * Start contract for the Sandbox plugin.
+ *
+ * Obtain this from your plugin's `start` dependencies after declaring `sandbox`
+ * as an optional plugin in `kibana.jsonc`:
+ *
+ * ```ts
+ * // kibana.jsonc
+ * { "plugin": { "optionalPlugins": ["sandbox"] } }
+ *
+ * // server/types.ts
+ * import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+ * interface MyPluginStartDeps { sandbox?: SandboxPluginStart; }
+ *
+ * // server/plugin.ts
+ * start(_core, { sandbox }) {
+ *   const session = sandbox?.getSession(spaceId, conversationId);
+ *   if (session) { /* sandbox is configured and ready *\/ }
+ * }
+ * ```
+ *
+ * `getSession` returns `undefined` when the sandbox is not configured
+ * (`xpack.sandbox.enabled: false`, or missing `api_key`/`ssl`). Always guard
+ * against `undefined` — the sandbox is an optional, deployment-specific service.
+ */
 export interface SandboxPluginStart {
-  /** Returns undefined when the sandbox is not configured (xpack.sandbox.enabled is false). */
+  /**
+   * Returns a {@link SandboxSession} for the given space + conversation, or
+   * `undefined` when the sandbox is not configured in this deployment.
+   *
+   * Sessions are created lazily and cached for the lifetime of the plugin: the
+   * same `(spaceId, conversationId)` pair always returns the same session
+   * object. Pod allocation happens transparently on the first RPC.
+   */
   getSession(spaceId: string, conversationId: string): SandboxSession | undefined;
 }
 

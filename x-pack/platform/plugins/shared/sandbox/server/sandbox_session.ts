@@ -15,18 +15,60 @@ import type {
   WriteFileResult,
 } from './grpc_client';
 
+/**
+ * A per-conversation handle to a gVisor sandbox pod.
+ *
+ * Each session is scoped to a `(spaceId, conversationId)` pair and proxies RPCs
+ * to a single pod via the sandbox-api gRPC service. Obtain a session from
+ * {@link SandboxPluginStart.getSession} — the plugin manages session lifecycle
+ * and pod allocation transparently.
+ *
+ * **Pod eviction and `isReset`**
+ *
+ * Pods can be evicted at any time (OOM, node pressure, deploy). When a call
+ * fails with gRPC status `UNAVAILABLE` (code 14) the session treats that as a
+ * pod eviction: `isReset` flips to `true` and the error is re-thrown so callers
+ * can react (e.g. surface a retry hint). After the next successful call
+ * `isReset` returns to `false`.
+ *
+ * Callers that need to seed a fresh pod (write config files, restore state)
+ * should check `isReset` before each invocation and perform setup when it is
+ * `true`. The check-then-setup pattern is inherently best-effort: a pod eviction
+ * that occurs between the check and the setup call will be caught on the next
+ * invocation.
+ *
+ * **Concurrency**
+ *
+ * Multiple concurrent calls are safe. A generation counter ensures that a
+ * late-arriving UNAVAILABLE from an already-replaced pod does not incorrectly
+ * flip `isReset` back to `true`, and a late-arriving success from an old pod
+ * does not prematurely clear a `true` set by a newer eviction.
+ */
 export interface SandboxSession {
   /**
-   * True on first use and after pod eviction (gRPC UNAVAILABLE). Goes false after the first
-   * successful operation. Callers should check this before each tool invocation and run any
-   * workspace setup (e.g. writing a connector manifest) when it is true.
+   * `true` when the pod is fresh and has not yet been seeded by the caller.
+   *
+   * Starts `true`. Flips to `false` after the first successful operation.
+   * Flips back to `true` after a pod eviction (gRPC `UNAVAILABLE`, code 14).
+   *
+   * Check this before each tool invocation and run any workspace setup
+   * (e.g. writing a connector manifest) when it is `true`.
    */
   readonly isReset: boolean;
 
+  /** Runs a shell command inside the sandbox pod and streams stdout/stderr. */
   runCommand(params: RunCommandParams): Promise<RunCommandResult>;
+
+  /** Reads one or more files from the sandbox pod's filesystem. */
   readFiles(requests: Array<{ path: string; maxReadBytes?: number }>): Promise<ReadFileResult[]>;
+
+  /** Writes one or more files to the sandbox pod's filesystem. */
   writeFiles(files: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]>;
+
+  /** Creates directories (including parents) inside the sandbox pod. */
   mkdirs(paths: string[]): Promise<boolean[]>;
+
+  /** Returns metadata (existence, size, type) for paths inside the sandbox pod. */
   statFiles(paths: string[]): Promise<FileMetadata[]>;
 }
 
