@@ -558,7 +558,7 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
           },
         },
@@ -718,7 +718,7 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
           },
         },

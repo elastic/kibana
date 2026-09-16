@@ -388,14 +388,18 @@ export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
 
 export const AgentPolicySchemaV8 = AgentPolicySchemaV7.extends(
   {
-    download_source_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
+    download_source_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 500 }), { maxSize: 3 })
+    ),
   },
   { meta: { id: 'agent_policy_v8' } }
 );
 
 export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
   {
-    download_source_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
+    download_source_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 500 }), { maxSize: 3 })
+    ),
     supports_agentless: schema.maybe(
       schema.oneOf([
         schema.literal(null),
@@ -416,7 +420,9 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
 
 export const AgentPolicySchema = AgentPolicySchemaV6.extends(
   {
-    download_source_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
+    download_source_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 500 }), { maxSize: 3 })
+    ),
     id: schema.string(),
     is_managed: schema.maybe(schema.boolean()),
     status: schema.oneOf([
