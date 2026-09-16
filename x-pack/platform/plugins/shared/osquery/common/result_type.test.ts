@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { mapResultTypeToWire, mapWireToExplicitResultType, mapWireToResultType } from './result_type';
+import {
+  mapResultTypeToWire,
+  mapWireToExplicitResultType,
+  mapWireToResultType,
+} from './result_type';
 
 describe('mapWireToResultType', () => {
   it('returns undefined when neither boolean is stored', () => {

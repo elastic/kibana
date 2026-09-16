@@ -256,9 +256,7 @@ describe('QueriesField', () => {
 
   describe('edit-draft result_type and enabled', () => {
     it('writes result_type and preserves enabled on edit save', async () => {
-      renderQueriesField([
-        { id: 'q1', query: 'select 1;', interval: 3600, enabled: false },
-      ]);
+      renderQueriesField([{ id: 'q1', query: 'select 1;', interval: 3600, enabled: false }]);
 
       expect(capturedTableProps).not.toBeNull();
       act(() => {

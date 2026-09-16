@@ -4309,12 +4309,12 @@ describe('updatePackRoute', () => {
       expect(isRight(decode({ platform: 'x'.repeat(257) }))).toBe(false);
       expect(isRight(decode({ platform: 'linux' }))).toBe(true);
       expect(isRight(decode({ min_osquery_version: 'x'.repeat(65) }))).toBe(false);
-      expect(
-        isRight(decode({ queries: { q1: { query: 'SELECT 1', enabled: null } } }))
-      ).toBe(false);
-      expect(
-        isRight(decode({ queries: { q1: { query: 'SELECT 1', result_type: null } } }))
-      ).toBe(false);
+      expect(isRight(decode({ queries: { q1: { query: 'SELECT 1', enabled: null } } }))).toBe(
+        false
+      );
+      expect(isRight(decode({ queries: { q1: { query: 'SELECT 1', result_type: null } } }))).toBe(
+        false
+      );
     });
   });
 });

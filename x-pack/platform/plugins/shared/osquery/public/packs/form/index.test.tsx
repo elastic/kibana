@@ -1066,14 +1066,14 @@ describe('PackForm', () => {
 
     it('emits selected min_osquery_version and result_type on create', async () => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
-      const { getByTestId, getByRole, container } = renderWithContext(<PackForm editMode={false} />);
+      const { getByTestId, getByRole, container } = renderWithContext(
+        <PackForm editMode={false} />
+      );
 
       const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
       fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
 
-      fireEvent.click(
-        within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput')
-      );
+      fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
       fireEvent.click(getByRole('option', { name: '5.0.1' }));
 
       fireEvent.click(getByTestId('pack-result-type-field'));
