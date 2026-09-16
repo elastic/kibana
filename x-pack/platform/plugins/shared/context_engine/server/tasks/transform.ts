@@ -220,7 +220,8 @@ export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[]
       const query =
         typeof rawQuery === 'string' ? rawQuery.slice(0, MAX_SIGNAL_TEXT_LENGTH) : undefined;
       const targetIndex = targetIndices[i];
-      const returned = parseReturned(row['attributes.gen_ai.tool.call.result']);
+      // `returned` stays an object; an unreadable result yields row_count: undefined
+      const returned = parseReturned(row['attributes.gen_ai.tool.call.result']) ?? {};
       const errorMessage = row['status.message']?.slice(0, MAX_SIGNAL_TEXT_LENGTH);
 
       signals.push({
