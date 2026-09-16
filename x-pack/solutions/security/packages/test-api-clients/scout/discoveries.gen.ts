@@ -92,7 +92,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.post<CreateAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -117,7 +117,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.delete<DeleteAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -142,7 +142,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.post<DisableAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -167,7 +167,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.post<EnableAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -191,7 +191,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       {
         headers: {
           'kbn-xsrf': 'true',
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
@@ -217,7 +217,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.get<GetAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -239,7 +239,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.post<PostGenerateResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -261,7 +261,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.post<PostGenerateWorkflowResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -286,7 +286,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     return apiClient.put<UpdateAttackDiscoveryScheduleResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },

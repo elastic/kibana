@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
@@ -23,23 +23,23 @@ import {
 apiTest.describe('Workflow schedule API - scaffold verification', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
+    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
 
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterAll(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders);
   });
 
-  apiTest('scaffold: can import test utilities without errors', async ({ apiClient }) => {
+  apiTest('scaffold: can import test utilities without errors', async ({ discoveriesApi }) => {
     const schedule = getSimpleWorkflowSchedule();
     expect(schedule).toBeDefined();
     expect(schedule.name).toBe('Test workflow schedule');
 
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     expect(apis.createSchedule).toBeDefined();
     expect(apis.deleteSchedule).toBeDefined();
     expect(apis.disableSchedule).toBeDefined();

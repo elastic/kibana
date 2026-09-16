@@ -749,7 +749,7 @@ Removes a privileged user from monitoring by their document ID.
     return apiClient.post<GetAnomalyOverviewResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -774,7 +774,7 @@ Removes a privileged user from monitoring by their document ID.
     return apiClient.post<GetAnomalySummaryResponse>(path, {
       headers: {
         'kbn-xsrf': 'true',
-        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
@@ -29,8 +29,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   let viewerHeaders: Record<string, string>;
   let monitorHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
+    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
 
     const adminCredentials = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...adminCredentials.cookieHeader };
@@ -64,95 +64,110 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     monitorHeaders = { ...monitorCredentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, adminHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, adminHeaders);
   });
 
-  apiTest('should return 403 when unauthorized user creates a schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
+  apiTest(
+    'should return 403 when unauthorized user creates a schedule',
+    async ({ discoveriesApi }) => {
+      const apis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
-    const response = await apis.createSchedule(getSimpleWorkflowSchedule());
-    const body = response.body as { error?: string; message?: string };
+      const response = await apis.createSchedule(getSimpleWorkflowSchedule());
+      const body = response.body as { error?: string; message?: string };
 
-    expect(response).toHaveStatusCode(403);
-    expect(body.error).toBe('Forbidden');
-  });
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
+    }
+  );
 
-  apiTest('should return 403 when unauthorized user updates a schedule', async ({ apiClient }) => {
-    const adminApis = getWorkflowSchedulesApis(apiClient, adminHeaders);
-    const viewerApis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
+  apiTest(
+    'should return 403 when unauthorized user updates a schedule',
+    async ({ discoveriesApi }) => {
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
-    const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
-    const createdId = (createResult.body as Record<string, unknown>).id as string;
+      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
+      expect(createResult.statusCode).toBe(200);
+      const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const response = await viewerApis.updateSchedule(createdId, {
-      actions: [],
-      name: 'Hacked name',
-      params: {
-        alerts_index_pattern: '.alerts-security.alerts-default',
-        api_config: {
-          action_type_id: '.gen-ai',
-          connector_id: 'test-connector-id',
+      const response = await viewerApis.updateSchedule(createdId, {
+        actions: [],
+        name: 'Hacked name',
+        params: {
+          alerts_index_pattern: '.alerts-security.alerts-default',
+          api_config: {
+            action_type_id: '.gen-ai',
+            connector_id: 'test-connector-id',
+          },
+          size: 20,
         },
-        size: 20,
-      },
-      schedule: { interval: '24h' },
-    });
-    const body = response.body as { error?: string; message?: string };
+        schedule: { interval: '24h' },
+      });
+      const body = response.body as { error?: string; message?: string };
 
-    expect(response).toHaveStatusCode(403);
-    expect(body.error).toBe('Forbidden');
-  });
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
+    }
+  );
 
-  apiTest('should return 403 when unauthorized user deletes a schedule', async ({ apiClient }) => {
-    const adminApis = getWorkflowSchedulesApis(apiClient, adminHeaders);
-    const viewerApis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
+  apiTest(
+    'should return 403 when unauthorized user deletes a schedule',
+    async ({ discoveriesApi }) => {
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
-    const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
-    const createdId = (createResult.body as Record<string, unknown>).id as string;
+      const createResult = await adminApis.createSchedule(getSimpleWorkflowSchedule());
+      expect(createResult.statusCode).toBe(200);
+      const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const response = await viewerApis.deleteSchedule(createdId);
-    const body = response.body as { error?: string; message?: string };
+      const response = await viewerApis.deleteSchedule(createdId);
+      const body = response.body as { error?: string; message?: string };
 
-    expect(response).toHaveStatusCode(403);
-    expect(body.error).toBe('Forbidden');
-  });
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
+    }
+  );
 
-  apiTest('should return 403 when unauthorized user enables a schedule', async ({ apiClient }) => {
-    const adminApis = getWorkflowSchedulesApis(apiClient, adminHeaders);
-    const viewerApis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
+  apiTest(
+    'should return 403 when unauthorized user enables a schedule',
+    async ({ discoveriesApi }) => {
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
-    const createResult = await adminApis.createSchedule(
-      getSimpleWorkflowSchedule({ enabled: false })
-    );
-    expect(createResult.statusCode).toBe(200);
-    const createdId = (createResult.body as Record<string, unknown>).id as string;
+      const createResult = await adminApis.createSchedule(
+        getSimpleWorkflowSchedule({ enabled: false })
+      );
+      expect(createResult.statusCode).toBe(200);
+      const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const response = await viewerApis.enableSchedule(createdId);
-    const body = response.body as { error?: string; message?: string };
+      const response = await viewerApis.enableSchedule(createdId);
+      const body = response.body as { error?: string; message?: string };
 
-    expect(response).toHaveStatusCode(403);
-    expect(body.error).toBe('Forbidden');
-  });
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
+    }
+  );
 
-  apiTest('should return 403 when unauthorized user disables a schedule', async ({ apiClient }) => {
-    const adminApis = getWorkflowSchedulesApis(apiClient, adminHeaders);
-    const viewerApis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
+  apiTest(
+    'should return 403 when unauthorized user disables a schedule',
+    async ({ discoveriesApi }) => {
+      const adminApis = getWorkflowSchedulesApis(discoveriesApi, adminHeaders);
+      const viewerApis = getWorkflowSchedulesApis(discoveriesApi, viewerHeaders);
 
-    const createResult = await adminApis.createSchedule(
-      getSimpleWorkflowSchedule({ enabled: true })
-    );
-    expect(createResult.statusCode).toBe(200);
-    const createdId = (createResult.body as Record<string, unknown>).id as string;
+      const createResult = await adminApis.createSchedule(
+        getSimpleWorkflowSchedule({ enabled: true })
+      );
+      expect(createResult.statusCode).toBe(200);
+      const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const response = await viewerApis.disableSchedule(createdId);
-    const body = response.body as { error?: string; message?: string };
+      const response = await viewerApis.disableSchedule(createdId);
+      const body = response.body as { error?: string; message?: string };
 
-    expect(response).toHaveStatusCode(403);
-    expect(body.error).toBe('Forbidden');
-  });
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
+    }
+  );
 
   // Run-triggering route (least-privilege matrix, bead kibana-5wd6.1): the
   // internal `_generate` route requires workflows read + execute. The `viewer`
@@ -161,8 +176,8 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   // dispatched.
   apiTest(
     'should return 403 when unauthorized user generates discoveries',
-    async ({ apiClient }) => {
-      const viewerApi = getGenerateApi(apiClient, viewerHeaders);
+    async ({ discoveriesApi }) => {
+      const viewerApi = getGenerateApi(discoveriesApi, viewerHeaders);
 
       const response = await viewerApi.generate(getSimpleGenerateBody());
       const body = response.body as { error?: string; message?: string };

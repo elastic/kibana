@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
@@ -19,19 +19,19 @@ import {
 apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ apiServices, kbnClient, samlAuth }) => {
+    await enableWorkflowsFeatureFlag({ apiServices, kbnClient });
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders);
   });
 
-  apiTest('should create a schedule with all fields', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should create a schedule with all fields', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const scheduleBody = getSimpleWorkflowSchedule();
 
     const { body, statusCode } = await apis.createSchedule(scheduleBody);
@@ -58,8 +58,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect(apiConfig.connector_id).toBe('test-connector-id');
   });
 
-  apiTest('should default enabled to false when omitted', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should default enabled to false when omitted', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const { enabled: _, ...scheduleWithoutEnabled } = getSimpleWorkflowSchedule();
 
     const { body, statusCode } = await apis.createSchedule(scheduleWithoutEnabled);
@@ -68,8 +68,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect((body as Record<string, unknown>).enabled).toBe(false);
   });
 
-  apiTest('should default actions to empty array when omitted', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should default actions to empty array when omitted', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const { actions: _, ...scheduleWithoutActions } = getSimpleWorkflowSchedule();
 
     const { body, statusCode } = await apis.createSchedule(scheduleWithoutActions);
@@ -78,8 +78,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect((body as Record<string, unknown>).actions).toStrictEqual([]);
   });
 
-  apiTest('should return 400 when name is missing', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 400 when name is missing', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const { name: _, ...scheduleWithoutName } = getSimpleWorkflowSchedule();
 
     const response = await apis.createSchedule(scheduleWithoutName);
@@ -90,8 +90,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect(body.message).toContain('name');
   });
 
-  apiTest('should return 400 when params is missing', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 400 when params is missing', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const { params: _, ...scheduleWithoutParams } = getSimpleWorkflowSchedule();
 
     const response = await apis.createSchedule(scheduleWithoutParams);
@@ -102,8 +102,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect(body.message).toContain('params');
   });
 
-  apiTest('should return 400 when schedule is missing', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 400 when schedule is missing', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const { schedule: _, ...scheduleWithoutSchedule } = getSimpleWorkflowSchedule();
 
     const response = await apis.createSchedule(scheduleWithoutSchedule);
@@ -114,8 +114,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect(body.message).toContain('schedule');
   });
 
-  apiTest('should persist workflow_config params', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should persist workflow_config params', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const scheduleBody = getSimpleWorkflowSchedule({
       params: {
         alerts_index_pattern: '.alerts-security.alerts-default',
@@ -140,8 +140,8 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     expect(params.size).toBe(50);
   });
 
-  apiTest('should persist snake_case api_config fields', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should persist snake_case api_config fields', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders);
     const scheduleBody = getSimpleWorkflowSchedule({
       params: {
         alerts_index_pattern: '.alerts-security.alerts-default',
