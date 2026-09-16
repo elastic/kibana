@@ -92,7 +92,11 @@ export function createRuleSoAttributes(
 ): RuleSavedObjectAttributes {
   return {
     kind: 'alert',
-    metadata: { name: 'test-rule', signature_id: 'test-signature-id', ownership: { managed: false } },
+    metadata: {
+      name: 'test-rule',
+      signature_id: 'test-signature-id',
+      ownership: { managed: false },
+    },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     recovery_strategy: 'no_breach',
