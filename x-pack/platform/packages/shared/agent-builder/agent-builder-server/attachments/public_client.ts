@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentEventSource, VersionedAttachment } from '@kbn/agent-builder-common';
-
-/** Callers of the public client, as recorded on attachment timeline events. */
-export type AttachmentPublicClientSource = Extract<AttachmentEventSource, 'http_api' | 'workflow'>;
+import type { VersionedAttachment } from '@kbn/agent-builder-common';
 
 /**
  * Arguments for {@link AttachmentPublicClient.create}.
@@ -27,8 +24,6 @@ export interface CreateAttachmentArgs {
   description?: string;
   /** Whether the attachment should be hidden from the user. */
   hidden?: boolean;
-  /** Who is calling; recorded as `source` on the emitted attachment event. */
-  source: AttachmentPublicClientSource;
   /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
   render_inline?: boolean;
 }
@@ -51,8 +46,6 @@ export interface UpdateAttachmentArgs {
   data?: unknown;
   /** Optional new description. */
   description?: string;
-  /** Who is calling; recorded as `source` on the emitted attachment event. */
-  source: AttachmentPublicClientSource;
   /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
   render_inline?: boolean;
 }
@@ -65,8 +58,6 @@ export interface DeleteAttachmentArgs {
   attachmentId: string;
   /** Permanently remove the attachment (only when unreferenced and no client_id). */
   permanent?: boolean;
-  /** Who is calling; recorded as `source` on the emitted attachment event. */
-  source: AttachmentPublicClientSource;
 }
 
 /**

@@ -57,7 +57,6 @@ describe('updateAttachmentStepDefinition', () => {
       data: { text: 'new' },
       description: undefined,
       render_inline: undefined,
-      source: 'workflow',
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', current_version: 3 },
@@ -90,9 +89,7 @@ describe('updateAttachmentStepDefinition', () => {
       })
     );
 
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ render_inline: true, source: 'workflow' })
-    );
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
   it('returns an error when experimental is disabled', async () => {

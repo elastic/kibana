@@ -46,7 +46,6 @@ describe('deleteAttachmentStepDefinition', () => {
       conversationId: 'conv-1',
       attachmentId: 'att-1',
       permanent: undefined,
-      source: 'workflow',
     });
     expect(result).toEqual({ output: { success: true, permanent: false } });
   });
@@ -71,7 +70,6 @@ describe('deleteAttachmentStepDefinition', () => {
       conversationId: 'conv-1',
       attachmentId: 'att-1',
       permanent: true,
-      source: 'workflow',
     });
     expect(result).toEqual({ output: { success: true, permanent: true } });
   });

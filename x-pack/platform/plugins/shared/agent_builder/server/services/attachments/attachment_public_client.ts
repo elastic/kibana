@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { AttachmentEventSource, Conversation } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import {
@@ -17,11 +17,7 @@ import {
   createAttachmentPermanentDeleteBlockedError,
   createAttachmentInvalidError,
 } from '@kbn/agent-builder-common';
-import type {
-  AttachmentPublicClient,
-  AttachmentPublicClientSource,
-  ListAttachmentsResult,
-} from '@kbn/agent-builder-server';
+import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   attachmentChangesToEvents,
@@ -32,12 +28,29 @@ import { userMessageActor } from '../conversation/client/rounds_to_events';
 import type { AttachmentServiceStart } from './types';
 import { hasClientId, isAttachmentReferencedInRounds } from './attachment_guards';
 
+/**
+ * The `source` recorded on attachment events emitted from the public client. Bound once when the
+ * client is constructed (see {@link createAttachmentPublicClient}) so external callers reaching
+ * the client through `AttachmentsStart.getScopedClient` cannot misattribute their mutations —
+ * they never see this type and cannot override it per call.
+ */
+export type AttachmentPublicClientSource = Extract<
+  AttachmentEventSource,
+  'http_api' | 'workflow' | 'server_api'
+>;
+
 interface Deps {
   request: KibanaRequest;
   conversationsService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   coreStart: CoreStart;
   spaces?: SpacesPluginStart;
+  /**
+   * Bound at construction: recorded as `source` on every attachment event this client emits.
+   * Routes pass `'http_api'`, workflow steps pass `'workflow'`, `AttachmentsStart.getScopedClient`
+   * in `plugin.ts` passes `'server_api'` for external plugin callers.
+   */
+  source: AttachmentPublicClientSource;
 }
 
 export const createAttachmentPublicClient = ({
@@ -46,6 +59,7 @@ export const createAttachmentPublicClient = ({
   attachmentsService,
   coreStart,
   spaces,
+  source,
 }: Deps): AttachmentPublicClient => {
   const loadState = async (conversationId: string) => {
     const conversationClient = await conversationsService.getScopedClient({ request });
@@ -59,24 +73,25 @@ export const createAttachmentPublicClient = ({
   /**
    * Persists the state manager's attachments and, when something was created, versioned or
    * deleted, the matching attachment events in the same write. Metadata-only changes have no
-   * event and fall back to a plain attachments update.
+   * event but still go through `appendEvents` so `reconcileAttachments` runs (race-safe).
    */
   const persist = async ({
     conversation,
     conversationClient,
     stateManager,
-    source,
     renderInline = false,
   }: {
     conversation: Conversation;
     conversationClient: ConversationClient;
     stateManager: AttachmentStateManager;
-    source: AttachmentPublicClientSource;
     renderInline?: boolean;
   }) => {
     const changes = stateManager.drainChanges();
     // The caller's identity: the authenticated Kibana user behind the HTTP request, or the user
-    // a workflow executes as (steps pass the workflow's fake request).
+    // a workflow executes as (steps pass the workflow's fake request). When the caller has no
+    // profile id (some API-key callers), pass `undefined` as the conversation to
+    // `userMessageActor` so its owner fallback does NOT fire — we would rather stamp the honest
+    // `id: 'unknown'` than lie by attributing the mutation to the conversation owner.
     const author = await conversationsService.getConversationRoundAuthor({ request });
     const actor = userMessageActor(author ? conversation : undefined, { author });
     const events =
@@ -124,7 +139,6 @@ export const createAttachmentPublicClient = ({
       origin,
       description,
       hidden,
-      source,
       render_inline: renderInline,
     }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
@@ -152,19 +166,12 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError((e as Error).message);
       }
 
-      await persist({ conversation, conversationClient, stateManager, source, renderInline });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return attachment;
     },
 
-    async update({
-      conversationId,
-      attachmentId,
-      data,
-      description,
-      source,
-      render_inline: renderInline,
-    }) {
+    async update({ conversationId, attachmentId, data, description, render_inline: renderInline }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -193,12 +200,12 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError(`Failed to update attachment '${attachmentId}'`);
       }
 
-      await persist({ conversation, conversationClient, stateManager, source, renderInline });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return updated;
     },
 
-    async delete({ conversationId, attachmentId, permanent, source }) {
+    async delete({ conversationId, attachmentId, permanent }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -239,7 +246,7 @@ export const createAttachmentPublicClient = ({
         }
       }
 
-      await persist({ conversation, conversationClient, stateManager, source });
+      await persist({ conversation, conversationClient, stateManager });
     },
   };
 };

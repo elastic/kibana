@@ -67,7 +67,6 @@ describe('addAttachmentStepDefinition', () => {
       description: undefined,
       hidden: undefined,
       render_inline: undefined,
-      source: 'workflow',
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', type: 'text', current_version: 1 },
@@ -100,9 +99,7 @@ describe('addAttachmentStepDefinition', () => {
       })
     );
 
-    expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ render_inline: true, source: 'workflow' })
-    );
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
   it('returns an error when experimental features are disabled', async () => {

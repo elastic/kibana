@@ -36,7 +36,6 @@ export const updateAttachmentStepDefinition = ({
           data: input.data,
           description: input.description,
           render_inline: input.render_inline,
-          source: 'workflow',
         });
 
         return {

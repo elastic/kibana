@@ -11,6 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import type { AttachmentPublicClientSource } from './attachment_public_client';
 import { createAttachmentPublicClient } from './attachment_public_client';
 
 const makeAttachment = (overrides: Partial<VersionedAttachment> = {}): VersionedAttachment =>
@@ -64,13 +65,14 @@ const buildDeps = () => {
     conversationClient,
     conversationsService,
     attachmentsService,
-    build: () =>
+    build: (source: AttachmentPublicClientSource = 'http_api') =>
       createAttachmentPublicClient({
         request,
         conversationsService: conversationsService as any,
         attachmentsService: attachmentsService as any,
         coreStart,
         spaces,
+        source,
       }),
   };
 };
@@ -154,7 +156,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         type: 'text',
         data: { text: 'hello' },
-        source: 'workflow',
         render_inline: true,
       });
 
@@ -180,10 +181,32 @@ describe('createAttachmentPublicClient', () => {
             attachment_type: 'text',
             current_version: 1,
             render_inline: true,
-            source: 'workflow',
+            source: 'http_api',
           },
         }),
       ]);
+    });
+
+    it('binds source at factory construction (workflow) so external callers cannot override it', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build('workflow');
+      await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
+
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events[0].data).toMatchObject({ source: 'workflow' });
+    });
+
+    it('binds source `server_api` for external plugin callers reaching the client via AttachmentsStart', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build('server_api');
+      await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
+
+      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(request.events[0].data).toMatchObject({ source: 'server_api' });
     });
 
     it('stamps id "unknown" (does NOT fall back to conversation owner) when the caller has no profile id', async () => {
@@ -203,7 +226,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         type: 'text',
         data: { text: 'hello' },
-        source: 'http_api',
       });
 
       const [request] = deps.conversationClient.appendEvents.mock.calls[0];
@@ -219,7 +241,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         type: 'text',
         data: { text: 'hello' },
-        source: 'http_api',
       });
 
       const [request] = deps.conversationClient.appendEvents.mock.calls[0];
@@ -243,7 +264,6 @@ describe('createAttachmentPublicClient', () => {
           id: 'a1',
           type: 'text',
           data: { text: 'x' },
-          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentAlreadyExists' });
     });
@@ -268,7 +288,6 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           type: 'text',
           data: { wrong: true },
-          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
@@ -288,7 +307,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         attachmentId: 'a1',
         data: { text: 'new' },
-        source: 'http_api',
       });
 
       expect(updated.id).toBe('a1');
@@ -325,7 +343,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         attachmentId: 'a1',
         description: 'renamed',
-        source: 'http_api',
       });
 
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
@@ -351,7 +368,6 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           attachmentId: 'missing',
           data: { text: 'x' },
-          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
@@ -371,7 +387,6 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           attachmentId: 'a1',
           data: { text: 'x' },
-          source: 'http_api',
         })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
@@ -387,7 +402,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      await client.delete({ conversationId: 'c1', attachmentId: 'a1', source: 'http_api' });
+      await client.delete({ conversationId: 'c1', attachmentId: 'a1' });
 
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
       const [request] = deps.conversationClient.appendEvents.mock.calls[0];
@@ -418,7 +433,7 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.delete({ conversationId: 'c1', attachmentId: 'missing', source: 'http_api' })
+        client.delete({ conversationId: 'c1', attachmentId: 'missing' })
       ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
 
@@ -433,7 +448,7 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.delete({ conversationId: 'c1', attachmentId: 'sc', source: 'http_api' })
+        client.delete({ conversationId: 'c1', attachmentId: 'sc' })
       ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
 
@@ -450,7 +465,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         attachmentId: 'a1',
         permanent: true,
-        source: 'workflow',
       });
 
       const [request] = deps.conversationClient.appendEvents.mock.calls[0];
@@ -462,7 +476,7 @@ describe('createAttachmentPublicClient', () => {
         attachment_id: 'a1',
         attachment_type: 'text',
         hard_delete: true,
-        source: 'workflow',
+        source: 'http_api',
       });
     });
 
@@ -481,7 +495,6 @@ describe('createAttachmentPublicClient', () => {
         conversationId: 'c1',
         attachmentId: 'a1',
         permanent: true,
-        source: 'http_api',
       });
 
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
@@ -505,7 +518,6 @@ describe('createAttachmentPublicClient', () => {
           conversationId: 'c1',
           attachmentId: 'a1',
           permanent: true,
-          source: 'http_api',
         })
       ).rejects.toMatchObject({
         code: 'attachmentPermanentDeleteBlocked',

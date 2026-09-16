@@ -242,7 +242,12 @@ export type ExecutionAbortedEvent = BaseTimelineEvent<
 >;
 
 /** What triggered an attachment mutation. */
-export type AttachmentEventSource = 'workflow' | 'http_api' | 'chat_input' | 'execution';
+export type AttachmentEventSource =
+  | 'workflow'
+  | 'http_api'
+  | 'server_api'
+  | 'chat_input'
+  | 'execution';
 
 /** An attachment was created in the conversation. */
 export interface AttachmentAddedEventData {

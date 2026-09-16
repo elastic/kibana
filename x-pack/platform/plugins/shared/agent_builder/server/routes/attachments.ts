@@ -99,6 +99,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         const result = await client.list({ conversationId, includeDeleted });
@@ -155,6 +156,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -343,14 +345,11 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
-          const attachment = await client.create({
-            conversationId,
-            source: 'http_api',
-            ...request.body,
-          });
+          const attachment = await client.create({ conversationId, ...request.body });
           return response.ok<CreateAttachmentResponse>({ body: { attachment } });
         } catch (e) {
           if (isAgentBuilderError(e)) {
@@ -433,13 +432,13 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
           const updated = await client.update({
             conversationId,
             attachmentId,
-            source: 'http_api',
             ...request.body,
           });
           return response.ok<UpdateAttachmentResponse>({
@@ -520,10 +519,11 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
-          await client.delete({ conversationId, attachmentId, permanent, source: 'http_api' });
+          await client.delete({ conversationId, attachmentId, permanent });
           return response.ok<DeleteAttachmentResponse>({
             body: { success: true, permanent: permanent ?? false },
           });
