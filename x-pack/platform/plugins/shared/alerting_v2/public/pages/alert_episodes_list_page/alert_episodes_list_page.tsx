@@ -676,7 +676,6 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
-          type="overlay"
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

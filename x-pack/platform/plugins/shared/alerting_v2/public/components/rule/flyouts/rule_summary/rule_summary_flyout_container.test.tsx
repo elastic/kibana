@@ -32,16 +32,13 @@ jest.mock('../../../../hooks/use_bulk_update_rule_api_key', () => ({
 jest.mock('./rule_summary_flyout', () => ({
   RuleSummaryFlyout: ({
     rule,
-    type,
     isToggleLoading,
   }: {
     rule: RuleApiResponse;
-    type?: string;
     isToggleLoading?: boolean;
   }) => (
     <div
       data-test-subj="mockRuleSummaryFlyout"
-      data-flyout-type={type}
       data-toggle-loading={isToggleLoading ? 'true' : 'false'}
     >
       {rule.metadata.name}
@@ -95,25 +92,6 @@ describe('RuleSummaryFlyoutContainer', () => {
     renderContainer();
 
     expect(screen.getByTestId('mockLoadingFlyout')).toBeInTheDocument();
-  });
-
-  it('renders a push flyout by default', () => {
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
-
-    renderContainer();
-
-    expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveAttribute('data-flyout-type', 'push');
-  });
-
-  it('renders the requested flyout type', () => {
-    mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
-
-    renderContainer({ type: 'overlay' });
-
-    expect(screen.getByTestId('mockRuleSummaryFlyout')).toHaveAttribute(
-      'data-flyout-type',
-      'overlay'
-    );
   });
 
   it('renders the fetched rule', () => {

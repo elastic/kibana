@@ -35,7 +35,6 @@ export interface RuleSummaryFlyoutProps {
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
   isToggleLoading?: boolean;
-  type?: EuiFlyoutProps['type'];
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
 }
@@ -52,7 +51,6 @@ export const RuleSummaryFlyout = ({
   onViewChangeHistory,
   canWrite = true,
   isToggleLoading = false,
-  type = 'push',
   session,
   ownFocus = true,
 }: RuleSummaryFlyoutProps) => {
@@ -81,8 +79,9 @@ export const RuleSummaryFlyout = ({
   return (
     <>
       <FlyoutTemplate
-        type={type}
-        size="s"
+        type="overlay"
+        size="m"
+        resizable
         ownFocus={ownFocus}
         session={session}
         onClose={onClose}
@@ -150,7 +149,7 @@ export const RuleSummaryFlyout = ({
             label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
               defaultMessage: 'Take action',
             })}
-            iconType={isTakeActionOpen ? 'chevronSingleDown' : 'chevronSingleUp'}
+            iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={() => setIsTakeActionOpen((open) => !open)}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />
