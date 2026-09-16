@@ -413,7 +413,11 @@ run(
         }
       } catch (error) {
         progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
-        errors.push(error instanceof Error ? error : new Error(String(error)));
+        const failure = error instanceof Error ? error : new Error(String(error));
+        writeln('');
+        for (const l of failure.message.split('\n')) writeln(`    ${l}`);
+        writeln('');
+        errors.push(failure);
       }
     }
 

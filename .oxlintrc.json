@@ -50,7 +50,7 @@
     "react/prefer-es6-class": ["error", "always"]
   },
 
-  // Mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
-  // TS1016) that ESLint's parser does not, and declaration files are never type-checked either.
-  "ignorePatterns": ["**/*.d.ts"]
+  // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
+  // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
+  "ignorePatterns": ["x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts"]
 }

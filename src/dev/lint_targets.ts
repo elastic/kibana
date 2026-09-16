@@ -48,7 +48,7 @@ export const resolveLintTargets = async ({
 }: ResolveLintTargetsOptions): Promise<LintTargets | null> => {
   if (baseContext.mode === 'direct_target') {
     throw createFailError(
-      `scripts/${runner} only supports validation-contract execution. Remove explicit file paths and use --profile/--scope instead.`
+      `${runner} validation only supports contract execution. Remove explicit file paths and use --profile/--scope instead.`
     );
   }
 

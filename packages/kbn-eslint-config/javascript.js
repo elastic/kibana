@@ -38,7 +38,6 @@ module.exports = {
       rules: {
         camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
         'consistent-return': 'off',
-        'dot-notation': [ 'error', { allowKeywords: true } ],
         eqeqeq: [ 'error', 'allow-null' ],
         'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
         'no-bitwise': 'off',

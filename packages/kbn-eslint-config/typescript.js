@@ -166,7 +166,6 @@ module.exports = {
             },
           ],
           '@typescript-eslint/no-var-requires': 'error',
-          'dot-notation': 'error',
           eqeqeq: ['error', 'always', { null: 'ignore' }],
           'import/order': [
             'error',

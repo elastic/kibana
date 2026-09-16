@@ -34,36 +34,60 @@ interface OxlintDiagnostic {
   message: string;
   code: string;
   severity: 'error' | 'warning' | 'advice';
-  filename: string;
+  /** Absent for tool-level errors such as an unreadable target path. */
+  filename?: string;
   labels?: Array<{ span: { line: number; column: number } }>;
 }
 
-interface OxlintJsonReport {
-  diagnostics: OxlintDiagnostic[];
+type FileDiagnostic = OxlintDiagnostic & { filename: string };
+
+interface OxlintJsonReport<D extends OxlintDiagnostic = OxlintDiagnostic> {
+  diagnostics: D[];
   number_of_files: number;
 }
+
+const hasFilename = (d: OxlintDiagnostic): d is FileDiagnostic => Boolean(d.filename);
 
 // ARG_MAX on macOS is 1MB; explicit path lists are batched to stay well under it.
 const MAX_PATHS_PER_RUN = 4000;
 
-interface OxlintRun {
-  report: OxlintJsonReport;
-  exitCode: number;
-  stderr: string;
-}
-
-async function runOxlint(args: string[]): Promise<OxlintRun> {
+async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnostic>> {
   const { stdout, stderr, exitCode } = await execa(
     process.execPath,
     [oxlintBinPath, '--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
     { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
   );
 
+  // When every passed path is ignored, oxlint prints "No files found to lint." ahead of the JSON
+  // report on stdout and exits 1.
+  const jsonStart = stdout.indexOf('{');
+  let report: OxlintJsonReport;
   try {
-    return { report: JSON.parse(stdout), exitCode, stderr };
+    report = JSON.parse(jsonStart === -1 ? stdout : stdout.slice(jsonStart));
   } catch {
     throw createFailError(`${LINT_LOG_PREFIX} exited with ${exitCode}:\n${stderr || stdout}`);
   }
+
+  // Diagnostics without a filename are tool-level errors (e.g. "Failed to open file"), not lint
+  // findings for a file.
+  const toolErrors = report.diagnostics.filter((d) => !hasFilename(d));
+  if (toolErrors.length > 0) {
+    throw createFailError(
+      `${LINT_LOG_PREFIX} exited with ${exitCode}:\n${toolErrors.map((d) => d.message).join('\n')}`
+    );
+  }
+
+  // oxlint exits 1 for lint errors and for an empty file set; any other nonzero exit is a tool
+  // failure (config, parser, or crash). Classified per run so one batch's lint errors cannot
+  // mask another batch's failure.
+  const hasErrors = report.diagnostics.some((d) => d.severity === 'error');
+  const noFilesMatched = report.number_of_files === 0 && report.diagnostics.length === 0;
+  const isLintExit = exitCode === 1 && (hasErrors || noFilesMatched);
+  if (exitCode !== 0 && !isLintExit) {
+    throw createFailError(`${LINT_LOG_PREFIX} exited with ${exitCode}:\n${stderr || stdout}`);
+  }
+
+  return { ...report, diagnostics: report.diagnostics.filter(hasFilename) };
 }
 
 /**
@@ -76,29 +100,22 @@ export async function lintFiles(
   { fix, fullRepo }: LintFilesOptions = {}
 ): Promise<LintFilesResult> {
   const fixArgs = fix ? ['--fix'] : [];
-  const runs: OxlintRun[] = [];
+  const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
   if (fullRepo) {
-    runs.push(await runOxlint(fixArgs));
+    reports.push(await runOxlint(fixArgs));
   } else {
     const paths = files.map((file) => file.getRelativePath());
     for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
-      runs.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
+      reports.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
     }
   }
 
-  const diagnostics = runs.flatMap((run) => run.report.diagnostics);
-  const lintedFileCount = runs.reduce((sum, run) => sum + run.report.number_of_files, 0);
-  const exitCode = runs.find((run) => run.exitCode !== 0)?.exitCode ?? 0;
-  const stderr = runs.map((run) => run.stderr).join('');
+  const diagnostics = reports.flatMap((report) => report.diagnostics);
+  const lintedFileCount = reports.reduce((sum, report) => sum + report.number_of_files, 0);
   const failedFiles = [
     ...new Set(diagnostics.filter((d) => d.severity === 'error').map((d) => d.filename)),
   ].sort((left, right) => left.localeCompare(right));
   const warningCount = diagnostics.filter((d) => d.severity === 'warning').length;
-
-  // oxlint exits 1 for lint errors; anything else without error diagnostics is a tool failure.
-  if (exitCode !== 0 && failedFiles.length === 0) {
-    throw createFailError(`${LINT_LOG_PREFIX} exited with ${exitCode}:\n${stderr}`);
-  }
 
   if (diagnostics.length > 0) {
     const msg = diagnostics

@@ -289,6 +289,20 @@ describe('run_check', () => {
     expect(output).toContain('lint  ✓ 3 files');
   });
 
+  it('prints oxlint tool failures instead of only marking the step failed', async () => {
+    mockExecuteOxlintValidation.mockRejectedValue(
+      new Error('[oxlint] exited with 2:\nFailed to parse configuration file')
+    );
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('    [oxlint] exited with 2');
+    expect(output).toContain('    Failed to parse configuration file');
+  });
+
   it('shows fixed file count when eslint auto-fixes', async () => {
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 10,
