@@ -9,8 +9,9 @@
 
 import { css } from '@emotion/react';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { euiBorderStyles } from '@elastic/eui-theme-common';
 import { layoutVar, layoutLevels } from '../constants';
-import { getHighContrastBorder } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
@@ -18,6 +19,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
   const isFramedAppearance = appearance === 'framed';
 
   return (useEuiTheme: UseEuiTheme) => {
+    const { euiTheme } = useEuiTheme;
+
     return css`
       grid-area: application;
 
@@ -38,19 +41,12 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&
       css`
-        background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-        border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
-
-        // use outline so it doesn't affect size/layout and cause a scrollbar
-        outline: ${getHighContrastBorder(useEuiTheme)};
-
-        // Keep the decorative frame unchanged by global focus-ring styles.
-        &:focus:not(:focus-visible) {
-          outline: ${getHighContrastBorder(useEuiTheme)};
-          outline-offset: 0;
-        }
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius.medium};
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+
+        ${euiBorderStyles(useEuiTheme, { side: 'all' })};
       `}
       ${!isFramedAppearance &&
       css`
@@ -58,10 +54,6 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         border-radius: 0;
         border: none;
       `}
-
-      &:focus-visible {
-        border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};
-      }
 
       // only restrict overflow scroll on screen (not print) to allow for full page printing
       @media screen {
