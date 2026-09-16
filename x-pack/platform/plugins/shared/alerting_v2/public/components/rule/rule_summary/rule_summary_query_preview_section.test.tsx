@@ -74,4 +74,12 @@ describe('RuleSummaryQueryPreviewSection', () => {
       dateEnd: 'now',
     });
   });
+
+  it('renders an empty prompt instead of QuerySandbox when the rule has no query', () => {
+    // A rule with no persisted query (execution-compiled) must not auto-run an empty
+    // ES|QL string, so the section explains why there is nothing to preview.
+    renderQueryPreview({ ...rule, query: undefined });
+
+    expect(screen.queryByTestId('mockQuerySandbox')).not.toBeInTheDocument();
+  });
 });

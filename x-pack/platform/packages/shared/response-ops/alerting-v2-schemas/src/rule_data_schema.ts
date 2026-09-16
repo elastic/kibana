@@ -1377,6 +1377,11 @@ export const ruleResponseMetadataSchema = lazySchema(() =>
 export const ruleResponseSchema = lazySchema(() =>
   createRuleDataBaseSchema
     .extend({
+      /**
+       * Absent on execution-compiled builder rules, which persist no query at all
+       * (rule-execution-logic.md "A rule without a persisted query").
+       */
+      query: querySchema.optional(),
       // The rule-template link (`metadata.template` in storage) is deliberately not
       // returned: its public shape is undecided, and a response-only key inside the
       // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
