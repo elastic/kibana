@@ -34,6 +34,9 @@ export function TransactionDetailFlyout({
   isOpen = true,
   onClose,
   historyKey = TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY,
+  preferDocumentBasedCharts,
+  schema,
+  indices,
 }: TransactionDetailFlyoutComponentProps) {
   const { transactionName, rangeFrom, rangeTo } = filters;
   const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
@@ -48,9 +51,12 @@ export function TransactionDetailFlyout({
       deps,
       contextActions,
       filters,
+      preferDocumentBasedCharts,
+      schema,
+      indices,
       openFullTraceFlyout,
     }),
-    [deps, contextActions, filters, openFullTraceFlyout]
+    [deps, contextActions, filters, preferDocumentBasedCharts, schema, indices, openFullTraceFlyout]
   );
 
   if (!isOpen) {

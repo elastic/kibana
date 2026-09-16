@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
+import type { ServiceSchemaType } from '@kbn/apm-types';
+
 export interface TransactionDetailFlyoutFilters {
   serviceName: string;
   transactionName: string;
@@ -19,4 +22,11 @@ export interface TransactionDetailFlyoutProps {
   isOpen?: boolean;
   onClose: () => void;
   historyKey?: symbol;
+  /**
+   * Set by hosts whose surrounding UI is computed from raw documents (Discover):
+   * RED charts then stay ES|QL so they agree with the host.
+   */
+  preferDocumentBasedCharts?: boolean;
+  schema?: ServiceSchemaType;
+  indices?: APMIndices | null;
 }

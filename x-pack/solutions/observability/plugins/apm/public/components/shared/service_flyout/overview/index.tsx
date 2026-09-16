@@ -31,7 +31,6 @@ import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metr
 import { useProjectRouting } from '../hooks/use_project_routing';
 import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
 import type { TransactionDetailFlyoutFilters } from '../../transaction_detail_flyout/types';
-import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
@@ -189,7 +188,7 @@ export function ServiceFlyoutOverview() {
   const [transactionDetailFilters, setTransactionDetailFilters] =
     useState<TransactionDetailFlyoutFilters | null>(null);
   const {
-    deps: { core, share },
+    deps: { core, share, lens, dataViews },
     contextActions,
     service,
     capabilities,
@@ -397,11 +396,14 @@ export function ServiceFlyoutOverview() {
       </EuiFlexGroup>
       {transactionDetailFilters && (
         <TransactionDetailFlyout
-          deps={{ core, share }}
+          deps={{ core, share, lens, dataViews }}
           contextActions={contextActions}
           filters={transactionDetailFilters}
           onClose={() => setTransactionDetailFilters(null)}
           historyKey={flyoutHistoryKey}
+          preferDocumentBasedCharts={preferDocumentBasedCharts}
+          schema={capabilities.schema}
+          indices={indices}
         />
       )}
     </div>

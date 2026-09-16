@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   asExactTransactionRate,
@@ -31,6 +31,9 @@ import { getTimeZone } from '../../charts/helper/timezone';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../charts/timeseries_chart';
 import { getMaxY, getResponseTimeTickFormatter } from '../../charts/transaction_charts/helper';
+import { useProjectRouting } from '../../service_flyout/hooks/use_project_routing';
+import { getEsqlKeyMetricCharts } from '../../service_flyout/overview/chart_configs';
+import { FlyoutLensChart } from '../../service_flyout/overview/lens_chart';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import { useTransactionDetailFlyoutRedMetricsCharts } from './use_transaction_detail_flyout_red_metrics_charts';
 
@@ -124,8 +127,13 @@ function yLabelFormatErrorRate(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function TransactionDetailFlyoutRedMetrics() {
-  const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+function TransactionDetailFlyoutApiRedMetrics({
+  latencyAggregationType,
+  setLatencyAggregationType,
+}: {
+  latencyAggregationType: LatencyAggregationType;
+  setLatencyAggregationType: (value: LatencyAggregationType) => void;
+}) {
   const { euiTheme } = useEuiTheme();
   const {
     deps: { core },
@@ -157,102 +165,219 @@ export function TransactionDetailFlyoutRedMetrics() {
   `;
 
   if (isLoading) {
-    return (
-      <section data-test-subj="transactionDetailFlyoutSection-redMetrics">
-        <RedMetricsChartsSkeleton />
-      </section>
-    );
+    return <RedMetricsChartsSkeleton />;
   }
 
   if (hasError) {
     return (
-      <section data-test-subj="transactionDetailFlyoutSection-redMetrics">
-        <KbnWarningCallout
-          size="s"
-          data-test-subj="transactionDetailFlyoutRedMetricsError"
-          title={CHARTS_LOAD_ERROR}
-        />
-      </section>
+      <KbnWarningCallout
+        size="s"
+        data-test-subj="transactionDetailFlyoutRedMetricsError"
+        title={CHARTS_LOAD_ERROR}
+      />
     );
   }
 
   return (
-    <section data-test-subj="transactionDetailFlyoutSection-redMetrics">
-      <ChartPointerEventContextProvider>
+    <ChartPointerEventContextProvider>
+      <FlyoutTimeseriesChartPanel
+        id="transactionDetailFlyoutRedMetricsChart-latency"
+        title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
+          defaultMessage: 'Latency',
+        })}
+        titleAction={
+          <LatencyAggregationTypeSelect
+            latencyAggregationType={latencyAggregationType}
+            onChange={setLatencyAggregationType}
+          />
+        }
+      >
+        <TimeseriesChart
+          id="transactionDetailFlyoutLatencyChart"
+          height={CHART_HEIGHT}
+          fetchStatus={latencyStatus}
+          timeseries={latencyTimeseries}
+          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+          comparisonEnabled={false}
+          timeZone={timeZone}
+          showAnnotations={false}
+        />
+      </FlyoutTimeseriesChartPanel>
+
+      <EuiSpacer size="m" />
+
+      <div css={secondaryChartsGridCss}>
         <FlyoutTimeseriesChartPanel
-          id="transactionDetailFlyoutRedMetricsChart-latency"
-          title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
-            defaultMessage: 'Latency',
+          id="transactionDetailFlyoutRedMetricsChart-throughput"
+          title={i18n.translate('xpack.apm.transactionDetailFlyout.throughputChartTitle', {
+            defaultMessage: 'Throughput',
           })}
-          titleAction={
-            <LatencyAggregationTypeSelect
-              latencyAggregationType={latencyAggregationType}
-              onChange={setLatencyAggregationType}
+          titleTip={
+            <EuiIconTip
+              content={i18n.translate('xpack.apm.transactionDetailFlyout.throughputHelp', {
+                defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
+              })}
+              position="right"
             />
           }
         >
           <TimeseriesChart
-            id="transactionDetailFlyoutLatencyChart"
+            id="transactionDetailFlyoutThroughputChart"
             height={CHART_HEIGHT}
-            fetchStatus={latencyStatus}
-            timeseries={latencyTimeseries}
-            yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+            fetchStatus={throughputStatus}
+            timeseries={throughputTimeseries}
+            yLabelFormat={asExactTransactionRate}
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
           />
         </FlyoutTimeseriesChartPanel>
 
-        <EuiSpacer size="m" />
+        <FlyoutTimeseriesChartPanel
+          id="transactionDetailFlyoutRedMetricsChart-failedTransactionRate"
+          title={i18n.translate('xpack.apm.transactionDetailFlyout.errorRateChartTitle', {
+            defaultMessage: 'Failed transaction rate',
+          })}
+          titleTip={<EuiIconTip content={errorRateI18n} position="right" />}
+        >
+          <TimeseriesChart
+            id="transactionDetailFlyoutErrorRateChart"
+            height={CHART_HEIGHT}
+            fetchStatus={errorRateStatus}
+            timeseries={errorRateTimeseries}
+            yLabelFormat={yLabelFormatErrorRate}
+            yDomain={{ min: 0, max: 1 }}
+            comparisonEnabled={false}
+            timeZone={timeZone}
+            showAnnotations={false}
+          />
+        </FlyoutTimeseriesChartPanel>
+      </div>
+    </ChartPointerEventContextProvider>
+  );
+}
 
-        <div css={secondaryChartsGridCss}>
-          <FlyoutTimeseriesChartPanel
-            id="transactionDetailFlyoutRedMetricsChart-throughput"
-            title={i18n.translate('xpack.apm.transactionDetailFlyout.throughputChartTitle', {
-              defaultMessage: 'Throughput',
-            })}
-            titleTip={
-              <EuiIconTip
-                content={i18n.translate('xpack.apm.transactionDetailFlyout.throughputHelp', {
-                  defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
-                })}
-                position="right"
-              />
-            }
-          >
-            <TimeseriesChart
-              id="transactionDetailFlyoutThroughputChart"
-              height={CHART_HEIGHT}
-              fetchStatus={throughputStatus}
-              timeseries={throughputTimeseries}
-              yLabelFormat={asExactTransactionRate}
-              comparisonEnabled={false}
-              timeZone={timeZone}
-              showAnnotations={false}
-            />
-          </FlyoutTimeseriesChartPanel>
+function TransactionDetailFlyoutEsqlRedMetrics({
+  latencyAggregationType,
+  setLatencyAggregationType,
+}: {
+  latencyAggregationType: LatencyAggregationType;
+  setLatencyAggregationType: (value: LatencyAggregationType) => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const {
+    deps: { lens, dataViews },
+    filters,
+    schema,
+    indices,
+  } = useTransactionDetailFlyoutContext();
+  const projectRouting = useProjectRouting();
 
-          <FlyoutTimeseriesChartPanel
-            id="transactionDetailFlyoutRedMetricsChart-failedTransactionRate"
-            title={i18n.translate('xpack.apm.transactionDetailFlyout.errorRateChartTitle', {
-              defaultMessage: 'Failed transaction rate',
-            })}
-            titleTip={<EuiIconTip content={errorRateI18n} position="right" />}
-          >
-            <TimeseriesChart
-              id="transactionDetailFlyoutErrorRateChart"
-              height={CHART_HEIGHT}
-              fetchStatus={errorRateStatus}
-              timeseries={errorRateTimeseries}
-              yLabelFormat={yLabelFormatErrorRate}
-              yDomain={{ min: 0, max: 1 }}
-              comparisonEnabled={false}
-              timeZone={timeZone}
-              showAnnotations={false}
-            />
-          </FlyoutTimeseriesChartPanel>
-        </div>
-      </ChartPointerEventContextProvider>
+  const charts = useMemo(
+    () =>
+      getEsqlKeyMetricCharts({
+        indices: indices ?? undefined,
+        schema,
+        serviceName: filters.serviceName,
+        environment: filters.environment,
+        transactionType: filters.transactionType,
+        transactionName: filters.transactionName,
+        latencyAggregationType,
+        latencyTitleAction: (
+          <LatencyAggregationTypeSelect
+            latencyAggregationType={latencyAggregationType}
+            onChange={setLatencyAggregationType}
+          />
+        ),
+        projectRouting,
+      }),
+    [
+      indices,
+      schema,
+      filters.serviceName,
+      filters.environment,
+      filters.transactionType,
+      filters.transactionName,
+      latencyAggregationType,
+      setLatencyAggregationType,
+      projectRouting,
+    ]
+  );
+
+  if (!lens || !dataViews) {
+    return (
+      <KbnWarningCallout
+        size="s"
+        data-test-subj="transactionDetailFlyoutRedMetricsError"
+        title={CHARTS_LOAD_ERROR}
+      />
+    );
+  }
+
+  if (indices === undefined) {
+    return <RedMetricsChartsSkeleton />;
+  }
+
+  if (indices === null) {
+    return (
+      <KbnWarningCallout
+        size="s"
+        data-test-subj="transactionDetailFlyoutRedMetricsError"
+        title={CHARTS_LOAD_ERROR}
+      />
+    );
+  }
+
+  return (
+    <div
+      data-test-subj="transactionDetailFlyoutEsqlRedMetrics"
+      css={css`
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: ${euiTheme.size.m};
+      `}
+    >
+      {charts.map((chart) => (
+        <FlyoutLensChart
+          key={chart.id}
+          deps={{ lens, dataViews }}
+          id={chart.id}
+          title={chart.title}
+          titleAction={chart.titleAction}
+          config={chart.config}
+          rangeFrom={filters.rangeFrom}
+          rangeTo={filters.rangeTo}
+          dataTestSubjPrefix="transactionDetailFlyoutLensChart"
+          embeddableIdPrefix="transaction-detail-flyout"
+          executionContextDescription="apm transaction detail flyout chart data"
+          executionContextProfileId="transaction-detail-flyout"
+        />
+      ))}
+    </div>
+  );
+}
+
+export function TransactionDetailFlyoutRedMetrics() {
+  const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+  const { preferDocumentBasedCharts, schema } = useTransactionDetailFlyoutContext();
+
+  // Same host/schema rule as the service flyout: document-based hosts (Discover)
+  // and unprocessed OTel services use ES|QL; APM/alert hosts use rollup APIs.
+  const useEsqlCharts = Boolean(preferDocumentBasedCharts) || schema === 'otel';
+
+  return (
+    <section data-test-subj="transactionDetailFlyoutSection-redMetrics">
+      {useEsqlCharts ? (
+        <TransactionDetailFlyoutEsqlRedMetrics
+          latencyAggregationType={latencyAggregationType}
+          setLatencyAggregationType={setLatencyAggregationType}
+        />
+      ) : (
+        <TransactionDetailFlyoutApiRedMetrics
+          latencyAggregationType={latencyAggregationType}
+          setLatencyAggregationType={setLatencyAggregationType}
+        />
+      )}
     </section>
   );
 }
