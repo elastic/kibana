@@ -31,6 +31,9 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
+      // Grid items default to min-height: auto (content size). Without this the wrapper grows with
+      // the content instead of constraining the scroll container below.
+      min-height: 0;
 
       z-index: ${layoutLevels.content};
 
@@ -46,7 +49,14 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
-        ${euiBorderStyles(useEuiTheme, { side: 'all' })};
+        // Frame drawn as a pseudo-element border, like EUI panels. It doesn't affect layout and
+        // lives on this wrapper rather than the scroll container, so it neither scrolls away with
+        // the content nor competes with the focus outline of the scroll container.
+        // borderBaseFloating is transparent in light mode and visible in dark mode.
+        ${euiBorderStyles(useEuiTheme, {
+          side: 'all',
+          borderColor: euiTheme.colors.borderBaseFloating,
+        })}
       `}
       ${!isFramedAppearance &&
       css`
@@ -54,18 +64,27 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         border-radius: 0;
         border: none;
       `}
-
-      // only restrict overflow scroll on screen (not print) to allow for full page printing
-      @media screen {
-        ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
-        // reset the height back to respect the margins
-        height: calc(
-          100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
-        );
-      }
     `;
   };
 };
+
+const scrollContainer: EmotionFn = (useEuiTheme) => css`
+  height: 100%;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+
+  // Programmatic focus target (skip link, sidenav "focus main content"). The frame is drawn by the
+  // wrapper and the app content signals focus itself, so no ring here.
+  &:focus {
+    outline: none;
+  }
+
+  // only restrict overflow scroll on screen (not print) to allow for full page printing
+  @media screen {
+    ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
+  }
+`;
 
 const content: EmotionFn = () => css`
   display: flex;
@@ -91,6 +110,7 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
 
 export const styles = {
   root,
+  scrollContainer,
   content,
   topBar,
   bottomBar,

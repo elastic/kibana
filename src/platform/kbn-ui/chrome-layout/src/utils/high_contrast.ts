@@ -9,31 +9,6 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 
-interface HighContrastFrame {
-  width: string;
-  color: string;
-}
-
-export const getHighContrastFrame = (
-  euiThemeContext: UseEuiTheme
-): HighContrastFrame | undefined => {
-  const { euiTheme, highContrastMode } = euiThemeContext;
-  const width = euiTheme.border.width.thin;
-
-  if (width == null) {
-    return undefined;
-  }
-
-  if (highContrastMode || (euiThemeContext.colorMode === 'DARK' && euiTheme.border.thin)) {
-    return {
-      width: String(width),
-      color: euiTheme.border.color,
-    };
-  }
-
-  return undefined;
-};
-
 /**
  * Helper function to get container border styles for high contrast mode.
  * In high contrast mode, renders a solid border. Otherwise, renders based on color mode.
@@ -43,11 +18,16 @@ export const getHighContrastFrame = (
  * @returns CSS border string
  */
 export const getHighContrastBorder = (euiThemeContext: UseEuiTheme): string => {
-  const frame = getHighContrastFrame(euiThemeContext);
-  if (!frame) {
-    return 'none';
+  const { euiTheme, highContrastMode } = euiThemeContext;
+
+  if (highContrastMode) {
+    return `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`;
   }
-  return `${frame.width} solid ${frame.color}`;
+  if (euiThemeContext.colorMode === 'DARK') {
+    const borderThin = euiTheme.border.thin;
+    return borderThin ? String(borderThin) : 'none';
+  }
+  return 'none';
 };
 
 export interface HighContrastSeparatorOptions {

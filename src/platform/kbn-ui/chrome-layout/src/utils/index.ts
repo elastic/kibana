@@ -24,7 +24,6 @@ export {
 export {
   type HighContrastSeparatorOptions,
   getHighContrastBorder,
-  getHighContrastFrame,
   getHighContrastSeparator,
 } from './high_contrast';
 
