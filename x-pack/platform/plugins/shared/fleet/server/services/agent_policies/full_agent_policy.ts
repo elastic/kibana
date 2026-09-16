@@ -237,9 +237,9 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-  const downloadSourceSecretReferences = downloadSources.flatMap((ds) =>
-    getDownloadSourceSecretReferences(ds)
-  );
+  const downloadSourceSecretReferences = downloadSources[0]
+    ? getDownloadSourceSecretReferences(downloadSources[0])
+    : [];
   // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
   // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
   // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.

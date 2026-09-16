@@ -300,6 +300,7 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
         ...agentPolicy,
@@ -2428,7 +2429,7 @@ class AgentPolicyService {
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+        filter: `${savedObjectType}.attributes.download_source_ids:${escapedId}`,
         fields: ['id'],
         perPage: 1,
         namespaces: ['*'],
@@ -2835,11 +2836,23 @@ class AgentPolicyService {
     return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 
+  private normalizeDownloadSourceFields<T extends Partial<AgentPolicySOAttributes>>(
+    agentPolicy: T
+  ): T {
+    if ('download_source_id' in agentPolicy && !('download_source_ids' in agentPolicy)) {
+      return {
+        ...agentPolicy,
+        download_source_ids: agentPolicy.download_source_id ? [agentPolicy.download_source_id] : [],
+      };
+    }
+    return agentPolicy;
+  }
+
   private prepareAsNewSo(
     agentPolicy: NewAgentPolicy,
     options: { username?: string }
   ): AgentPolicySOAttributes {
-    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    const { space_ids: _, ...baseAgentPolicySo } = this.normalizeDownloadSourceFields(agentPolicy);
     const now = new Date().toISOString();
     return {
       ...baseAgentPolicySo,
