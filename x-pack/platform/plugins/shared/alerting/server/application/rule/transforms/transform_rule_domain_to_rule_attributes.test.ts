@@ -168,6 +168,38 @@ describe('transformRuleDomainToRuleAttributes', () => {
     expect(result).not.toHaveProperty('updatedByProfileUid');
   });
 
+  test('should preserve explicit null createdByProfileUid and updatedByProfileUid', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        createdByProfileUid: null,
+        updatedByProfileUid: null,
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: '.no-op',
+          params: {},
+          uuid: '1',
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [],
+        investigation_guide: {
+          blob: '',
+        },
+      },
+      params: {
+        legacyId: null,
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.createdByProfileUid).toBe(null);
+    expect(result.updatedByProfileUid).toBe(null);
+  });
+
   test('should transform rule domain to rule attribute', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule,

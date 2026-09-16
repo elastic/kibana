@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { useKibana } from '../../common/lib/kibana';
 
 export interface UseBulkGetUserProfilesParams {
@@ -14,29 +14,30 @@ export interface UseBulkGetUserProfilesParams {
   uids: string[];
 }
 
+export type UseBulkGetUserProfilesResult = UseQueryResult<Map<string, string>>;
+
 /**
  * Resolves a list of Elasticsearch user profile UIDs to display names, keyed by uid.
  */
 export const useBulkGetUserProfiles = ({
   uids,
-}: UseBulkGetUserProfilesParams): Map<string, string> => {
+}: UseBulkGetUserProfilesParams): UseBulkGetUserProfilesResult => {
   const { userProfile } = useKibana().services;
 
   const uniqueUids = Array.from(new Set(uids)).sort();
 
-  const { data } = useQuery({
+  return useQuery({
     queryKey: ['useBulkGetUserProfiles', uniqueUids],
     queryFn: () => userProfile.bulkGet({ uids: new Set(uniqueUids) }),
     enabled: uniqueUids.length > 0,
     staleTime: 60 * 1000,
     retry: false,
+    select: (data) => {
+      const profileByUid = new Map<string, string>();
+      data.forEach((profile) => {
+        profileByUid.set(profile.uid, profile.user.full_name || profile.user.username);
+      });
+      return profileByUid;
+    },
   });
-
-  return useMemo(() => {
-    const profileByUid = new Map<string, string>();
-    data?.forEach((profile) => {
-      profileByUid.set(profile.uid, profile.user.full_name || profile.user.username);
-    });
-    return profileByUid;
-  }, [data]);
 };

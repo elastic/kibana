@@ -456,6 +456,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -506,6 +507,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -722,6 +724,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -772,6 +775,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
   });
@@ -1206,6 +1210,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1228,6 +1233,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1465,6 +1471,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1513,6 +1520,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1730,6 +1738,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1752,6 +1761,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1937,6 +1947,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1958,6 +1969,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -2130,8 +2142,10 @@ describe('create()', () => {
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2287,8 +2301,10 @@ describe('create()', () => {
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2446,8 +2462,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2628,7 +2646,9 @@ describe('create()', () => {
         },
         legacyId: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
@@ -3105,8 +3125,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -3219,8 +3241,10 @@ describe('create()', () => {
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
@@ -4181,8 +4205,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -4496,6 +4522,7 @@ describe('create()', () => {
           consumer: 'bar',
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
+          createdByProfileUid: null,
           enabled: true,
           legacyId: null,
           executionStatus: {
@@ -4518,6 +4545,7 @@ describe('create()', () => {
           throttle: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
         },
         {
           id: 'mock-saved-object-id',

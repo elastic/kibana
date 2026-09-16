@@ -89,6 +89,8 @@ const ruleDetailStyle = {
   minWidth: 0,
 };
 
+const EMPTY_PROFILES_BY_UID = new Map<string, string>();
+
 const ENABLED_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.enabledBadgeLabel',
   { defaultMessage: 'Enabled' }
@@ -140,7 +142,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     [rule.createdByProfileUid, rule.updatedByProfileUid]
   );
 
-  const profilesByUid = useBulkGetUserProfiles({ uids: auditProfileUids });
+  const { data: profilesByUid = EMPTY_PROFILES_BY_UID } = useBulkGetUserProfiles({
+    uids: auditProfileUids,
+  });
   const creator = rule.createdByProfileUid
     ? profilesByUid.get(rule.createdByProfileUid)
     : rule.createdBy ?? '';

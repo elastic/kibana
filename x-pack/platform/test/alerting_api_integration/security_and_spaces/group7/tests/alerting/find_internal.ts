@@ -844,7 +844,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .set('Cookie', sessionCookie)
-          .send({ search: createdRule.id, search_fields: 'id' })
+          .send({ search: 'test.noop', search_fields: 'alertTypeId' })
           .expect(200);
 
         const match = response.body.data.find((obj: any) => obj.id === createdRule.id);
@@ -859,7 +859,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password)
-          .send({ search: createdRule.id, search_fields: 'id' })
+          .send({ search: 'test.noop', search_fields: 'alertTypeId' })
           .expect(200);
 
         const match = response.body.data.find((obj: any) => obj.id === createdRule.id);

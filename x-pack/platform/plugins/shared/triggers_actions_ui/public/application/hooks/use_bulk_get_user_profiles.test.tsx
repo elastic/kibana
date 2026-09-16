@@ -46,9 +46,10 @@ describe('useBulkGetUserProfiles', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.get('u_1')).toBe('User One');
-      expect(result.current.get('u_2')).toBe('user.two');
+      expect(result.current.data?.get('u_1')).toBe('User One');
+      expect(result.current.data?.get('u_2')).toBe('user.two');
     });
+    expect(result.current.isLoading).toBe(false);
   });
 
   it('dedupes uids and issues a single bulkGet call', async () => {
@@ -62,10 +63,11 @@ describe('useBulkGetUserProfiles', () => {
     });
   });
 
-  it('does not call bulkGet and returns an empty map when uids is empty', async () => {
+  it('does not call bulkGet and returns undefined data when uids is empty', async () => {
     const { result } = renderHook(() => useBulkGetUserProfiles({ uids: [] }), { wrapper });
 
     expect(bulkGet).not.toHaveBeenCalled();
-    expect(result.current.size).toBe(0);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isFetching).toBe(false);
   });
 });
