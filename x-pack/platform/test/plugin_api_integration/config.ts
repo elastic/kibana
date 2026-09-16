@@ -17,10 +17,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [
-      // require.resolve('./test_suites/platform'),
+      require.resolve('./test_suites/platform'),
       require.resolve('./test_suites/task_manager'),
-      // require.resolve('./test_suites/event_log'),
-      // require.resolve('./test_suites/licensed_feature_usage'),
+      require.resolve('./test_suites/event_log'),
+      require.resolve('./test_suites/licensed_feature_usage'),
     ],
     services,
     servers: integrationConfig.get('servers'),
