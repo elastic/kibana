@@ -47,6 +47,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  showTooltip?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   filtersCount?: number;
   dataViews?: DataViewsContract;
@@ -320,6 +321,7 @@ export function FilterItemComponent(props: FilterItemProps) {
   const filterViewProps = {
     filter,
     readOnly,
+    showTooltip: props.showTooltip,
     valueLabel: valueLabelConfig.title,
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,

@@ -22,6 +22,7 @@ import { FilterBadge } from '../../filter_badge';
 interface Props {
   filter: Filter;
   readOnly: boolean;
+  showTooltip?: boolean;
   valueLabel: string;
   fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
@@ -34,6 +35,7 @@ interface Props {
 export const FilterView: FC<Props> = ({
   filter,
   readOnly,
+  showTooltip = true,
   iconOnClick,
   onClick,
   valueLabel,
@@ -74,7 +76,7 @@ export const FilterView: FC<Props> = ({
       { ...sharedProps, title: undefined }
     : {
         ...sharedProps,
-        title, // use native tooltip for non-read-only filter pills
+        title: showTooltip ? title : undefined,
         iconType: 'cross',
         iconSide: 'right',
         iconOnClick,
@@ -107,7 +109,7 @@ export const FilterView: FC<Props> = ({
     />
   );
 
-  return readOnly ? (
+  return readOnly && showTooltip ? (
     <EuiToolTip position="bottom" content={title}>
       <span ref={ref} tabIndex={0}>
         {filterBadge}

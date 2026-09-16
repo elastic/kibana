@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { setProjectAnnotations, composeStories } from '@storybook/react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { action } from '@storybook/addon-actions';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -22,13 +23,18 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
-import { USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from '../mock/constants';
+import {
+  USE_FETCH_GRAPH_DATA_REFRESH_ACTION,
+  USE_FETCH_GRAPH_DATA_ACTION,
+} from '../mock/constants';
+import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
 import { mockDataView } from '../mock/data_view.mock';
 
 setProjectAnnotations(previewAnnotations);
@@ -134,10 +140,9 @@ const hideActionsByNode = async (container: HTMLElement, nodeId: string) => {
 };
 
 const disableFilter = (container: HTMLElement, filterIndex: number) => {
-  const filterBtn = container.querySelector(
-    `[data-test-subj*="filter-id-${filterIndex}"]`
-  ) as HTMLButtonElement;
-  expect(filterBtn).not.toBeNull();
+  const filterBtn = within(container).getAllByRole('button', { name: 'Filter actions' })[
+    filterIndex
+  ];
   filterBtn.click();
 
   const disableFilterBtn = screen.getByTestId('disableFilter');
@@ -208,6 +213,33 @@ describe('GraphInvestigation Component', () => {
 
     // Assert
     expect(mockDangerToast).toHaveBeenCalledTimes(1);
+  });
+
+  describe('default filter display', () => {
+    it.each([
+      { originEventIds: [{ id: 'origin-event', isAlert: false }], entityIds: [] },
+      { originEventIds: [], entityIds: [{ id: 'admin@example.com', isOrigin: true }] },
+    ])('separates the origin from added filters with OR: %j', async (origins) => {
+      const { container } = renderStory({
+        initialState: {
+          dataView: mockDataView,
+          timeRange: { from: 'now-30d', to: 'now' },
+          ...origins,
+        },
+      });
+
+      expect(screen.queryByTestId('graphDefaultFilterOr')).not.toBeInTheDocument();
+
+      await showActionsByNode(container, 'admin@example.com');
+
+      const filterBar = screen.getByTestId('filter-items-group');
+      expect(within(filterBar).getByTestId('graphDefaultFilterOr')).toHaveTextContent('OR');
+      expect(within(filterBar).getAllByRole('button', { name: 'Filter actions' })).toHaveLength(1);
+
+      await hideActionsByNode(container, 'admin@example.com');
+
+      expect(screen.queryByTestId('graphDefaultFilterOr')).not.toBeInTheDocument();
+    });
   });
 
   it('calls refresh on submit button click', () => {
@@ -450,10 +482,8 @@ describe('GraphInvestigation Component', () => {
   describe('dismisses external overlays on ReactFlow pane click', () => {
     const openFilterDropdown = async (container: HTMLElement) => {
       await showActionsByNode(container, 'admin@example.com');
-      await waitFor(() => {
-        expect(container.querySelector(`[data-test-subj*="filter-id-0"]`)).not.toBeNull();
-      });
-      (container.querySelector(`[data-test-subj*="filter-id-0"]`) as HTMLButtonElement).click();
+      const filterButton = await within(container).findByRole('button', { name: 'Filter actions' });
+      filterButton.click();
       await waitFor(() => {
         expect(screen.getByTestId('disableFilter')).toBeInTheDocument();
       });
@@ -508,6 +538,148 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('investigateInTimeline', () => {
+    describe('entity origins', () => {
+      it.each([
+        { hasQuery: false, hasNodeFilter: false },
+        { hasQuery: false, hasNodeFilter: true },
+        { hasQuery: true, hasNodeFilter: false },
+        { hasQuery: true, hasNodeFilter: true },
+      ])(
+        'includes the origin with query=$hasQuery and node filter=$hasNodeFilter',
+        async ({ hasQuery, hasNodeFilter }) => {
+          const onInvestigateInTimeline = jest.fn<
+            void,
+            Parameters<NonNullable<GraphInvestigationProps['onInvestigateInTimeline']>>
+          >();
+          const timeRange = { from: 'now-30d', to: 'now' };
+          const { getByTestId, container } = renderStory({
+            onInvestigateInTimeline,
+            showInvestigateInTimeline: true,
+            initialState: {
+              dataView: mockDataView,
+              entityIds: [{ id: 'admin@example.com', isOrigin: true }],
+              timeRange,
+            },
+          });
+
+          if (hasNodeFilter) {
+            await showActionsByNode(container, 'admin@example.com');
+          }
+          if (hasQuery) {
+            fireEvent.change(getByTestId('queryInput'), {
+              target: { value: 'host.name: server' },
+            });
+            getByTestId('querySubmitButton').click();
+          }
+
+          const graphRequest: UseFetchGraphDataParams = JSON.parse(
+            actionMocks[USE_FETCH_GRAPH_DATA_ACTION].mock.calls.at(-1)?.[0]
+          );
+          getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+          expect(onInvestigateInTimeline).toHaveBeenCalledTimes(1);
+          const [query, filters, actualTimeRange] = onInvestigateInTimeline.mock.calls[0];
+          expect(query).toEqual({ language: 'kuery', query: '' });
+          expect(actualTimeRange).toEqual(timeRange);
+          const filterDsl = JSON.stringify(
+            buildEsQuery(mockDataView, query ? [query] : [], filters)
+          );
+          expect(filterDsl).toContain('user.email');
+          expect(filterDsl).toContain('user.target.email');
+          expect(filterDsl).toContain('admin@example.com');
+          expect(filterDsl).not.toContain('entity.id');
+          if (hasQuery) {
+            expect(filterDsl).toContain('host.name');
+            expect(filterDsl).toContain('server');
+          }
+          const [combinedFilter] = filters;
+          if (!isCombinedFilter(combinedFilter)) {
+            throw new Error('Expected a combined Timeline origin filter');
+          }
+          expect(combinedFilter.meta.params).toHaveLength(hasQuery || hasNodeFilter ? 2 : 1);
+          expect(combinedFilter.meta.relation).toBe('OR');
+          if (hasQuery) {
+            // Keep the graph's complete query-and-filters branch together when ORing the origin.
+            expect(combinedFilter.meta.params[1]).toMatchObject(
+              graphRequest.req.query.esQuery ?? {}
+            );
+          } else if (hasNodeFilter) {
+            expect(combinedFilter.meta.params[1]).toMatchObject({ meta: { relation: 'AND' } });
+          }
+          expect(
+            within(container).queryAllByRole('button', { name: 'Filter actions' })
+          ).toHaveLength(hasNodeFilter ? 1 : 0);
+        }
+      );
+
+      it('includes all origin entities and excludes expanded entities', () => {
+        const onInvestigateInTimeline = jest.fn();
+        const { getByTestId } = renderStory({
+          onInvestigateInTimeline,
+          showInvestigateInTimeline: true,
+          initialState: {
+            dataView: mockDataView,
+            entityIds: [
+              { id: 'admin@example.com', isOrigin: true },
+              { id: 'projects/your-project-id/roles/customRole', isOrigin: true },
+              { id: 'user:expanded', isOrigin: false },
+            ],
+            timeRange: { from: 'now-30d', to: 'now' },
+          },
+        });
+
+        getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+        const filters = onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX];
+        expect(filters[0].meta.params).toHaveLength(2);
+        const filterDsl = JSON.stringify(buildEsQuery(mockDataView, [], filters));
+        expect(filterDsl).toContain('admin@example.com');
+        expect(filterDsl).toContain('projects/your-project-id/roles/customRole');
+        expect(filterDsl).not.toContain('user:expanded');
+      });
+
+      it('preserves disabled filters without adding their events to the origin search', async () => {
+        const onInvestigateInTimeline = jest.fn();
+        const { getByTestId, container } = renderStory({
+          onInvestigateInTimeline,
+          showInvestigateInTimeline: true,
+          initialState: {
+            dataView: mockDataView,
+            entityIds: [{ id: 'projects/your-project-id/roles/customRole', isOrigin: true }],
+            timeRange: { from: 'now-30d', to: 'now' },
+          },
+        });
+        await showActionsByNode(container, 'admin@example.com');
+        disableFilter(container, 0);
+
+        getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+        const filters = onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX];
+        expect(filters).toHaveLength(2);
+        expect(filters[1].meta.disabled).toBe(true);
+        const filterDsl = JSON.stringify(buildEsQuery(mockDataView, [], filters));
+        expect(filterDsl).toContain('projects/your-project-id/roles/customRole');
+        expect(filterDsl).not.toContain('admin@example.com');
+      });
+
+      it('does not open an unfiltered Timeline when origin source fields are unavailable', () => {
+        const onInvestigateInTimeline = jest.fn();
+        const { getByTestId } = renderStory({
+          onInvestigateInTimeline,
+          showInvestigateInTimeline: true,
+          initialState: {
+            dataView: mockDataView,
+            entityIds: [{ id: 'host:unavailable', isOrigin: true }],
+            timeRange: { from: 'now-30d', to: 'now' },
+          },
+        });
+
+        expect(getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID)).toBeDisabled();
+        getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+        expect(onInvestigateInTimeline).not.toHaveBeenCalled();
+      });
+    });
+
     it('has originEventIds, empty query and no filters - calls onInvestigateInTimeline action with event.id filter only', () => {
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
@@ -1046,13 +1218,13 @@ describe('GraphInvestigation Component', () => {
       expect(showActionsBy).not.toBeInTheDocument();
     });
 
-    it('grouped actor node shows entity details option', async () => {
+    it('grouped actor node shows grouped entities option', async () => {
       const { container, getByTestId } = renderGroupedActorStory();
 
       await expandNode(container, 'mixed-entities');
 
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toBeInTheDocument();
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show grouped entities');
     });
   });
 
@@ -1130,13 +1302,13 @@ describe('GraphInvestigation Component', () => {
       expect(showActionsBy).not.toBeInTheDocument();
     });
 
-    it('grouped target node shows entity details option', async () => {
+    it('grouped target node shows grouped entities option', async () => {
       const { container, getByTestId } = renderGroupedTargetStory();
 
       await expandNode(container, 'mixed-targets');
 
-      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).toBeInTheDocument();
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show grouped entities');
     });
   });
 });
