@@ -167,10 +167,10 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
-    // The number_format_exception variant is in practice caused by the rule's own query, but it
-    // is deliberately not classified as a user error: its reason is the generic Java
-    // NumberFormatException text, which is not specific enough to match on its own. This test
-    // pins that scope decision (https://github.com/elastic/kibana/issues/289109).
+    // The number_format_exception variant is usually caused by the rule's own query, but we
+    // intentionally don't classify it as a user error: its reason is the generic Java
+    // NumberFormatException text, which is not specific enough to match on its own. See
+    // https://github.com/elastic/kibana/issues/289109 for the discussion.
     it('should not mark a query_shard_exception with a reason outside the known list as user error', () => {
       const errorMessage = `index: "logs-*" reason: "failed to create query: For input string: \\"16 \\"" type: "query_shard_exception" caused by reason: "For input string: \\"16 \\"" caused by type: "number_format_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
