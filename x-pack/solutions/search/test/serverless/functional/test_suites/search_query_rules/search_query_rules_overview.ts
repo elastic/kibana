@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   const createTestRuleset = async (rulesetId: string) => {
     await es.transport.request({
@@ -133,8 +134,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
 
-        // give time for the ruleset to be created
-        await pageObjects.common.sleep(400);
+        // The success toast only fires after the PUT resolves, so it proves the ruleset was committed before we navigate away and read the list.
+        await toasts.getTitleAndDismiss();
         await browser.navigateTo('about:blank');
         await pageObjects.common.navigateToApp('searchQueryRules');
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -174,8 +175,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
 
-        // give time for the ruleset to be created
-        await pageObjects.common.sleep(400);
+        // The success toast only fires after the PUT resolves, so it proves the ruleset was committed before we navigate away and read the list.
+        await toasts.getTitleAndDismiss();
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
           deepLinkId: 'searchQueryRules',
         });
