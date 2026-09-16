@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+} from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -44,6 +50,7 @@ export class StackConnectorsPlugin
   implements Plugin<void, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
 {
   private config: StackConnectorsConfigType;
+  private readonly logger: Logger;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   // Whether this is a Serverless deployment, and — if so — whether its organization is in trial.
@@ -55,6 +62,7 @@ export class StackConnectorsPlugin
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get();
+    this.logger = context.logger.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
 
@@ -93,7 +101,7 @@ export class StackConnectorsPlugin
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {
-      registerConnectorTypesFromSpecs({ actions });
+      registerConnectorTypesFromSpecs({ actions, logger: this.logger });
     }
 
     if (plugins.usageCollection) {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
 export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/atlassian/confluence_cloud/confluence';

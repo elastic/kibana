@@ -58,7 +58,7 @@ describe('Stack Connectors Plugin', () => {
       const builtInConnectorTypesCount = 18;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
-        builtInConnectorTypesCount + specConnectorTypes.length
+        builtInConnectorTypesCount + specConnectorTypes.length + 1
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
@@ -190,6 +190,13 @@ describe('Stack Connectors Plugin', () => {
           })
         );
       });
+
+      expect(actionsSetup.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.abuseipdb',
+          source: 'spec',
+        })
+      );
 
       // SubAction Connectors
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
