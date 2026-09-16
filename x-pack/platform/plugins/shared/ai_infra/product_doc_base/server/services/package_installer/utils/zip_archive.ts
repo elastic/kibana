@@ -32,6 +32,11 @@ export const openZipArchive = async (archivePath: string): Promise<ZipArchive> =
         resolve(archive);
       });
 
+      zipFile.on('error', (error) => {
+        zipFile.close();
+        reject(error);
+      });
+
       zipFile.on('close', () => {});
 
       zipFile.readEntry();
