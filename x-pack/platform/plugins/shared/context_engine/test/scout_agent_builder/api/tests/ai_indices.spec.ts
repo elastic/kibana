@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -13,12 +14,16 @@ import { apiTest, testData } from '../fixtures';
 const COLLECTION = 'api/context_engine/ai_index';
 const MANAGED_ID = 'elastic';
 const aiIndexPath = (id: string) => `${COLLECTION}/${id}`;
+const OTHER_SPACE = 'scout_ce_other_space';
+const SPACES = [DEFAULT_SPACE_ID, OTHER_SPACE];
+const spacePath = (path: string, spaceId: string) => `s/${spaceId}/${path}`;
 
 const DEST = {
   dataStream: 'ai-index-ds-scout-test',
   index: 'ai-index-idx-scout-test',
   last: 'ai-index-ds-scout-last-dest',
   shared: 'ai-index-ds-scout-shared-dest',
+  crossSpace: 'ai-index-ds-scout-cross-space-dest',
 };
 
 const AI_INDEX = {
@@ -28,10 +33,11 @@ const AI_INDEX = {
   last: 'scout_last_dest_ai_index',
   sharedA: 'scout_shared_dest_a',
   sharedB: 'scout_shared_dest_b',
+  crossSpace: 'scout_cross_space_shared_dest',
   pattern: 'scout_pattern_dest_ai_index',
 };
 
-const DATA_STREAMS = [DEST.dataStream, DEST.last, DEST.shared];
+const DATA_STREAMS = [DEST.dataStream, DEST.last, DEST.shared, DEST.crossSpace];
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -58,23 +64,26 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiServices }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
+    await apiServices.spaces.create({ id: OTHER_SPACE, name: OTHER_SPACE });
     for (const name of DATA_STREAMS) {
       await esClient.indices.createDataStream({ name }, { ignore: [400] });
     }
     await esClient.indices.create({ index: DEST.index }, { ignore: [400] });
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    // AI index deletes tolerate records that were never created (404).
-    for (const id of Object.values(AI_INDEX)) {
-      await apiClient.delete(aiIndexPath(id), {
-        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
+  apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
+    for (const spaceId of SPACES) {
+      for (const id of Object.values(AI_INDEX)) {
+        await apiClient.delete(spacePath(aiIndexPath(id), spaceId), {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+      }
     }
+    await apiServices.spaces.delete(OTHER_SPACE);
     await esClient.indices.delete({ index: DEST.index }, { ignore: [404] });
     for (const name of DATA_STREAMS) {
       await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
@@ -358,6 +367,51 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
         expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({ acknowledged: true, errors: [] });
         expect(await esClient.indices.exists({ index: DEST.shared })).toBe(false);
+      });
+    }
+  );
+
+  apiTest(
+    'skips dest delete while the same AI index id in another space still uses it',
+    async ({ apiClient, esClient }) => {
+      const headers = { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS };
+      const path = `${aiIndexPath(AI_INDEX.crossSpace)}?delete_knowledge_indicators=true`;
+
+      await apiTest.step('reuses one id in two spaces, both pointing at one dest', async () => {
+        for (const spaceId of SPACES) {
+          const response = await apiClient.post(spacePath(COLLECTION, spaceId), {
+            headers,
+            responseType: 'json',
+            body: { id: AI_INDEX.crossSpace, ...emptyAiIndex(DEST.crossSpace) },
+          });
+          expect(response).toHaveStatusCode(201);
+        }
+      });
+
+      await apiTest.step('keeps the dest when the other space is deleted first', async () => {
+        const response = await apiClient.delete(spacePath(path, OTHER_SPACE), {
+          headers,
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.acknowledged).toBe(true);
+        // The remaining user sits in another space, so it is reported as `space/id`.
+        expect(response.body.errors).toStrictEqual([
+          expect.stringContaining(`default/${AI_INDEX.crossSpace}`),
+        ]);
+        expect(await esClient.indices.exists({ index: DEST.crossSpace })).toBe(true);
+      });
+
+      await apiTest.step('deletes the dest once the last space releases it', async () => {
+        const response = await apiClient.delete(spacePath(path, DEFAULT_SPACE_ID), {
+          headers,
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ acknowledged: true, errors: [] });
+        expect(await esClient.indices.exists({ index: DEST.crossSpace })).toBe(false);
       });
     }
   );
