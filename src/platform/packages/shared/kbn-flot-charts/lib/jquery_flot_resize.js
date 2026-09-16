@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for automatically redrawing plots as the placeholder resizes.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

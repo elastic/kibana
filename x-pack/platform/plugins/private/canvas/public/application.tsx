@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux-v7';
 import type { BehaviorSubject } from 'rxjs';
 
-import '@kbn/flot-charts';
+import $ from '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
 import type { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';

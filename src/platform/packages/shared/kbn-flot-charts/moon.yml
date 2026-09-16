@@ -27,5 +27,6 @@ tags:
 fileGroups:
   src:
     - '**/*.js'
+    - index.d.ts
     - '!target/**/*'
 tasks: {}

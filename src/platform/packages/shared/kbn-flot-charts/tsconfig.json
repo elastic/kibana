@@ -4,7 +4,8 @@
     "outDir": "target/types"
   },
   "include": [
-    "**/*.js"
+    "**/*.js",
+    "index.d.ts"
   ],
   "exclude": [
     "target/**/*",
