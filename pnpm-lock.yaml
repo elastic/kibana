@@ -587,12 +587,18 @@ importers:
       '@kbn/application-usage-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/usage_collection/plugins/application_usage_test
+      '@kbn/as-code-dashboard-schema':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/as-code/dashboard-schema
       '@kbn/as-code-data-views-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/data-views-schema
       '@kbn/as-code-data-views-transforms':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/data-views-transforms
+      '@kbn/as-code-discover-schema':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/as-code/discover-schema
       '@kbn/as-code-export-flyout-component':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/export-flyout-component
@@ -1736,6 +1742,9 @@ importers:
       '@kbn/discover-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/discover
+      '@kbn/discover-session-constants':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-discover-session-constants
       '@kbn/discover-shared-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/discover_shared
@@ -7373,6 +7382,8 @@ importers:
 
   src/platform/packages/private/kbn-data-streams: {}
 
+  src/platform/packages/private/kbn-discover-session-constants: {}
+
   src/platform/packages/private/kbn-dot-text: {}
 
   src/platform/packages/private/kbn-dot-text-loader: {}
@@ -7501,9 +7512,13 @@ importers:
 
   src/platform/packages/private/shared-ux/storybook/config: {}
 
+  src/platform/packages/shared/as-code/dashboard-schema: {}
+
   src/platform/packages/shared/as-code/data-views-schema: {}
 
   src/platform/packages/shared/as-code/data-views-transforms: {}
+
+  src/platform/packages/shared/as-code/discover-schema: {}
 
   src/platform/packages/shared/as-code/export-flyout-component: {}
 
@@ -24604,6 +24619,9 @@ packages:
   third-party-web@0.29.2:
     resolution: {integrity: sha512-fegtha91tq2DHphyoiBXVHjVi2YG9zFaRnboT9C28tO1en9Y3wJsfspuy40F+u5wl3hHVbw7cnd1b67kEGHb8g==}
 
+  third-party-web@0.30.0:
+    resolution: {integrity: sha512-p+PfyL5U0ediGzvwPzMSdD9MnC8rHW6nWJJVLIQvqN7RsSqfaZ+7n4c9GILqH36EYR0eXB9CzAeCRnKFr/9uJg==}
+
   thread-stream@2.7.0:
     resolution: {integrity: sha512-qQiRWsU/wvNolI6tbbCKd9iKaTnCXsTwVxhhKM6nctPdujTyztjlbUkUTUymidWcMnZ5pWR0ej4a0tjsW021vw==}
 
@@ -30707,7 +30725,7 @@ snapshots:
   '@paulirish/trace_engine@0.0.65':
     dependencies:
       legacy-javascript: 0.0.1
-      third-party-web: 0.29.2
+      third-party-web: 0.30.0
 
   '@pdf-lib/standard-fonts@1.0.0':
     dependencies:
@@ -44061,6 +44079,8 @@ snapshots:
       tslib: 2.8.1
 
   third-party-web@0.29.2: {}
+
+  third-party-web@0.30.0: {}
 
   thread-stream@2.7.0:
     dependencies:

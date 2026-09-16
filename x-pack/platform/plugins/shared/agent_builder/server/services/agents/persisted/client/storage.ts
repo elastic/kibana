@@ -54,6 +54,7 @@ const storageSettings = {
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
           ai_indices: types.keyword({}),
+          subagent_ids: types.keyword({}),
         },
         dynamic: false,
       }),
@@ -96,6 +97,7 @@ export interface AgentConfigurationProperties {
   plugin_ids?: string[];
   connector_ids?: string[];
   ai_indices?: string[];
+  subagent_ids?: string[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;
