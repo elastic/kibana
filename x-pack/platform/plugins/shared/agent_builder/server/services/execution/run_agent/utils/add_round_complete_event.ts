@@ -22,7 +22,7 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
-import type { EventActor } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { EventActorType } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
@@ -67,7 +67,10 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
-import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from '../../../conversation/client/rounds_to_events';
+import {
+  ROUND_DERIVED_EVENT_ID_SUFFIXES,
+  userMessageActor,
+} from '../../../conversation/client/rounds_to_events';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
@@ -101,22 +104,15 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
   );
 };
 
-/** Actor for `chat_input` attachment events: mirrors `userMessageActor` from the round's author/origin. */
-const chatInputActor = (round: ConversationRound): EventActor => ({
-  type: round.origin ? EventActorType.external : EventActorType.user,
-  id: round.author?.id ?? 'unknown',
-  ...(round.author?.username ? { username: round.author.username } : {}),
-  ...(round.author?.full_name ? { full_name: round.author.full_name } : {}),
-  ...(round.origin ? { origin: round.origin } : {}),
-});
-
 const buildAttachmentEvents = ({
+  conversation,
   round,
   chatInputChanges,
   executionChanges,
   agentId,
   createdAt,
 }: {
+  conversation: Conversation | undefined;
   round: ConversationRound;
   chatInputChanges: AttachmentChange[];
   executionChanges: AttachmentChange[];
@@ -127,7 +123,7 @@ const buildAttachmentEvents = ({
   return [
     ...attachmentChangesToEvents(chatInputChanges, {
       source: 'chat_input',
-      actor: chatInputActor(round),
+      actor: userMessageActor(conversation, round),
       execution_id: executionId,
       created_at: createdAt,
     }),
@@ -160,6 +156,7 @@ export const addRoundCompleteEvent = ({
   getWorkspaceId,
   chatInputChanges,
   agentId,
+  conversation,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -202,6 +199,12 @@ export const addRoundCompleteEvent = ({
   chatInputChanges: AttachmentChange[];
   /** Agent running this round; actor of the `execution` attachment events. */
   agentId: string;
+  /**
+   * Existing conversation, when this round is on an already-persisted one. Undefined for CREATE.
+   * Used to resolve the `chat_input` actor's fallback to the conversation owner when the round
+   * carries no author.
+   */
+  conversation: Conversation | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(shareReplay());
@@ -270,6 +273,7 @@ export const addRoundCompleteEvent = ({
           }
 
           const attachmentEvents = buildAttachmentEvents({
+            conversation,
             round,
             chatInputChanges,
             executionChanges: attachmentStateManager.drainChanges(),

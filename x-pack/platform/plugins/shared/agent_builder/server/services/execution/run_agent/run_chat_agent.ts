@@ -489,6 +489,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
       chatInputChanges,
       agentId: agentId ?? conversation?.agent_id ?? 'unknown',
+      conversation,
     }),
     evictInternalEvents(),
     shareReplay()

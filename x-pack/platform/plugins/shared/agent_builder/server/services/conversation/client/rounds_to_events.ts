@@ -183,7 +183,7 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
 
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
-  conversation: Conversation,
+  conversation: Pick<Conversation, 'user'> | undefined,
   round: Pick<ConversationRound, 'author' | 'origin'>
 ): EventActor => {
   if (round.author) {
@@ -196,10 +196,18 @@ export const userMessageActor = (
     };
   }
 
+  if (conversation) {
+    return {
+      type: round.origin ? EventActorType.external : EventActorType.user,
+      id: conversation.user.id ?? conversation.user.username,
+      ...(conversation.user.username ? { username: conversation.user.username } : {}),
+      ...(round.origin ? { origin: round.origin } : {}),
+    };
+  }
+
   return {
     type: round.origin ? EventActorType.external : EventActorType.user,
-    id: conversation.user.id ?? conversation.user.username,
-    ...(conversation.user.username ? { username: conversation.user.username } : {}),
+    id: 'unknown',
     ...(round.origin ? { origin: round.origin } : {}),
   };
 };

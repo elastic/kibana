@@ -51,6 +51,7 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
     chatInputChanges: [],
     agentId: 'agent-1',
+    conversation: undefined,
   });
 
   const completedRunEvents = () =>
