@@ -403,7 +403,7 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboard_id\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.",
+              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
@@ -421,16 +421,16 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "alert",
-                  "description": "Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.",
+                  "description": "Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.",
                   "type": "string",
                 },
                 Object {
                   "const": "signal",
-                  "description": "Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.",
+                  "description": "Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.",
                   "type": "string",
                 },
               ],
-              "description": "The kind of the rule.",
+              "description": "Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`).",
             },
             "metadata": Object {
               "$ref": "#/definitions/alerting_rule_metadata",
@@ -439,26 +439,26 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "last_known_status",
-                  "description": "Holds the last known episode status when no data is present.",
+                  "description": "Keeps the alert's last status when the rule finds no data.",
                   "type": "string",
                 },
                 Object {
                   "const": "emit",
-                  "description": "Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API.",
+                  "description": "Not accepted when creating or updating rules. Do not send this value.",
                   "type": "string",
                 },
                 Object {
                   "const": "recover",
-                  "description": "Resolves the alert episode to inactive on the first no-data run.",
+                  "description": "Marks the alert \`inactive\` the first time the rule finds no data for the alert.",
                   "type": "string",
                 },
                 Object {
                   "const": "none",
-                  "description": "No-data situations are ignored (default).",
+                  "description": "Ignores runs where the rule finds no data.",
                   "type": "string",
                 },
               ],
-              "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
+              "description": "How the rule behaves when it finds no data for a group. If you omit this field or set it to \`none\`, those runs are ignored. If you set \`last_known_status\` or \`recover\`, a standalone query (\`query.format: standalone\`) must include \`query.no_data\`. A composed query (\`query.format: composed\`) uses \`query.base\` to detect whether data is present. The \`emit\` value is not accepted when creating or updating rules.",
             },
             "query": Object {
               "$ref": "#/definitions/alerting_rule_query",
@@ -467,21 +467,21 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "no_breach",
-                  "description": "recovers groups that stop breaching (default).",
+                  "description": "Recovers an alert when the breach query no longer returns matches.",
                   "type": "string",
                 },
                 Object {
                   "const": "query",
-                  "description": "uses a custom recovery query to detect recovery.",
+                  "description": "Recovers an alert when a separate recovery query matches. Requires \`query.recovery\`.",
                   "type": "string",
                 },
                 Object {
                   "const": "none",
-                  "description": "disables recovery entirely.",
+                  "description": "The rule never marks an alert as \`recovered\`, even after the breach query stops returning matches.",
                   "type": "string",
                 },
               ],
-              "description": "How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery.",
+              "description": "The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`.",
             },
             "schedule": Object {
               "$ref": "#/definitions/alerting_rule_schedule",
@@ -490,16 +490,16 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "additionalProperties": false,
-                  "description": "Episode state transition thresholds (alert-only).",
+                  "description": "Consecutive-match or time requirements before an alert becomes \`active\` or \`inactive\`. Applies only when \`kind\` is \`alert\`.",
                   "properties": Object {
                     "pending_count": Object {
-                      "description": "Consecutive breaches before transitioning to active.",
+                      "description": "Number of consecutive matches required before the alert becomes \`active\`.",
                       "maximum": 1000,
                       "minimum": 0,
                       "type": "integer",
                     },
                     "pending_operator": Object {
-                      "description": "How to combine count and timeframe for pending.",
+                      "description": "The operator that combines \`pending_count\` and \`pending_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
                       "enum": Array [
                         "AND",
                         "OR",
@@ -507,17 +507,17 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "string",
                     },
                     "pending_timeframe": Object {
-                      "description": "Time window for pending evaluation, e.g. 5m, 15m.",
+                      "description": "Time window used with \`pending_count\`, for example \`5m\` or \`15m\`.",
                       "type": "string",
                     },
                     "recovering_count": Object {
-                      "description": "Consecutive recoveries before transitioning to inactive.",
+                      "description": "Number of consecutive recoveries required before the alert becomes \`inactive\`.",
                       "maximum": 1000,
                       "minimum": 0,
                       "type": "integer",
                     },
                     "recovering_operator": Object {
-                      "description": "How to combine count and timeframe for recovering.",
+                      "description": "The operator that combines \`recovering_count\` and \`recovering_timeframe\`. \`AND\` requires both. \`OR\` requires either.",
                       "enum": Array [
                         "AND",
                         "OR",
@@ -525,7 +525,7 @@ describe('rule template create-rule schema coupling', () => {
                       "type": "string",
                     },
                     "recovering_timeframe": Object {
-                      "description": "Time window for recovering evaluation, e.g. 5m, 15m.",
+                      "description": "Time window used with \`recovering_count\`, for example \`5m\` or \`15m\`.",
                       "type": "string",
                     },
                   },
@@ -538,7 +538,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "time_field": Object {
               "default": "@timestamp",
-              "description": "Time field used for the lookback window range filter.",
+              "description": "Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`.",
               "maxLength": 128,
               "minLength": 1,
               "type": "string",

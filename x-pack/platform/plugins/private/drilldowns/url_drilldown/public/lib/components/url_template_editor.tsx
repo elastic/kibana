@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { css } from '@emotion/react';
-import * as React from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  type ComponentType,
+  type KeyboardEvent,
+} from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { monaco, CodeEditor, HANDLEBARS_LANG_ID, type CodeEditorProps } from '@kbn/code-editor';
 
@@ -27,7 +31,7 @@ export interface UrlTemplateEditorProps {
   onChange: CodeEditorProps['onChange'];
   onEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   placeholder?: string;
-  Editor?: React.ComponentType<CodeEditorProps>;
+  Editor?: ComponentType<CodeEditorProps>;
 }
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
@@ -40,16 +44,19 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   onEditor,
   Editor = CodeEditor,
 }) => {
-  const refEditor = React.useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const handleEditor = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    refEditor.current = editor;
+  const refEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const handleEditor = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      refEditor.current = editor;
 
-    if (onEditor) {
-      onEditor(editor);
-    }
-  }, []);
+      if (onEditor) {
+        onEditor(editor);
+      }
+    },
+    [onEditor]
+  );
 
-  const handleKeyDown = React.useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     const editor = refEditor.current;
     if (!editor) return;
 
@@ -64,7 +71,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!variables) {
       return;
     }

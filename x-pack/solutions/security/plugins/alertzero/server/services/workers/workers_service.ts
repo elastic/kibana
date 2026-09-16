@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -48,12 +50,13 @@ const templateValuesEqual = (
   right: Record<string, unknown>
 ): boolean =>
   left != null &&
-  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
+  Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
@@ -143,7 +146,7 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = patch.autonomyLevel != null || patch.scheduleInterval != null;
+    const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -163,12 +166,10 @@ export class WorkersService {
       if (patch.settingsRevision !== (state?.documentVersion ?? null)) {
         return { outcome: 'conflict' };
       }
-      const currentValues = state?.templateValues
-        ? registration.settings.migrate(state.templateValues).values
-        : registration.settings.createDefaultValues();
-      const applied = registration.settings.applyPatch(currentValues, patch);
-      if ('rejected' in applied) {
-        return { outcome: 'rejected', what: applied.rejected };
+      const currentValues = state?.templateValues ?? registration.settings.createDefaultValues();
+      const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
+      if ('invalid' in applied) {
+        return { outcome: 'invalid', message: applied.invalid };
       }
 
       await installRegisteredWorker(managedWorkflows, registration, {
@@ -245,7 +246,8 @@ export class WorkersService {
     let enabled = false;
     let lastRun: string | null = null;
     let settingsRevision: number | null = null;
-    let values = registration.settings.createDefaultValues();
+    // Defaults stand in for an uninstalled Worker and for one whose stored settings cannot be read.
+    let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
 
@@ -256,8 +258,9 @@ export class WorkersService {
         if (!state?.templateValues) {
           settingsUnavailable = true;
         } else {
+          // Parse before taking the revision so an unreadable document reports revision null.
+          settings = registration.settings.toSettings(state.templateValues);
           settingsRevision = state.documentVersion ?? null;
-          values = registration.settings.migrate(state.templateValues).values;
         }
       } catch (error) {
         settingsUnavailable = true;
@@ -300,7 +303,7 @@ export class WorkersService {
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
-      settings: registration.settings.toSettings(values),
+      settings,
       settingsRevision,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
