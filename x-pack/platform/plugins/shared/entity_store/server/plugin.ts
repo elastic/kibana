@@ -41,7 +41,9 @@ import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
+import { Subject } from 'rxjs';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
+import { subscribeToDualProcessFlag } from './infra/feature_flags';
 
 export class EntityStorePlugin
   implements
@@ -54,6 +56,7 @@ export class EntityStorePlugin
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private readonly stop$ = new Subject<void>();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -146,6 +149,13 @@ export class EntityStorePlugin
       isMigrationEnabled: () => isLegacySecurityAssetsMigrationEnabled(core.featureFlags),
     });
 
+    subscribeToDualProcessFlag({
+      coreStart: core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      stop$: this.stop$,
+    });
+
     const logger = this.logger;
     return {
       createCRUDClient: (esClient, namespace, getWorkflowsClient) => {
@@ -171,5 +181,7 @@ export class EntityStorePlugin
 
   public stop() {
     this.logger.info('Stopping plugin');
+    this.stop$.next();
+    this.stop$.complete();
   }
 }

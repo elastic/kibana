@@ -2264,4 +2264,35 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
     expect(firstQuery).not.toContain(priorityCheckpoint);
     expect(firstQuery).toContain('2025-01-15T09:00:00.000Z');
   });
+
+  it('nonPriority resumes from its own cursor, not from lookbackPeriod', async () => {
+    // After an interrupted run, nonPriorityLogExtractionState holds a live checkpoint.
+    // The non-priority client must resume from that checkpoint, not restart from lookbackPeriod.
+    const { client, mockEngineDescriptorClient } = createContextWithMode(
+      EXTRACTION_MODE.nonPriority
+    );
+    const nonPriorityCheckpoint = '2025-01-15T11:00:00.000Z'; // 1 hour ago — within lookback
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        // Priority cursor is absent (null) — should be ignored entirely.
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: nonPriorityCheckpoint,
+          paginationId: null,
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: null,
+        },
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    // The first query must use the non-priority checkpoint as the from boundary,
+    // proving it read nonPriorityLogExtractionState rather than starting fresh.
+    const firstQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+    expect(firstQuery).toContain(nonPriorityCheckpoint);
+    // And it must not fall back to the lookbackPeriod start (fixedNow − 3h = 09:00).
+    expect(firstQuery).not.toContain('2025-01-15T09:00:00.000Z');
+  });
 });
