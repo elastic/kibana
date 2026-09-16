@@ -115,6 +115,26 @@ describe('evaluateFailures', () => {
     expect(result.real).toEqual([scoutFailure]);
   });
 
+  it('keeps the failure when the merge base already skipped one of several same-titled occurrences', () => {
+    const failure: EvaluableFailure = { kind: 'ftr', file: CASES_FILE, fullTitle: 'a c' };
+    const readFile = readerFor({
+      [`main:${CASES_FILE}`]: `
+        describe.skip('a', () => { it('c', () => {}); });
+        describe.skip('a', () => { it('c', () => {}); });
+      `,
+      // The PR may have un-skipped the first occurrence; a rebase keeps it runnable.
+      [`base:${CASES_FILE}`]: `
+        describe.skip('a', () => { it('c', () => {}); });
+        describe('a', () => { it('c', () => {}); });
+      `,
+    });
+
+    const result = evaluateFailures([failure], { mainRef: 'main', baseRef: 'base', readFile });
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([failure]);
+  });
+
   it('keeps failures without a file location', () => {
     const failure: EvaluableFailure = { kind: 'ftr', file: '', fullTitle: 'something' };
     const result = evaluateFailures([failure], {
