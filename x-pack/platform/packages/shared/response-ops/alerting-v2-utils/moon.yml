@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/i18n'
+  - '@kbn/deeplinks-observability'
 tags:
   - shared-common
   - package
