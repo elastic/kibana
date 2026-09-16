@@ -50,22 +50,25 @@ jest.mock('./take_action_button', () => ({
 }));
 
 const makeRule = (overrides: Partial<SourceRuleData> = {}): SourceRuleData => ({
-    id: 'rule-1',
-    enabled: true,
-    metadata: { name: 'My classic rule', tags: ['tag-a', 'tag-b'] },
-    schedule: { interval: '1m' },
-    created_by: 'elastic',
-    created_at: '2026-01-15T10:00:00.000Z',
-    updated_by: 'admin',
-    updated_at: '2026-06-01T12:00:00.000Z',
-    rule_type_id: '.es-query',
-    consumer: 'stackAlerts',
-    params: {
-      criteria: [{ comparator: '>', threshold: [100] }, { comparator: '<', threshold: [50] }],
-      groupBy: ['host.name', 'service.name'],
-    },
-    alert_delay: { active: 3 },
-    ...overrides,
+  id: 'rule-1',
+  enabled: true,
+  metadata: { name: 'My classic rule', tags: ['tag-a', 'tag-b'] },
+  schedule: { interval: '1m' },
+  created_by: 'elastic',
+  created_at: '2026-01-15T10:00:00.000Z',
+  updated_by: 'admin',
+  updated_at: '2026-06-01T12:00:00.000Z',
+  rule_type_id: '.es-query',
+  consumer: 'stackAlerts',
+  params: {
+    criteria: [
+      { comparator: '>', threshold: [100] },
+      { comparator: '<', threshold: [50] },
+    ],
+    groupBy: ['host.name', 'service.name'],
+  },
+  alert_delay: { active: 3 },
+  ...overrides,
 });
 
 const defaultProps: React.ComponentProps<typeof SourceRuleSummaryFlyout> = {

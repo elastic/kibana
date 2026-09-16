@@ -251,20 +251,11 @@ export const SourceRuleSummaryFlyout = ({
             <h2 data-test-subj="sourceRuleSummaryFlyoutTitle">
               <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <span data-test-subj="sourceRuleName">
-                    {rule.metadata?.name ?? rule.id}
-                  </span>
+                  <span data-test-subj="sourceRuleName">{rule.metadata?.name ?? rule.id}</span>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    wrap={false}
-                    responsive={false}
-                  >
-                    {statusBadge ? (
-                      <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem>
-                    ) : null}
+                  <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+                    {statusBadge ? <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem> : null}
                     <TagsOverflowBadgeRow
                       tags={tags}
                       overflowSize={TAGS_OVERFLOW_SIZE}
@@ -288,9 +279,12 @@ export const SourceRuleSummaryFlyout = ({
             <>
               <EuiTitle size="xxs">
                 <h3>
-                  {i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.ruleConditionsSection', {
-                    defaultMessage: 'Rule conditions',
-                  })}
+                  {i18n.translate(
+                    'xpack.alertingV2.sourceRuleSummaryFlyout.ruleConditionsSection',
+                    {
+                      defaultMessage: 'Rule conditions',
+                    }
+                  )}
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
