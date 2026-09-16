@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
@@ -274,16 +275,16 @@ describe('test endpoint app context services', () => {
       expect(getCurrentUserMock).toHaveBeenCalledTimes(1);
     });
 
-    it('returns undefined when the request is unauthenticated', () => {
+    it("returns the 'unknown' sentinel when the request is unauthenticated", () => {
       startService();
       getCurrentUserMock.mockReturnValue(null);
 
-      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('unknown');
     });
 
-    it('returns undefined when the security plugin is not available', () => {
+    it('returns unknown when the security plugin is not available', () => {
       // no setup/start — `this.security` is null
-      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBeUndefined();
+      expect(service.getCurrentUsername(httpServerMock.createKibanaRequest())).toBe('unknown');
     });
   });
 
@@ -295,8 +296,10 @@ describe('test endpoint app context services', () => {
 
     const startService = () => {
       service = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
       service.setup(createMockEndpointAppContextServiceSetupContract());
-      service.start(createMockEndpointAppContextServiceStartContract());
+      service.start(startContract);
+      return startContract;
     };
 
     beforeEach(() => {
@@ -320,17 +323,42 @@ describe('test endpoint app context services', () => {
     });
 
     it('passes isAutomated: false through to the response actions client factory', () => {
-      startService();
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = startService();
+      startContract.security.authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({ username: 'some-analyst' })
+      );
+      const getCurrentUserMock = startContract.security.authc.getCurrentUser as jest.Mock;
 
       const client = service.getInternalResponseActionsClient({
         spaceId: 'default',
         isAutomated: false,
+        request,
       });
 
       expect(client).toBe(fakeClient);
       expect(responseActionsClientFactoryMock).toHaveBeenCalledTimes(1);
       const [, options] = responseActionsClientFactoryMock.mock.calls[0];
       expect(options.isAutomated).toBe(false);
+      // username is derived from the request's authenticated user, never the 'elastic' default
+      expect(options.username).toBe('some-analyst');
+      expect(getCurrentUserMock).toHaveBeenCalledWith(request);
+    });
+
+    it('derives the unknown sentinel username when the manual-caller request has no user', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = startService();
+      startContract.security.authc.getCurrentUser.mockReturnValue(null);
+
+      service.getInternalResponseActionsClient({
+        spaceId: 'default',
+        isAutomated: false,
+        request,
+      });
+
+      const [, options] = responseActionsClientFactoryMock.mock.calls[0];
+      // distinguishable sentinel — NOT the system user, which would misattribute the action
+      expect(options.username).toBe('unknown');
     });
 
     it('throws if the service was not started', () => {

@@ -152,6 +152,34 @@ export interface ScopedEndpointServices {
 }
 
 /**
+ * Options for {@link EndpointAppContextService#getInternalResponseActionsClient}.
+ *
+ * The option set is a discriminated union on `isAutomated` so that the two usage modes are
+ * each enforced by construction instead of by review discipline:
+ *  - `isAutomated: true` (or omitted) — system/rule-triggered actions (detection-rule response
+ *    actions, the pending-actions task runner). Username defaults to the internal `'elastic'`
+ *    system user, exactly as before this option existed.
+ *  - `isAutomated: false` — analyst/user-initiated actions (e.g. AI Agent skill tools gated
+ *    behind HITL confirmation). A `request` is REQUIRED: the username is derived from the
+ *    authenticated user so the audit trail never silently attributes a manual action to the
+ *    system user. The internal client performs no authz and skips the Enterprise license gate
+ *    (manual actions are not Enterprise-gated), so callers MUST still enforce endpoint
+ *    privileges via `getEndpointAuthz(request)` with the same privilege the equivalent HTTP
+ *    route requires (`withEndpointAuthz(...)`), which carries the license floor.
+ */
+export type GetInternalResponseActionsClientOptions = {
+  spaceId: string;
+  agentType?: ResponseActionAgentType;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskId?: string;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskType?: string;
+} & (
+  | { isAutomated?: true; username?: string; request?: undefined }
+  | { isAutomated: false; request: KibanaRequest; username?: undefined }
+);
+
+/**
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
@@ -471,11 +499,14 @@ export class EndpointAppContextService {
   }
 
   /**
-   * Username of the authenticated user for a request. Used to attribute
-   * agent-dispatched response actions to the initiating analyst for the audit trail.
+   * Username of the authenticated user for a request, or `'unknown'` when the user cannot be
+   * resolved (unauthenticated request, security plugin absent, or service not started) — matching
+   * the `user?.username || 'unknown'` convention of the response actions HTTP routes. Used to
+   * attribute agent-dispatched response actions to the initiating analyst for the audit trail;
+   * never returns the system user (`'elastic'`) for an unresolved caller.
    */
-  public getCurrentUsername(request: KibanaRequest): string | undefined {
-    return this.security?.authc.getCurrentUser(request)?.username;
+  public getCurrentUsername(request: KibanaRequest): string {
+    return this.security?.authc.getCurrentUser(request)?.username ?? 'unknown';
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
@@ -590,31 +621,8 @@ export class EndpointAppContextService {
     taskType,
     spaceId,
     isAutomated = true,
-  }: {
-    spaceId: string;
-    agentType?: ResponseActionAgentType;
-    username?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskId?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskType?: string;
-    /**
-     * Whether the action is system/rule-triggered (`true`, the default — preserves behavior for
-     * detection-rule response actions and the pending-actions task runner) or was requested
-     * directly by an analyst/user (`false` — e.g. AI Agent skill tools gated behind HITL
-     * confirmation). `RESPONSE_ACTIONS_SUPPORT_MAP` gates several actions (isolate, unisolate,
-     * running-processes, scan) as unsupported for `automated` on some agent types, so callers
-     * representing user-initiated actions MUST pass `false`.
-     *
-     * NOTE: when `false`, the client skips the Enterprise license check in
-     * `validateRequest()` (manual actions are not Enterprise-gated — the UI isolate path
-     * is legal on Platinum). The internal client also never applies route-level authz
-     * (no `KibanaRequest`), so callers MUST enforce endpoint privileges themselves via
-     * `getEndpointAuthz(request)` with the same privilege the equivalent HTTP route
-     * requires (`withEndpointAuthz(...)`), which carries the license floor.
-     */
-    isAutomated?: boolean;
-  }): ResponseActionsClient {
+    request,
+  }: GetInternalResponseActionsClientOptions): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
@@ -622,7 +630,7 @@ export class EndpointAppContextService {
     return getResponseActionsClient(agentType, {
       endpointService: this,
       esClient: this.startDependencies.esClient,
-      username,
+      username: isAutomated ? username : this.getCurrentUsername(request as KibanaRequest),
       spaceId,
       isAutomated,
       connectorActions: new NormalizedExternalConnectorClient(
