@@ -134,7 +134,7 @@ export function evaluateFailures(
   const findSkip = (tree: SuiteNode[], failure: EvaluableFailure): SuiteNode | undefined =>
     failure.kind === 'ftr'
       ? findSkipForFullTitle(tree, failure.fullTitle)
-      : findSkipForScoutFailure(tree, failure.suite, failure.title);
+      : findSkipForScoutFailure(tree, failure.suite, failure.title, failure.file);
 
   /** The skip on `mainRef` that explains `failure`, if it is absent at `baseRef`. */
   const findNewSkipOnMain = (failure: EvaluableFailure): SuiteNode | undefined => {

@@ -194,20 +194,27 @@ export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): Sui
 /**
  * Whether a Scout failure (immediate parent `suite` title + test `title`) resolves through a
  * skipped node. Playwright reports the nearest describe only, so match on that pair anywhere
- * in the tree and check the ancestors.
+ * in the tree and check the ancestors. A test outside any describe has Playwright's synthetic
+ * file suite as its parent, titled with the spec path relative to the config's `testDir`; such a
+ * `suite` is matched against `file` (the repo-relative spec path) instead of a describe.
  *
  * Returns the skipped node only when every matching occurrence in the file is skipped.
  */
 export function findSkipForScoutFailure(
   nodes: SuiteNode[],
   suite: string,
-  title: string
+  title: string,
+  file: string
 ): SuiteNode | undefined {
+  const isFileSuite = file === suite || file.endsWith(`/${suite}`);
   return skipIfUnanimous(
     collectMatches(
       nodes,
       true,
-      (node, parent) => node.kind === 'test' && node.title === title && parent?.title === suite
+      (node, parent) =>
+        node.kind === 'test' &&
+        node.title === title &&
+        (parent === undefined ? isFileSuite : parent.title === suite)
     )
   );
 }

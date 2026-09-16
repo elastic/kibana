@@ -189,21 +189,42 @@ describe('findSkipForFullTitle', () => {
 });
 
 describe('findSkipForScoutFailure', () => {
+  const FILE = 'x-pack/platform/plugins/a/test/scout/api/tests/ai_indices.spec.ts';
+
   it('matches a test whose nearest describe is skipped', () => {
     const tree = parseSuiteTree(fixture('scout_ai_indices.after'));
     const match = findSkipForScoutFailure(
       tree,
       'context engine AI indices API',
-      'manages an AI index through its full lifecycle'
+      'manages an AI index through its full lifecycle',
+      FILE
     );
     expect(match?.issue).toBe('https://github.com/elastic/kibana/issues/280639');
     expect(
       findSkipForScoutFailure(
         parseSuiteTree(fixture('scout_ai_indices.before')),
         'context engine AI indices API',
-        'manages an AI index through its full lifecycle'
+        'manages an AI index through its full lifecycle',
+        FILE
       )
     ).toBeUndefined();
+  });
+
+  it('matches a root-level test through the Playwright file suite title', () => {
+    const tree = parseSuiteTree(`
+      test.skip('flaky', async () => {});
+      apiTest('ok', async () => {});
+      test.describe('d', () => { test('flaky', async () => {}); });
+    `);
+    // Playwright titles the file suite with the spec path relative to testDir.
+    expect(findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'flaky', FILE)?.title).toBe(
+      'flaky'
+    );
+    expect(findSkipForScoutFailure(tree, FILE, 'flaky', FILE)?.title).toBe('flaky');
+    expect(findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'ok', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'other.spec.ts', 'flaky', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'indices.spec.ts', 'flaky', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'd', 'flaky', FILE)).toBeUndefined();
   });
 
   it('matches through a skipped grandparent and a skipped test itself', () => {
@@ -216,10 +237,10 @@ describe('findSkipForScoutFailure', () => {
         test('ok', async () => {});
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'inner', 't')?.title).toBe('outer');
-    expect(findSkipForScoutFailure(tree, 'plain', 'flaky')?.title).toBe('flaky');
-    expect(findSkipForScoutFailure(tree, 'plain', 'ok')).toBeUndefined();
-    expect(findSkipForScoutFailure(tree, 'outer', 't')).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'inner', 't', FILE)?.title).toBe('outer');
+    expect(findSkipForScoutFailure(tree, 'plain', 'flaky', FILE)?.title).toBe('flaky');
+    expect(findSkipForScoutFailure(tree, 'plain', 'ok', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'outer', 't', FILE)).toBeUndefined();
   });
 
   it('does not forgive when the same suite/title pair also occurs unskipped', () => {
@@ -231,7 +252,7 @@ describe('findSkipForScoutFailure', () => {
         test.describe('b', () => { test('c', async () => {}); });
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'b', 'c')).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE)).toBeUndefined();
   });
 
   it('forgives when every occurrence of the suite/title pair is skipped', () => {
@@ -243,6 +264,6 @@ describe('findSkipForScoutFailure', () => {
         test.describe.skip('b', () => { test('c', async () => {}); });
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'b', 'c')?.title).toBe('a');
+    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE)?.title).toBe('a');
   });
 });
