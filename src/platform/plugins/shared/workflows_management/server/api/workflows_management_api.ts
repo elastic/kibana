@@ -306,6 +306,7 @@ export class WorkflowsManagementApi {
     'indexAttachment' | 'deleteAttachment'
   > | null = null;
   private smlLogger: Logger | null = null;
+  private readonly pendingSmlUpdates = new Map<string, Promise<void>>();
   private audit: WorkflowManagementAuditLog | null = null;
 
   constructor(
@@ -330,11 +331,17 @@ export class WorkflowsManagementApi {
     this.smlLogger = logger;
   }
 
-  private notifySml(originId: string, action: SmlIndexAction, request: KibanaRequest): void {
+  private notifySml(
+    originId: string,
+    spaceId: string,
+    action: SmlIndexAction,
+    request: KibanaRequest
+  ): void {
     if (!this.smlClient) {
       return;
     }
-    this.smlClient
+    const key = JSON.stringify([spaceId, originId]);
+    const update = this.smlClient
       .indexAttachment({
         request,
         originId,
@@ -346,6 +353,12 @@ export class WorkflowsManagementApi {
           `Failed to ${action} SML index for workflow '${originId}': ${(error as Error).message}`
         );
       });
+    const pending = Promise.all([this.pendingSmlUpdates.get(key), update]).then(() => {
+      if (this.pendingSmlUpdates.get(key) === pending) {
+        this.pendingSmlUpdates.delete(key);
+      }
+    });
+    this.pendingSmlUpdates.set(key, pending);
   }
 
   public async assertWorkflowAccess(
@@ -372,6 +385,8 @@ export class WorkflowsManagementApi {
     await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     if (input.access_mode === 'private') {
+      // Finish earlier public writes before removing their search entries.
+      await this.pendingSmlUpdates.get(JSON.stringify([spaceId, id]));
       await this.smlClient?.deleteAttachment({
         request,
         originId: id,
@@ -380,7 +395,7 @@ export class WorkflowsManagementApi {
         strict: true,
       });
     } else {
-      this.notifySml(id, 'update', request);
+      this.notifySml(id, spaceId, 'update', request);
     }
     return result;
   }
@@ -474,7 +489,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     const result = await this.workflowsService.createWorkflow(workflow, spaceId, request);
-    this.notifySml(result.id, 'create', request);
+    this.notifySml(result.id, spaceId, 'create', request);
     return result;
   }
 
@@ -498,7 +513,7 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      this.notifySml(created.id, 'create', request);
+      this.notifySml(created.id, spaceId, 'create', request);
     }
     const access = await this.workflowsService.getAccessControl();
     return {
@@ -531,7 +546,7 @@ export class WorkflowsManagementApi {
       request,
       { nameFallback: cloneName }
     );
-    this.notifySml(result.id, 'create', request);
+    this.notifySml(result.id, spaceId, 'create', request);
     return result;
   }
 
@@ -556,7 +571,7 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
-    this.notifySml(id, 'update', request);
+    this.notifySml(id, spaceId, 'update', request);
     return result;
   }
 
@@ -582,7 +597,7 @@ export class WorkflowsManagementApi {
       spaceId,
       request
     );
-    this.notifySml(id, 'update', request);
+    this.notifySml(id, spaceId, 'update', request);
     return result;
   }
 
@@ -612,7 +627,7 @@ export class WorkflowsManagementApi {
     });
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
-        this.notifySml(id, 'delete', request);
+        this.notifySml(id, spaceId, 'delete', request);
       }
     }
     return result;

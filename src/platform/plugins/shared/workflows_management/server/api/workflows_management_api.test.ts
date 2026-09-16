@@ -1556,6 +1556,77 @@ steps:
       await expect(update).resolves.toBe(saved);
     });
 
+    it('waits for all pending public SML writes before deleting private workflow entries', async () => {
+      let completeFirst = () => {};
+      let completeSecond = () => {};
+      mockSmlIndex
+        .mockReturnValueOnce(
+          new Promise<void>((resolve) => {
+            completeFirst = resolve;
+          })
+        )
+        .mockReturnValueOnce(
+          new Promise<void>((resolve) => {
+            completeSecond = resolve;
+          })
+        );
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+
+      const update = api.updateAccessControl(
+        'wf-1',
+        'default',
+        { access_mode: 'private' },
+        mockRequest
+      );
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      completeSecond();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      completeFirst();
+      await update;
+      expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['wf-2', 'default'],
+      ['wf-1', 'other-space'],
+    ])('does not wait for SML writes for %s in %s', async (id, spaceId) => {
+      let completeIndex = () => {};
+      mockSmlIndex.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          completeIndex = resolve;
+        })
+      );
+      await api.updateAccessControl(id, spaceId, { access_mode: 'public' }, mockRequest);
+      try {
+        await api.updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest);
+        expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+      } finally {
+        completeIndex();
+      }
+    });
+
+    it('still removes SML entries when a pending public write fails', async () => {
+      let failIndex = (_error: Error) => {};
+      mockSmlIndex.mockReturnValueOnce(
+        new Promise<void>((_resolve, reject) => {
+          failIndex = reject;
+        })
+      );
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+      const update = api.updateAccessControl(
+        'wf-1',
+        'default',
+        { access_mode: 'private' },
+        mockRequest
+      );
+      failIndex(new Error('SML unavailable'));
+      await update;
+      expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+    });
+
     it('surfaces SML deletion failure during a private access update', async () => {
       mockSmlDelete.mockRejectedValue(new Error('SML unavailable'));
       await expect(
