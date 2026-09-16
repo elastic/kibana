@@ -59,15 +59,14 @@ need per-query filtering.
 
 ### Space scoping
 
-Some AI indices also carry a `spaces` keyword field naming the Kibana spaces a KI belongs to.
-Others omit the field entirely, and their KIs are visible from every space.
+Some AI indices carry nested `permissions.kibana.privileges` entries that restrict a KI to named
+Kibana spaces. Others omit that field entirely, and their KIs are visible from every space.
 
-Because of that split, the space condition belongs in the `filter` parameter of `execute_esql`,
-never in a `WHERE` clause: a `WHERE` on `spaces` would discard every KI from the indices that do
-not define the field. When your instructions include an AI INDICES section, pass its exact `filter`
-verbatim as an `execute_esql` argument on every AI-index query below, including memory queries.
-It is already resolved to include unscoped documents and documents assigned to the current space
-or all spaces.
+Because of that split and because the field is nested, the space condition belongs in the `filter`
+parameter of `execute_esql`, never in a `WHERE` clause. When your instructions include an AI
+INDICES section, pass its exact `filter` verbatim as an `execute_esql` argument on every AI-index
+query below, including memory queries. It is already resolved to include unscoped documents and
+documents assigned to the current space or all spaces.
 
 The filter is a tool argument, not part of the ES|QL text, so the query templates below cannot
 show it. Every call pairs the two like this:

@@ -44,9 +44,13 @@ describe('kiRetrievalSkill', () => {
   });
 
   it('documents memory exclusion and recall', () => {
-    expect(kiRetrievalSkill.content).toContain(
-      'type != "memory.session" AND type != "memory.session_fact"'
-    );
+    // Both the FORK+FUSE template and the keyword-only alternative must carry the null-safe
+    // predicate. A single toContain() would pass even if only one template was fixed.
+    expect([
+      ...kiRetrievalSkill.content.matchAll(
+        /type IS NULL OR \(type != "memory\.session" AND type != "memory\.session_fact"\)/g
+      ),
+    ]).toHaveLength(2);
     expect(kiRetrievalSkill.content).toContain('Use `describe_ai_index`');
     expect(kiRetrievalSkill.content).toContain('expires_at IS NULL OR expires_at > NOW()');
     expect(kiRetrievalSkill.content).toContain('INLINE STATS latest_at = MAX(@timestamp) BY id');
@@ -60,17 +64,12 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.indexOf('| WHERE @timestamp == latest_at')).toBeLessThan(
       kiRetrievalSkill.content.indexOf('expires_at IS NULL OR expires_at > NOW()')
     );
-    // Session recall: DESC selects newest memories, ASC presents them chronologically.
-    // updated_at (not @timestamp) is used because it reflects the last-write time on both
-    // index-backed and data-stream destinations; @timestamp stays at creation time for indexes.
-    const sessionSection = kiRetrievalSkill.content.slice(
-      kiRetrievalSkill.content.indexOf('FIELD_EXTRACT(attributes, "memory.session_id")')
-    );
-    expect(sessionSection.indexOf('| SORT updated_at DESC')).toBeLessThan(
-      sessionSection.indexOf('| LIMIT')
-    );
-    expect(sessionSection.indexOf('| LIMIT')).toBeLessThan(
-      sessionSection.indexOf('| SORT @timestamp ASC')
+    // Session recall: DESC selects most recently written memories, ASC presents chronologically.
+    // updated_at (not @timestamp) is used because it reflects last-write time on both destination
+    // types; @timestamp stays at creation time for index-backed memories.
+    // Assert the exact three-line sequence so a missing sort cannot produce a false -1 < n pass.
+    expect(kiRetrievalSkill.content).toContain(
+      '| SORT updated_at DESC\n| LIMIT <n>\n| SORT @timestamp ASC'
     );
   });
 
