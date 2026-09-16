@@ -18,6 +18,7 @@ import {
   addMonitor,
   omitMonitorKeys,
   parseMonitorResponse,
+  saveMonitorInternal,
 } from '../../../common/fixtures/monitors';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
@@ -62,11 +63,10 @@ apiTest.describe(
     });
 
     apiTest(
-      'sets namespace to Kibana space when not set to a custom namespace',
+      'honors an explicitly set namespace, even the default sentinel, for non-internal API calls',
       async ({ apiClient, apiServices, kbnClient }) => {
         const SPACE_ID = `test-space-${uuidv4()}`;
         const SPACE_NAME = `test-space-name ${uuidv4()}`;
-        const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
 
         await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
         try {
@@ -86,10 +86,92 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(res).toHaveStatusCode(200);
+          expect((res.body as Record<string, unknown>).namespace).toBe('default');
+        } finally {
+          await kbnClient.spaces.delete(SPACE_ID);
+        }
+      }
+    );
+
+    apiTest(
+      'sets namespace to the Kibana space for internal (UI) calls that leave it at the default sentinel',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+        const SPACE_NAME = `test-space-name ${uuidv4()}`;
+        const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
+
+        await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        try {
+          const spacePrivateLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+
+          const monitor = {
+            ...httpMonitorFixture,
+            namespace: 'default',
+            locations: [spacePrivateLocation],
+            spaces: [],
+          };
+
+          const res = await saveMonitorInternal(apiClient, editorHeaders, monitor, {
+            spaceId: SPACE_ID,
+          });
           expect((res.body as Record<string, unknown>).namespace).toStrictEqual(EXPECTED_NAMESPACE);
         } finally {
           await kbnClient.spaces.delete(SPACE_ID);
         }
+      }
+    );
+
+    apiTest('creates a monitor with a caller-supplied id in the body', async ({ apiClient }) => {
+      const customId = `custom-monitor-id-${uuidv4()}`;
+      const newMonitor = {
+        ...httpMonitorFixture,
+        locations: [privateLocation],
+      };
+
+      const res = await apiClient.post('api/synthetics/monitors', {
+        headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+        body: { ...newMonitor, id: customId },
+        responseType: 'json',
+      });
+
+      expect(res).toHaveStatusCode(200);
+      expect((res.body as Record<string, unknown>).id).toStrictEqual(customId);
+      expect((res.body as Record<string, unknown>).config_id).toStrictEqual(customId);
+    });
+
+    apiTest(
+      'rejects creating a second monitor that reuses an existing id',
+      async ({ apiClient }) => {
+        const customId = `custom-monitor-id-${uuidv4()}`;
+        const firstName = 'custom-id-collision-first';
+        const secondName = 'custom-id-collision-second';
+        const newMonitor = {
+          ...httpMonitorFixture,
+          locations: [privateLocation],
+        };
+
+        const first = await apiClient.post('api/synthetics/monitors', {
+          headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+          body: { ...newMonitor, id: customId, name: firstName },
+          responseType: 'json',
+        });
+        expect(first).toHaveStatusCode(200);
+
+        const second = await apiClient.post('api/synthetics/monitors', {
+          headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+          body: { ...newMonitor, id: customId, name: secondName },
+          responseType: 'json',
+        });
+        expect(second).toHaveStatusCode(409);
+
+        // the original monitor must be untouched by the rejected second create
+        const getRes = await apiClient.get(`api/synthetics/monitors/${customId}`, {
+          headers: { ...editorHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+          responseType: 'json',
+        });
+        expect(getRes).toHaveStatusCode(200);
+        expect((getRes.body as Record<string, unknown>).name).toBe(firstName);
       }
     );
   }

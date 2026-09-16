@@ -439,16 +439,21 @@ describe('AddNewMonitorsPublicAPI', () => {
 
   describe('normalizeMonitor - maintenance windows', () => {
     const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
-      const syntheticsService = new SyntheticsService({ config: {} } as any);
-      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      const maintenanceWindowsSyntheticsService = new SyntheticsService({ config: {} } as any);
+      maintenanceWindowsSyntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue(maintenanceWindows);
       return {
         api: new AddEditMonitorAPI({
           spaceId: 'default',
-          syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+          syntheticsMonitorClient: new SyntheticsMonitorClient(
+            maintenanceWindowsSyntheticsService,
+            {} as any
+          ),
           request: { body: {} },
         } as any),
         maintenanceWindows,
-        getMaintenanceWindows: syntheticsService.getMaintenanceWindows,
+        getMaintenanceWindows: maintenanceWindowsSyntheticsService.getMaintenanceWindows,
       };
     };
 

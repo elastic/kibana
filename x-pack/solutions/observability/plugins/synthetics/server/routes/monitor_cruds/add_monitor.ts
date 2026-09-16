@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,6 +31,7 @@ import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
+import type { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
 const CreateMonitorQueryParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -67,9 +69,9 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, server, spaceId } = routeContext;
+    const { request, response, server, spaceId, monitorConfigRepository } = routeContext;
     // usually id is auto generated, but this is useful for testing
-    const { id, internal, savedObjectType } = request.query;
+    const { id: queryId, internal, savedObjectType } = request.query;
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -78,6 +80,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       private_locations: privateLocations,
       ...monitor
     } = request.body as CreateMonitorPayLoad;
+
+    // A caller can specify the monitor id directly in the body; the query param is
+    // kept for backwards compatibility. Either way, a colliding id must not silently
+    // overwrite an existing monitor (`syncNewMonitor` otherwise upserts by id).
+    const id = (request.body as CreateMonitorPayLoad & { id?: string }).id || queryId;
 
     if (request.body.origin && request.body.origin !== 'ui') {
       return response.badRequest({
@@ -133,10 +140,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const normalizedMonitor = validationResult.decodedMonitor;
 
-      // Parallelize permission and unique name validation
-      const [err, nameError] = await Promise.all([
+      // Parallelize permission, unique name, and (when a custom id was supplied) id
+      // collision validation
+      const [err, nameError, idConflictError] = await Promise.all([
         validatePermissions(routeContext, normalizedMonitor.locations),
         addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name),
+        id ? monitorIdConflictError(monitorConfigRepository, id) : undefined,
       ]);
 
       if (err) {
@@ -149,6 +158,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (nameError) {
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },
+        });
+      }
+      if (idConflictError) {
+        return response.conflict({
+          body: { message: idConflictError, attributes: { details: idConflictError } },
         });
       }
 
@@ -217,6 +231,21 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     }
   },
 });
+
+const monitorIdConflictError = async (
+  monitorConfigRepository: MonitorConfigRepository,
+  id: string
+): Promise<string | undefined> => {
+  try {
+    await monitorConfigRepository.get(id);
+    return i18n.translate('xpack.synthetics.createMonitor.validation.idConflict', {
+      defaultMessage: 'Monitor with id "{id}" already exists.',
+      values: { id },
+    });
+  } catch (e) {
+    return undefined;
+  }
+};
 
 export const invalidOriginError = (origin: string) => {
   return i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicOriginError', {
