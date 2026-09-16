@@ -29,7 +29,13 @@ import {
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const updateActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
@@ -42,6 +48,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Partially update an action policy.',
     description:
       'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',

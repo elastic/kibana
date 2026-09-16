@@ -62,26 +62,36 @@ describe('buildImprovementId', () => {
   const proposal = { action: 'remove_workflow' as const, target: { workflow_id: 'wf-1' } };
 
   it('is stable across runs, so a re-proposal appends a revision instead of duplicating', () => {
-    expect(buildImprovementId({ aiIndexId: 'sales', ...proposal })).toBe(
-      buildImprovementId({ aiIndexId: 'sales', ...proposal })
+    expect(buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal })).toBe(
+      buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal })
     );
   });
 
   it('is scoped to the AI index', () => {
-    expect(buildImprovementId({ aiIndexId: 'sales', ...proposal })).not.toBe(
-      buildImprovementId({ aiIndexId: 'support', ...proposal })
+    expect(buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal })).not.toBe(
+      buildImprovementId({ spaceId: 'default', aiIndexId: 'support', ...proposal })
     );
+  });
+
+  it('is scoped to the space: same proposal, two spaces, two lineages', () => {
+    const inDefault = buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal });
+    const alsoDefault = buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal });
+    const inOther = buildImprovementId({ spaceId: 'other', aiIndexId: 'sales', ...proposal });
+    expect(inDefault).toBe(alsoDefault);
+    expect(inDefault).not.toBe(inOther);
   });
 
   it('cannot be collided by splicing the AI index id into the fingerprint', () => {
     expect(
       buildImprovementId({
+        spaceId: 'default',
         aiIndexId: 'a',
         action: 'remove_workflow',
         target: { workflow_id: 'b' },
       })
     ).not.toBe(
       buildImprovementId({
+        spaceId: 'default',
         aiIndexId: 'a:remove_workflow',
         action: 'remove_workflow',
         target: { workflow_id: 'b' },
@@ -90,6 +100,8 @@ describe('buildImprovementId', () => {
   });
 
   it('is a short lowercase hex digest', () => {
-    expect(buildImprovementId({ aiIndexId: 'sales', ...proposal })).toMatch(/^[0-9a-f]{32}$/);
+    expect(buildImprovementId({ spaceId: 'default', aiIndexId: 'sales', ...proposal })).toMatch(
+      /^[0-9a-f]{32}$/
+    );
   });
 });
