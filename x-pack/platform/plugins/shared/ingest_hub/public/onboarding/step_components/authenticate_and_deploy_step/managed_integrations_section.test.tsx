@@ -83,6 +83,18 @@ function setupMocks({
     setConnectorId,
     setStaticKeys,
     authenticateAndDeployStep: { connectorId, authMethod },
+    awsServicesMap: new Map([
+      [
+        'guardduty',
+        {
+          id: 'guardduty',
+          packageName: 'aws',
+          dataStreams: ['guardduty'],
+          inputs: ['aws-s3', 'httpjson'],
+          identityFederationSupported: true,
+        },
+      ],
+    ]),
   });
 
   MockIdentityFederation.mockImplementation(
@@ -158,6 +170,8 @@ function renderSection(
       <React.Suspense fallback={<div>Loading...</div>}>
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
+          serviceIds={['guardduty']}
+          serviceVars={{}}
           showIdentityFederation={props.showIdentityFederation ?? true}
           onDeploy={props.onDeploy ?? jest.fn()}
           isDeploying={props.isDeploying ?? false}
@@ -300,6 +314,22 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('initial-connector-id')).toHaveTextContent('persisted-connector');
     });
 
+    it('passes IaC render integrations for selected managed services', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+      expect(MockIdentityFederation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] }],
+            },
+          ],
+        }),
+        expect.anything()
+      );
+    });
+
     it('passes initialConnectorId after accordion collapse and reopen', () => {
       setupMocks({ connectorId: 'persisted-connector' });
       renderSection({ showIdentityFederation: true });
@@ -379,6 +409,8 @@ describe('ManagedIntegrationsSection', () => {
             <React.Suspense fallback={<div>Loading...</div>}>
               <ManagedIntegrationsSection
                 serviceCount={3}
+                serviceIds={['guardduty']}
+                serviceVars={{}}
                 showIdentityFederation={true}
                 onDeploy={jest.fn()}
                 isDeploying={false}
