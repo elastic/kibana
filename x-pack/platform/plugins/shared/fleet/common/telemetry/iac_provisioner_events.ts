@@ -138,9 +138,11 @@ export type IacKeyVerificationOutcome =
 export type IacKeySurface = 'onboarding' | 'flyout';
 /**
  * update_stack_clicked: the callout's Update button; redeploy_clicked: the flyout's "Redeploy
- * CloudFormation stack" (a forced render, offered regardless of the upgrade status).
+ * CloudFormation stack" (a forced render for an identity with a stack ARN on record);
+ * launch_clicked: the flyout's "Launch CloudFormation" (create-stack render for an identity with
+ * no stack ARN on record).
  */
-export type IacKeyCheckAction = 'update_stack_clicked' | 'redeploy_clicked';
+export type IacKeyCheckAction = 'update_stack_clicked' | 'redeploy_clicked' | 'launch_clicked';
 export type IacKeyCheckReason = 'no_key' | 'key_mismatch';
 
 export interface IacKeyVerificationCompletedFields {
@@ -237,14 +239,14 @@ export const IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT: EventTypeOpts<IacKeyCheckAc
       type: 'keyword',
       _meta: {
         description:
-          'What the user clicked: update_stack_clicked opens the CloudFormation console with the freshly rendered template from the upgrade callout; redeploy_clicked does the same from the flyout\'s "Redeploy CloudFormation stack" action, which is offered even when the stack is current.',
+          'What the user clicked: update_stack_clicked opens the CloudFormation console with the freshly rendered template from the upgrade callout; redeploy_clicked does the same from the flyout\'s "Redeploy CloudFormation stack" action, which is offered even when the stack is current; launch_clicked is the flyout\'s "Launch CloudFormation" (create-stack quick-create) for an identity with no stack ARN on record.',
       },
     },
     reason: {
       type: 'keyword',
       _meta: {
         description:
-          'Why the callout was shown: no_key (static template deployed) or key_mismatch (deployed template differs from the current render). For redeploy_clicked, which has no callout, it reports whether the connector had a stored key (key_mismatch) or not (no_key).',
+          'Why the callout was shown: no_key (static template deployed) or key_mismatch (deployed template differs from the current render). For redeploy_clicked and launch_clicked, which have no callout, it reports whether the connector had a stored key (key_mismatch) or not (no_key).',
       },
     },
     hasDeploymentId: {

@@ -73,5 +73,6 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',
   IAC_UPDATE_STACK_BUTTON: 'cloudConnectorIacUpdateStackButton',
   IAC_REDEPLOY_BUTTON: 'cloudConnectorIacRedeployButton',
+  IAC_LAUNCH_BUTTON: 'cloudConnectorIacLaunchButton',
   IAC_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacTemplateErrorCallout',
 };

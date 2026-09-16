@@ -30,6 +30,7 @@ jest.mock('../hooks/use_get_cloud_connectors');
 jest.mock('../../../hooks', () => ({
   useIacProvisioner: jest.fn(),
   useStartServices: jest.fn(),
+  useGetPackageInfoByKeyQuery: jest.fn().mockReturnValue({ data: undefined }),
 }));
 jest.mock('../hooks/use_verify_iac_key', () => ({
   useVerifyIacKey: jest.fn().mockReturnValue({ data: undefined }),

@@ -60,6 +60,7 @@ import {
 } from '../hooks/use_cloud_connector_template';
 import { GCP_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import {
+  getAnyCloudConnectorIacTemplateUrl,
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
@@ -70,7 +71,8 @@ import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
 import { IacTemplateDetails } from '../components/iac_template_details';
 import { IacUpgradeCallout } from '../components/iac_upgrade_callout';
-import { useIacProvisioner, useStartServices } from '../../../hooks';
+import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
+import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -98,7 +100,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   iacUpgradeCheckedAt,
 }) => {
   const { application } = useKibana().services;
-  const { analytics, http } = useStartServices();
+  const { analytics, http, cloud } = useStartServices();
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const queryClient = useQueryClient();
 
@@ -116,8 +118,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
   const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
+  // Never a malformed ARN: Launch is offered exactly while the field is invalid, and its render
+  // writes this alongside the key.
   const iacDeploymentIdToSave =
-    showIac && editedIacDeploymentId && editedIacDeploymentId !== (iacDeploymentId ?? '')
+    showIac &&
+    editedIacDeploymentId &&
+    !deploymentIdInvalid &&
+    editedIacDeploymentId !== (iacDeploymentId ?? '')
       ? editedIacDeploymentId
       : undefined;
 
@@ -188,17 +195,38 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [cloudConnectorId, http, iacDeploymentIdToSave, queryClient]
   );
 
-  const { launchButtonProps, isGeneratingTemplate, templateGenerationError } =
-    useCloudConnectorTemplate({
-      provider: AWS_PROVIDER,
-      accountType: accountType ?? 'single-account',
-      integrations: verification?.integrations,
-      deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
-      // This identity already has a generated template; sending the user to the static one
-      // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
-      staticTemplateFallback: false,
-      onTemplateRendered,
-    });
+  // Without a stack ARN the hook lands the rendered template on the package's quick-create
+  // console URL (create stack) instead of the update-stack deep link; that scaffold needs the aws
+  // package's iac_template_url and the cloud context, as the onboarding provides them.
+  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
+    'aws',
+    undefined,
+    { full: true },
+    // The template URL only changes on a package upgrade; do not hit EPR on every flyout open.
+    { enabled: showIac, staleTime: 5 * 60 * 1000 }
+  );
+  const iacTemplateUrl = useMemo(
+    () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
+    [awsPackageResponse]
+  );
+
+  const {
+    launchButtonProps,
+    isDisabled: isLaunchDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+  } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
+    cloud,
+    accountType: accountType ?? 'single-account',
+    iacTemplateUrl,
+    integrations: verification?.integrations,
+    deploymentId: deploymentIdInvalid ? undefined : editedIacDeploymentId || undefined,
+    // This identity already has a generated template; sending the user to the static one
+    // would downgrade it (https://github.com/elastic/ingest-dev/issues/9415).
+    staticTemplateFallback: false,
+    onTemplateRendered,
+  });
 
   const hasRenderableIntegrations = Boolean(verification?.integrations?.length);
   const hasValidDeploymentId = Boolean(editedIacDeploymentId) && !deploymentIdInvalid;
@@ -209,13 +237,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         surface: 'flyout',
         action,
         reason: iacKey ? 'key_mismatch' : 'no_key',
-        hasDeploymentId: Boolean(editedIacDeploymentId),
+        hasDeploymentId: hasValidDeploymentId,
       });
       if ('onClick' in launchButtonProps) {
         launchButtonProps.onClick();
       }
     },
-    [analytics, editedIacDeploymentId, iacKey, launchButtonProps]
+    [analytics, hasValidDeploymentId, iacKey, launchButtonProps]
   );
 
   // The stored status alone drives the callout: nothing in the flyout compares templates, and
@@ -227,6 +255,14 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   // then (https://github.com/elastic/ingest-dev/issues/9415).
   const showRedeploy =
     showIac && !showUpgradeCallout && hasRenderableIntegrations && hasValidDeploymentId;
+  // With no stack ARN on record (legacy identity, or an ARN never saved) there is no stack to
+  // update: Launch creates one from the current template, which also moves the identity onto the
+  // generated template once the render writes its key.
+  const showLaunch =
+    showIac && !showUpgradeCallout && hasRenderableIntegrations && !hasValidDeploymentId;
+  // With the provisioner on the hook never disables the button, but the quick-create landing
+  // still needs the scaffold only `cloud` and the package template URL provide.
+  const isLaunchUnavailable = isLaunchDisabled || !cloud || !iacTemplateUrl;
 
   const handleDeleteConnector = useCallback(() => {
     setIsDeleteModalVisible(true);
@@ -460,9 +496,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               isDeploymentIdInvalid={deploymentIdInvalid}
               onIacDeploymentIdChange={setEditedIacDeploymentId}
               // One stack action at a time: the upgrade callout's Update while an update is
-              // pending, Redeploy otherwise. The render error follows whichever is shown.
+              // pending; otherwise Redeploy with a stack ARN on record, Launch without one. The
+              // render error follows whichever is shown.
               actions={
-                showUpgradeCallout || showRedeploy ? (
+                showUpgradeCallout || showRedeploy || showLaunch ? (
                   <>
                     {showUpgradeCallout ? (
                       <IacUpgradeCallout
@@ -472,6 +509,33 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                         isUpdating={isGeneratingTemplate}
                         onUpdateStack={() => launchTemplate('update_stack_clicked')}
                       />
+                    ) : showLaunch ? (
+                      <>
+                        <LaunchCloudFormationButton
+                          // showIac implies the provisioner is on, so the hook always launches
+                          // through onClick here; the telemetry wrapper is the only addition.
+                          launchButtonProps={{
+                            onClick: async () => launchTemplate('launch_clicked'),
+                          }}
+                          isLoading={isGeneratingTemplate}
+                          isDisabled={isLaunchUnavailable}
+                          data-test-subj={
+                            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON
+                          }
+                          errorCalloutTestSubj={
+                            CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT
+                          }
+                        />
+                        <EuiSpacer size="xs" />
+                        <EuiText size="xs" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.fleet.cloudConnector.policiesFlyout.launchHelp"
+                              defaultMessage="This identity has no CloudFormation stack on record: it predates generated templates or its stack ARN was never saved. If the stack already exists, paste its StackId below and save, then use Redeploy. Otherwise Launch creates a stack from the current template; paste the new stack's StackId below and save."
+                            />
+                          </p>
+                        </EuiText>
+                      </>
                     ) : (
                       <>
                         <EuiButton

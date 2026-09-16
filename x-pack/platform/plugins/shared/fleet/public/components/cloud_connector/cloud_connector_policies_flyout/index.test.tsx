@@ -26,8 +26,9 @@ import {
   useCloudConnectorTemplate,
   type TemplateRendered,
 } from '../hooks/use_cloud_connector_template';
-import { useIacProvisioner, useStartServices } from '../../../hooks';
+import { useGetPackageInfoByKeyQuery, useIacProvisioner, useStartServices } from '../../../hooks';
 import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
+import { getAnyCloudConnectorIacTemplateUrl } from '../utils';
 
 import { CloudConnectorPoliciesFlyout } from '.';
 
@@ -46,6 +47,11 @@ jest.mock('../hooks/use_cloud_connector_template');
 jest.mock('../../../hooks', () => ({
   useIacProvisioner: jest.fn(),
   useStartServices: jest.fn(),
+  useGetPackageInfoByKeyQuery: jest.fn(),
+}));
+jest.mock('../utils', () => ({
+  ...jest.requireActual('../utils'),
+  getAnyCloudConnectorIacTemplateUrl: jest.fn(),
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -70,6 +76,18 @@ const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useS
 const mockSendVerify = sendVerifyCloudConnectorIacKey as jest.MockedFunction<
   typeof sendVerifyCloudConnectorIacKey
 >;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+  typeof useGetPackageInfoByKeyQuery
+>;
+const mockGetAnyCloudConnectorIacTemplateUrl =
+  getAnyCloudConnectorIacTemplateUrl as jest.MockedFunction<
+    typeof getAnyCloudConnectorIacTemplateUrl
+  >;
+
+const QUICK_CREATE_TEMPLATE_URL =
+  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic.example/static.yml';
+const AWS_PACKAGE_ITEM = { name: 'aws', version: '9.0.0' };
+const mockCloud = { isCloudEnabled: true, cloudId: 'cid' };
 
 const VALID_STACK_ARN =
   'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/guid-guid-guid';
@@ -131,9 +149,16 @@ describe('CloudConnectorPoliciesFlyout', () => {
     mockUseStartServices.mockReturnValue({
       analytics: { reportEvent: mockReportEvent },
       http: mockHttp,
+      cloud: mockCloud,
     } as unknown as ReturnType<typeof useStartServices>);
 
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+
+    mockUseGetPackageInfoByKeyQuery.mockReturnValue({
+      data: { item: AWS_PACKAGE_ITEM },
+    } as unknown as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    mockGetAnyCloudConnectorIacTemplateUrl.mockReset();
+    mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(QUICK_CREATE_TEMPLATE_URL);
 
     mockUseCloudConnectorUsage.mockReturnValue({
       data: { items: mockUsageData, total: mockUsageData.length, page: 1, perPage: 10 },
@@ -1624,6 +1649,19 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(screen.getByText('boom')).toBeInTheDocument();
     });
 
+    it('is not offered alongside Launch', () => {
+      currentVerdict();
+
+      renderFlyout({ provider: 'aws', iacKey: 'sha256:current', iacUpgradeStatus: 'up_to_date' });
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON)
+      ).toBeInTheDocument();
+    });
+
     it('shows the render error once, under the callout, while an update is pending', () => {
       mockUseVerifyIacKey.mockReturnValue({
         data: { matches: false, reason: 'key_mismatch', outcome: 'key_mismatch', integrations },
@@ -1654,6 +1692,250 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(
         screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON)
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Launch CloudFormation (no stack ARN on record)', () => {
+    // A legacy identity (no iac_deployment_id, often no iac_key) or one whose ARN was never saved
+    // has no stack to update; Launch creates one from the current template
+    // (https://github.com/elastic/ingest-dev/issues/9415).
+    const integrations = [
+      { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
+    ];
+    const setRead = () =>
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'not_checked', integrations },
+        isFetching: false,
+        refetch: jest.fn(),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+    const LAUNCH = CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_LAUNCH_BUTTON;
+    const REDEPLOY = CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_REDEPLOY_BUTTON;
+
+    it('is offered, with its help text, for a legacy identity with neither key nor stack ARN', () => {
+      setRead();
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(screen.getByTestId(LAUNCH)).toBeEnabled();
+      expect(screen.getByTestId(LAUNCH)).toHaveTextContent('Launch CloudFormation');
+      expect(screen.getByText(/no CloudFormation stack on record/)).toBeInTheDocument();
+      expect(screen.queryByTestId(REDEPLOY)).not.toBeInTheDocument();
+      // Inside the stack details section, above the Deployment ID field the user fills afterwards.
+      const section = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION);
+      const domOrder = Array.from(section.querySelectorAll('*'));
+      expect(domOrder.indexOf(screen.getByTestId(LAUNCH))).toBeLessThan(
+        domOrder.indexOf(
+          screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT)
+        )
+      );
+    });
+
+    it('is offered while the typed stack ARN is invalid, and gives way to Redeploy once it is valid', async () => {
+      setRead();
+
+      renderFlyout({ provider: 'aws', iacKey: 'sha256:current' });
+      const input = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
+      );
+
+      fireEvent.change(input, { target: { value: 'not-an-arn' } });
+      expect(screen.getByTestId(LAUNCH)).toBeInTheDocument();
+      expect(screen.queryByTestId(REDEPLOY)).not.toBeInTheDocument();
+
+      fireEvent.change(input, { target: { value: VALID_STACK_ARN } });
+      await waitFor(() => expect(screen.getByTestId(REDEPLOY)).toBeInTheDocument());
+      expect(screen.queryByTestId(LAUNCH)).not.toBeInTheDocument();
+    });
+
+    it('is not offered while the upgrade callout shows: Update is the action then', () => {
+      setRead();
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId(LAUNCH)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(REDEPLOY)).not.toBeInTheDocument();
+    });
+
+    it('is not offered when the identity has no renderable integrations', () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'not_checked', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(screen.queryByTestId(LAUNCH)).not.toBeInTheDocument();
+    });
+
+    it('hands the hook the quick-create scaffold (cloud + package template URL) and no deploymentId', () => {
+      setRead();
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(mockUseGetPackageInfoByKeyQuery).toHaveBeenCalledWith(
+        'aws',
+        undefined,
+        { full: true },
+        // The URL only changes on a package upgrade: re-opening the flyout must not hit EPR.
+        { enabled: true, staleTime: 5 * 60 * 1000 }
+      );
+      expect(mockGetAnyCloudConnectorIacTemplateUrl).toHaveBeenCalledWith(AWS_PACKAGE_ITEM);
+      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provider: 'aws',
+          cloud: mockCloud,
+          iacTemplateUrl: QUICK_CREATE_TEMPLATE_URL,
+          integrations,
+          deploymentId: undefined,
+          staticTemplateFallback: false,
+        })
+      );
+    });
+
+    it('does not fetch the aws package outside the IaC section', () => {
+      renderFlyout({
+        provider: 'azure',
+        cloudConnectorVars: {
+          tenant_id: { value: 'tenant-123' },
+          azure_credentials_cloud_connector_id: { value: 'subscription-123' },
+        },
+      });
+
+      expect(mockUseGetPackageInfoByKeyQuery).toHaveBeenCalledWith(
+        'aws',
+        undefined,
+        { full: true },
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('is disabled when the package has no template URL to scaffold the quick-create link', () => {
+      setRead();
+      mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(screen.getByTestId(LAUNCH)).toBeDisabled();
+    });
+
+    it('is disabled without the cloud context', () => {
+      setRead();
+      mockUseStartServices.mockReturnValue({
+        analytics: { reportEvent: mockReportEvent },
+        http: mockHttp,
+        cloud: undefined,
+      } as unknown as ReturnType<typeof useStartServices>);
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(screen.getByTestId(LAUNCH)).toBeDisabled();
+    });
+
+    it('click renders, writes the key (moving the identity onto the generated template), re-checks once and reports launch_clicked', async () => {
+      const user = userEvent.setup();
+      setRead();
+      mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => ({
+        launchButtonProps: {
+          onClick: async () => {
+            mockLaunchOnClick();
+            onTemplateRendered?.({ key: 'sha256:new', integrations, ...RENDERED_BLUEPRINT });
+          },
+        },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        isIacProvisionerEnabled: true,
+      }));
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+      renderFlyout({ provider: 'aws' });
+      await user.click(screen.getByTestId(LAUNCH));
+
+      expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({
+          surface: 'flyout',
+          action: 'launch_clicked',
+          reason: 'no_key',
+          hasDeploymentId: false,
+        })
+      );
+      await waitFor(() => {
+        expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-123', {
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        });
+      });
+      await waitFor(() => expect(mockSendVerify).toHaveBeenCalledWith('connector-123', {}));
+      expect(mockSendVerify).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(invalidateQueries).toHaveBeenCalledWith(['get-cloud-connectors']);
+      });
+      expect(invalidateQueries).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-123']);
+    });
+
+    it('shows the render error once under the button', () => {
+      setRead();
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: mockLaunchOnClick },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        templateGenerationError: 'boom',
+        isIacProvisionerEnabled: true,
+      });
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(
+        screen.getAllByTestId(
+          CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT
+        )
+      ).toHaveLength(1);
+      expect(screen.getByText('boom')).toBeInTheDocument();
+    });
+
+    it('never persists a malformed ARN typed before Launch, and reports hasDeploymentId false', async () => {
+      // Launch is offered exactly while the field is invalid; the render's write must not carry
+      // the invalid value along with the key.
+      const user = userEvent.setup();
+      setRead();
+      mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => ({
+        launchButtonProps: {
+          onClick: async () => {
+            onTemplateRendered?.({ key: 'sha256:new', integrations, ...RENDERED_BLUEPRINT });
+          },
+        },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        isIacProvisionerEnabled: true,
+      }));
+
+      renderFlyout({ provider: 'aws' });
+      fireEvent.change(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT),
+        { target: { value: 'not-an-arn' } }
+      );
+      await user.click(screen.getByTestId(LAUNCH));
+
+      await waitFor(() => expect(mockUpdateCloudConnector).toHaveBeenCalledTimes(1));
+      expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-123', {
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+      expect(mockUpdateCloudConnector.mock.calls[0][2]).not.toHaveProperty('iac_deployment_id');
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({ action: 'launch_clicked', hasDeploymentId: false })
+      );
     });
   });
 });
