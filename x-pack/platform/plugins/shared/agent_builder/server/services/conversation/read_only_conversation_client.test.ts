@@ -62,6 +62,24 @@ describe('createConversationPublicClient', () => {
     expect(result).toEqual(listResult);
   });
 
+  it('delegates search() to the internal conversation client', async () => {
+    const conversations = [createEmptyConversation({ id: 'conv-1' })].map(
+      ({ rounds, ...withoutRounds }) => withoutRounds
+    );
+    const searchResult = { results: conversations, total: conversations.length };
+    internalClient.search.mockResolvedValue(searchResult);
+
+    const options = {
+      query: 'payment',
+      filter: 'attachment_type: alert',
+      sort: { field: 'created_at', order: 'desc' },
+    } as const;
+    const result = await publicClient.search(options);
+
+    expect(internalClient.search).toHaveBeenCalledWith(options);
+    expect(result).toEqual(searchResult);
+  });
+
   describe('create()', () => {
     beforeEach(() => {
       internalClient.exists.mockResolvedValue(false);
@@ -122,7 +140,7 @@ describe('createConversationPublicClient', () => {
 
   it('does not expose update, delete, upsertRound, or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
-    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'create']));
+    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'search', 'create']));
     expect(clientKeys).not.toContain('update');
     expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
