@@ -1212,6 +1212,11 @@ export const replaceRuleBodySchema = lazySchema(() =>
       path: ['query', 'no_data'],
     })
     .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+    .refine(isRecoveryTransitionConsistentWithStrategy, {
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      path: ['state_transition', 'recovering_count'],
+    })
     .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
     .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
     .refine(isQueryProvidedWithoutBuilderFields, {
