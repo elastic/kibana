@@ -209,7 +209,7 @@ steps:
   - name: record_entry
     type: data.set
     with:
-      declined: "${{ steps.propose_entry.output.status == 'dismissed' }}"
+      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
 
   # A declined review still retires its alerts, or the next sweep would open the
   # same entry gate for the same alerts again.
@@ -648,20 +648,27 @@ steps:
         impact: low
         confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
-  # The gate reports `succeeded` once the action ran, `approved` for a manual
-  # proposal, `dismissed` otherwise. Spelled out per outcome rather than derived
-  # from a single flag so a run that never proposed (no diagnosis) matches none of
-  # them and leaves the alerts untagged.
+  # The gate reports its outcome on two independent axes: `decision` is what the
+  # analyst concluded (`approved` / `dismissed`, absent until someone decides),
+  # and `status` is how far it got (`succeeded` once the action ran, `no_action`
+  # when there was nothing to run, `expired` when nobody answered). Spelled out
+  # per outcome rather than derived from a single flag so a run that never
+  # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
+  #
+  # NOTE: `approved` still reads `succeeded` for the action path, so a decision
+  # the analyst approved but whose patch failed counts as not approved. The
+  # decision axis can now tell those apart — left as-is here because this change
+  # is only migrating the renamed values.
   - name: record_proposal_action_decision
     type: data.set
     with:
       applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
       approved: >-
         ${{ steps.propose_action.output.status == 'succeeded'
-          or steps.propose_manual.output.status == 'approved' }}
+          or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
-        ${{ steps.propose_action.output.status == 'dismissed'
-          or steps.propose_manual.output.status == 'dismissed' }}
+        ${{ steps.propose_action.output.decision == 'dismissed'
+          or steps.propose_manual.output.decision == 'dismissed' }}
 
   ### this is temporray, unitl excepion/rule score proposals is implemented
   - name: review_tuning
@@ -797,7 +804,7 @@ steps:
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.status == 'approved' }}
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.decision == 'approved' }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:

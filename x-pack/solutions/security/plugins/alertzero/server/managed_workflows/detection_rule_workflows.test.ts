@@ -496,7 +496,7 @@ describe('detection rule workflows', () => {
         expect(acknowledged.if).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'manual'"
         );
-        expect(acknowledged.if).toContain("steps.propose_manual.output.status == 'approved'");
+        expect(acknowledged.if).toContain("steps.propose_manual.output.decision == 'approved'");
         expect(acknowledged.if).not.toContain('review_tuning');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -507,11 +507,12 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The applied tag must mean the gate actually ran the edit-rule action: it
-      // reports `succeeded` only after the action completed, `approved` for a manual
-      // proposal, `dismissed` otherwise. A run that never proposed matches none of
-      // them, so its alerts stay untagged and a later sweep can retry them.
-      it('derives every decision flag from the gate status', () => {
+      // The applied tag must mean the gate actually ran the edit-rule action, so it
+      // reads `status == 'succeeded'`. What the analyst concluded is a separate axis:
+      // `decision` is `approved` or `dismissed`, and is absent until someone decides
+      // — so a run that never proposed matches none of these, leaving its alerts
+      // untagged for a later sweep to retry.
+      it('derives every decision flag from the gate outcome', () => {
         const decision = reviewSteps.find(
           ({ name }) => name === 'record_proposal_action_decision'
         )!;
@@ -524,13 +525,13 @@ describe('detection rule workflows', () => {
           "steps.propose_action.output.status == 'succeeded'"
         );
         expect(String(flags.approved)).toContain(
-          "steps.propose_manual.output.status == 'approved'"
+          "steps.propose_manual.output.decision == 'approved'"
         );
         expect(String(flags.dismissed)).toContain(
-          "steps.propose_action.output.status == 'dismissed'"
+          "steps.propose_action.output.decision == 'dismissed'"
         );
         expect(String(flags.dismissed)).toContain(
-          "steps.propose_manual.output.status == 'dismissed'"
+          "steps.propose_manual.output.decision == 'dismissed'"
         );
 
         // record_outcome reads from record_apply_results to avoid Liquid parentheses;
