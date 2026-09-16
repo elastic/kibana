@@ -468,7 +468,15 @@ describe('RulesClient', () => {
         const client = createClient();
         // The uniqueness find returns an existing rule with the same signature_id.
         rulesSavedObjectService.find.mockResolvedValueOnce({
-          saved_objects: [{ id: 'existing-rule', attributes: baseSoAttrs, references: [], score: 0, type: RULE_SAVED_OBJECT_TYPE }],
+          saved_objects: [
+            {
+              id: 'existing-rule',
+              attributes: baseSoAttrs,
+              references: [],
+              score: 0,
+              type: RULE_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
           page: 1,
           per_page: 1,
@@ -1880,7 +1888,15 @@ describe('RulesClient', () => {
       it('rejects with 409 RULE_ALREADY_EXISTS when signature_id collides in the create branch', async () => {
         const client = createClient();
         rulesSavedObjectService.find.mockResolvedValueOnce({
-          saved_objects: [{ id: 'other-rule', attributes: baseSoAttrs, references: [], score: 0, type: RULE_SAVED_OBJECT_TYPE }],
+          saved_objects: [
+            {
+              id: 'other-rule',
+              attributes: baseSoAttrs,
+              references: [],
+              score: 0,
+              type: RULE_SAVED_OBJECT_TYPE,
+            },
+          ],
           total: 1,
           page: 1,
           per_page: 1,
@@ -2484,6 +2500,60 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
+      );
+    });
+
+    // Phase 4 — filter and sort additions (step 4.5)
+
+    it('filters by signature_id through findRules', async () => {
+      const client = createClient();
+
+      await client.findRules({ filter: 'metadata.signature_id: "RULE-001"' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id: "RULE-001"`,
+        })
+      );
+    });
+
+    it('filters by builder_type through findRules', async () => {
+      const client = createClient();
+
+      await client.findRules({
+        filter: 'metadata.builder_type: "security.detection.query"',
+      });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.builder_type: "security.detection.query"`,
+        })
+      );
+    });
+
+    it('maps builder_type sort to the keyword SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_type', sortOrder: 'asc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_type',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('maps builder_fields.risk_score sort to the integer sub-field SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_fields.risk_score', sortOrder: 'desc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_fields.risk_score',
+          sortOrder: 'desc',
+        })
       );
     });
   });
@@ -4582,6 +4652,50 @@ describe('RulesClient', () => {
       });
     });
 
+    describe('upsertRule — replace branch', () => {
+      it('does not bump revision when the replace body is identical to the stored rule', async () => {
+        const client = createClient();
+        // Build a stored rule whose meaningful fields exactly match what
+        // transformCreateRuleBodyToRuleSoAttributes produces from baseCreateData,
+        // so the revision diff on the replace branch finds no change.
+        // Fields excluded from the diff (updatedAt, updatedBy, metadata.version,
+        // metadata.revision) are set to distinct values so a regression that
+        // accidentally includes them in the comparison would still be caught.
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule-1',
+            signature_id: 'rev-noop-replace-sig',
+            version: 3,
+            revision: 7,
+            source: { type: 'internal', version: 1 },
+            ownership: { managed: false },
+          },
+          schedule: { every: '1m', lookback: '1m' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          recovery_strategy: undefined,
+          grouping: undefined,
+        });
+        const existingDoc = {
+          id: 'rule-rev-upsert-noop',
+          attributes: stored,
+          version: 'v1',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-rev-upsert-noop' });
+
+        await client.upsertRule({
+          id: 'rule-rev-upsert-noop',
+          data: baseCreateData, // identical body to what produced the stored rule
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(7); // unchanged — body matches stored rule exactly
+        expect(attrs.metadata.version).toBe(4); // version still bumps on every mutation
+      });
+    });
+
     describe('enableRule — never diffs', () => {
       it('does not change revision on enable', async () => {
         const client = createClient();
@@ -4636,11 +4750,10 @@ describe('RulesClient', () => {
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
           { id: 'rule-rev-apikey', attributes: stored, version: 'v1' },
         ]);
-        taskManager.bulkUpdateSchedules.mockResolvedValueOnce(
-          { tasks: [{ id: 'task-rev-apikey' }], errors: [] } as unknown as Awaited<
-            ReturnType<typeof taskManager.bulkUpdateSchedules>
-          >
-        );
+        taskManager.bulkUpdateSchedules.mockResolvedValueOnce({
+          tasks: [{ id: 'task-rev-apikey' }],
+          errors: [],
+        } as unknown as Awaited<ReturnType<typeof taskManager.bulkUpdateSchedules>>);
         getRuleExecutorTaskIdMock.mockReturnValue('task-rev-apikey');
         rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
           { id: 'rule-rev-apikey', success: true },

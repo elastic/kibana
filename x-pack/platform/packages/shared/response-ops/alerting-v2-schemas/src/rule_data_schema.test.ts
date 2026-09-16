@@ -13,6 +13,7 @@ import {
   createRuleDataSchema,
   isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
+  ruleOwnershipSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
   getRecoverEsqlQuery,
@@ -1784,10 +1785,6 @@ describe('findRulesRequestSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('ruleOwnershipSchema (step 4.4)', () => {
-  // Imported via the re-export from rule_data_schema.ts
-  const { ruleOwnershipSchema, createRuleDataSchema, updateRuleDataSchema } =
-    require('./rule_data_schema');
-
   it('accepts a managed ownership object', () => {
     const result = ruleOwnershipSchema.parse({
       managed: true,
@@ -1835,6 +1832,26 @@ describe('ruleOwnershipSchema (step 4.4)', () => {
   it('updateRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
     const result = updateRuleDataSchema.safeParse({
       metadata: { name: 'r', ownership: { managed: false } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  // Step 4.2: metadata.revision is server-managed and response-only. No create or
+  // update body may carry it. These tests pin that the strict metadataSchema rejects
+  // it, the same guarantee ownership gets above.
+  it('createRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = createRuleDataSchema.safeParse({
+      kind: 'alert',
+      metadata: { name: 'r', revision: 0 },
+      schedule: { every: '5m' },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('updateRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'r', revision: 0 },
     });
     expect(result.success).toBe(false);
   });
