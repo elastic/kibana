@@ -242,7 +242,7 @@ test.describe.skip(
 
         // Only 1 iteration per execution (single-alert mode)
         const logEachAlertButton = await pageObjects.workflowExecution.getStep(
-          'foreach_log_each_alert > 0 > log_each_alert'
+          'foreach_log_each_alert > iteration-0 > log_each_alert'
         );
         await logEachAlertButton.click();
 
@@ -272,7 +272,7 @@ test.describe.skip(
       const iterationOutputs: string[] = [];
       for (let i = 0; i < mockAlerts.length; i++) {
         const logEachAlertButton = await pageObjects.workflowExecution.getStep(
-          `foreach_log_each_alert > ${i} > log_each_alert`
+          `foreach_log_each_alert > iteration-${i} > log_each_alert`
         );
         await logEachAlertButton.click();
 

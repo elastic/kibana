@@ -89,7 +89,7 @@ test.describe('InternalActions/Elasticsearch', { tag: [...tags.stateful.classic]
 
     for (let i = 0; i < requiredOutputs.length; i++) {
       const step = await pageObjects.workflowExecution.getStep(
-        `loop_over_results > ${i} > process-item`
+        `loop_over_results > iteration-${i} > process-item`
       );
       await step.click();
 
