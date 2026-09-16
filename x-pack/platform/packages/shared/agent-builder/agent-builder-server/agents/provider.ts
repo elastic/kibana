@@ -49,6 +49,7 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -312,10 +313,20 @@ export interface AgentHandlerContext {
    */
   subAgentExecutor: SubAgentExecutor;
   /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
+  /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.
    */
   conversationClient: ConversationClient;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Populated from Advanced Settings (agentBuilder:deductive*) when the
+   * per-deployment feature flag is enabled; empty when the path is inactive.
+   */
+  deductive?: DeductiveRuntimeConfig;
   /**
    * Optional analytics surface for emitting agent-runtime events such as
    * SkillInvoked. Provided by the plugin when telemetry is wired.
@@ -336,6 +347,12 @@ export interface AgentHandlerContext {
 /**
  * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
+export interface DeductiveRuntimeConfig {
+  enabled: boolean;
+  endpoint: string;
+  apiKey: string | undefined;
+}
+
 export type AgentEventEmitterFn = (event: ChatAgentEvent) => void;
 
 export interface AgentEventEmitter {
