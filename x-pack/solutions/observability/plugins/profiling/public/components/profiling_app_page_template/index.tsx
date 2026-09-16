@@ -20,6 +20,7 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { AddDataTabs } from '../../views/add_data_view/types';
 
@@ -62,10 +63,12 @@ export function ProfilingAppPageTemplate({
 
   const router = useProfilingRouter();
 
+  const { from: defaultRangeFrom, to: defaultRangeTo } = useDefaultTimeRange();
+
   const searchParams = new URLSearchParams(search);
   const kuery = searchParams.get('kuery') ?? '';
-  const rangeFrom = searchParams.get('rangeFrom') || 'now-15m';
-  const rangeTo = searchParams.get('rangeTo') || 'now';
+  const rangeFrom = searchParams.get('rangeFrom') || defaultRangeFrom;
+  const rangeTo = searchParams.get('rangeTo') || defaultRangeTo;
 
   const backTarget = useBackNavigation();
 
