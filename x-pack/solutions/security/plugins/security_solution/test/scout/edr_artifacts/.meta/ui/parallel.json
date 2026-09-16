@@ -1,5 +1,5 @@
 {
-  "sha1": "35fdb454dc1052df2c67cbe582eff79dcf9a5a8f",
+  "sha1": "aa0fae9ebf7e979f0d367a67ee12b6eada44319e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -59,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -75,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -91,8 +91,72 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
+      }
+    },
+    {
+      "id": "9667109acb83f7a-704761aa317f060",
+      "title": "Artifact list page — Blocklist T1 analyst sees no privileges on the list page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 60,
+        "column": 26
+      }
+    },
+    {
+      "id": "9667109acb83f7a-ea665a9ca5d0bf3",
+      "title": "Artifact list page — Blocklist READ user sees empty state without add",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 72,
+        "column": 29
+      }
+    },
+    {
+      "id": "9667109acb83f7a-b583141ad1188db",
+      "title": "Artifact list page — Blocklist READ user can view artifacts but cannot add, edit, or delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 80,
+        "column": 17
+      }
+    },
+    {
+      "id": "9667109acb83f7a-eb4f392470e5d87",
+      "title": "Artifact list page — Blocklist WRITE user can create, update, and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 103,
+        "column": 57
       }
     },
     {
@@ -105,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -119,7 +183,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -133,7 +197,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -147,7 +211,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -161,7 +225,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
       }
     },
@@ -177,7 +241,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -193,7 +257,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -209,7 +273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -225,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -241,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
       }
     },
@@ -257,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -273,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -289,7 +353,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -305,7 +369,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -321,7 +385,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
       }
     },
@@ -337,7 +401,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -353,7 +417,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -369,7 +433,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -385,7 +449,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -401,7 +465,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
       }
     },
@@ -417,7 +481,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 48,
+        "line": 49,
         "column": 9
       }
     },
@@ -433,7 +497,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 53,
+        "line": 54,
         "column": 27
       }
     },
@@ -449,7 +513,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 116,
+        "line": 117,
         "column": 17
       }
     },
@@ -465,7 +529,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 144,
+        "line": 145,
         "column": 42
       }
     },
@@ -481,7 +545,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 181,
+        "line": 182,
         "column": 29
       }
     },
