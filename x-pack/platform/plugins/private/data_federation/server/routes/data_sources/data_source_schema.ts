@@ -15,7 +15,6 @@ const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 const nullableSecretString = schema.maybe(schema.nullable(schema.string({ maxLength: 4096 })));
 
 const s3SettingsWithSecretsSchema = schema.object({
-  region: optionalString,
   endpoint: optionalString,
   auth: optionalString,
   access_key: nullableSecretString,

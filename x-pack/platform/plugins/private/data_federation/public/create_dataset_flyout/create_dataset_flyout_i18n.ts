@@ -457,16 +457,6 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Must be a non-negative integer.',
     }),
 
-  advancedSettingsShow: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.advancedSettingsShow', {
-      defaultMessage: 'Show advanced settings',
-    }),
-
-  advancedSettingsHide: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.advancedSettingsHide', {
-      defaultMessage: 'Hide advanced settings',
-    }),
-
   cancelButton: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.cancelButton', {
       defaultMessage: 'Cancel',
