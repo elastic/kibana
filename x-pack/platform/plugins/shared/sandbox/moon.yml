@@ -20,7 +20,9 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-plugins-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
