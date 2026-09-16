@@ -108,6 +108,8 @@ export default ({ getService }: FtrProviderContext): void => {
         if (prior) {
           expect(found?.id).toBe(prior.id);
           expect(found?.revision).toBe(prior.revision + 1);
+        } else {
+          expect(found?.revision).toBe(0);
         }
       }
     });
