@@ -701,7 +701,13 @@ export function buildUpdateRuleAttributes(
       ownership: existingAttrs.metadata.ownership,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
-    schedule: { ...existingAttrs.schedule, ...updateData.schedule },
+    schedule: {
+      ...existingAttrs.schedule,
+      ...updateData.schedule,
+      // `null` → clear (undefined). SO schema uses maybe() without nullable(),
+      // so a cleared lookback must be stored as undefined (absent), not null.
+      lookback: nullToUndefined(updateData.schedule?.lookback, existingAttrs.schedule.lookback),
+    },
     // `query`, `recovery`, and `no_data` are replaced wholesale: each is a
     // closed shape (two of them discriminated unions), so a partial merge could
     // produce a member that never validates. Omitted = preserved.
