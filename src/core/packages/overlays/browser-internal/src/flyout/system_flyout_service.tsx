@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { flushSync, render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
 import type { EuiFlyoutMenuProps, EuiFlyoutProps } from '@elastic/eui';
@@ -22,9 +22,10 @@ import type {
   OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
   OverlayFlyoutTemplateStart,
+  SystemFlyoutSize,
   SystemFlyoutType,
 } from '@kbn/core-overlays-browser';
-import { SystemFlyoutTypeContext } from '@kbn/core-overlays-browser';
+import { SystemFlyoutSizeContext, SystemFlyoutTypeContext } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -33,32 +34,85 @@ import type { FlyoutTemplateManaged } from '@kbn/flyout-template';
 import { SystemFlyoutRef } from './system_flyout_ref';
 import { FlyoutMountGuard } from './flyout_mount_guard';
 
-interface SystemFlyoutTypeControllerProps {
-  /** The `type` open option, used to seed the reactive state. */
+interface SystemFlyoutControllerRenderState {
+  type: SystemFlyoutType;
+  size: SystemFlyoutSize;
+  /** Resize handler to pass to `EuiFlyout`; keeps state in sync and forwards to the consumer. */
+  onResize: (width: number) => void;
+}
+
+interface SystemFlyoutControllerProps {
+  /** The `type` open option, used to seed the reactive push/overlay state. */
   initialType: SystemFlyoutType | undefined;
+  /** The `size` open option, used to seed the reactive size state. */
+  initialSize: SystemFlyoutSize;
+  /** The size `resetSize` returns the flyout to (the caller's default named size). */
+  resetSizeTarget: SystemFlyoutSize;
+  /** The consumer's resize handler (e.g. to persist the width). */
+  onResize: OverlaySystemFlyoutOpenOptions['onResize'];
   /**
-   * Render-prop receiving the current (reactive) flyout type, so the enclosing
-   * `EuiFlyout` markup only needs to thread `type` through.
+   * Render-prop receiving the current (reactive) type/size and a resize handler, so the enclosing
+   * `EuiFlyout` markup only needs to thread them through.
    */
-  children: (type: SystemFlyoutType) => React.ReactNode;
+  children: (state: SystemFlyoutControllerRenderState) => React.ReactNode;
 }
 
 /**
- * Owns the reactive push/overlay `type` of a system flyout and exposes it via
- * {@link SystemFlyoutTypeContext}. Because the state lives here — above the
- * `EuiFlyout` — content rendered inside the flyout can switch push/overlay and
- * have the live flyout re-render, rather than the change only applying on the
- * next open.
+ * Owns the reactive push/overlay `type` and `size` of a system flyout and exposes them via
+ * {@link SystemFlyoutTypeContext} / {@link SystemFlyoutSizeContext}. Because the state lives here —
+ * above the `EuiFlyout` — content rendered inside the flyout can switch push/overlay or reset the
+ * size and have the live flyout re-render, rather than the change only applying on the next open.
+ *
+ * `size` tracks the live resized width (via `onResize`) so that a later `resetSize` always changes
+ * the `size` prop, forcing EUI to snap back to the default.
  */
-const SystemFlyoutTypeController: React.FC<SystemFlyoutTypeControllerProps> = ({
+const SystemFlyoutController: React.FC<SystemFlyoutControllerProps> = ({
   initialType,
+  initialSize,
+  resetSizeTarget,
+  onResize,
   children,
 }) => {
   const [type, setType] = React.useState<SystemFlyoutType>(initialType ?? 'overlay');
-  const value = React.useMemo(() => ({ type, setType }), [type]);
+  const [size, setSize] = React.useState<SystemFlyoutSize>(initialSize);
+  // The latest user-resized width, tracked in a ref so resizing does NOT re-render with a new
+  // `size` prop — a managed flyout re-registers and replays its opening animation whenever `size`
+  // changes, which would flicker on every resize.
+  const resizedWidthRef = React.useRef<number | null>(null);
+  const sizeRef = React.useRef<SystemFlyoutSize>(size);
+  sizeRef.current = size;
+
+  const typeValue = React.useMemo(() => ({ type, setType }), [type]);
+
+  const resetSize = React.useCallback(() => {
+    // Changing `size` re-seeds the flyout. If the prop already equals the reset target (the flyout
+    // was dragged away from its default this session), EUI wouldn't re-seed — so first pin the prop
+    // to the measured width, synchronously (before paint), so the change to the default registers.
+    const resizedWidth = resizedWidthRef.current;
+    if (sizeRef.current === resetSizeTarget && resizedWidth != null) {
+      flushSync(() => setSize(resizedWidth));
+    }
+    setSize(resetSizeTarget);
+    resizedWidthRef.current = null;
+  }, [resetSizeTarget]);
+
+  const sizeValue = React.useMemo(() => ({ size, resetSize }), [size, resetSize]);
+
+  const handleResize = React.useCallback(
+    (width: number) => {
+      // Record the width and forward it to the consumer (to persist). Do NOT call `setSize` here,
+      // or the managed flyout would re-register and replay its opening animation on every resize.
+      resizedWidthRef.current = width;
+      onResize?.(width);
+    },
+    [onResize]
+  );
+
   return (
-    <SystemFlyoutTypeContext.Provider value={value}>
-      {children(type)}
+    <SystemFlyoutTypeContext.Provider value={typeValue}>
+      <SystemFlyoutSizeContext.Provider value={sizeValue}>
+        {children({ type, size, onResize: handleResize })}
+      </SystemFlyoutSizeContext.Provider>
     </SystemFlyoutTypeContext.Provider>
   );
 };
@@ -227,7 +281,13 @@ export class SystemFlyoutService {
     return {
       open: (
         content: React.ReactElement,
-        { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
+        {
+          session = 'start',
+          title,
+          defaultSize,
+          onResize,
+          ...options
+        }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
         const { flyoutMenuProps } = options;
         const { flyoutContainer, flyoutRef, flyoutElementId, onCloseFlyout } =
@@ -255,12 +315,19 @@ export class SystemFlyoutService {
             {/* `OverlaySystemFlyoutOpenOptions` is built from `Omit<EuiFlyoutProps |
                 EuiFlyoutResizableProps, …>`; omitting over that union widens `type`, so narrow it
                 back to `SystemFlyoutType` to seed the controller. */}
-            <SystemFlyoutTypeController initialType={options.type as SystemFlyoutType | undefined}>
-              {(type) => (
+            <SystemFlyoutController
+              initialType={options.type as SystemFlyoutType | undefined}
+              initialSize={options.size}
+              resetSizeTarget={defaultSize ?? options.size}
+              onResize={onResize}
+            >
+              {({ type, size, onResize: handleResize }) => (
                 <EuiFlyout
                   {...options}
                   id={flyoutElementId}
                   type={type}
+                  size={size}
+                  onResize={handleResize}
                   flyoutMenuProps={mergedFlyoutMenuProps}
                   session={session}
                   onClose={onCloseFlyout}
@@ -270,7 +337,7 @@ export class SystemFlyoutService {
                   {content}
                 </EuiFlyout>
               )}
-            </SystemFlyoutTypeController>
+            </SystemFlyoutController>
           </KibanaRenderContextProvider>,
           flyoutContainer
         );
