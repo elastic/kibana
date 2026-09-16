@@ -20,7 +20,7 @@ import {
 } from '@kbn/alerting-v2-rule-form';
 import type { SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
-import { ruleKeys } from '../../hooks/query_key_factory';
+import { ruleKeys, sequenceBuilderKeys } from '../../hooks/query_key_factory';
 import { useAlertingLocators } from '../../application/locator_context';
 
 export const DEFAULT_SEQUENCE_RULE_NAME = i18n.translate(
@@ -47,8 +47,6 @@ const getDefaultFormValues = (): FormValues => ({
 
 export type SequenceBuilderStep = 'alert' | 'recovery';
 
-const EDIT_RULE_QUERY_KEY = 'sequence-builder-edit-rule';
-
 export const useSequenceBuilderForm = (
   ruleId: string | undefined,
   options?: { isClone?: boolean }
@@ -57,7 +55,7 @@ export const useSequenceBuilderForm = (
   const rulesApi = useService(RulesApi);
 
   const { data: editData, isLoading } = useQuery({
-    queryKey: [EDIT_RULE_QUERY_KEY, ruleId],
+    queryKey: sequenceBuilderKeys.editRule(ruleId!),
     enabled: Boolean(ruleId),
     refetchOnWindowFocus: false,
     cacheTime: 0,
@@ -105,52 +103,70 @@ export const useSequenceBuilderForm = (
     [rawParsedSeqValues]
   );
 
-  const { data: enrichedRules, isLoading: isEnrichingRules } = useQuery<
-    Record<string, { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }>
-  >({
-    queryKey: ['sequence-builder-rule-enrichment', ...parsedRuleIds],
+  const { data: ruleFetchResult, isLoading: isRuleFetchLoading } = useQuery<{
+    rules: Record<string, { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }>;
+    failedCount: number;
+  }>({
+    queryKey: sequenceBuilderKeys.ruleFetch(parsedRuleIds),
     enabled: parsedRuleIds.length > 0,
     refetchOnWindowFocus: false,
     cacheTime: 0,
     staleTime: Infinity,
     queryFn: async ({ signal }) => {
-      const results = await Promise.all(parsedRuleIds.map((id) => rulesApi.getRule(id, signal)));
-      return Object.fromEntries(
-        results.map((r) => [
-          r.id,
-          { name: r.metadata.name, groupingFields: r.grouping?.fields ?? [], kind: r.kind },
-        ])
+      const settled = await Promise.allSettled(
+        parsedRuleIds.map((id) => rulesApi.getRule(id, signal))
       );
+      const rules: Record<
+        string,
+        { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+      > = {};
+      let failedCount = 0;
+      for (const result of settled) {
+        if (result.status === 'fulfilled') {
+          const rule = result.value;
+          rules[rule.id] = {
+            name: rule.metadata.name,
+            groupingFields: rule.grouping?.fields ?? [],
+            kind: rule.kind,
+          };
+        } else {
+          failedCount++;
+        }
+      }
+      return { rules, failedCount };
     },
   });
 
-  const isEnrichmentPending = parsedRuleIds.length > 0 && isEnrichingRules;
+  const isRuleFetchPending = parsedRuleIds.length > 0 && isRuleFetchLoading;
+
+  const fetchedRules = ruleFetchResult?.rules;
 
   const parsedSeqValues = useMemo<SequenceFormValues | undefined>(() => {
     if (!rawParsedSeqValues) return undefined;
-    if (isEnrichmentPending) return undefined;
-    if (!enrichedRules) return rawParsedSeqValues;
+    if (isRuleFetchPending) return undefined;
+    if (!fetchedRules) return rawParsedSeqValues;
 
     return {
       ...rawParsedSeqValues,
       steps: rawParsedSeqValues.steps.map((step) => ({
         ...step,
         rules: step.rules.map((r) => {
-          const enriched = enrichedRules[r.ruleId];
+          const fetched = fetchedRules[r.ruleId];
           return {
             ...r,
-            ruleName: enriched?.name ?? r.ruleName,
-            groupingFields: enriched?.groupingFields ?? r.groupingFields,
-            kind: enriched?.kind ?? r.kind,
+            ruleName: fetched?.name ?? r.ruleName,
+            groupingFields: fetched?.groupingFields ?? r.groupingFields,
+            kind: fetched?.kind ?? r.kind,
+            isMissing: !fetched,
           };
         }),
       })),
     };
-  }, [rawParsedSeqValues, isEnrichmentPending, enrichedRules]);
+  }, [rawParsedSeqValues, isRuleFetchPending, fetchedRules]);
 
   return {
     methods,
-    isLoading: (Boolean(ruleId) && isLoading) || isEnrichmentPending,
+    isLoading: (Boolean(ruleId) && isLoading) || isRuleFetchPending,
     parsedSeqValues,
     savedRecoveryStepIndices: rawParsedSeqValues?.recoveryStepIndices,
     savedStepsCount: rawParsedSeqValues?.steps.length,
@@ -224,7 +240,7 @@ export const useSequenceBuilderState = (initialSeqValues?: SequenceFormValues) =
         queryClient.invalidateQueries(ruleKeys.allTags());
         if (ruleId) {
           queryClient.invalidateQueries(ruleKeys.detail(ruleId));
-          queryClient.removeQueries([EDIT_RULE_QUERY_KEY, ruleId]);
+          queryClient.removeQueries(sequenceBuilderKeys.editRule(ruleId));
         }
 
         notifications.toasts.addSuccess(

@@ -36,6 +36,7 @@ export interface SequenceRule {
   ruleName: string;
   groupingFields: string[];
   kind: 'alert' | 'signal';
+  isMissing?: boolean;
 }
 
 export interface SequenceStep {
