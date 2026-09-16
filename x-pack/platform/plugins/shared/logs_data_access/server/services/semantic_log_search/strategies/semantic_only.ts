@@ -16,7 +16,8 @@ import type { TargetCapabilities } from '../capabilities';
  *
  * To be implemented. The planned direction is to feed log patterns from
  * Knowledge Indicators in the AI Index rather than querying logs at request
- * time. See git history for the previous implementation.
+ * time. See git history for a previous implementation attempt (may or may not
+ * be useful as reference).
  */
 export async function searchWithSemanticOnly(
   _params: SemanticLogSearchParams,

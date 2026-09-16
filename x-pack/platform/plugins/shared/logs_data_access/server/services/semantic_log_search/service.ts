@@ -53,7 +53,8 @@ export async function search(
 /**
  * Expand a pattern to retrieve raw documents.
  *
- * To be implemented. See git history for the previous implementation.
+ * To be implemented. See git history for a previous implementation attempt
+ * (may or may not be useful as reference).
  */
 export async function expand(_params: ExpandPatternParams): Promise<ExpandPatternResult> {
   throw new Error('to be implemented');
