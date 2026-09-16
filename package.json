@@ -58,6 +58,7 @@
     "serverless-es": "node scripts/kibana --dev --serverless=es",
     "serverless-oblt": "node scripts/kibana --dev --serverless=oblt",
     "serverless-security": "node scripts/kibana --dev --serverless=security",
+    "serverless-vectordb": "node scripts/kibana --dev --serverless=vectordb",
     "serverless-workplace-ai": "node scripts/kibana --dev --serverless=workplaceai",
     "spec_to_console": "node scripts/spec_to_console",
     "start": "node scripts/kibana --dev",
