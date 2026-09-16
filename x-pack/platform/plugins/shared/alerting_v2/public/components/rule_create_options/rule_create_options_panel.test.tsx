@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_create_options_panel';
+import type { RuleBuilderCreateOptionItem } from '@kbn/alerting-v2-rule-form';
 
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
@@ -22,8 +23,15 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onCreateBuilderRule = jest.fn();
 const onBuildSequence = jest.fn();
+
+const thresholdBuilderOption: RuleBuilderCreateOptionItem = {
+  type: 'threshold',
+  title: 'Threshold rule',
+  description: 'Detect when a count crosses a threshold.',
+  iconType: 'visLine',
+};
 
 const renderPanel = () =>
   render(
@@ -31,7 +39,6 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
@@ -79,25 +86,50 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('renders the rule builder divider between the second and third options', () => {
+  it('does not render the rule builder divider when no builderOptions are provided', () => {
     renderPanel();
 
-    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
-    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
+    expect(screen.queryByText('or start from a builder')).not.toBeInTheDocument();
   });
 
-  it('renders the "Threshold rule" card', () => {
+  it('does not render any builder cards when no builderOptions are provided', () => {
     renderPanel();
 
+    expect(screen.queryByTestId('createThresholdRuleCard')).not.toBeInTheDocument();
+  });
+
+  it('renders the builder divider and cards when builderOptions are provided', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          builderOptions={[thresholdBuilderOption]}
+          onCreateBuilderRule={onCreateBuilderRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
-    renderPanel();
+  it('calls onCreateBuilderRule with the builder type when a builder card is clicked', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          builderOptions={[thresholdBuilderOption]}
+          onCreateBuilderRule={onCreateBuilderRule}
+        />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
 
-    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledWith('threshold');
   });
 
   it('renders the agent card disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
@@ -138,7 +170,6 @@ describe('RuleCreateOptionsPanel', () => {
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
@@ -161,7 +192,8 @@ describe('RuleCreateOptionsPanel', () => {
             layout="vertical"
             onCreateEsqlRule={onCreateEsqlRule}
             onCreateWithAgent={onCreateWithAgent}
-            onCreateThresholdRule={onCreateThresholdRule}
+            builderOptions={[thresholdBuilderOption]}
+            onCreateBuilderRule={onCreateBuilderRule}
             onBuildSequence={withSequence ? onBuildSequence : undefined}
           />
         </I18nProvider>

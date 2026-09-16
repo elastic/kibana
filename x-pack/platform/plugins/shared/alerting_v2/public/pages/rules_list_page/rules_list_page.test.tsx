@@ -121,6 +121,14 @@ jest.mock('@kbn/alerting-v2-rule-form', () => {
       );
     },
     RULE_BUILDER_REGISTRY: { threshold: {} },
+    getRuleBuilderCreateOptions: () => [
+      {
+        type: 'threshold',
+        title: 'Threshold rule',
+        description: 'Detect when a count crosses a threshold.',
+        iconType: 'chartThreshold',
+      },
+    ],
     STACKED_FLYOUT_SIZE: 540,
     STACKED_FLYOUT_MIN_WIDTH: 480,
     useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),
