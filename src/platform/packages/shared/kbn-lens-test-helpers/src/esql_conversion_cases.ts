@@ -607,6 +607,50 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
+      description: 'top values sorted by metric alias when column roles are provided',
+      columns: {
+        col1: terms('host.keyword', {
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      columnRoles: { col2: 'avg_bytes' },
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | STATS avg_bytes = AVG(bytes) BY host.keyword | SORT avg_bytes DESC | LIMIT 5`,
+        columnNames: ['avg_bytes', 'host.keyword'],
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms ordered by a missing column is not convertible',
+      columns: {
+        col1: terms('host.keyword', {
+          orderBy: { type: 'column', columnId: 'missing-metric' },
+          orderDirection: 'desc',
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: { success: false, reason: 'terms_order_by_not_supported' },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms with rare ranking is not convertible',
+      columns: {
+        col1: terms('host.keyword', { orderBy: { type: 'rare', maxDocCount: 3 } }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: { success: false, reason: 'terms_order_by_not_supported' },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
       description: 'terms with other bucket is not convertible',
       columns: {
         col1: terms('host.keyword', { otherBucket: true }),
