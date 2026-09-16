@@ -526,13 +526,23 @@ export function resolveUpdateRuleBuilder(
   const queryChanged = data.query !== undefined && !isEqual(toStoredQuery(data.query), storedQuery);
 
   if (queryChanged && effectiveType) {
-    throw Boom.badRequest(
-      `Rule "${ruleId}" is authored by the "${effectiveType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
-      {
-        code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
-        details: { rule_id: ruleId, builder_type: effectiveType },
-      }
-    );
+    // The direct-query-write protection exists for registered (server-side)
+    // builder types, whose query is generated from builder_fields and must not
+    // drift from them. A builder type with no registration has no server-side
+    // generation — the client owns its query (kibana's shipped client-side
+    // builders) — so a body that restates the type may carry a new query,
+    // matching the framework's pre-existing semantics. Omitting the type on a
+    // query change is still rejected for both: that would silently strip the
+    // builder relationship.
+    if (registry.get(effectiveType) !== undefined || !requestedType) {
+      throw Boom.badRequest(
+        `Rule "${ruleId}" is authored by the "${effectiveType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
+        {
+          code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+          details: { rule_id: ruleId, builder_type: effectiveType },
+        }
+      );
+    }
   }
 
   if (requestedType && existingType && requestedType !== existingType) {
@@ -594,13 +604,22 @@ export function resolveReplaceRuleBuilder(
 ): ResolvedCreateRuleData {
   const existingType = existing.metadata.builder_type;
 
-  // No stored builder type: the replace is a straightforward create-shaped
-  // resolution. Delegate to the create path unchanged.
-  if (!existingType) {
+  // No stored builder type, or a stored type with no server-side registration
+  // (a legacy client-side builder, whose query the client owns): the replace is
+  // a straightforward create-shaped resolution with plain PUT semantics — the
+  // body is the full new state, so an omitted builder_type clears the marker.
+  // The strict paths below protect server-generated queries, which only
+  // registered types have.
+  if (!existingType || registry.get(existingType) === undefined) {
     // Cast: data.metadata.builder_type is `string | null | undefined` on
-    // ReplaceRuleData. When there is no stored builder_type we know the null
-    // escape hatch is irrelevant; create resolution treats null as absent.
-    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData, options);
+    // ReplaceRuleData. The null escape hatch is redundant here, but its
+    // contract still holds: normalise null -> undefined so it never reaches
+    // storage, exactly as the explicit-clear path below does.
+    const normalized =
+      data.metadata?.builder_type === null
+        ? { ...data, metadata: { ...data.metadata, builder_type: undefined } }
+        : data;
+    return resolveCreateRuleBuilder(registry, normalized as unknown as CreateRuleData, options);
   }
 
   // The stored rule is builder-managed. Four valid paths:
