@@ -8,7 +8,12 @@
  */
 
 import { css } from '@emotion/react';
-import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import {
+  euiOverflowScroll,
+  euiShadow,
+  highContrastModeStyles,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { layoutVar, layoutLevels } from '../constants';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
@@ -78,6 +83,11 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
   &:focus-visible {
     outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
     outline-offset: 0;
+
+    // Thicker ring so it stands out next to the strong high contrast borders around it.
+    ${highContrastModeStyles(useEuiTheme, {
+      preferred: `outline-width: calc(${useEuiTheme.euiTheme.focus.width} * 2);`,
+    })}
   }
 `;
 
