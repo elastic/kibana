@@ -259,9 +259,13 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
+      const dataSourceForColumns =
+        isEsqlMode && currentDataSource?.kind === 'esql'
+          ? (currentDataSource as EsqlSource)
+          : undefined;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
-        currentEsqlSource: latestFetchDetails?.currentEsqlSource,
+        currentDataSource: dataSourceForColumns,
         isEsqlMode,
       });
 
@@ -473,14 +477,14 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 function getUnifiedHistogramTableForEsql({
   documentsValue,
-  currentEsqlSource,
+  currentDataSource,
   isEsqlMode,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
-  currentEsqlSource: EsqlSource | undefined;
+  currentDataSource: EsqlSource | undefined;
   isEsqlMode: boolean;
 }) {
-  if (!isEsqlMode || !currentEsqlSource) {
+  if (!isEsqlMode || !currentDataSource) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,
@@ -488,7 +492,7 @@ function getUnifiedHistogramTableForEsql({
   }
 
   // EsqlSource has columns from its eager LIMIT 0 query — no need to wait for documents.
-  const esqlQueryColumns = [...currentEsqlSource.resultColumns];
+  const esqlQueryColumns = [...currentDataSource.resultColumns];
 
   // Provide a pre-fetched data table only when documents are already available,
   // so Lens can reuse the rows for suggestion enrichment without an extra request.

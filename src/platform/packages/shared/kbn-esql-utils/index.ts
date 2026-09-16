@@ -103,6 +103,7 @@ export {
   type ESQLSourceKind,
   ensureApproximationLicense,
   getESQLSourceInfo,
+  clearESQLSourceInfoCache,
   buildEsqlSourceCacheKey,
 } from './src';
 

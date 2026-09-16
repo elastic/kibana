@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LRUCache } from 'lru-cache';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
@@ -14,6 +15,7 @@ import type { HttpStart } from '@kbn/core/public';
 import {
   getIndexPatternFromESQLQuery,
   getESQLSourceInfo,
+  getESQLTimeField,
   buildEsqlSourceCacheKey,
   isComputedColumn,
   getQuerySummary,
@@ -71,10 +73,7 @@ interface EsqlSourceConstructorArgs {
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
 export class EsqlSource implements DataSourceBase {
-  // Instance cache keyed by (query, projectRouting, cleanVariables).
-  // `meta` is stripped from variables because it is client-only and must not affect caching.
-  private static readonly instanceCache = new Map<string, EsqlSource>();
-  private static readonly MAX_CACHE_SIZE = 100;
+  private static readonly instanceCache = new LRUCache<string, EsqlSource>({ max: 100 });
 
   public readonly kind = 'esql' as const;
   public readonly id: string;
@@ -116,11 +115,15 @@ export class EsqlSource implements DataSourceBase {
 
   /** Async factory — id derivation via `crypto.subtle` requires async. */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
-    const { cacheKey: instanceKey, cleanVariables } = buildEsqlSourceCacheKey(
+    const { cacheKey: baseKey, cleanVariables } = buildEsqlSourceCacheKey(
       args.query,
       args.projectRouting,
       args.esqlVariables
     );
+    // When timeFieldName is explicitly provided it is included in the key so
+    // that the same query with a different pre-resolved time field gets a
+    // distinct cache entry.
+    const instanceKey = args.timeFieldName != null ? `${baseKey}\0${args.timeFieldName}` : baseKey;
 
     const cached = EsqlSource.instanceCache.get(instanceKey);
     if (cached) return cached;
@@ -132,16 +135,25 @@ export class EsqlSource implements DataSourceBase {
 
     if (args.http) {
       const querySummary = getQuerySummary(args.query);
-      const info = await getESQLSourceInfo({
-        query: args.query,
-        http: args.http,
-        projectRouting: args.projectRouting,
-        timeRange: args.timeRange,
-        esqlVariables: cleanVariables,
-      }).catch(() => null);
+      const [resolvedTimeField, info] = await Promise.all([
+        timeFieldName === undefined
+          ? getESQLTimeField({
+              query: args.query,
+              http: args.http,
+              projectRouting: args.projectRouting,
+            })
+          : Promise.resolve(timeFieldName),
+        getESQLSourceInfo({
+          query: args.query,
+          http: args.http,
+          projectRouting: args.projectRouting,
+          timeRange: args.timeRange,
+          esqlVariables: cleanVariables,
+        }).catch(() => null),
+      ]);
 
+      timeFieldName = resolvedTimeField;
       if (info) {
-        timeFieldName = info.timeField;
         resultColumns = info.columns.map(
           ({ name, esType }) =>
             ({
@@ -169,12 +181,12 @@ export class EsqlSource implements DataSourceBase {
       resultColumns,
     });
 
-    if (EsqlSource.instanceCache.size >= EsqlSource.MAX_CACHE_SIZE) {
-      const oldestKey = EsqlSource.instanceCache.keys().next().value;
-      if (oldestKey) EsqlSource.instanceCache.delete(oldestKey);
-    }
     EsqlSource.instanceCache.set(instanceKey, instance);
     return instance;
+  }
+
+  public static clearCache(): void {
+    EsqlSource.instanceCache.clear();
   }
 
   public get name(): string {

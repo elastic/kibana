@@ -12,7 +12,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 
 export interface ESQLSourceInfo {
-  timeField?: string;
   columns: Array<{ name: string; esType: string }>;
 }
 
@@ -35,6 +34,10 @@ export function buildEsqlSourceCacheKey(
     cacheKey: JSON.stringify([query, projectRouting ?? null, cleanVariables ?? null]),
     cleanVariables,
   };
+}
+
+export function clearESQLSourceInfoCache(): void {
+  sourceInfoCache.clear();
 }
 
 export async function getESQLSourceInfo({

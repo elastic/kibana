@@ -29,7 +29,6 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import { getColumnsWithHighlights } from '@kbn/esql-utils';
-import type { EsqlSource } from '@kbn/data-source';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -45,7 +44,7 @@ export interface FetchEsqlParams {
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  esqlSource: EsqlSource;
+  timeFieldName?: string;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
@@ -66,7 +65,7 @@ export function fetchEsql({
   inputQuery,
   filters,
   timeRange,
-  esqlSource,
+  timeFieldName,
   abortSignal,
   inspectorAdapters,
   data,
@@ -84,7 +83,7 @@ export function fetchEsql({
       inputQuery,
       filters,
       timeRange,
-      timeFieldName: esqlSource.timeFieldName,
+      timeFieldName,
       data,
       inspectorConfig,
     }),

@@ -51,7 +51,8 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
-  currentEsqlSource?: EsqlSource;
+  esqlTimeFieldName?: string;
+  fullEsqlSourcePromise?: Promise<EsqlSource>;
 }
 
 /**
@@ -79,7 +80,8 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
-    currentEsqlSource,
+    esqlTimeFieldName,
+    fullEsqlSourcePromise,
   } = params;
   const { data, expressions } = services;
 
@@ -108,25 +110,31 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, {
       query,
-      ...(isEsqlQuery && currentEsqlSource
-        ? { dataSource: currentEsqlSource }
-        : !isEsqlQuery && dataView.id
-        ? { dataSource: new DataViewSource(dataView) }
-        : {}),
+      ...(!isEsqlQuery && dataView.id ? { dataSource: new DataViewSource(dataView) } : {}),
     });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
 
-    // Start fetching all required requests
-    if (isEsqlQuery && !currentEsqlSource) {
-      throw new Error('ES|QL fetch attempted without a current EsqlSource');
+    // When the full EsqlSource (with columns) resolves, update the LOADING
+    // emit so the sidebar shows the real field list while the table is still
+    // fetching.
+    if (isEsqlQuery && fullEsqlSourcePromise) {
+      fullEsqlSourcePromise
+        .then((fullSource) => {
+          if (abortController.signal.aborted) return;
+          const current = dataSubjects.documents$.getValue();
+          if (current.fetchStatus === FetchStatus.LOADING) {
+            dataSubjects.documents$.next({ ...current, dataSource: fullSource });
+          }
+        })
+        .catch(() => {});
     }
 
     const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          esqlSource: currentEsqlSource!,
+          timeFieldName: esqlTimeFieldName,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
@@ -186,11 +194,19 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
+        // For ES|QL, ensure the PARTIAL emit carries the full EsqlSource (with
+        // columns) so that build_esql_fetch_subscribe derives the correct default
+        // columns. getESQLSourceInfo (LIMIT 0) always resolves before the full
+        // table fetch completes, so this await is effectively instant.
+        const latestEsqlSource = isEsqlQuery
+          ? await fullEsqlSourcePromise?.catch(() => undefined)
+          : undefined;
+
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
           dataSource: isEsqlQuery
-            ? currentEsqlSource
+            ? latestEsqlSource
             : dataView.id
             ? new DataViewSource(dataView)
             : undefined,
@@ -209,10 +225,7 @@ export function fetchAll(
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
       .catch((e) => {
-        sendErrorMsg(dataSubjects.documents$, e, {
-          query,
-          ...(isEsqlQuery && currentEsqlSource ? { dataSource: currentEsqlSource } : {}),
-        });
+        sendErrorMsg(dataSubjects.documents$, e, { query });
         sendErrorMsg(dataSubjects.main$, e);
       });
 

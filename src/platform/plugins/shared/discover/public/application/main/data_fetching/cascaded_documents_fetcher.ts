@@ -98,10 +98,10 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      const { dataSource: esqlSource, records: fetchedRecords } = await fetchEsql({
+      const { records: fetchedRecords } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        esqlSource: currentEsqlSource as EsqlSource,
+        timeFieldName: (currentEsqlSource as EsqlSource).timeFieldName,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,
@@ -123,7 +123,7 @@ export class CascadedDocumentsFetcher {
       records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = esqlSource ? columnsToColumnsMeta(esqlSource.getColumns()) : {};
+      const columnsMeta = columnsToColumnsMeta((currentEsqlSource as EsqlSource).getColumns());
       const previousColumnsMeta = this.stateManager.getColumnsMeta();
       if (!isEqual(previousColumnsMeta, columnsMeta)) {
         this.stateManager.setColumnsMeta(columnsMeta);

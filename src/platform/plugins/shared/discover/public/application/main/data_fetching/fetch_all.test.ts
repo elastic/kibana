@@ -127,6 +127,7 @@ describe('test fetchAll', () => {
       {
         fetchStatus: FetchStatus.LOADING,
         query: { query: '', language: 'kuery' },
+        dataSource: expect.any(Object),
       },
       {
         fetchStatus: FetchStatus.COMPLETE,
@@ -254,10 +255,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchEsql.mockResolvedValue({
-      records: documents,
-      dataSource: createMockEsqlSource(),
-    });
+    mockfetchEsql.mockResolvedValue({ records: documents });
     const query = { esql: 'from foo' };
     deps.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -265,12 +263,23 @@ describe('test fetchAll', () => {
         appState: { query },
       })
     );
-    fetchAll({ ...deps, currentEsqlSource: createMockEsqlSource() });
+    const mockEsqlSource = createMockEsqlSource();
+    fetchAll({
+      ...deps,
+      esqlTimeFieldName: '@timestamp',
+      fullEsqlSourcePromise: Promise.resolve(mockEsqlSource),
+    });
     await waitForNextTick();
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, query },
+      // fullEsqlSourcePromise resolves → LOADING re-emitted with dataSource for sidebar
+      {
+        fetchStatus: FetchStatus.LOADING,
+        query,
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
+      },
       {
         fetchStatus: FetchStatus.PARTIAL,
         interceptedWarnings: [],

@@ -25,6 +25,8 @@ function makeColumn(
 }
 
 describe('EsqlSource', () => {
+  beforeEach(() => EsqlSource.clearCache());
+
   describe('create', () => {
     it('extracts the title from the FROM clause', async () => {
       const source = await EsqlSource.create({

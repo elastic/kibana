@@ -150,7 +150,7 @@ const setupLineSearch = ({
   const fetchParams: ChangePointFetchParams = {
     searchSessionId: 'session-1',
     lastReloadRequestTime: 1,
-    dataView: { isTimeBased: () => false } as never,
+    dataSource: { timeFieldName: '@timestamp' } as never,
     filters: [],
     timeRange: { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
     table: makeTable(resolvedColumns, resolvedRows),
@@ -328,8 +328,9 @@ describe('change_point_summary_series', () => {
       expect(esql.mock.calls[0][0].query).toContain('LIMIT 10000');
       expect(esql.mock.calls[0][0].query).not.toContain('CHANGE_POINT');
       expect(getTime).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ from: '2023-11-10T00:00:00.000Z' })
+        undefined,
+        expect.objectContaining({ from: '2023-11-10T00:00:00.000Z' }),
+        { fieldName: '@timestamp' }
       );
       if (ready.status === 'ready') {
         expect(ready.seriesByEntity.get('')).toHaveLength(2);

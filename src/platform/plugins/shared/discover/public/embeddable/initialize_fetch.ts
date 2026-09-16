@@ -235,7 +235,7 @@ export function initializeFetch({
               timeRange: getTimeRangeFromFetchContext(fetchContext),
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              esqlSource: embeddableEsqlSource,
+              timeFieldName: embeddableEsqlSource.timeFieldName,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,

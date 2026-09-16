@@ -74,7 +74,10 @@ const createStateManager = (
   };
 };
 
-const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta) => {
+const createFetcher = (
+  initialColumnsMeta?: DataTableColumnsMeta,
+  currentSource?: DataSource
+) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
@@ -82,7 +85,7 @@ const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta) => {
   });
   const stateManager = createStateManager(initialColumnsMeta);
   const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(
-    createMockEsqlSource([], [], '@timestamp')
+    currentSource ?? createMockEsqlSource([], [], '@timestamp')
   );
 
   return {
@@ -136,17 +139,20 @@ describe('CascadedDocumentsFetcher', () => {
   });
 
   it('constructs a cascade query, fetches records, and caches them', async () => {
-    const { stateManager, fetcher, scopedProfilesManager, discoverServices } = createFetcher();
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const { stateManager, fetcher, scopedProfilesManager, discoverServices } = createFetcher(
+      undefined,
+      extensionSource
+    );
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({
-      records,
-      dataSource: createMockEsqlSource([
-        { name: 'extension', type: 'string', source: 'esql-result' },
-      ]),
-    });
+    mockFetchEsql.mockResolvedValue({ records });
 
     const params = createFetchParams({ nodeId: 'node-2' });
     const result = await fetcher.fetchCascadedDocuments(params);
@@ -164,7 +170,7 @@ describe('CascadedDocumentsFetcher', () => {
       expect.objectContaining({
         query: cascadeQuery,
         esqlVariables: params.esqlVariables,
-        esqlSource: expect.objectContaining({ kind: 'esql' }),
+        timeFieldName: '@timestamp',
         data: discoverServices.data,
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,
@@ -202,17 +208,17 @@ describe('CascadedDocumentsFetcher', () => {
   });
 
   it('skips updating columns meta when the fetched value is unchanged', async () => {
-    const { stateManager, fetcher } = createFetcher(columnsMeta);
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const { stateManager, fetcher } = createFetcher(columnsMeta, extensionSource);
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({
-      records,
-      dataSource: createMockEsqlSource([
-        { name: 'extension', type: 'string', source: 'esql-result' },
-      ]),
-    });
+    mockFetchEsql.mockResolvedValue({ records });
 
     await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));
 

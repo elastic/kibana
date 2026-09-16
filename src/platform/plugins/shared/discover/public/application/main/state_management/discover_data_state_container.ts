@@ -35,7 +35,11 @@ import {
 } from '@kbn/discover-utils';
 import type { DataSource, EsqlSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import {
+  getESQLStatsQueryMeta,
+  getESQLTimeField,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -90,7 +94,6 @@ export interface DataTotalHitsMsg extends DataMsg {
 
 export interface DiscoverLatestFetchDetails {
   abortController?: AbortController;
-  currentEsqlSource?: EsqlSource;
 }
 
 export interface DiscoverDataStateContainer {
@@ -304,19 +307,33 @@ export function getDataStateContainer({
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
-          let currentEsqlSource: EsqlSource | undefined;
+          let esqlTimeFieldName: string | undefined;
+          let fullEsqlSourcePromise: Promise<EsqlSource> | undefined;
+
           if (isOfAggregateQueryType(appState.query)) {
-            const freshEsqlSource = await createEsqlSource({
-              esql: appState.query.esql,
+            const esql = appState.query.esql;
+            const projectRoutingFallback = services.cps?.cpsManager?.getProjectRouting();
+            const projectRouting =
+              getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;
+
+            esqlTimeFieldName = await getESQLTimeField({
+              query: esql,
               http: services.http,
-              projectRoutingFallback: services.cps?.cpsManager?.getProjectRouting(),
+              projectRouting,
+            });
+
+            fullEsqlSourcePromise = createEsqlSource({
+              esql,
+              http: services.http,
+              projectRoutingFallback,
               timeRange: timefilter.getTime(),
               esqlVariables: getCurrentTab().esqlVariables ?? undefined,
+              timeFieldName: esqlTimeFieldName,
             });
-            if (freshEsqlSource !== currentDataSource$.getValue()) {
-              currentDataSource$.next(freshEsqlSource);
-            }
-            currentEsqlSource = freshEsqlSource;
+
+            fullEsqlSourcePromise
+              .then((fullSource) => currentDataSource$.next(fullSource))
+              .catch(() => {});
           }
 
           let searchSessionId: string;
@@ -348,7 +365,8 @@ export function getDataStateContainer({
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
-            currentEsqlSource,
+            esqlTimeFieldName,
+            fullEsqlSourcePromise,
           };
 
           cancel(AbortReason.REPLACED);
@@ -498,18 +516,29 @@ export function getDataStateContainer({
           }
 
           abortController = new AbortController();
+          const fetchAbortController = abortController;
 
           const query = getCurrentTab().appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
-          const latestFetchDetails: DiscoverLatestFetchDetails = {
-            abortController,
-            ...(isEsqlQuery && currentEsqlSource ? { currentEsqlSource } : {}),
-          };
 
           // Trigger chart fetching in parallel with the main request.
-          // For ES|QL, EsqlSource already has columns from its eager LIMIT 0 query,
-          // so the histogram no longer needs to wait for documents to complete.
-          fetchChart$.next(latestFetchDetails);
+          // For ES|QL, wait for fullEsqlSourcePromise so currentDataSource$ is
+          // already populated when the histogram reads it. For non-ES|QL, trigger immediately.
+          if (isEsqlQuery && fullEsqlSourcePromise) {
+            fullEsqlSourcePromise
+              .then(() => {
+                if (!fetchAbortController.signal.aborted) {
+                  fetchChart$.next({ abortController: fetchAbortController });
+                }
+              })
+              .catch(() => {
+                if (!fetchAbortController.signal.aborted) {
+                  fetchChart$.next({ abortController: fetchAbortController });
+                }
+              });
+          } else {
+            fetchChart$.next({ abortController });
+          }
 
           // Cascade groups are derived purely from the query structure — update them synchronously
           // before fetchAll fires so they're already committed when main$ reaches COMPLETE.

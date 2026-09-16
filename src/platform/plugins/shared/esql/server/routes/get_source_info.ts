@@ -12,12 +12,7 @@ import { getNamedParams } from '@kbn/esql-utils';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
-import {
-  DATASET_FILTERING_FEATURE_FLAG_KEY,
-  getMaxNestingDepth,
-  MAX_NESTING_DEPTH,
-  resolveTimeField,
-} from './get_timefield';
+import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
 
 export const registerGetSourceInfoRoute = (
   router: IRouter,
@@ -66,10 +61,6 @@ export const registerGetSourceInfoRoute = (
 
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
-      const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
-        DATASET_FILTERING_FEATURE_FLAG_KEY,
-        false
-      );
       try {
         const namedParams = getNamedParams(
           query,
@@ -77,22 +68,13 @@ export const registerGetSourceInfoRoute = (
           esqlVariables as ESQLControlVariable[] | undefined
         );
 
-        const [timeFieldResult, columnsResult] = await Promise.all([
-          resolveTimeField(
-            client,
-            query,
-            logger.get(),
-            datasetFilteringEnabled,
-            projectRouting
-          ).catch(() => ({ timeField: undefined })),
-          client.esql
-            .query({
-              query: `${query} | LIMIT 0`,
-              ...(namedParams.length ? { params: namedParams } : {}),
-              ...(projectRouting ? { project_routing: projectRouting } : {}),
-            })
-            .catch(() => ({ columns: [] as Array<{ name: string; type: string }> })),
-        ]);
+        const columnsResult = await client.esql
+          .query({
+            query: `${query} | LIMIT 0`,
+            ...(namedParams.length ? { params: namedParams } : {}),
+            ...(projectRouting ? { project_routing: projectRouting } : {}),
+          })
+          .catch(() => ({ columns: [] as Array<{ name: string; type: string }> }));
 
         const columns = (columnsResult.columns ?? []).map(
           ({ name, type }: { name: string; type: string }) => ({ name, esType: type })
@@ -103,7 +85,7 @@ export const registerGetSourceInfoRoute = (
           outcome: 'success',
           'http.response.status_code': 200,
         });
-        return response.ok({ body: { timeField: timeFieldResult.timeField, columns } });
+        return response.ok({ body: { columns } });
       } catch (error) {
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',
