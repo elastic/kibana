@@ -95,10 +95,6 @@ const resolveApiKeyOwnerProfileUid = async ({
 
     return response.api_keys?.[0]?.profile_uid;
   } catch (error) {
-    // Missing privileges (403) or a credential that the native `_security/api_key`
-    // endpoint cannot resolve (404, e.g. UIAM `essu_` keys, which respond with
-    // `{ api_keys: [] }`) both mean the creator's profile uid is unavailable. Fall
-    // back to username matching instead of failing the request.
     if (
       error instanceof errors.ResponseError &&
       (error.statusCode === 403 || error.statusCode === 404)
