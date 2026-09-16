@@ -115,48 +115,50 @@ export class NightshiftInvestigationsPlugin
         })
       );
 
-      const sandboxLogger = this.logger.get('sandbox');
+      if (plugins.sandbox?.isAvailable) {
+        const sandboxLogger = this.logger.get('sandbox');
 
-      // Start deps are read lazily: tools are registered in setup() but only run after start().
-      const getSandboxStart = () => this.sandboxStart;
-      const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-        getDeps: () => ({ actions: this.actionsStart }),
-        logger: sandboxLogger,
-      });
-      const resolveConnectorCredentials = createConnectorCredentialResolver({
-        getDeps: () => ({ actions: this.actionsStart }),
-        logger: sandboxLogger.get('connector_credentials'),
-      });
+        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        const getSandboxStart = () => this.sandboxStart;
+        const sandboxWorkspaceManager = createSandboxWorkspaceManager({
+          getDeps: () => ({ actions: this.actionsStart }),
+          logger: sandboxLogger,
+        });
+        const resolveConnectorCredentials = createConnectorCredentialResolver({
+          getDeps: () => ({ actions: this.actionsStart }),
+          logger: sandboxLogger.get('connector_credentials'),
+        });
 
-      plugins.agentBuilder.tools.register(
-        createSandboxBashTool({
-          getSandboxStart,
-          sandboxWorkspaceManager,
-          resolveConnectorCredentials,
-          logger: sandboxLogger,
-        })
-      );
-      plugins.agentBuilder.tools.register(
-        createSandboxViewFileTool({
-          getSandboxStart,
-          sandboxWorkspaceManager,
-          logger: sandboxLogger,
-        })
-      );
-      plugins.agentBuilder.tools.register(
-        createSandboxStrReplaceTool({
-          getSandboxStart,
-          sandboxWorkspaceManager,
-          logger: sandboxLogger,
-        })
-      );
-      plugins.agentBuilder.tools.register(
-        createSandboxWriteFileTool({
-          getSandboxStart,
-          sandboxWorkspaceManager,
-          logger: sandboxLogger,
-        })
-      );
+        plugins.agentBuilder.tools.register(
+          createSandboxBashTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            resolveConnectorCredentials,
+            logger: sandboxLogger,
+          })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxViewFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxStrReplaceTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
+        );
+        plugins.agentBuilder.tools.register(
+          createSandboxWriteFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
+        );
+      }
     }
 
     if (plugins.workflowsManagement) {

@@ -25,6 +25,19 @@ interface SandboxPluginStartDeps {
 }
 
 /**
+ * Setup contract for the Sandbox plugin.
+ *
+ * Available in your plugin's `setup` deps when `sandbox` is declared as an
+ * optional plugin. Use `isAvailable` to gate registration of sandbox-dependent
+ * features so they are absent (rather than present-but-erroring) in deployments
+ * where the sandbox is not configured.
+ */
+export interface SandboxPluginSetup {
+  /** `true` when `xpack.sandbox.enabled` is `true` and `api_key`/`ssl` are present in config. */
+  readonly isAvailable: boolean;
+}
+
+/**
  * Start contract for the Sandbox plugin.
  *
  * Obtain this from your plugin's `start` dependencies after declaring `sandbox`
@@ -69,7 +82,9 @@ export interface SandboxPluginStart {
   getSession(request: KibanaRequest, sessionId: string): SandboxSession;
 }
 
-export class SandboxPlugin implements Plugin<void, SandboxPluginStart, {}, SandboxPluginStartDeps> {
+export class SandboxPlugin
+  implements Plugin<SandboxPluginSetup, SandboxPluginStart, {}, SandboxPluginStartDeps>
+{
   private readonly logger: Logger;
   private apiClient?: SandboxApiClient;
   private readonly sessions = new Map<string, SandboxSession>();
@@ -79,7 +94,12 @@ export class SandboxPlugin implements Plugin<void, SandboxPluginStart, {}, Sandb
     this.logger = ctx.logger.get();
   }
 
-  setup(_core: CoreSetup): void {}
+  setup(_core: CoreSetup): SandboxPluginSetup {
+    const config = this.ctx.config.get();
+    return {
+      isAvailable: config.enabled && !!config.api_key && !!config.ssl,
+    };
+  }
 
   start(_core: CoreStart, { spaces }: SandboxPluginStartDeps): SandboxPluginStart {
     this.spaces = spaces;
