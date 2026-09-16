@@ -14,11 +14,10 @@ import { SEARCH_API_BASE_URL } from '@kbn/data-plugin/server/search/routes';
 import {
   buildEsqlConversionCasesByGroup,
   ESQL_CONVERSION_DATE_RANGE,
-  ESQL_CONVERSION_DATASETS,
-  ESQL_CONVERSION_NOW,
 } from '@kbn/lens-test-helpers';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { ES_ARCHIVE_PATHS } from '../../../common/fixtures/constants';
 import { apiTest } from '../fixtures';
 
 const INTERNAL_HEADERS = {
@@ -56,23 +55,12 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-      // Install with `now` pinned to the matrix reference time so the rebased
-      // document timestamps fall inside ESQL_CONVERSION_DATE_RANGE.
-      for (const dataset of Object.values(ESQL_CONVERSION_DATASETS)) {
-        await apiServices.sampleData.install(
-          dataset.id,
-          undefined,
-          ESQL_CONVERSION_NOW.toISOString()
-        );
-      }
+    apiTest.beforeAll(async ({ esArchiver, samlAuth }) => {
+      await Promise.all([
+        esArchiver.loadIfNeeded(ES_ARCHIVE_PATHS.ML_ECOMMERCE),
+        esArchiver.loadIfNeeded(ES_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_LOGS_TSDB),
+      ]);
       cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      for (const dataset of Object.values(ESQL_CONVERSION_DATASETS)) {
-        await apiServices.sampleData.remove(dataset.id);
-      }
     });
 
     // playwright/max-nested-describe allows only one level, so groups become

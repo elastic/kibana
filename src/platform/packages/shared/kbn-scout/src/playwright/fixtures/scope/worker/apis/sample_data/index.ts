@@ -11,12 +11,7 @@ import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
 export interface SampleDataApiService {
-  /**
-   * Installs a sample data set. Pass `now` (ISO 8601) to pin the reference
-   * time the installer rebases document timestamps around, making the data
-   * window deterministic across runs.
-   */
-  install: (dataSetId: string, spaceId?: string, now?: string) => Promise<void>;
+  install: (dataSetId: string, spaceId?: string) => Promise<void>;
   remove: (dataSetId: string, spaceId?: string) => Promise<void>;
 }
 
@@ -27,12 +22,11 @@ export const getSampleDataApiHelper = (
   const withSpace = (path: string, spaceId?: string) => (spaceId ? `/s/${spaceId}${path}` : path);
 
   return {
-    install: async (dataSetId: string, spaceId?: string, now?: string) => {
+    install: async (dataSetId: string, spaceId?: string) => {
       await measurePerformanceAsync(log, 'sampleDataApi.install', async () => {
-        const query = now ? `?now=${encodeURIComponent(now)}` : '';
         await kbnClient.request({
           method: 'POST',
-          path: withSpace(`/api/sample_data/${dataSetId}${query}`, spaceId),
+          path: withSpace(`/api/sample_data/${dataSetId}`, spaceId),
           retries: 3,
         });
       });

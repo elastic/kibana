@@ -12,7 +12,7 @@ import type { EsqlConversionDataset, EsqlConversionDatasetId } from './types';
 export const ESQL_CONVERSION_DATASETS: Record<EsqlConversionDatasetId, EsqlConversionDataset> = {
   ecommerce: {
     id: 'ecommerce',
-    index: 'kibana_sample_data_ecommerce',
+    index: 'ft_ecommerce',
     timeField: 'order_date',
     fieldTypes: {
       order_date: 'date',
@@ -25,7 +25,7 @@ export const ESQL_CONVERSION_DATASETS: Record<EsqlConversionDatasetId, EsqlConve
   },
   logs: {
     id: 'logs',
-    index: 'kibana_sample_data_logs',
+    index: 'kibana_sample_data_logstsdb',
     timeField: 'timestamp',
     fieldTypes: {
       timestamp: 'date',
