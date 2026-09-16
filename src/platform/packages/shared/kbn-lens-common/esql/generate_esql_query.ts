@@ -242,7 +242,7 @@ export function generateEsqlQuery(
       // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
       // 2. Operation-specific format
-      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, dateRange) ??
+      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, absDateRange) ??
       // 3. Field's default format from data view
       ('sourceField' in col
         ? col.sourceField === '___records___'
@@ -412,7 +412,7 @@ export function generateEsqlQuery(
       // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
       // 2. Operation-specific format
-      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, dateRange) ??
+      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, absDateRange) ??
       // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
