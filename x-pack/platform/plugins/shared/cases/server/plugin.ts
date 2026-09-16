@@ -312,7 +312,8 @@ export class CasePlugin
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     const isCasesAgentBuilderAllowed =
-      !serverlessProjectType || SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType);
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
 
     if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(

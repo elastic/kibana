@@ -415,6 +415,13 @@ describe('Cases Plugin', () => {
       expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
     });
 
+    it('does not register tools when serverless project type is undefined', () => {
+      setupServerlessPlugin(undefined as unknown as string);
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
+    });
+
     it('does not register tools when agentBuilder plugin is not available', () => {
       delete pluginsSetup.agentBuilder;
       plugin.setup(coreSetup, pluginsSetup);
