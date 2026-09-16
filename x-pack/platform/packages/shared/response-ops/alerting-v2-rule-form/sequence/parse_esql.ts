@@ -91,7 +91,7 @@ const ruleKindPairsFromTCaseCondition = (cond: ESQLSingleAstItem): RuleKindPair[
 
   const orLeaf = ruleKindLeaves.find((l) => asFn(l)?.name === 'or');
   if (orLeaf) {
-    return asFn(orLeaf)!.args.flatMap((a) => {
+    return flattenBool(orLeaf, 'or').flatMap((a) => {
       const subLeaves = flattenBool(unwrapSingle(a), 'and');
       const subRuleIdLeaf = subLeaves.find((l) => {
         const f = asFn(l);
@@ -208,12 +208,30 @@ const detectSingleRecoveryIdx = (recoveryQuery: string, steps: SequenceStep[]): 
   const leaves = flattenBool(whereCmd.args[0] as ESQLSingleAstItem, 'and');
   for (const leaf of leaves) {
     const fn = asFn(leaf);
-    if (!fn || fn.name !== '==' || fn.args.length !== 2) continue;
+    if (!fn) continue;
     const col = getColName(fn.args[0]);
-    const val = getStringVal(fn.args[1]);
-    if (col === 'rule.id' && val !== null) {
-      const found = steps.findIndex((s) => s.rules.some((r) => r.ruleId === val));
-      if (found !== -1) return found;
+    if (col !== 'rule.id') continue;
+
+    if (fn.name === '==' && fn.args.length === 2) {
+      const val = getStringVal(fn.args[1]);
+      if (val !== null) {
+        const found = steps.findIndex((s) => s.rules.some((r) => r.ruleId === val));
+        if (found !== -1) return found;
+      }
+    } else if (fn.name === 'in') {
+      const listNode = fn.args[1] as any;
+      const listValues: ESQLAstItem[] = Array.isArray(listNode?.values)
+        ? listNode.values
+        : Array.isArray(listNode)
+        ? listNode
+        : [];
+      const inValues = listValues.map((a) => getStringVal(a)).filter(Boolean) as string[];
+      if (inValues.length > 0) {
+        const found = steps.findIndex((s) =>
+          inValues.every((v) => s.rules.some((r) => r.ruleId === v))
+        );
+        if (found !== -1) return found;
+      }
     }
   }
 
