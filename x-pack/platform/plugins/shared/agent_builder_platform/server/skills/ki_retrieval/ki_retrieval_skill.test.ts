@@ -6,8 +6,7 @@
  */
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
-import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -21,9 +20,8 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features and Context Engine availability', () => {
+  it('is gated behind experimental features', () => {
     expect(kiRetrievalSkill.experimental).toBe(true);
-    expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {
@@ -31,43 +29,24 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('references the correct AI Index pattern in content', () => {
+  it('references the correct AI index pattern in content', () => {
     expect(kiRetrievalSkill.content).toContain('ai-index-*');
     expect(kiRetrievalSkill.content).not.toContain('ai-index-idx-*');
     expect(kiRetrievalSkill.content).not.toContain('ai-index-ds-*');
   });
 
-  it('routes discovery, orientation and querying through the AI-index tools', () => {
-    const { content } = kiRetrievalSkill;
-
-    expect(content).toContain('`list_ai_indices`');
-    expect(content).toContain('`describe_ai_index`');
-    expect(content).toContain('`query_ai_indices`');
-    expect(content).toContain('Do not use `execute_esql` or `list_indices` on AI Indices');
-    expect(content).not.toContain('platform.core.list_indices');
-  });
-
-  it('describes describe_ai_index as a context block to read and copy ES|QL from', () => {
-    expect(kiRetrievalSkill.content).toContain('context block you can read and copy');
-    expect(kiRetrievalSkill.content).not.toContain('suggested_queries');
-    expect(kiRetrievalSkill.content).not.toContain('query_templates');
-  });
-
-  it('does not teach the agent about spaces or space scoping', () => {
-    const { content } = kiRetrievalSkill;
-
-    expect(content).not.toMatch(/space/i);
-    expect(content).not.toContain('"filter"');
-    expect(content).not.toContain('verbatim');
+  it('requires the prompt-provided space filter on every AI-index query', () => {
+    expect(kiRetrievalSkill.content).toContain('pass its exact `filter`');
+    expect(kiRetrievalSkill.content).toContain('on every AI-index query');
   });
 
   it('has no referencedContent', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });
 
-  it('binds exactly the three AI-index tools', async () => {
+  it('binds the two required registry tools', async () => {
     const toolIds = (await kiRetrievalSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).toEqual(Object.values(contextEngineAiIndexTools));
+    expect(toolIds).toEqual([platformCoreTools.executeEsql, platformCoreTools.listIndices]);
   });
 });
