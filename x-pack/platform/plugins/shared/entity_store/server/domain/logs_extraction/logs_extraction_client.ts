@@ -13,6 +13,7 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
+  GatedEntityDefinition,
   ManagedEntityDefinition,
   ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
@@ -290,7 +291,7 @@ export class LogsExtractionClient {
     config: LogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
-    entityDefinition: ManagedEntityDefinition;
+    entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -352,7 +353,7 @@ export class LogsExtractionClient {
     config: LogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
-    entityDefinition: ManagedEntityDefinition;
+    entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
     indexPatterns: string[];
     latestIndex: string;
   }): Promise<{
@@ -558,7 +559,7 @@ export class LogsExtractionClient {
     docsLimit: number;
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
-    entityDefinition: ManagedEntityDefinition;
+    entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -736,7 +737,7 @@ export class LogsExtractionClient {
   }: {
     indexPatterns: string[];
     type: EntityType;
-    entityDefinition: ManagedEntityDefinition;
+    entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
     fromDateISO: string;
     toDateISO: string;
     logsPageCursorStart: LogSlicePaginationParams | undefined;
@@ -812,7 +813,7 @@ export class LogsExtractionClient {
     opts?: LogsExtractionOptions;
     indexPatterns: string[];
     latestIndex: string;
-    entityDefinition: ManagedEntityDefinition;
+    entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;

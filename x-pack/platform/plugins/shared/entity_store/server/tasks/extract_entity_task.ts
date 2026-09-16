@@ -26,7 +26,7 @@ import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { isDualProcessEnabled } from '../infra/feature_flags';
 import {
-  hasPriorityVariant,
+  hasPriorityExtractionGate,
   resolveExtractionMode,
 } from '../../common/domain/definitions/registry';
 import { wrapTaskRun } from '../telemetry/traces';
@@ -42,19 +42,19 @@ const TASK_CONFIG_BY_MODE = {
 } as const satisfies Record<ExtractionMode, EntityStoreTaskConfig>;
 
 export function getExtractEntityTaskConfig(
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): EntityStoreTaskConfig {
   return TASK_CONFIG_BY_MODE[extractionMode];
 }
 
-function getTaskType(entityType: EntityType, extractionMode: ExtractionMode = 'single'): string {
+function getTaskType(entityType: EntityType, extractionMode: ExtractionMode = EXTRACTION_MODE.single): string {
   return `${getExtractEntityTaskConfig(extractionMode).type}:${entityType}`;
 }
 
 export function getExtractEntityTaskId(
   entityType: EntityType,
   namespace: string,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): string {
   return `${getTaskType(entityType, extractionMode)}:${namespace}`;
 }
@@ -104,13 +104,13 @@ async function runTask({
   // The task definitions are registered unconditionally, so the flag is read per run: it can be
   // flipped while a task is already scheduled. Non-priority extraction only exists in dual-process
   // mode, so with the flag off this run does nothing rather than falling back to another mode.
-  if (registeredExtractionMode === 'nonPriority' && !dualProcessEnabled) {
+  if (registeredExtractionMode === EXTRACTION_MODE.nonPriority && !dualProcessEnabled) {
     logger.debug('Dual process is disabled, skipping non-priority extraction');
     return { state: currentState };
   }
 
   const extractionMode =
-    registeredExtractionMode === 'nonPriority'
+    registeredExtractionMode === EXTRACTION_MODE.nonPriority
       ? registeredExtractionMode
       : resolveExtractionMode(dualProcessEnabled, entityType);
 
@@ -237,14 +237,14 @@ export function registerExtractEntityTasks({
       registerOne({ taskManager, logger, core, isServerless, type });
 
       // Unconditional: setup runs before the flag is readable, and the flag gates execution.
-      if (hasPriorityVariant(type)) {
+      if (hasPriorityExtractionGate(type)) {
         registerOne({
           taskManager,
           logger,
           core,
           isServerless,
           type,
-          extractionMode: 'nonPriority',
+          extractionMode: EXTRACTION_MODE.nonPriority,
         });
       }
     });
@@ -260,7 +260,7 @@ function registerOne({
   core,
   isServerless,
   type,
-  extractionMode = 'single',
+  extractionMode = EXTRACTION_MODE.single,
 }: {
   core: types.EntityStoreCoreSetup;
   taskManager: TaskManagerSetupContract;

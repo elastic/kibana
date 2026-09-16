@@ -77,7 +77,7 @@ import type {
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import {
   getEntityDefinition,
-  hasPriorityVariant,
+  hasPriorityExtractionGate,
 } from '../../../common/domain/definitions/registry';
 import {
   type TelemetryReporter,
@@ -225,7 +225,7 @@ export class AssetManagerClient {
 
   /** True when this type runs two processes: the flag is on and it has a priority variant. */
   private async isDualProcessType(type: EntityType): Promise<boolean> {
-    return hasPriorityVariant(type) && (await this.isDualProcessEnabled());
+    return hasPriorityExtractionGate(type) && (await this.isDualProcessEnabled());
   }
 
   public async start(request: KibanaRequest, type: EntityType) {

@@ -7,80 +7,53 @@
 
 import assert from 'assert';
 
-import type { EntityType, ExtractionMode } from './entity_schema';
-import { EXTRACTION_MODE } from './entity_schema';
-import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
-import { hostEntityDefinition } from './host';
+import { EXTRACTION_MODE, type EntityType, type ExtractionMode } from './entity_schema';
 import {
-  userEntityDefinition,
-  userNonPriorityEntityDefinition,
-  userPriorityEntityDefinition,
-} from './user';
+  type EntityDefinitionWithoutId,
+  type GatedEntityDefinition,
+  type ManagedEntityDefinition,
+} from './entity_schema';
+import { resolveExtractionGate } from './extraction_gate';
+import { hostEntityDefinition } from './host';
+import { userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
 
-/** The definition every consumer outside log extraction resolves to. */
-interface EntityDefinitionBase {
-  single: EntityDefinitionWithoutId;
-}
-
-/**
- * A type without dual-process support. `never` keeps the process variants out entirely rather than
- * making them optional, so a half-registered pair cannot typecheck, while still leaving the keys
- * readable across the union.
- */
-interface SingleProcessDefinition extends EntityDefinitionBase {
-  priority?: never;
-  nonPriority?: never;
-}
-
-/**
- * A type with dual-process support. The two process variants exist only as a pair: a priority gate
- * without its complement would leave the documents that gate rejects unscanned.
- */
-interface DualProcessDefinitions extends EntityDefinitionBase {
-  priority: EntityDefinitionWithoutId;
-  nonPriority: EntityDefinitionWithoutId;
-}
-
-/** Either single only, or single plus both process variants. */
-type EntityDefinitionVariants = SingleProcessDefinition | DualProcessDefinitions;
-
+/** One definition per entity type; the extraction processes are modes of it, not copies of it. */
 const entitiesDefinitionRegistry = {
-  host: { single: hostEntityDefinition },
-  user: {
-    single: userEntityDefinition,
-    priority: userPriorityEntityDefinition,
-    nonPriority: userNonPriorityEntityDefinition,
-  },
-  service: { single: serviceEntityDefinition },
-  generic: { single: genericEntityDefinition },
-} as const satisfies Record<EntityType, EntityDefinitionVariants>;
+  host: hostEntityDefinition,
+  user: userEntityDefinition,
+  service: serviceEntityDefinition,
+  generic: genericEntityDefinition,
+} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
 
-const getEntityDefinitionVariants = (type: EntityType): EntityDefinitionVariants => {
-  const variants = entitiesDefinitionRegistry[type];
-  assert(variants, `No entity description found for type: ${type}`);
+const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId => {
+  const definition = entitiesDefinitionRegistry[type];
+  assert(definition, `No entity description found for type: ${type}`);
 
-  return variants;
+  return definition;
 };
 
-/** Dual-process capability is derived from the registry, so it cannot be declared without being implemented. */
-export const hasPriorityVariant = (type: EntityType): boolean =>
-  getEntityDefinitionVariants(type).priority !== undefined;
+/**
+ * Dual-process capability is derived from the definition, so it cannot be declared without being
+ * implemented. A declared gate yields both processes at once, since the non-priority process scans
+ * the complement the same gate defines.
+ */
+export const hasPriorityExtractionGate = (type: EntityType): boolean =>
+  getRegisteredDefinition(type).priorityExtractionGate !== undefined;
 
 /**
- * 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly.
+ * 'nonPriority' is excluded: the non-priority task hardcodes its own mode directly.
  *
- * Enabling the flag for a type sends it down the priority variant, which scans only the documents
- * its gate admits. The complement is reached solely by the non-priority task, so the flag is safe
- * to enable only once that task is scheduled for the type; a registered priority variant on its own
- * is not enough.
+ * Enabling the flag for a type sends it down the priority mode, which scans only the documents its
+ * gate admits. The complement is reached solely by the non-priority task, so the flag is safe to
+ * enable only once that task is scheduled for the type; a declared gate on its own is not enough.
  */
 export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
 ): Extract<ExtractionMode, 'priority' | 'single'> => {
-  if (isDualProcessEnabled && hasPriorityVariant(entityType)) return EXTRACTION_MODE.priority;
+  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType)) return EXTRACTION_MODE.priority;
   return EXTRACTION_MODE.single;
 };
 
@@ -91,7 +64,7 @@ export function getEntityDefinition(
   type: EntityType,
   namespace: string,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single
-): ManagedEntityDefinition {
+): GatedEntityDefinition<ManagedEntityDefinition> {
   const definition = getEntityDefinitionWithoutId(type, extractionMode);
 
   return {
@@ -102,18 +75,24 @@ export function getEntityDefinition(
 }
 
 /**
- * Resolves an entity definition. The default `'single'` mode returns the definition used by every
- * consumer outside log extraction.
+ * Resolves an entity definition for an extraction mode. The default `'single'` mode returns the
+ * registered definition untouched, which is what every consumer outside log extraction reads.
+ *
+ * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
+ * gates come from that one declaration, so they cannot drift out of being complements.
  */
 export function getEntityDefinitionWithoutId(
   type: EntityType,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single
-): EntityDefinitionWithoutId {
-  const definition = getEntityDefinitionVariants(type)[extractionMode];
+): GatedEntityDefinition<EntityDefinitionWithoutId> {
+  const definition = getRegisteredDefinition(type);
   assert(
-    definition,
-    `No '${extractionMode}' extraction variant registered for entity type: ${type}`
+    extractionMode === EXTRACTION_MODE.single || definition.priorityExtractionGate,
+    `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
-  return definition;
+  const extractionGate = resolveExtractionGate(definition.priorityExtractionGate, extractionMode);
+  if (!extractionGate) return definition;
+
+  return { ...definition, extractionGate };
 }

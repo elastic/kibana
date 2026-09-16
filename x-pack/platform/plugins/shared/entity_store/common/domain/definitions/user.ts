@@ -149,6 +149,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     ],
   },
 
+  /** High-signal user logs: authoritative identity snapshots from an IdP. */
+  priorityExtractionGate: idpGate,
+
   /**
    * Restricts single-document creation to local users; other namespaces would mint a
    * high-confidence entity without authoritative IdP evidence.
@@ -240,37 +243,3 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'host.name' }),
   ],
 } as const satisfies EntityDefinitionWithoutId;
-
-/**
- * Strict complement of the priority gate, so every log is handled by exactly one process.
- * The explicit `exists` arm is required: on a document without `event.kind`,
- * `NOT (MV_CONTAINS(event.kind, "asset"))` evaluates to null rather than true, which would leave
- * that document unscanned by both processes.
- */
-const nonPriorityExtractionGate: Condition = {
-  or: [{ field: 'event.kind', exists: false }, { not: idpGate }],
-};
-
-/**
- * Priority extraction: authoritative identity snapshots only. Variants are spread from the base
- * definition so they share one identity logic object, keeping a given user on a single entity id
- * whichever process discovers them first.
- */
-export const userPriorityEntityDefinition: EntityDefinitionWithoutId = {
-  ...userEntityDefinition,
-  extractionGate: idpGate,
-};
-
-/**
- * Non-priority extraction: every log the priority gate rejects.
- *
- * `postAggFilter` admits a row only when the entity is already stored, resolves to the local
- * namespace, or carries an asset event. Non-priority rows never satisfy the last of those, so this
- * variant creates local entities and otherwise enriches entities that already exist. A user first
- * discovered through the priority variant therefore picks up its non-asset fields on a later run
- * rather than within the same window.
- */
-export const userNonPriorityEntityDefinition: EntityDefinitionWithoutId = {
-  ...userEntityDefinition,
-  extractionGate: nonPriorityExtractionGate,
-};
