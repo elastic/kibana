@@ -83,8 +83,7 @@ export function privilegesFactory(
       const tryStoreComposablePrivilege = (
         feature: KibanaFeature,
         privilegeId: string,
-        privilege: FeatureKibanaPrivileges,
-        extractedIntoReferences?: readonly FeatureKibanaPrivilegesReference[]
+        privilege: FeatureKibanaPrivileges
       ) => {
         // If privilege is configured with `composedOf` it should be complemented with **all**
         // actions from referenced privileges.
@@ -104,14 +103,6 @@ export function privilegesFactory(
             references: replacedBy,
             actionsFilter: (action) => actions.ui.isValid(action),
           });
-        }
-
-        // A legacy minimal privilege (minted from `privilegeVersions`) must be complemented with
-        // **all** actions of the sub-feature privilege(s) that were extracted out of it after it
-        // was minted, so that roles still holding this name keep the exact access they always had
-        // — unlike `replacedBy` above, this isn't UI-capability-only, it's a real, permanent grant.
-        if (extractedIntoReferences && extractedIntoReferences.length > 0) {
-          referenceGroups.push({ references: extractedIntoReferences });
         }
 
         if (referenceGroups.length > 0) {
@@ -142,6 +133,26 @@ export function privilegesFactory(
           tryStoreComposablePrivilege(feature, fullPrivilegeId, featurePrivilege.privilege);
         }
 
+        // Actions for every sub-feature privilege of this feature, computed regardless of
+        // whether the current license allows sub-feature privilege *customization*
+        // (`allowSubFeaturePrivileges`/`respectLicenseLevel` below). A `privilegeVersions`
+        // extraction target must still be composed into its frozen legacy minimal privilege on
+        // every license, since the grant it represents was previously unconditional, licensed or
+        // not — only the *standalone*, independently-grantable sub-feature privilege (registered
+        // further down) is meant to be license-gated.
+        const subFeaturePrivilegeActionsById = new Map<string, string[]>();
+        if (feature.subFeatures?.length > 0) {
+          for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
+            feature,
+            licenseHasAtLeast
+          )) {
+            subFeaturePrivilegeActionsById.set(
+              subFeaturePrivilege.id,
+              uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature))
+            );
+          }
+        }
+
         for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: false,
           licenseHasAtLeast,
@@ -160,14 +171,23 @@ export function privilegesFactory(
             basePrivilegeId,
             privilegeVersions
           )) {
-            featurePrivileges[feature.id][minimalPrivilegeId] = baseMinimalActions;
-
-            tryStoreComposablePrivilege(
-              feature,
+            const extractedActions = getReferencesExtractedAfter(
               minimalPrivilegeId,
-              featurePrivilege.privilege,
-              getReferencesExtractedAfter(minimalPrivilegeId, basePrivilegeId, privilegeVersions)
+              basePrivilegeId,
+              privilegeVersions
+            ).flatMap((reference) =>
+              reference.privileges.flatMap(
+                (subFeaturePrivilegeId) =>
+                  subFeaturePrivilegeActionsById.get(subFeaturePrivilegeId) ?? []
+              )
             );
+
+            featurePrivileges[feature.id][minimalPrivilegeId] = uniq([
+              ...baseMinimalActions,
+              ...extractedActions,
+            ]);
+
+            tryStoreComposablePrivilege(feature, minimalPrivilegeId, featurePrivilege.privilege);
           }
         }
 
