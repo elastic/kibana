@@ -280,7 +280,6 @@ function isLocalhostUrl(nodeUrl) {
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
       hostname === '[::1]' ||
-      hostname === '::1' ||
       hostname === 'host.docker.internal'
     );
   } catch (err) {
@@ -349,6 +348,10 @@ function formatDestCandidate(candidate) {
     return candidate.destHost + ' (api key)';
   }
   return candidate.destHost + ' as ' + candidate.destUsername;
+}
+
+function formatDestCandidatesTried(config) {
+  return destCandidates(config).map(formatDestCandidate).join(', ');
 }
 
 function applyDestCandidate(config, candidate) {
@@ -420,9 +423,14 @@ function tryDestCandidate(config, candidate) {
     requestTimeout: 2000,
     maxRetries: 0,
   });
-  return probe.info().then(function (info) {
-    return { candidate: candidate, info: info };
-  });
+  return probe
+    .info()
+    .then(function (info) {
+      return { candidate: candidate, info: info };
+    })
+    .finally(function () {
+      return probe.close();
+    });
 }
 
 function resolveDestClient(config, log) {
@@ -441,10 +449,7 @@ function resolveDestClient(config, log) {
     if (index >= candidates.length) {
       log('[dest] Connection failed: could not detect a running Elasticsearch instance.');
       throw (
-        lastErr ||
-        new Error(
-          'Tried: http://localhost:9200, https://localhost:9200 with auth users: elastic, elastic_serverless'
-        )
+        lastErr || new Error('Tried: ' + formatDestCandidatesTried(config))
       );
     }
     var candidate = candidates[index];
@@ -919,11 +924,6 @@ function main() {
     })
     .catch(function (err) {
       console.error('Fatal:', err);
-      if (isLocalhostUrl(config.destHost)) {
-        console.error(
-          'Tried: http://localhost:9200, https://localhost:9200 with auth users: elastic, elastic_serverless'
-        );
-      }
       process.exit(1);
     });
 }
