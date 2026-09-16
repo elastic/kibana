@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-import { SEVERITY_DOT_COLOR_KEY } from '../common/severity';
+import { SEVERITY_DOT_COLOR } from '../common/severity';
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
   onSeverityClick: (severity: Severity) => void;
 }
 
-export function InvestigationSeverityTiles({
+export const InvestigationSeverityTiles = ({
   severityCounts,
   onSeverityClick,
-}: InvestigationSeverityTilesProps): React.ReactElement {
+}: InvestigationSeverityTilesProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -44,32 +44,18 @@ export function InvestigationSeverityTiles({
               hasBorder
               hasShadow={false}
               paddingSize="m"
-              role={isMuted ? undefined : 'button'}
-              tabIndex={isMuted ? undefined : 0}
+              color={isMuted ? 'subdued' : undefined}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
               onClick={isMuted ? undefined : () => onSeverityClick(severity)}
-              onKeyDown={
-                isMuted
-                  ? undefined
-                  : (e: React.KeyboardEvent<HTMLDivElement>) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSeverityClick(severity);
-                      }
-                    }
-              }
               css={
                 isMuted
-                  ? css`
-                      opacity: 0.5;
-                    `
+                  ? undefined
                   : css`
-                      cursor: pointer;
-                      outline: 2px solid transparent;
-                      transition: outline 150ms ease;
-                      &:hover,
-                      &:focus-visible {
-                        outline: 2px solid ${euiTheme.colors.primary};
+                      text-align: left;
+                      outline: ${euiTheme.border.width.thick} solid transparent;
+                      transition: outline ${euiTheme.animation.fast} ease;
+                      &:hover {
+                        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
                       }
                     `
               }
@@ -86,10 +72,19 @@ export function InvestigationSeverityTiles({
               </EuiText>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="dot" color={SEVERITY_DOT_COLOR_KEY[severity]} aria-hidden={true} />
+                  <EuiIcon type="dot" color={SEVERITY_DOT_COLOR[severity]} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
+                  <EuiTitle
+                    size="s"
+                    css={
+                      isMuted
+                        ? css`
+                            color: ${euiTheme.colors.textSubdued};
+                          `
+                        : undefined
+                    }
+                  >
                     <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>{count}</span>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -100,4 +95,4 @@ export function InvestigationSeverityTiles({
       })}
     </EuiFlexGroup>
   );
-}
+};

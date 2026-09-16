@@ -16,9 +16,9 @@ import type {
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from './use_kibana';
 
-export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
+const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
-export const INVESTIGATIONS_PAGE_SIZE = 10;
+const INVESTIGATIONS_PAGE_SIZE = 10;
 
 export interface FetchInvestigationsParams {
   statuses: InvestigationStatus[];
@@ -44,7 +44,7 @@ export interface FetchInvestigationsResult {
 }
 
 /** Offset pages over a live `created_at desc` window can repeat an id across boundaries. */
-export const flattenInvestigationPages = (
+const flattenInvestigationPages = (
   pages: ListInvestigationsResponse[]
 ): ListInvestigationItem[] => {
   const seen = new Set<string>();
@@ -63,9 +63,7 @@ export const flattenInvestigationPages = (
   return items;
 };
 
-export const getInvestigationsNextPageParam = (
-  lastPage: ListInvestigationsResponse
-): number | undefined =>
+const getInvestigationsNextPageParam = (lastPage: ListInvestigationsResponse): number | undefined =>
   lastPage.page * lastPage.size < lastPage.total ? lastPage.page + 1 : undefined;
 
 export const useFetchInvestigations = ({
@@ -134,15 +132,28 @@ export const useFetchInvestigations = ({
     void refetch();
   }, [refetch]);
 
-  return {
-    investigations,
-    total,
-    hasMore: hasNextPage ?? false,
-    isInitialLoading,
-    isFetchingNextPage,
-    isFetching,
-    error: error ?? null,
-    fetchNextPage: handleFetchNextPage,
-    refetch: handleRefetch,
-  };
+  return useMemo(
+    () => ({
+      investigations,
+      total,
+      hasMore: hasNextPage ?? false,
+      isInitialLoading,
+      isFetchingNextPage,
+      isFetching,
+      error: error ?? null,
+      fetchNextPage: handleFetchNextPage,
+      refetch: handleRefetch,
+    }),
+    [
+      investigations,
+      total,
+      hasNextPage,
+      isInitialLoading,
+      isFetchingNextPage,
+      isFetching,
+      error,
+      handleFetchNextPage,
+      handleRefetch,
+    ]
+  );
 };

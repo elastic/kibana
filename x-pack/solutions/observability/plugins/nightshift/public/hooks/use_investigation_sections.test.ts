@@ -240,4 +240,60 @@ describe('useInvestigationSections', () => {
     expect(refetchCritical).not.toHaveBeenCalled();
     expect(refetchFailed).not.toHaveBeenCalled();
   });
+  const implementationWithInProgressIds =
+    ({
+      ids,
+      refetchCritical,
+      refetchFailed,
+    }: {
+      ids: string[];
+      refetchCritical: jest.Mock;
+      refetchFailed: jest.Mock;
+    }) =>
+    ({ statuses, severities }: { statuses: InvestigationStatus[]; severities?: Severity[] }) => {
+      if (statuses.includes('pending')) {
+        return {
+          ...sectionResult({ total: ids.length }),
+          investigations: ids.map((id) => ({
+            investigation_id: id,
+            status: 'pending' as const,
+            created_at: '2026-09-11T09:00:00.000Z',
+            subject: { type: 'significant_event' as const, id: 'event-1', summary: 'pending' },
+          })),
+        };
+      }
+      if (statuses.includes('failed')) {
+        return { ...sectionResult({ total: 1, status: 'failed' }), refetch: refetchFailed };
+      }
+      if (severities?.[0] === '80-critical') {
+        return { ...sectionResult({ total: 3 }), refetch: refetchCritical };
+      }
+      return sectionResult();
+    };
+
+  it('refetches when one finishes as another starts, leaving the in-progress total flat', () => {
+    const refetchCritical = jest.fn();
+    const refetchFailed = jest.fn();
+
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({
+        ids: ['running-a', 'running-b'],
+        refetchCritical,
+        refetchFailed,
+      })
+    );
+    const { rerender } = renderHook(() => useInvestigationSections());
+
+    mockUseInvestigationSection.mockImplementation(
+      implementationWithInProgressIds({
+        ids: ['running-b', 'running-c'],
+        refetchCritical,
+        refetchFailed,
+      })
+    );
+    rerender();
+
+    expect(refetchCritical).toHaveBeenCalledTimes(1);
+    expect(refetchFailed).toHaveBeenCalledTimes(1);
+  });
 });

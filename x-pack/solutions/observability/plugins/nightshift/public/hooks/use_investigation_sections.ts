@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   InvestigationStatus,
+  ListInvestigationItem,
   Severity,
   SeverityCounts,
 } from '@kbn/nightshift-investigations-plugin/common';
@@ -43,6 +44,9 @@ export interface InvestigationSectionsResult {
   loadedCount: number;
   refetchAll: () => void;
 }
+
+const toInvestigationIds = (investigations: ListInvestigationItem[]): Set<string> =>
+  new Set(investigations.map(({ investigation_id: investigationId }) => investigationId));
 
 const toSectionState = ({
   id,
@@ -100,15 +104,25 @@ export const useInvestigationSections = ({
   const { refetch: refetchLow } = low;
   const { refetch: refetchFailed } = failed;
 
-  // An investigation leaving the in-progress section landed in one of the others, so a shrinking
-  // in-progress total is the signal that the rest are stale. Watching the count rather than
-  // waiting for it to reach zero also catches one finishing while others keep running.
-  const previousInProgressTotal = useRef(inProgress.total);
-  useEffect(() => {
-    const finishedSinceLastRender = inProgress.total < previousInProgressTotal.current;
-    previousInProgressTotal.current = inProgress.total;
+  // An investigation leaving the in-progress section landed in one of the others, so the rest are
+  // stale the moment one finishes. Two signals are needed to see that: a loaded id disappearing
+  // catches one finishing while another starts in the same tick, which leaves the total flat; a
+  // shrinking total catches one finishing past the loaded window, where the loaded ids never move.
+  const inProgressInvestigations = inProgress.investigations;
+  const previousInProgress = useRef({
+    total: inProgress.total,
+    ids: toInvestigationIds(inProgressInvestigations),
+  });
 
-    if (!finishedSinceLastRender) {
+  useEffect(() => {
+    const ids = toInvestigationIds(inProgressInvestigations);
+    const previous = previousInProgress.current;
+    previousInProgress.current = { total: inProgress.total, ids };
+
+    const hasFinished =
+      inProgress.total < previous.total || [...previous.ids].some((id) => !ids.has(id));
+
+    if (!hasFinished) {
       return;
     }
 
@@ -117,7 +131,15 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchFailed();
-  }, [inProgress.total, refetchCritical, refetchHigh, refetchMedium, refetchLow, refetchFailed]);
+  }, [
+    inProgress.total,
+    inProgressInvestigations,
+    refetchCritical,
+    refetchHigh,
+    refetchMedium,
+    refetchLow,
+    refetchFailed,
+  ]);
 
   const sections = useMemo(
     () => [
@@ -141,6 +163,12 @@ export const useInvestigationSections = ({
     [critical.total, high.total, medium.total, low.total]
   );
 
+  const refetchAll = useCallback(() => {
+    for (const section of sections) {
+      section.refetch();
+    }
+  }, [sections]);
+
   return {
     sections,
     severityCounts,
@@ -149,10 +177,6 @@ export const useInvestigationSections = ({
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
-    refetchAll: () => {
-      for (const section of sections) {
-        section.refetch();
-      }
-    },
+    refetchAll,
   };
 };

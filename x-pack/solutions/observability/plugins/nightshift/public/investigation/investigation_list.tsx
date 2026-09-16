@@ -8,10 +8,14 @@
 import { css } from '@emotion/react';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../common/messages';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { InvestigationSection } from './investigation_section';
+import {
+  getInvestigationSectionAnchorId,
+  InvestigationSection,
+  isInvestigationSectionVisible,
+} from './investigation_section';
 
 export interface InvestigationListHandle {
   scrollToSeverity: (severity: Severity) => void;
@@ -23,26 +27,24 @@ export interface InvestigationListProps {
   onInvestigationClick?: (investigation: ListInvestigationItem) => void;
 }
 
-const isVisibleSection = (section: InvestigationSectionState): boolean =>
-  section.isInitialLoading ||
-  section.error != null ||
-  section.total > 0 ||
-  section.investigations.length > 0;
-
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
   function InvestigationList(
     { sections, selectedInvestigationId, onInvestigationClick },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
-    const visibleSections = sections.filter(isVisibleSection);
+    const visibleSections = sections.filter(isInvestigationSectionVisible);
 
     useImperativeHandle(ref, () => ({
       scrollToSeverity: (severity: Severity) => {
-        document.getElementById(`nightshiftInvestigationSection-${severity}`)?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+        const section = document.getElementById(getInvestigationSectionAnchorId(severity));
+        if (section == null) {
+          return;
+        }
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
+        // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
+        section.focus({ preventScroll: true });
       },
     }));
 
@@ -61,9 +63,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
           `}
         >
           <EuiText textAlign="center" color="subdued" size="s">
-            {i18n.translate('xpack.nightshift.investigations.emptyDescription', {
-              defaultMessage: 'No investigations found',
-            })}
+            {NO_INVESTIGATIONS_FOUND_MESSAGE}
           </EuiText>
         </EuiPanel>
       );

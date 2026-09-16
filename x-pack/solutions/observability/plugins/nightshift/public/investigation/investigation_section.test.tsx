@@ -53,7 +53,7 @@ const renderSection = ({
   );
 
 describe('InvestigationSection', () => {
-  it('shows a skeleton instead of the empty state during the initial load', () => {
+  it('shows a skeleton, and no count, while the section is still loading', () => {
     renderSection({ isInitialLoading: true });
 
     expect(
@@ -62,19 +62,12 @@ describe('InvestigationSection', () => {
     expect(
       screen.queryByTestId('nightshiftInvestigationSectionCount-80-critical')
     ).not.toBeInTheDocument();
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
   });
 
-  it('shows the empty state after an empty initial response', () => {
-    renderSection();
+  it('renders nothing once a section resolves empty, so the list can drop it', () => {
+    const { container } = renderSection();
 
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSectionSkeleton-80-critical')
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationSectionCount-80-critical')).toHaveTextContent(
-      '0'
-    );
-    expect(screen.getByText('No investigations found')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('shows Show more only when more investigations are available', () => {

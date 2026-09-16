@@ -19,7 +19,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { SEVERITY_DOT_COLOR_KEY } from '../common/severity';
+import { SEVERITY_DOT_COLOR } from '../common/severity';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import {
   getInvestigationPrimaryText,
@@ -29,7 +29,7 @@ import {
 
 const MAX_VISIBLE_ENTITY_CHIPS = 3;
 
-export interface InvestigationListItemProps extends Partial<ReturnType<typeof getEbtProps>> {
+export interface InvestigationListItemProps {
   investigation: ListInvestigationItem;
   isSelected?: boolean;
   onClick?: (investigation: ListInvestigationItem) => void;
@@ -39,7 +39,6 @@ export function InvestigationListItem({
   investigation,
   isSelected = false,
   onClick,
-  ...ebtProps
 }: InvestigationListItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
@@ -75,8 +74,8 @@ export function InvestigationListItem({
       status: investigation.status,
     });
 
-  const severityDotColorKey =
-    investigation.severity != null ? SEVERITY_DOT_COLOR_KEY[investigation.severity] : 'primary';
+  const severityDotColor =
+    investigation.severity != null ? SEVERITY_DOT_COLOR[investigation.severity] : 'primary';
 
   return (
     <div
@@ -88,7 +87,6 @@ export function InvestigationListItem({
             detail: investigation.status,
           })
         : {})}
-      {...ebtProps}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-pressed={onClick ? isSelected : undefined}
@@ -169,7 +167,7 @@ export function InvestigationListItem({
         {/* entity chips */}
         <EntityChips
           entities={investigation.impact?.entities}
-          severityColorKey={severityDotColorKey}
+          severityColorKey={severityDotColor}
         />
       </EuiFlexGroup>
     </div>

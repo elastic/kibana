@@ -23,6 +23,7 @@ import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigat
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
+import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
   InvestigationList,
@@ -130,8 +131,10 @@ export function NightshiftApp(): React.ReactElement {
   const allFailed =
     !isInitialLoading &&
     sections.every((section) => section.error && section.investigations.length === 0);
-  const fatalError = sections.find((section) => section.error)?.error ?? null;
-  const loadedInvestigations = sections.flatMap((section) => section.investigations);
+  const loadedInvestigations = useMemo(
+    () => sections.flatMap((section) => section.investigations),
+    [sections]
+  );
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,
@@ -154,6 +157,7 @@ export function NightshiftApp(): React.ReactElement {
   });
 
   if (!isInvestigationsAvailable || allFailed) {
+    const fatalError = sections.find((section) => section.error)?.error ?? null;
     if (!isInvestigationsAvailable || isHttpNotFoundError(fatalError)) {
       return (
         <EuiCallOut
@@ -252,9 +256,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         onClick={onRetry}
         size="s"
       >
-        {i18n.translate('xpack.nightshift.retryButtonText', {
-          defaultMessage: 'Retry',
-        })}
+        {RETRY_BUTTON_LABEL}
       </EuiButton>
     </EuiCallOut>
   );
