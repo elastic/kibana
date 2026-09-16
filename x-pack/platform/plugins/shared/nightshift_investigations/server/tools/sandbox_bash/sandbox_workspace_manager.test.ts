@@ -32,7 +32,10 @@ const createSessionMock = (isReset: boolean): SandboxSession => {
   return session as unknown as SandboxSession;
 };
 
-const createMutableSessionMock = (): { session: SandboxSession; setIsReset: (v: boolean) => void } => {
+const createMutableSessionMock = (): {
+  session: SandboxSession;
+  setIsReset: (v: boolean) => void;
+} => {
   let isReset = false;
   const session = {
     get isReset() {
