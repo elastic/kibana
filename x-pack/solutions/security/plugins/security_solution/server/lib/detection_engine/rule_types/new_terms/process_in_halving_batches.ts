@@ -18,9 +18,14 @@ export interface ProcessInHalvingBatchesArgs<TItem> {
   initialBatchSize?: number;
   /**
    * Processes one batch of items, typically by sending an Elasticsearch request for them.
-   * `startIndex` is the position of the first batch item within `items`.
+   * `startIndex` is the position of the first batch item within `items` and `batchSize` is the current batch
+   * size limit, the last batch can hold fewer items.
    */
-  processBatch: (batch: TItem[], startIndex: number) => Promise<ProcessBatchResult>;
+  processBatch: (
+    batch: TItem[],
+    startIndex: number,
+    batchSize: number
+  ) => Promise<ProcessBatchResult>;
   /**
    * Returns the batch size to retry the failed batch with, or undefined when a smaller batch cannot work
    * around the error. Halves the batch on oversized Elasticsearch responses by default.
@@ -76,7 +81,7 @@ export const processInHalvingBatches = async <TItem>({
     const batch = items.slice(processedCount, processedCount + batchSize);
 
     try {
-      const { stop } = await processBatch(batch, processedCount);
+      const { stop } = await processBatch(batch, processedCount, batchSize);
 
       if (stop) {
         return;

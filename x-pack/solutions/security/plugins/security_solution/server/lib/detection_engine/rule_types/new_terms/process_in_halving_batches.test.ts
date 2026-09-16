@@ -25,7 +25,7 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch).toHaveBeenCalledTimes(1);
-    expect(processBatch).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], 0);
+    expect(processBatch).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], 0, 4);
     expect(onBatchSizeReduced).not.toHaveBeenCalled();
   });
 
@@ -40,9 +40,9 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch.mock.calls).toEqual([
-      [['a', 'b'], 0],
-      [['c', 'd'], 2],
-      [['e'], 4],
+      [['a', 'b'], 0, 2],
+      [['c', 'd'], 2, 2],
+      [['e'], 4, 2],
     ]);
   });
 
@@ -70,10 +70,10 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch.mock.calls).toEqual([
-      [['a', 'b', 'c', 'd', 'e'], 0],
-      [['a', 'b'], 0],
-      [['c', 'd'], 2],
-      [['e'], 4],
+      [['a', 'b', 'c', 'd', 'e'], 0, 5],
+      [['a', 'b'], 0, 2],
+      [['c', 'd'], 2, 2],
+      [['e'], 4, 2],
     ]);
     expect(onBatchSizeReduced).toHaveBeenCalledTimes(1);
     expect(onBatchSizeReduced).toHaveBeenCalledWith({ from: 5, to: 2, error });
@@ -94,11 +94,11 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch.mock.calls).toEqual([
-      [['a', 'b', 'c'], 0],
-      [['d', 'e', 'f'], 3],
-      [['d'], 3],
-      [['e'], 4],
-      [['f'], 5],
+      [['a', 'b', 'c'], 0, 3],
+      [['d', 'e', 'f'], 3, 3],
+      [['d'], 3, 1],
+      [['e'], 4, 1],
+      [['f'], 5, 1],
     ]);
   });
 
@@ -189,8 +189,8 @@ describe('processInHalvingBatches', () => {
     ).rejects.toBe(error);
 
     expect(processBatch.mock.calls).toEqual([
-      [['a', 'b'], 0],
-      [['a'], 0],
+      [['a', 'b'], 0, 2],
+      [['a'], 0, 1],
     ]);
     expect(onBatchSizeReduced).toHaveBeenCalledTimes(1);
   });

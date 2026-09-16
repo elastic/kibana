@@ -125,7 +125,11 @@ export const multiTermsComposite = async ({
   let pageNumber = 0;
   let truncatedBulkCreateResult: TruncatedBulkCreateResult | undefined;
 
-  const processBatch = async (batch: Bucket[], startIndex: number): Promise<ProcessBatchResult> => {
+  const processBatch = async (
+    batch: Bucket[],
+    startIndex: number,
+    batchSize: number
+  ): Promise<ProcessBatchResult> => {
     pageNumber++;
     // the composite aggregation continues right after the last bucket of the previous batch
     const internalAfterKey = startIndex === 0 ? afterKey : buckets[startIndex - 1].key;
@@ -152,7 +156,7 @@ export const multiTermsComposite = async ({
         timestampField: aggregatableTimestampField,
         fields: params.newTermsFields,
         after: internalAfterKey,
-        pageSize: batch.length,
+        pageSize: batchSize,
       }),
       runtimeMappings,
       searchAfterSortIds: undefined,
@@ -219,7 +223,7 @@ export const multiTermsComposite = async ({
           timestampField: aggregatableTimestampField,
           fields: params.newTermsFields,
           after: internalAfterKey,
-          pageSize: batch.length,
+          pageSize: batchSize,
         }),
         runtimeMappings,
         searchAfterSortIds: undefined,
