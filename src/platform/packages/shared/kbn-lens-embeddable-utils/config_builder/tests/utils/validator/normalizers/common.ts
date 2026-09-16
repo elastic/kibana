@@ -1556,21 +1556,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.params.rangeType = 'percent';
         }
 
-        if (!palette.params.continuity) {
-          palette.params.continuity = getContinuity(rangeMin, rangeMax);
-        }
-
         // Legacy SOs may omit params.name, but the transform always sets it from the root name
         if (palette.params.name === undefined && palette.name) {
           palette.params.name = palette.name;
-        }
-
-        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-        if (!('rangeMin' in palette.params)) {
-          palette.params.rangeMin = null as unknown as number;
-        }
-        if (!('rangeMax' in palette.params)) {
-          palette.params.rangeMax = null as unknown as number;
         }
       });
 
