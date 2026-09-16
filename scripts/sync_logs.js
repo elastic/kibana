@@ -301,7 +301,16 @@ function destHostCandidates(config) {
   try {
     var parsed = new URL(host);
     var port = parsed.port || '9200';
-    return ['http://localhost:' + port, 'https://localhost:' + port];
+    var httpCandidate = new URL(host);
+    var httpsCandidate = new URL(host);
+    httpCandidate.protocol = 'http:';
+    httpsCandidate.protocol = 'https:';
+    httpCandidate.port = port;
+    httpsCandidate.port = port;
+    return [
+      httpCandidate.toString().replace(/\/$/, ''),
+      httpsCandidate.toString().replace(/\/$/, ''),
+    ];
   } catch (err) {
     return ['http://localhost:9200', 'https://localhost:9200'];
   }
@@ -385,7 +394,7 @@ function createSourceClient(config) {
     node: node,
     auth: { apiKey: config.sourceApiKey },
     requestTimeout: requestTimeoutMs,
-    tls: getTlsOptions(node, config.noVerifyCerts),
+    tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
   });
   return client;
 }
@@ -448,8 +457,10 @@ function resolveDestClient(config, log) {
   function tryNext(lastErr) {
     if (index >= candidates.length) {
       log('[dest] Connection failed: could not detect a running Elasticsearch instance.');
-      throw (
-        lastErr || new Error('Tried: ' + formatDestCandidatesTried(config))
+      throw new Error(
+        'Tried: ' +
+          formatDestCandidatesTried(config) +
+          (lastErr ? '. Last error: ' + lastErr.message : '')
       );
     }
     var candidate = candidates[index];
