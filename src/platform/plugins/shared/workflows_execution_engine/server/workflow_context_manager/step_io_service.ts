@@ -698,6 +698,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
+   * Read-pins an explicit set of step execution ids for `consumerId`.
+   *
+   * {@link prepareForRead} pins the ids it derives from static template
+   * analysis; this is the equivalent for a caller that names the ids itself
+   * (see `StepExecutionRuntime.rehydrateStepOutputs`). Both must pin *before*
+   * awaiting {@link rehydrateOutputs}: that call snapshots only the ids which
+   * are evicted at entry, so a resident id in the set would otherwise be
+   * eligible for the concurrent eviction cycle during the ES round trip and
+   * end up neither fetched nor resident.
+   *
+   * Released by {@link releaseReadPins} under the same `consumerId`.
+   */
+  public pinOutputsForRead(consumerId: string, stepExecutionIds: ReadonlyArray<string>): void {
+    this.readPinnedOutputIdsByConsumer.set(consumerId, new Set(stepExecutionIds));
+  }
+
+  /**
    * Pins the outputs referenced by a loop's source value (foreach `foreach:`
    * expression or while `condition`) for the lifetime of the loop, keyed by the
    * loop's `stepId`. Called unconditionally when a loop is entered (before any
