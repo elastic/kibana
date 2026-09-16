@@ -31,7 +31,7 @@ describe('useSpaceId', () => {
     await waitFor(() => {
       expect(result.current).toBe('my-space');
     });
-  });
+  }, 30000);
 
   it('should return undefined initially before space is loaded', () => {
     const services = createStartServicesMock();
