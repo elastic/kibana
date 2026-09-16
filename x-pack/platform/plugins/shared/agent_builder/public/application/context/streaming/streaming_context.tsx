@@ -125,6 +125,7 @@ export const StreamingProvider = ({
   }, []);
 
   const sendMutation = useSendMessageMutation({
+    conversationStreamService,
     setPendingMessage,
     clearPendingMessage,
     setError,
@@ -133,6 +134,7 @@ export const StreamingProvider = ({
   });
 
   const resumeMutation = useResumeRoundMutation({
+    conversationStreamService,
     setError,
     clearActiveStream,
   });

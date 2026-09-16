@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { euiScreenReaderOnly } from '@elastic/eui';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
@@ -63,8 +62,8 @@ const useGeneratingAnnouncements = (isActive: boolean) => {
   return announcement;
 };
 
-export const RoundsScreenReaderStatus: React.FC<{ lastRound?: ConversationRound }> = ({
-  lastRound,
+export const RoundsScreenReaderStatus: React.FC<{ responseMessage?: string }> = ({
+  responseMessage,
 }) => {
   const { isResponseLoading } = useConversationStream();
   const announcement = useGeneratingAnnouncements(isResponseLoading);
@@ -93,10 +92,10 @@ export const RoundsScreenReaderStatus: React.FC<{ lastRound?: ConversationRound 
       </div>
       {/* Response region: transitions from empty to message text when loading completes */}
       <div role="status" aria-live="polite" aria-atomic="true">
-        {shouldAnnounceResponse
+        {shouldAnnounceResponse && responseMessage
           ? i18n.translate('xpack.agentBuilder.conversationRounds.agentResponse', {
               defaultMessage: 'Agent said: {message}',
-              values: { message: lastRound?.response.message ?? '' },
+              values: { message: responseMessage },
             })
           : ''}
       </div>

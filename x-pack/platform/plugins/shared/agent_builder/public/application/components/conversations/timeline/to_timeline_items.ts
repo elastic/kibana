@@ -24,6 +24,8 @@ export type AgentTurnStatus = 'running' | 'awaiting_prompt' | 'completed' | 'fai
 export interface AgentTurnItem {
   kind: 'agentTurn';
   key: string;
+  executionId?: string;
+  triggerEventId?: string;
   status: AgentTurnStatus;
   startedAt: string;
   origin?: ConversationRoundOrigin;
@@ -63,7 +65,15 @@ const accumulatorToItem = (
     ? eventsById.get(triggerEventId)?.actor.origin
     : undefined;
   const status = resolveStatus(terminal);
-  const item: AgentTurnItem = { kind: 'agentTurn', key: executionId, status, startedAt, steps };
+  const item: AgentTurnItem = {
+    kind: 'agentTurn',
+    key: executionId,
+    executionId,
+    status,
+    startedAt,
+    steps,
+  };
+  if (triggerEventId) item.triggerEventId = triggerEventId;
   if (origin) item.origin = origin;
   if (terminal) item.terminal = terminal;
   if (
@@ -78,15 +88,21 @@ const accumulatorToItem = (
 
 export const ACTIVE_EXECUTION_ITEM_KEY = 'active';
 
+// Keyed by the persisted execution id as soon as it is known, so the saved item that replaces
+// this one after the refetch keeps the same React identity.
 export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnItem => {
   const key = draft.executionId ?? ACTIVE_EXECUTION_ITEM_KEY;
   const startedAt = draft.startedAt ?? new Date().toISOString();
+  const identity: Pick<AgentTurnItem, 'executionId' | 'triggerEventId'> = {};
+  if (draft.executionId) identity.executionId = draft.executionId;
+  if (draft.triggerEventId) identity.triggerEventId = draft.triggerEventId;
 
   if (draft.status === 'completed' && draft.terminalEvent) {
     const { terminalEvent } = draft;
     const item: AgentTurnItem = {
       kind: 'agentTurn',
       key,
+      ...identity,
       status: 'completed',
       startedAt,
       steps: draft.steps,
@@ -101,6 +117,7 @@ export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnIte
   const item: AgentTurnItem = {
     kind: 'agentTurn',
     key,
+    ...identity,
     status: draft.status,
     startedAt,
     steps: draft.steps,
@@ -236,9 +253,29 @@ export const buildLiveItems = ({
   return items;
 };
 
+export interface SavedReplacement {
+  turn: boolean;
+  userMessage: boolean;
+}
+
+export const findSavedReplacement = (
+  savedItems: TimelineItem[],
+  activeExecution: Pick<ActiveExecutionDraft, 'executionId' | 'triggerEventId'> | null | undefined
+): SavedReplacement => {
+  const executionId = activeExecution?.executionId;
+  const triggerEventId = activeExecution?.triggerEventId;
+  return {
+    turn:
+      executionId !== undefined &&
+      savedItems.some((item) => item.kind === 'agentTurn' && item.executionId === executionId),
+    userMessage:
+      triggerEventId !== undefined &&
+      savedItems.some((item) => item.kind === 'userMessage' && item.key === triggerEventId),
+  };
+};
+
 const appendDraftItem = (items: TimelineItem[], draftItem: AgentTurnItem): void => {
-  const alreadyPersisted =
-    draftItem.key !== ACTIVE_EXECUTION_ITEM_KEY && items.some((item) => item.key === draftItem.key);
+  const alreadyPersisted = findSavedReplacement(items, draftItem).turn;
   if (!alreadyPersisted) {
     items.push(draftItem);
   }
@@ -249,10 +286,12 @@ export const assembleTimelineItems = (
   liveItems: TimelineItem[]
 ): TimelineItem[] => {
   const items = [...savedItems];
+  const liveTurn = liveItems.find((item): item is AgentTurnItem => item.kind === 'agentTurn');
+  const { userMessage: userMessagePersisted } = findSavedReplacement(savedItems, liveTurn);
   for (const item of liveItems) {
     if (item.kind === 'agentTurn') {
       appendDraftItem(items, item);
-    } else {
+    } else if (!(item.kind === 'userMessage' && item.isPending && userMessagePersisted)) {
       items.push(item);
     }
   }

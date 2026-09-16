@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import type {
-  ExecutionTerminatedEvent as ExecutionTerminatedEventData,
+  ExecutionTerminatedEvent,
   ConversationRound,
   ConversationRoundStep,
+  AssistantResponse,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { AgentResponse } from '../agent_response';
 
-interface ExecutionTerminatedEventProps {
-  event: ExecutionTerminatedEventData;
-  /**
-   * Steps from separate `execution_step` events, passed by the caller.
-   * Server-derived terminated events omit `steps` entirely because the steps ship as separate
-   * `execution_step` events, so the grouped steps are passed in by the caller.
-   */
-  steps?: ConversationRoundStep[];
+export interface TerminatedResponse {
+  steps: ConversationRoundStep[];
+  response: AssistantResponse;
+  rawRound: ConversationRound;
 }
 
 const toSyntheticRound = (
-  event: ExecutionTerminatedEventData,
+  event: ExecutionTerminatedEvent,
   steps: ConversationRound['steps']
 ): ConversationRound => ({
   id: event.execution_id ?? event.id,
@@ -41,24 +36,19 @@ const toSyntheticRound = (
   trace_id: event.data.trace_id,
 });
 
-/** Adapts a finished run (`execution_terminated`) to the shared `AgentResponse` bubble. */
-export const ExecutionTerminatedEvent: React.FC<ExecutionTerminatedEventProps> = ({
-  event,
-  steps: stepsProp,
-}) => {
+/**
+ * Props for `AgentResponse` from a terminal event. Server-derived terminated events omit `steps`
+ * because the steps ship as separate `execution_step` events, so the grouped steps are passed in.
+ * Returns `undefined` for a `prompt_requested` outcome, which has no response to show.
+ */
+export const executionTerminatedToResponse = (
+  event: ExecutionTerminatedEvent,
+  groupedSteps: ConversationRoundStep[]
+): TerminatedResponse | undefined => {
   const { outcome } = event.data;
-  const steps = event.data.steps ?? stepsProp ?? [];
-
   if (outcome.type !== 'responded') {
-    return null;
+    return undefined;
   }
-
-  return (
-    <AgentResponse
-      steps={steps}
-      response={outcome.response}
-      isLoading={false}
-      rawRound={toSyntheticRound(event, steps)}
-    />
-  );
+  const steps = event.data.steps ?? groupedSteps;
+  return { steps, response: outcome.response, rawRound: toSyntheticRound(event, steps) };
 };

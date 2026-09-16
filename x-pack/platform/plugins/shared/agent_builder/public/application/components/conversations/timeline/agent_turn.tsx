@@ -13,7 +13,7 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { AgentResponse } from './agent_response';
-import { ExecutionTerminatedEvent } from './items/execution_terminated_event';
+import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
 import { ExecutionAbortedEvent } from './items/execution_aborted_event';
 import type { AgentTurnItem } from './to_timeline_items';
@@ -28,9 +28,22 @@ interface AgentTurnProps {
   agent?: AgentDefinition | null;
 }
 
+// `AgentResponse` stays at the same position for running and completed turns so its subtree
+// (expanded steps, streamed text) survives completion and the later swap to the saved item.
 const renderContent = (item: AgentTurnItem): React.ReactNode => {
   if (isCompletedTurn(item)) {
-    return <ExecutionTerminatedEvent event={item.terminal} steps={item.steps} />;
+    const completed = executionTerminatedToResponse(item.terminal, item.steps);
+    if (!completed) {
+      return null;
+    }
+    return (
+      <AgentResponse
+        steps={completed.steps}
+        response={completed.response}
+        isLoading={false}
+        rawRound={completed.rawRound}
+      />
+    );
   }
   if (isFailedTurn(item)) {
     return <ExecutionFailedEvent event={item.terminal} />;

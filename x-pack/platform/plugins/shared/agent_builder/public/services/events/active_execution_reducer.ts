@@ -48,6 +48,8 @@ export interface ActiveExecutionDraft {
   pendingPrompts?: PromptRequest[];
   /** Execution id from the SSE execution_started event - matches the persisted execution_id. */
   executionId?: string;
+  /** Id of the saved content event that triggered this execution (user message or prompt response). */
+  triggerEventId?: string;
   /** ISO timestamp from the SSE execution_started event. */
   startedAt?: string;
   /** Terminal event stored when the draft is sealed (status === 'completed'). */
@@ -202,6 +204,7 @@ export const activeExecutionReducer = (
     return {
       ...draft,
       ...(event.execution_id ? { executionId: event.execution_id } : {}),
+      ...(event.trigger_event_id ? { triggerEventId: event.trigger_event_id } : {}),
       startedAt: event.created_at,
     };
   }
@@ -212,6 +215,11 @@ export const activeExecutionReducer = (
       status: 'completed',
       terminalEvent: event,
       ...(draft.executionId ? {} : event.execution_id ? { executionId: event.execution_id } : {}),
+      ...(draft.triggerEventId
+        ? {}
+        : event.trigger_event_id
+        ? { triggerEventId: event.trigger_event_id }
+        : {}),
       ...(draft.startedAt ? {} : { startedAt: event.created_at }),
     };
   }

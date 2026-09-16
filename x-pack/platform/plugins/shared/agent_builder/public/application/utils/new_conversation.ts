@@ -8,27 +8,6 @@
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
-
-export const createNewConversation = ({
-  id,
-  agentId,
-}: {
-  id: string;
-  agentId: string;
-}): ConversationWithPermissions => {
-  const now = new Date().toISOString();
-  return {
-    id,
-    agent_id: agentId,
-    user: { id: '', username: '' },
-    title: '',
-    created_at: now,
-    updated_at: now,
-    rounds: [],
-    permissions: { rename: true, delete: true, update_access_control: true },
-  };
-};
 
 export const pendingRoundId = '__pending__';
 

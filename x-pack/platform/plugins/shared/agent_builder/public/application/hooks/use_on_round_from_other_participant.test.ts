@@ -6,10 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext } from '../context/streaming/streaming_context';
-import { useConversationRounds, useConversationStatus } from './use_conversation';
+import { useConversationStatus } from './use_conversation';
+import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
+import type { TimelineItem } from '../components/conversations/timeline/to_timeline_items';
+import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
 import { useOnRoundFromOtherParticipant } from './use_on_round_from_other_participant';
 
 jest.mock('../context/conversation/use_conversation_id', () => ({
@@ -21,13 +23,16 @@ jest.mock('../context/streaming/streaming_context', () => ({
 }));
 
 jest.mock('./use_conversation', () => ({
-  useConversationRounds: jest.fn(),
   useConversationStatus: jest.fn(),
+}));
+
+jest.mock('../components/conversations/timeline/use_timeline_items', () => ({
+  useTimelineItems: jest.fn(),
 }));
 
 const mockUseConversationId = jest.mocked(useConversationId);
 const mockUseStreamingContext = jest.mocked(useStreamingContext);
-const mockUseConversationRounds = jest.mocked(useConversationRounds);
+const mockUseTimelineItems = jest.mocked(useTimelineItems);
 const mockUseConversationStatus = jest.mocked(useConversationStatus);
 
 interface State {
@@ -39,12 +44,14 @@ interface State {
 
 const setState = ({ conversationId, roundCount, isStreaming = false, isFetched = true }: State) => {
   mockUseConversationId.mockReturnValue(conversationId);
-  mockUseConversationRounds.mockReturnValue(
-    Array.from(
-      { length: roundCount },
-      (_, index) => ({ id: `round-${index}` } as ConversationRound)
-    )
-  );
+  const items: TimelineItem[] = Array.from({ length: roundCount }, (_, index) => ({
+    kind: 'userMessage',
+    key: `user-${index}`,
+    event: createUserMessageEvent({ id: `user-${index}` }),
+  }));
+  // Agent turns must not count as rounds.
+  items.push({ kind: 'agentTurn', key: 'active', status: 'running', startedAt: '', steps: [] });
+  mockUseTimelineItems.mockReturnValue(items);
   mockUseConversationStatus.mockReturnValue({
     isFetched,
   } as ReturnType<typeof useConversationStatus>);

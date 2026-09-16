@@ -16,7 +16,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { createNewRound, pendingRoundId } from '../utils/new_conversation';
+import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
@@ -33,17 +33,18 @@ export const useConversation = () => {
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
   const { byConversationId } = useStreamingContext();
 
-  // Disable the query when this conversation is being written to by a stream, OR when
-  // its cached state shows a HITL pause, OR when there's an unpersisted error in the
-  // per-conversation error map. The cache is authoritative in all three cases; a
-  // refetch would race with optimistic chunks (streaming), or with the resume mutation
-  // about to fire (HITL), or 404 a fresh conversation that errored before the backend
-  // persisted it (overriding the in-round error UI with "Conversation not found").
-  const isAwaitingPrompt =
-    queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
-    ConversationRoundStatus.awaitingPrompt;
+  const cached = queryClient.getQueryData<Conversation>(queryKey);
 
+  // The query is enabled whenever the conversation exists on the server. The only case we
+  // cannot know that is a new conversation before its first SSE event: the app navigates to
+  // its URL before the request reaches the server, and a GET would 404. The stream's
+  // `execution_started` fetch puts it in the cache, after which the gate never closes again.
   const isThisConversationStreaming = useIsCurrentConversationStreaming();
+  const isUnpersistedNewConversation = isThisConversationStreaming && !cached;
+
+  // @todo: HITL (#291069) and temporary error (#291068) guards, unchanged.
+  const isAwaitingPrompt =
+    cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
 
   const hasUnpersistedError = conversationId
     ? Boolean(byConversationId[conversationId]?.error)
@@ -60,7 +61,7 @@ export const useConversation = () => {
     queryKey,
     enabled:
       Boolean(conversationId) &&
-      !isThisConversationStreaming &&
+      !isUnpersistedNewConversation &&
       !isAwaitingPrompt &&
       !hasUnpersistedError,
     queryFn: () => {
@@ -153,12 +154,13 @@ export const useConversationTitle = () => {
 export const useConversationReadOnly = () => {
   const conversationId = useConversationId();
   const { conversation, isFetching } = useConversation();
+  const isStreaming = useIsCurrentConversationStreaming();
 
   return {
     isReadOnly: conversation?.read_only ?? false,
-    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
-    // for the whole stream that creates a conversation.
-    isLoading: Boolean(conversationId) && !conversation && isFetching,
+    // Not `isLoading`: v4 reports it for disabled queries too. A conversation this client is
+    // streaming into is not read-only, so its first fetch must not hide the input.
+    isLoading: Boolean(conversationId) && !conversation && isFetching && !isStreaming,
   };
 };
 
@@ -209,10 +211,7 @@ export const useIsUnpersistedConversation = (conversation?: Conversation) => {
   const { pendingMessage, error } = useStreamRecord(conversationId);
   const isConversationStreaming = useIsCurrentConversationStreaming();
 
-  return Boolean(
-    (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||
-      (error && pendingMessage && conversation?.rounds.length === 0)
-  );
+  return Boolean((isConversationStreaming || (error && pendingMessage)) && !conversation);
 };
 
 export const useIsAwaitingPrompt = () => {

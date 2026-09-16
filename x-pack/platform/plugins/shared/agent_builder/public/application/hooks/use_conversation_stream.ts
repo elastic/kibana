@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationContext } from '../context/conversation/conversation_context';
@@ -68,11 +67,7 @@ export const useConversationStream = () => {
   const myStream = conversationId ? activeStreams.get(conversationId) : undefined;
   const isMyStreamActive = Boolean(myStream);
 
-  const lastRound = conversation?.rounds?.at(-1);
-  const isLastRoundInProgress = lastRound?.status === ConversationRoundStatus.inProgress;
-
-  const isResponseLoading =
-    isMyStreamActive && (isLastRoundInProgress || myStream?.type === 'resume');
+  const isResponseLoading = isMyStreamActive;
   const isResuming = isMyStreamActive && myStream?.type === 'resume';
 
   const sendMessage = useCallback(
