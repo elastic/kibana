@@ -2817,6 +2817,10 @@ paths:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   maxLength: 256
@@ -3102,6 +3106,10 @@ paths:
                   description: Optional new description for the attachment.
                   maxLength: 2048
                   type: string
+                render_inline:
+                  default: false
+                  description: When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.
+                  type: boolean
               required:
                 - data
       responses:
