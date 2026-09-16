@@ -40,6 +40,9 @@ describe('describe_ai_index tool', () => {
     expect(schema.safeParse({ ai_index_id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1) }).success).toBe(
       false
     );
+    expect(schema.shape.ai_index_id.description).toContain(
+      'Do not use the backing Elasticsearch index or data stream name'
+    );
   });
 
   it('wraps the context block in an object', async () => {
