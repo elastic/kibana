@@ -47,6 +47,7 @@ export type EpisodesTableColumnSettings = EpisodesTableConfig['columnSettings'];
 
 export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'episode.status',
+  'source',
   'severity',
   '@timestamp',
   'rule.id',
@@ -66,6 +67,7 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   assignees: { width: 120 },
   'episode.status': { width: 110 },
   severity: { width: 100 },
+  source: { width: 120 },
 };
 
 export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {

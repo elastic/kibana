@@ -30,7 +30,7 @@ export const alertEpisodeSchema = z
     '@timestamp': z.iso.datetime(),
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
     'episode.status': alertEpisodeStatusSchema,
-    'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
+    'rule.id': z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
     group_hash: z.string().min(1).max(MAX_FINGERPRINT_LENGTH),
     first_timestamp: z.iso.datetime(),
     last_timestamp: z.iso.datetime(),
@@ -52,6 +52,12 @@ export const alertEpisodeSchema = z
     episode_data: z.string().nullable().optional(),
     /** Latest top-level `severity` from a breached rule event, when present. */
     severity: z.string().min(1).nullable().optional(),
+    /**
+     * The source of the alert event. Elastic native rules write `'internal'`;
+     * externally-imported alerts carry a vendor string (e.g. `'datadog'`).
+     * Classic v1 rows carry `'elastic-v1'` (set client-side in mapClassicAlertToEpisode).
+     */
+    source: z.string().min(1).nullable().optional(),
   })
   .strict();
 

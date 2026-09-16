@@ -142,6 +142,7 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     severity: normalizeV1Severity(source[ALERT_SEVERITY]),
     supports_actions: false,
     supports_timeline: false,
+    source: 'elastic-v1',
   };
 };
 

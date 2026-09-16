@@ -11,6 +11,10 @@ export {
   shouldShowAlertingV2CreateRuleFlyout,
   hasAlertingV2RulesReadCapability,
   canAccessAlertingV2Rules,
+  hasAlertingV2Capability,
+  shouldShowClassicObservabilityAlertsTable,
+  type AlertingV2CapabilityFeature,
+  type AlertingV2CapabilityLevel,
 } from './is_alerting_v2_enabled';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';

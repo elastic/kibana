@@ -8,6 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiIcon,
@@ -293,5 +294,40 @@ export const EpisodeRuleCell = ({
         </>
       ) : null}
     </span>
+  );
+};
+
+/** Maps raw `source` field values to display labels and badge colors. */
+const SOURCE_DISPLAY: Record<string, { label: string; color: string }> = {
+  internal: { label: 'Elastic v2', color: '#0077CC' },
+  'elastic-v1': { label: 'Elastic v1', color: '#006BB4' },
+  datadog: { label: 'Datadog', color: '#632CA6' },
+  newrelic: { label: 'New Relic', color: '#1CE783' },
+  dynatrace: { label: 'Dynatrace', color: '#1496FF' },
+};
+
+/**
+ * Renders the `source` column as a colored badge.
+ * Elastic rows also show the Elastic logo icon for instant recognition.
+ */
+export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
+  // row.flattened is Record<string, unknown>; narrow with typeof
+  const rawValue = row.flattened.source;
+  const rawSource = typeof rawValue === 'string' ? rawValue : null;
+  if (!rawSource) {
+    return null;
+  }
+  const display = SOURCE_DISPLAY[rawSource];
+  const label = display?.label ?? rawSource;
+  const color = display?.color ?? '#6a717d';
+  const isElastic = rawSource === 'internal' || rawSource === 'elastic-v1';
+
+  return (
+    <EuiBadge color={color} style={{ whiteSpace: 'nowrap' }}>
+      {isElastic && (
+        <EuiIcon type="logoElastic" size="s" style={{ marginRight: 4, verticalAlign: 'middle' }} />
+      )}
+      {label}
+    </EuiBadge>
   );
 };
