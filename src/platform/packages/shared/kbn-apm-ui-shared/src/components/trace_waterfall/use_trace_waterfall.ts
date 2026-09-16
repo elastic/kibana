@@ -170,6 +170,7 @@ function getWaterfallErrorsMarks({
               errorGroupId: error.error.grouping_key,
               traceId: error.trace?.id,
               transactionId: error.transaction?.id,
+              spanId: error.span?.id,
             })
           : undefined,
     };

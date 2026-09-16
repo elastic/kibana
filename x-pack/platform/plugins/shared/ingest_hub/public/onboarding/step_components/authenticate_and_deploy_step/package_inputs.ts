@@ -14,7 +14,7 @@ import type {
   ServiceDataStreamVars,
 } from '../service_settings_step/use_service_settings';
 
-interface PackageInputEntry {
+export interface PackageInputEntry {
   enabled: boolean;
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
@@ -145,10 +145,27 @@ export function buildPackageInputs(
   return inputs;
 }
 
+export interface AgentCredentialVars {
+  method: 'direct_access_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
+  /** direct_access_keys / temporary_keys — access key id (non-secret) */
+  access_key_id?: string;
+  /** direct_access_keys / temporary_keys — secret (memory-only, never persisted) */
+  secret_access_key?: string;
+  /** temporary_keys — session token (memory-only, never persisted) */
+  session_token?: string;
+  /** shared_credentials — path to the shared credentials file */
+  shared_credential_file?: string;
+  /** shared_credentials — profile name within the file */
+  credential_profile_name?: string;
+  /** assume_role — role ARN */
+  role_arn?: string;
+}
+
 export function buildPackageVars(
   globalRegion: string,
   staticKeys: AuthenticateAndDeployStepState['staticKeys'],
-  pkgVarNames: Set<string>
+  pkgVarNames: Set<string>,
+  agentCredentials?: AgentCredentialVars
 ): Record<string, string> | undefined {
   const vars: Record<string, string> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
@@ -156,7 +173,29 @@ export function buildPackageVars(
   // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
   // the deployed package actually declares it.
   if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
-  if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
+
+  if (agentCredentials) {
+    const { method } = agentCredentials;
+    if (method === 'direct_access_keys' || method === 'temporary_keys') {
+      if (agentCredentials.access_key_id && agentCredentials.secret_access_key) {
+        if (pkgVarNames.has('access_key_id')) vars.access_key_id = agentCredentials.access_key_id;
+        if (pkgVarNames.has('secret_access_key'))
+          vars.secret_access_key = agentCredentials.secret_access_key;
+      }
+      if (method === 'temporary_keys' && agentCredentials.session_token) {
+        if (pkgVarNames.has('session_token')) vars.session_token = agentCredentials.session_token;
+      }
+    } else if (method === 'shared_credentials') {
+      if (agentCredentials.shared_credential_file && pkgVarNames.has('shared_credential_file'))
+        vars.shared_credential_file = agentCredentials.shared_credential_file;
+      if (agentCredentials.credential_profile_name && pkgVarNames.has('credential_profile_name'))
+        vars.credential_profile_name = agentCredentials.credential_profile_name;
+    } else if (method === 'assume_role') {
+      if (agentCredentials.role_arn && pkgVarNames.has('role_arn'))
+        vars.role_arn = agentCredentials.role_arn;
+    }
+  } else if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
+    // Agentless path: staticKeys is used when no agentCredentials are provided.
     if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
     if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;
   }

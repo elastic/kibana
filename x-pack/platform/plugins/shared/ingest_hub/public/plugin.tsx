@@ -112,7 +112,7 @@ export class IngestHubPlugin implements Plugin<
       },
     });
 
-    registerOnboardingApp(coreSetup, startServicesPromise);
+    registerOnboardingApp(coreSetup, startServicesPromise, this.context.env.packageInfo.version);
 
     return {};
   }

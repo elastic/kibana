@@ -7,22 +7,20 @@
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AttachmentRequestV2 } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
 import type { FlattedEcsData } from '../../../common/observables/get_observables_from_ecs';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
-import {
-  isLegacyAlertAttachment,
-  isLegacyEventAttachment,
-} from '../../../common/utils/attachments/v1_type_guards';
+import { getIndexFromMetadata } from '../../../common/utils/attachments/index_metadata';
 import {
   isUnifiedAlertAttachment,
   isUnifiedEventAttachment,
 } from '../../../common/utils/attachments/v2_type_guards';
 import { applyObservablesToCase } from '../cases/observables';
+import { emitObservablesAddedEvent } from '../cases/trigger_utils';
 import type { CasesClientArgs } from '../types';
 
 /**
@@ -38,27 +36,15 @@ const zipIdsAndIndices = (ids: string[], indices: string[]): AlertInfo[] => {
 };
 
 /**
- * Extract AlertInfo (id + index pairs) from a single attachment request.
- * Handles legacy and unified shapes for both alert and event attachments.
+ * Extract AlertInfo (id + index pairs) from a single unified attachment.
  * Non-alert/event attachments produce an empty array.
  */
-const getAlertInfoFromAttachment = (attachment: AttachmentRequestV2): AlertInfo[] => {
-  if (isLegacyAlertAttachment(attachment)) {
-    return zipIdsAndIndices(toStringArray(attachment.alertId), toStringArray(attachment.index));
-  }
-
-  if (isUnifiedAlertAttachment(attachment)) {
-    const metadata = (attachment.metadata ?? {}) as { index?: unknown };
-    return zipIdsAndIndices(toStringArray(attachment.attachmentId), toStringArray(metadata.index));
-  }
-
-  if (isLegacyEventAttachment(attachment)) {
-    return zipIdsAndIndices(toStringArray(attachment.eventId), toStringArray(attachment.index));
-  }
-
-  if (isUnifiedEventAttachment(attachment)) {
-    const metadata = (attachment.metadata ?? {}) as { index?: unknown };
-    return zipIdsAndIndices(toStringArray(attachment.attachmentId), toStringArray(metadata.index));
+const getAlertInfoFromAttachment = (attachment: UnifiedAttachmentPayload): AlertInfo[] => {
+  if (isUnifiedAlertAttachment(attachment) || isUnifiedEventAttachment(attachment)) {
+    return zipIdsAndIndices(
+      toStringArray(attachment.attachmentId),
+      toStringArray(getIndexFromMetadata(attachment.metadata))
+    );
   }
 
   return [];
@@ -90,7 +76,7 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
  */
 export const extractAndAddObservables = async (
   caseId: string,
-  attachments: AttachmentRequestV2[],
+  attachments: UnifiedAttachmentPayload[],
   updatedCase: Case,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
@@ -150,10 +136,17 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    await applyObservablesToCase(caseId, observables, clientArgs);
+    const result = await applyObservablesToCase(caseId, observables, clientArgs);
+    if (!result) {
+      logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
+      return;
+    }
+
+    // Best-effort path — a bus error here is caught by the outer try and logged.
+    emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
 
     logger.debug(
-      `[extractAndAddObservables] Added ${observables.length} observable(s) to case ${caseId}`
+      `[extractAndAddObservables] Added ${result.newlyAddedObservables.length} observable(s) to case ${caseId}`
     );
   } catch (error) {
     logger.warn(

@@ -15,7 +15,6 @@
 
 export {
   API_VERSIONS,
-  CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -24,6 +23,8 @@ export {
   ALERTZERO_INVESTIGATIONS_URL,
   ALERTZERO_INVESTIGATION_URL_TEMPLATE,
   ALERTZERO_PLUGIN_NAME,
+  ALERTZERO_ACTIONS_URL,
+  ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_SKILLS_URL,
@@ -64,7 +65,13 @@ export {
   buildWorkerUrl,
 } from './constants';
 
-export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionCatalogEntry,
+  ActionImpact,
+  ListActionsResponse,
+} from './action_catalog_types';
 
 export {
   ApprovalRequirement,
