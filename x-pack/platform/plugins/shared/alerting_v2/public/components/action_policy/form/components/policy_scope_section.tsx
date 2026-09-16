@@ -5,155 +5,57 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiDescribedFormGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchRuleEventFields } from '../../../../hooks/use_fetch_rule_event_fields';
-import {
-  parseRuleTagsFromMatcher,
-  mergeRuleTagsIntoMatcher,
-  stripRuleTagsFromMatcher,
-} from '../matcher_quick_filter_utils';
+import React from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { ActionPolicyFormState } from '../types';
-import { MatcherInput } from './matcher_input';
-import { RuleTagsMatcherInput } from './rule_tags_matcher_input';
+import type { ActionPolicyPrototypeView } from './rule_tags_prototype_toggle';
+import { PolicyScopeSummary } from './policy_scope_summary';
+import { RuleTagsScopeField } from './rule_tags_scope_field';
 
-const optionalLabel = (
-  <EuiText color="subdued" size="xs">
-    {i18n.translate('xpack.alertingV2.actionPolicy.form.optionalLabel', {
-      defaultMessage: 'Optional',
-    })}
-  </EuiText>
-);
+interface PolicyScopeSectionProps {
+  selectedTags: string[];
+  onChangeTags: (tags: string[]) => void;
+  prototypeView: ActionPolicyPrototypeView;
+}
 
-const getPolicyScopeSummary = (matcher: string): string => {
-  const tags = parseRuleTagsFromMatcher(matcher);
-  const advancedMatcher = stripRuleTagsFromMatcher(matcher);
-
-  if (tags.length === 0 && !advancedMatcher) {
-    return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.summary.allEpisodes', {
-      defaultMessage: 'Applies to all episodes in the space.',
-    });
-  }
-
-  if (tags.length > 0 && !advancedMatcher) {
-    return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.summary.tagsOnly', {
-      defaultMessage:
-        'Applies to alerts from rules with any of these tags: {tags}.',
-      values: { tags: tags.join(', ') },
-    });
-  }
-
-  if (tags.length === 0 && advancedMatcher) {
-    return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.summary.advancedOnly', {
-      defaultMessage: 'Applies to episodes that match the advanced conditions.',
-    });
-  }
-
-  return i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.summary.tagsAndAdvanced', {
-    defaultMessage:
-      'Applies to alerts from rules with any of these tags ({tags}) that also match the advanced conditions.',
-    values: { tags: tags.join(', ') },
-  });
-};
-
-/**
- * Policy scope: primary rule-tag picker (OR semantics, stored as `rule.tags` in the
- * matcher) plus optional Advanced matching KQL accordion.
- */
-export const PolicyScopeSection = () => {
+export const PolicyScopeSection = ({
+  selectedTags,
+  onChangeTags,
+  prototypeView,
+}: PolicyScopeSectionProps) => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const matcher = useWatch({ control, name: 'matcher' }) ?? '';
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
-  const accordionId = useGeneratedHtmlId({ prefix: 'actionPolicyAdvancedMatching' });
-  const summary = useMemo(() => getPolicyScopeSummary(matcher), [matcher]);
+  const matcher = useWatch({ control, name: 'matcher' });
 
   return (
     <EuiDescribedFormGroup
       fullWidth
       title={
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.policyScope.title"
-            defaultMessage="Policy scope"
-          />
-        </h3>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
+              defaultMessage="Policy scope"
+            />
+          </h3>
+        </EuiTitle>
       }
       description={
-        <EuiText size="s" color="subdued" data-test-subj="policyScopeSummary">
-          <p>{summary}</p>
-        </EuiText>
+        <>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
+            defaultMessage="Define which alert episodes this policy applies to. Select rule tags (joined with OR) or add a KQL match expression in advanced matching."
+          />
+          <EuiSpacer size="m" />
+          <PolicyScopeSummary selectedTags={selectedTags} matcher={matcher} />
+        </>
       }
     >
-      <Controller
-        name="matcher"
-        control={control}
-        render={({ field }) => {
-          const tags = parseRuleTagsFromMatcher(field.value);
-          const advancedValue = stripRuleTagsFromMatcher(field.value);
-
-          return (
-            <>
-              <RuleTagsMatcherInput
-                matcher={field.value}
-                onChange={field.onChange}
-                showRecommendedGroups
-              />
-              <EuiSpacer size="m" />
-              <EuiAccordion
-                id={accordionId}
-                buttonContent={i18n.translate(
-                  'xpack.alertingV2.actionPolicy.form.policyScope.advancedMatching',
-                  { defaultMessage: 'Advanced matching' }
-                )}
-                paddingSize="m"
-                initialIsOpen={advancedValue.length > 0}
-                data-test-subj="policyScopeAdvancedMatching"
-              >
-                <EuiFormRow
-                  label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                    defaultMessage: 'Match conditions',
-                  })}
-                  labelAppend={optionalLabel}
-                  helpText={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.policyScope.advancedMatchingHelp',
-                    {
-                      defaultMessage:
-                        'Optional KQL for additional episode filters. Leave empty to match all episodes for the selected rule tags (or all episodes in the space when no tags are selected).',
-                    }
-                  )}
-                  fullWidth
-                >
-                  <MatcherInput
-                    value={advancedValue}
-                    onChange={(nextAdvanced) => {
-                      field.onChange(mergeRuleTagsIntoMatcher(nextAdvanced, tags));
-                    }}
-                    fullWidth
-                    data-test-subj="matcherInput"
-                    dataFieldNames={dataFieldNames}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                      {
-                        defaultMessage:
-                          'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
-                      }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiAccordion>
-            </>
-          );
-        }}
+      <RuleTagsScopeField
+        selectedTags={selectedTags}
+        onChangeTags={onChangeTags}
+        prototypeView={prototypeView}
       />
     </EuiDescribedFormGroup>
   );

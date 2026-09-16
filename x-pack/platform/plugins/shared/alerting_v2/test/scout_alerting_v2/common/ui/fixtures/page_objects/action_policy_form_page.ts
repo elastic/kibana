@@ -17,8 +17,7 @@ const WORKFLOW_OPTIONS_TIMEOUT = 15_000;
 /**
  * Drives the create/edit Action Policy form page. Every locator is scoped to
  * the `actionPolicyFormPage` wrapper because the form reuses generic test
- * subjects (`nameInput`, `submitButton`, `cancelButton`) that also exist in
- * the action policy form flyout.
+ * subjects (`nameInput`, `submitButton`) that also exist in the action policy form flyout.
  */
 export class ActionPolicyFormPage {
   /** Page-level wrapper; a stable anchor that the form finished rendering. */
@@ -28,17 +27,18 @@ export class ActionPolicyFormPage {
   /** KQL query bar (`QueryStringInput`) backing the `matcher` field. */
   public readonly matcherInput: Locator;
   public readonly submitButton: Locator;
-  public readonly cancelButton: Locator;
+  /** Header back link; navigates to the action policies list. */
+  public readonly backButton: Locator;
   /** Shown instead of the workflows combo box when `workflows:ui:enabled` is off. */
   public readonly workflowsDisabledCallout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
-    this.pageTitle = this.container.getByTestId('pageTitle');
+    this.pageTitle = this.page.testSubj.locator('appHeaderTitle');
     this.nameInput = this.container.getByTestId('nameInput');
     this.matcherInput = this.container.getByTestId('matcherInput');
-    this.submitButton = this.container.getByTestId('submitButton');
-    this.cancelButton = this.container.getByTestId('cancelButton');
+    this.submitButton = this.page.testSubj.locator('submitButton');
+    this.backButton = this.page.testSubj.locator('appHeaderBack');
     this.workflowsDisabledCallout = this.container.getByTestId('workflowsDisabledCallout');
   }
 
@@ -57,6 +57,11 @@ export class ActionPolicyFormPage {
   }
 
   async setMatcher(matcher: string) {
+    const accordion = this.container.getByTestId('advancedMatchingAccordion');
+    const isExpanded = await accordion.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      await accordion.click();
+    }
     await this.matcherInput.fill(matcher);
     // Typing opens the KQL suggestions popover, which overlays the rest of the
     // form and would swallow the submit click.

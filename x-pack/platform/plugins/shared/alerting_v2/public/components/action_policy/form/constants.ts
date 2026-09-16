@@ -12,36 +12,58 @@ import type { ActionPolicyFormState } from './types';
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
     id: 'per_episode',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perEpisode', {
-      defaultMessage: 'Episode',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perAlert', {
+      defaultMessage: 'Per alert',
     }),
   },
   {
     id: 'per_field',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perGroup', {
-      defaultMessage: 'Group',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combined', {
+      defaultMessage: 'Combined',
     }),
   },
   {
     id: 'all',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.digest', {
-      defaultMessage: 'Digest',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedAll', {
+      defaultMessage: 'Combined',
     }),
   },
 ];
 
+/** UI-only: Group + Digest merged into Combined. */
+export type GroupingModeUiOption = 'per_episode' | 'bundle';
+
+export const GROUPING_MODE_UI_OPTIONS: Array<{ id: GroupingModeUiOption; label: string }> = [
+  {
+    id: 'per_episode',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perAlert', {
+      defaultMessage: 'Per alert',
+    }),
+  },
+  {
+    id: 'bundle',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combined', {
+      defaultMessage: 'Combined',
+    }),
+  },
+];
+
+export const groupingModeToUiOption = (groupingMode: GroupingMode): GroupingModeUiOption =>
+  groupingMode === 'per_episode' ? 'per_episode' : 'bundle';
+
+export const uiOptionToGroupingMode = (option: GroupingModeUiOption): GroupingMode =>
+  option === 'per_episode' ? 'per_episode' : 'all';
+
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perEpisode.help', {
-    defaultMessage:
-      'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
+  per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perAlert.help', {
+    defaultMessage: 'Per alert. Best when you need visibility into each alert separately.',
   }),
-  per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perGroup.help', {
+  per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedGroup.help', {
     defaultMessage:
-      'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
+      'Combined. Best when many related alerts should share one send per field value, for example per host or service.',
   }),
-  all: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.digest.help', {
-    defaultMessage:
-      "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
+  all: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedAll.help', {
+    defaultMessage: 'Combined. Best for periodic roll-ups when individual alerts are not needed.',
   }),
 };
 
@@ -55,7 +77,7 @@ export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text
   {
     value: 'per_status_interval',
     text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.perStatusInterval', {
-      defaultMessage: 'On status change + repeat at interval',
+      defaultMessage: 'On change, then repeat',
     }),
   },
   {
@@ -70,7 +92,7 @@ export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: 
   {
     value: 'time_interval',
     text: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.strategy.timeInterval', {
-      defaultMessage: 'At most once every...',
+      defaultMessage: 'At most once every',
     }),
   },
   {

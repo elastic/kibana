@@ -97,17 +97,74 @@ describe('DispatchSection', () => {
     expect(await screen.findByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
   });
 
-  it('switches the default strategy to time_interval when groupingMode changes to digest', async () => {
+  it('switches the default strategy to time_interval when Combined mode is selected', async () => {
     const user = userEvent.setup();
     renderSection();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[2]); // Digest
+    await user.click(buttons[1]); // Combined
 
     await waitFor(() =>
       expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('time_interval')
     );
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
+    expect(screen.getByTestId('groupByFieldSwitch')).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
+  });
+
+  it('shows group-by fields when Group by field switch is enabled', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    await user.click(toggle.querySelectorAll('button')[1]); // Combined
+    await user.click(screen.getByTestId('groupByFieldSwitch'));
+
+    expect(screen.getByTestId(TEST_SUBJ.groupByInput)).toBeInTheDocument();
+  });
+
+  it('nests frequency controls inside Per alert options when Per alert is selected', () => {
+    renderSection();
+
+    const panel = screen.getByTestId('perAlertOptions');
+    expect(panel.querySelector('[data-test-subj="strategySelect"]')).toBeInTheDocument();
+    expect(screen.queryByText('How often?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Per alert options')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('combinedOptions')).not.toBeInTheDocument();
+  });
+
+  it('nests frequency controls inside Combined options when Combined is selected', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    await user.click(screen.getByTestId(TEST_SUBJ.groupingModeToggle).querySelectorAll('button')[1]);
+
+    const panel = screen.getByTestId('combinedOptions');
+    expect(panel.querySelector('[data-test-subj="strategySelect"]')).toBeInTheDocument();
+    expect(screen.queryByText('How often?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Combined options')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('perAlertOptions')).not.toBeInTheDocument();
+  });
+
+  it('shows all frequency option explanations in a help popover next to Frequency', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    const selectedHelp =
+      'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.';
+
+    expect(screen.queryByText(selectedHelp)).not.toBeInTheDocument();
+
+    await user.hover(screen.getByTestId('frequencyOptionsHelpButton'));
+
+    expect(await screen.findByTestId('frequencyOptionsHelpPanel')).toBeInTheDocument();
+    expect(screen.getByText(selectedHelp)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Notifies on status change, then resends at a regular interval/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sends a notification on every rule evaluation per episode/)
+    ).toBeInTheDocument();
   });
 });

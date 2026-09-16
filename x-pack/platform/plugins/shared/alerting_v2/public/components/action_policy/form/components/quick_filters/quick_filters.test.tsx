@@ -64,11 +64,11 @@ describe('QuickFilters', () => {
     mockUseFetchRuleTags.mockReturnValue({ data: MOCK_TAGS, isLoading: false });
   });
 
-  it('renders all three filter buttons', () => {
+  it('renders the Tags quick filter only', () => {
     renderWithI18n(<QuickFilters matcher="" onChange={jest.fn()} />);
 
-    expect(screen.getByTestId('quickFilterRule')).toBeInTheDocument();
-    expect(screen.getByTestId('quickFilterStatus')).toBeInTheDocument();
+    expect(screen.queryByTestId('quickFilterRule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('quickFilterStatus')).not.toBeInTheDocument();
     expect(screen.getByTestId('quickFilterTags')).toBeInTheDocument();
   });
 });
