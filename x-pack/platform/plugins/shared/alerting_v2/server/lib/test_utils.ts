@@ -74,7 +74,13 @@ export function createRuleResponse(
     updated_by: { profile_uid: 'elastic_profile_uid' },
     updated_at: '2025-01-01T00:00:00.000Z',
     ...rest,
-    metadata: { name: 'test-rule', signature_id: 'test-rule-id', ...metadata },
+    metadata: {
+      name: 'test-rule',
+      signature_id: 'test-rule-id',
+      source: { type: 'internal' as const, version: 1 },
+      ...metadata,
+      revision: metadata?.revision ?? 0,
+    },
   };
 }
 
