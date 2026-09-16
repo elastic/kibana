@@ -577,6 +577,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+/** Maximum accepted length for a conversation metadata key */
+export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
+
 /**
  * Main structure representing a conversation with an agent.
  */
