@@ -85,9 +85,13 @@ const getInputPaddingStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   padding-bottom: ${euiTheme.size.base};
 `;
 
-const TypedCapability: React.FC<{ messages: readonly string[] }> = ({ messages }) => {
+const TypedCapability: React.FC<{ messages: readonly string[]; enabled?: boolean }> = ({
+  messages,
+  enabled = true,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const typedText = useTypewriterLoop({ messages, enabled: true });
+  const caretStyle = getCaretStyles(euiTheme);
+  const typedText = useTypewriterLoop({ messages, enabled });
 
   return (
     <span
@@ -99,13 +103,13 @@ const TypedCapability: React.FC<{ messages: readonly string[] }> = ({ messages }
         {messages.map((message) => (
           <span key={message} css={reservedMessageStyles}>
             {message}
-            <span css={getCaretStyles(euiTheme)} />
+            <span css={caretStyle} />
           </span>
         ))}
       </span>
       <span css={typedOverlayStyles}>
         {typedText}
-        <span css={getCaretStyles(euiTheme)} />
+        <span css={caretStyle} />
       </span>
     </span>
   );
@@ -118,7 +122,8 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     services: { plugins },
   } = useKibana();
   const spaceSolution = useSpaceSolution(plugins.spaces);
-  const capabilityMessages = spaceSolution ? getCapabilityMessagesForSolution(spaceSolution) : [];
+  const capabilityMessages =
+    spaceSolution !== undefined ? getCapabilityMessagesForSolution(spaceSolution) : [];
 
   const greeting = greetingMessage ?? (
     <>
@@ -137,7 +142,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       css={conversationElementWidthStyles}
       data-test-subj="agentBuilderWelcomePage"
     >
-      <EuiFlexItem grow={isEmbeddedContext ? true : false} css={getCenterFlexItemStyles(euiTheme)}>
+      <EuiFlexItem grow={isEmbeddedContext} css={getCenterFlexItemStyles(euiTheme)}>
         <EuiTitle size="m">
           <h2>{greeting}</h2>
         </EuiTitle>

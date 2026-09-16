@@ -170,9 +170,7 @@ const workplaceaiCapabilityMessages = [
   ),
 ] as const;
 
-const CAPABILITY_MESSAGES_BY_SOLUTION: Partial<Record<SolutionView, readonly string[]>> & {
-  classic: readonly string[];
-} = {
+const CAPABILITY_MESSAGES_BY_SOLUTION: Record<SolutionView, readonly string[]> = {
   classic: classicCapabilityMessages,
   oblt: observabilityCapabilityMessages,
   security: securityCapabilityMessages,

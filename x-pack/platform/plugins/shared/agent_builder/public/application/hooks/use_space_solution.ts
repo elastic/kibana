@@ -14,14 +14,24 @@ export const useSpaceSolution = (spaces?: SpacesPluginStart): SolutionView | und
   const [solution, setSolution] = useState<SolutionView>();
 
   useEffect(() => {
+    let cancelled = false;
     if (!spaces) {
       setSolution('classic');
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
     spaces
       .getActiveSpace()
-      .then((space) => setSolution(space.solution ?? 'classic'))
-      .catch(() => setSolution('classic'));
+      .then((space) => {
+        if (!cancelled) setSolution(space.solution ?? 'classic');
+      })
+      .catch(() => {
+        if (!cancelled) setSolution('classic');
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [spaces]);
 
   return solution;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { getCapabilityMessagesForSolution } from './capability_messages';
 
 describe('getCapabilityMessagesForSolution', () => {
@@ -29,7 +30,7 @@ describe('getCapabilityMessagesForSolution', () => {
   });
 
   it('falls back to Classic for unknown solutions', () => {
-    expect(getCapabilityMessagesForSolution('unknown' as never)).toEqual(
+    expect(getCapabilityMessagesForSolution('unknown' as unknown as SolutionView)).toEqual(
       getCapabilityMessagesForSolution('classic')
     );
   });
