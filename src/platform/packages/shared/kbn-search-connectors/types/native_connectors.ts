@@ -1469,7 +1469,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.gmail.include_full_raw_message.tooltip',
           {
             defaultMessage:
-              'When disabled (default), only the email body is indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
           }
         ),
         type: BOOLEAN,
@@ -3945,7 +3945,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.outlook.include_full_raw_message.tooltip',
           {
             defaultMessage:
-              'When disabled (default), only the email body is indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
           }
         ),
         type: BOOLEAN,
