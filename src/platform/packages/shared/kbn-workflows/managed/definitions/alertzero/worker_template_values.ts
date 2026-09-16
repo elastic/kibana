@@ -38,3 +38,20 @@ export const renderScheduledWorkerYaml = (
     '__WORKER_SCHEDULE_INTERVAL__',
     values.scheduleInterval
   );
+
+/**
+ * Values for the Alert Triage Worker, which adds a confidence threshold on top of the common base.
+ * Alert-triggered — no schedule interval.
+ */
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  autoCloseConfidenceScoreMinThreshold: number;
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    String(values.autoCloseConfidenceScoreMinThreshold)
+  );

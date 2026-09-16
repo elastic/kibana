@@ -299,6 +299,12 @@ export const WorkerSettings = lazySchema(() =>
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
     ),
+    extras: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        "Worker-specific extra settings, validated against the Worker's declaration schema. Omitted for Workers with no extras declaration."
+      ),
   })
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;

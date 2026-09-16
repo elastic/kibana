@@ -269,6 +269,12 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        extras:
+          type: object
+          additionalProperties: true
+          description: >-
+            Worker-specific extra settings, validated against the Worker's declaration schema.
+            Omitted for Workers with no extras declaration.
 
     Worker:
       type: object
