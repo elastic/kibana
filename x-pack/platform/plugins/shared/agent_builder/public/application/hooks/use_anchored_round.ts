@@ -21,7 +21,7 @@ interface AnchorLatch {
  * min-height that pushes the user's input to the top of the container), or null.
  *
  * Only the LAST round can ever be anchored. It gets the anchor from the moment it becomes
- * active (streaming, errored, or awaiting a prompt) and keeps it until the conversation
+ * active (streaming or awaiting a prompt) and keeps it until the conversation
  * moves on — meaning a newer round starts or the user switches conversations — NOT when
  * the stream finishes. Releasing the anchor at stream end would collapse the round's
  * blank space and make the scroll position visibly jump.
@@ -29,7 +29,7 @@ interface AnchorLatch {
 export const useAnchoredRoundIndex = (): number | null => {
   const conversationId = useConversationId();
   const rounds = useConversationRounds();
-  const { isResponseLoading, error, isResuming } = useConversationStream();
+  const { isResponseLoading, isResuming } = useConversationStream();
   const [latch, setLatch] = useState<AnchorLatch | null>(null);
 
   const lastIndex = rounds.length - 1;
@@ -38,8 +38,7 @@ export const useAnchoredRoundIndex = (): number | null => {
     lastRound?.status === ConversationRoundStatus.awaitingPrompt &&
     (lastRound.pending_prompts?.length ?? 0) > 0 &&
     !isResuming;
-  const isLastRoundActive =
-    lastIndex >= 0 && (isResponseLoading || Boolean(error) || isAwaitingPrompt);
+  const isLastRoundActive = lastIndex >= 0 && (isResponseLoading || isAwaitingPrompt);
 
   useEffect(() => {
     if (isLastRoundActive) {

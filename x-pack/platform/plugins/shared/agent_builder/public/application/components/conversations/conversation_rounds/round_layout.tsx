@@ -24,7 +24,6 @@ import { RoundResponse } from './round_response/round_response';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
-import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
@@ -122,19 +121,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const { agent } = useAgentBuilderAgentById(agentId);
   const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
-  const {
-    isResponseLoading,
-    isStreaming,
-    error,
-    retry: retrySendMessage,
-    resumeRound,
-    isResuming,
-  } = useConversationStream();
+  const { isResponseLoading, isStreaming, resumeRound, isResuming } = useConversationStream();
   const isHitlDisabled =
     isReadOnly || isConversationReadOnlyLoading || (isStreaming && !isResuming);
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
-  const isErrorCurrentRound = Boolean(error) && isCurrentRound;
   // Don't show prompts if we're already resuming (user already clicked confirm/cancel)
   // This prevents prompts from reappearing when server data is refetched
   const isAwaitingPrompt =
@@ -186,13 +177,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             attachmentRefs={attachmentRefs}
             conversationId={conversationId}
           />
-        </EuiFlexItem>
-      )}
-
-      {/* Error */}
-      {isErrorCurrentRound && (
-        <EuiFlexItem grow={false}>
-          <RoundError error={error} onRetry={retrySendMessage} />
         </EuiFlexItem>
       )}
 
@@ -261,7 +245,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         <>
           <EuiFlexItem grow={false}>
             <RoundResponse
-              hasError={isErrorCurrentRound}
+              hasError={false}
               response={response}
               steps={steps}
               isLoading={isLoadingCurrentRound}

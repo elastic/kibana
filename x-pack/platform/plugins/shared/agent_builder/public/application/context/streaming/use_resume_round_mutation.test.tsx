@@ -11,7 +11,6 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
 import { EventsService } from '../../../services/events/events_service';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
 import { propagateEvents } from '../../../services/chat/propagate_events';
@@ -40,7 +39,7 @@ const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::exec
 const setup = () => {
   const eventsService = new EventsService();
   const conversationStreamService = new ConversationStreamService(eventsService);
-  const bindings = { conversationStreamService, setError: jest.fn(), clearActiveStream: jest.fn() };
+  const bindings = { conversationStreamService, clearActiveStream: jest.fn() };
   const source = new Subject<ChatEvent>();
   mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
 
@@ -78,22 +77,17 @@ describe('useResumeRoundMutation', () => {
 
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toBeNull());
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
-    expect(bindings.setError).not.toHaveBeenCalled();
   });
 
-  it('reports the steps the draft held when the stream fails', async () => {
+  it('ends a stream that errors like a completed one: refetch, then release', async () => {
     const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });
 
     act(() => result.current.mutate(vars));
     await waitFor(() => expect(mockResume).toHaveBeenCalled());
-    act(() => {
-      source.next({ type: ChatEventType.reasoning, data: { reasoning: 'thinking' } } as ChatEvent);
-      source.error(new Error('boom'));
-    });
+    act(() => source.error(new Error('boom')));
 
-    await waitFor(() => expect(bindings.setError).toHaveBeenCalled());
-    const [, , steps] = bindings.setError.mock.calls[0];
-    expect(steps).toHaveLength(1);
-    expect(mockGet).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
   });
 });

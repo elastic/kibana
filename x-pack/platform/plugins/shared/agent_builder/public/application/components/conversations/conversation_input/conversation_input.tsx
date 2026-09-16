@@ -99,7 +99,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
+  const { pendingMessage, isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -149,8 +149,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     flex-direction: column;
     height: 100%;
   `;
-  // Hide attachments if there's an error from current round or if message has been just sent
-  const shouldHideAttachments = Boolean(error) || isResponseLoading;
+  // Hide attachments while the message that carries them is being sent
+  const shouldHideAttachments = isResponseLoading;
 
   const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
