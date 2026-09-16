@@ -114,6 +114,7 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isInteractive,
   isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,

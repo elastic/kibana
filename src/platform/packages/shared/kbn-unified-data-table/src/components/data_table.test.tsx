@@ -1936,6 +1936,9 @@ describe('UnifiedDataTable', () => {
       rows,
       rowsPerPageOptions: [1, 5],
       rowsPerPageState: 1,
+      initialState: {
+        pageIndex: 0,
+      },
       onUpdatePageIndex: onChangePageMock,
       setExpandedDoc: jest.fn(),
       renderDocumentView: jest.fn(),

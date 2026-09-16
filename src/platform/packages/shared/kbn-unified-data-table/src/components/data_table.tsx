@@ -1000,7 +1000,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       expandedDoc,
       displayedRows,
       paginationMode,
-      isPaginationActive,
+      isPaginationEnabled: isPaginationActive,
       pageIndex: currentPageIndex,
       pageSize: currentPageSize,
       onChangePageIndex: changeCurrentPageIndex,
@@ -1425,10 +1425,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       | undefined => {
       if (
         !isInteractive ||
-        !onUpdateDataGridDensity &&
-        !onUpdateRowHeight &&
-        !onUpdateHeaderRowHeight &&
-        !onUpdateSampleSize
+        (!onUpdateDataGridDensity &&
+          !onUpdateRowHeight &&
+          !onUpdateHeaderRowHeight &&
+          !onUpdateSampleSize)
       ) {
         return;
       }
@@ -1650,7 +1650,9 @@ const InternalUnifiedDataTable = React.forwardRef<
                 data-test-subj="docTable"
                 leadingControlColumns={leadingControlColumns}
                 onColumnResize={isInteractive ? onResize : undefined}
-                pagination={isPaginationActive && paginationMode === 'multiPage' ? paginationObj : undefined}
+                pagination={
+                  isPaginationActive && paginationMode === 'multiPage' ? paginationObj : undefined
+                }
                 renderCellValue={renderCellValueWithInTableSearchSupport}
                 ref={dataGridRef}
                 rowCount={rowCount}
