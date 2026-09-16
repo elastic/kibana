@@ -9,6 +9,7 @@ import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 
 export type RuleSummaryData = Pick<
   RuleAttachmentData,
+  | 'id'
   | 'kind'
   | 'metadata'
   | 'query'

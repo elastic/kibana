@@ -19,7 +19,6 @@ import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { RuleProvider } from '../../../rule_details/rule_context';
 import { RuleSummaryBody } from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
@@ -80,7 +79,7 @@ export const RuleSummaryFlyout = ({
   const { Badge, InfoBlock } = Header;
 
   return (
-    <RuleProvider rule={rule}>
+    <>
       <FlyoutTemplate
         type={type}
         size="s"
@@ -173,6 +172,6 @@ export const RuleSummaryFlyout = ({
         onUpdateApiKey={onUpdateApiKey}
         onViewChangeHistory={onViewChangeHistory}
       />
-    </RuleProvider>
+    </>
   );
 };

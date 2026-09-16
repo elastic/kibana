@@ -21,7 +21,7 @@ import {
   getDisplayQueryParts,
   getQueryOverflowHeight,
   getDisplayRecoveryCondition,
-} from '../../../utils/rule_display';
+} from '../../utils/rule_display';
 import { RuleDetailsTable } from './rule_details_table';
 import type { RuleSummaryData } from './types';
 

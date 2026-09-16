@@ -9,7 +9,7 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleSummaryRunbookCard } from './rule_summary_runbook_card';
-import type { RuleSummarySectionProps } from './types';
+import type { RuleSummarySectionProps } from '../types';
 
 export const RuleSummaryInvestigationSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const hasRunbook = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'runbook'));

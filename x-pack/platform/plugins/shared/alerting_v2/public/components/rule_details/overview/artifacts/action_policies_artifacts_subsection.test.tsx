@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
-import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
@@ -63,9 +62,7 @@ const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
     <MockLocatorProvider locators={mockLocators}>
       <I18nProvider>
-        <RuleProvider rule={rule}>
-          <ActionPoliciesArtifactsSubsection />
-        </RuleProvider>
+        <ActionPoliciesArtifactsSubsection rule={rule} />
       </I18nProvider>
     </MockLocatorProvider>
   );

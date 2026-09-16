@@ -7,4 +7,4 @@
 
 export { RuleSummaryBody } from './rule_summary_body';
 export type { RuleSummaryBodyProps } from './rule_summary_body';
-export type { RuleSummaryData, RuleSummarySectionProps } from './types';
+export type { RuleSummaryData, RuleSummarySectionProps } from '../types';

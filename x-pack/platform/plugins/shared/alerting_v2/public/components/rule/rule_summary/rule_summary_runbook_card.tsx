@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { RuleSummarySectionProps } from './types';
+import type { RuleSummarySectionProps } from '../types';
 
 const RUNBOOK_PREVIEW_HEIGHT = 172;
 

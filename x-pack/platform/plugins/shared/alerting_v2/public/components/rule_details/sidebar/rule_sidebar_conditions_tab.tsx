@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleConditions } from '../../rule/rule_summary/rule_conditions';
+import { RuleConditions } from '../../rule/rule_conditions';
 import { useRule } from '../rule_context';
 
 export const RuleSidebarConditionsTab: React.FC = () => {

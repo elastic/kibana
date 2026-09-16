@@ -55,7 +55,7 @@ const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
   mockCanRead: jest.Mock;
 };
 
-jest.mock('../../rule_summary/rule_conditions', () => ({
+jest.mock('../../rule_conditions', () => ({
   RuleConditions: ({ variant }: { variant?: string }) => (
     <div data-test-subj="mockRuleConditions" data-variant={variant} />
   ),

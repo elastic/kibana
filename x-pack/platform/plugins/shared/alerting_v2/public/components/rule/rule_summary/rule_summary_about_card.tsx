@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EMPTY_VALUE } from '../../../utils/rule_display';
-import type { RuleSummarySectionProps } from './types';
+import type { RuleSummarySectionProps } from '../types';
 
 export const RuleSummaryAboutCard: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const { description, tags } = rule.metadata;

@@ -12,7 +12,7 @@ import { RuleSummaryAboutSection } from './rule_summary_about_section';
 import { RuleSummaryInvestigationSection } from './rule_summary_investigation_section';
 import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
 import { RuleSummaryArtifactsSection } from './rule_summary_artifacts_section';
-import type { RuleSummaryData } from './types';
+import type { RuleSummaryData } from '../types';
 
 export interface RuleSummaryBodyProps {
   rule: RuleSummaryData;
@@ -25,7 +25,7 @@ export const RuleSummaryBody: React.FC<RuleSummaryBodyProps> = ({ rule }) => {
     <div data-test-subj="ruleSummaryBody">
       <RuleSummaryAboutSection rule={rule} />
       <RuleSummaryInvestigationSection rule={rule} />
-      {canReadActionPolicies && <RuleSummaryActionPoliciesSection />}
+      {canReadActionPolicies && <RuleSummaryActionPoliciesSection rule={rule} />}
       <RuleSummaryArtifactsSection rule={rule} />
     </div>
   );

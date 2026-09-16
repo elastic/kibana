@@ -9,9 +9,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { FlyoutAccordion, FlyoutSubsection } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RuleConditions } from './rule_conditions';
+import { RuleConditions } from '../rule_conditions';
 import { RuleSummaryAboutCard } from './rule_summary_about_card';
-import type { RuleSummarySectionProps } from './types';
+import type { RuleSummarySectionProps } from '../types';
 
 export const RuleSummaryAboutSection: React.FC<RuleSummarySectionProps> = ({ rule }) => (
   <FlyoutAccordion
