@@ -1,16 +1,37 @@
 {
   "10.7.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.7.0 and 10.8.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false,
+      "download_source_id": "download-source-1"
+    },
+    {
+      "id": "id-2",
+      "name": "Policy 2",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false
     }
   ],
   "10.8.0": [
-    {}
+    {
+      "id": "id",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false,
+      "download_source_id": "download-source-1",
+      "download_source_ids": ["download-source-1"]
+    },
+    {
+      "id": "id-2",
+      "name": "Policy 2",
+      "namespace": "default",
+      "inactivity_timeout": 0,
+      "is_verifier": false
+    }
   ]
 }
