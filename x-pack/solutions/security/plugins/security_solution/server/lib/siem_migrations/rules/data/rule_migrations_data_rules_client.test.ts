@@ -763,6 +763,65 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
   });
 
+  describe('getIntegrationStats', () => {
+    const mockBuckets = [
+      { key: 'endpoint', doc_count: 3 },
+      { key: 'system', doc_count: 2 },
+    ];
+
+    beforeEach(() => {
+      esClient.asInternalUser.search = jest.fn().mockResolvedValue({
+        aggregations: { integrationIds: { buckets: mockBuckets } },
+      });
+    });
+
+    test('returns per-integration stats scoped to a migration with ids filter', async () => {
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats('migration1', {
+        ids: ['rule1', 'rule2'],
+      });
+
+      expect(result).toEqual([
+        { id: 'endpoint', total_rules: 3 },
+        { id: 'system', total_rules: 2 },
+      ]);
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { migration_id: 'migration1' } },
+                { terms: { _id: ['rule1', 'rule2'] } },
+              ],
+            },
+          },
+          aggregations: expect.objectContaining({
+            integrationIds: expect.objectContaining({
+              terms: expect.objectContaining({ field: 'elastic_rule.integration_ids' }),
+            }),
+          }),
+        })
+      );
+    });
+
+    test('returns per-integration stats scoped to a migration without ids filter', async () => {
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats('migration1');
+
+      expect(result).toEqual([
+        { id: 'endpoint', total_rules: 3 },
+        { id: 'system', total_rules: 2 },
+      ]);
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [{ term: { migration_id: 'migration1' } }],
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe('prepareDelete', () => {
     test('should prepare bulk delete operations', async () => {
       const migrationId = 'migration1';

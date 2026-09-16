@@ -199,7 +199,7 @@ between them.
 | \`finished\` | 0 | \`rules.failed > 0\` | **REPROCESS failed** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "failed" }\` |
 | \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "not_fully_translated" }\` |
 | \`finished\` | 0 | User-selected rules, including rules with mixed statuses | **REPROCESS selected** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids } }\` |
-| \`finished\` | 0 | \`rules.success.installable > 0\` | Tell the user their rules are ready to install and direct them to **LaunchPad → Manage Automatic Migrations** in the UI (do not start) | — |
+| \`finished\` | 0 | \`rules.success.installable > 0\` | Route to **automatic-migration-rules-install-rules** (do not start) | — |
 | \`stopped\` or \`interrupted\` | \`items.pending + items.processing > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
 | \`running\` | any | any | Tell the user it is already running and route to **${RULE_MIGRATION_SKILLS.SUMMARIZE}** for progress on **this migration only** | — |
 

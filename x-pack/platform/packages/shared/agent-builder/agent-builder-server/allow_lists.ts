@@ -97,6 +97,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.get_integration_stats`,
+  `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -245,6 +247,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'investigate-rule',
   'siem-readiness',
   'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-install-rules',
   'automatic-migration-rules-summarize',
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
