@@ -327,11 +327,10 @@ export class UnifiedTabs {
     await this.closeTabsBarMenu();
   }
 
-  async closeTab(index: number) {
-    const tab = await this.getTab(index);
+  private async closeTabLocator(tab: Locator) {
     const tabTestSubj = await tab.getAttribute('data-test-subj');
     if (!tabTestSubj) {
-      throw new Error(`Tab at index ${index} is missing a data-test-subj attribute`);
+      throw new Error('Tab is missing a data-test-subj attribute');
     }
 
     const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
@@ -341,19 +340,12 @@ export class UnifiedTabs {
     await this.hideTabPreview();
   }
 
-  /** Closes a tab identified by its visible label. */
-  async closeTabByName(name: string) {
-    const tab = this.getTabsBar().getByRole('tab', { name, exact: true });
-    const tabTestSubj = await tab.getAttribute('data-test-subj');
-    if (!tabTestSubj) {
-      throw new Error(`Tab "${name}" is missing a data-test-subj attribute`);
-    }
+  async closeTab(index: number) {
+    await this.closeTabLocator(await this.getTab(index));
+  }
 
-    const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
-    await tab.hover();
-    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
-    await tab.waitFor({ state: 'hidden' });
-    await this.hideTabPreview();
+  async closeTabByName(name: string) {
+    await this.closeTabLocator(this.getTabsBar().getByRole('tab', { name, exact: true }));
   }
 
   async restoreRecentlyClosedTab(index: number) {
