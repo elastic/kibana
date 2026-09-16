@@ -36,7 +36,12 @@ const storageSettings = {
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
-      title: types.text({ fields: { keyword: types.keyword() } }),
+      title: types.text({
+        fields: {
+          keyword: types.keyword(),
+          caseless: types.keyword({ normalizer: 'lowercase' }),
+        },
+      }),
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({
@@ -81,7 +86,13 @@ const storageSettings = {
         },
       }),
       schema_version: types.long({}),
-      attachments: types.object({ dynamic: false, properties: {} }),
+      attachments: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+        },
+      }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       // legacy field, superseded by read_by

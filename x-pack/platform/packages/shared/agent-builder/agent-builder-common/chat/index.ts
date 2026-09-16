@@ -26,6 +26,7 @@ export {
   DEFAULT_CONVERSATION_TITLE,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_METADATA_KEY_MAX_LENGTH,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
@@ -174,12 +175,26 @@ export {
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {
+  type ConversationSearchOptions,
+  type ConversationSearchSort,
+  type ConversationSearchSortField,
+  type ConversationSearchFilterField,
+  CONVERSATION_SEARCH_FILTER_FIELDS,
+  CONVERSATION_SEARCH_FILTER_MAX_LENGTH,
+  CONVERSATION_SEARCH_FILTER_MAX_NODES,
+  CONVERSATION_SEARCH_METADATA_FIELD_PREFIX,
+  CONVERSATION_SEARCH_SORT_FIELDS,
+} from './conversation_search';
+export {
   CONVERSATION_SCHEMA_VERSION,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   isEventsNativeVersion,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
+  type ServerAssignedEventFields,
+  type ConversationEventInput,
+  type ConversationEvent,
   type EventActor,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
@@ -202,4 +217,10 @@ export {
   type TimelineEvent,
   type TimelineEventInput,
   type ActiveExecution,
+  CONVERSATION_EVENT_ID_DELIMITER,
+  RESERVED_CONVERSATION_EVENT_TYPES,
+  type ReservedConversationEventType,
+  BUILT_IN_CONVERSATION_EVENT_TYPES,
+  isBuiltInConversationEventType,
+  type ValidConversationEventType,
 } from './timeline_events';
