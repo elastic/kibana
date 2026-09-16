@@ -79,8 +79,8 @@ The workflow agent has innate knowledge of (meaning you don't need to gather inf
 — The list of connectors available on the current Kibana instance
 — When the 'attachmentId' parameter is specified, the corresponding workflow definition
 
-The workflow agent has **no** knowledge of (meaning you may need to gather and pass specific facts):
-— Specific data referenced in the conversation: index names, field names/mappings, connector IDs, space IDs, or alert field paths that the workflow needs. Pass only the relevant facts as \`context\`, not a conversation summary.
+The workflow agent has **no** knowledge of (meaning you may need to gather and pass additional context):
+— Specific semantics referenced in the conversation: index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc, that the workflow needs. Pass only the relevant context as \`context\`.
 — Elasticsearch cluster state: index names and their mappings when relevant to the workflow.
 
 E.g., if the user message is "Ok now that we've identified that log index, now generate a workflow checking every 30mins for error in it and post a summary to slack in the foo channel", you should
