@@ -22,6 +22,13 @@ export interface SoFilterBuilderConfig {
    * An `id` entry is special: its values are prefixed with the saved-object type.
    */
   fieldMap: Readonly<Record<string, string>>;
+  /**
+   * Mapping from API-facing field-name prefixes (e.g. `metadata.builder_fields.`)
+   * to their saved-object KQL path prefixes. Any field that starts with a prefix
+   * and has a non-empty remainder is accepted, so an open container such as a
+   * `flattened` field can be filtered on any sub-path. The bare prefix is rejected.
+   */
+  fieldPrefixMap?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -36,8 +43,21 @@ export interface SoFilterBuilderConfig {
 export const createSoFilterBuilder = ({
   savedObjectType,
   fieldMap,
+  fieldPrefixMap = {},
 }: SoFilterBuilderConfig): ((apiFilter: string) => string) => {
   const allowedFields = Object.keys(fieldMap);
+  const allowedPrefixes = Object.keys(fieldPrefixMap);
+
+  const toSavedObjectField = (apiFieldName: string): string | undefined => {
+    if (fieldMap[apiFieldName]) {
+      return fieldMap[apiFieldName];
+    }
+    const prefix = allowedPrefixes.find(
+      (candidate) => apiFieldName.startsWith(candidate) && apiFieldName.length > candidate.length
+    );
+    return prefix ? `${fieldPrefixMap[prefix]}${apiFieldName.slice(prefix.length)}` : undefined;
+  };
+
   const idPrefix = `${savedObjectType}:`;
 
   const toSavedObjectIdFilterValue = (id: string): string => {
@@ -54,10 +74,15 @@ export const createSoFilterBuilder = ({
     }
 
     const apiFieldName = fieldArg.value;
-    const soField = fieldMap[apiFieldName];
+    const soField = toSavedObjectField(apiFieldName);
     if (!soField) {
+      const allowedPrefixPaths = allowedPrefixes.map(
+        (prefix) => `; or any ${prefix}<sub-field> path`
+      );
       throw Boom.badRequest(
-        `Invalid filter field "${apiFieldName}". Allowed fields: ${allowedFields.join(', ')}`,
+        `Invalid filter field "${apiFieldName}". Allowed fields: ${allowedFields.join(
+          ', '
+        )}${allowedPrefixPaths.join('')}`,
         {
           code: ALERTING_ERROR_CODES.INVALID_FILTER_FIELD,
           details: { field: apiFieldName, allowed_fields: allowedFields },
