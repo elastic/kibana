@@ -9,7 +9,7 @@ import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow, EuiText } from '
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
 import { optionalLabel } from '../optional_label';
 
@@ -21,7 +21,7 @@ interface RuleTagsSelectorProps {
 export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) => {
   const { data: apiTags = [], isLoading } = useFetchRuleTags({ kind: 'alert', enabled: true });
 
-  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
+  const selectedTags = matcher?.tags ?? [];
 
   const options = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
     const groups: Array<EuiComboBoxOptionOption<string>> = [];
@@ -37,7 +37,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     }
 
     const apiTagSet = new Set(apiTags);
-    const orphaned = selectedTags.filter((t) => !apiTagSet.has(t));
+    const orphaned = (matcher?.tags ?? []).filter((t) => !apiTagSet.has(t));
 
     if (orphaned.length > 0) {
       groups.push({
@@ -50,31 +50,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     }
 
     return groups;
-  }, [apiTags, selectedTags]);
-
-  const selectedOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
-    return selectedTags.map((tag) => ({ label: tag, value: tag }));
-  }, [selectedTags]);
-
-  const handleChange = useCallback(
-    (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      const tags = selected.map((o) => o.value ?? o.label);
-      onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
-    },
-    [matcher, onChange]
-  );
-
-  const handleCreateOption = useCallback(
-    (newTag: string) => {
-      const trimmed = newTag.trim();
-      if (!trimmed) return;
-      onChange({
-        ...matcher,
-        tags: [...(matcher?.tags ?? []), trimmed],
-      });
-    },
-    [matcher, onChange]
-  );
+  }, [apiTags, matcher]);
 
   const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
 
@@ -91,9 +67,16 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
           fullWidth
           isLoading={isLoading}
           options={options}
-          selectedOptions={selectedOptions}
-          onChange={handleChange}
-          onCreateOption={handleCreateOption}
+          selectedOptions={selectedTags.map((tag) => ({ label: tag, value: tag }))}
+          onChange={(selected) => {
+            const tags = selected.map((o) => o.value ?? o.label);
+            onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
+          }}
+          onCreateOption={(newTag) => {
+            const trimmed = newTag.trim();
+            if (!trimmed) return;
+            onChange({ ...matcher, tags: [...(matcher?.tags ?? []), trimmed] });
+          }}
           isClearable
           data-test-subj="ruleTagsSelector"
         />
