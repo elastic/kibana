@@ -116,6 +116,60 @@ const elasticsearchCapabilityMessages = [
   ),
 ] as const;
 
+const vectordbCapabilityMessages = [
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.vectordb.runVectorSearchesDetail',
+    {
+      defaultMessage: 'I can run vector searches',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.vectordb.exploreVectorIndicesDetail',
+    {
+      defaultMessage: 'I can explore vector indices',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.vectordb.buildSemanticSearchDetail',
+    {
+      defaultMessage: 'I can build semantic search',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.vectordb.analyzeEmbeddingsDetail',
+    {
+      defaultMessage: 'I can analyze embeddings',
+    }
+  ),
+] as const;
+
+const workplaceaiCapabilityMessages = [
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.searchKnowledgeBaseDetail',
+    {
+      defaultMessage: 'I can search your knowledge base',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.summarizeDocumentsDetail',
+    {
+      defaultMessage: 'I can summarize documents',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.findRelevantContentDetail',
+    {
+      defaultMessage: 'I can find relevant content',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.answerFromYourDataDetail',
+    {
+      defaultMessage: 'I can answer from your data',
+    }
+  ),
+] as const;
+
 const CAPABILITY_MESSAGES_BY_SOLUTION: Partial<Record<SolutionView, readonly string[]>> & {
   classic: readonly string[];
 } = {
@@ -123,6 +177,8 @@ const CAPABILITY_MESSAGES_BY_SOLUTION: Partial<Record<SolutionView, readonly str
   oblt: observabilityCapabilityMessages,
   security: securityCapabilityMessages,
   es: elasticsearchCapabilityMessages,
+  vectordb: vectordbCapabilityMessages,
+  workplaceai: workplaceaiCapabilityMessages,
 };
 
 export const getCapabilityMessagesForSolution = (solution: SolutionView): readonly string[] =>

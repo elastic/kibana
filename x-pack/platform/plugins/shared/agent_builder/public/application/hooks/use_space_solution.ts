@@ -18,7 +18,10 @@ export const useSpaceSolution = (spaces?: SpacesPluginStart): SolutionView | und
       setSolution('classic');
       return;
     }
-    spaces.getActiveSpace().then((space) => setSolution(space.solution ?? 'classic'));
+    spaces
+      .getActiveSpace()
+      .then((space) => setSolution(space.solution ?? 'classic'))
+      .catch(() => setSolution('classic'));
   }, [spaces]);
 
   return solution;
