@@ -781,6 +781,8 @@ const countDefinition: FunctionDefinition = {
     'ROW n=1\n| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime)',
     'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS cnt = COUNT(responseTime::tdigest)',
+    'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime, bucket) BY bucket = BUCKET(responseTime, 1)\n| SORT RANGE_MIN(bucket)',
+    'TS histogram_timeseries_index\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime::tdigest, bucket) BY bucket = BUCKET(responseTime::tdigest, 1)\n| SORT RANGE_MIN(bucket)',
   ],
 };
 
