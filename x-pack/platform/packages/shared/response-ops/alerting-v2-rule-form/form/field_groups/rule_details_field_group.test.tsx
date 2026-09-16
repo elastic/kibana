@@ -26,7 +26,7 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.queryByText('Rule details')).not.toBeInTheDocument();
   });
 
-  it('renders the tags field with optional label', () => {
+  it('renders optional labels on tags and description', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -36,7 +36,8 @@ describe('RuleDetailsFieldGroup', () => {
     );
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('optional')).toBeInTheDocument();
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getAllByText('optional')).toHaveLength(2);
   });
 
   it('renders the description field immediately', () => {

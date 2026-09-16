@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -539,6 +540,7 @@ export interface DocLinks {
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;

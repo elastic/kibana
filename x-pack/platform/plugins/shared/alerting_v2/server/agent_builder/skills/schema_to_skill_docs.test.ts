@@ -408,7 +408,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
