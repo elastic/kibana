@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SearchBar, FilterItems } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -24,7 +25,7 @@ import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/g
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiTextColor } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
@@ -138,6 +139,19 @@ const useGraphPopovers = ({
     createEventClickHandler,
   };
 };
+
+const DefaultFilterItems = ({ filters, dataView }: { filters: Filter[]; dataView: DataView }) => (
+  <>
+    {filters.map((filter) => (
+      <EuiFlexItem grow={false} key={`${filter.meta.key}-${filter.meta.type}`}>
+        <EuiBadge color="hollow" title="" data-test-subj="graphDefaultFilter">
+          {filter.meta.key}:{' '}
+          <EuiTextColor color="success">{getDisplayValueFromFilter(filter, [dataView])}</EuiTextColor>
+        </EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </>
+);
 
 const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
   title: i18n.translate(
@@ -701,12 +715,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         : undefined;
 
     const defaultFilterItems = dataView && defaultFilters.length > 0 && (
-      <FilterItems
-        filters={defaultFilters}
-        indexPatterns={[dataView]}
-        readOnly={true}
-        showTooltip={false}
-      />
+      <DefaultFilterItems filters={defaultFilters} dataView={dataView} />
     );
 
     return (

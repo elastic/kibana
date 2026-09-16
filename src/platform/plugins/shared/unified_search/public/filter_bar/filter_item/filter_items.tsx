@@ -31,8 +31,6 @@ export interface FilterItemsProps {
   /** Optional property that controls whether or not clicking the filter pill opens a popover *and* whether
    * or not the `x` button to remove the filter is rendered.*/
   readOnly?: boolean;
-  /** Whether filter pills show a tooltip. Defaults to true. */
-  showTooltip?: boolean;
   /** If not read only, this is called whenever a filter is removed and/or updated */
   onFiltersUpdated?: (filters: Filter[]) => void;
   /** A list of all dataviews that are used for the filters */
@@ -87,7 +85,6 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           filtersForSuggestions={props.filtersForSuggestions}
           readOnly={readOnly}
-          showTooltip={props.showTooltip}
           suggestionsAbstraction={props.suggestionsAbstraction}
           filtersCount={props.filters.length}
           dataViews={data?.dataViews}

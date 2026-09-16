@@ -234,7 +234,7 @@ describe('GraphInvestigation Component', () => {
 
       const filterBar = screen.getByTestId('filter-items-group');
       expect(within(filterBar).getByTestId('graphDefaultFilterOr')).toHaveTextContent('OR');
-      expect(within(filterBar).getAllByRole('button', { name: 'Filter actions' })).toHaveLength(1);
+      expect(screen.getByTestId('graphDefaultFilter')).toHaveAttribute('title', '');
 
       await hideActionsByNode(container, 'admin@example.com');
 
