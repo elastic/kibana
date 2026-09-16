@@ -22,7 +22,7 @@
         },
         "id": "user:admin@example.com@gcp",
         "name": "AdminExample",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS IAM User",
         "type": "Identity"
       },
@@ -61,7 +61,7 @@
         },
         "id": "user:entity-user@example.com@gcp",
         "name": "EntityTestUser",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP IAM User",
         "type": "Identity",
         "risk": {
@@ -108,7 +108,7 @@
         },
         "id": "entity-service-target-1",
         "name": "ComputeServiceTarget",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Compute",
         "risk": {
@@ -151,7 +151,7 @@
         },
         "id": "service:ServiceAccount123",
         "name": "ServiceAccount123",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Service Account",
         "type": "Service",
         "risk": {
@@ -198,7 +198,11 @@
         },
         "id": "host:host-instance-1",
         "name": "HostInstance1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": [
+          "cloud_asset_inventory",
+          "endpoint",
+          "system"
+        ],
         "sub_type": "GCP Compute Instance",
         "type": "Container",
         "risk": {
@@ -245,7 +249,7 @@
         },
         "id": "host:host-instance-2",
         "name": "HostInstance2",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Container",
         "risk": {
@@ -292,7 +296,7 @@
         },
         "id": "user:multi-target-user@example.com@gcp",
         "name": "MultiTargetUser",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP IAM User",
         "type": "Identity",
         "risk": {
@@ -336,7 +340,7 @@
         },
         "id": "projects/multi-target-project-id/buckets/target-bucket-a",
         "name": "TargetBucketA",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_storage_bucket-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Storage Bucket",
         "type": "Storage",
         "risk": {
@@ -376,7 +380,7 @@
         },
         "id": "projects/multi-target-project-id/buckets/target-bucket-b",
         "name": "TargetBucketB",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_storage_bucket-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Storage Bucket",
         "type": "Storage"
       },
@@ -414,7 +418,7 @@
         },
         "id": "projects/multi-target-project-id/buckets/target-bucket-c",
         "name": "TargetBucketC",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_storage_bucket-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Storage Bucket",
         "type": "Storage"
       },
@@ -449,7 +453,7 @@
         },
         "id": "service:TargetServiceDifferent",
         "name": "TargetServiceDifferent",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Service Account",
         "type": "Service"
       },
@@ -491,7 +495,7 @@
         },
         "id": "user:partial-user@example.com@gcp",
         "name": "PartialUserNameOnly",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005"
+        "source": "cloud_asset_inventory"
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -527,7 +531,7 @@
           "Type": "host"
         },
         "id": "host:partial-host-instance-1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Container"
       },
@@ -565,7 +569,10 @@
         },
         "id": "user:relationships-test-user@gcp",
         "name": "Relationships Test User",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
+        "source": [
+          "cloud_asset_inventory",
+          "okta"
+        ],
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
@@ -620,7 +627,7 @@
         },
         "id": "host:relationships-target-host-1",
         "name": "Relationships Target Host 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "risk": {
@@ -667,7 +674,7 @@
         },
         "id": "host:relationships-target-host-2",
         "name": "Relationships Target Host 2",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "risk": {
@@ -714,7 +721,7 @@
         },
         "id": "service:Relationships Target Service",
         "name": "Relationships Target Service",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS Lambda",
         "type": "Service"
       },
@@ -757,7 +764,7 @@
         },
         "id": "user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "data-pipeline Service Account",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Service Account",
         "type": "Service Account",
         "relationships": {
@@ -814,7 +821,7 @@
         },
         "id": "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
         "name": "web-server-prod-1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Host"
       },
@@ -857,7 +864,7 @@
         },
         "id": "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
         "name": "api-gateway-prod-1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Host"
       },
@@ -900,7 +907,7 @@
         },
         "id": "user:gcp-admin-user@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "GCP Admin User",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Service Account",
         "type": "Service Account"
       },
@@ -943,7 +950,7 @@
         },
         "id": "host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1",
         "name": "database-server-prod-1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP Compute Instance",
         "type": "Host",
         "relationships": {
@@ -994,7 +1001,7 @@
         },
         "id": "user:gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "GCP Compute Operator",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "GCP IAM User",
         "type": "Identity"
       },
@@ -1033,7 +1040,7 @@
         },
         "id": "user:rel-hierarchy-root-user@gcp",
         "name": "Hierarchy Root User",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
@@ -1089,7 +1096,7 @@
         },
         "id": "host:rel-hierarchy-host-1",
         "name": "Hierarchy Host 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "relationships": {
@@ -1145,7 +1152,7 @@
         },
         "id": "service:Hierarchy Service 1",
         "name": "Hierarchy Service 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-service_aws_lambda-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
@@ -1192,7 +1199,7 @@
         },
         "id": "user:rel-hierarchy-identity-1@gcp",
         "name": "Hierarchy Identity 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_role-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS IAM Role",
         "type": "Identity",
         "relationships": {
@@ -1257,7 +1264,7 @@
         },
         "id": "rel-hierarchy-storage-1",
         "name": "Hierarchy Storage Bucket 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_aws_s3_bucket-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS S3 Bucket",
         "type": "Storage"
       },
@@ -1292,7 +1299,7 @@
         },
         "id": "rel-hierarchy-storage-2",
         "name": "Hierarchy Storage Bucket 2",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_aws_s3_bucket-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS S3 Bucket",
         "type": "Storage"
       },
@@ -1327,7 +1334,7 @@
         },
         "id": "rel-hierarchy-database-1",
         "name": "Hierarchy Database 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-database_aws_rds-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS RDS Instance",
         "type": "Database"
       },
@@ -1362,7 +1369,7 @@
         },
         "id": "rel-hierarchy-database-2",
         "name": "Hierarchy Database 2",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-database_aws_rds-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS RDS Instance",
         "type": "Database"
       },
@@ -1397,7 +1404,7 @@
         },
         "id": "rel-hierarchy-network-1",
         "name": "Hierarchy Network VPC 1",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-network_aws_vpc-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS VPC",
         "type": "Networking"
       },
@@ -1435,7 +1442,7 @@
         },
         "id": "rel-hierarchy-network-2",
         "name": "Hierarchy Network VPC 2",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-network_aws_vpc-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS VPC",
         "type": "Networking"
       },
@@ -1473,7 +1480,7 @@
         },
         "id": "user:rel-hierarchy-delegate-1@gcp",
         "name": "Hierarchy Delegate Agent",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_organizations_admin-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS Organizations Admin",
         "type": "User",
         "risk": {
@@ -1520,7 +1527,7 @@
         },
         "id": "service:Hierarchy External Caller",
         "name": "Hierarchy External Caller",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-service_aws_lambda-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
@@ -1566,7 +1573,7 @@
         },
         "id": "host:host-with-multiple-ips",
         "name": "Host with multiple ips",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host"
       },
@@ -1610,7 +1617,7 @@
         },
         "id": "host:host-with-single-ip",
         "name": "Host with single ip",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host"
       },
@@ -1650,7 +1657,7 @@
         },
         "id": "host:host-with-no-ip",
         "name": "Host with no ip",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host"
       },
@@ -1689,7 +1696,7 @@
         },
         "id": "host:host-with-multiple-ips-actor",
         "name": "Actor Host with multiple ips",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "relationships": {
@@ -1740,7 +1747,7 @@
         },
         "id": "host:host-with-multiple-ips-target",
         "name": "Target Host with multiple ips",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "source": "cloud_asset_inventory",
         "sub_type": "AWS EC2 Instance",
         "type": "Host"
       },
@@ -1877,7 +1884,10 @@
         },
         "id": "host:origin-pinned-server",
         "name": "Origin Pinned Server",
-        "source": "manual",
+        "source": [
+          "endpoint",
+          "system"
+        ],
         "sub_type": "AWS EC2 Instance",
         "type": "Linux Server",
         "relationships": {

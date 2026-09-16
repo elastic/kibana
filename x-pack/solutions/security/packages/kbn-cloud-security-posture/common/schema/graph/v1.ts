@@ -58,6 +58,12 @@ export const COUNTRY_CODES_MAX_SIZE = 250;
 // (low/medium/high/extreme_impact).
 export const ASSET_CRITICALITY_LEVELS_MAX_SIZE = 4;
 
+// Integration/dataset names collected onto a single entity (`entity.source`). The entity
+// store accumulates one value per distinct event.module / event.dataset /
+// data_stream.dataset an entity was seen in; 100 is well above the number of integrations
+// a single entity realistically merges from (observed cases carry under 10).
+export const ENTITY_SOURCES_MAX_SIZE = 100;
+
 // Documents aggregated onto a single graph node, bounded by the events query limit.
 const DOCUMENTS_DATA_MAX_SIZE = ESQL_DEFAULT_ROW_LIMIT;
 
@@ -222,9 +228,17 @@ export const entitySchema = schema.object({
   // absent is not the same as zero.
   riskScore: schema.maybe(schema.number()),
   // Raw asset criticality level for this entity (e.g. "extreme_impact"). Omitted when
-  // unassigned. Node-level `assetCriticality` carries display labels instead; see
-  // `entityNodeDataSchema`.
+  // unassigned. Node-level `assetCriticality` carries the same raw levels as a
+  // distribution; see `entityNodeDataSchema`.
   assetCriticality: schema.maybe(schema.string()),
+  // Integrations / datasets this entity was derived from (`entity.source`, e.g.
+  // ["okta"] or ["endpoint", "system"]). The entity store collects these from
+  // event.module / event.dataset / data_stream.dataset, so an entity merged from several
+  // integrations carries several values. Omitted when the entity has none.
+  //
+  // Distinct from `sourceFields`, which holds the *event field values* that pointed at
+  // this entity (e.g. `user.id`) and is used to query logs-*.
+  sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: ENTITY_SOURCES_MAX_SIZE })),
   sourceFields: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 

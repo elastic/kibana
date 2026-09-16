@@ -411,6 +411,35 @@ describe('rebuildDocData', () => {
     expect(doc.entity).not.toHaveProperty('assetCriticality');
   });
 
+  it('adds sources from the entity store, keeping them distinct from sourceFields', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:ea-endpoint-1', { sources: ['endpoint', 'system'] }],
+    ]);
+    const entry = JSON.stringify({
+      id: 'host:ea-endpoint-1',
+      type: 'entity',
+      sourceFields: { 'host.id': '1f2a4026' },
+    });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    // `sources` = integrations the entity came from; `sourceFields` = event field values
+    // that pointed at it. They must both survive, independently.
+    expect(doc.entity.sources).toEqual(['endpoint', 'system']);
+    expect(doc.entity.sourceFields).toEqual({ 'host.id': '1f2a4026' });
+  });
+
+  it('omits sources when the entity has none', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', sources: [] }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity).not.toHaveProperty('sources');
+  });
+
   it('keeps a zero risk score, which is a real score rather than a missing one', () => {
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       ['user:alice', { riskScore: 0 }],

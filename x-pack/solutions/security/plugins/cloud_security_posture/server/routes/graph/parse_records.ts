@@ -1429,7 +1429,13 @@ const injectEntityDocDataEnrichment = (
   enrichment: EntityEnrichmentFields,
   logger?: Logger
 ): string => {
-  if (enrichment.riskScore == null && enrichment.assetCriticality == null) return docData;
+  if (
+    enrichment.riskScore == null &&
+    enrichment.assetCriticality == null &&
+    !enrichment.sources?.length
+  ) {
+    return docData;
+  }
 
   let doc: Record<string, unknown>;
   try {
@@ -1442,6 +1448,9 @@ const injectEntityDocDataEnrichment = (
   const entity = (doc.entity ?? {}) as Record<string, unknown>;
   if (enrichment.riskScore != null) entity.riskScore = enrichment.riskScore;
   if (enrichment.assetCriticality != null) entity.assetCriticality = enrichment.assetCriticality;
+  // The entities query already serializes `sources` into docData, so only fill it in when
+  // that query did not (e.g. an entity reached here from another path).
+  if (enrichment.sources?.length && entity.sources == null) entity.sources = enrichment.sources;
   doc.entity = entity;
 
   return JSON.stringify(doc);

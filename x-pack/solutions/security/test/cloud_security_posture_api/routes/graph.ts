@@ -786,6 +786,7 @@ export default function (providerContext: FtrProviderContext) {
               if (doc.type === 'entity') {
                 expect(doc.entity).to.not.have.property('riskScore');
                 expect(doc.entity).to.not.have.property('assetCriticality');
+                expect(doc.entity).to.not.have.property('sources');
               }
             });
           }
@@ -1984,6 +1985,8 @@ export default function (providerContext: FtrProviderContext) {
                     engine_type: 'host',
                     riskScore: 82,
                     assetCriticality: 'high_impact',
+                    // Entity merged from several integrations by the entity store.
+                    sources: ['cloud_asset_inventory', 'endpoint', 'system'],
                     sourceFields: expectExpect.objectContaining({
                       'host.id': 'host-instance-1',
                     }),
@@ -2002,6 +2005,7 @@ export default function (providerContext: FtrProviderContext) {
                     engine_type: 'host',
                     riskScore: 34,
                     assetCriticality: 'low_impact',
+                    sources: ['cloud_asset_inventory'],
                     sourceFields: expectExpect.objectContaining({
                       'host.id': 'host-instance-2',
                     }),
@@ -2065,6 +2069,7 @@ export default function (providerContext: FtrProviderContext) {
                     engine_type: 'user',
                     riskScore: 91,
                     assetCriticality: 'extreme_impact',
+                    sources: ['cloud_asset_inventory'],
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'entity-user@example.com',
                     }),
@@ -2097,6 +2102,7 @@ export default function (providerContext: FtrProviderContext) {
                     engine_type: 'generic',
                     riskScore: 47,
                     assetCriticality: 'medium_impact',
+                    sources: ['cloud_asset_inventory'],
                     sourceFields: expectExpect.objectContaining({
                       'entity.id': 'entity-service-target-1',
                     }),

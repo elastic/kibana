@@ -22,6 +22,11 @@ export interface EntityEnrichmentFields {
   riskScore?: number | null;
   /** Raw asset criticality level (`asset.criticality`), e.g. "extreme_impact". */
   assetCriticality?: string | null;
+  /**
+   * Integrations / datasets the entity was derived from (`entity.source`). Multi-value when
+   * the entity store merged events from several integrations onto one entity.
+   */
+  sources?: string[];
   sourceFields?: Record<string, string | string[]>;
 }
 
@@ -38,6 +43,7 @@ const BASE_ENRICHMENT_COLUMNS = new Set([
   'host.ip',
   'entity.risk.calculated_score_norm',
   'asset.criticality',
+  'entity.source',
 ]);
 
 // Additional entity-store columns needed to reconstruct sourceFields, beyond the base set.
@@ -142,7 +148,7 @@ export const fetchEntityEnrichment = async ({
       const query = `SET unmapped_fields="nullify";
 FROM ${indexName}
 | WHERE entity.id IN (${paramNames})
-| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip, \`entity.risk.calculated_score_norm\`, asset.criticality${
+| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip, \`entity.risk.calculated_score_norm\`, asset.criticality, entity.source${
         EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
       }`;
 
@@ -164,6 +170,7 @@ FROM ${indexName}
                 'host.ip'?: string | string[] | null;
                 'entity.risk.calculated_score_norm'?: number | null;
                 'asset.criticality'?: string | null;
+                'entity.source'?: string | string[] | null;
               } & Record<string, unknown>
             >(),
         {
@@ -199,6 +206,11 @@ FROM ${indexName}
               ? rawHostIp.map(String)
               : [String(rawHostIp)]
             : [];
+        const rawSources = record['entity.source'];
+        const sources =
+          rawSources != null
+            ? (Array.isArray(rawSources) ? rawSources : [rawSources]).map(String)
+            : [];
         const sourceFields = buildSourceFields(id, record);
         result.set(id, {
           name: record['entity.name'] ?? null,
@@ -210,6 +222,9 @@ FROM ${indexName}
           // unscored, which is not the same as scoring zero.
           riskScore: firstValue(record['entity.risk.calculated_score_norm']),
           assetCriticality: firstValue(record['asset.criticality']),
+          // entity.source is genuinely multi-value (collectValues in the entity store), so
+          // unlike the scalars above it is normalized to an array rather than a first value.
+          ...(sources.length > 0 ? { sources } : {}),
           ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
         });
       }

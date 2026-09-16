@@ -273,6 +273,7 @@ export const rebuildDocData = (
     if (enrichment?.assetCriticality != null) {
       entityData.assetCriticality = enrichment.assetCriticality;
     }
+    if (enrichment?.sources?.length) entityData.sources = enrichment.sources;
 
     delete doc.sourceFields;
     doc.entity = entityData;

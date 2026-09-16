@@ -1020,6 +1020,49 @@ describe('enrichEntityRecords', () => {
     expect(doc.entity).not.toHaveProperty('assetCriticality');
   });
 
+  it('fills in sources when the entities query did not already serialize them', () => {
+    const record: EntityRecord = {
+      id: 'user:alice@example.com@okta',
+      name: 'alice@example.com',
+      type: 'Identity',
+      sub_type: 'Okta User',
+      docData: JSON.stringify({
+        id: 'user:alice@example.com@okta',
+        type: 'entity',
+        entity: { availableInEntityStore: true },
+      }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice@example.com@okta', { sources: ['okta'] }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(JSON.parse(result.docData).entity.sources).toEqual(['okta']);
+  });
+
+  it('does not overwrite sources already serialized by the entities query', () => {
+    const record: EntityRecord = {
+      id: 'host:ea-endpoint-1',
+      name: 'ea-endpoint-1',
+      type: 'Host',
+      sub_type: '',
+      // The entities ES|QL query emits `sources` inline; enrichment must leave it alone.
+      docData: JSON.stringify({
+        id: 'host:ea-endpoint-1',
+        type: 'entity',
+        entity: { availableInEntityStore: true, sources: ['endpoint', 'system'] },
+      }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:ea-endpoint-1', { sources: ['should-not-win'] }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(JSON.parse(result.docData).entity.sources).toEqual(['endpoint', 'system']);
+  });
+
   it('returns unparseable docData unchanged rather than throwing', () => {
     const record: EntityRecord = {
       id: 'user:alice',

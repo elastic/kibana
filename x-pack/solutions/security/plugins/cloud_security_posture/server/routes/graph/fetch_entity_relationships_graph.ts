@@ -118,6 +118,12 @@ ${forkBranches}
           ${JSON_OBJECT_END}),
         ""
       ),
+      CASE(
+        entity.source IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"sources\\":[\\"",
+          MV_CONCAT(TO_STRING(entity.source), "\\",\\""), "\\"]"),
+        ""
+      ),
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
@@ -305,7 +311,9 @@ export const fetchEntities = async ({
   const esqlQuery = `SET unmapped_fields="nullify";
     FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
-    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
+    // host.ip and entity.source are both multi-value; cast to string so MV_CONCAT can
+    // serialize them into the docData JSON below.
+    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)), __entity_source = VALUES(TO_STRING(entity.source))
     | EVAL id = entity.id
     | EVAL name = entity.name
     | EVAL type = entity.type
@@ -331,6 +339,12 @@ export const fetchEntities = async ({
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
             "\\"ip\\":[\\"", MV_CONCAT(__host_ip, "\\",\\""), "\\"]",
             ${JSON_OBJECT_END}),
+          ""
+        ),
+        CASE(
+          entity.source IS NOT NULL,
+          CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"sources\\":[\\"",
+            MV_CONCAT(__entity_source, "\\",\\""), "\\"]"),
           ""
         ),
         ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
