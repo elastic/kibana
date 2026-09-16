@@ -6,6 +6,24 @@
  */
 
 // Original test (remove during Scout migration): x-pack/platform/test/functional/apps/discover/group3/visualize_field.ts
+
+/**
+ * Migration recommendation: DELETE (whole file). This is a subset of the stateful original (ES|QL
+ * tests stripped), so it adds no scenario the original does not already have — only a second
+ * deployment target. Scout expresses that via `tags.deploymentAgnostic` on the migrated specs
+ * instead of a duplicated file.
+ *
+ * When the stateful original (linked above) is processed, each test listed here is automatically
+ * covered; no separate migration work is needed for this serverless copy:
+ *
+ * - 'shows "visualize" field button' → DELETE from original (covered by field_visualize_button.test.tsx).
+ * - 'visualizes field to Lens and loads fields to the dimension editor' → MIGRATE in original.
+ * - 'should preserve app filters in lens' / 'should preserve query in lens' → MIGRATE in original,
+ *   merged into one spec.
+ * - 'should visualize correctly using breakdown field' → MIGRATE in original.
+ * - 'should visualize correctly using adhoc data view' → MIGRATE in original.
+ */
+
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -34,7 +52,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover field visualize button', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/290942
+  describe.skip('discover field visualize button', () => {
     before(async () => {
       // Security project requires admin role, search/oblt project passes with developer/editor.
       await PageObjects.svlCommonPage.loginAsAdmin();

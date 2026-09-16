@@ -18,7 +18,6 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
-  AttachmentMode,
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
@@ -61,7 +60,6 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   savedObjectId: string;
-  mode: AttachmentMode;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {

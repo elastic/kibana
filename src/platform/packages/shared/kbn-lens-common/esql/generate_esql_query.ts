@@ -9,7 +9,7 @@
 
 import { esql } from '@elastic/esql';
 import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/common';
-import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
+import { TIME_SYSTEM_PARAMS, escapeEsqlColumnName } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
 import { calculateAuto } from '@kbn/calculate-auto';
@@ -17,6 +17,7 @@ import type { DateRange, IndexPattern, OriginalColumn } from '../types';
 import type {
   DateHistogramIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { isColumnFormatted, isColumnOfType } from '../datasources/form_based/helpers';
@@ -25,6 +26,7 @@ import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
+import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -106,6 +108,19 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
 } as const;
 
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
+
+/**
+ * Format a name for SORT.
+ * - Field paths (e.g. agent.keyword): per-segment escape — never wrap the whole path.
+ * - Expression/agg output names (e.g. COUNT(bytes)): quote as a single identifier.
+ */
+const quoteEsqlSortField = (name: string): string => {
+  const trimmed = name.trim();
+  if (trimmed.includes('(') || trimmed.includes(')')) {
+    return escapeEsqlColumnName(trimmed, { asExpression: true });
+  }
+  return escapeEsqlColumnName(trimmed);
+};
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -198,6 +213,8 @@ export function generateEsqlQuery(
   });
 
   // Process metrics (excluding static_value which is handled above)
+  // Maps metric column IDs to STATS output names (alias or bare expression) for terms orderBy.
+  const metricOutputNamesByColId = new Map<string, string>();
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
@@ -276,6 +293,8 @@ export function generateEsqlQuery(
     // Use the same truthy check as statsMetricFragment so empty string roles map to the bare expression.
     const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
+    metricOutputNamesByColId.set(colId, esAggsIdMapKey);
+
     esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
       col,
       colId,
@@ -304,9 +323,14 @@ export function generateEsqlQuery(
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    // Check for specific unsupported operations before general toESQL check
-    if (col.operationType === 'terms') {
-      return getEsqlQueryFailedResult('terms_not_supported');
+    if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
+      if (bucketEsAggsEntries.length !== 1) {
+        return getEsqlQueryFailedResult('terms_not_supported');
+      }
+      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
+      if (termsFailure) {
+        return getEsqlQueryFailedResult(termsFailure);
+      }
     }
 
     const toESQL = getToEsqlFn(col.operationType);
@@ -423,23 +447,52 @@ export function generateEsqlQuery(
   const validMetrics = metricsResult.map((m) => m.esql);
   const validBuckets = bucketsResult.map((b) => b.esql);
 
+  const singleTermsColumn =
+    bucketEsAggsEntries.length === 1 &&
+    isColumnOfType<TermsIndexPatternColumn>('terms', bucketEsAggsEntries[0][1])
+      ? bucketEsAggsEntries[0][1]
+      : undefined;
+
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
       const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
       queryParts.push(`STATS ${statsBody}`);
     }
 
-    // Build sort fields, excluding date fields (date_histogram columns)
-    // The first .map() attaches the original index so we can reference
-    // the correct esAggsId in the final string.
-    const sortFields = bucketEsAggsEntries
-      .map(([, col], index) => ({ col, index }))
-      .filter(({ col, index }) => col.dataType !== 'date' && resolvedBucketExprs.has(index))
-      .map(({ index }) => `\`${resolvedBucketExprs.get(index)}\` ASC`);
+    if (singleTermsColumn) {
+      const { orderBy, orderDirection, size } = singleTermsColumn.params;
+      let sortField: string | undefined;
 
-    // Only add SORT clause if there are non-date fields to sort by
-    if (sortFields.length > 0) {
-      queryParts.push(`SORT ${sortFields.join(', ')}`);
+      if (orderBy.type === 'alphabetical') {
+        sortField = resolvedBucketExprs.get(0);
+      } else if (orderBy.type === 'column') {
+        sortField = metricOutputNamesByColId.get(orderBy.columnId);
+        if (!sortField) {
+          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        }
+      } else {
+        return getEsqlQueryFailedResult('terms_order_by_not_supported');
+      }
+
+      if (!sortField) {
+        return getEsqlQueryFailedResult('terms_not_supported');
+      }
+
+      queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
+      queryParts.push(`LIMIT ${size}`);
+    } else {
+      // Build sort fields, excluding date fields (date_histogram columns)
+      // The first .map() attaches the original index so we can reference
+      // the correct esAggsId in the final string.
+      const sortFields = bucketEsAggsEntries
+        .map(([, col], index) => ({ col, index }))
+        .filter(({ col, index }) => col.dataType !== 'date' && resolvedBucketExprs.has(index))
+        .map(({ index }) => `${quoteEsqlSortField(resolvedBucketExprs.get(index)!)} ASC`);
+
+      // Only add SORT clause if there are non-date fields to sort by
+      if (sortFields.length > 0) {
+        queryParts.push(`SORT ${sortFields.join(', ')}`);
+      }
     }
   } else {
     if (validMetrics.length > 0) {
