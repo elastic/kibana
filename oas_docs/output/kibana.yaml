@@ -2156,6 +2156,11 @@ paths:
                       total: 128
                     results:
                       - agent_id: elastic-ai-agent
+                        attachments:
+                          - id: 6f1c0f1e-6c2a-4a0a-9a1e-2f2b1c7d4e11
+                            type: text
+                          - id: 2b9d7c53-0b8e-4a77-9f0c-91a5d6c3b208
+                            type: esql
                         created_at: '2025-09-19T17:45:39.554Z'
                         id: bcc176c5-38f6-40be-be0c-898e34fa1480
                         permissions:
@@ -3503,6 +3508,7 @@ paths:
                   type: string
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
+                  maxLength: 256
                   type: string
                 execution_id:
                   description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
@@ -3983,6 +3989,7 @@ paths:
                   type: string
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
+                  maxLength: 256
                   type: string
                 execution_id:
                   description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
@@ -8784,7 +8791,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -8935,7 +8942,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9058,7 +9065,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9181,7 +9188,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9304,7 +9311,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9428,7 +9435,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9551,7 +9558,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9674,7 +9681,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9798,7 +9805,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9945,7 +9952,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10127,7 +10134,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10349,7 +10356,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10519,7 +10526,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10689,7 +10696,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10869,7 +10876,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11039,7 +11046,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11178,7 +11185,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11302,7 +11309,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11422,7 +11429,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11544,7 +11551,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11664,7 +11671,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11788,7 +11795,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11908,7 +11915,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12038,7 +12045,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12169,7 +12176,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12300,7 +12307,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12431,7 +12438,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12564,7 +12571,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12694,7 +12701,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12884,7 +12891,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13079,7 +13086,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13264,7 +13271,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13430,7 +13437,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13654,7 +13661,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13774,7 +13781,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13894,7 +13901,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14014,7 +14021,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14176,7 +14183,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14296,7 +14303,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14418,7 +14425,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14540,7 +14547,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14662,7 +14669,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14784,7 +14791,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14908,7 +14915,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15062,7 +15069,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15248,7 +15255,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15492,7 +15499,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15669,7 +15676,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15842,7 +15849,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15976,7 +15983,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16097,7 +16104,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16217,7 +16224,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16348,7 +16355,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16478,7 +16485,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting engine is disabled
+                  summary: Alerting V2 is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -43968,6 +43975,12 @@ paths:
                       - accountType: single-account
                         cloudProvider: aws
                         created_at: '2024-01-15T10:00:00.000Z'
+                        iac_blueprint_id: federated-identity
+                        iac_blueprint_version: 1.0.0
+                        iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                        iac_key: sha256:661cb7def1c7101f
+                        iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                        iac_upgrade_status: up_to_date
                         id: cloud-connector-id-1
                         name: My AWS connector
                         packagePolicyCount: 2
@@ -43988,6 +44001,44 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        iac_blueprint_id:
+                          description: Identifier of the template source last used for this connector. Set to null to remove it.
+                          maxLength: 255
+                          minLength: 1
+                          nullable: true
+                          type: string
+                          x-state: Experimental; added in 9.6.0
+                        iac_blueprint_version:
+                          description: Version of the template source last used for this connector. Set to null to remove it.
+                          maxLength: 64
+                          minLength: 1
+                          nullable: true
+                          type: string
+                          x-state: Experimental; added in 9.6.0
+                        iac_deployment_id:
+                          description: Identifier of the last CloudFormation stack deployed for this connector.
+                          maxLength: 2048
+                          minLength: 1
+                          type: string
+                          x-state: Experimental; added in 9.6.0
+                        iac_key:
+                          description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                          maxLength: 512
+                          minLength: 1
+                          nullable: true
+                          type: string
+                          x-state: Experimental; added in 9.6.0
+                        iac_upgrade_checked_at:
+                          description: When this connector was last checked for a CloudFormation template upgrade.
+                          type: string
+                          x-state: Experimental; added in 9.6.0
+                        iac_upgrade_status:
+                          description: Whether a newer CloudFormation template is available for this connector.
+                          enum:
+                            - up_to_date
+                            - upgrade_available
+                          type: string
+                          x-state: Experimental; added in 9.6.0
                         id:
                           type: string
                         name:
@@ -44084,6 +44135,10 @@ paths:
                 value:
                   accountType: single-account
                   cloudProvider: aws
+                  iac_blueprint_id: federated-identity
+                  iac_blueprint_version: 1.0.0
+                  iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                  iac_key: sha256:661cb7def1c7101f
                   name: My AWS connector
                   vars: {}
             schema:
@@ -44103,6 +44158,33 @@ paths:
                     - azure
                     - gcp
                   type: string
+                iac_blueprint_id:
+                  description: Identifier of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 255
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_blueprint_version:
+                  description: Version of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_deployment_id:
+                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_key:
+                  description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                  maxLength: 512
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -44158,6 +44240,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-2
                       name: My AWS connector
                       packagePolicyCount: 0
@@ -44177,6 +44265,44 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      iac_blueprint_id:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_blueprint_version:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental; added in 9.6.0
                       id:
                         type: string
                       name:
@@ -44358,6 +44484,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T10:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-1
                       name: My AWS connector
                       packagePolicyCount: 2
@@ -44377,6 +44509,44 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      iac_blueprint_id:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_blueprint_version:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental; added in 9.6.0
                       id:
                         type: string
                       name:
@@ -44475,6 +44645,10 @@ paths:
               putCloudConnectorRequestExample:
                 description: Update a Fleet cloud connector
                 value:
+                  iac_blueprint_id: federated-identity
+                  iac_blueprint_version: 1.0.0
+                  iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                  iac_key: sha256:661cb7def1c7101f
                   name: Updated AWS connector
                   vars: {}
             schema:
@@ -44487,6 +44661,33 @@ paths:
                     - single-account
                     - organization-account
                   type: string
+                iac_blueprint_id:
+                  description: Identifier of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 255
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_blueprint_version:
+                  description: Version of the template source last used for this connector. Set to null to remove it.
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_deployment_id:
+                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                  x-state: Experimental; added in 9.6.0
+                iac_key:
+                  description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                  maxLength: 512
+                  minLength: 1
+                  nullable: true
+                  type: string
+                  x-state: Experimental; added in 9.6.0
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -44538,6 +44739,12 @@ paths:
                       accountType: single-account
                       cloudProvider: aws
                       created_at: '2024-01-15T10:00:00.000Z'
+                      iac_blueprint_id: federated-identity
+                      iac_blueprint_version: 1.0.0
+                      iac_deployment_id: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-connector/abc
+                      iac_key: sha256:661cb7def1c7101f
+                      iac_upgrade_checked_at: '2024-01-15T11:00:00.000Z'
+                      iac_upgrade_status: up_to_date
                       id: cloud-connector-id-1
                       name: Updated AWS connector
                       packagePolicyCount: 2
@@ -44557,6 +44764,44 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      iac_blueprint_id:
+                        description: Identifier of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_blueprint_version:
+                        description: Version of the template source last used for this connector. Set to null to remove it.
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_deployment_id:
+                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_key:
+                        description: Checksum of the CloudFormation template last saved on this connector. Set to null to remove it.
+                        maxLength: 512
+                        minLength: 1
+                        nullable: true
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_checked_at:
+                        description: When this connector was last checked for a CloudFormation template upgrade.
+                        type: string
+                        x-state: Experimental; added in 9.6.0
+                      iac_upgrade_status:
+                        description: Whether a newer CloudFormation template is available for this connector.
+                        enum:
+                          - up_to_date
+                          - upgrade_available
+                        type: string
+                        x-state: Experimental; added in 9.6.0
                       id:
                         type: string
                       name:
@@ -98324,7 +98569,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -98342,92 +98587,92 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -98462,14 +98707,14 @@ components:
                 type: object
                 properties:
                   code:
-                    description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
                     type: object
                   message:
-                    description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
                     type: string
                 required:
                   - code
@@ -98584,14 +98829,14 @@ components:
                 type: object
                 properties:
                   code:
-                    description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
                     type: object
                   message:
-                    description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
                     type: string
                 required:
                   - code
@@ -98783,17 +99028,17 @@ components:
       type: object
       properties:
         code:
-          description: A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.
+          description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
           type: string
         details:
           additionalProperties: {}
-          description: Optional structured context (e.g., validation field errors, conflict resource IDs).
+          description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
           type: object
         error:
           description: A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.
           type: string
         message:
-          description: A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.
+          description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
           type: string
       required:
         - code
@@ -98898,7 +99143,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -98907,92 +99152,92 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -99375,7 +99620,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -99397,92 +99642,92 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
               enum:
                 - alert
               type: string
-            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
               enum:
                 - signal
               type: string
-          description: The kind of the rule.
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
-          description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
+          description: 'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
-          description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
+          description: 'The condition that marks an alert recovered. If omitted or set to `none`, recovery is disabled: the alert stays `active` even after the breach query stops returning matches, and `state_transition.recovering_count` / `recovering_timeframe` are not allowed. Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`.'
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
           additionalProperties: false
-          description: Episode state transition thresholds (alert-only).
+          description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
           nullable: true
           type: object
           properties:
             pending_count:
-              description: Consecutive breaches before transitioning to active.
+              description: Number of consecutive matches required before the alert becomes `active`.
               maximum: 1000
               minimum: 0
               type: integer
             pending_operator:
-              description: How to combine count and timeframe for pending.
+              description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             pending_timeframe:
-              description: Time window for pending evaluation, e.g. 5m, 15m.
+              description: Time window used with `pending_count`, for example `5m` or `15m`.
               type: string
             recovering_count:
-              description: Consecutive recoveries before transitioning to inactive.
+              description: Number of consecutive recoveries required before the alert becomes `inactive`.
               maximum: 1000
               minimum: 0
               type: integer
             recovering_operator:
-              description: How to combine count and timeframe for recovering.
+              description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
               enum:
                 - AND
                 - OR
               type: string
             recovering_timeframe:
-              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              description: Time window used with `recovering_count`, for example `5m` or `15m`.
               type: string
         time_field:
           default: '@timestamp'
-          description: Time field used for the lookback window range filter.
+          description: Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.
           maxLength: 128
           minLength: 1
           type: string
@@ -99688,7 +99933,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -99730,39 +99975,41 @@ components:
               type: array
         no_data_strategy:
           anyOf:
-            - description: Holds the last known episode status when no data is present.
+            - description: Keeps the alert's last status when the rule finds no data.
               enum:
                 - last_known_status
               type: string
-            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+            - description: Not accepted when creating or updating rules. Do not send this value.
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Marks the alert `inactive` the first time the rule finds no data for the alert.
               enum:
                 - recover
               type: string
-            - description: No-data situations are ignored (default).
+            - description: Ignores runs where the rule finds no data.
               enum:
                 - none
               type: string
+          description: 'How the rule behaves when it finds no data for a group. If omitted, the existing value is kept. Set to `null` to clear it (those runs are then ignored). If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
           nullable: true
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
           anyOf:
-            - description: recovers groups that stop breaching (default).
+            - description: Recovers an alert when the breach query no longer returns matches.
               enum:
                 - no_breach
               type: string
-            - description: uses a custom recovery query to detect recovery.
+            - description: Recovers an alert when a separate recovery query matches. Requires `query.recovery`.
               enum:
                 - query
               type: string
-            - description: disables recovery entirely.
+            - description: The rule never marks an alert as `recovered`, even after the breach query stops returning matches.
               enum:
                 - none
               type: string
+          description: The condition that marks an alert recovered. If omitted, the existing value is kept. Set to `null` to clear it (recovery is then disabled). Set to `no_breach` to recover when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`. With `none`, the alert stays `active`, even after the breach query stops returning matches. `state_transition.recovering_count` and `recovering_timeframe` require an explicit `recovery_strategy` other than `none`.
           nullable: true
         schedule:
           additionalProperties: false
@@ -99778,40 +100025,41 @@ components:
         state_transition:
           anyOf:
             - additionalProperties: false
-              description: Episode state transition thresholds (alert-only).
+              description: Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.
               type: object
               properties:
                 pending_count:
-                  description: Consecutive breaches before transitioning to active.
+                  description: Number of consecutive matches required before the alert becomes `active`.
                   maximum: 1000
                   minimum: 0
                   type: integer
                 pending_operator:
-                  description: How to combine count and timeframe for pending.
+                  description: The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.
                   enum:
                     - AND
                     - OR
                   type: string
                 pending_timeframe:
-                  description: Time window for pending evaluation, e.g. 5m, 15m.
+                  description: Time window used with `pending_count`, for example `5m` or `15m`.
                   type: string
                 recovering_count:
-                  description: Consecutive recoveries before transitioning to inactive.
+                  description: Number of consecutive recoveries required before the alert becomes `inactive`.
                   maximum: 1000
                   minimum: 0
                   type: integer
                 recovering_operator:
-                  description: How to combine count and timeframe for recovering.
+                  description: The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.
                   enum:
                     - AND
                     - OR
                   type: string
                 recovering_timeframe:
-                  description: Time window for recovering evaluation, e.g. 5m, 15m.
+                  description: Time window used with `recovering_count`, for example `5m` or `15m`.
                   type: string
             - nullable: true
           nullable: true
         time_field:
+          description: Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.
           maxLength: 128
           minLength: 1
           type: string

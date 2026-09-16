@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { AttachmentType, type Case, type Observable } from '../../../common/types/domain';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import { type Case, type Observable } from '../../../common/types/domain';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
-import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { createCasesClientMockArgs } from '../mocks';
 import { createCaseServiceMock, createLicensingServiceMock } from '../../services/mocks';
 import { mockCases } from '../../mocks';
@@ -32,24 +36,23 @@ const makeCase = (extractObservables: boolean): Case =>
     total_observables: 0,
   } as unknown as Case);
 
-const legacyAlertAttachment: AttachmentRequestV2 = {
-  type: AttachmentType.alert,
-  alertId: 'alert-id-1',
-  index: 'alert-index-1',
-  rule: { id: 'rule-1', name: 'rule-1' },
+const alertAttachment: UnifiedAttachmentPayload = {
+  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+  attachmentId: 'alert-id-1',
+  metadata: { index: 'alert-index-1', rule: { id: 'rule-1', name: 'rule-1' } },
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-const legacyEventAttachment: AttachmentRequestV2 = {
-  type: AttachmentType.event,
-  eventId: 'event-id-1',
-  index: 'event-index-1',
+const eventAttachment: UnifiedAttachmentPayload = {
+  type: SECURITY_EVENT_ATTACHMENT_TYPE,
+  attachmentId: 'event-id-1',
+  metadata: { index: 'event-index-1' },
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-const commentAttachment: AttachmentRequestV2 = {
-  type: AttachmentType.user,
-  comment: 'a comment',
+const commentAttachment: UnifiedAttachmentPayload = {
+  type: COMMENT_ATTACHMENT_TYPE,
+  data: { content: 'a comment' },
   owner: SECURITY_SOLUTION_OWNER,
 };
 
@@ -74,7 +77,7 @@ describe('extractAndAddObservables', () => {
     it('returns early without calling alertsService when extractObservables is false', async () => {
       const theCase = makeCase(false);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(alertsService.getAlerts).not.toHaveBeenCalled();
     });
@@ -94,7 +97,7 @@ describe('extractAndAddObservables', () => {
       const theCase = makeCase(true);
 
       await expect(
-        extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs)
+        extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs)
       ).resolves.toBeUndefined();
 
       expect(alertsService.getAlerts).not.toHaveBeenCalled();
@@ -108,7 +111,7 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({ docs: [] });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(licensingService.notifyUsage).toHaveBeenCalledWith(LICENSING_CASE_OBSERVABLES_FEATURE);
     });
@@ -121,7 +124,7 @@ describe('extractAndAddObservables', () => {
       const theCase = makeCase(true);
 
       await expect(
-        extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs)
+        extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs)
       ).resolves.toBeUndefined();
 
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
@@ -131,7 +134,7 @@ describe('extractAndAddObservables', () => {
   });
 
   describe('attachment shape normalization', () => {
-    it('collects AlertInfo from a legacy alert attachment (string id + index)', async () => {
+    it('collects AlertInfo from a unified alert attachment (string id + index)', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
@@ -140,21 +143,20 @@ describe('extractAndAddObservables', () => {
       caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(alertsService.getAlerts).toHaveBeenCalledWith([
         { id: 'alert-id-1', index: 'alert-index-1' },
       ]);
     });
 
-    it('collects AlertInfo from a legacy alert attachment with array ids', async () => {
+    it('collects AlertInfo from a unified alert attachment with array ids', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({ docs: [] });
-      const multiAlert: AttachmentRequestV2 = {
-        type: AttachmentType.alert,
-        alertId: ['id-1', 'id-2'],
-        index: ['idx-1', 'idx-2'],
-        rule: { id: 'r', name: 'r' },
+      const multiAlert: UnifiedAttachmentPayload = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: ['id-1', 'id-2'],
+        metadata: { index: ['idx-1', 'idx-2'], rule: { id: 'r', name: 'r' } },
         owner: SECURITY_SOLUTION_OWNER,
       };
       const theCase = makeCase(true);
@@ -167,27 +169,27 @@ describe('extractAndAddObservables', () => {
       ]);
     });
 
-    it('collects AlertInfo from a legacy event attachment', async () => {
+    it('collects AlertInfo from a unified event attachment', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({ docs: [] });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyEventAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [eventAttachment], theCase, clientArgs);
 
       expect(alertsService.getAlerts).toHaveBeenCalledWith([
         { id: 'event-id-1', index: 'event-index-1' },
       ]);
     });
 
-    it('collects AlertInfo from a unified alert attachment', async () => {
+    it('collects AlertInfo from a unified alert attachment with a distinct id + index', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({ docs: [] });
-      const unifiedAlert: AttachmentRequestV2 = {
+      const unifiedAlert: UnifiedAttachmentPayload = {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: 'unified-id-1',
         metadata: { index: 'unified-index-1', rule: { id: 'r', name: 'r' } },
         owner: SECURITY_SOLUTION_OWNER,
-      } as unknown as AttachmentRequestV2;
+      };
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [unifiedAlert], theCase, clientArgs);
@@ -208,7 +210,7 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables(
         'case-1',
-        [commentAttachment, legacyAlertAttachment],
+        [commentAttachment, alertAttachment],
         theCase,
         clientArgs
       );
@@ -228,7 +230,7 @@ describe('extractAndAddObservables', () => {
       });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
     });
@@ -238,7 +240,7 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({ docs: [] });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
     });
@@ -252,7 +254,7 @@ describe('extractAndAddObservables', () => {
       caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -285,7 +287,7 @@ describe('extractAndAddObservables', () => {
       });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
     });
@@ -299,7 +301,7 @@ describe('extractAndAddObservables', () => {
       caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(clientArgs.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Added 1 observable')
@@ -328,7 +330,7 @@ describe('extractAndAddObservables', () => {
       });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
       expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
