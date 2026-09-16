@@ -74,6 +74,7 @@ export class NightshiftInvestigationsPlugin
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private savedObjects?: CoreStart['savedObjects'];
+  private featureFlags?: CoreStart['featureFlags'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -246,6 +247,7 @@ export class NightshiftInvestigationsPlugin
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
+    this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -279,6 +281,7 @@ export class NightshiftInvestigationsPlugin
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
+          featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
           logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
@@ -305,6 +308,7 @@ export class NightshiftInvestigationsPlugin
       isAvailable: () =>
         isInvestigationAvailable({
           request,
+          featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
           logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,

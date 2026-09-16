@@ -34,7 +34,11 @@ const sandboxConfigSchema = schema.object({
 
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
-  enabled: schema.boolean({ defaultValue: false }),
+  // Kept for BWC so existing deployments with `enabled: false` explicit in
+  // kibana.yml don't error on an unknown config key.  The real gate for the
+  // nightshift experience is the LaunchDarkly flag
+  // `streams.significantEventsAvailable`; this plugin loads unconditionally.
+  enabled: schema.boolean({ defaultValue: true }),
   sandbox: schema.maybe(sandboxConfigSchema),
 });
 

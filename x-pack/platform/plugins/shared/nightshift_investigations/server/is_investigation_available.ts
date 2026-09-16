@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
@@ -15,8 +15,12 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+// STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG from @kbn/significant-events-plugin/common
+const STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG = 'streams.significantEventsAvailable';
+
 export const isInvestigationAvailable = async ({
   request,
+  featureFlags,
   agentBuilder,
   logger,
   searchInferenceEndpoints,
@@ -26,6 +30,7 @@ export const isInvestigationAvailable = async ({
   workflowsManagement,
 }: {
   request: KibanaRequest;
+  featureFlags?: CoreStart['featureFlags'];
   agentBuilder?: AgentBuilderPluginStart;
   logger: Logger;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
@@ -34,6 +39,13 @@ export const isInvestigationAvailable = async ({
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): Promise<boolean> => {
+  if (
+    featureFlags &&
+    !(await featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false))
+  ) {
+    return false;
+  }
+
   if (!agentBuilder || !searchInferenceEndpoints || !workflowsExtensions || !workflowsManagement) {
     return false;
   }
