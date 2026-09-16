@@ -118,6 +118,4 @@ describe('evidenceCollectionEvaluator', () => {
     expect(result).toMatchObject({ score: 0, label: 'unexpected-rule-uuid' });
     expect(result.explanation).toContain('"unexpected"');
   });
-
 });
-

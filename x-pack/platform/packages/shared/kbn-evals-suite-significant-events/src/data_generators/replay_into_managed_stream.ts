@@ -558,4 +558,3 @@ export async function replayIntoManagedStream(
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }
 }
-

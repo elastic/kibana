@@ -208,21 +208,21 @@ evaluate.describe(
                     examples: collectedExamples,
                   },
                 ].map(({ name, description, examples }) => ({
-                      name,
-                      description,
-                      examples: examples.map(({ scenario }) => ({
-                        id: scenario.input.scenario_id,
-                        input: {
-                          ...scenario.input,
-                          snapshot_source: scenario.snapshot_source,
-                        },
-                        output: { ...scenario.output, criteria: scenario.output.criteria },
-                        metadata: {
-                          ...scenario.metadata,
-                          test_index: MANAGED_STREAM_SEARCH_PATTERN,
-                        },
-                      })),
+                  name,
+                  description,
+                  examples: examples.map(({ scenario }) => ({
+                    id: scenario.input.scenario_id,
+                    input: {
+                      ...scenario.input,
+                      snapshot_source: scenario.snapshot_source,
+                    },
+                    output: { ...scenario.output, criteria: scenario.output.criteria },
+                    metadata: {
+                      ...scenario.metadata,
+                      test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                    },
                   })),
+                })),
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
                 task: async ({ input }: { input: DiscoveryScenario['input'] }) => {

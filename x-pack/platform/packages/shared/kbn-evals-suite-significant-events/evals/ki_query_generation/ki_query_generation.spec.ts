@@ -384,10 +384,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const promptSnippet = [
-                  groundingTools?.promptSnippet,
-                  eventSearchTool.promptSnippet,
-                ]
+                const promptSnippet = [groundingTools?.promptSnippet, eventSearchTool.promptSnippet]
                   .filter(Boolean)
                   .join('\n');
 

@@ -391,7 +391,6 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
-
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {

@@ -23,4 +23,3 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 /** Root cause investigation. */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
-
