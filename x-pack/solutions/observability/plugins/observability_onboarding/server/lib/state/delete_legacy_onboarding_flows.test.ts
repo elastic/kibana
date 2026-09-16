@@ -56,7 +56,7 @@ describe('deleteLegacyOnboardingFlows', () => {
     expect(repository.find).toHaveBeenCalledTimes(1);
     expect(repository.find).toHaveBeenCalledWith({
       type: TYPE,
-      filter: `not ${TYPE}.attributes.createdBy: *`,
+      filter: `not ${TYPE}.attributes.createdBy: * and ${TYPE}.updated_at < now-1d`,
       page: 1,
       perPage: 1000,
       sortField: 'created_at',

@@ -9,7 +9,10 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingInternalRepository } from './flow_ownership';
 
-const LEGACY_FLOW_FILTER = `not ${OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE}.attributes.createdBy: *`;
+// Flows touched within this window are left alone so a node that still writes ownerless flows
+// during a mixed-version rollout cannot have them deleted mid-session by an upgraded node.
+const LEGACY_FLOW_MIN_AGE = '1d';
+const LEGACY_FLOW_FILTER = `not ${OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE}.attributes.createdBy: * and ${OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE}.updated_at < now-${LEGACY_FLOW_MIN_AGE}`;
 const PER_PAGE = 1000;
 
 /**
@@ -19,10 +22,10 @@ const PER_PAGE = 1000;
  * steady-state cost is a single filtered find per startup. Remove this once every branch that
  * ever wrote ownerless flows is out of maintenance.
  *
- * Release constraint: must not ship in the release that first delivers #276743 on a branch.
- * During a mixed-version rollout old nodes still create flows without `createdBy` that this
- * sweep would delete while they are in use, and the KQL filter requires the `createdBy` mapping
- * to already be applied to the index.
+ * Safe to ship in any release relative to #276743: the age gate protects flows still being
+ * written by not-yet-upgraded nodes, and the saved objects migrator applies the `createdBy`
+ * mapping before plugins start. If the mapping were somehow missing the filter is rejected by
+ * saved objects field validation and nothing is deleted.
  */
 export async function deleteLegacyOnboardingFlows({
   coreStart,
