@@ -91,7 +91,9 @@ describe('createUnackAction', () => {
 
   it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkUnackEpisodeActions')
+      .mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createUnackAction(deps).execute({
       episodes: [
@@ -117,7 +119,9 @@ describe('createUnackAction', () => {
       execute: extensionExecute,
     };
 
-    jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkUnackEpisodeActions')
+      .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
 
     await createUnackAction(deps, extension).execute({

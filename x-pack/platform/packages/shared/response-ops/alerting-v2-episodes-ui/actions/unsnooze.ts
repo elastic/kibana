@@ -31,9 +31,11 @@ export const createUnsnoozeAction = (
       execute: (episodes, http) =>
         bulkUnsnoozeSeriesActions(
           http,
-          uniqueByGroup(episodes).map((ep): BulkUnsnoozeSeriesActionItem => ({
-            group_hash: ep.group_hash,
-          }))
+          uniqueByGroup(episodes).map(
+            (ep): BulkUnsnoozeSeriesActionItem => ({
+              group_hash: ep.group_hash,
+            })
+          )
         ),
     },
     extension,

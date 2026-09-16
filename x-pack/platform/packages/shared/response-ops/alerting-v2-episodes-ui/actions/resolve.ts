@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_STATUS, type BulkDeactivateEpisodeActionItem } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  type BulkDeactivateEpisodeActionItem,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { bulkDeactivateEpisodeActions } from './bulk_create_alert_actions';
@@ -29,10 +32,12 @@ export const createResolveAction = (
       execute: (episodes, http) =>
         bulkDeactivateEpisodeActions(
           http,
-          episodes.map((ep): BulkDeactivateEpisodeActionItem => ({
-            episode_id: ep['episode.id'],
-            reason: i18n.RESOLVE_ACTION_REASON,
-          }))
+          episodes.map(
+            (ep): BulkDeactivateEpisodeActionItem => ({
+              episode_id: ep['episode.id'],
+              reason: i18n.RESOLVE_ACTION_REASON,
+            })
+          )
         ),
     },
     extension,
