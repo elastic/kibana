@@ -13,7 +13,7 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
-import { createDiscoverSessionClient } from './api_client';
+import { createDiscoverSessionClient, DISCOVER_SESSION_HTTP_ERROR_NAME } from './api_client';
 
 describe('Discover session API client', () => {
   const data = { title: 'Session', tabs: [] };
@@ -127,9 +127,11 @@ describe('Discover session API client', () => {
     const client = createDiscoverSessionClient(http);
     http.get.mockRejectedValue(createBadRequestError());
 
-    await expect(client.get('session-id')).rejects.toThrow(
-      'chart_interval must be a supported value'
-    );
+    await expect(client.get('session-id')).rejects.toMatchObject({
+      name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+      code: '400',
+      message: 'chart_interval must be a supported value',
+    });
   });
 
   it('uses the server message and keeps the original cause when create fails', async () => {
@@ -142,6 +144,10 @@ describe('Discover session API client', () => {
 
     await expect(result).rejects.toThrow('chart_interval must be a supported value');
     await expect(result).rejects.toHaveProperty('cause', error);
+    await expect(result).rejects.toMatchObject({
+      name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+      code: '400',
+    });
   });
 
   it('uses the server message and keeps the original cause when upsert fails', async () => {
@@ -154,6 +160,29 @@ describe('Discover session API client', () => {
 
     await expect(result).rejects.toThrow('chart_interval must be a supported value');
     await expect(result).rejects.toHaveProperty('cause', error);
+    await expect(result).rejects.toMatchObject({
+      name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+      code: '400',
+    });
+  });
+
+  it('keeps the HTTP status when the response has no message body', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    const error = createHttpFetchError(
+      'Internal Server Error',
+      'Error',
+      new Request('http://localhost'),
+      new Response(undefined, { status: 500 })
+    );
+    http.put.mockRejectedValue(error);
+
+    await expect(client.upsert('session-id', data)).rejects.toMatchObject({
+      name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+      code: '500',
+      message: 'Internal Server Error',
+      cause: error,
+    });
   });
 });
 
