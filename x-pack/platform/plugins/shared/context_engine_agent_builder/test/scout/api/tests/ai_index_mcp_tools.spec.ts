@@ -29,7 +29,11 @@ const { AI_INDEX_COLLECTION_PATH, MCP_PATH } = testData;
 const RUN_ID = randomUUID().slice(0, 8);
 const OTHER_SPACE_ID = `ce-mcp-other-${RUN_ID}`;
 const INDEX = `ai-index-idx-scout-mcp-${RUN_ID}`;
+// Registered in both spaces, on the same backing index, with a description that names the space.
 const AI_INDEX_ID = `scout-mcp-${RUN_ID}`;
+// Registered in the default space only.
+const DEFAULT_ONLY_AI_INDEX_ID = `scout-mcp-default-only-${RUN_ID}`;
+const DESCRIPTION = { default: 'Scout MCP fixture', other: 'Scout MCP fixture (other space)' };
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -113,8 +117,21 @@ const runChain = async (client: Client) => {
     'other'
   );
 
-  return { entry, block, titles: columnValues(rows, 'title') };
+  return {
+    listedIds: aiIndices.map(({ id }) => id),
+    entry,
+    block,
+    titles: columnValues(rows, 'title'),
+  };
 };
+
+const registration = (id: string, description: string) => ({
+  id,
+  description,
+  dest: { type: 'index', value: INDEX },
+  automations: [],
+  sources: [],
+});
 
 apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () => {
   let mcpCredentials: RoleApiCredentials;
@@ -157,27 +174,31 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
       ],
     });
 
-    await kbnClient.request({
-      method: 'POST',
-      path: `/${AI_INDEX_COLLECTION_PATH}`,
-      headers: API_HEADERS,
-      body: {
-        id: AI_INDEX_ID,
-        description: 'Scout MCP fixture',
-        dest: { type: 'index', value: INDEX },
-        automations: [],
-        sources: [],
-      },
-    });
+    for (const [path, body] of [
+      [`/${AI_INDEX_COLLECTION_PATH}`, registration(AI_INDEX_ID, DESCRIPTION.default)],
+      [`/${AI_INDEX_COLLECTION_PATH}`, registration(DEFAULT_ONLY_AI_INDEX_ID, DESCRIPTION.default)],
+      [
+        `/s/${OTHER_SPACE_ID}/${AI_INDEX_COLLECTION_PATH}`,
+        registration(AI_INDEX_ID, DESCRIPTION.other),
+      ],
+    ] as const) {
+      await kbnClient.request({ method: 'POST', path, headers: API_HEADERS, body });
+    }
   });
 
   apiTest.afterAll(async ({ kbnClient, esClient }) => {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `/${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`,
-      headers: API_HEADERS,
-      ignoreErrors: [404],
-    });
+    for (const path of [
+      `/${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`,
+      `/${AI_INDEX_COLLECTION_PATH}/${DEFAULT_ONLY_AI_INDEX_ID}`,
+      `/s/${OTHER_SPACE_ID}/${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`,
+    ]) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path,
+        headers: API_HEADERS,
+        ignoreErrors: [404],
+      });
+    }
     await esClient.indices.delete({ index: INDEX }, { ignore: [404] });
     await kbnClient.spaces.delete(OTHER_SPACE_ID);
     await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING_ID);
@@ -197,10 +218,11 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
       }
       expect(byName.get(TOOL.query)?.description).toContain('/s/{spaceId}/api/agent_builder/mcp');
 
+      expect(chain.listedIds).toContain(DEFAULT_ONLY_AI_INDEX_ID);
       expect(chain.entry).toStrictEqual({
         id: AI_INDEX_ID,
         esql_target: INDEX,
-        description: 'Scout MCP fixture',
+        description: DESCRIPTION.default,
         managed: false,
       });
       expect(chain.block).toContain(`FROM ${INDEX}`);
@@ -219,11 +241,14 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
   );
 
   apiTest('takes the space from the /s/{spaceId} MCP URL', async ({ apiClient }) => {
-    const { entry, block, titles } = await asMcp(runChain, {
+    const { listedIds, entry, block, titles } = await asMcp(runChain, {
       path: `s/${OTHER_SPACE_ID}/${MCP_PATH}`,
     });
 
-    expect(entry.id).toBe(AI_INDEX_ID);
+    // The list starts from that space's registry: its own record for the shared id, and not the
+    // entry registered only in the default space.
+    expect(entry.description).toBe(DESCRIPTION.other);
+    expect(listedIds).not.toContain(DEFAULT_ONLY_AI_INDEX_ID);
     expect(block).toContain(`FROM ${INDEX}`);
     expect(titles).toStrictEqual(['Other space only', 'Shared']);
 
