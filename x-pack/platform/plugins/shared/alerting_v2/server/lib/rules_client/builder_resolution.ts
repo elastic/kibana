@@ -8,15 +8,9 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import {
-  getBreachEsqlQuery,
-  isNoDataQueryProvidedForStrategy,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isSignalUsingStandaloneFormat,
   type CreateRuleData,
   type ReplaceRuleData,
   type Query,
-  type RuleKind,
   type UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
@@ -24,71 +18,10 @@ import type { BuilderTypeRegistry, GeneratedQuery, OpaqueBuilderFields } from '.
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { ResolvedCreateRuleData, ResolvedUpdateRuleData } from './types';
 import { toStoredQuery } from './utils';
-
-const adaptToKind = (
-  generated: GeneratedQuery,
-  kind: RuleKind,
-  builderType: string
-): GeneratedQuery => {
-  if (kind !== 'signal' || generated.query.format === 'standalone') {
-    return generated;
-  }
-
-  if (generated.query.recovery) {
-    throw Boom.badRequest(
-      `The "${builderType}" rule builder generated a recovery query, which a signal rule cannot run.`,
-      {
-        code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
-        details: { builder_type: builderType },
-      }
-    );
-  }
-
-  return {
-    ...generated,
-    query: {
-      format: 'standalone',
-      breach: { query: getBreachEsqlQuery(generated.query) },
-    },
-  };
-};
-
-const GENERATED_QUERY_INVARIANTS = [
-  {
-    holds: isSignalUsingStandaloneFormat,
-    message: 'kind "signal" requires query.format "standalone".',
-  },
-  {
-    holds: isRecoveryQueryConsistentWithStrategy,
-    message: 'query.recovery is only allowed when recovery_strategy is "query".',
-  },
-  {
-    holds: isRecoveryQueryProvidedForStrategy,
-    message: 'query.recovery is required when recovery_strategy is "query".',
-  },
-  {
-    holds: isNoDataQueryProvidedForStrategy,
-    message:
-      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-  },
-] as const;
-
-const assertGeneratedQueryIsValid = (
-  resolved: ResolvedCreateRuleData,
-  builderType: string
-): void => {
-  for (const { holds, message } of GENERATED_QUERY_INVARIANTS) {
-    if (!holds(resolved)) {
-      throw Boom.badRequest(
-        `The "${builderType}" rule builder generated a query that is not valid for this rule: ${message}`,
-        {
-          code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
-          details: { builder_type: builderType },
-        }
-      );
-    }
-  }
-};
+import {
+  adaptToKind,
+  assertGeneratedQueryIsValid,
+} from '../builder_types/generated_query_validation';
 
 const withGenerated = <T extends { query?: Query; time_field?: string; grouping?: unknown }>(
   data: T,
