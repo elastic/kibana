@@ -390,4 +390,9 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.threatq',
+    lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
 ]);
