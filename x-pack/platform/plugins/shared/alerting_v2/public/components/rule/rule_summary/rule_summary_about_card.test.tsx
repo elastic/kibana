@@ -8,16 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleApiResponse } from '../../../../services/rules_api';
-import { RuleProvider } from '../../../rule_details/rule_context';
+import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryAboutCard } from './rule_summary_about_card';
 
 const renderCard = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
-      <RuleProvider rule={rule}>
-        <RuleSummaryAboutCard />
-      </RuleProvider>
+      <RuleSummaryAboutCard rule={rule} />
     </I18nProvider>
   );
 
@@ -47,7 +44,7 @@ describe('RuleSummaryAboutCard', () => {
   it('renders description and tags in a bordered card', () => {
     renderCard(baseRule);
 
-    expect(screen.getByTestId('ruleSummaryFlyoutAboutCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
     expect(screen.getByText('Rule tags')).toBeInTheDocument();

@@ -9,8 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
-import { RuleProvider } from '../rule_context';
-import { getQueryOverflowHeight } from '../utils';
+import { getQueryOverflowHeight } from '../../rule_details/utils';
 import { RuleConditions } from './rule_conditions';
 
 jest.mock('@kbn/alerting-plugin/common', () => ({
@@ -60,9 +59,7 @@ const alertRule: RuleApiResponse = {
 const renderConditions = (rule: RuleApiResponse, variant?: 'full' | 'summary') =>
   render(
     <I18nProvider>
-      <RuleProvider rule={rule}>
-        <RuleConditions variant={variant} />
-      </RuleProvider>
+      <RuleConditions rule={rule} variant={variant} />
     </I18nProvider>
   );
 

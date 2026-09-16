@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useRule } from '../../../rule_details/rule_context';
-import { RuleTagsList } from '../../../rule_details/rule_summary_header';
-import { EMPTY_VALUE } from '../../../rule_details/utils';
+import { EMPTY_VALUE } from '../../rule_details/utils';
+import type { RuleSummarySectionProps } from './types';
 
-export const RuleSummaryAboutCard: React.FC = () => {
-  const { metadata } = useRule();
-  const { description, tags } = metadata;
+export const RuleSummaryAboutCard: React.FC<RuleSummarySectionProps> = ({ rule }) => {
+  const { description, tags } = rule.metadata;
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      data-test-subj="ruleSummaryFlyoutAboutCard"
-    >
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj="ruleSummaryAboutCard">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.description', {
+              {i18n.translate('xpack.alertingV2.ruleSummary.description', {
                 defaultMessage: 'Description',
               })}
             </h5>
@@ -40,13 +41,23 @@ export const RuleSummaryAboutCard: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.ruleTags', {
+              {i18n.translate('xpack.alertingV2.ruleSummary.ruleTags', {
                 defaultMessage: 'Rule tags',
               })}
             </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {tags && tags.length > 0 ? <RuleTagsList /> : EMPTY_VALUE}
+          {tags?.length ? (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
+              {tags.map((tag) => (
+                <EuiFlexItem key={tag} grow={false}>
+                  <EuiBadge color="hollow">{tag}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ) : (
+            EMPTY_VALUE
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

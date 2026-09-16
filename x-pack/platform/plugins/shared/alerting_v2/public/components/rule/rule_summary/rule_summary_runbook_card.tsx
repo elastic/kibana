@@ -19,12 +19,11 @@ import { css } from '@emotion/react';
 import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useRule } from '../../../rule_details/rule_context';
+import type { RuleSummarySectionProps } from './types';
 
 const RUNBOOK_PREVIEW_HEIGHT = 172;
 
-export const RuleSummaryRunbookCard: React.FC = () => {
-  const rule = useRule();
+export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const runbook = rule.artifacts?.find((artifact) => artifact.type === 'runbook');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -45,19 +44,19 @@ export const RuleSummaryRunbookCard: React.FC = () => {
         iconType="documentation"
         title={
           <h3>
-            {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.runbook.emptyTitle', {
+            {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyTitle', {
               defaultMessage: 'No runbook',
             })}
           </h3>
         }
         body={
           <p>
-            {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.runbook.emptyBody', {
+            {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyBody', {
               defaultMessage: 'No runbook has been added to this rule yet.',
             })}
           </p>
         }
-        data-test-subj="ruleSummaryFlyoutRunbookEmpty"
+        data-test-subj="ruleSummaryRunbookEmpty"
       />
     );
   }
@@ -65,12 +64,12 @@ export const RuleSummaryRunbookCard: React.FC = () => {
   const showToggle = isExpanded || isOverflowing;
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj="ruleSummaryFlyoutRunbook">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj="ruleSummaryRunbook">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.runbook.title', {
+              {i18n.translate('xpack.alertingV2.ruleSummary.runbook.title', {
                 defaultMessage: 'Runbook',
               })}
             </h5>
@@ -82,13 +81,13 @@ export const RuleSummaryRunbookCard: React.FC = () => {
               size="xs"
               flush="both"
               onClick={() => setIsExpanded((open) => !open)}
-              data-test-subj="ruleSummaryFlyoutRunbookToggle"
+              data-test-subj="ruleSummaryRunbookToggle"
             >
               {isExpanded
-                ? i18n.translate('xpack.alertingV2.ruleSummaryFlyout.runbook.hideFullGuide', {
+                ? i18n.translate('xpack.alertingV2.ruleSummary.runbook.hideFullGuide', {
                     defaultMessage: 'Hide full guide',
                   })
-                : i18n.translate('xpack.alertingV2.ruleSummaryFlyout.runbook.showFullGuide', {
+                : i18n.translate('xpack.alertingV2.ruleSummary.runbook.showFullGuide', {
                     defaultMessage: 'Show full guide',
                   })}
             </EuiButtonEmpty>
@@ -106,7 +105,7 @@ export const RuleSummaryRunbookCard: React.FC = () => {
                 overflow-y: auto;
               `
         }
-        data-test-subj="ruleSummaryFlyoutRunbookContent"
+        data-test-subj="ruleSummaryRunbookContent"
       >
         <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
       </div>

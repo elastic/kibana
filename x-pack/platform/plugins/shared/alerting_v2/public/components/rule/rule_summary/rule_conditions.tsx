@@ -12,7 +12,6 @@ import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useRule } from '../rule_context';
 import {
   EMPTY_VALUE,
   formatAlertDelay,
@@ -22,13 +21,15 @@ import {
   getDisplayQueryParts,
   getQueryOverflowHeight,
   getRecoverEsqlSegment,
-} from '../utils';
+} from '../../rule_details/utils';
 import { RuleDetailsTable } from './rule_details_table';
+import type { RuleSummaryData } from './types';
 
 export interface RuleConditionsProps {
+  rule: RuleSummaryData;
   /**
    * `'full'` (default) shows the rule description above the query blocks.
-   * `'summary'` omits it — the flyout About card already shows description.
+   * `'summary'` omits it because the About card already shows the description.
    */
   variant?: 'full' | 'summary';
 }
@@ -59,10 +60,7 @@ const ConditionQueryBlock = ({
   </>
 );
 
-export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
-  variant = 'full',
-}) => {
-  const rule = useRule();
+export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 'full' }) => {
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
@@ -167,7 +165,6 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       : []),
   ];
 
-  // Summary flyout shows the description on the About card, not here.
   const description = isSummary ? undefined : rule.metadata.description;
 
   return (

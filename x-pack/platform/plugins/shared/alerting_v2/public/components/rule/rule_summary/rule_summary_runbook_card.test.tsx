@@ -8,16 +8,13 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleApiResponse } from '../../../../services/rules_api';
-import { RuleProvider } from '../../../rule_details/rule_context';
+import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryRunbookCard } from './rule_summary_runbook_card';
 
 const renderCard = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
-      <RuleProvider rule={rule}>
-        <RuleSummaryRunbookCard />
-      </RuleProvider>
+      <RuleSummaryRunbookCard rule={rule} />
     </I18nProvider>
   );
 
@@ -32,8 +29,8 @@ describe('RuleSummaryRunbookCard', () => {
   it('renders the empty prompt when the rule has no runbook', () => {
     renderCard({ ...baseRule, artifacts: [] });
 
-    expect(screen.getByTestId('ruleSummaryFlyoutRunbookEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('ruleSummaryFlyoutRunbookToggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryRunbookEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryRunbookToggle')).not.toBeInTheDocument();
   });
 
   it('renders runbook markdown and toggles the full guide when content overflows', () => {
@@ -49,11 +46,9 @@ describe('RuleSummaryRunbookCard', () => {
       artifacts: [{ id: 'runbook-1', type: 'runbook', data: { content: '# Guide\n\nDetails' } }],
     } as RuleApiResponse);
 
-    expect(screen.getByTestId('ruleSummaryFlyoutRunbookContent')).toHaveTextContent('Guide');
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutRunbookToggle'));
-    expect(screen.getByTestId('ruleSummaryFlyoutRunbookToggle')).toHaveTextContent(
-      'Hide full guide'
-    );
+    expect(screen.getByTestId('ruleSummaryRunbookContent')).toHaveTextContent('Guide');
+    fireEvent.click(screen.getByTestId('ruleSummaryRunbookToggle'));
+    expect(screen.getByTestId('ruleSummaryRunbookToggle')).toHaveTextContent('Hide full guide');
 
     Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
       configurable: true,

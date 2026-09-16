@@ -55,7 +55,7 @@ const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
   mockCanRead: jest.Mock;
 };
 
-jest.mock('../../../rule_details/sidebar/rule_conditions', () => ({
+jest.mock('../../rule_summary/rule_conditions', () => ({
   RuleConditions: ({ variant }: { variant?: string }) => (
     <div data-test-subj="mockRuleConditions" data-variant={variant} />
   ),
@@ -69,7 +69,7 @@ jest.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_su
   ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
 }));
 
-jest.mock('./rule_summary_runbook_card', () => ({
+jest.mock('../../rule_summary/rule_summary_runbook_card', () => ({
   RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
 }));
 
@@ -127,12 +127,12 @@ describe('RuleSummaryFlyout', () => {
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
-    expect(screen.getByTestId('ruleSummaryFlyoutAbout')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutAboutCard')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryAbout')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
-    expect(screen.getByTestId('ruleSummaryFlyoutInvestigation')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutActionPolicies')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryActionPolicies')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
     expect(screen.getByTestId('mockActionPoliciesArtifacts')).toBeInTheDocument();
@@ -146,9 +146,9 @@ describe('RuleSummaryFlyout', () => {
     mockCanRead.mockImplementation((capability: string) => capability !== 'actionPolicies');
     renderFlyout();
 
-    expect(screen.queryByTestId('ruleSummaryFlyoutActionPolicies')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
   });
 
   it('shows last-update timestamp and audit info blocks in the header', () => {

@@ -6,13 +6,12 @@
  */
 
 import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiLoadingSpinner, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import { FlyoutAccordion, FlyoutSubsection } from '@kbn/flyout-sections';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -22,11 +21,11 @@ import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { RuleProvider } from '../../../rule_details/rule_context';
-import { DashboardArtifactsSubsection } from '../../../rule_details/overview/artifacts/dashboard_artifacts_subsection';
-import { ActionPoliciesArtifactsSubsection } from '../../../rule_details/overview/artifacts/action_policies_artifacts_subsection';
-import { RuleConditions } from '../../../rule_details/sidebar/rule_conditions';
-import { RuleSummaryAboutCard } from './rule_summary_about_card';
-import { RuleSummaryRunbookCard } from './rule_summary_runbook_card';
+import {
+  RuleSummaryActionPoliciesSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+} from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
@@ -74,8 +73,6 @@ export const RuleSummaryFlyout = ({
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
-  const hasRunbook = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'runbook'));
-  const hasDashboards = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'dashboard'));
   const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
   const enabledLabel = rule.enabled
     ? i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
@@ -151,67 +148,10 @@ export const RuleSummaryFlyout = ({
         </Header>
 
         <Body>
-          <FlyoutAccordion
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.about', {
-              defaultMessage: 'About',
-            })}
-            hasBorder={false}
-            initialIsOpen
-            data-test-subj="ruleSummaryFlyoutAbout"
-          >
-            <RuleSummaryAboutCard />
-            <EuiSpacer size="m" />
-            <FlyoutSubsection
-              title={i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
-                defaultMessage: 'Rule conditions',
-              })}
-              hasBorder
-            >
-              <RuleConditions variant="summary" />
-            </FlyoutSubsection>
-          </FlyoutAccordion>
-
-          <EuiSpacer size="m" />
-
-          <FlyoutAccordion
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.investigation', {
-              defaultMessage: 'Investigation',
-            })}
-            hasBorder={false}
-            initialIsOpen={hasRunbook}
-            data-test-subj="ruleSummaryFlyoutInvestigation"
-          >
-            <RuleSummaryRunbookCard />
-          </FlyoutAccordion>
-
-          {canReadActionPolicies ? (
-            <>
-              <EuiSpacer size="m" />
-              <FlyoutAccordion
-                title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.actionPolicies', {
-                  defaultMessage: 'Action Policies',
-                })}
-                hasBorder={false}
-                initialIsOpen
-                data-test-subj="ruleSummaryFlyoutActionPolicies"
-              >
-                <ActionPoliciesArtifactsSubsection />
-              </FlyoutAccordion>
-            </>
-          ) : null}
-
-          <EuiSpacer size="m" />
-
-          <FlyoutAccordion
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.artifacts', {
-              defaultMessage: 'Artifacts',
-            })}
-            hasBorder={false}
-            initialIsOpen={hasDashboards}
-            data-test-subj="ruleSummaryFlyoutArtifacts"
-          >
-            <DashboardArtifactsSubsection />
-          </FlyoutAccordion>
+          <RuleSummaryBody rule={rule}>
+            {canReadActionPolicies ? <RuleSummaryActionPoliciesSection /> : null}
+            <RuleSummaryArtifactsSection rule={rule} />
+          </RuleSummaryBody>
         </Body>
 
         <Footer>
