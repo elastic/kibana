@@ -15,7 +15,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -35,7 +35,7 @@ const HOUR = 60 * MINUTE;
 export const SKILLS_SEED: WatchSkillSeed[] = [
   {
     id: 'alert-triage',
-    watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_DARK_ID],
+    watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_HUNT_ID],
     lastRunSecondsAgo: 4,
   },
   {
@@ -69,7 +69,7 @@ export const SKILLS_SEED: WatchSkillSeed[] = [
   },
   {
     id: 'containment',
-    watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
+    watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
     lastRunSecondsAgo: 31 * MINUTE,
   },
   {
