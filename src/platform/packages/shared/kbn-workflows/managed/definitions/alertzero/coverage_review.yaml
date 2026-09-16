@@ -5,8 +5,8 @@ description: >
   whether a rule covers the gap. For a disabled rule, asks a human to enable it. For a
   prebuilt rule that is not installed, asks a human to install it. For an enabled rule,
   asks a human to confirm the coverage. Without a rule, starts rule creation. After the
-  answer, marks the indicator processed. Without an answer, or after a failed action, the
-  indicator stays pending.
+  answer, marks the indicator processed. Without an answer, or when an approved action
+  changed nothing, the indicator stays pending.
 enabled: true
 tags:
   - security
@@ -66,7 +66,7 @@ outputs:
   - name: ki_processed
     type: boolean
 steps:
-  # Step 1 of 5: read the indicator. This step has no `on-failure: continue`. If the read
+  # Step 1 of 6: read the indicator. This step has no `on-failure: continue`. If the read
   # fails, the run fails. The indicator stays pending, and the next sweep starts a new
   # review. If the read finds no indicator, the check in step 3 does not run, and
   # `emit_result` reports `check_error`.
@@ -80,7 +80,7 @@ steps:
           values:
             - "{{ inputs.ki_id }}"
 
-  # Step 2 of 5: prepare the gap text for the model. The text is truncated. Indicator
+  # Step 2 of 6: prepare the gap text for the model. The text is truncated. Indicator
   # content can be 64 kB.
   - name: gap
     type: data.set
@@ -89,7 +89,7 @@ steps:
       description: "{{ steps.read_ki.output.hits.hits[0]._source.title | truncate: 2000, '' }}"
       evidence: "{{ steps.read_ki.output.hits.hits[0]._source.content | truncate: 4000, '' }}"
 
-  # Step 3 of 5: ask the coverage skill for a verdict. A new rule is the last option. A
+  # Step 3 of 6: ask the coverage skill for a verdict. A new rule is the last option. A
   # reported gap is often covered by a rule that is disabled or not installed.
   - name: coverage_check
     type: ai.agent
@@ -136,7 +136,7 @@ steps:
             type: string
         required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
 
-  # Step 4 of 5: one branch per verdict. A missing or unknown verdict matches no branch.
+  # Step 4 of 6: one branch per verdict. A missing or unknown verdict matches no branch.
   # It goes to the default branch, never to rule creation.
   #
   # No approval step below has `on-failure: continue`. If nobody answers in 72 hours, the
@@ -277,11 +277,36 @@ steps:
 
             Review the check: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
 
-  # Step 5 of 5: mark the indicator processed. This is the only write to the indicator
+  # Step 5 of 6: decide whether each approved action was applied. `error` cannot answer
+  # that. A step's `error` is null when it succeeded, when its own `if` skipped it, when
+  # its branch never ran, and when it ran and changed nothing: an enable whose query
+  # matches no rule returns a summary of zeros without an error. Each flag below reads
+  # the API response instead. `emit_result` reports the same three values.
+  #
+  # A dismissed approval leaves every flag false. A dismissal is a decision, so the
+  # indicator is processed.
+  - name: resolve_outcome
+    type: data.set
+    with:
+      enable_approved_not_applied: >-
+        ${{ steps.review_enable.output.response.approved == true
+          and not (steps.enable_existing_rule.output.succeeded > 0
+            or steps.enable_existing_rule.output.skipped > 0) }}
+      install_approved_not_applied: >-
+        ${{ steps.review_install.output.response.approved == true
+          and not (steps.install_prebuilt_rule.output.summary.succeeded > 0
+            or steps.install_prebuilt_rule.output.summary.skipped > 0) }}
+      installed_not_enabled: >-
+        ${{ (steps.install_prebuilt_rule.output.summary.succeeded > 0
+          or steps.install_prebuilt_rule.output.summary.skipped > 0)
+          and not (steps.enable_installed_rule.output.succeeded > 0
+            or steps.enable_installed_rule.output.skipped > 0) }}
+
+  # Step 6 of 6: mark the indicator processed. This is the only write to the indicator
   # and the last step. It runs only after an applied decision. A timed-out approval
   # failed the run earlier. A check without a verdict asked nobody. A failed rule-creation
-  # run decided nothing. A failed enable or install did not apply the decision. In each
-  # case the indicator stays pending for the next sweep.
+  # run decided nothing. An approved action that changed nothing did not apply the
+  # decision. In each case the indicator stays pending for the next sweep.
   #
   # Only `attributes.status` is written. `attributes` merges on update. `tags` is a list,
   # and a partial update replaces the full list. This workflow does not write tags.
@@ -291,15 +316,15 @@ steps:
     # stays pending for the next sweep.
     on-failure:
       continue: true
-    # A step's `error` is null when the step did not run and when it returned. Only a
-    # failed rule-creation run, a failed enable, or a failed install blocks this step.
+    # `run_rule_creation` is a child run, so it either fails or returns; `error` is the
+    # right test there. The three action flags come from step 5.
     if: >-
       ${{ steps.coverage_check.output.structured_output.verdict != null
         and steps.coverage_check.output.structured_output.verdict != ''
         and steps.run_rule_creation.error == null
-        and steps.enable_existing_rule.error == null
-        and steps.install_prebuilt_rule.error == null
-        and steps.enable_installed_rule.error == null }}
+        and steps.resolve_outcome.output.enable_approved_not_applied == false
+        and steps.resolve_outcome.output.install_approved_not_applied == false
+        and steps.resolve_outcome.output.installed_not_enabled == false }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -319,26 +344,18 @@ steps:
       # no error. An error check would report success for work that did not run.
       rule_enabled: "${{ steps.enable_existing_rule.output.succeeded > 0 or steps.enable_existing_rule.output.skipped > 0 or steps.enable_installed_rule.output.succeeded > 0 or steps.enable_installed_rule.output.skipped > 0 }}"
       rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}"
-      # Approved but not applied. One flag per action. A combined flag does not work. A
-      # step from another branch did not run and evaluates to null. That hides the true
-      # case.
-      enable_approved_not_applied: >-
-        ${{ steps.review_enable.output.response.approved == true
-          and not (steps.enable_existing_rule.output.succeeded > 0
-            or steps.enable_existing_rule.output.skipped > 0) }}
-      install_approved_not_applied: >-
-        ${{ steps.review_install.output.response.approved == true
-          and not (steps.install_prebuilt_rule.output.summary.succeeded > 0
-            or steps.install_prebuilt_rule.output.summary.skipped > 0) }}
-      installed_not_enabled: >-
-        ${{ (steps.install_prebuilt_rule.output.summary.succeeded > 0
-          or steps.install_prebuilt_rule.output.summary.skipped > 0)
-          and not (steps.enable_installed_rule.output.succeeded > 0
-            or steps.enable_installed_rule.output.skipped > 0) }}
-      # Set when the check returned no verdict, or did not run because step 1 found no
-      # indicator. No branch ran, and nobody was asked.
+      # Approved but not applied. One flag per action, read from step 5. A combined flag
+      # does not work. A step from another branch did not run and evaluates to null. That
+      # hides the true case. Each flag also blocks `mark_processed`, so a true flag means
+      # the indicator is still pending.
+      enable_approved_not_applied: "${{ steps.resolve_outcome.output.enable_approved_not_applied }}"
+      install_approved_not_applied: "${{ steps.resolve_outcome.output.install_approved_not_applied }}"
+      installed_not_enabled: "${{ steps.resolve_outcome.output.installed_not_enabled }}"
+      # Two different failures. Step 1 found no indicator, so the check never ran. Or the
+      # check ran and returned no verdict. In both cases no branch ran and nobody was
+      # asked.
       check_error: >-
-        {% if steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
+        {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
       # Rule-creation path only.
       rule_created: "${{ steps.run_rule_creation.output.created == true }}"
       created_rule_name: "{{ steps.run_rule_creation.output.rule_name }}"

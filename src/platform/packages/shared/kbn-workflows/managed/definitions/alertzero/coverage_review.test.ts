@@ -147,21 +147,34 @@ describe('Detection Coverage review', () => {
     );
 
     // The indicator leaves the queue only after an applied decision. No verdict means no
-    // approval was asked. A failed rule-creation run, enable, or install did not apply a
-    // decision. Each case must leave the indicator pending.
+    // approval was asked. A failed rule-creation run decided nothing. An approved enable
+    // or install that changed nothing did not apply the decision. Each case must leave
+    // the indicator pending.
     it('marks the indicator processed only after an applied decision', () => {
       const condition = stepByName('mark_processed')?.if ?? '';
       expect(condition).toContain('structured_output.verdict != null');
       expect(condition).toContain("structured_output.verdict != ''");
-      for (const action of [
-        'run_rule_creation',
-        'enable_existing_rule',
-        'install_prebuilt_rule',
-        'enable_installed_rule',
+      // A child run either fails or returns, so its `error` is the right test.
+      expect(condition).toContain('steps.run_rule_creation.error == null');
+      for (const flag of [
+        'enable_approved_not_applied',
+        'install_approved_not_applied',
+        'installed_not_enabled',
       ]) {
-        expect(condition).toContain(`steps.${action}.error == null`);
+        expect(condition).toContain(`steps.resolve_outcome.output.${flag} == false`);
       }
     });
+
+    // `error` is null for a step its own `if` skipped, for a step in a branch that never
+    // ran, and for an enable whose query matched no rule. Gating the queue write on the
+    // absence of an error therefore drops an indicator whose approved action never
+    // applied. The three API-response flags are the only admissible evidence.
+    it.each(['enable_existing_rule', 'install_prebuilt_rule', 'enable_installed_rule'])(
+      'does not treat a missing %s error as evidence the action applied',
+      (action) => {
+        expect(stepByName('mark_processed')?.if ?? '').not.toContain(`steps.${action}.error`);
+      }
+    );
 
     // The review runs in the space of the sweep that started it. A link without the
     // space prefix opens the default space.
@@ -178,6 +191,7 @@ describe('Detection Coverage review', () => {
 
   describe('outcome flags', () => {
     const emit = stepByName('emit_result')?.with as Record<string, string> | undefined;
+    const outcome = stepByName('resolve_outcome')?.with as Record<string, string> | undefined;
 
     // A step whose `if` was false is skipped, and a skipped step has no error. Deriving a
     // flag from `error == null` therefore reports success for work that never ran, e.g. an
@@ -196,21 +210,33 @@ describe('Detection Coverage review', () => {
       ['enable_approved_not_applied', 'review_enable', 'enable_existing_rule'],
       ['install_approved_not_applied', 'review_install', 'install_prebuilt_rule'],
     ])('%s flags an approval the guards did not honour', (flag, gate, action) => {
-      expect(emit?.[flag]).toContain(`steps.${gate}.output.response.approved == true`);
-      expect(emit?.[flag]).toContain(`steps.${action}.output`);
+      expect(outcome?.[flag]).toContain(`steps.${gate}.output.response.approved == true`);
+      expect(outcome?.[flag]).toContain(`steps.${action}.output`);
+      expect(outcome?.[flag]).not.toContain('error == null');
+    });
+
+    // One source for the queue write and the report. If they were computed separately, a
+    // run could report "approved but not applied" and still drop the indicator.
+    it.each([
+      'enable_approved_not_applied',
+      'install_approved_not_applied',
+      'installed_not_enabled',
+    ])('%s is computed once and forwarded to the output', (flag) => {
+      expect(outcome?.[flag]).toBeDefined();
+      expect(emit?.[flag]).toBe(`\${{ steps.resolve_outcome.output.${flag} }}`);
     });
 
     it('treats an installation skipped because the rule is already present as available', () => {
-      expect(emit?.install_approved_not_applied).toContain(
+      expect(outcome?.install_approved_not_applied).toContain(
         'steps.install_prebuilt_rule.output.summary.skipped > 0'
       );
-      expect(emit?.installed_not_enabled).toContain(
+      expect(outcome?.installed_not_enabled).toContain(
         'steps.install_prebuilt_rule.output.summary.succeeded > 0'
       );
-      expect(emit?.installed_not_enabled).toContain(
+      expect(outcome?.installed_not_enabled).toContain(
         'steps.install_prebuilt_rule.output.summary.skipped > 0'
       );
-      expect(emit?.installed_not_enabled).toContain(
+      expect(outcome?.installed_not_enabled).toContain(
         'not (steps.enable_installed_rule.output.succeeded > 0'
       );
     });
@@ -221,7 +247,11 @@ describe('Detection Coverage review', () => {
       );
     });
 
-    it('reports when the check returned no verdict', () => {
+    // Two different failures need two different messages. "Not found" means the producer
+    // or the index is wrong. "No verdict" means the check itself failed.
+    it('tells a missing indicator apart from a check that returned no verdict', () => {
+      expect(emit?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
+      expect(emit?.check_error).toContain('knowledge indicator not found');
       expect(emit?.check_error).toContain('produced no verdict');
     });
 

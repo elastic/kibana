@@ -1,10 +1,10 @@
 version: "1"
 name: Detection Coverage Worker
 description: >
-  Finds knowledge indicators that report a detection gap and are still pending. Starts
-  one Detection Coverage Review for each, up to a limit of active reviews per space.
-  Skips indicators that already have an active review. Does not write to indicators. One
-  run is one sweep.
+  Finds knowledge indicators that report a detection gap, are still pending, and were
+  created inside the lookback window. Starts one Detection Coverage Review for each, up
+  to a limit of active reviews per space. Skips indicators that already have an active
+  review. Does not write to indicators. One run is one sweep.
 enabled: true
 tags:
   - security
@@ -32,6 +32,11 @@ triggers:
           # The maximum equals the default. The search below reads at most 50 indicators.
           maximum: 50
           description: "Maximum number of active reviews in this space. Default: 50. A manual run can only lower it."
+        lookback_days:
+          type: integer
+          minimum: 1
+          maximum: 90
+          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 30. A manual run can raise or lower it."
       additionalProperties: false
 outputs:
   - name: pending
@@ -50,11 +55,14 @@ consts:
   # Maximum number of active reviews per space. A sweep starts new reviews up to this
   # number.
   max_open_checks: 50
+  # How many days back the sweep looks. An indicator older than this is never reviewed,
+  # so the sweep reads the oldest indicators in the window first.
+  lookback_days: 30
   # The template language has no empty-list literal. `| default: []` returns nothing.
   # This constant is the empty-list fallback.
   no_rows: []
 steps:
-  # Step 1 of 6: list the reviews that are active in this space. A review is active from
+  # Step 1 of 7: list the reviews that are active in this space. A review is active from
   # its start until it ends. Each review has the concurrency key
   # `coverage-<indicator id>`. The key gives the indicator id.
   #
@@ -72,16 +80,28 @@ steps:
       headers:
         elastic-api-version: "2023-10-31"
 
-  # Step 2 of 6: get the indicator ids of the active reviews, and count them. The
+  # Step 2 of 7: get the indicator ids of the active reviews, and count them. The
   # template language cannot change list items one by one. The keys are joined into one
   # string, the prefix is removed, and the string is split into ids.
   - name: collect_active_indicators
     type: data.set
     with:
-      indicator_ids: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'coverage-' | split: ',' }}"
+      parsed: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'coverage-' | split: ',' }}"
+      parsed_count: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'coverage-' | split: ',' | size }}"
       count: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | size }}"
 
-  # Step 3 of 6: count the reviews this sweep can start: the maximum minus the active
+  # Step 3 of 7: publish the ids only when the parse is sound. `join` and `split` use a
+  # comma, so a comma inside a key would produce more ids than there are reviews, and a
+  # fragment could name an unrelated indicator. The parse counts only when it yields
+  # exactly one id per active review. Otherwise this step is skipped and the search below
+  # excludes nothing. The review's own drop concurrency then stops a duplicate review.
+  - name: resolve_active_indicators
+    type: data.set
+    if: "${{ steps.collect_active_indicators.output.parsed_count == steps.collect_active_indicators.output.count }}"
+    with:
+      indicator_ids: "${{ steps.collect_active_indicators.output.parsed }}"
+
+  # Step 4 of 7: count the reviews this sweep can start: the maximum minus the active
   # reviews. The result is never below zero. A negative slice length does not give an
   # empty list.
   - name: resolve_free_slots
@@ -89,13 +109,19 @@ steps:
     with:
       free: "${{ inputs.max_open_checks | default: consts.max_open_checks | minus: steps.collect_active_indicators.output.count | at_least: 0 }}"
 
-  # Step 4 of 6: find pending indicators without an active review. The query matches
-  # type and status only. `attributes` is a flattened field in Elasticsearch. Values
-  # match exactly and are case-sensitive.
+  # Step 5 of 7: find pending indicators without an active review. The query matches
+  # type, status, and creation time. `attributes` is a flattened field in Elasticsearch.
+  # Values match exactly and are case-sensitive. `@timestamp` is written once, when the
+  # indicator is created, so the range is a creation-time window and marking an indicator
+  # processed does not move it.
   #
   # The query excludes indicators with an active review. An excluded indicator does not
-  # use a place in the result. If step 1 failed, the list is empty, and an empty list
-  # excludes nothing.
+  # use a place in the result. If step 1 failed or the parse was unsound, the list is
+  # empty, and an empty list excludes nothing.
+  #
+  # Oldest first: an indicator that leaves the window is never reviewed, so the sweep
+  # takes the ones closest to leaving it. `_source` is not read. Only `_id` reaches the
+  # review, and indicator content can be 64 kB.
   #
   # If this search fails, the sweep starts no review. The next sweep tries again.
   - name: search_pending_indicators
@@ -107,6 +133,11 @@ steps:
       # A plain number. The step rejects a template in a number field. The value equals
       # max_open_checks, so one sweep can fill an empty space. Change both together.
       size: 50
+      _source: false
+      sort:
+        - "@timestamp":
+            order: asc
+            unmapped_type: date
       query:
         bool:
           filter:
@@ -114,17 +145,20 @@ steps:
                 type: security.coverage
             - term:
                 attributes.status: pending
+            - range:
+                "@timestamp":
+                  gte: "now-{{ inputs.lookback_days | default: consts.lookback_days }}d"
           must_not:
             - ids:
-                values: "${{ steps.collect_active_indicators.output.indicator_ids | default: consts.no_rows }}"
+                values: "${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"
 
-  # Step 5 of 6: keep only as many indicators as the sweep can start.
+  # Step 6 of 7: keep only as many indicators as the sweep can start.
   - name: resolve_dispatch_batch
     type: data.set
     with:
       indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_free_slots.output.free }}"
 
-  # Step 6 of 6: start one review per indicator. The sweep does not wait for the review.
+  # Step 7 of 7: start one review per indicator. The sweep does not wait for the review.
   # A review can wait up to 72 hours for a human. The sweep passes the indicator id and
   # the index name. The review reads the indicator.
   - name: start_reviews
@@ -145,8 +179,8 @@ steps:
     type: workflow.output
     status: completed
     with:
-      # Pending indicators without an active review. `pending` plus `in_flight` is the
-      # full queue.
+      # Pending indicators inside the lookback window and without an active review.
+      # `pending` plus `in_flight` is the queue inside the window.
       pending: "${{ steps.search_pending_indicators.output.hits.total.value | default: 0 }}"
       # Reviews this sweep tried to start.
       started: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size }}"

@@ -860,13 +860,32 @@ describe('detection rule workflows', () => {
       it('parses the review concurrency key prefix the review actually uses', () => {
         const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
-        const collect = String(withOf('collect_active_indicators').indicator_ids);
+        const collect = String(withOf('collect_active_indicators').parsed);
 
         expect(concurrency.key).toBe('coverage-{{ inputs.ki_id }}');
         expect(concurrency.strategy).toBe('drop');
         expect(concurrency.max).toBe(1);
         expect(collect).toContain("map: 'concurrencyGroupKey'");
         expect(collect).toContain("remove: 'coverage-'");
+      });
+
+      // `remove` strips every occurrence, not a prefix, and `join`/`split` use a comma.
+      // A comma inside a key would yield more ids than there are reviews, and a fragment
+      // could name an unrelated indicator. The ids are published only when the parse
+      // yields exactly one id per active review, the same integrity check the rule-tuning
+      // sweep applies.
+      it('publishes the parsed ids only when they match the number of active reviews', () => {
+        const collect = withOf('collect_active_indicators');
+        const resolve = step('resolve_active_indicators');
+
+        expect(String(collect.parsed_count)).toContain("remove: 'coverage-'");
+        expect(String(collect.parsed_count)).toContain('| size');
+        expect(String(resolve.if)).toContain(
+          'steps.collect_active_indicators.output.parsed_count == steps.collect_active_indicators.output.count'
+        );
+        expect(String((resolve.with as Record<string, unknown>).indicator_ids)).toContain(
+          'steps.collect_active_indicators.output.parsed'
+        );
       });
 
       // Active reviews are read from the engine, never from the indicator. If the lookup
@@ -928,10 +947,41 @@ describe('detection rule workflows', () => {
         expect(query).toContain('"attributes.status":"pending"');
         expect(query).toContain('must_not');
         expect(query).toContain(
-          '"ids":{"values":"${{ steps.collect_active_indicators.output.indicator_ids | default: consts.no_rows }}"}'
+          '"ids":{"values":"${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"}'
         );
         expect(search.with?.size).toBe(consts.max_open_checks);
         expect(search['on-failure']).toEqual({ continue: true });
+      });
+
+      // Only `_id` reaches the review. An indicator's content can be 64 kB, so 50 hits
+      // would move megabytes the sweep never reads.
+      it('reads no indicator content', () => {
+        expect(step('search_pending_indicators').with?._source).toBe(false);
+        expect(
+          ((step('start_reviews').steps ?? [])[0].with?.inputs as Record<string, string>).ki_id
+        ).toBe('{{ foreach.item._id }}');
+      });
+
+      // The window counts from the indicator's creation time, which `context-engine`
+      // stamps once. An indicator that leaves the window is never reviewed, so the sweep
+      // takes the oldest ones in the window first.
+      it('looks back a bounded number of days and takes the oldest indicators first', () => {
+        const search = step('search_pending_indicators');
+        const query = JSON.stringify(search.with?.query);
+        const inputs = (
+          sweep.triggers as unknown as Array<{
+            type: string;
+            inputs?: { properties: Record<string, { minimum?: number; maximum?: number }> };
+          }>
+        ).find(({ type }) => type === 'manual')!.inputs!.properties;
+
+        expect(consts.lookback_days).toBe(30);
+        expect(query).toContain(
+          '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
+        );
+        expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
+        expect(inputs.lookback_days.minimum).toBe(1);
+        expect(inputs.lookback_days.maximum).toBe(90);
       });
 
       // Async fan-out: the sweep starts one review per indicator and exits. Each review
