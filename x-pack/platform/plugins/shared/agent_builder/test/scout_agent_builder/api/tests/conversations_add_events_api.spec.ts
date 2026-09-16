@@ -228,5 +228,22 @@ apiTest.describe(
 
       expect(res).toHaveStatusCode(400);
     });
+
+    apiTest('returns 400 when event is invalid for custom schema', async ({ asAdmin }) => {
+      const res = await asAdmin.post(ADD_EVENTS_PATH(conversationId), {
+        body: {
+          events: [
+            { type: EXAMPLE_NOTE_EVENT_TYPE, data: { 
+              // example.note event limits text to 1000 characters
+              text: 'a'.repeat(2000) 
+            } },
+          ],
+        },
+        headers: ADD_EVENTS_HEADERS,
+        responseType: 'json',
+      });
+
+      expect(res).toHaveStatusCode(400);
+    });
   }
 );
