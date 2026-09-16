@@ -70,15 +70,6 @@ export const setSyntheticsDynamicSettings = async (
   return settingsObject.attributes;
 };
 
-// Per-space allow-list of creatable monitor types. `undefined`/empty means no
-// restriction. Read on monitor-write paths to enforce the space policy.
-export const getAllowedMonitorTypes = async (
-  client: SavedObjectsClientContract
-): Promise<string[] | undefined> => {
-  const settings = await getSyntheticsDynamicSettings(client);
-  return settings.allowedMonitorTypes;
-};
-
 const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
   try {
     const obj = await client.get<DynamicSettingsAttributes>(

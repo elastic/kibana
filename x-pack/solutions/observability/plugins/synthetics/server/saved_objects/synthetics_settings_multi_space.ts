@@ -19,6 +19,17 @@ const syntheticsSettingsMultiSpaceSchemaV1 = schema.object(
   { unknowns: 'ignore' }
 );
 
+// v2 adds the per-space allow-list of creatable monitor types. Empty/undefined
+// means no restriction. Shared across spaces via the SO `namespaces`.
+const syntheticsSettingsMultiSpaceSchemaV2 = schema.object(
+  {
+    useAllRemoteClusters: schema.maybe(schema.boolean()),
+    selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    allowedMonitorTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  },
+  { unknowns: 'ignore' }
+);
+
 export const syntheticsSettingsMultiSpace: SavedObjectsType = {
   name: SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
   hidden: false,
@@ -33,6 +44,13 @@ export const syntheticsSettingsMultiSpace: SavedObjectsType = {
       schemas: {
         create: syntheticsSettingsMultiSpaceSchemaV1,
         forwardCompatibility: syntheticsSettingsMultiSpaceSchemaV1,
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        create: syntheticsSettingsMultiSpaceSchemaV2,
+        forwardCompatibility: syntheticsSettingsMultiSpaceSchemaV2,
       },
     },
   },

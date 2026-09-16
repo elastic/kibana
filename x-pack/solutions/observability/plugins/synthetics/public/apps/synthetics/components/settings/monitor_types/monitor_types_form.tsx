@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -19,17 +19,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { isEqual } from 'lodash';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useCanManageMonitorTypes } from '../../../../../hooks/use_capabilities';
-import { selectDynamicSettings } from '../../../state/settings/selectors';
-import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { setAllowedMonitorTypes } from '../../../state/settings/api';
+import type { MonitorTypesPolicy } from '../../../state/settings/api';
+import { getAllowedMonitorTypesPolicy, setAllowedMonitorTypes } from '../../../state/settings/api';
 
 const MONITOR_TYPE_LABELS: Record<string, string> = {
   [MonitorTypeEnum.HTTP]: 'HTTP',
@@ -49,47 +48,105 @@ const ALL_MONITOR_TYPES = [
   MonitorTypeEnum.API,
 ];
 
-export const MonitorTypesForm = () => {
-  const dispatch = useDispatch();
-  const {
-    services: { notifications },
-  } = useKibana<ClientPluginsStart>();
+const sorted = (values: string[]) => [...values].sort();
 
-  const { settings, loading } = useSelector(selectDynamicSettings);
+export const MonitorTypesForm = () => {
+  const { services } = useKibana<ClientPluginsStart>();
+  const { spaces, notifications } = services;
   const canEdit = useCanManageMonitorTypes();
 
+  const [savedPolicy, setSavedPolicy] = useState<MonitorTypesPolicy | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedSpaces, setSelectedSpaces] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
+  const loadPolicy = useCallback(async () => {
+    setLoading(true);
+    try {
+      const policy = await getAllowedMonitorTypesPolicy();
+      setSavedPolicy(policy);
+      setSelectedTypes(policy.allowedMonitorTypes);
+      setSelectedSpaces(policy.spaces);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    dispatch(getDynamicSettingsAction.get());
-  }, [dispatch]);
+    loadPolicy();
+  }, [loadPolicy]);
 
-  const persistedTypes = useMemo(() => settings?.allowedMonitorTypes ?? [], [settings]);
+  // Spaces available to the current user (from the spaces plugin), with the
+  // "All spaces" pseudo-option prepended so the policy can be shared with every space.
+  const [availableSpaces, setAvailableSpaces] = useState<Array<{ id: string; label: string }>>([]);
+  const spacesData = spaces?.ui.useSpaces();
 
   useEffect(() => {
-    setSelectedTypes(persistedTypes);
-  }, [persistedTypes]);
+    if (!spacesData?.spacesDataPromise) return;
+    let cancelled = false;
 
-  const options: Array<EuiComboBoxOptionOption<string>> = ALL_MONITOR_TYPES.map((type) => ({
-    label: MONITOR_TYPE_LABELS[type],
-    value: type,
-  }));
+    spacesData.spacesDataPromise.then(({ spacesMap }) => {
+      if (cancelled) return;
+      const fromSpacesPlugin = [...spacesMap].map(([spaceId, spaceData]) => ({
+        id: spaceId,
+        label: spaceData.name,
+      }));
+      setAvailableSpaces([{ id: ALL_SPACES_ID, label: ALL_SPACES_LABEL }, ...fromSpacesPlugin]);
+    });
 
-  const isFormDirty = !isEqual([...selectedTypes].sort(), [...persistedTypes].sort());
+    return () => {
+      cancelled = true;
+    };
+  }, [spacesData?.spacesDataPromise]);
 
-  const onApply = async () => {
+  const isFormDirty =
+    !!savedPolicy &&
+    (!isEqual(sorted(selectedTypes), sorted(savedPolicy.allowedMonitorTypes)) ||
+      !isEqual(sorted(selectedSpaces), sorted(savedPolicy.spaces)));
+
+  const handleDiscard = useCallback(() => {
+    if (savedPolicy) {
+      setSelectedTypes(savedPolicy.allowedMonitorTypes);
+      setSelectedSpaces(savedPolicy.spaces);
+    }
+  }, [savedPolicy]);
+
+  const handleSave = useCallback(async () => {
     try {
       setIsSaving(true);
-      await setAllowedMonitorTypes(selectedTypes);
+      const spacesToShare = selectedSpaces.length ? selectedSpaces : undefined;
+      await setAllowedMonitorTypes(selectedTypes, spacesToShare);
       notifications?.toasts.addSuccess(SAVED_TOAST);
-      dispatch(getDynamicSettingsAction.get());
+      await loadPolicy();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: SAVE_ERROR_TOAST });
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [selectedTypes, selectedSpaces, notifications, loadPolicy]);
+
+  const typeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () => ALL_MONITOR_TYPES.map((type) => ({ label: MONITOR_TYPE_LABELS[type], value: type })),
+    []
+  );
+  const selectedTypeOptions = useMemo(
+    () => typeOptions.filter((opt) => selectedTypes.includes(opt.value as string)),
+    [typeOptions, selectedTypes]
+  );
+
+  const spaceOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () => availableSpaces.map(({ id, label }) => ({ label, value: id })),
+    [availableSpaces]
+  );
+  const selectedSpaceOptions = useMemo(
+    () =>
+      selectedSpaces.map((id) => {
+        const match = availableSpaces.find((space) => space.id === id);
+        return { label: match?.label ?? id, value: id };
+      }),
+    [availableSpaces, selectedSpaces]
+  );
 
   return (
     <EuiForm>
@@ -119,7 +176,7 @@ export const MonitorTypesForm = () => {
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.monitorTypes.description"
-            defaultMessage="Restrict which monitor types can be created in this space, from the UI and from project (CLI) pushes. Leave empty to allow all types."
+            defaultMessage="Restrict which monitor types can be created, from the UI and from project (CLI) pushes. Leave empty to allow all types."
           />
         }
       >
@@ -139,13 +196,52 @@ export const MonitorTypesForm = () => {
             placeholder={i18n.translate('xpack.synthetics.settings.monitorTypes.placeholder', {
               defaultMessage: 'All monitor types allowed',
             })}
-            options={options}
-            selectedOptions={options.filter((opt) => selectedTypes.includes(opt.value as string))}
+            options={typeOptions}
+            selectedOptions={selectedTypeOptions}
             isDisabled={!canEdit}
             isLoading={loading}
-            onChange={(selected) => {
-              setSelectedTypes(selected.map((opt) => opt.value as string));
-            }}
+            onChange={(selected) => setSelectedTypes(selected.map((opt) => opt.value as string))}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.synthetics.settings.monitorTypes.spacesTitle"
+              defaultMessage="Spaces with this policy"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.synthetics.settings.monitorTypes.spacesDescription"
+            defaultMessage="Choose which spaces this policy applies to. Select {allSpaces} to apply it to every space in your deployment. Leave empty to keep the current selection."
+            values={{ allSpaces: <strong>{ALL_SPACES_LABEL}</strong> }}
+          />
+        }
+      >
+        <EuiFormRow
+          label={i18n.translate('xpack.synthetics.settings.monitorTypes.spacesLabel', {
+            defaultMessage: 'Spaces',
+          })}
+        >
+          <EuiComboBox
+            data-test-subj="syntheticsMonitorTypesSpacesSelect"
+            aria-label={i18n.translate('xpack.synthetics.settings.monitorTypes.spacesAriaLabel', {
+              defaultMessage: 'Select spaces this policy applies to',
+            })}
+            options={spaceOptions}
+            selectedOptions={selectedSpaceOptions}
+            isDisabled={!canEdit}
+            isLoading={loading}
+            onChange={(selected) => setSelectedSpaces(selected.map((opt) => opt.value as string))}
+            placeholder={i18n.translate(
+              'xpack.synthetics.settings.monitorTypes.spacesPlaceholder',
+              {
+                defaultMessage: 'Select spaces',
+              }
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -155,7 +251,7 @@ export const MonitorTypesForm = () => {
           <EuiButtonEmpty
             data-test-subj="syntheticsMonitorTypesDiscardButton"
             iconType="cross"
-            onClick={() => setSelectedTypes(persistedTypes)}
+            onClick={handleDiscard}
             flush="left"
             isDisabled={!isFormDirty || isSaving}
           >
@@ -165,7 +261,7 @@ export const MonitorTypesForm = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="syntheticsMonitorTypesApplyButton"
-            onClick={onApply}
+            onClick={handleSave}
             fill
             isLoading={isSaving}
             isDisabled={!isFormDirty || !canEdit}
@@ -192,4 +288,8 @@ const SAVED_TOAST = i18n.translate('xpack.synthetics.settings.monitorTypes.saved
 
 const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.settings.monitorTypes.saveError', {
   defaultMessage: 'Failed to update allowed monitor types.',
+});
+
+const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.settings.monitorTypes.allSpaces', {
+  defaultMessage: 'All spaces',
 });

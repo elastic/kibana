@@ -15,7 +15,7 @@ import { InvalidMaintenanceWindowError } from '../maintenance_windows/resolve_ma
 import type { SyntheticsServerSetup } from '../../types';
 import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
-import { getAllowedMonitorTypes } from '../../saved_objects/synthetics_settings';
+import { getAllowedMonitorTypes } from '../../services/allowed_monitor_types';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
@@ -113,7 +113,10 @@ export class ProjectMonitorFormatter {
       savedObjectsClient: this.savedObjectsClient,
       excludeAgentPolicies: true,
     });
-    const allowedMonitorTypesPromise = getAllowedMonitorTypes(this.savedObjectsClient);
+    const allowedMonitorTypesPromise = getAllowedMonitorTypes(
+      this.server,
+      this.routeContext.request
+    );
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
     // Only fetch maintenance windows when a monitor actually references one, so
     // pushes that don't use them avoid the extra alerting lookup.

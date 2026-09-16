@@ -38,9 +38,6 @@ export const DynamicSettingsCodec = t.intersection([
     defaultStatusRuleEnabled: t.boolean,
     privateLocationsSyncInterval: t.number,
     rebalancePrivateLocationShardsEnabled: t.boolean,
-    // Per-space allow-list of monitor types that may be created. Empty/undefined
-    // means every type is allowed. Editable only via the manage-monitor-types privilege.
-    allowedMonitorTypes: t.array(t.string),
   }),
 ]);
 

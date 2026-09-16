@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import {
-  getSyntheticsDynamicSettings,
-  setSyntheticsDynamicSettings,
-} from '../../saved_objects/synthetics_settings';
 import { MANAGE_MONITOR_TYPES_API } from '../../feature';
 import { MonitorTypeEnum } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import { buildMultiSpaceSettingsRepository } from '../../services/allowed_monitor_types';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 const AllowedMonitorTypesSchema = schema.arrayOf(
@@ -26,12 +22,34 @@ const AllowedMonitorTypesSchema = schema.arrayOf(
   { maxSize: 10 }
 );
 
-// Editing the per-space monitor-type allow-list is gated behind the dedicated
-// `manage-monitor-types` privilege so that monitor writers (base `all`) cannot
-// widen the policy that constrains them.
-export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<{
+const MAX_SHARED_SPACES = 100;
+
+export interface MonitorTypesPolicy {
   allowedMonitorTypes: string[];
-}> = () => ({
+  spaces: string[];
+}
+
+// Read-only view of the current policy + the spaces it applies to. Available to any
+// Synthetics reader so the settings UI can render current state.
+export const getMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
+  MonitorTypesPolicy
+> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY,
+  validate: false,
+  handler: async ({ server, request }) => {
+    const settings = await buildMultiSpaceSettingsRepository(server, request).get();
+    return { allowedMonitorTypes: settings.allowedMonitorTypes ?? [], spaces: settings.spaces };
+  },
+});
+
+// Editing the per-space monitor-type allow-list is gated behind the dedicated
+// `manage-monitor-types` privilege so monitor writers (base `all`) cannot widen the policy
+// that constrains them. The policy is stored on the shared multi-space settings object and
+// can be applied across multiple spaces, like the remote clusters settings.
+export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<
+  MonitorTypesPolicy
+> = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.MONITOR_TYPES_POLICY,
   writeAccess: false,
@@ -39,17 +57,20 @@ export const editMonitorTypesPolicyRoute: SyntheticsRestApiRouteFactory<{
   validate: {
     body: schema.object({
       allowedMonitorTypes: AllowedMonitorTypesSchema,
+      // Spaces the policy should apply to. `*` means all spaces. Omitted keeps the current set.
+      spaces: schema.maybe(
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: MAX_SHARED_SPACES })
+      ),
     }),
   },
-  handler: async ({ savedObjectsClient, request }) => {
-    const { allowedMonitorTypes } = request.body;
-    const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+  handler: async ({ server, request }) => {
+    const { allowedMonitorTypes, spaces } = request.body;
+    const repository = buildMultiSpaceSettingsRepository(server, request);
 
-    const attr = (await setSyntheticsDynamicSettings(savedObjectsClient, {
-      ...prevSettings,
-      allowedMonitorTypes,
-    })) as DynamicSettingsAttributes;
+    // Preserve any co-located settings (e.g. CCS remote clusters) on the shared object.
+    const { spaces: _currentSpaces, ...currentAttributes } = await repository.get();
+    const saved = await repository.save({ ...currentAttributes, allowedMonitorTypes }, spaces);
 
-    return { allowedMonitorTypes: attr.allowedMonitorTypes ?? [] };
+    return { allowedMonitorTypes: saved.allowedMonitorTypes ?? [], spaces: saved.spaces };
   },
 });
