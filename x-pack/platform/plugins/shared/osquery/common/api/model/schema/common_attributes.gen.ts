@@ -34,11 +34,20 @@ export type PackDescriptionOrUndefined = z.infer<typeof PackDescriptionOrUndefin
 /**
  * Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.
  */
-export const Platform = lazySchema(() => z.string().max(256));
+export const Platform = lazySchema(() => z.string());
 export type Platform = z.infer<typeof Platform>;
 
 export const PlatformOrUndefined = lazySchema(() => Platform.nullable());
 export type PlatformOrUndefined = z.infer<typeof PlatformOrUndefined>;
+
+/**
+ * Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.
+ */
+export const PackPlatform = lazySchema(() => z.string().min(1).max(256));
+export type PackPlatform = z.infer<typeof PackPlatform>;
+
+export const PackPlatformOrUndefined = lazySchema(() => PackPlatform.nullable());
+export type PackPlatformOrUndefined = z.infer<typeof PackPlatformOrUndefined>;
 
 /**
  * The SQL query you want to run.
@@ -220,8 +229,8 @@ export const ArrayQueriesItem = lazySchema(() =>
     platform: PlatformOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
-    enabled: QueryEnabledOrUndefined.optional(),
-    result_type: ResultTypeOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
@@ -346,8 +355,8 @@ export const ObjectQueriesItem = lazySchema(() =>
       ),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-    enabled: QueryEnabledOrUndefined.optional(),
-    result_type: ResultTypeOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -417,7 +426,7 @@ export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
 /**
  * Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
  */
-export const MinOsqueryVersion = lazySchema(() => z.string().max(64));
+export const MinOsqueryVersion = lazySchema(() => z.string().min(1).max(64));
 export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
 
 export const MinOsqueryVersionOrUndefined = lazySchema(() => MinOsqueryVersion.nullable());

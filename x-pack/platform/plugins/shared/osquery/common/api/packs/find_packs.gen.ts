@@ -22,14 +22,13 @@ import {
   ECSMappingArrayOrUndefined,
   ScheduleTypeOrUndefined,
   RRuleScheduleConfigOrUndefined,
-  QueryEnabledOrUndefined,
-  ResultTypeOrUndefined,
+  QueryEnabled,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
   MinOsqueryVersion,
   ResultType,
-  Platform,
+  PackPlatform,
   ObjectQueries,
   Shards,
 } from '../model/schema/common_attributes.gen';
@@ -80,8 +79,8 @@ export const FindPacksResponse = lazySchema(() =>
                 ecs_mapping: ECSMappingArrayOrUndefined.optional(),
                 schedule_type: ScheduleTypeOrUndefined.optional(),
                 rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-                enabled: QueryEnabledOrUndefined.optional(),
-                result_type: ResultTypeOrUndefined.optional(),
+                enabled: QueryEnabled.optional(),
+                result_type: ResultType.optional(),
               })
             )
             .optional()
@@ -112,7 +111,7 @@ export const FindPacksResponse = lazySchema(() =>
           rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
           min_osquery_version: MinOsqueryVersion.optional(),
           result_type: ResultType.optional(),
-          platform: Platform.optional(),
+          platform: PackPlatform.optional(),
         })
       )
       .describe('An array of pack objects.'),
@@ -170,7 +169,7 @@ export const FindPackResponse = lazySchema(() =>
         rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
         min_osquery_version: MinOsqueryVersion.optional(),
         result_type: ResultType.optional(),
-        platform: Platform.optional(),
+        platform: PackPlatform.optional(),
       })
       .describe('The pack details.'),
   })

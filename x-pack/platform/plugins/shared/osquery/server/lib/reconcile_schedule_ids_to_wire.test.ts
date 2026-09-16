@@ -572,6 +572,52 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packagePolicyUpdate).not.toHaveBeenCalled();
   });
 
+  test('skips a pack whose queries are all disabled instead of writing queries: {}', async () => {
+    const scopedClient = createMockScopedClient({
+      'reconcile-pack': {
+        id: 'pack-1',
+        attrs: {
+          name: 'reconcile-pack',
+          enabled: true,
+          created_at: '2026-01-01T00:00:00.000Z',
+          queries: [
+            {
+              id: 'q1',
+              query: 'SELECT 1',
+              interval: 60,
+              name: 'q1',
+              schedule_id: 'sched-q1',
+              enabled: false,
+            },
+            {
+              id: 'q2',
+              query: 'SELECT 2',
+              interval: 120,
+              name: 'q2',
+              schedule_id: 'sched-q2',
+              enabled: false,
+            },
+          ],
+        },
+      },
+    });
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: createMockCoreStart(scopedClient),
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([buildPackagePolicy()]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(packagePolicyUpdate).not.toHaveBeenCalled();
+  });
+
   test('still repairs a DISABLED but still-wired pack in place (never detaches)', async () => {
     // `enabled` is deliberately NOT gated on — detaching is the edit/delete
     // routes' job, never the reconciler's.

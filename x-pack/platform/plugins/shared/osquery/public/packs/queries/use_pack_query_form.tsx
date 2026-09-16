@@ -12,7 +12,7 @@ import { produce } from 'immer-v9';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
-import { platformSetsEqual } from '../../../common/platform';
+import { isEmptyOrAllPlatforms, platformSetsEqual } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { ResultType } from '../../../common/result_type';
 import {
@@ -68,11 +68,6 @@ export interface PackSOQueryFormData {
   enabled?: boolean;
   /** Per-query result type override. Only present when it differs from the pack default. */
   result_type?: ResultType;
-  /**
-   * Form-only flag: whether this query overrides the pack's execution defaults
-   * (min osquery version / result type / platform). Never persisted.
-   */
-  override_pack_defaults?: boolean;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
@@ -189,6 +184,133 @@ const deserializeQuerySchedule = (
     : deserializeSchedule(resolveInheritedScheduleInput(packSchedule, queryInterval));
 };
 
+/**
+ * Stored query fields that participate in pack execution-default inheritance.
+ * Shared by the flyout deserializer and saved-query seeding so the two paths
+ * cannot diverge on override predicates.
+ */
+export interface ExecutionDefaultSource {
+  platform?: string;
+  version?: string;
+  result_type?: ResultType;
+  snapshot?: boolean;
+  removed?: boolean;
+}
+
+export interface ExecutionDefaultFormValues {
+  override_pack_defaults: boolean;
+  platform: string;
+  version: string[];
+  snapshot: boolean;
+  removed: boolean;
+  result_type?: ResultType;
+}
+
+/**
+ * Resolve the form values for the three pack execution defaults (platform,
+ * version, result type) from a stored query plus optional pack-level defaults.
+ *
+ * The single toggle is ON when this query stores its own value for any of
+ * the three execution defaults.
+ *
+ * Deliberately *not* gated on the matching pack default. The toggle governs
+ * all three fields at once, so a query that stores a platform while the pack
+ * only defaults a result type still holds a value the toggle is responsible
+ * for. Gating each predicate on its own pack default rendered the toggle OFF
+ * while the disabled controls displayed the query's real values — the state
+ * shown did not match the state stored.
+ *
+ * `result_type` is read alongside the legacy `snapshot`/`removed` pair so a
+ * pre-V5 query that only ever stored the booleans is still recognised as
+ * holding its own result type.
+ *
+ * Two different decoders are needed here, because "does this query hold an
+ * override" and "what should the control display when there is no pack
+ * default" are different questions:
+ *
+ *  - the override predicate uses the explicit-only decoder, because the
+ *    flyout used to seed `snapshot: true, removed: false` into every new
+ *    query. Counting that pair as an override would force the toggle ON for
+ *    virtually every pre-existing query in every pack;
+ *  - with no pack default, display uses the faithful inverse so a query
+ *    storing `snapshot: true` still renders as Snapshot.
+ *
+ * When a pack default *is* present, seeding and display use the explicit
+ * decoder too — matching Fleet emit. The faithful inverse would show
+ * Snapshot for the pre-V5 seed while the agent inherits the pack default,
+ * and enabling the toggle to change another field would then persist that
+ * Snapshot as a real override.
+ *
+ * Canonical `result_type` is written onto the form only when the query
+ * stored an explicit choice or the pack has a result-type default. The
+ * implicit `{ snapshot: true, removed: false }` pair is display-only:
+ * putting `'snapshot'` on the form made a no-op save persist it as an
+ * override the server honors over a later pack-level default.
+ *
+ * All-OS / empty platform CSVs are not per-query overrides — Fleet and the
+ * queries table treat them as "no restriction" and inherit the pack OS.
+ */
+export const resolveExecutionDefaultFormValues = (
+  payload: ExecutionDefaultSource,
+  packMinOsqueryVersion?: string,
+  packResultType?: ResultType,
+  packPlatform?: string
+): ExecutionDefaultFormValues => {
+  const storedExplicitResultType =
+    payload.result_type ??
+    mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed });
+  const hasVersionOverride = payload.version !== undefined;
+  // Not gated on `packResultType`, matching the two predicates around it. The
+  // toggle governs all three fields at once, so gating this one alone rendered
+  // the toggle OFF while the enabled Result type control displayed the query's
+  // own stored value — the state shown did not match the state stored.
+  const hasResultTypeOverride = storedExplicitResultType !== undefined;
+  const hasPlatformOverride = !isEmptyOrAllPlatforms(payload.platform);
+  const hasAnyOverride = hasVersionOverride || hasResultTypeOverride || hasPlatformOverride;
+
+  // Seed each execution-default field with the pack's value when the query has
+  // none of its own, so the (disabled) controls show what the query actually
+  // inherits rather than the field's own hardcoded default. The serializer
+  // drops any value equal to the pack default, so seeding cannot turn an
+  // inheriting query into an overriding one.
+  const ownPlatform = isEmptyOrAllPlatforms(payload.platform) ? undefined : payload.platform;
+  const effectivePlatform = ownPlatform || packPlatform || DEFAULT_PLATFORM;
+  const effectiveVersion = payload.version ?? packMinOsqueryVersion;
+  // An explicit per-query type (canonical field, or a deliberate
+  // `snapshot: false` pair) wins over the pack default, otherwise opening a
+  // legacy differential query in a pack that defaults to snapshot would
+  // display — and then save — snapshot. The flyout seed is not explicit.
+  const displayResultType = packResultType
+    ? storedExplicitResultType ?? packResultType
+    : payload.result_type ??
+      mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
+  // Display of Snapshot is already served by the seeded booleans. Only an
+  // explicit stored choice or a pack default belongs on the canonical field.
+  const formResultType = storedExplicitResultType ?? packResultType;
+
+  // `ResultsTypeField` derives its display from the `snapshot`/`removed`
+  // booleans, not from `result_type`, so the inherited value has to be
+  // projected onto them. `mapResultTypeToWire` returns `{}` for 'snapshot'
+  // (absence means snapshot on the wire), which the field reads as
+  // `snapshot: undefined` → falsy → Differential. Default explicitly instead.
+  // An API/upload query with no result-type keys must still display Snapshot
+  // (osquerybeat's default), not Differential — `undefined`/`undefined` is
+  // read by the field as ignore-removals.
+  const inheritedResultBooleans =
+    displayResultType !== undefined
+      ? { snapshot: true, removed: false, ...mapResultTypeToWire(displayResultType) }
+      : { snapshot: payload.snapshot ?? true, removed: payload.removed ?? false };
+
+  return {
+    override_pack_defaults: hasAnyOverride,
+    platform: effectivePlatform,
+    version: effectiveVersion ? [effectiveVersion] : [],
+    snapshot: inheritedResultBooleans.snapshot,
+    removed: inheritedResultBooleans.removed,
+    ...(formResultType !== undefined ? { result_type: formResultType } : {}),
+  };
+};
+
 const deserializer = (
   payload: PackSOQueryFormData,
   deserializedSchedule: ScheduleFormData,
@@ -198,89 +320,29 @@ const deserializer = (
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
   const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
-
-  // The single toggle is ON when this query stores its own value for any of
-  // the three execution defaults.
-  //
-  // Deliberately *not* gated on the matching pack default. The toggle governs
-  // all three fields at once, so a query that stores a platform while the pack
-  // only defaults a result type still holds a value the toggle is responsible
-  // for. Gating each predicate on its own pack default rendered the toggle OFF
-  // while the disabled controls displayed the query's real values — the state
-  // shown did not match the state stored.
-  //
-  // `result_type` is read alongside the legacy `snapshot`/`removed` pair so a
-  // pre-V5 query that only ever stored the booleans is still recognised as
-  // holding its own result type.
-  //
-  // Two different decoders are needed here, because "does this query hold an
-  // override" and "what should the control display when there is no pack
-  // default" are different questions:
-  //
-  //  - the override predicate uses the explicit-only decoder, because the
-  //    flyout used to seed `snapshot: true, removed: false` into every new
-  //    query. Counting that pair as an override would force the toggle ON for
-  //    virtually every pre-existing query in every pack;
-  //  - with no pack default, display uses the faithful inverse so a query
-  //    storing `snapshot: true` still renders as Snapshot.
-  //
-  // When a pack default *is* present, seeding and display use the explicit
-  // decoder too — matching Fleet emit. The faithful inverse would show
-  // Snapshot for the pre-V5 seed while the agent inherits the pack default,
-  // and enabling the toggle to change another field would then persist that
-  // Snapshot as a real override.
-  const storedExplicitResultType =
-    payload.result_type ??
-    mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed });
-  const hasStoredResultType = storedExplicitResultType !== undefined;
-  const hasVersionOverride = payload.version !== undefined;
-  // Not gated on `packResultType`, matching the two predicates around it. The
-  // toggle governs all three fields at once, so gating this one alone rendered
-  // the toggle OFF while the enabled Result type control displayed the query's
-  // own stored value — the state shown did not match the state stored.
-  const hasResultTypeOverride = hasStoredResultType;
-  const hasPlatformOverride = !!payload.platform;
-  const hasAnyOverride = hasVersionOverride || hasResultTypeOverride || hasPlatformOverride;
-
-  // Seed each execution-default field with the pack's value when the query has
-  // none of its own, so the (disabled) controls show what the query actually
-  // inherits rather than the field's own hardcoded default. The serializer
-  // drops any value equal to the pack default, so seeding cannot turn an
-  // inheriting query into an overriding one.
-  const effectivePlatform = payload.platform || packPlatform || DEFAULT_PLATFORM;
-  const effectiveVersion = payload.version ?? packMinOsqueryVersion;
-  // An explicit per-query type (canonical field, or a deliberate
-  // `snapshot: false` pair) wins over the pack default, otherwise opening a
-  // legacy differential query in a pack that defaults to snapshot would
-  // display — and then save — snapshot. The flyout seed is not explicit.
-  const effectiveResultType = packResultType
-    ? storedExplicitResultType ?? packResultType
-    : payload.result_type ??
-      mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
-
-  // `ResultsTypeField` derives its display from the `snapshot`/`removed`
-  // booleans, not from `result_type`, so the inherited value has to be
-  // projected onto them. `mapResultTypeToWire` returns `{}` for 'snapshot'
-  // (absence means snapshot on the wire), which the field reads as
-  // `snapshot: undefined` → falsy → Differential. Default explicitly instead.
-  const inheritedResultBooleans =
-    effectiveResultType !== undefined
-      ? { snapshot: true, removed: false, ...mapResultTypeToWire(effectiveResultType) }
-      : { snapshot: payload.snapshot, removed: payload.removed };
+  const executionDefaults = resolveExecutionDefaultFormValues(
+    payload,
+    packMinOsqueryVersion,
+    packResultType,
+    packPlatform
+  );
 
   return {
     id: payload.id,
     query: payload.query,
     interval: queryInterval ?? 3600,
     timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
-    ...inheritedResultBooleans,
-    platform: effectivePlatform,
-    version: effectiveVersion ? [effectiveVersion] : [],
+    snapshot: executionDefaults.snapshot,
+    removed: executionDefaults.removed,
+    platform: executionDefaults.platform,
+    version: executionDefaults.version,
     ecs_mapping: payload.ecs_mapping ?? {},
     override_pack_schedule: hasOverride,
     schedule: deserializedSchedule,
-    override_pack_defaults: hasAnyOverride,
-    ...(effectiveResultType !== undefined ? { result_type: effectiveResultType } : {}),
+    override_pack_defaults: executionDefaults.override_pack_defaults,
+    ...(executionDefaults.result_type !== undefined
+      ? { result_type: executionDefaults.result_type }
+      : {}),
     ...(payload.enabled !== undefined ? { enabled: payload.enabled } : {}),
   };
 };
@@ -311,7 +373,7 @@ const serializer = (
     (draft: Draft<PackSOQueryFormData>) => {
       if (isArray(draft.platform)) {
         if (draft.platform.length) {
-          draft.platform.join(',');
+          draft.platform = draft.platform.join(',');
         } else {
           delete draft.platform;
         }
@@ -392,7 +454,8 @@ const serializer = (
 
         if (
           packDefaults.packPlatform &&
-          platformSetsEqual(draft.platform, packDefaults.packPlatform)
+          (isEmptyOrAllPlatforms(draft.platform) ||
+            platformSetsEqual(draft.platform, packDefaults.packPlatform))
         ) {
           delete draft.platform;
         }
@@ -472,18 +535,13 @@ export const usePackQueryForm = ({
             interval: 3600,
             // Seed a new query from the pack's execution defaults so the
             // disabled controls show what it will actually inherit.
-            ...(packResultType
-              ? {
-                  snapshot: true,
-                  removed: false,
-                  ...mapResultTypeToWire(packResultType),
-                  result_type: packResultType,
-                }
-              : { snapshot: true, removed: false }),
-            platform: packPlatform || DEFAULT_PLATFORM,
-            version: packMinOsqueryVersion ? [packMinOsqueryVersion] : [],
+            ...resolveExecutionDefaultFormValues(
+              {},
+              packMinOsqueryVersion,
+              packResultType,
+              packPlatform
+            ),
             override_pack_schedule: false,
-            override_pack_defaults: false,
             schedule: deserializedSchedule,
           },
     }),

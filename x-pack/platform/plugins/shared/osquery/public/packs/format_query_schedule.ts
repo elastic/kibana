@@ -59,7 +59,7 @@ const WEEKDAY_DISPLAY_ORDER: readonly WeekdayStr[] = ['SU', 'MO', 'TU', 'WE', 'T
  * `@kbn/rrule` {@link Weekday} enum member → {@link WeekdayStr} token. Local to
  * this module so the display path does not widen `schedule_serializer`'s API.
  */
-const WEEKDAY_TO_TOKEN: Record<Weekday, WeekdayStr> = {
+const WEEKDAY_TO_TOKEN: Partial<Record<Weekday, WeekdayStr>> = {
   [Weekday.MO]: 'MO',
   [Weekday.TU]: 'TU',
   [Weekday.WE]: 'WE',
@@ -127,7 +127,7 @@ const formatEveryNYears = (interval: number): string =>
  * Short month labels for `BYMONTH`. Indexed 1..12 to match RFC 5545 numbering
  * so a rule value can be used as the key directly.
  */
-const MONTH_SHORT_LABEL: Record<number, string> = {
+const MONTH_SHORT_LABEL: Partial<Record<number, string>> = {
   1: i18n.translate('xpack.osquery.pack.queriesTable.scheduleMonth.jan', { defaultMessage: 'Jan' }),
   2: i18n.translate('xpack.osquery.pack.queriesTable.scheduleMonth.feb', { defaultMessage: 'Feb' }),
   3: i18n.translate('xpack.osquery.pack.queriesTable.scheduleMonth.mar', { defaultMessage: 'Mar' }),
@@ -265,9 +265,9 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
 
         case Frequency.YEARLY: {
           const months = [...(fields.bymonth ?? [])]
-            .filter((month) => MONTH_SHORT_LABEL[month] !== undefined)
             .sort((a, b) => a - b)
             .map((month) => MONTH_SHORT_LABEL[month])
+            .filter((label): label is string => label !== undefined)
             .join(', ');
           const monthdays = formatMonthDays(fields.bymonthday ?? []);
 

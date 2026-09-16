@@ -93,6 +93,7 @@ const renderWithContext = (Element: React.ReactElement) =>
 describe('PackForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
   });
 
   it('should target the Packs list for cancel button navigation in edit mode', async () => {
@@ -910,6 +911,11 @@ describe('PackForm', () => {
       expect(getByTestId('pack-result-type-field')).toBeInTheDocument();
     });
 
+    it('defaults a new pack result type to no pack default', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-result-type-field')).toHaveTextContent('No pack default');
+    });
+
     it('does not show migration advisory for a new pack (editMode=false)', () => {
       const { queryByTestId } = renderWithContext(<PackForm editMode={false} />);
       expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
@@ -964,7 +970,7 @@ describe('PackForm', () => {
         },
       };
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={nonUniformVersions as never} />
+        <PackForm editMode={true} defaultValue={nonUniformVersions} />
       );
       expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
     });
@@ -1056,6 +1062,135 @@ describe('PackForm', () => {
       // Defaulting this to 'snapshot' on open would silently convert the
       // pack's differential queries the first time a user saved it.
       expect(submitted).not.toHaveProperty('result_type');
+    });
+
+    it('emits selected min_osquery_version and result_type on create', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId, getByRole, container } = renderWithContext(<PackForm editMode={false} />);
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      fireEvent.click(
+        within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput')
+      );
+      fireEvent.click(getByRole('option', { name: '5.0.1' }));
+
+      fireEvent.click(getByTestId('pack-result-type-field'));
+      fireEvent.click(getByRole('option', { name: /^Differential$/ }));
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      expect(submitted.min_osquery_version).toBe('5.0.1');
+      expect(submitted.result_type).toBe('differential');
+    });
+
+    it('emits null when a previously stored pack default is cleared', async () => {
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const packWithDefaults = {
+        ...basePackValue,
+        min_osquery_version: '5.0.1',
+        result_type: 'snapshot' as const,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId, getByRole } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithDefaults} />
+      );
+
+      fireEvent.click(getByTestId('comboBoxClearButton'));
+
+      fireEvent.click(getByTestId('pack-result-type-field'));
+      fireEvent.click(getByRole('option', { name: /No pack default/ }));
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.min_osquery_version).toBeNull();
+      expect(submitted.result_type).toBeNull();
+    });
+
+    it('hides the migration advisory after dismiss and records sessionStorage', () => {
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+      const { getByTestId, getByRole, queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformPack} />
+      );
+
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+      fireEvent.click(getByRole('button', { name: /dismiss/i }));
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+      expect(sessionStorage.getItem('osquery.pack.migration-advisory-dismissed.v5-pack-so')).toBe(
+        'true'
+      );
+    });
+
+    it('still renders the migration advisory when sessionStorage throws', () => {
+      const getItemSpy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      });
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+
+      try {
+        const { getByTestId, getByRole, queryByTestId } = renderWithContext(
+          <PackForm editMode={true} defaultValue={nonUniformPack} />
+        );
+
+        expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+
+        const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+          throw new DOMException('The operation is insecure.', 'SecurityError');
+        });
+        try {
+          fireEvent.click(getByRole('button', { name: /dismiss/i }));
+          expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+        } finally {
+          setItemSpy.mockRestore();
+        }
+      } finally {
+        getItemSpy.mockRestore();
+      }
     });
   });
 });

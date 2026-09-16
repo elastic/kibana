@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { resultTypeConfigSchema } from '../result_type_config_schema';
 
 // `ecs_mapping` lives in two shapes:
 // - HTTP request bodies use the record form `{ [field]: { value/field } }`
@@ -61,20 +62,16 @@ const packQuerySchema = schema.object(
     ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
-    // V5: declared for validation honesty. The queries map is `dynamic: false`
-    // with `unknowns: 'allow'`, so no mappings addition is needed.
-    enabled: schema.maybe(schema.boolean()),
-    // Per-query result_type override value.
-    result_type: schema.maybe(
-      schema.oneOf([
-        schema.literal('snapshot'),
-        schema.literal('differential'),
-        schema.literal('differential_added_only'),
-      ])
-    ),
   },
   { unknowns: 'allow' }
 );
+
+// V5-only per-query fields. Do not add these to `packQuerySchema`: V1–V4
+// already feed released `create` / `forwardCompatibility` schemas.
+const packQuerySchemaV5 = packQuerySchema.extends({
+  enabled: schema.maybe(schema.boolean()),
+  result_type: schema.maybe(resultTypeConfigSchema),
+});
 
 const packSchemaV1 = schema.object({
   name: schema.maybe(schema.string()),
@@ -135,22 +132,21 @@ export const packSchemaV3 = packSchemaV2.extends({
 export const packSchemaV4 = packSchemaV3;
 
 // V5 adds three pack-level execution defaults: `min_osquery_version`,
-// `result_type`, and `platform`. They are stored unindexed (`dynamic: false`
-// on the type). The field name `min_osquery_version` avoids colliding with the
-// pack-asset `version: long`.
+// `result_type`, and `platform`. Pack SO root is NOT `dynamic: false`, so
+// these fields also need mappings (see packSavedObjectModelVersion5). The
+// field name `min_osquery_version` avoids colliding with the pack's own
+// `version: long` mapping.
 //
 // These are *defaults that fan out onto inheriting queries*, never pack-level
 // gates — a query's own value always wins.
 export const packSchemaV5 = packSchemaV4.extends({
   min_osquery_version: schema.maybe(schema.nullable(schema.string())),
-  result_type: schema.maybe(
-    schema.nullable(
-      schema.oneOf([
-        schema.literal('snapshot'),
-        schema.literal('differential'),
-        schema.literal('differential_added_only'),
-      ])
-    )
-  ),
+  result_type: schema.maybe(schema.nullable(resultTypeConfigSchema)),
   platform: schema.maybe(schema.nullable(schema.string())),
+  queries: schema.maybe(
+    schema.oneOf([
+      schema.recordOf(schema.string(), packQuerySchemaV5),
+      schema.arrayOf(packQuerySchemaV5, { maxSize: 1000 }),
+    ])
+  ),
 });

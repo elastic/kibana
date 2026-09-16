@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { NonEmptyString } from '../model/non_empty_string';
 
 // String-length cap on string fields. Defense at the API edge against
 // blob-sized payloads (RRULE, splay, dates) — SO `unknowns: 'allow'` would
@@ -25,6 +26,11 @@ export const boundedString = (maxLength: number) =>
     },
     t.identity
   );
+
+// Pack-level execution defaults: reject "" / whitespace (UI treats those as
+// unset) while keeping the length cap. Per-query `platform` stays `t.string`.
+export const nonEmptyBoundedString = (maxLength: number) =>
+  t.intersection([NonEmptyString, boundedString(maxLength)]);
 
 // Wire shape mirroring RRuleScheduleConfig; field-level validity is enforced
 // in the route handler.
@@ -53,6 +59,11 @@ export const resultTypeRt = t.union([
   t.literal('differential'),
   t.literal('differential_added_only'),
 ]);
+
+// Length caps match OpenAPI `MinOsqueryVersion.maxLength` / `PackPlatform.maxLength`
+// in `common/api/model/schema/common_attributes.schema.yaml`.
+export const MIN_OSQUERY_VERSION_MAX_LENGTH = 64;
+export const PLATFORM_MAX_LENGTH = 256;
 
 const basePackQueryFields = {
   interval: toNumberRt,

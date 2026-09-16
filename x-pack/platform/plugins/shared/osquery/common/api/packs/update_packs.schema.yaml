@@ -34,7 +34,7 @@ components:
         result_type:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultTypeOrUndefined'
         platform:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatformOrUndefined'
     UpdatePacksResponse:
         description: 'The response for updating a pack.'
         type: object
@@ -88,7 +88,7 @@ components:
               result_type:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
               platform:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatform'
         example:
           data:
             saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

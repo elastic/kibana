@@ -173,6 +173,18 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       dynamic: false,
       properties: {},
     },
+    min_osquery_version: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    result_type: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    platform: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     queries: {
       dynamic: false,
       properties: {

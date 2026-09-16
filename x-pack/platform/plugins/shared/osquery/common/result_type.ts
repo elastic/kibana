@@ -17,9 +17,12 @@
  * the two differential modes; the snapshot mode emits nothing (preserving the
  * osquerybeat default of `snapshot: true` when no key is present).
  */
-export type ResultType = 'snapshot' | 'differential' | 'differential_added_only';
+export const RESULT_TYPES = ['snapshot', 'differential', 'differential_added_only'] as const;
 
-export const RESULT_TYPES: ResultType[] = ['snapshot', 'differential', 'differential_added_only'];
+export type ResultType = (typeof RESULT_TYPES)[number];
+
+export const isResultType = (value: unknown): value is ResultType =>
+  typeof value === 'string' && (RESULT_TYPES as readonly string[]).includes(value);
 
 /**
  * Maps a {@link ResultType} to the wire-level `{ snapshot, removed }` boolean
@@ -52,6 +55,12 @@ export const mapResultTypeToWire = (
  *
  * `snapshot: true` wins over `removed` because osquerybeat ignores `removed`
  * in snapshot mode.
+ *
+ * When `snapshot` is false, an *absent* `removed` is osquery's default of
+ * `true` (log added and removed rows). Only an explicit `removed: false`
+ * means added-only. Treating a missing key as falsy would rewrite
+ * `{ snapshot: false }` to `{ snapshot: false, removed: false }` on the
+ * next Fleet emit and silently stop REMOVED rows being logged.
  */
 export const mapWireToResultType = (wire: {
   snapshot?: boolean;
@@ -67,7 +76,7 @@ export const mapWireToResultType = (wire: {
     return 'snapshot';
   }
 
-  return removed ? 'differential' : 'differential_added_only';
+  return removed === false ? 'differential_added_only' : 'differential';
 };
 
 /**

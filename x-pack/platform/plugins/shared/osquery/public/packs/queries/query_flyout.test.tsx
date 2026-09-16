@@ -884,5 +884,89 @@ describe('QueryFlyout', () => {
       expect(saved.result_type).not.toBe('differential');
       expect(saved.snapshot).toBe(true);
     });
+
+    it('does not treat a saved query without a platform as an override of the pack OS', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: [],
+        packPlatform: 'linux',
+        packResultType: 'differential',
+      });
+
+      expect(savedQueryOnChange).not.toBeNull();
+      act(() => {
+        savedQueryOnChange!({
+          id: 'from-saved',
+          query: 'select * from uptime;',
+        });
+      });
+
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).not.toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('platform');
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
+    it('turns the override toggle on when a saved query differs from the pack result type', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: [],
+        packResultType: 'snapshot',
+      });
+
+      expect(savedQueryOnChange).not.toBeNull();
+      act(() => {
+        savedQueryOnChange!({
+          id: 'from-saved',
+          query: 'select * from uptime;',
+          snapshot: false,
+          removed: true,
+        });
+      });
+
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeChecked();
+      expect(screen.getByTestId('resultsTypeField')).toHaveTextContent('Differential');
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved.result_type).toBe('differential');
+      expect(saved.snapshot).toBe(false);
+      expect(saved.removed).toBe(true);
+    });
+
+    it('turns the override toggle on when the saved query has its own platform', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: [],
+        packPlatform: 'linux',
+      });
+
+      expect(savedQueryOnChange).not.toBeNull();
+      act(() => {
+        savedQueryOnChange!({
+          id: 'from-saved',
+          query: 'select * from uptime;',
+          platform: 'windows',
+        });
+      });
+
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0].platform).toBe('windows');
+    });
   });
 });

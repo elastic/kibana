@@ -374,6 +374,7 @@ describe('createPackRoute', () => {
           queries: { q1: { query: 'SELECT 1', interval: 60 } },
           min_osquery_version: '5.10.0',
           result_type: 'differential',
+          platform: 'linux,darwin',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -386,6 +387,7 @@ describe('createPackRoute', () => {
       const createdAttributes = mockClient.create.mock.calls[0][1];
       expect(createdAttributes.min_osquery_version).toBe('5.10.0');
       expect(createdAttributes.result_type).toBe('differential');
+      expect(createdAttributes.platform).toBe('linux,darwin');
     });
 
     it('omits min_osquery_version and result_type from SO when not provided (legacy shape)', async () => {
@@ -413,6 +415,7 @@ describe('createPackRoute', () => {
       const createdAttributes = mockClient.create.mock.calls[0][1];
       expect(createdAttributes).not.toHaveProperty('min_osquery_version');
       expect(createdAttributes).not.toHaveProperty('result_type');
+      expect(createdAttributes).not.toHaveProperty('platform');
     });
 
     it('surfaces min_osquery_version and result_type in response data', async () => {
@@ -427,6 +430,7 @@ describe('createPackRoute', () => {
           queries: { q1: { query: 'SELECT 1', interval: 60 } },
           min_osquery_version: '5.11.0',
           result_type: 'differential_added_only',
+          platform: 'linux',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -439,6 +443,7 @@ describe('createPackRoute', () => {
       };
       expect(responseBody.data.min_osquery_version).toBe('5.11.0');
       expect(responseBody.data.result_type).toBe('differential_added_only');
+      expect(responseBody.data.platform).toBe('linux');
     });
 
     it('per-query enabled: false is persisted to the SO', async () => {
@@ -486,6 +491,32 @@ describe('createPackRoute', () => {
       expect(
         isRight(decode({ name: 'p', queries: {}, result_type: 'differential_added_only' }))
       ).toBe(true);
+
+      expect(isRight(decode({ name: 'p', queries: {}, platform: '' }))).toBe(false);
+      expect(isRight(decode({ name: 'p', queries: {}, platform: '   ' }))).toBe(false);
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: '' }))).toBe(false);
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: '   ' }))).toBe(false);
+      expect(isRight(decode({ name: 'p', queries: {}, platform: 'x'.repeat(257) }))).toBe(false);
+      expect(isRight(decode({ name: 'p', queries: {}, platform: 'x'.repeat(256) }))).toBe(true);
+      expect(isRight(decode({ name: 'p', queries: {}, min_osquery_version: 'x'.repeat(65) }))).toBe(
+        false
+      );
+      expect(
+        isRight(
+          decode({
+            name: 'p',
+            queries: { q1: { query: 'SELECT 1', enabled: null } },
+          })
+        )
+      ).toBe(false);
+      expect(
+        isRight(
+          decode({
+            name: 'p',
+            queries: { q1: { query: 'SELECT 1', result_type: null } },
+          })
+        )
+      ).toBe(false);
     });
   });
 });

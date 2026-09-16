@@ -6,13 +6,21 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 import { useController, useFormState } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import type { ResultType } from '../../common/result_type';
+import { isResultType } from '../../common/result_type';
 
-const SNAPSHOT_OPTION = {
+export const SNAPSHOT_OPTION = {
   value: 'snapshot',
   inputDisplay: (
     <FormattedMessage
@@ -22,7 +30,7 @@ const SNAPSHOT_OPTION = {
   ),
 };
 
-const DIFFERENTIAL_OPTION = {
+export const DIFFERENTIAL_OPTION = {
   value: 'differential',
   inputDisplay: (
     <FormattedMessage
@@ -32,8 +40,8 @@ const DIFFERENTIAL_OPTION = {
   ),
 };
 
-const DIFFERENTIAL_ADDED_ONLY_OPTION = {
-  value: 'added_only',
+export const DIFFERENTIAL_ADDED_ONLY_OPTION = {
+  value: 'differential_added_only',
   inputDisplay: (
     <FormattedMessage
       id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyLabel"
@@ -42,18 +50,11 @@ const DIFFERENTIAL_ADDED_ONLY_OPTION = {
   ),
 };
 
-const FIELD_OPTIONS = [SNAPSHOT_OPTION, DIFFERENTIAL_OPTION, DIFFERENTIAL_ADDED_ONLY_OPTION];
-
-/**
- * Select value → canonical {@link ResultType}. The two differential options use
- * distinct `ResultType` names from their select values, so the mapping is
- * explicit rather than a cast.
- */
-const OPTION_TO_RESULT_TYPE: Record<string, ResultType> = {
-  [SNAPSHOT_OPTION.value]: 'snapshot',
-  [DIFFERENTIAL_OPTION.value]: 'differential',
-  [DIFFERENTIAL_ADDED_ONLY_OPTION.value]: 'differential_added_only',
-};
+export const RESULT_TYPE_SELECT_OPTIONS = [
+  SNAPSHOT_OPTION,
+  DIFFERENTIAL_OPTION,
+  DIFFERENTIAL_ADDED_ONLY_OPTION,
+];
 
 interface ResultsTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -90,10 +91,9 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   });
 
   const handleChange = useCallback(
-    (newValue: any) => {
-      const resultType = OPTION_TO_RESULT_TYPE[newValue];
-      if (resultType !== undefined) {
-        onResultTypeChange(resultType);
+    (newValue: string) => {
+      if (isResultType(newValue)) {
+        onResultTypeChange(newValue);
       }
 
       if (newValue === SNAPSHOT_OPTION.value) {
@@ -135,15 +135,27 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   return (
     <EuiFormRow
       label={
-        <FormattedMessage
-          id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
-          defaultMessage="Result type"
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
+              defaultMessage="Result type"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('xpack.osquery.betaBadgeLabel', {
+                defaultMessage: 'Beta',
+              })}
+              size="s"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       labelAppend={
         <EuiText size="xs" color="subdued">
           <FormattedMessage
-            id="xpack.osquery.queryFlyoutForm.fieldOptionalLabel"
+            id="xpack.osquery.queryFlyoutForm.optionalLabel"
             defaultMessage="optional"
           />
         </EuiText>
@@ -152,7 +164,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
     >
       <EuiSuperSelect
         data-test-subj={'resultsTypeField'}
-        options={FIELD_OPTIONS}
+        options={RESULT_TYPE_SELECT_OPTIONS}
         fullWidth
         valueOfSelected={selectedOption}
         onChange={handleChange}

@@ -26,6 +26,7 @@ import {
   makePackKey,
   PACK_KEY_SEPARATOR,
   removePackFromPolicy,
+  toPackExecutionDefaults,
 } from '../routes/pack/utils';
 import { escapeFilterValue } from '../routes/utils/generate_copy_name';
 
@@ -385,9 +386,11 @@ export const reconcileScheduleIdsToWire = async ({
 
         const { id: packId, attributes: packAttrs } = packEntry;
 
-        // Nothing to anchor; rebuilding would write an empty `queries` map every
-        // pass. `enabled` is deliberately NOT gated on — a disabled-but-wired
-        // pack is the drift we repair in place (detaching is the routes' job).
+        // Cheap skip when the SO itself has no queries. All-disabled packs
+        // still pass this (they have rows) and are caught after the build.
+        // Pack-level `enabled` is deliberately NOT gated on — a
+        // disabled-but-wired pack is the drift we repair in place (detaching
+        // is the routes' job).
         if (!hasQueries(packAttrs.queries)) {
           logger.debug(
             `reconcileScheduleIdsToWire: pack "${packKey}" has no queries, skipping write`
@@ -418,13 +421,19 @@ export const reconcileScheduleIdsToWire = async ({
               },
               isRruleFeatureEnabled,
               fallbackStartDate: packAttrs.created_at,
-              packExecutionDefaults: {
-                min_osquery_version: packAttrs.min_osquery_version,
-                result_type: packAttrs.result_type ?? undefined,
-                platform: packAttrs.platform ?? undefined,
-              },
+              packExecutionDefaults: toPackExecutionDefaults(packAttrs),
             }
           );
+
+          // Test the *built* map: `enabled === false` is filtered inside
+          // convert, so an all-disabled pack would otherwise write
+          // `queries: {}` — the empty block this guard exists to prevent.
+          if (!hasQueries(builtQueries)) {
+            logger.debug(
+              `reconcileScheduleIdsToWire: pack "${packKey}" has no queries, skipping write`
+            );
+            continue;
+          }
 
           const intendedPackBlock = {
             ...(existingShard !== undefined ? { shard: existingShard } : {}),

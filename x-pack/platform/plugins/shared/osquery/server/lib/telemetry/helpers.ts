@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, find, isEmpty, pick, isString } from 'lodash';
+import { filter, find, isEmpty, isString } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
@@ -34,31 +34,20 @@ export const templatePacks = (packsData: PackSavedObject[]) => {
     // native `.filter` would throw and take the whole telemetry task down.
     const disabledQueryCount = filter(item.queries ?? [], (q) => q.enabled === false).length;
 
-    return pick(
-      {
-        name: item.name,
-        enabled: item.enabled,
-        queries: item.queries,
-        policies: (filter(item.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')
-          ?.length,
-        prebuilt:
-          !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
-        // V5 telemetry counters
-        has_pack_level_version: !!item.min_osquery_version,
-        has_pack_level_result_type: !!item.result_type,
-        disabled_query_count: disabledQueryCount,
-      },
-      [
-        'name',
-        'queries',
-        'policies',
-        'prebuilt',
-        'enabled',
-        'has_pack_level_version',
-        'has_pack_level_result_type',
-        'disabled_query_count',
-      ]
-    );
+    return {
+      name: item.name,
+      enabled: item.enabled,
+      queries: item.queries,
+      policies: (filter(item.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')
+        ?.length,
+      prebuilt:
+        !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
+      // V5 telemetry counters
+      has_pack_level_version: !!item.min_osquery_version,
+      has_pack_level_result_type: !!item.result_type,
+      has_pack_level_platform: !!item.platform,
+      disabled_query_count: disabledQueryCount,
+    };
   });
 };
 

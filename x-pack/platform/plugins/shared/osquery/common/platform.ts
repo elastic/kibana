@@ -7,43 +7,11 @@
 
 import { DEFAULT_PLATFORM } from './constants';
 
-/**
- * True when a platform string names every OS in {@link DEFAULT_PLATFORM},
- * regardless of token order, spacing, or duplicate tokens.
- *
- * The stored value's token order depends on how it was produced (the flyout's
- * seeded default, a pack upload, or a hand-edited saved object), so
- * `'linux,darwin,windows'` and `'linux,windows,darwin'` must be treated alike.
- * Duplicate tokens (`'linux,linux,linux'`) are a Linux restriction, not "all
- * platforms" — comparison uses the distinct token set.
- */
-const ALL_PLATFORM_TOKENS = new Set(DEFAULT_PLATFORM.split(',').map((token) => token.trim()));
-
 const parsePlatformTokens = (value: string): string[] =>
   value
     .split(',')
     .map((token) => token.trim())
     .filter((token) => token.length > 0);
-
-export const isAllPlatforms = (value?: string): boolean => {
-  if (!value) {
-    return false;
-  }
-
-  const tokens = new Set(parsePlatformTokens(value));
-
-  if (tokens.size !== ALL_PLATFORM_TOKENS.size) {
-    return false;
-  }
-
-  for (const token of tokens) {
-    if (!ALL_PLATFORM_TOKENS.has(token)) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 /** True when two platform CSVs name the same distinct token set, ignoring order and spacing. */
 export const platformSetsEqual = (left?: string, right?: string): boolean => {
@@ -69,4 +37,33 @@ export const platformSetsEqual = (left?: string, right?: string): boolean => {
   }
 
   return true;
+};
+
+/**
+ * True when a platform string names every OS in {@link DEFAULT_PLATFORM},
+ * regardless of token order, spacing, or duplicate tokens.
+ *
+ * The stored value's token order depends on how it was produced (the flyout's
+ * seeded default, a pack upload, or a hand-edited saved object), so
+ * `'linux,darwin,windows'` and `'linux,windows,darwin'` must be treated alike.
+ * Duplicate tokens (`'linux,linux,linux'`) are a Linux restriction, not "all
+ * platforms" — comparison uses the distinct token set.
+ */
+export const isAllPlatforms = (value?: string): boolean =>
+  !!value && platformSetsEqual(value, DEFAULT_PLATFORM);
+
+/**
+ * True when a platform CSV names no restriction: missing, empty (whitespace
+ * or comma-only), or every OS in {@link DEFAULT_PLATFORM}.
+ *
+ * Used at pack-default fan-out so these values inherit rather than defeating
+ * the pack default. Distinct from {@link isAllPlatforms}, which is false for
+ * empty/missing (those are not "all platforms").
+ */
+export const isEmptyOrAllPlatforms = (value?: string | null): boolean => {
+  if (value == null) {
+    return true;
+  }
+
+  return parsePlatformTokens(value).length === 0 || isAllPlatforms(value);
 };

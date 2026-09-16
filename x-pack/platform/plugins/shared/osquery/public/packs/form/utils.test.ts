@@ -59,7 +59,7 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
   it('deserializer captures originalId; a rename then round-trips the original claim', () => {
     // GET delivers queries keyed by stored id; a rename must still round-trip that id.
     const stored = { processes: { query: 'SELECT 1;', interval: 3600, ecs_mapping: {} } };
-    const asArray = convertPackQueriesToSO(stored as never);
+    const asArray = convertPackQueriesToSO(stored);
     expect(asArray[0].id).toBe('processes');
     expect(asArray[0].originalId).toBe('processes');
 
@@ -68,6 +68,14 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
     const backToRecord = convertSOQueriesToPack(renamed, { includeId: true });
     expect(Object.keys(backToRecord)).toEqual(['renamed']);
     expect(backToRecord.renamed).toMatchObject({ id: 'processes' });
+  });
+
+  it('deserializes a wire string version without treating it as a character array', () => {
+    const stored = {
+      processes: { query: 'SELECT 1;', interval: 3600, version: '5.10.0', ecs_mapping: {} },
+    };
+    const asArray = convertPackQueriesToSO(stored);
+    expect(storedQueryVersion(asArray[0].version)).toBe('5.10.0');
   });
 });
 

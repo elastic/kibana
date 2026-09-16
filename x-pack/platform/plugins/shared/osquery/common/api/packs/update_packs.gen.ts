@@ -28,10 +28,10 @@ import {
   RRuleScheduleConfigOrUndefined,
   MinOsqueryVersionOrUndefined,
   ResultTypeOrUndefined,
-  PlatformOrUndefined,
+  PackPlatformOrUndefined,
   MinOsqueryVersion,
   ResultType,
-  Platform,
+  PackPlatform,
 } from '../model/schema/common_attributes.gen';
 
 export const UpdatePacksRequestBody = lazySchema(() =>
@@ -47,7 +47,7 @@ export const UpdatePacksRequestBody = lazySchema(() =>
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
     min_osquery_version: MinOsqueryVersionOrUndefined.optional(),
     result_type: ResultTypeOrUndefined.optional(),
-    platform: PlatformOrUndefined.optional(),
+    platform: PackPlatformOrUndefined.optional(),
   })
 );
 export type UpdatePacksRequestBody = z.infer<typeof UpdatePacksRequestBody>;
@@ -84,7 +84,7 @@ export const UpdatePacksResponse = lazySchema(() =>
         rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
         min_osquery_version: MinOsqueryVersion.optional(),
         result_type: ResultType.optional(),
-        platform: Platform.optional(),
+        platform: PackPlatform.optional(),
       })
       .optional(),
   })

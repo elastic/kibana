@@ -71,6 +71,16 @@ describe('ResultsTypeField', () => {
     expect(screen.getByText('Result type')).toBeInTheDocument();
   });
 
+  it('should render a Beta badge on the Result type label', () => {
+    render(
+      <FormWrapper>
+        <ResultsTypeField />
+      </FormWrapper>
+    );
+
+    expect(screen.getByText('Beta')).toBeInTheDocument();
+  });
+
   it('should be disabled when euiFieldProps.isDisabled is true', () => {
     render(
       <FormWrapper>

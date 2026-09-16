@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
-import { useController } from 'react-hook-form';
+import React, { useMemo } from 'react';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
-import type { PlatformId } from '../queries/platforms';
-import { OS_OPTIONS, isPlatformId } from '../queries/platforms';
+import { PlatformCheckBoxGroupField } from '../queries/platform_checkbox_group_field';
 
 interface PackPlatformFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
+
+const PACK_PLATFORM_LABEL_APPEND = (
+  <EuiText size="xs" color="subdued">
+    <FormattedMessage id="xpack.osquery.queryFlyoutForm.optionalLabel" defaultMessage="optional" />
+  </EuiText>
+);
+
+const PACK_PLATFORM_PLACEHOLDER = i18n.translate(
+  'xpack.osquery.pack.form.packPlatformFieldPlaceholder',
+  { defaultMessage: 'All' }
+);
 
 /**
  * Pack-level operating-systems default.
@@ -33,69 +41,22 @@ interface PackPlatformFieldProps {
  * to its own platform.
  */
 const PackPlatformFieldComponent: React.FC<PackPlatformFieldProps> = ({ euiFieldProps = {} }) => {
-  const { isDisabled, ...restEuiFieldProps } = euiFieldProps;
-
-  const {
-    field: { onChange, value },
-  } = useController<{ platform: string }>({
-    name: 'platform',
-    defaultValue: '',
-  });
-
-  const selectedOptions = useMemo(() => {
-    if (typeof value !== 'string' || value.length === 0) {
-      return [];
-    }
-
-    const ids = value
-      .split(',')
-      .map((token) => token.trim())
-      .filter((token): token is PlatformId => isPlatformId(token));
-
-    // `OS_OPTIONS` entries are keyed by `key`, not `value` (EuiComboBox
-    // treats the whole option object as opaque here).
-    return OS_OPTIONS.filter((option) => ids.includes(option.key));
-  }, [value]);
-
-  const handleChange = useCallback(
-    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      onChange(newOptions.map((option) => option.key).join(','));
-    },
-    [onChange]
+  const mergedEuiFieldProps = useMemo(
+    () => ({
+      'data-test-subj': 'pack-platform-field',
+      isClearable: true,
+      placeholder: PACK_PLATFORM_PLACEHOLDER,
+      ...euiFieldProps,
+    }),
+    [euiFieldProps]
   );
 
   return (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.osquery.pack.form.packPlatformFieldLabel"
-          defaultMessage="Operating systems"
-        />
-      }
-      labelAppend={
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.osquery.pack.form.packPlatformFieldOptionalLabel"
-            defaultMessage="optional"
-          />
-        </EuiText>
-      }
-      fullWidth
-    >
-      <EuiComboBox
-        data-test-subj="pack-platform-field"
-        options={OS_OPTIONS}
-        selectedOptions={selectedOptions}
-        onChange={handleChange}
-        isDisabled={!!isDisabled}
-        placeholder={i18n.translate('xpack.osquery.pack.form.packPlatformFieldPlaceholder', {
-          defaultMessage: 'All',
-        })}
-        fullWidth
-        isClearable
-        {...restEuiFieldProps}
-      />
-    </EuiFormRow>
+    <PlatformCheckBoxGroupField
+      required={false}
+      labelAppend={PACK_PLATFORM_LABEL_APPEND}
+      euiFieldProps={mergedEuiFieldProps}
+    />
   );
 };
 

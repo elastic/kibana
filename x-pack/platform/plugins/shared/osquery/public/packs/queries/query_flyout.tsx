@@ -23,8 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
-import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
-import { mapWireToResultType } from '../../../common/result_type';
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import {
   QueryIdField,
@@ -51,7 +50,11 @@ import type {
   PackQueryFormData,
   PackSOQueryFormData,
 } from './use_pack_query_form';
-import { usePackQueryForm, resolveInheritedScheduleInput } from './use_pack_query_form';
+import {
+  usePackQueryForm,
+  resolveInheritedScheduleInput,
+  resolveExecutionDefaultFormValues,
+} from './use_pack_query_form';
 import { deserializeSchedule } from '../form/schedule_serializer';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
@@ -76,6 +79,14 @@ const ALL_VERSIONS_PLACEHOLDER = i18n.translate(
   'xpack.osquery.queryFlyoutForm.versionAllPlaceholder',
   { defaultMessage: 'All' }
 );
+
+const PLAIN_VERSION_FIELD_PROPS = {
+  noSuggestions: false,
+  singleSelection: { asPlainText: true },
+  placeholder: ALL_VERSIONS_PLACEHOLDER,
+  options: ALL_OSQUERY_VERSIONS_OPTIONS,
+  onCreateOption: undefined,
+};
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   uniqueQueryIds,
@@ -198,37 +209,18 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   // The pack exposes at least one execution default, so the query can override.
   const packHasDefaults = !!packMinOsqueryVersion || !!packResultType || !!packPlatform;
 
-  const platformFieldProps = useMemo(
-    () => ({ isDisabled: !overridePackDefaults }),
-    [overridePackDefaults]
-  );
-
-  const resultTypeFieldProps = useMemo(
+  const disabledFieldProps = useMemo(
     () => ({ isDisabled: !overridePackDefaults }),
     [overridePackDefaults]
   );
 
   const versionFieldProps = useMemo(
     () => ({
-      noSuggestions: false,
-      singleSelection: { asPlainText: true },
+      ...PLAIN_VERSION_FIELD_PROPS,
       placeholder: packMinOsqueryVersion ?? ALL_VERSIONS_PLACEHOLDER,
-      options: ALL_OSQUERY_VERSIONS_OPTIONS,
-      onCreateOption: undefined,
       isDisabled: !overridePackDefaults,
     }),
     [packMinOsqueryVersion, overridePackDefaults]
-  );
-
-  const plainVersionFieldProps = useMemo(
-    () => ({
-      noSuggestions: false,
-      singleSelection: { asPlainText: true },
-      placeholder: ALL_VERSIONS_PLACEHOLDER,
-      options: ALL_OSQUERY_VERSIONS_OPTIONS,
-      onCreateOption: undefined,
-    }),
-    []
   );
 
   const handleScheduleChange = useCallback(
@@ -274,28 +266,41 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const handleSetQueryValue = useCallback(
     (savedQuery: any) => {
       if (savedQuery) {
+        // Same predicates as the deserializer: all-OS is not an override, a
+        // missing saved-query platform keeps the inherited pack OS (do not
+        // replace it with DEFAULT_PLATFORM), and canonical result_type is
+        // seeded only for an explicit stored choice or a pack default.
+        const seeded = resolveExecutionDefaultFormValues(
+          {
+            platform: savedQuery.platform,
+            version: savedQuery.version,
+            result_type: savedQuery.result_type,
+            snapshot: savedQuery.snapshot,
+            removed: savedQuery.removed,
+          },
+          packMinOsqueryVersion,
+          packResultType,
+          packPlatform
+        );
+
         resetField('id', { defaultValue: savedQuery.id });
         resetField('query', { defaultValue: savedQuery.query });
-        resetField('platform', {
-          defaultValue: savedQuery.platform ? savedQuery.platform : DEFAULT_PLATFORM,
-        });
-        resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
         resetField('timeout', {
           defaultValue: savedQuery.timeout ? savedQuery.timeout : QUERY_TIMEOUT.DEFAULT,
         });
-        resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
-        resetField('removed', { defaultValue: savedQuery.removed });
-        resetField('result_type', {
-          defaultValue: mapWireToResultType({
-            snapshot: savedQuery.snapshot ?? true,
-            removed: savedQuery.removed,
-          }),
-        });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
+        // `setValue` (not `resetField`) so `watch('override_pack_defaults')`
+        // and the disabled execution controls update in the same tick.
+        setValue('platform', seeded.platform);
+        setValue('version', seeded.version);
+        setValue('snapshot', seeded.snapshot);
+        setValue('removed', seeded.removed);
+        setValue('result_type', seeded.result_type);
+        setValue('override_pack_defaults', seeded.override_pack_defaults);
       }
     },
-    [resetField]
+    [resetField, setValue, packMinOsqueryVersion, packResultType, packPlatform]
   );
 
   return (
@@ -395,11 +400,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   <EuiFlexItem>
                     <VersionField euiFieldProps={versionFieldProps} />
                     <EuiSpacer />
-                    <ResultsTypeField euiFieldProps={resultTypeFieldProps} />
+                    <ResultsTypeField euiFieldProps={disabledFieldProps} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <PlatformCheckBoxGroupField
-                      euiFieldProps={platformFieldProps}
+                      euiFieldProps={disabledFieldProps}
                       helpText={
                         packPlatform
                           ? i18n.translate(
@@ -444,7 +449,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                     <EuiSpacer />
                   </>
                 ) : null}
-                <VersionField euiFieldProps={plainVersionFieldProps} />
+                <VersionField euiFieldProps={PLAIN_VERSION_FIELD_PROPS} />
                 <EuiSpacer />
                 <ResultsTypeField />
               </EuiFlexItem>

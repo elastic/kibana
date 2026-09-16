@@ -15,13 +15,16 @@ import deepEqual from 'fast-deep-equal';
 
 interface VersionFieldProps {
   euiFieldProps?: Record<string, unknown>;
+  /** react-hook-form field name. Defaults to `version` (per-query). Pack defaults use `min_osquery_version`. */
+  name?: string;
 }
-const VersionFieldComponent = ({ euiFieldProps = {} }: VersionFieldProps) => {
+
+const VersionFieldComponent = ({ euiFieldProps = {}, name = 'version' }: VersionFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },
   } = useController({
-    name: 'version',
+    name,
     defaultValue: [],
     rules: {},
   });
@@ -42,19 +45,23 @@ const VersionFieldComponent = ({ euiFieldProps = {} }: VersionFieldProps) => {
     [onChange]
   );
   const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const selectedOptions = useMemo(
+    () => (Array.isArray(value) ? value.map((v: string) => ({ label: v })) : []),
+    [value]
+  );
 
   return (
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
+          id="xpack.osquery.pack.queryFlyoutForm.minOsqueryVersionLabel"
           defaultMessage="Minimum osquery version"
         />
       }
       labelAppend={
         <EuiText size="xs" color="subdued">
           <FormattedMessage
-            id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
+            id="xpack.osquery.queryFlyoutForm.versionOptionalLabel"
             defaultMessage="optional"
           />
         </EuiText>
@@ -69,7 +76,7 @@ const VersionFieldComponent = ({ euiFieldProps = {} }: VersionFieldProps) => {
         placeholder={i18n.translate('xpack.osquery.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
-        selectedOptions={value.map((v: string) => ({ label: v }))}
+        selectedOptions={selectedOptions}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
         fullWidth

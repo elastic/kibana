@@ -153,6 +153,13 @@ export class TelemetryEventsSender {
             optional: true,
           },
         },
+        has_pack_level_platform: {
+          type: 'boolean',
+          _meta: {
+            description: 'Pack has a pack-level platform restriction set',
+            optional: true,
+          },
+        },
         disabled_query_count: {
           type: 'short',
           _meta: {

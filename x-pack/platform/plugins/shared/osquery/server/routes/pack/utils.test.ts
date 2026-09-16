@@ -26,6 +26,10 @@ import {
   hasQueries,
   START_DATE_EPOCH_FALLBACK,
   convergePerQueryIntervals,
+  isPackQueryEnabled,
+  resolveEffectiveQueryExecution,
+  buildExecutionDefaultsResponseSlice,
+  toPackExecutionDefaults,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -947,6 +951,44 @@ describe('Pack utils', () => {
           } as never,
         });
         expect(result[0]).not.toHaveProperty('extra_field');
+      });
+
+      test('drops snapshot/removed when result_type is supplied', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            name: 'q1',
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            result_type: 'differential',
+          },
+        });
+
+        expect(result[0]).toMatchObject({
+          id: 'q1',
+          result_type: 'differential',
+        });
+        expect(result[0]).not.toHaveProperty('snapshot');
+        expect(result[0]).not.toHaveProperty('removed');
+      });
+
+      test('keeps snapshot/removed when result_type is absent', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            name: 'q1',
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+          },
+        });
+
+        expect(result[0]).toMatchObject({
+          snapshot: true,
+          removed: false,
+        });
+        expect(result[0]).not.toHaveProperty('result_type');
       });
     });
 
@@ -1944,6 +1986,25 @@ describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () =>
       expect(queries.q1.snapshot).toBe(false);
       expect(queries.q1.removed).toBe(true);
     });
+
+    // Regression: `{ snapshot: false }` with no `removed` key is a genuine
+    // differential query (osquery defaults `removed` to true). Decoding a
+    // missing key as falsy rewrote it to added-only (`removed: false`) on
+    // the next Fleet emit and stopped REMOVED rows being logged.
+    it('should emit differential (not added-only) for a lone stored snapshot:false', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ snapshot: false }), baseOpts);
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('should keep a lone stored snapshot:false differential when the pack defaults to snapshot', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ snapshot: false }), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'snapshot' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
   });
 
   // Regression: `DEFAULT_PLATFORM` is what the flyout seeds when a query has no
@@ -2162,6 +2223,115 @@ describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () =>
       });
       expect(output).not.toHaveProperty('platform');
       expect(output).not.toHaveProperty('default_platform');
+    });
+
+    it.each(['', '  ', ','])(
+      'should apply the pack platform default when the per-query platform is empty (%j)',
+      (platform) => {
+        const { queries } = convertSOQueriesToPackConfig(makeQuery({ platform }), {
+          ...baseOpts,
+          packExecutionDefaults: { platform: 'linux' },
+        });
+        expect(queries.q1.platform).toBe('linux');
+      }
+    );
+  });
+});
+
+describe('isPackQueryEnabled', () => {
+  it('treats a missing enabled field as enabled', () => {
+    expect(isPackQueryEnabled({})).toBe(true);
+  });
+
+  it('treats enabled: true as enabled', () => {
+    expect(isPackQueryEnabled({ enabled: true })).toBe(true);
+  });
+
+  it('treats enabled: false as disabled', () => {
+    expect(isPackQueryEnabled({ enabled: false })).toBe(false);
+  });
+});
+
+describe('resolveEffectiveQueryExecution', () => {
+  it('fans pack defaults onto a query with no version or platform', () => {
+    expect(
+      resolveEffectiveQueryExecution({}, { min_osquery_version: '5.10.0', platform: 'linux' })
+    ).toEqual({ version: '5.10.0', platform: 'linux' });
+  });
+
+  it('lets a per-query version and platform win', () => {
+    expect(
+      resolveEffectiveQueryExecution(
+        { version: '5.12.0', platform: 'windows' },
+        { min_osquery_version: '5.10.0', platform: 'linux' }
+      )
+    ).toEqual({ version: '5.12.0', platform: 'windows' });
+  });
+
+  it('treats an all-OS per-query platform as inherit', () => {
+    expect(
+      resolveEffectiveQueryExecution({ platform: 'linux,darwin,windows' }, { platform: 'linux' })
+    ).toEqual({ platform: 'linux' });
+  });
+
+  it.each(['', '  ', ','])(
+    'treats an empty-token per-query platform (%j) as inherit',
+    (platform) => {
+      expect(resolveEffectiveQueryExecution({ platform }, { platform: 'linux' })).toEqual({
+        platform: 'linux',
+      });
+    }
+  );
+
+  it('omits an all-OS effective platform from the result', () => {
+    expect(resolveEffectiveQueryExecution({}, { platform: 'linux,windows,darwin' })).toEqual({});
+  });
+
+  it('does not resolve result_type', () => {
+    expect(
+      resolveEffectiveQueryExecution({}, { result_type: 'differential', platform: 'linux' })
+    ).toEqual({ platform: 'linux' });
+  });
+});
+
+describe('buildExecutionDefaultsResponseSlice', () => {
+  it('omits null and undefined fields', () => {
+    expect(
+      buildExecutionDefaultsResponseSlice({
+        min_osquery_version: null,
+        result_type: undefined,
+        platform: null,
+      })
+    ).toEqual({});
+  });
+
+  it('includes only present fields', () => {
+    expect(
+      buildExecutionDefaultsResponseSlice({
+        min_osquery_version: '5.10.0',
+        result_type: 'differential',
+        platform: 'linux',
+      })
+    ).toEqual({
+      min_osquery_version: '5.10.0',
+      result_type: 'differential',
+      platform: 'linux',
+    });
+  });
+});
+
+describe('toPackExecutionDefaults', () => {
+  it('normalizes null to undefined on every field', () => {
+    expect(
+      toPackExecutionDefaults({
+        min_osquery_version: null,
+        result_type: null,
+        platform: null,
+      })
+    ).toEqual({
+      min_osquery_version: undefined,
+      result_type: undefined,
+      platform: undefined,
     });
   });
 });

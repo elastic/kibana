@@ -58,7 +58,7 @@ components:
         result_type:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
         platform:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatform'
 
     CreatePacksResponse:
       description: 'The response for creating a pack.'
@@ -135,7 +135,7 @@ components:
             result_type:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
             platform:
-              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatform'
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

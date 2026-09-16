@@ -24,10 +24,20 @@ components:
       description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.'
       example: 'linux,darwin'
       type: string
-      maxLength: 256
 
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
+      nullable: true
+
+    PackPlatform:
+      description: 'Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.'
+      example: 'linux,darwin'
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    PackPlatformOrUndefined:
+      $ref: '#/components/schemas/PackPlatform'
       nullable: true
 
 
@@ -207,9 +217,9 @@ components:
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         enabled:
-          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+          $ref: '#/components/schemas/QueryEnabled'
         result_type:
-          $ref: '#/components/schemas/ResultTypeOrUndefined'
+          $ref: '#/components/schemas/ResultType'
 
     ArrayQueries:
       type: array
@@ -250,9 +260,9 @@ components:
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         enabled:
-          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+          $ref: '#/components/schemas/QueryEnabled'
         result_type:
-          $ref: '#/components/schemas/ResultTypeOrUndefined'
+          $ref: '#/components/schemas/ResultType'
 
     ObjectQueries:
       type: object
@@ -415,6 +425,7 @@ components:
     MinOsqueryVersion:
       description: 'Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.'
       type: string
+      minLength: 1
       maxLength: 64
       example: '5.10.0'
 

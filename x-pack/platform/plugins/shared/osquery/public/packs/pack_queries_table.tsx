@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSwitchEvent, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -47,7 +47,9 @@ export interface PackQueriesTableProps {
   packPlatform?: string;
 }
 
-const DISABLED_ROW_STYLE: React.CSSProperties = { opacity: 0.6 };
+const disabledRowCss = ({ euiTheme }: UseEuiTheme) => ({
+  color: euiTheme.colors.textDisabled,
+});
 
 const QueryEnabledSwitch: React.FC<{
   item: PackQueryFormData;
@@ -363,7 +365,10 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   );
 
   const rowProps = useCallback(
-    (item: PackQueryFormData) => (item.enabled === false ? { style: DISABLED_ROW_STYLE } : {}),
+    (item: PackQueryFormData) =>
+      item.enabled === false
+        ? { css: disabledRowCss, 'data-test-subj': `pack-query-row-disabled-${item.id}` }
+        : {},
     []
   );
 

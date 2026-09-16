@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import { usePackQueryForm } from './use_pack_query_form';
 import type { PackQueryFormData, PackSOQueryFormData } from './use_pack_query_form';
+import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import {
   createDefaultScheduleFormData,
@@ -482,8 +483,75 @@ describe('usePackQueryForm', () => {
         })
       );
 
-      expect(result.current.getValues('result_type')).toBe('snapshot');
+      // Display comes from the seeded booleans. Putting canonical
+      // `result_type: 'snapshot'` on the form made a no-op save persist it as
+      // an override the server honors over a later pack-level default.
+      expect(result.current.getValues('result_type')).toBeUndefined();
       expect(result.current.getValues('snapshot')).toBe(true);
+      expect(result.current.getValues('removed')).toBe(false);
+
+      const saved = result.current.serializer(result.current.getValues());
+      expect(saved).not.toHaveProperty('result_type');
+    });
+
+    it('defaults missing snapshot/removed to snapshot mode when the pack has no result type', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({}),
+        })
+      );
+
+      expect(result.current.getValues('snapshot')).toBe(true);
+      expect(result.current.getValues('removed')).toBe(false);
+      expect(result.current.getValues('result_type')).toBeUndefined();
+    });
+
+    it('keeps an explicit stored result_type of snapshot when the pack has no result type', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          defaultValue: makeSOPayload({ result_type: 'snapshot' }),
+        })
+      );
+
+      expect(result.current.getValues('result_type')).toBe('snapshot');
+      expect(result.current.getValues('override_pack_defaults')).toBe(true);
+
+      const saved = result.current.serializer(result.current.getValues());
+      expect(saved.result_type).toBe('snapshot');
+    });
+
+    it('treats an all-OS platform CSV as inheritance, not an override', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packPlatform: 'linux',
+          defaultValue: makeSOPayload({ platform: DEFAULT_PLATFORM }),
+        })
+      );
+
+      expect(result.current.getValues('override_pack_defaults')).toBe(false);
+      expect(result.current.getValues('platform')).toBe('linux');
+    });
+
+    it('drops an all-OS platform CSV when the toggle is on and the pack has a platform default', () => {
+      const { result } = renderHook(() =>
+        usePackQueryForm({
+          uniqueQueryIds: [],
+          packPlatform: 'linux',
+        })
+      );
+
+      const saved = result.current.serializer({
+        ...result.current.getValues(),
+        id: 'q1',
+        query: 'select 1;',
+        override_pack_defaults: true,
+        platform: DEFAULT_PLATFORM,
+      });
+
+      expect(saved).not.toHaveProperty('platform');
     });
 
     it('strips a reordered matching platform CSV as inheritance', () => {

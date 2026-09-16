@@ -18,7 +18,11 @@ import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { PackResponseData } from './types';
-import { buildScheduleResponseSlice, stripPerQueryRruleFields } from './utils';
+import {
+  buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
+  stripPerQueryRruleFields,
+} from './utils';
 import { copyPackResponseSchema } from './response_schemas';
 
 // Fields that are intentionally NOT copied — they are pack-instance metadata
@@ -167,12 +171,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: newPackSO.id,
             // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
-            // V5: pack-level execution defaults (copied from source via restAttributes)
-            ...(attributes.min_osquery_version != null
-              ? { min_osquery_version: attributes.min_osquery_version }
-              : {}),
-            ...(attributes.result_type != null ? { result_type: attributes.result_type } : {}),
-            ...(attributes.platform != null ? { platform: attributes.platform } : {}),
+            ...buildExecutionDefaultsResponseSlice(attributes),
           };
 
           return response.ok({

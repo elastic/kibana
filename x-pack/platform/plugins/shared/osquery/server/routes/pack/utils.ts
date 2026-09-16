@@ -31,7 +31,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
-import { isAllPlatforms } from '../../../common/platform';
+import { isAllPlatforms, isEmptyOrAllPlatforms } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
 import type { ResultType } from '../../../common/result_type';
@@ -126,6 +126,13 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         value.schedule_type === 'rrule' ? RRULE_MODE_PICK : INTERVAL_MODE_PICK
       );
 
+      // Canonical `result_type` wins: drop the legacy boolean pair so a
+      // request cannot persist contradictory encodings
+      // (`result_type: 'differential'` + `snapshot: true`). Boolean-only
+      // records (no `result_type`) are unchanged so pre-V5 data round-trips.
+      const { snapshot: _snapshot, removed: _removed, ...withoutLegacyPair } = baseFields;
+      const persistedFields = baseFields.result_type != null ? withoutLegacyPair : baseFields;
+
       // Defense in depth: if a query carries `rrule_schedule` without
       // `schedule_type`, drop it. The route validator rejects this earlier;
       // this branch covers code paths that bypass the validator.
@@ -138,7 +145,7 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
 
       acc.push({
         id: key,
-        ...baseFields,
+        ...persistedFields,
         ...scheduleOverride,
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       } as SOPackQuery);
@@ -274,6 +281,38 @@ export const buildScheduleResponseSlice = (
   return {};
 };
 
+/**
+ * Build the pack-level execution-defaults slice for a route response.
+ * Omits null/undefined fields so the public API matches OAS optional non-null
+ * (absent when unset), the same convention as {@link buildScheduleResponseSlice}.
+ */
+export const buildExecutionDefaultsResponseSlice = (
+  attributes: PackExecutionDefaults
+): {
+  min_osquery_version?: string;
+  result_type?: ResultType;
+  platform?: string;
+} => ({
+  ...(attributes.min_osquery_version != null
+    ? { min_osquery_version: attributes.min_osquery_version }
+    : {}),
+  ...(attributes.result_type != null ? { result_type: attributes.result_type } : {}),
+  ...(attributes.platform != null ? { platform: attributes.platform } : {}),
+});
+
+/**
+ * Normalize pack SO / request attributes into {@link PackExecutionDefaults}
+ * for {@link convertSOQueriesToPackConfig}. Applies `?? undefined` uniformly
+ * so stored `null` does not leak onto the Fleet emit.
+ */
+export const toPackExecutionDefaults = (
+  attributes: PackExecutionDefaults
+): PackExecutionDefaults => ({
+  min_osquery_version: attributes.min_osquery_version ?? undefined,
+  result_type: attributes.result_type ?? undefined,
+  platform: attributes.platform ?? undefined,
+});
+
 // Response-side mirror of the wire-boundary gate: strips per-query rrule
 // fields when the flag is off. No-op (no copy) when the flag is on.
 export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string, PackQueryInput>>(
@@ -381,6 +420,41 @@ export interface PackExecutionDefaults {
   platform?: string | null;
 }
 
+/**
+ * Whether a pack query should run. `enabled` defaults to true when absent
+ * (legacy queries never stored the field). Shared by the scheduled Fleet
+ * emit and the live-query action path.
+ */
+export const isPackQueryEnabled = (query: { enabled?: boolean }): boolean =>
+  query.enabled !== false;
+
+/**
+ * Resolve a query's effective version and platform against pack-level
+ * defaults. Per-query wins; an empty-token or all-OS platform is treated as
+ * unset so the pack default can apply. The result omits an all-OS platform
+ * (emitting it is a no-op on the wire).
+ *
+ * Shared by the scheduled Fleet emit and the live-query action path so the
+ * two cannot drift. `result_type` is intentionally not resolved here — live
+ * queries do not send it.
+ */
+export const resolveEffectiveQueryExecution = (
+  query: { version?: string | null; platform?: string | null },
+  packExecutionDefaults?: PackExecutionDefaults
+): { version?: string; platform?: string } => {
+  const effectiveVersion = query.version ?? packExecutionDefaults?.min_osquery_version ?? undefined;
+
+  const perQueryPlatform = isEmptyOrAllPlatforms(query.platform)
+    ? undefined
+    : query.platform ?? undefined;
+  const effectivePlatform = perQueryPlatform ?? packExecutionDefaults?.platform ?? undefined;
+
+  return {
+    ...(effectiveVersion ? { version: effectiveVersion } : {}),
+    ...(isEmptyOrAllPlatforms(effectivePlatform) ? {} : { platform: effectivePlatform }),
+  };
+};
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
@@ -449,7 +523,7 @@ export const convertSOQueriesToPackConfig = (
       key: number
     ) => {
       // V5: disabled queries are filtered before fan-out (D7 / Path A)
-      if (queryEnabled === false) {
+      if (!isPackQueryEnabled({ enabled: queryEnabled })) {
         return null;
       }
 
@@ -516,27 +590,20 @@ export const convertSOQueriesToPackConfig = (
                 : resolvedFallback,
           };
 
-      // V5: Path A fan-out for min_osquery_version (per-query value or pack default)
-      const packDefaultVersion = packExecutionDefaults?.min_osquery_version ?? undefined;
-      // `version` lives in rest; extract to compute the effective value
+      // V5: Path A fan-out for version / platform. Shared helper so the
+      // live-query path cannot drift: per-query wins, empty-token and all-OS
+      // platforms inherit the pack default, and an all-OS effective value is
+      // suppressed from the wire (emitting it is a no-op for osquery).
+      // `version` lives in rest; extract so a stored empty string cannot leak
+      // onto the wire after the helper omits it.
       const { version: perQueryVersion, ...restWithoutVersion } = rest as PackQueryInput & {
         version?: string;
       };
-      const effectiveVersion = perQueryVersion ?? packDefaultVersion;
-
-      // V5: Path A fan-out for platform. Same rule as version — the per-query
-      // value wins outright when present, otherwise the pack default applies.
-      // `DEFAULT_PLATFORM` (all three OSes) stays suppressed from the wire in
-      // both cases: emitting it is a no-op for osquery and would bloat every
-      // query in every pack.
-      // A per-query value naming every supported OS is not a restriction — it
-      // is what the flyout seeds when a query has no platform of its own, so it
-      // is common in stored data. Treating it as an override would discard the
-      // pack default and run the query everywhere, the opposite of what the
-      // curator configured.
-      const packDefaultPlatform = packExecutionDefaults?.platform ?? undefined;
-      const perQueryPlatform = isAllPlatforms(platform) ? undefined : platform;
-      const effectivePlatform = perQueryPlatform ?? packDefaultPlatform;
+      const { version: effectiveVersion, platform: effectivePlatform } =
+        resolveEffectiveQueryExecution(
+          { version: perQueryVersion, platform },
+          packExecutionDefaults
+        );
 
       queriesOut[index] = omitBy(
         {
@@ -551,9 +618,7 @@ export const convertSOQueriesToPackConfig = (
               ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
               : { ecs_mapping }
             : {}),
-          ...(isAllPlatforms(effectivePlatform) || effectivePlatform === undefined
-            ? {}
-            : { platform: effectivePlatform }),
+          ...(effectivePlatform ? { platform: effectivePlatform } : {}),
           ...wireResultType,
           ...(effectiveVersion ? { version: effectiveVersion } : {}),
           ...(spaceId ? { space_id: spaceId } : {}),

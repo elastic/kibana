@@ -43,6 +43,8 @@ import {
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
+  toPackExecutionDefaults,
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
   resolvePreservedQueries,
@@ -428,11 +430,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               },
               isRruleFeatureEnabled,
               fallbackStartDate: updatedPackSO.attributes.created_at,
-              packExecutionDefaults: {
-                min_osquery_version: updatedPackSO.attributes.min_osquery_version,
-                result_type: updatedPackSO.attributes.result_type ?? undefined,
-                platform: updatedPackSO.attributes.platform ?? undefined,
-              },
+              packExecutionDefaults: toPackExecutionDefaults(updatedPackSO.attributes),
             }
           );
 
@@ -484,12 +482,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             shards: convertShardsToObject(attrs.shards) as unknown as PackResponseData['shards'],
             saved_object_id: updatedPackSO.id,
             ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),
-            // V5: pack-level execution defaults
-            ...(attrs.min_osquery_version != null
-              ? { min_osquery_version: attrs.min_osquery_version }
-              : {}),
-            ...(attrs.result_type != null ? { result_type: attrs.result_type } : {}),
-            ...(attrs.platform != null ? { platform: attrs.platform } : {}),
+            ...buildExecutionDefaultsResponseSlice(attrs),
           };
         };
 

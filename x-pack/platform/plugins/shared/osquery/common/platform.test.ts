@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_PLATFORM } from './constants';
-import { isAllPlatforms, platformSetsEqual } from './platform';
+import { isAllPlatforms, isEmptyOrAllPlatforms, platformSetsEqual } from './platform';
 
 describe('isAllPlatforms', () => {
   it('returns false for undefined or empty', () => {
@@ -28,6 +28,27 @@ describe('isAllPlatforms', () => {
 
   it('returns false when an unknown token is mixed in', () => {
     expect(isAllPlatforms('linux,windows,darwin,posix')).toBe(false);
+  });
+});
+
+describe('isEmptyOrAllPlatforms', () => {
+  it('returns true for missing, empty, whitespace, and comma-only values', () => {
+    expect(isEmptyOrAllPlatforms(undefined)).toBe(true);
+    expect(isEmptyOrAllPlatforms(null)).toBe(true);
+    expect(isEmptyOrAllPlatforms('')).toBe(true);
+    expect(isEmptyOrAllPlatforms('  ')).toBe(true);
+    expect(isEmptyOrAllPlatforms(',')).toBe(true);
+    expect(isEmptyOrAllPlatforms(' , , ')).toBe(true);
+  });
+
+  it('returns true for every DEFAULT_PLATFORM permutation', () => {
+    expect(isEmptyOrAllPlatforms(DEFAULT_PLATFORM)).toBe(true);
+    expect(isEmptyOrAllPlatforms('windows,linux,darwin')).toBe(true);
+  });
+
+  it('returns false for a real platform restriction', () => {
+    expect(isEmptyOrAllPlatforms('linux')).toBe(false);
+    expect(isEmptyOrAllPlatforms('linux,windows')).toBe(false);
   });
 });
 

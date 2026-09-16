@@ -7,6 +7,7 @@
 
 import { pick, reduce } from 'lodash';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import type { PackSavedObjectQuery } from '../types';
 
 /**
  * Normalise a per-query `version` from either the read-pack API (string) or
@@ -21,7 +22,7 @@ export const storedQueryVersion = (version: string | string[] | undefined): stri
   return version ?? '';
 };
 
-export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFormData, 'id'>>) =>
+export const convertPackQueriesToSO = (queries: Record<string, PackSavedObjectQuery>) =>
   reduce(
     queries,
     (acc, value, key) => {

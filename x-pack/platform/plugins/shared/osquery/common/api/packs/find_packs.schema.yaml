@@ -68,9 +68,9 @@ components:
                     rrule_schedule:
                       $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
                     enabled:
-                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/QueryEnabledOrUndefined'
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/QueryEnabled'
                     result_type:
-                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultTypeOrUndefined'
+                      $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
               version:
                 description: 'The pack version number.'
                 type: integer
@@ -109,7 +109,7 @@ components:
               result_type:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
               platform:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatform'
       example:
         page: 1
         per_page: 10
@@ -205,7 +205,7 @@ components:
             result_type:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
             platform:
-              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackPlatform'
       example:
         data:
           saved_object_id: "3c42c847-eb30-4452-80e0-728584042334"

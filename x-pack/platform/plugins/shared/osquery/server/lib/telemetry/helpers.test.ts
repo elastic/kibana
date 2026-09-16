@@ -15,19 +15,23 @@ import { TELEMETRY_EBT_PACK_EVENT, TELEMETRY_EBT_SAVED_QUERY_EVENT } from './con
 /**
  * EBT wraps every registered schema in `excess()`, so a property emitted by a
  * template helper but missing from the registered schema fails validation in
- * dev mode and is shipped unmapped in production. These tests pin the two
- * together so adding a field to one without the other fails here.
+ * dev mode and is shipped unmapped in production. These tests pin both
+ * directions: emitted ⊆ registered, and registered non-`pass_through` keys ⊆
+ * emitted, so a key missing from both sides is visible.
  */
-const registeredSchemaKeys = (eventType: string): string[] => {
-  const schemas = new Map<string, object>();
+const registeredSchema = (eventType: string): Record<string, { type?: string }> => {
+  const schemas = new Map<string, Record<string, { type?: string }>>();
   const registerEventType = jest.fn(({ eventType: type, schema }) => {
     schemas.set(type, schema);
   }) as unknown as AnalyticsServiceSetup['registerEventType'];
 
   new TelemetryEventsSender(loggingSystemMock.createLogger()).registerEvents(registerEventType);
 
-  return Object.keys(schemas.get(eventType) ?? {});
+  return schemas.get(eventType) ?? {};
 };
+
+const registeredSchemaKeys = (eventType: string): string[] =>
+  Object.keys(registeredSchema(eventType));
 
 describe('osquery telemetry helpers', () => {
   describe('templatePacks', () => {
@@ -39,6 +43,7 @@ describe('osquery telemetry helpers', () => {
           enabled: true,
           min_osquery_version: '5.10.0',
           result_type: 'snapshot',
+          platform: 'linux',
           references: [],
           queries: [
             { id: 'q1', query: 'select 1;', enabled: true },
@@ -52,13 +57,22 @@ describe('osquery telemetry helpers', () => {
       expect(Object.keys(emitted).sort()).toEqual(
         expect.arrayContaining([
           'disabled_query_count',
+          'has_pack_level_platform',
           'has_pack_level_result_type',
           'has_pack_level_version',
         ])
       );
 
-      const allowed = registeredSchemaKeys(TELEMETRY_EBT_PACK_EVENT);
+      const schema = registeredSchema(TELEMETRY_EBT_PACK_EVENT);
+      const allowed = Object.keys(schema);
       expect(Object.keys(emitted).filter((key) => !allowed.includes(key))).toEqual([]);
+
+      const registeredNonPassThrough = Object.entries(schema)
+        .filter(([, def]) => def.type !== 'pass_through')
+        .map(([key]) => key);
+      expect(registeredNonPassThrough.filter((key) => !Object.keys(emitted).includes(key))).toEqual(
+        []
+      );
     });
 
     it('should report pack-level defaults and the disabled query count', () => {
@@ -69,6 +83,7 @@ describe('osquery telemetry helpers', () => {
           enabled: true,
           min_osquery_version: '5.10.0',
           result_type: 'snapshot',
+          platform: 'linux',
           references: [],
           queries: [
             { id: 'q1', query: 'select 1;', enabled: true },
@@ -81,6 +96,7 @@ describe('osquery telemetry helpers', () => {
         expect.objectContaining({
           has_pack_level_version: true,
           has_pack_level_result_type: true,
+          has_pack_level_platform: true,
           disabled_query_count: 1,
         })
       );
@@ -101,6 +117,7 @@ describe('osquery telemetry helpers', () => {
         expect.objectContaining({
           has_pack_level_version: false,
           has_pack_level_result_type: false,
+          has_pack_level_platform: false,
           disabled_query_count: 0,
         })
       );

@@ -12,13 +12,6 @@ import { EuiProvider } from '@elastic/eui';
 
 import { PackQueriesTable } from './pack_queries_table';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { allowedExperimentalValues } from '../../common/experimental_features';
-
-const setFlag = (rruleScheduling: boolean) =>
-  ExperimentalFeaturesService.init({
-    experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling },
-  });
 
 const baseQuery = (overrides: Partial<PackQueryFormData> = {}): PackQueryFormData => ({
   id: 'query-1',
@@ -38,12 +31,7 @@ const renderTable = (props: Partial<React.ComponentProps<typeof PackQueriesTable
   );
 
 describe('PackQueriesTable', () => {
-  // The Schedule column is no longer gated on `rruleScheduling`. With the flag
-  // off every query is interval-mode, which renders as `"{n}s"` — the same
-  // value the old "Interval (s)" column showed, under an honest label.
-  describe('flag off (Schedule column is not flag-gated)', () => {
-    beforeEach(() => setFlag(false));
-
+  describe('interval-mode schedule column', () => {
     it('renders the "Schedule" column with interval text and no legacy column', () => {
       renderTable({ data: [baseQuery({ interval: 3600 })] });
 
@@ -53,10 +41,7 @@ describe('PackQueriesTable', () => {
     });
   });
 
-  describe('flag on (Schedule column)', () => {
-    beforeEach(() => setFlag(true));
-    afterEach(() => setFlag(false));
-
+  describe('rrule-mode schedule column', () => {
     it('renders the "Schedule" column header', () => {
       renderTable({ data: [baseQuery()] });
 
@@ -169,17 +154,14 @@ describe('PackQueriesTable', () => {
       expect(screen.getByTestId('query-enabled-switch-query-1')).not.toBeChecked();
     });
 
-    it('applies opacity 0.6 to a disabled row', () => {
-      const { container } = renderTable({ data: [baseQuery({ enabled: false })] });
-      const rows = container.querySelectorAll('tr[style*="opacity"]');
-      expect(rows).toHaveLength(1);
-      expect((rows[0] as HTMLElement).style.opacity).toBe('0.6');
+    it('marks a disabled query row', () => {
+      renderTable({ data: [baseQuery({ enabled: false })] });
+      expect(screen.getByTestId('pack-query-row-disabled-query-1')).toBeInTheDocument();
     });
 
-    it('does not apply opacity to an enabled row', () => {
-      const { container } = renderTable({ data: [baseQuery({ enabled: true })] });
-      const rows = container.querySelectorAll('tr[style*="opacity"]');
-      expect(rows).toHaveLength(0);
+    it('does not mark an enabled query row as disabled', () => {
+      renderTable({ data: [baseQuery({ enabled: true })] });
+      expect(screen.queryByTestId('pack-query-row-disabled-query-1')).not.toBeInTheDocument();
     });
 
     it('calls onToggleEnabled with correct args when switch is toggled', () => {
@@ -241,7 +223,6 @@ describe('PackQueriesTable', () => {
 
   describe('Schedule column truncation', () => {
     it('renders a short schedule inline with no tooltip wrapper', () => {
-      setFlag(true);
       renderTable({
         data: [
           baseQuery({
@@ -254,11 +235,9 @@ describe('PackQueriesTable', () => {
       const cell = screen.getByText('Daily');
       expect(cell).toBeInTheDocument();
       expect(cell.tagName).not.toBe('SPAN');
-      setFlag(false);
     });
 
-    it('truncates a long schedule and exposes the full text for assistive tech', () => {
-      setFlag(true);
+    it('renders a seven-weekday schedule in full when it fits the budget', () => {
       renderTable({
         data: [
           baseQuery({
@@ -275,11 +254,9 @@ describe('PackQueriesTable', () => {
       // 47 chars — under the 48 budget, so it must NOT truncate.
       expect(full.length).toBeLessThanOrEqual(48);
       expect(screen.getByText(full)).toBeInTheDocument();
-      setFlag(false);
     });
 
     it('truncates when the rendered text exceeds the budget', () => {
-      setFlag(true);
       renderTable({
         data: [
           baseQuery({
@@ -298,7 +275,6 @@ describe('PackQueriesTable', () => {
       expect(screen.queryByText(full)).not.toBeInTheDocument();
       expect(screen.getByLabelText(full)).toBeInTheDocument();
       expect(screen.getByLabelText(full).textContent).toMatch(/…$/);
-      setFlag(false);
     });
   });
 

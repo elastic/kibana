@@ -140,15 +140,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [isRruleSchedulingEnabled, defaultValue]
   );
 
-  const deserializer = (payload: PackItem) => {
+  const deserializer = (payload: PackItem): Omit<PackFormData, 'pack_type'> => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Strip rrule-era fields before spreading so a flag-off form never
-    // carries them into state or re-emits them on submit.
+    // Strip identity, query, and V5 fields whose form shapes differ from the
+    // wire, plus rrule-era fields when the flag is off so a flag-off form
+    // never carries them into state or re-emits them on submit.
     const {
+      id: _id,
+      queries: _queries,
+      min_osquery_version: payloadMinOsqueryVersion,
+      result_type: payloadResultType,
       schedule_type: payloadScheduleType,
       interval: payloadInterval,
       rrule_schedule: payloadRruleSchedule,
@@ -156,14 +161,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     } = payload;
 
     return {
-      ...(isRruleSchedulingEnabled ? payload : legacyPayload),
+      ...(isRruleSchedulingEnabled
+        ? {
+            ...legacyPayload,
+            schedule_type: payloadScheduleType,
+            interval: payloadInterval,
+            rrule_schedule: payloadRruleSchedule,
+          }
+        : legacyPayload),
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
       schedule: deserializedSchedule,
-      // V5: deserialize pack-level execution defaults
-      min_osquery_version: payload.min_osquery_version ? [payload.min_osquery_version] : [],
-      result_type: payload.result_type ?? '',
+      min_osquery_version: payloadMinOsqueryVersion ? [payloadMinOsqueryVersion] : [],
+      result_type: payloadResultType ?? '',
       platform: payload.platform ?? '',
     };
   };
@@ -172,7 +183,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const hooksForm = useHookForm<PackFormData>({
     defaultValues: defaultValue
-      ? ({ ...deserializer(defaultValue), pack_type: defaultPackType } as PackFormData)
+      ? { ...deserializer(defaultValue), pack_type: defaultPackType }
       : {
           name: '',
           description: '',

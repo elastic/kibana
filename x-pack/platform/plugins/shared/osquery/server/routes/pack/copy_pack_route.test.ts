@@ -533,6 +533,7 @@ describe('copyPackRoute', () => {
           ...sourcePackSO.attributes,
           min_osquery_version: '5.10.0',
           result_type: 'differential' as const,
+          platform: 'linux,darwin',
         },
       };
 
@@ -573,6 +574,7 @@ describe('copyPackRoute', () => {
       expect(mockResponse.ok).toHaveBeenCalled();
       expect(capturedCreateArgs!.min_osquery_version).toBe('5.10.0');
       expect(capturedCreateArgs!.result_type).toBe('differential');
+      expect(capturedCreateArgs!.platform).toBe('linux,darwin');
     });
 
     it('surfaces min_osquery_version and result_type in copy response', async () => {
@@ -582,6 +584,7 @@ describe('copyPackRoute', () => {
           ...sourcePackSO.attributes,
           min_osquery_version: '5.12.0',
           result_type: 'snapshot' as const,
+          platform: 'windows',
         },
       };
 
@@ -595,6 +598,7 @@ describe('copyPackRoute', () => {
             enabled: false,
             min_osquery_version: '5.12.0',
             result_type: 'snapshot',
+            platform: 'windows',
             created_at: '2025-06-01T00:00:00.000Z',
             created_by: 'tester',
             updated_at: '2025-06-01T00:00:00.000Z',
@@ -621,6 +625,7 @@ describe('copyPackRoute', () => {
       };
       expect(responseBody.data.min_osquery_version).toBe('5.12.0');
       expect(responseBody.data.result_type).toBe('snapshot');
+      expect(responseBody.data.platform).toBe('windows');
     });
 
     it('copy of a pack without execution defaults has neither field in response', async () => {
@@ -658,6 +663,7 @@ describe('copyPackRoute', () => {
       };
       expect(responseBody.data).not.toHaveProperty('min_osquery_version');
       expect(responseBody.data).not.toHaveProperty('result_type');
+      expect(responseBody.data).not.toHaveProperty('platform');
     });
   });
 });

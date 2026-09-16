@@ -22,14 +22,13 @@ import {
   ECSMappingArrayOrUndefined,
   ScheduleTypeOrUndefined,
   RRuleScheduleConfigOrUndefined,
-  QueryEnabledOrUndefined,
-  ResultTypeOrUndefined,
+  QueryEnabled,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
   MinOsqueryVersion,
   ResultType,
-  Platform,
+  PackPlatform,
 } from '../model/schema/common_attributes.gen';
 
 /**
@@ -61,8 +60,8 @@ export const CopyPacksResponse = lazySchema(() =>
             ecs_mapping: ECSMappingArrayOrUndefined.optional(),
             schedule_type: ScheduleTypeOrUndefined.optional(),
             rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-            enabled: QueryEnabledOrUndefined.optional(),
-            result_type: ResultTypeOrUndefined.optional(),
+            enabled: QueryEnabled.optional(),
+            result_type: ResultType.optional(),
           })
         )
         .optional()
@@ -98,7 +97,7 @@ export const CopyPacksResponse = lazySchema(() =>
       rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
       min_osquery_version: MinOsqueryVersion.optional(),
       result_type: ResultType.optional(),
-      platform: Platform.optional(),
+      platform: PackPlatform.optional(),
     }),
   })
 );

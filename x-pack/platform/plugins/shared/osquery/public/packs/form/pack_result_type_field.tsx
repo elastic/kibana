@@ -11,36 +11,7 @@ import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import type { ResultType } from '../../../common/result_type';
-
-const PACK_RESULT_TYPE_OPTIONS = [
-  {
-    value: 'snapshot' as const,
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.form.packResultTypeField.snapshotLabel"
-        defaultMessage="Snapshot"
-      />
-    ),
-  },
-  {
-    value: 'differential' as const,
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.form.packResultTypeField.differentialLabel"
-        defaultMessage="Differential"
-      />
-    ),
-  },
-  {
-    value: 'differential_added_only' as const,
-    inputDisplay: (
-      <FormattedMessage
-        id="xpack.osquery.pack.form.packResultTypeField.differentialAddedOnlyLabel"
-        defaultMessage="Differential (ignore removals)"
-      />
-    ),
-  },
-];
+import { RESULT_TYPE_SELECT_OPTIONS } from '../../form/results_type_field';
 
 const EMPTY_VALUE = '' as const;
 
@@ -62,7 +33,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
 
   const handleChange = useCallback(
     (newValue: ResultType | '') => {
-      onChange(newValue === EMPTY_VALUE ? undefined : newValue);
+      onChange(newValue);
     },
     [onChange]
   );
@@ -72,6 +43,12 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
       {
         value: EMPTY_VALUE,
         inputDisplay: (
+          <FormattedMessage
+            id="xpack.osquery.pack.form.packResultTypeField.noDefaultLabel"
+            defaultMessage="No pack default"
+          />
+        ),
+        dropdownDisplay: (
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.osquery.pack.form.packResultTypeField.noDefaultLabel"
@@ -80,7 +57,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
           </EuiText>
         ),
       },
-      ...PACK_RESULT_TYPE_OPTIONS,
+      ...RESULT_TYPE_SELECT_OPTIONS,
     ],
     []
   );
@@ -89,14 +66,14 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.osquery.pack.form.packResultTypeFieldLabel"
+          id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
           defaultMessage="Result type"
         />
       }
       labelAppend={
         <EuiText size="xs" color="subdued">
           <FormattedMessage
-            id="xpack.osquery.pack.form.packResultTypeFieldOptionalLabel"
+            id="xpack.osquery.queryFlyoutForm.optionalLabel"
             defaultMessage="optional"
           />
         </EuiText>

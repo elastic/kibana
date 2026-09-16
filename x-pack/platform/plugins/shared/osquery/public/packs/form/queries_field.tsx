@@ -20,8 +20,7 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
-import type { ResultType } from '../../../common/result_type';
-import { RESULT_TYPES } from '../../../common/result_type';
+import { isResultType } from '../../../common/result_type';
 import { serializeSchedule } from './schedule_serializer';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 
@@ -32,10 +31,6 @@ interface QueriesFieldProps {
   // `resolveInheritedScheduleInput` in `../queries/use_pack_query_form.tsx`.
   packHasExplicitSchedule?: boolean;
 }
-
-/** Type guard narrowing a watched form value to a canonical {@link ResultType}. */
-const isResultType = (value: string | undefined): value is ResultType =>
-  value !== undefined && (RESULT_TYPES as string[]).includes(value);
 
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   euiFieldProps,
@@ -204,8 +199,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       // Resolve by identity rather than by `id`. `findIndex(..., ['id', ...])`
       // returns the *first* row with a matching id, so during a rename — or in
       // any state where two rows transiently share an id — toggling the second
-      // row silently flipped the first. `handleDeleteQueries` already resolves
-      // by identity via `indexOf`.
+      // row silently flipped the first.
       const streamIndex = indexOf(fieldValue, query);
       if (streamIndex > -1) {
         update(streamIndex, { ...fieldValue[streamIndex], enabled });
@@ -215,10 +209,18 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   );
 
   const handleDeleteQueries = useCallback(() => {
-    const idsToRemove = map(tableSelectedItems, (selectedItem) =>
-      indexOf(fieldValue, selectedItem)
-    );
-    remove(idsToRemove);
+    // `update()` in `handleToggleEnabled` replaces the row with a new object,
+    // but EuiBasicTable keeps the pre-toggle identity in `tableSelectedItems`
+    // (`itemId` matches, so `onSelectionChange` does not re-fire). Resolving
+    // by object identity then `indexOf`s `-1`, and RHF `removeAtIndexes`
+    // `splice(-1, 1)` deletes the last query instead of the selected one.
+    const idsToRemove = tableSelectedItems
+      .map((selectedItem) => findIndex(fieldValue, ['id', selectedItem.id]))
+      .filter((index) => index > -1);
+    if (idsToRemove.length) {
+      remove(idsToRemove);
+    }
+
     setTableSelectedItems([]);
   }, [fieldValue, remove, tableSelectedItems]);
 

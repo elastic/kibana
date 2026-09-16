@@ -395,4 +395,58 @@ describe('findPackRoute', () => {
       expect(body.data[0].interval).toBe(60);
     });
   });
+
+  describe('V5: pack-level execution defaults', () => {
+    it('returns min_osquery_version, result_type, and platform when set', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          makePack({
+            min_osquery_version: '5.10.0',
+            result_type: 'differential',
+            platform: 'linux',
+          }),
+        ],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as {
+        data: Array<Record<string, unknown>>;
+      };
+      expect(body.data[0].min_osquery_version).toBe('5.10.0');
+      expect(body.data[0].result_type).toBe('differential');
+      expect(body.data[0].platform).toBe('linux');
+    });
+
+    it('omits V5 fields when they are not set', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack()],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      setupRoute();
+
+      const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      const body = mockResponse.ok.mock.calls[0][0]?.body as {
+        data: Array<Record<string, unknown>>;
+      };
+      expect(body.data[0]).not.toHaveProperty('min_osquery_version');
+      expect(body.data[0]).not.toHaveProperty('result_type');
+      expect(body.data[0]).not.toHaveProperty('platform');
+    });
+  });
 });
