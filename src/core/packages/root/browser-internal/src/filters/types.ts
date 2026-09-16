@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const KBN_LOAD_MARKS = 'kbnLoad';
-export const KIBANA_LOADED_EVENT = 'kibana_loaded';
-export const LOAD_START = 'load_started';
-export const LOAD_BOOTSTRAP_START = 'bootstrap_started';
-export const LOAD_CORE_CREATED = 'core_created';
-export const LOAD_SETUP_DONE = 'setup_done';
-export const LOAD_START_DONE = 'start_done';
-export const LOAD_FIRST_NAV = 'first_app_nav';
+// Copied from @elastic/apm-rum/src/common/types.ts
+export type FilterFn = (payload: Payload) => Payload | boolean | void;
+
+export interface Payload {
+  transactions: Array<Record<string, any>>;
+  errors: Array<Record<string, any>>;
+  [key: string]: any;
+}

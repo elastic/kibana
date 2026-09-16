@@ -15,7 +15,8 @@ import { init, apm, type Transaction } from '@elastic/apm-rum';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ApmSystem } from './apm_system';
-import { RESIZE_OBSERVER_LOOP_ERROR } from './events';
+import { ebtSpanFilter } from './filters/ebt_span_filter';
+import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
@@ -45,27 +46,11 @@ describe('ApmSystem', () => {
       expect(apm.addLabels).toHaveBeenCalledWith({ alpha: 'one' });
     });
 
-    it('filters benign ResizeObserver errors from APM payloads', async () => {
+    it('registers the payload filters', async () => {
       const apmSystem = new ApmSystem({ active: true });
       await apmSystem.setup();
-      const errorFilter = apmMock.addFilter.mock.calls[1][0];
-      const payload = {
-        transactions: [],
-        errors: [
-          {
-            exception: {
-              type: RESIZE_OBSERVER_LOOP_ERROR,
-              message: RESIZE_OBSERVER_LOOP_ERROR,
-            },
-          },
-          { exception: { type: 'Error', message: 'Unexpected error' } },
-        ],
-      };
-
-      expect(errorFilter(payload)).toEqual({
-        transactions: [],
-        errors: [{ exception: { type: 'Error', message: 'Unexpected error' } }],
-      });
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ebtSpanFilter);
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ignoredErrorsFilter);
     });
 
     describe('manages the page load transaction', () => {

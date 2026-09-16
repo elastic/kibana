@@ -12,9 +12,9 @@ import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ebtSpanFilter } from './filters/ebt_span_filter';
+import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 import { CachedResourceObserver } from './apm_resource_counter';
 import { getPageLoadTransactionName, isAppPath } from './get_page_load_transaction_name';
-import { IGNORED_EVENTS_LIST } from './events';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
@@ -65,14 +65,7 @@ export class ApmSystem {
     });
 
     apm.addFilter(ebtSpanFilter);
-
-    // Ignore specific events
-    apm.addFilter((payload) => {
-      payload.errors = payload.errors.filter(
-        (error) => !IGNORED_EVENTS_LIST.includes(error.exception?.message ?? '')
-      );
-      return payload;
-    });
+    apm.addFilter(ignoredErrorsFilter);
 
     // Remove the query params from the URLs (page's URL and refererer)
     apm.addFilter((payload) => {
