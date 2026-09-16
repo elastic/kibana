@@ -99,6 +99,23 @@ describe('EsqlQueryStep', () => {
     expect(await screen.findByText('event_time')).toBeInTheDocument();
   });
 
+  it('uses the first date column when the output has no bucket column', async () => {
+    getEsqlQueryColumns.mockResolvedValue({
+      columns: [
+        { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
+        { name: 'event_time', type: 'date', hasConflict: false, userDefined: false },
+      ],
+    });
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(await screen.findByText('event_time')).toBeInTheDocument();
+  });
+
   it('keeps source time field and bucket span explicit and distinct from emitted time', () => {
     renderWithI18n(<EsqlQueryStep />);
 
