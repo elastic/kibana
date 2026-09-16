@@ -367,14 +367,23 @@ export function resolveUpdateRuleBuilder(
     //
     // Use the post-write (effective) values of schedule and time_field so that
     // a query compiled here agrees with what `buildUpdateRuleAttributes` will
-    // persist. The persisted schedule is `{ ...existing.schedule, ...data.schedule }`,
-    // and the persisted time_field is `data.time_field ?? existing.time_field`.
+    // persist. The persisted schedule merges the update onto existing, with
+    // `lookback: null` treated as "clear" (undefined). `data.time_field` uses
+    // the same ?? fallback as buildUpdateRuleAttributes.
     // Passing pre-update values would produce a query compiled against a
     // schedule or time_field that the stored rule no longer reflects.
     //
     // Ref: rule-execution-logic.md "The compilation contract" —
     //   "Read-only framework fields of the rule being compiled"
-    const effectiveSchedule = { ...existing.schedule, ...data.schedule };
+    const effectiveSchedule = {
+      ...existing.schedule,
+      ...data.schedule,
+      // `null` → clear (undefined), matching buildUpdateRuleAttributes.
+      lookback:
+        data.schedule?.lookback === null
+          ? undefined
+          : data.schedule?.lookback ?? existing.schedule.lookback,
+    };
     const effectiveTimeField = data.time_field ?? existing.time_field;
 
     const generated = adaptToKind(
