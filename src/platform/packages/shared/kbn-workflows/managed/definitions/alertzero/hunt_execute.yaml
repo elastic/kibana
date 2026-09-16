@@ -16,6 +16,12 @@ inputs:
     report_id:
       description: Threat report id this hunt pass runs against (hunt:report:{report_id}).
       type: string
+    revision:
+      description: >
+        Report revision at candidate-selection time. Written back as
+        evidence.last_hunted_revision so the next sweep can bypass cooldown
+        when enrich bumps revision.
+      type: integer
     investigation_id:
       description: Conversation id of the report's Investigation.
       type: string
@@ -29,6 +35,7 @@ inputs:
       type: string
   required:
     - report_id
+    - revision
     - investigation_id
 steps:
   # Always runs Tier 1; gates Tier 2 on whether Tier 1 found candidates.
@@ -77,8 +84,8 @@ steps:
           report_id: "{{ inputs.report_id }}"
           sse: "{{ steps.run_hunt_coordinator.output.sse | json }}"
 
-  # Writes last_hunted_at, rank score, status, and run id to the shared
-  # threat-report store.
+  # Writes last_hunted_at, last_hunted_revision, rank score, status, and run
+  # id onto the per-space evidence element in the shared threat-report store.
   # TODO(follow-up): route does not exist yet. TI supply lives under
   # security_solution's THREAT_INTEL_API_BASE (/internal/threat_intel), not
   # under /internal/alertzero.
@@ -90,6 +97,7 @@ steps:
         path: /internal/threat_intel/reports/{{ inputs.report_id }}/hunt_feedback
         body:
           last_hunted_at: "{{ execution.startedAt }}"
+          last_hunted_revision: "{{ inputs.revision }}"
           corroborated_rank_score: "{{ steps.run_hunt_coordinator.output.corroborated_rank_score }}"
           last_hunt_status: "{{ steps.run_hunt_coordinator.output.status }}"
           last_hunt_run_id: "{{ execution.id }}"

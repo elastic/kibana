@@ -34,21 +34,23 @@ steps:
     with:
       request:
         method: GET
-        # TODO(follow-up): route does not exist yet. TI supply lives under
-        # security_solution's THREAT_INTEL_API_BASE (/internal/threat_intel),
-        # not under /internal/alertzero. Land the readiness route there before this
-        # Worker can run.
+        # TI supply readiness under security_solution's THREAT_INTEL_API_BASE.
+        # Response: { status: 'ready'|'degraded'|'blocked', reasonCodes, ... }.
         path: /internal/threat_intel/readiness
 
   - name: select_candidate_reports
     type: elasticsearch.search
-    if: "${{ steps.check_ti_readiness.output.ready == true }}"
+    if: "${{ steps.check_ti_readiness.output.status == 'ready' }}"
     with:
       index: ".kibana-threat-reports"
       size: 10
       query:
         bool:
           filter:
+            # Per-space Worker copy (workflowIdSuffix: spaceId); include global
+            # catalog rows (`space_id: "*"`) the same way Attribute Alerts does.
+            - terms:
+                space_id: ["{{ workflow.spaceId }}", "*"]
             # Usable-report bar (mvp-slice.md): has content, has IOCs or
             # techniques, has severity. Replaces the removed `reportable`
             # field, which does not exist on the shipped mapping.
@@ -61,21 +63,63 @@ steps:
                 minimum_should_match: 1
             - exists:
                 field: severity.level
-            # Cooldown: feedback.last_hunted_at is nested, not top-level.
+            # Cooldown / revision bypass against nested per-space `evidence`.
+            # Flat range/exists on a nested subfield matches nothing. A report
+            # is eligible when any of: never hunted in this space, cooldown
+            # elapsed in this space, or top-level revision advanced past this
+            # space's last_hunted_revision (re-enrich bypasses the time gate).
             - bool:
                 should:
-                  - range:
-                      feedback.last_hunted_at:
-                        lte: "now-240m"
                   - bool:
                       must_not:
-                        exists:
-                          field: feedback.last_hunted_at
+                        - nested:
+                            path: evidence
+                            query:
+                              bool:
+                                filter:
+                                  - term:
+                                      evidence.space_id: "{{ workflow.spaceId }}"
+                                  - exists:
+                                      field: evidence.last_hunted_at
+                  - nested:
+                      path: evidence
+                      query:
+                        bool:
+                          filter:
+                            - term:
+                                evidence.space_id: "{{ workflow.spaceId }}"
+                            - range:
+                                evidence.last_hunted_at:
+                                  lte: "now-240m"
+                  - script:
+                      script:
+                        lang: painless
+                        params:
+                          space_id: "{{ workflow.spaceId }}"
+                        source: >
+                          def rev = params._source.revision;
+                          if (rev == null) { return false; }
+                          if (!(params._source.evidence instanceof List)) { return false; }
+                          for (def el : params._source.evidence) {
+                            if (el != null && el.space_id == params.space_id) {
+                              def last = el.last_hunted_revision;
+                              if (last == null) { return ((Number)rev).intValue() > 0; }
+                              return ((Number)rev).intValue() > ((Number)last).intValue();
+                            }
+                          }
+                          return false;
                 minimum_should_match: 1
       sort:
-        - corroborated_rank_score:
+        # corroborated_rank_score lives only under nested evidence; sort must
+        # use nested path + space filter or ES ignores / rejects the field.
+        - evidence.corroborated_rank_score:
             order: desc
             missing: _last
+            nested:
+              path: evidence
+              filter:
+                term:
+                  evidence.space_id: "{{ workflow.spaceId }}"
         - rank_score:
             order: desc
             missing: 0
@@ -110,6 +154,7 @@ steps:
           workflow-id: system-security-hunt-execute
           inputs:
             report_id: "{{ foreach.item._id }}"
+            revision: "{{ foreach.item._source.revision }}"
             investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
             inference_endpoint_id: "{{ consts.inference_endpoint_id }}"
             tier2_when: "{{ consts.tier2_when }}"

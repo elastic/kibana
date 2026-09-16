@@ -23,7 +23,7 @@ export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   id: ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 1,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
     renderScheduledWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
