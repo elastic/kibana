@@ -24,12 +24,10 @@ test.describe(
       await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('hides Stack Alerts under Alerts and Insights', async ({ pageObjects }) => {
+    test('hides Stack Alerts under Alerts and Insights', async ({ config, pageObjects }) => {
       const nav = pageObjects.observabilityNavigation;
-      const stackManagement = nav.navItemInFooterById('stack_management');
-      const useStackManagement = await stackManagement.isVisible();
-      const panelId = useStackManagement ? 'stack_management' : 'admin_and_settings';
-      const opener = useStackManagement ? stackManagement : nav.navItemInFooterById(panelId);
+      const panelId = config.serverless ? 'admin_and_settings' : 'stack_management';
+      const opener = nav.navItemInFooterById(panelId);
 
       await expect(opener).toBeVisible();
       await opener.click();

@@ -7,7 +7,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
-const FOOTER_PANEL_IDS = ['admin_and_settings', 'stack_management'] as const;
+/** Serverless / cloud: primary chrome nav can lag behind Playwright defaults (gh-267186). */
+const PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
+
+export const PROJECT_MANAGEMENT_PANEL_IDS = ['admin_and_settings', 'stack_management'] as const;
+export type ProjectManagementPanelId = (typeof PROJECT_MANAGEMENT_PANEL_IDS)[number];
 
 /** Project chrome footer + Stack Management / Admin and Settings side panel. */
 export class ProjectManagementNav {
@@ -20,7 +24,7 @@ export class ProjectManagementNav {
   }
 
   async waitForLoad() {
-    await this.primaryNav.waitFor({ state: 'visible' });
+    await this.primaryNav.waitFor({ state: 'visible', timeout: PRIMARY_NAV_LOAD_TIMEOUT_MS });
   }
 
   footerItemById(id: string): Locator {
@@ -36,22 +40,14 @@ export class ProjectManagementNav {
   }
 
   /**
-   * Opens serverless Admin and Settings or stateful Stack Management, whichever
-   * the current project chrome renders.
+   * Opens the given project-chrome management panel. Caller picks the id from
+   * `config.serverless` (`admin_and_settings`) vs stateful solution nav (`stack_management`).
    */
-  async openManagementPanel(): Promise<Locator> {
-    await this.footerNav.waitFor({ state: 'visible' });
-
-    for (const panelId of FOOTER_PANEL_IDS) {
-      const opener = this.footerItemById(panelId);
-      if (await opener.isVisible()) {
-        await opener.click();
-        const panel = this.sidePanel(panelId);
-        await panel.waitFor({ state: 'visible' });
-        return panel;
-      }
-    }
-
-    throw new Error(`Project chrome footer has no ${FOOTER_PANEL_IDS.join(' or ')} panel opener`);
+  async openManagementPanel(panelId: ProjectManagementPanelId): Promise<Locator> {
+    const opener = this.footerItemById(panelId);
+    await opener.click();
+    const panel = this.sidePanel(panelId);
+    await panel.waitFor({ state: 'visible' });
+    return panel;
   }
 }

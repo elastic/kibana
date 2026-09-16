@@ -28,7 +28,7 @@ describe('Elasticsearch solution navigation tree', () => {
     )) as NavigationTreeDefinition;
     const stackManagement = footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
     const alertsSection = stackManagement?.children?.find(
-      (item) => item.title === 'Alerts and Insights'
+      (item) => item.id === 'alerts_and_insights'
     ) as NodeDefinition | undefined;
     const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
 

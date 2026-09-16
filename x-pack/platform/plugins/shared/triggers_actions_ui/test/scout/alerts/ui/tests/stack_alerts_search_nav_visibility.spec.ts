@@ -53,7 +53,8 @@ test.describe(
 
       const nav = pageObjects.projectManagementNav;
       await nav.waitForLoad();
-      const panel = await nav.openManagementPanel();
+      const panelId = config.serverless ? 'admin_and_settings' : 'stack_management';
+      const panel = await nav.openManagementPanel(panelId);
 
       await expect(nav.managementLink(panel, 'triggersActions')).toBeVisible();
       await expect(nav.managementLink(panel, 'triggersActionsAlerts')).toBeVisible();
