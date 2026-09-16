@@ -34,7 +34,7 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['alert', 'manual'] },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',

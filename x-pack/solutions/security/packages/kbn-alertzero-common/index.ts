@@ -30,6 +30,7 @@ export {
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_SKILLS_URL,
   ALERTZERO_SKILL_URL_TEMPLATE,
@@ -129,6 +130,12 @@ export {
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
+
+export type {
+  WorkerSettingsDeclaration,
+  WorkerExtrasDeclaration,
+} from './impl/worker_settings/types';
+export { ALERT_TRIAGE_SETTINGS } from './impl/worker_settings/floor_watch';
 
 export {
   compareWatchesForDisplay,
