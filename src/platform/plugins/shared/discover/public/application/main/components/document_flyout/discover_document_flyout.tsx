@@ -9,26 +9,23 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  EuiCode,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   type EuiFlyoutMenuAction,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getEbtProps } from '@kbn/ebt-click';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import {
+  DiscoverGridFlyout,
+  useShareDirectLinkAction,
+} from '../../../../components/discover_grid_flyout';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -42,20 +39,7 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
-import {
-  ExpandedDocLinkability,
-  getEsqlMissingMetadataExample,
-  getExpandedDocLinkability,
-  getExpandedDocLinkDisabledReason,
-} from '../../utils/expanded_doc';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-
-const expandedDocLinkabilityEbtDetails: Record<ExpandedDocLinkability, string> = {
-  [ExpandedDocLinkability.Linkable]: 'linkable',
-  [ExpandedDocLinkability.EsqlUnsupportedSource]: 'esqlUnsupportedSource',
-  [ExpandedDocLinkability.EsqlMissingMetadata]: 'esqlMissingMetadata',
-  [ExpandedDocLinkability.EsqlTransformational]: 'esqlTransformational',
-};
+import { getExpandedDocLinkability } from '../../utils/expanded_doc';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -77,8 +61,6 @@ export const DiscoverDocumentFlyout = memo(
     onRemoveColumn,
     onAddFilter,
   }: DiscoverDocumentFlyoutProps) => {
-    const services = useDiscoverServices();
-    const { toastNotifications } = services;
     const dispatch = useInternalStateDispatch();
     const query = useAppStateSelector((state) => state.query);
     const persistedDiscoverSession = useInternalStateSelector(
@@ -106,77 +88,18 @@ export const DiscoverDocumentFlyout = memo(
       () => getExpandedDocLinkability(query, expandedDoc),
       [query, expandedDoc]
     );
-    const copyLinkDisabledReason = useMemo(
-      () => getExpandedDocLinkDisabledReason(expandedDocLinkability),
-      [expandedDocLinkability]
-    );
-    const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(() => {
-      if (!expandedDoc || expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
-        return undefined;
-      }
-
-      const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkLabel', {
-        defaultMessage: 'Copy link',
-      });
-
-      return [
-        {
-          iconType: 'share',
-          'aria-label': copyLinkDisabledReason
-            ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
-                defaultMessage: 'Cannot copy link: {reason}',
-                values: { reason: copyLinkDisabledReason },
-              })
-            : copyLinkLabel,
-          toolTipContent: copyLinkDisabledReason ?? copyLinkLabel,
-          toolTipProps: {
-            anchorProps: {
-              'data-test-subj': 'discoverDocFlyoutShareDirectLink',
-              ...getEbtProps({
-                action: 'shareDirectLink',
-                element: 'docViewerFlyoutHeader',
-                detail: expandedDocLinkabilityEbtDetails[expandedDocLinkability],
-              }),
-            },
-          },
-          onClick: () => {
-            if (copyLinkDisabledReason) {
-              const isMissingMetadata =
-                expandedDocLinkability === ExpandedDocLinkability.EsqlMissingMetadata;
-              const metadataExample =
-                isMissingMetadata && isOfAggregateQueryType(query)
-                  ? getEsqlMissingMetadataExample(query.esql)
-                  : undefined;
-
-              toastNotifications.addWarning({
-                title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                  defaultMessage: 'Link not copied',
-                }),
-                text: metadataExample
-                  ? toMountPoint(
-                      <EsqlMissingMetadataToastText example={metadataExample} />,
-                      services
-                    )
-                  : copyLinkDisabledReason,
-                'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
-                ...(metadataExample && { toastLifeTimeMs: Infinity }),
-              });
-            } else {
-              void copyLink();
-            }
-          },
-        },
-      ];
-    }, [
+    const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
-      copyLinkDisabledReason,
-      expandedDoc,
-      expandedDocLinkability,
-      expandedDocOwner,
+      linkability: expandedDocLinkability,
       query,
-      services,
-      toastNotifications,
-    ]);
+    });
+    const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
+      () =>
+        expandedDoc && expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
+          ? shareDirectLinkActions
+          : undefined,
+      [expandedDoc, expandedDocOwner, shareDirectLinkActions]
+    );
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
     const setExpandedDocForCurrentOwner = useCallback(
@@ -271,29 +194,6 @@ export const DiscoverDocumentFlyout = memo(
       />
     );
   }
-);
-
-const EsqlMissingMetadataToastText = ({ example }: { example: string }) => (
-  <>
-    <p>
-      <FormattedMessage
-        id="discover.docViews.flyout.copyLinkMissingMetadataDescription"
-        defaultMessage="Add <code>METADATA _id, _index</code> on the FROM or TS line, then rerun the query and reopen the row details."
-        values={{
-          code: (chunks) => <EuiCode>{chunks}</EuiCode>,
-        }}
-      />
-    </p>
-    <EuiCodeBlock
-      language="esql"
-      fontSize="s"
-      paddingSize="s"
-      isCopyable
-      data-test-subj="discoverDocFlyoutCopyLinkMetadataExample"
-    >
-      {example}
-    </EuiCodeBlock>
-  </>
 );
 
 const ExpandedDocNoticeText = ({

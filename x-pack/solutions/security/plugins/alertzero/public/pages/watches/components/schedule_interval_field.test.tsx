@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
@@ -33,20 +33,13 @@ describe('ScheduleIntervalField', () => {
     expect([...unit().options].map((option) => option.value)).toEqual(['m', 'h', 'd']);
   });
 
-  it('persists once on blur rather than per keystroke', () => {
+  it('reports each valid number change to the parent immediately, without blur', () => {
     const { onChange, value } = renderField('24h');
 
     fireEvent.change(value(), { target: { value: '3' } });
     fireEvent.change(value(), { target: { value: '30' } });
 
-    // A save per keystroke would rewrite the workflow and re-register its Task Manager schedule
-    // twice, once at the intermediate "3h".
-    expect(onChange).not.toHaveBeenCalled();
-
-    fireEvent.blur(value());
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith('30h');
+    expect(onChange.mock.calls).toEqual([['3h'], ['30h']]);
   });
 
   it('persists immediately when the unit changes', () => {
@@ -58,10 +51,10 @@ describe('ScheduleIntervalField', () => {
     expect(onChange).toHaveBeenCalledWith('24m');
   });
 
-  it('does not persist when blurred on the unchanged value', () => {
+  it('does not report an unchanged value', () => {
     const { onChange, value } = renderField('24h');
 
-    fireEvent.blur(value());
+    fireEvent.change(value(), { target: { value: '24' } });
 
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -77,12 +70,36 @@ describe('ScheduleIntervalField', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('re-syncs when the server echoes a different value', () => {
+  it('re-syncs when the parent resets the value', () => {
     const { rerender, value } = renderField('24h');
 
     rerender(<ScheduleIntervalField current="15m" onChange={jest.fn()} />);
 
     expect(value().value).toBe('15');
     expect(screen.getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
+  });
+
+  it('follows the parent after a change and reports the next edit against it', () => {
+    const onChange = jest.fn();
+    const Controlled: React.FC = () => {
+      const [current, setCurrent] = useState('24h');
+      return (
+        <ScheduleIntervalField
+          current={current}
+          onChange={(interval) => {
+            onChange(interval);
+            setCurrent(interval);
+          }}
+        />
+      );
+    };
+    render(<Controlled />);
+    const value = screen.getByTestId('alertZeroScheduleIntervalValue');
+
+    fireEvent.change(value, { target: { value: '30' } });
+    fireEvent.change(value, { target: { value: '3' } });
+
+    expect(onChange.mock.calls).toEqual([['30h'], ['3h']]);
+    expect(value).toHaveValue(3);
   });
 });

@@ -459,6 +459,10 @@ export class Plugin implements CorePlugin<
         title: alertsFeatureTitle,
         capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
+        // Keep the deep link for project side nav. `hideFromGlobalSearch` drops the
+        // entire deep link, which also hides the page from Search/ES and VectorDB
+        // nav trees that reference `management:triggersActionsAlerts`.
+        visibleIn: ['projectSideNav'],
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
