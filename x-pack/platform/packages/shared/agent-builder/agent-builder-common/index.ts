@@ -334,6 +334,9 @@ export {
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
+  type ServerAssignedEventFields,
+  type ConversationEventInput,
+  type ConversationEvent,
   type EventActor,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
@@ -356,6 +359,12 @@ export {
   type TimelineEvent,
   type TimelineEventInput,
   type ActiveExecution,
+  CONVERSATION_EVENT_ID_DELIMITER,
+  RESERVED_CONVERSATION_EVENT_TYPES,
+  type ReservedConversationEventType,
+  BUILT_IN_CONVERSATION_EVENT_TYPES,
+  isBuiltInConversationEventType,
+  type ValidConversationEventType,
 } from './chat';
 export {
   type PublicSkillDefinition,

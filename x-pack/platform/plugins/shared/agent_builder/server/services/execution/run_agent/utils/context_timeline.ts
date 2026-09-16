@@ -17,20 +17,11 @@ import type {
 import { TimelineEventType, isEventsNativeVersion } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
-import { parseExecutionId, roundsToEvents } from '../../../conversation/client/rounds_to_events';
-
-/**
- * The normalized timeline the agent context is built from: one execution per round, with HITL
- * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
- * stored rounds; events-native conversations are folded and re-serialized. Context only, never
- * persisted, so downstream consumers can read events without reconstructing rounds.
- */
-export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
-  isEventsNativeVersion(conversation.schema_version) &&
-  conversation.events &&
-  conversation.events.length > 0
-    ? roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) })
-    : roundsToEvents(conversation);
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundsToEvents,
+} from '../../../conversation/client/rounds_to_events';
 
 /** A `user_message` whose payload has been processed for the agent (attachments migrated to refs, context rendered). */
 export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {
@@ -58,6 +49,38 @@ export interface TimelineRound<E extends AnyTimelineEvent = TimelineEvent> {
   /** Every event of the round, in timeline order. */
   events: E[];
 }
+
+/** A user message that triggered no execution, as it appears on the context timeline. */
+export interface TimelineStandaloneUserMessage<E extends AnyTimelineEvent = TimelineEvent> {
+  userMessage: UserMessageOf<E>;
+}
+
+export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
+  | TimelineRound<E>
+  | TimelineStandaloneUserMessage<E>;
+
+/**
+ * The normalized timeline the agent context is built from: one execution per round, with HITL
+ * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
+ * stored rounds; events-native conversations are folded and re-serialized. Context only, never
+ * persisted, so downstream consumers can read events without reconstructing rounds.
+ */
+export const eventsForContext = (conversation: Conversation): TimelineEvent[] => {
+  if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
+    return roundsToEvents(conversation);
+  }
+  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) });
+  const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
+  // Folding drops the standalone messages, so re-add them and restore the order they were stored
+  // in. Timestamps come first because folding also synthesizes events that were never stored;
+  // stored position then breaks ties, keeping a message and a round sent in the same second apart.
+  return [...folded, ...standaloneUserMessages(conversation.events)].sort(
+    (left, right) =>
+      left.created_at.localeCompare(right.created_at) ||
+      (positions.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+        (positions.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+  );
+};
 
 /**
  * Groups a normalized timeline (see `eventsForContext`) into rounds. Ownership is resolved through
@@ -149,3 +172,45 @@ export const lastExecutionTerminated = (
     (event): event is ExecutionTerminatedEvent =>
       event.type === TimelineEventType.executionTerminated
   );
+
+/** Narrows an entry to a round; a standalone user message has no execution to terminate. */
+export const isTimelineRound = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): entry is TimelineRound<E> => 'terminated' in entry;
+
+export const isTimelineStandaloneUserMessage = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): entry is TimelineStandaloneUserMessage<E> => !isTimelineRound(entry);
+
+/** Selects user messages, excluding execution triggers and receipt-time round inputs. */
+export const standaloneUserMessages = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<UserMessageOf<E>> => {
+  const triggerIds = new Set(timeline.map((event) => event.trigger_event_id));
+  return timeline.filter(
+    (event): event is E & UserMessageOf<E> =>
+      event.type === TimelineEventType.userMessage &&
+      !event.execution_id &&
+      !triggerIds.has(event.id) &&
+      !isRoundDerivedEventId(event.id)
+  );
+};
+
+/** Groups execution history and user messages without fabricating rounds. */
+export const groupTimelineEntries = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<TimelineEntry<E>> => {
+  const entries: Array<TimelineEntry<E>> = [
+    ...groupTimelineRounds(timeline),
+    ...standaloneUserMessages(timeline).map((userMessage) => ({ userMessage })),
+  ];
+  const positions = new Map(timeline.map((event, index) => [event.id, index]));
+  // Entries are concatenated by kind, so restore timeline order: by the entry's triggering
+  // message, falling back to its position in `timeline` when two share a timestamp.
+  return entries.sort(
+    (left, right) =>
+      left.userMessage.created_at.localeCompare(right.userMessage.created_at) ||
+      (positions.get(left.userMessage.id) ?? Number.MAX_SAFE_INTEGER) -
+        (positions.get(right.userMessage.id) ?? Number.MAX_SAFE_INTEGER)
+  );
+};
