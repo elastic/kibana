@@ -141,6 +141,32 @@ describe('TimeBuckets', () => {
     expect(format).toEqual('HH:mm');
   });
 
+  test('getScaledDateFormat - prepends date when range spans more than 24 hours and format is time-only', () => {
+    // Use a high maxBars so a 20m interval is not scaled up past 1h for a ~26h range.
+    const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
+    const timeBuckets = new TimeBuckets(config);
+    timeBuckets.setBounds({
+      min: moment('2020-03-25T00:00:00'),
+      max: moment('2020-03-26T02:00:00'), // 26 hours
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    // The PT1M rule selects 'HH:mm'; because duration > 24h the date is prepended.
+    expect(format).toEqual('YYYY-MM-DD HH:mm');
+  });
+
+  test('getScaledDateFormat - does not prepend date when range spans 24 hours or less', () => {
+    const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
+    const timeBuckets = new TimeBuckets(config);
+    timeBuckets.setBounds({
+      min: moment('2020-03-25T00:00:00'),
+      max: moment('2020-03-25T23:00:00'), // 23 hours
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('HH:mm');
+  });
+
   test('allows days but throws error on weeks', () => {
     const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('14d');
