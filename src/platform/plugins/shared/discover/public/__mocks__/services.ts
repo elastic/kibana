@@ -15,6 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
   coreMock,
@@ -54,6 +55,7 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { SessionService } from '../session';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -194,6 +196,18 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const savedSearch = savedSearchPluginMock.createStartContract();
+  const sessionService: SessionService = {
+    get: jest.fn(async (id: string) => ({
+      session: await savedSearch.getDiscoverSession(id),
+      warnings: [],
+    })),
+    save: jest.fn(async (session: SaveDiscoverSessionParams) => ({
+      ...session,
+      id: session.id ?? 'new-session',
+      managed: false,
+    })),
+  };
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -289,7 +303,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
+    savedSearch,
+    sessionService,
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
