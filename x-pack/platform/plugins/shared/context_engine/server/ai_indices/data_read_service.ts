@@ -75,7 +75,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   async list(ids?: string[]): Promise<AiIndexHttpItem[]> {
     const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
     try {
-      const registry = await aiIndexService.list();
+      const registry = await aiIndexService.list(spaceId);
       const requested = ids && new Set(ids);
       const aiIndices = requested ? registry.filter(({ id }) => requested.has(id)) : registry;
       const results = await resolveAiIndexVisibility({ esClient, aiIndices, spaceId, logger });

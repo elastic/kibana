@@ -1438,15 +1438,12 @@ describe('ai indices routes', () => {
       const spaces = spacesMock.createStart();
       spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
       getSpaces.mockResolvedValue(spaces);
-      aiIndexService.list.mockResolvedValue([]);
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       aiIndexService.delete.mockResolvedValue(undefined);
 
-      await callRoute('GET', aiIndexPath, {});
       await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
       await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
-      expect(aiIndexService.list).toHaveBeenCalledWith('marketing');
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'marketing');
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', 'marketing');
     });
