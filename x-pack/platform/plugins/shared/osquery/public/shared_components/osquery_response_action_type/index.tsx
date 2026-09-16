@@ -30,6 +30,7 @@ interface OsqueryResponseActionsValues {
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    interval?: number;
     timeout?: number;
   }>;
 }
@@ -44,6 +45,7 @@ interface OsqueryResponseActionsParamsFormFields {
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    interval?: number;
     timeout?: number;
   }>;
   queryType: 'query' | 'pack';
@@ -90,9 +92,17 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     if (packData?.queries) {
+      // `interval` is carried through deliberately: the response action is
+      // persisted onto the rule, and `create_queries` spreads these fields onto
+      // the action document at execution time. Dropping it here silently
+      // changed the cadence recorded for every pack response action. The pack
+      // read API types it as `number | string`, so normalize to a number the
+      // way the pack forms do.
       const queriesArray = map(packData.queries, (query, queryId: string) => ({
         id: queryId,
         query: query.query,
+        interval:
+          typeof query.interval === 'string' ? parseInt(query.interval, 10) : query.interval,
         ecs_mapping: (query.ecs_mapping ?? {}) as NonNullable<typeof query.ecs_mapping>,
         timeout: query.timeout,
       }));
