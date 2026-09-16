@@ -21,7 +21,6 @@ function providerStringToModel(
 ): { provider: ModelProvider; family: ModelFamily } {
   switch (provider) {
     case 'elastic': {
-      // Derive family from model_id — EIS hosts multiple provider families.
       if (modelId) {
         const id = modelId.toLowerCase();
         if (id.includes('gpt') || id.includes('openai') || id.includes('o1') || id.includes('o3')) {
@@ -41,8 +40,9 @@ function providerStringToModel(
     case 'google':
       return { provider: ModelProvider.Google, family: ModelFamily.Gemini };
     case 'openai':
-    default:
       return { provider: ModelProvider.OpenAI, family: ModelFamily.GPT };
+    default:
+      return { provider: ModelProvider.Other, family: ModelFamily.Unknown };
   }
 }
 
