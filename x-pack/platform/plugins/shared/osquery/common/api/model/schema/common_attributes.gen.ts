@@ -217,9 +217,6 @@ export type ResultType = z.infer<typeof ResultType>;
 export type ResultTypeEnum = typeof ResultType.enum;
 export const ResultTypeEnum = ResultType.enum;
 
-export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
-export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
-
 export const ArrayQueriesItem = lazySchema(() =>
   z.object({
     id: QueryId.optional(),
@@ -422,6 +419,9 @@ export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
 export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
+
+export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
+export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
 
 /**
  * Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.

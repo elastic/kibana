@@ -23,11 +23,11 @@ import {
   ScheduleTypeOrUndefined,
   RRuleScheduleConfigOrUndefined,
   QueryEnabled,
+  ResultType,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
   MinOsqueryVersion,
-  ResultType,
   PackPlatform,
 } from '../model/schema/common_attributes.gen';
 
