@@ -17,10 +17,7 @@ import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type {
-  AppenderConfigType,
-  FileAppenderPluginConfig,
-} from '@kbn/core-logging-server';
+import type { AppenderConfigType, FileAppenderPluginConfig } from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
