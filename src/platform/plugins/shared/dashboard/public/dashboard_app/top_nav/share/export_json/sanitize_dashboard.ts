@@ -24,5 +24,7 @@ export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortS
   return {
     data: result.data,
     warnings: (result.warnings ?? []).map(({ message }) => message),
+    relatedItems: result.related_items ?? [],
+    relatedItemsCount: result.related_items_count ?? result.related_items?.length ?? 0,
   };
 }

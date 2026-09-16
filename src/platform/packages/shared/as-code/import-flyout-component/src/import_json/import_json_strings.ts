@@ -52,6 +52,14 @@ export const importJsonFlyoutStrings = {
     i18n.translate('asCodeImport.importJson.ndjsonNoteLink', {
       defaultMessage: 'here',
     }),
+  getReviewWarningsTitle: () =>
+    i18n.translate('asCodeImport.importJson.reviewWarningsTitle', {
+      defaultMessage: 'Review import warnings',
+    }),
+  getReviewWarningsSummary: () =>
+    i18n.translate('asCodeImport.importJson.reviewWarningsSummary', {
+      defaultMessage: 'Review the following before importing this JSON.',
+    }),
   getWarningsTitle: () =>
     i18n.translate('asCodeImport.importJson.warningsTitle', {
       defaultMessage: 'Unsupported properties were removed',
@@ -69,5 +77,28 @@ export const importJsonFlyoutStrings = {
   getWarningsAccordionHide: () =>
     i18n.translate('asCodeImport.importJson.warningsAccordionHide', {
       defaultMessage: 'Hide details',
+    }),
+  getRelatedItemsSummary: (count: number) =>
+    i18n.translate('asCodeImport.importJson.relatedItemsSummary', {
+      defaultMessage:
+        '{count} related item{count, plural, one {} other {s}} might not exist in this cluster or space.',
+      values: { count },
+    }),
+  getRelatedItemsTruncatedSummary: (displayedCount: number) =>
+    i18n.translate('asCodeImport.importJson.relatedItemsTruncatedSummary', {
+      defaultMessage: 'Showing the first {displayedCount}.',
+      values: { displayedCount },
+    }),
+  getRelatedItemsTypeColumn: () =>
+    i18n.translate('asCodeImport.importJson.relatedItemsTypeColumn', {
+      defaultMessage: 'Item Type',
+    }),
+  getRelatedItemsIdColumn: () =>
+    i18n.translate('asCodeImport.importJson.relatedItemsIdColumn', {
+      defaultMessage: 'Item ID',
+    }),
+  getRelatedItemsTableCaption: () =>
+    i18n.translate('asCodeImport.importJson.relatedItemsTableCaption', {
+      defaultMessage: 'Related items that might not exist in this cluster or space',
     }),
 };

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -115,8 +115,8 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.queryByTestId('importDashboardJsonWarningsList')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Show details'));
-    expect(screen.getByTestId('importDashboardJsonWarningsList')).toBeInTheDocument();
-    expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
+    expect(screen.getAllByTestId('importDashboardJsonWarningsList')[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Panel "chart-1" could not be loaded/)[0]).toBeInTheDocument();
 
     const warnings = screen.getByTestId('importDashboardJsonWarnings');
     const filePicker = screen.getByTestId('importDashboardJsonFilePicker');
@@ -125,16 +125,28 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
-  it('creates a dashboard from the sanitized state instead of the uploaded state', async () => {
+  it('shows related items and creates a dashboard from only the sanitized state', async () => {
+    const user = userEvent.setup();
     const onImportSuccess = jest.fn();
     const closeFlyout = jest.fn();
+    mockSanitizeDashboard.mockResolvedValue({
+      data: SANITIZED_STATE,
+      warnings: [],
+      relatedItems: [{ type: 'index-pattern', type_label: 'data view', id: 'data-view-1' }],
+    });
     renderFlyout(onImportSuccess, closeFlyout);
     await pickFile(VALID_FILE);
     await waitFor(() =>
       expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled()
     );
+    expect(screen.getByText(/1 related item might not exist/)).toBeInTheDocument();
+    await user.click(
+      within(screen.getByTestId('importDashboardJsonRelatedItemsAccordion')).getByRole('button')
+    );
+    expect(screen.getAllByText('data view')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
     await act(async () => {
-      await userEvent.click(screen.getByTestId('importDashboardJsonImportButton'));
+      await user.click(screen.getByTestId('importDashboardJsonImportButton'));
     });
     await waitFor(() =>
       expect(mockHttpPost).toHaveBeenCalledWith('/api/dashboards', {

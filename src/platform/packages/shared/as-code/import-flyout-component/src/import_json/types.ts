@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
+
 export interface SanitizeImportJsonResult<SanitizedState> {
   data: SanitizedState;
   warnings: string[];
+  relatedItems?: AsCodeRelatedItem[];
+  relatedItemsCount?: number;
 }
 
 export type SanitizeImportJson<SanitizedState> = (

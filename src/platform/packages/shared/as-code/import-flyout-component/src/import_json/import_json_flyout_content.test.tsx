@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -201,14 +201,98 @@ describe('ImportJsonFlyoutContent', () => {
     expect(screen.queryByTestId('testWarningsList')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Show details'));
-    expect(screen.getByTestId('testWarningsList')).toBeInTheDocument();
-    expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
+    expect(screen.getAllByTestId('testWarningsList')[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Panel "chart-1" could not be loaded/)[0]).toBeInTheDocument();
 
     const warnings = screen.getByTestId('testWarnings');
     const filePicker = screen.getByTestId('testFilePicker');
     const position = warnings.compareDocumentPosition(filePicker);
     expect(Math.floor(position / Node.DOCUMENT_POSITION_FOLLOWING) % 2).toBe(1);
     expect(screen.getByTestId('testImportButton')).toBeEnabled();
+  });
+
+  it('shows potentially unavailable related items but still allows import', async () => {
+    const user = userEvent.setup();
+    const sanitizeImportJson = jest.fn().mockResolvedValue({
+      data: VALID_STATE,
+      warnings: [],
+      relatedItems: [
+        { type: 'index-pattern', type_label: 'data view', id: 'data-view-1' },
+        { type: 'lens', type_label: 'lens', id: 'library-item-1' },
+      ],
+      relatedItemsCount: 123,
+    });
+    renderFlyout({ sanitizeImportJson });
+    await pickFile(VALID_FILE);
+
+    await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
+    expect(screen.getByText('Review import warnings')).toBeInTheDocument();
+    expect(screen.getByText(/123 related items might not exist/)).toBeInTheDocument();
+    expect(screen.getByText('Showing the first 2.')).toBeInTheDocument();
+    expect(screen.queryByTestId('testRelatedItemsList')).not.toBeInTheDocument();
+
+    await user.click(within(screen.getByTestId('testRelatedItemsAccordion')).getByRole('button'));
+    expect(screen.getAllByTestId('testRelatedItemsList')[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader', { name: 'Item Type' })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader', { name: 'Item ID' })[0]).toBeInTheDocument();
+    expect(screen.getAllByText('data view')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('lens')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('library-item-1')[0]).toBeInTheDocument();
+    expect(screen.getByTestId('testImportButton')).toBeEnabled();
+  });
+
+  it('shows sanitize warnings and related items as separate sections in one callout', async () => {
+    const user = userEvent.setup();
+    const sanitizeImportJson = jest.fn().mockResolvedValue({
+      data: VALID_STATE,
+      warnings: ['Panel "chart-1" could not be loaded'],
+      relatedItems: [{ type: 'index-pattern', type_label: 'index-pattern', id: 'data-view-1' }],
+    });
+    renderFlyout({ sanitizeImportJson });
+    await pickFile(VALID_FILE);
+
+    await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
+    expect(screen.getAllByTestId('testWarnings')).toHaveLength(1);
+    expect(screen.getByText(/1 item removed from the imported JSON/)).toBeInTheDocument();
+    expect(screen.getByText(/1 related item might not exist/)).toBeInTheDocument();
+
+    const warningsAccordion = screen.getByTestId('testWarningsAccordion');
+    const relatedItemsAccordion = screen.getByTestId('testRelatedItemsAccordion');
+    await user.click(within(warningsAccordion).getByRole('button'));
+    await user.click(within(relatedItemsAccordion).getByRole('button'));
+    expect(screen.getAllByText(/Panel "chart-1" could not be loaded/)[0]).toBeInTheDocument();
+    expect(screen.getAllByText('index-pattern')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
+    expect(screen.getByTestId('testImportButton')).toBeEnabled();
+  });
+
+  it('resets a dismissed warning callout when another file is selected', async () => {
+    const user = userEvent.setup();
+    const sanitizeImportJson = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data: VALID_STATE,
+        warnings: [],
+        relatedItems: [{ type: 'index-pattern', type_label: 'index-pattern', id: 'data-view-1' }],
+      })
+      .mockResolvedValueOnce({
+        data: VALID_STATE,
+        warnings: ['A property was removed'],
+        relatedItems: [],
+      });
+    renderFlyout({ sanitizeImportJson });
+    await pickFile(VALID_FILE);
+    await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /dismiss/i }));
+    expect(screen.queryByTestId('testWarnings')).not.toBeInTheDocument();
+
+    await pickFile(new File([JSON.stringify(VALID_STATE)], 'another-object.json'));
+    await waitFor(() => expect(sanitizeImportJson).toHaveBeenCalledTimes(2));
+    expect(screen.getByTestId('testWarnings')).toBeInTheDocument();
+    await user.click(within(screen.getByTestId('testWarningsAccordion')).getByRole('button'));
+    expect(screen.getAllByText('A property was removed')[0]).toBeInTheDocument();
   });
 
   it('creates the object and calls onImportSuccess', async () => {
