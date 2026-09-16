@@ -5,20 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Investigation } from '../types';
-import { ConversationDetailsFlyoutHeader } from '../components/details/flyout_header';
-import { ConversationDetailsFlyoutFooter } from '../components/details/flyout_footer';
-import {
-  AttachmentsTab,
-  OverviewTab,
-  TimelineTab,
-} from '../components/details/details_flyout_tab_contents';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
-import { InvestigationSlot, type InvestigationLoader } from './investigation_slot';
+import { ConversationTitle } from './conversation_title';
+import type { InvestigationLoader } from './investigation_slot';
+
+/**
+ * The slot contents are loaded on demand: registration runs during every consuming plugin's
+ * `start`, so anything this module imports statically lands in that plugin's page load bundle.
+ * All five share one chunk, which the first opened flyout pulls in.
+ */
+const LazyOverviewSlot = lazy(() =>
+  import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
+);
+const LazyAttachmentsSlot = lazy(() =>
+  import('./slots').then(({ AttachmentsSlot }) => ({ default: AttachmentsSlot }))
+);
+const LazyTimelineSlot = lazy(() =>
+  import('./slots').then(({ TimelineSlot }) => ({ default: TimelineSlot }))
+);
+const LazyHeaderSlot = lazy(() =>
+  import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
+);
+const LazyFooterSlot = lazy(() =>
+  import('./slots').then(({ FooterSlot }) => ({ default: FooterSlot }))
+);
 
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
@@ -43,7 +58,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
 
 /**
  * Every slot of an open flyout resolves the same investigation, so concurrent loads for one
- * conversation share a request instead of issuing one per slot.
+ * conversation share a request instead of issuing one per slot. Slots mount as the lazy chunk
+ * below resolves, so they join whichever request the first of them put in flight.
  */
 const shareConcurrentLoads = (load: InvestigationLoader): InvestigationLoader => {
   const inFlight = new Map<string, Promise<Investigation>>();
@@ -81,9 +97,9 @@ export const registerAgenticInvestigationTemplateUI = ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
-        <InvestigationSlot conversation={conversation} loadInvestigation={load}>
-          {(investigation) => <OverviewTab investigation={investigation} />}
-        </InvestigationSlot>
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyOverviewSlot conversation={conversation} loadInvestigation={load} />
+        </Suspense>
       );
     },
   }));
@@ -91,7 +107,14 @@ export const registerAgenticInvestigationTemplateUI = ({
   conversationTemplates.registerTab(attachmentsTabId, ({ attachmentsService }) => ({
     label: DETAILS_FLYOUT_LABELS.tabs.attachments,
     content: function AttachmentsTabContent({ conversation }) {
-      return <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />;
+      return (
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyAttachmentsSlot
+            conversation={conversation}
+            attachmentsService={attachmentsService}
+          />
+        </Suspense>
+      );
     },
   }));
 
@@ -99,9 +122,9 @@ export const registerAgenticInvestigationTemplateUI = ({
     label: DETAILS_FLYOUT_LABELS.tabs.timeline,
     content: function TimelineTabContent({ conversation }) {
       return (
-        <InvestigationSlot conversation={conversation} loadInvestigation={load}>
-          {(investigation) => <TimelineTab events={investigation.events} />}
-        </InvestigationSlot>
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyTimelineSlot conversation={conversation} loadInvestigation={load} />
+        </Suspense>
       );
     },
   }));
@@ -113,31 +136,22 @@ export const registerAgenticInvestigationTemplateUI = ({
     detailsFlyout: {
       header: function InvestigationFlyoutHeader({ conversation }) {
         return (
-          <InvestigationSlot
-            conversation={conversation}
-            loadInvestigation={load}
-            // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
-            // collapse to nothing when the investigation is unavailable.
-            fallback={
-              <EuiTitle size="s">
-                <h2>{conversation.title}</h2>
-              </EuiTitle>
-            }
-          >
-            {(investigation) => <ConversationDetailsFlyoutHeader investigation={investigation} />}
-          </InvestigationSlot>
+          // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
+          // collapse to nothing while the slot's chunk loads.
+          <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <LazyHeaderSlot conversation={conversation} loadInvestigation={load} />
+          </Suspense>
         );
       },
       footer: function InvestigationFlyoutFooter({ conversation }) {
         return (
-          <InvestigationSlot conversation={conversation} loadInvestigation={load} fallback={null}>
-            {(investigation) => (
-              <ConversationDetailsFlyoutFooter
-                investigation={investigation}
-                onOpenChat={() => openSidebarConversation(conversation.id)}
-              />
-            )}
-          </InvestigationSlot>
+          <Suspense fallback={null}>
+            <LazyFooterSlot
+              conversation={conversation}
+              loadInvestigation={load}
+              onOpenChat={() => openSidebarConversation(conversation.id)}
+            />
+          </Suspense>
         );
       },
     },

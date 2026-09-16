@@ -179,7 +179,12 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
   it('shares one request between the slots of an open flyout', async () => {
     const { contract } = createFakeService();
-    const loadInvestigation = jest.fn().mockResolvedValue(investigation);
+    // Slots mount as their lazy chunk resolves, so the request has to still be in flight for the
+    // later ones to join it. A `mockResolvedValue` would settle before the footer mounts at all,
+    // which no HTTP request does.
+    const loadInvestigation = jest.fn(
+      () => new Promise<Investigation>((resolve) => setTimeout(() => resolve(investigation), 20))
+    );
     register(contract, { loadInvestigation });
     const Header = getSlot(contract, 'investigation', 'header');
     const Footer = getSlot(contract, 'investigation', 'footer');

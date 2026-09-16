@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { ReactNode } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { ReactElement, ReactNode } from 'react';
+import { EuiEmptyPrompt, EuiSkeletonLoading, EuiSkeletonText } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { Investigation } from '../types';
@@ -21,6 +21,11 @@ export interface InvestigationSlotProps {
   loadInvestigation: InvestigationLoader;
   /** Rendered when the investigation cannot be resolved. Pass `null` to render nothing. */
   fallback?: ReactNode;
+  /**
+   * Skeleton shaped like this slot's content, shown while the investigation loads. Must be a
+   * single element: `EuiSkeletonLoading` clones it to apply the progressbar role and label.
+   */
+  loadingContent?: ReactElement;
   children: (investigation: Investigation, refresh: () => void) => ReactNode;
 }
 
@@ -29,6 +34,7 @@ export const InvestigationSlot = ({
   conversation,
   loadInvestigation,
   fallback,
+  loadingContent = <EuiSkeletonText lines={3} />,
   children,
 }: InvestigationSlotProps) => {
   const { id } = conversation;
@@ -41,30 +47,33 @@ export const InvestigationSlot = ({
 
   // `useAbortableAsync` reports `loading: false` until its effect runs, so the first render has
   // neither a value nor an error yet.
-  if (loading || (!investigation && !error)) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" aria-label={TEMPLATE_UI_LABELS.loading} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const isLoading = loading || (!investigation && !error);
 
-  if (!investigation) {
-    if (fallback !== undefined) {
-      return <>{fallback}</>;
+  const renderLoaded = () => {
+    if (!investigation) {
+      if (fallback !== undefined) {
+        return <>{fallback}</>;
+      }
+      return (
+        <EuiEmptyPrompt
+          iconType={error ? 'warning' : 'documents'}
+          color={error ? 'danger' : 'subdued'}
+          title={
+            <h3>{error ? TEMPLATE_UI_LABELS.loadErrorTitle : TEMPLATE_UI_LABELS.notFoundTitle}</h3>
+          }
+        />
+      );
     }
-    return (
-      <EuiEmptyPrompt
-        iconType={error ? 'warning' : 'documents'}
-        color={error ? 'danger' : 'subdued'}
-        title={
-          <h3>{error ? TEMPLATE_UI_LABELS.loadErrorTitle : TEMPLATE_UI_LABELS.notFoundTitle}</h3>
-        }
-      />
-    );
-  }
 
-  return <>{children(investigation, refresh)}</>;
+    return <>{children(investigation, refresh)}</>;
+  };
+
+  return (
+    <EuiSkeletonLoading
+      isLoading={isLoading}
+      contentAriaLabel={TEMPLATE_UI_LABELS.contentLabel}
+      loadingContent={loadingContent}
+      loadedContent={renderLoaded()}
+    />
+  );
 };

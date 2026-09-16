@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const TEMPLATE_UI_LABELS = Object.freeze({
-  loading: i18n.translate('xpack.alertzero.templateUi.loading', {
-    defaultMessage: 'Loading investigation',
+  /** Names the content for `EuiSkeletonLoading`, which composes it into "Loading/Loaded {label}". */
+  contentLabel: i18n.translate('xpack.alertzero.templateUi.contentLabel', {
+    defaultMessage: 'Investigation',
   }),
   loadErrorTitle: i18n.translate('xpack.alertzero.templateUi.loadErrorTitle', {
     defaultMessage: 'Unable to load this investigation',
