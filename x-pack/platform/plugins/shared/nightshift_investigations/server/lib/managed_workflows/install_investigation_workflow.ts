@@ -6,6 +6,7 @@
  */
 
 import {
+  DEDUCTIVE_ALERT_TRIGGER_WORKFLOW_ID,
   DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -21,6 +22,9 @@ export const installInvestigationWorkflow = async ({
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
   await client.install(DEDUCTIVE_INVESTIGATION_WORKFLOW_ID, {
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  });
+  await client.install(DEDUCTIVE_ALERT_TRIGGER_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };

@@ -37,6 +37,53 @@ const INVESTIGABLE_RULE_TYPE_IDS = [
   ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
 ];
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value != null && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * AAD documents arrive nested (`kibana: { alert: { uuid } }`) from v1 rule-action events and
+ * flattened (`'kibana.alert.uuid'` as a single key) from RAC. Flatten nested objects so
+ * {@link parseAlertSnapshot} can read the same dotted field names in both cases. Arrays stay intact.
+ */
+const flattenAlertFields = (
+  value: Record<string, unknown>,
+  prefix = ''
+): Record<string, unknown> => {
+  const flattened: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isPlainObject(nested)) {
+      Object.assign(flattened, flattenAlertFields(nested, path));
+    } else {
+      flattened[path] = nested;
+    }
+  }
+  return flattened;
+};
+
+/**
+ * Accepts an investigation snapshot, a nested AAD document, a flattened AAD document, or a
+ * `_source`-wrapped hit, and returns the snapshot the investigation brief is composed from.
+ */
+export const snapshotFromAlertDocument = (alert: unknown): AlertSnapshot | undefined => {
+  if (!isPlainObject(alert)) {
+    return undefined;
+  }
+
+  const asSnapshot = alertSnapshotSchema.safeParse(alert);
+  if (asSnapshot.success) {
+    return asSnapshot.data;
+  }
+
+  const source = isPlainObject(alert._source) ? alert._source : alert;
+  const flattened = flattenAlertFields(source);
+  if (flattened[ALERT_UUID] == null && typeof alert._id === 'string') {
+    flattened[ALERT_UUID] = alert._id;
+  }
+
+  return parseAlertSnapshot(flattened);
+};
+
 export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapshot | undefined => {
   const value = alert[ALERT_EVALUATION_VALUES] ?? alert[ALERT_EVALUATION_VALUE];
   const threshold = alert[ALERT_EVALUATION_THRESHOLD];

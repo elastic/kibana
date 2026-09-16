@@ -6,7 +6,11 @@
  */
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { fetchAlertSnapshot, parseAlertSnapshot } from './alert_snapshot';
+import {
+  fetchAlertSnapshot,
+  parseAlertSnapshot,
+  snapshotFromAlertDocument,
+} from './alert_snapshot';
 
 const alert = {
   'kibana.alert.uuid': 'alert-1',
@@ -59,6 +63,90 @@ describe('parseAlertSnapshot', () => {
         evaluation: { value: [42, null] },
       })
     );
+  });
+});
+
+describe('snapshotFromAlertDocument', () => {
+  const expected = expect.objectContaining({
+    id: 'alert-1',
+    rule_id: 'rule-1',
+    rule_name: 'Test rule',
+    rule_type_id: 'test.rule',
+    rule_category: 'Test category',
+    status: 'active',
+    start: '2026-09-02T10:00:00.000Z',
+  });
+
+  it('passes through an already-valid snapshot', () => {
+    expect(
+      snapshotFromAlertDocument({
+        id: 'alert-1',
+        rule_id: 'rule-1',
+        rule_name: 'Test rule',
+        rule_type_id: 'test.rule',
+        rule_category: 'Test category',
+        status: 'active',
+        start: '2026-09-02T10:00:00.000Z',
+      })
+    ).toEqual(expected);
+  });
+
+  it('parses a flattened AAD document', () => {
+    expect(snapshotFromAlertDocument(alert)).toEqual(expected);
+  });
+
+  it('parses a nested v1 rule-action alert document', () => {
+    expect(
+      snapshotFromAlertDocument({
+        _id: 'alert-1',
+        _index: '.alerts-observability.test',
+        '@timestamp': '2026-09-02T10:01:00.000Z',
+        kibana: {
+          alert: {
+            uuid: 'alert-1',
+            status: 'active',
+            reason: 'Threshold exceeded',
+            start: '2026-09-02T10:00:00.000Z',
+            flapping: false,
+            group: [{ field: 'host.name', value: 'host-1' }],
+            rule: {
+              uuid: 'rule-1',
+              name: 'Test rule',
+              rule_type_id: 'test.rule',
+              category: 'Test category',
+            },
+          },
+        },
+      })
+    ).toEqual(expected);
+  });
+
+  it('reads uuid from _id when the nested document omits kibana.alert.uuid', () => {
+    expect(
+      snapshotFromAlertDocument({
+        _id: 'alert-1',
+        kibana: {
+          alert: {
+            status: 'active',
+            start: '2026-09-02T10:00:00.000Z',
+            rule: {
+              uuid: 'rule-1',
+              name: 'Test rule',
+              rule_type_id: 'test.rule',
+              category: 'Test category',
+            },
+          },
+        },
+      })
+    ).toEqual(expected);
+  });
+
+  it('unwraps a _source-wrapped hit', () => {
+    expect(snapshotFromAlertDocument({ _id: 'alert-1', _source: alert })).toEqual(expected);
+  });
+
+  it('returns undefined for a document missing required fields', () => {
+    expect(snapshotFromAlertDocument({ _id: 'alert-1', kibana: { alert: {} } })).toBeUndefined();
   });
 });
 
