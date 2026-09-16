@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       await testSubjects.click('starred-queries-tab');
 
-      await esql.clickStarredItem();
+      await esql.clickStarredItem(0);
       await header.waitUntilLoadingHasFinished();
 
       const editorValue = await monacoEditor.getCodeEditorValue();
