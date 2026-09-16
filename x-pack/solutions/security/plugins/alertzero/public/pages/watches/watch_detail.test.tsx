@@ -401,6 +401,68 @@ describe('WatchDetailPage', () => {
     });
   });
 
+  it('enables Save while the analysis window is being typed and saves the latest value', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(field, { target: { value: '2' } });
+    expect(save).toBeEnabled();
+    fireEvent.change(field, { target: { value: '21' } });
+    expect(save).toBeEnabled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(save);
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: null },
+    });
+  });
+
+  it('enables Save while the interval is being typed and saves the latest value', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+    const value = within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.change(value, { target: { value: '1' } });
+    expect(save).toBeEnabled();
+    fireEvent.change(value, { target: { value: '12' } });
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.click(save);
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      patch: { settings: { scheduleInterval: '12h' }, settingsRevision: null },
+    });
+  });
+
+  it('resets typed numeric values on Discard without writing', () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const window = within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays');
+    const interval = within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue');
+
+    fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.change(interval, { target: { value: '6' } });
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+    expect(window).toHaveValue(14);
+    expect(interval).toHaveValue(2);
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   it('sends the whole extras object under settings when the analysis window is saved', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');

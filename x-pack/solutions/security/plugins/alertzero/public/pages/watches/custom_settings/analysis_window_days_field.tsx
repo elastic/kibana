@@ -16,11 +16,17 @@ interface AnalysisWindowDaysFieldProps {
   onChange: (analysisWindowDays: number) => void;
 }
 
-/**
- * Detection Watch / Rule Tuning analysis window. The typed text is buffered locally and committed
- * to the page draft on blur, so partial input never reaches the draft; an out-of-range entry
- * reverts to `current`. The buffer follows `current`, which resets the field on Discard or refresh.
- */
+const parseAnalysisWindowDays = (text: string): number | undefined => {
+  const parsed = Number(text);
+  return text !== '' &&
+    Number.isInteger(parsed) &&
+    parsed >= ANALYSIS_WINDOW_DAYS_MIN &&
+    parsed <= ANALYSIS_WINDOW_DAYS_MAX
+    ? parsed
+    : undefined;
+};
+
+/** Rule Tuning analysis window: buffers incomplete or out-of-range input locally and publishes every valid edit to the page draft immediately. */
 export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = ({
   current,
   isDisabled,
@@ -32,20 +38,23 @@ export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = (
     setDraft(String(current));
   }, [current]);
 
-  const commit = useCallback(() => {
-    const parsed = Number(draft);
-    if (
-      !Number.isInteger(parsed) ||
-      parsed < ANALYSIS_WINDOW_DAYS_MIN ||
-      parsed > ANALYSIS_WINDOW_DAYS_MAX
-    ) {
+  const onDraftChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const text = event.target.value;
+      setDraft(text);
+      const parsed = parseAnalysisWindowDays(text);
+      if (parsed !== undefined && parsed !== current) {
+        onChange(parsed);
+      }
+    },
+    [current, onChange]
+  );
+
+  const revertInvalidDraft = useCallback(() => {
+    if (parseAnalysisWindowDays(draft) === undefined) {
       setDraft(String(current));
-      return;
     }
-    if (parsed !== current) {
-      onChange(parsed);
-    }
-  }, [current, draft, onChange]);
+  }, [current, draft]);
 
   return (
     <EuiFormRow
@@ -61,8 +70,8 @@ export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = (
         step={1}
         value={draft}
         disabled={isDisabled}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
+        onChange={onDraftChange}
+        onBlur={revertInvalidDraft}
         aria-label={i18n.ANALYSIS_WINDOW_DAYS_ARIA_LABEL}
         data-test-subj="alertZeroAnalysisWindowDays"
       />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { WORKER_SCHEDULE_UNITS, type WorkerScheduleUnit } from '@kbn/alertzero-common';
 import * as i18n from '../settings_translations';
@@ -29,33 +29,17 @@ const parseInterval = (interval: string): ParsedInterval | undefined => {
   return match ? { value: Number(match[1]), unit: match[2] as WorkerScheduleUnit } : undefined;
 };
 
-/**
- * Interval control for a schedule-driven Worker, mirroring the Attack Discovery schedule form's
- * number + unit pairing.
- *
- * The number half is buffered locally and committed to the page draft on blur (the unit commits
- * immediately with the buffered number), so an intermediate "3" on the way to "30" never reaches
- * the draft. The buffer follows `current`, which is what resets the field on Discard or refresh.
- */
+/** Number + unit interval control, controlled by `current`; every valid change updates the page draft immediately. */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   current,
   isDisabled,
   onChange,
 }) => {
-  const [draft, setDraft] = useState<ParsedInterval>(
-    () => parseInterval(current) ?? DEFAULT_PARSED_INTERVAL
-  );
-
-  useEffect(() => {
-    const next = parseInterval(current);
-    if (next) {
-      setDraft(next);
-    }
-  }, [current]);
+  const { value, unit } = parseInterval(current) ?? DEFAULT_PARSED_INTERVAL;
 
   const commit = useCallback(
-    ({ value, unit }: ParsedInterval) => {
-      const interval = `${value}${unit}`;
+    (next: ParsedInterval) => {
+      const interval = `${next.value}${next.unit}`;
       if (interval !== current) {
         onChange(interval);
       }
@@ -63,35 +47,31 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
     [current, onChange]
   );
 
-  const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = event.target.value.trim();
-    // Anything but a positive integer is rejected outright rather than buffered.
-    if (!/^[1-9][0-9]*$/.test(raw)) {
-      return;
-    }
-    setDraft((previous) => ({ ...previous, value: Number(raw) }));
-  }, []);
+  const onValueChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = event.target.value.trim();
+      if (!/^[1-9][0-9]*$/.test(raw)) {
+        return;
+      }
+      commit({ value: Number(raw), unit });
+    },
+    [commit, unit]
+  );
 
   const onUnitChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const next = { ...draft, unit: event.target.value as WorkerScheduleUnit };
-      setDraft(next);
-      commit(next);
+      commit({ value, unit: event.target.value as WorkerScheduleUnit });
     },
-    [commit, draft]
+    [commit, value]
   );
-
-  const onValueBlur = useCallback(() => {
-    commit(draft);
-  }, [commit, draft]);
 
   const unitOptions = useMemo(
     () =>
-      WORKER_SCHEDULE_UNITS.map((unit) => ({
-        value: unit,
-        text: i18n.scheduleUnitLabel(unit, draft.value),
+      WORKER_SCHEDULE_UNITS.map((option) => ({
+        value: option,
+        text: i18n.scheduleUnitLabel(option, value),
       })),
-    [draft.value]
+    [value]
   );
 
   return (
@@ -106,10 +86,9 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
           <EuiFieldNumber
             fullWidth
             min={1}
-            value={draft.value}
+            value={value}
             disabled={isDisabled}
             onChange={onValueChange}
-            onBlur={onValueBlur}
             aria-label={i18n.SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL}
             data-test-subj="alertZeroScheduleIntervalValue"
           />
@@ -117,7 +96,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
         <EuiFlexItem grow={3}>
           <EuiSelect
             fullWidth
-            value={draft.unit}
+            value={unit}
             options={unitOptions}
             disabled={isDisabled}
             onChange={onUnitChange}
