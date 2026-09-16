@@ -45,6 +45,7 @@ export const aiIndexSourceSchema = z.discriminatedUnion('type', [
 
 export const aiIndexPropertiesSchema = z.object({
   description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
+  memory_enabled: z.boolean().default(false),
   dest: aiIndexDestSchema,
   sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES),
   automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS),
