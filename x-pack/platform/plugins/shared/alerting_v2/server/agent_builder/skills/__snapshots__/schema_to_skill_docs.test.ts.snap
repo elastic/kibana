@@ -405,6 +405,7 @@ Use \`set_metadata\` to name the rule and add a description or \`tags\` so the u
 | \`description\` | string | optional | Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected. (min length: 1, max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`routing_tags\` | string[] | optional | Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\". (min items: 1, max items: 20) |
+| \`signature_id\` | string | optional | Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation. (min length: 1, max length: 256) |
 | \`builder\` | object | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL; send \`null\` on PATCH to clear it. |
 | \`builder_fields\` | object | optional | Structured parameters for the rule builder identified by \`builder.type\`. The server generates the rule query from these fields. |
 | \`operation\` | \\"set_metadata\\" | required |  |
