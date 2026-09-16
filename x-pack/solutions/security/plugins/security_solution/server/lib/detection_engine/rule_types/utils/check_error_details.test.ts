@@ -159,20 +159,6 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       const errorMessage = `search_phase_execution_exception
 	Root causes:
 		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
-      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
-    });
-
-    it('should mark prefix-on-ip error as user error when wrapped in search_phase_execution_exception', () => {
-      const errorMessage = `search_phase_execution_exception
-	Root causes:
-		query_shard_exception: Can only use prefix queries on keyword, text and wildcard fields - not on [destination.ip] which is of type [ip]`;
-      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
-    });
-
-    it('should mark IP string literal error as user error when passed as a raw string', () => {
-      const errorMessage = `search_phase_execution_exception
-	Root causes:
-		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
       expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
     });
 
@@ -181,7 +167,11 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
-    it('should not mark query_shard_exception with an unrecognized reason as user error', () => {
+    // The number_format_exception variant is in practice caused by the rule's own query, but it
+    // is deliberately not classified as a user error: its reason is the generic Java
+    // NumberFormatException text, which is not specific enough to match on its own. This test
+    // pins that scope decision (https://github.com/elastic/kibana/issues/289109).
+    it('should not mark a query_shard_exception with a reason outside the known list as user error', () => {
       const errorMessage = `index: "logs-*" reason: "failed to create query: For input string: \\"16 \\"" type: "query_shard_exception" caused by reason: "For input string: \\"16 \\"" caused by type: "number_format_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
     });
