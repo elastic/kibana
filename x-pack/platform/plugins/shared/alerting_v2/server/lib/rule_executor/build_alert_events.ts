@@ -11,6 +11,7 @@ import { stableStringify } from '@kbn/std';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventEnrichment } from '@kbn/alerting-v2-rule-builders';
 import type { AlertEvent, AlertEventType } from '../../resources/datastreams/alert_events';
 import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
@@ -119,6 +120,17 @@ export interface BuildAlertEventsBaseOpts {
   scheduledTimestamp: string;
   maxGroupsPerExecution: number;
   activeGroupHashes?: ReadonlySet<string>;
+  /**
+   * Optional per-event enrichment callback, pre-bound with the rule's parsed
+   * builder fields and identity by the step. When present, called once per
+   * query-row event before the document joins the batch. Synthetic events
+   * (recovery, no-data, continued-breach) skip it by construction — they are
+   * built by separate functions that do not accept this callback.
+   *
+   * The callback may throw; callers are responsible for classifying any thrown
+   * error as a user-source run failure.
+   */
+  enrichRuleEvent?: (row: Readonly<Record<string, unknown>>) => RuleEventEnrichment;
 }
 
 export interface AlertEventsBatchBuilder {
@@ -135,6 +147,7 @@ export function createAlertEventsBatchBuilder({
   scheduledTimestamp,
   maxGroupsPerExecution,
   activeGroupHashes = new Set<string>(),
+  enrichRuleEvent,
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
@@ -182,17 +195,25 @@ export function createAlertEventsBatchBuilder({
         groupHashes.add(groupHash);
       }
 
+      // Apply the enrichment hook when the type registered one.
+      // Hook severity wins over the row's `severity` column (design precedence rule 1).
+      // Hook `data` additions merge over the row, hook wins on key collisions (rule 2).
+      // The hook may throw; callers wrap any such error as a user-source run failure.
+      const enrichment = enrichRuleEvent ? enrichRuleEvent(rowDoc) : undefined;
+      const severity = enrichment?.severity ?? extractSeverity(rowDoc);
+      const data = enrichment?.data != null ? { ...rowDoc, ...enrichment.data } : rowDoc;
+
       const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
-        data: rowDoc,
+        data,
         status: 'breached',
         source,
         type,
         space_id: spaceId,
-        severity: extractSeverity(rowDoc),
+        severity,
       });
 
       alertEventsBatch.push(doc);
