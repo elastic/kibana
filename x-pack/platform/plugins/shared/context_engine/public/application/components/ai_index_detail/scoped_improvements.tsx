@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
@@ -54,11 +54,10 @@ export const ScopedImprovements = ({
   const scoped = useScopedImprovements({ aiIndexId, actions });
   const { approve, reject, approvingId, rejectingId } = useDecideImprovement(aiIndexId ?? '');
   const [rejecting, setRejecting] = useState<Improvement | undefined>();
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const { history, isLoading: historyLoading } = useScopedImprovementsHistory({
+  const { history } = useScopedImprovementsHistory({
     aiIndexId,
     actions,
-    enabled: historyOpen,
+    enabled: feedbackLoopEnabled,
   });
 
   const handleTalkWithAgent = (improvement: Improvement) => {
@@ -74,7 +73,7 @@ export const ScopedImprovements = ({
     }
   };
 
-  if (scoped.length === 0 && !feedbackLoopEnabled) {
+  if (scoped.length === 0 && history.length === 0) {
     return null;
   }
 
@@ -115,7 +114,7 @@ export const ScopedImprovements = ({
         </>
       )}
 
-      {feedbackLoopEnabled && (
+      {history.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
           <EuiAccordion
@@ -130,38 +129,24 @@ export const ScopedImprovements = ({
                 </strong>
               </EuiText>
             }
-            onToggle={setHistoryOpen}
             data-test-subj="contextImprovementsHistory"
           >
             <EuiSpacer size="s" />
-            {historyLoading ? (
-              <EuiLoadingSpinner size="m" />
-            ) : history.length === 0 ? (
-              <EuiText size="xs" color="subdued">
-                <p>
-                  {i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.scopedImprovements.historyEmpty',
-                    { defaultMessage: 'No past decisions yet.' }
-                  )}
-                </p>
-              </EuiText>
-            ) : (
-              <div role="list">
-                {history.map((improvement, index) => (
-                  <React.Fragment key={improvement.improvement_id}>
-                    <ImprovementRow
-                      improvement={improvement}
-                      onApprove={({ improvement_id: id }) => approve({ improvementId: id })}
-                      onReject={setRejecting}
-                      isApproving={approvingId === improvement.improvement_id}
-                      isRejecting={rejectingId === improvement.improvement_id}
-                      canDecide={aiIndex !== undefined}
-                    />
-                    {index < history.length - 1 && <EuiSpacer size="s" />}
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
+            <div role="list">
+              {history.map((improvement, index) => (
+                <React.Fragment key={improvement.improvement_id}>
+                  <ImprovementRow
+                    improvement={improvement}
+                    onApprove={({ improvement_id: id }) => approve({ improvementId: id })}
+                    onReject={setRejecting}
+                    isApproving={approvingId === improvement.improvement_id}
+                    isRejecting={rejectingId === improvement.improvement_id}
+                    canDecide={aiIndex !== undefined}
+                  />
+                  {index < history.length - 1 && <EuiSpacer size="s" />}
+                </React.Fragment>
+              ))}
+            </div>
           </EuiAccordion>
         </>
       )}
