@@ -70,6 +70,10 @@ spaceTest.describe(
         await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
 
         await discover.selectClassicMode();
+        // Switching from ES|QL cancels the async query, which can race the first classic
+        // search and leave Discover in a PARTIAL state. Resubmit to get a clean result.
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
         await expect(discover.getHitCountLocator()).toHaveText('14,004');
 
         const dataViews = await discover.getAvailableDataViewsFromSearchBar();
