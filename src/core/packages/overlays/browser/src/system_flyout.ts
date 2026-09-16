@@ -55,8 +55,18 @@ export interface OverlaySystemFlyoutStart {
 }
 
 /**
- * Options for opening a system flyout rendered as a `FlyoutTemplate`: the template's own
- * props, minus the zones, which are the second argument to `open`.
+ * Options for `openFlyoutTemplate`.
+ *
+ * Intentionally derived from {@link FlyoutTemplateProps} (minus `children` and
+ * `onClose`). This service wraps `FlyoutTemplate`, so the Core public options
+ * type tracks the template contract: adding, removing, or renaming a template
+ * root prop changes this API even when the Core package is not in the diff.
+ * Breaking changes to `FlyoutTemplateProps` are breaking changes to
+ * `core.overlays.openFlyoutTemplate`.
+ *
+ * `onClose` is re-declared here as an optional listener that runs just before
+ * the returned {@link OverlayRef} is closed. The dismiss handler passed into
+ * the content component is supplied by the opener.
  *
  * @public
  */
