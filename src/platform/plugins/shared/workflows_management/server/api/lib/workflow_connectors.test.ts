@@ -8,6 +8,7 @@
  */
 
 import { getAvailableConnectors } from './workflow_connectors';
+import { convertDynamicConnectorsToContracts } from '../../../common/schema';
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
   id: '.slack',
@@ -227,5 +228,35 @@ describe('getAvailableConnectors', () => {
     // Both starts precede both ends — proves parallel, not sequential.
     expect(order.indexOf('getAll:start')).toBeLessThan(order.indexOf('listTypes:end'));
     expect(order.indexOf('listTypes:start')).toBeLessThan(order.indexOf('getAll:end'));
+  });
+
+  it('exposes AbuseIPDB checkIp and reportIp and can generate a checkIp contract', async () => {
+    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([
+        mockActionType({
+          id: '.abuseipdb',
+          name: 'AbuseIPDB',
+          minimumLicenseRequired: 'gold',
+        }),
+      ]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.abuseipdb'].subActions).toEqual([
+      { name: 'checkIp', displayName: 'Check Ip' },
+      { name: 'reportIp', displayName: 'Report Ip' },
+    ]);
+
+    const contracts = convertDynamicConnectorsToContracts(result.connectorTypes);
+    expect(contracts.map((contract) => contract.type)).toEqual(
+      expect.arrayContaining(['abuseipdb.checkIp', 'abuseipdb.reportIp'])
+    );
   });
 });

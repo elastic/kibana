@@ -153,6 +153,13 @@ function createSubActionsMapping() {
     }));
   });
 
+  // Disk-loaded spec connectors are not in the bundled barrel; keep workflow
+  // discovery for the shipped AbuseIPDB actions only.
+  mapping['.abuseipdb'] = ['checkIp', 'reportIp'].map((action) => ({
+    name: action,
+    displayName: formatSubActionName(action),
+  }));
+
   return mapping;
 }
 

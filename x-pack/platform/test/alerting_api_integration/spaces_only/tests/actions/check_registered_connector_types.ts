@@ -36,6 +36,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           .sort()
       ).to.eql(
         [
+          '.abuseipdb',
           '.d3security',
           '.email',
           '.index',
