@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
-  - '@kbn/as-code-dashboard-schema'
   - '@kbn/as-code-filters-schema'
   - '@kbn/ui-callout'
 tags:

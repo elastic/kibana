@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
   - '@kbn/nightshift-investigations-plugin'
-  - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'

@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/zod'
-  - '@kbn/as-code-dashboard-schema'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-common'
   - '@kbn/visualizations-common'
