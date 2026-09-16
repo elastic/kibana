@@ -133,6 +133,22 @@ export default ({ getService }: FtrProviderContext): void => {
         overwrite: false,
       });
 
+      const { body: beforeOverwrite } = await detectionsApi
+        .findRules({
+          query: {
+            page: 1,
+            per_page: BATCH_SIZE,
+          },
+        })
+        .expect(200);
+
+      const priorByRuleId = new Map<string, { id: string; revision: number }>(
+        beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
+          rule.rule_id,
+          { id: rule.id, revision: rule.revision },
+        ])
+      );
+
       await importRulesWithSuccess({
         getService,
         rules: [
@@ -164,6 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body.total).toBe(BATCH_SIZE);
+      expect(body.data).toHaveLength(BATCH_SIZE);
 
       const mid = Math.floor(enableIds.length / 2);
       const sampleEnable = [enableIds[0], enableIds[mid], enableIds[enableIds.length - 1]];
@@ -171,13 +188,19 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const ruleId of sampleEnable) {
         const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
+        const prior = priorByRuleId.get(ruleId);
         expect(found?.enabled).toBe(true);
         expect(found?.name).toBe(`Enabled ${ruleId}`);
+        expect(found?.id).toBe(prior?.id);
+        expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
       }
       for (const ruleId of sampleDisable) {
         const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
+        const prior = priorByRuleId.get(ruleId);
         expect(found?.enabled).toBe(false);
         expect(found?.name).toBe(`Disabled ${ruleId}`);
+        expect(found?.id).toBe(prior?.id);
+        expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
       }
     });
   });

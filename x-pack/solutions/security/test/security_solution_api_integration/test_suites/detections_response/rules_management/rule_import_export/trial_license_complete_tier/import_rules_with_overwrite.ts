@@ -370,6 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ],
       });
+      // Schema validation failures currently omit rule_id on the error object.
       expect(importResponse.errors[0].rule_id).toBeUndefined();
 
       const { body: updatedFirst } = await detectionsApi
@@ -384,10 +385,109 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(updatedFirst.id).toBe(first.id);
       expect(updatedFirst.name).toBe('Updated one');
+      expect(updatedFirst.revision).toBe(first.revision + 1);
       expect(updatedSecond.id).toBe(second.id);
       expect(updatedSecond.name).toBe('Updated two');
+      expect(updatedSecond.revision).toBe(second.revision + 1);
       expect(unchanged.id).toBe(failed.id);
       expect(unchanged.name).toBe('Existing bad');
+      expect(unchanged.revision).toBe(failed.revision);
+    });
+
+    it('reports partial success when one overwrite target references a missing connector', async () => {
+      const first = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-1',
+          name: 'Existing one',
+          enabled: false,
+        })
+      );
+      const second = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-ok-2',
+          name: 'Existing two',
+          enabled: false,
+        })
+      );
+      const failed = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({
+          rule_id: 'overwrite-partial-bad',
+          name: 'Existing bad',
+          enabled: false,
+        })
+      );
+
+      const importResponse = await importRules({
+        getService,
+        rules: [
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-1',
+            name: 'Updated one',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-ok-2',
+            name: 'Updated two',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'overwrite-partial-bad',
+            name: 'Should not update',
+            enabled: false,
+            actions: [
+              {
+                group: 'default',
+                id: 'missing-overwrite-connector',
+                action_type_id: '.webhook',
+                params: {},
+              },
+            ],
+          }),
+        ],
+        overwrite: true,
+      });
+
+      expect(importResponse).toMatchObject({
+        success: false,
+        success_count: 2,
+        rules_count: 3,
+        errors: [
+          {
+            rule_id: 'overwrite-partial-bad',
+            error: {
+              status_code: 404,
+              message:
+                'Rule actions reference the following missing action IDs: missing-overwrite-connector',
+            },
+          },
+        ],
+      });
+
+      const { body: updatedFirst } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-1' } })
+        .expect(200);
+      const { body: updatedSecond } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-ok-2' } })
+        .expect(200);
+      const { body: unchanged } = await detectionsApi
+        .readRule({ query: { rule_id: 'overwrite-partial-bad' } })
+        .expect(200);
+
+      expect(updatedFirst.id).toBe(first.id);
+      expect(updatedFirst.name).toBe('Updated one');
+      expect(updatedFirst.revision).toBe(first.revision + 1);
+      expect(updatedSecond.id).toBe(second.id);
+      expect(updatedSecond.name).toBe('Updated two');
+      expect(updatedSecond.revision).toBe(second.revision + 1);
+      expect(unchanged.id).toBe(failed.id);
+      expect(unchanged.name).toBe('Existing bad');
+      expect(unchanged.revision).toBe(failed.revision);
     });
 
     // History API is ESS-only until ruleChangesHistoryEnabled is on in serverless.
@@ -426,20 +526,33 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.total).toBe(2);
+        expect(body.items).toHaveLength(2);
+
         const [imported, created] = body.items;
         expect(imported.action).toBe('rule_import');
+        expect(imported.user).toEqual({ name: 'elastic' });
         expect(imported.metadata?.bulk_count).toBe(1);
         expect(imported.rule).toMatchObject({
           id: rule.id,
           rule_id: 'overwrite-history-rule',
           name: 'After import overwrite',
           revision: 1,
+          enabled: false,
         });
         expect(imported.old_values).toMatchObject({
           name: 'Before import overwrite',
           revision: 0,
         });
+        expect(imported.rule.created_at).not.toBe(imported.rule.updated_at);
+
         expect(created.action).toBe('rule_create');
+        expect(created.old_values).toBeNull();
+        expect(created.rule).toMatchObject({
+          id: rule.id,
+          rule_id: 'overwrite-history-rule',
+          name: 'Before import overwrite',
+          revision: 0,
+        });
       });
     });
   });
