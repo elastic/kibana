@@ -78,6 +78,10 @@ function mapToAbsolutePosition(
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
+// Matches ${{ ... }} — JS/conditional expression syntax used alongside Liquid in workflow YAML.
+// These may contain operators (!=, ?, :) that are not valid Liquid syntax and must be stripped
+// before the Liquid parser sees the value.
+const DYNAMIC_EXPRESSION_STRIP = /\$\{\{(?:[^}]|\}(?!\}))*\}\}/g;
 
 export function validateLiquidTemplate(
   yamlString: string,
@@ -90,11 +94,16 @@ export function validateLiquidTemplate(
       if (key === 'key') return;
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
-      if (!node.value.includes(LIQUID_OUTPUT_PATTERN) && !node.value.includes(LIQUID_TAG_PATTERN))
+
+      // Strip ${{ ... }} before Liquid validation — the Liquid parser would reject
+      // JS-style operators (!=, ?) inside those expressions as invalid Liquid syntax.
+      const liquidValue = node.value.replace(DYNAMIC_EXPRESSION_STRIP, '');
+
+      if (!liquidValue.includes(LIQUID_OUTPUT_PATTERN) && !liquidValue.includes(LIQUID_TAG_PATTERN))
         return;
 
       try {
-        parseTemplateString(node.value);
+        parseTemplateString(liquidValue);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
         const relativePosition = extractLiquidErrorPosition(node.value, errorMessage);
