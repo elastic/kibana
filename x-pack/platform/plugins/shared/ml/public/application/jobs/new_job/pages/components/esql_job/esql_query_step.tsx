@@ -92,7 +92,7 @@ export interface EsqlQueryStepState {
  */
 const EsqlQueryStepContent = () => {
   const mlApi = useMlApi();
-  const { state, setQueryState } = useEsqlWizardContext();
+  const { state, setQueryProbeState, setQueryState } = useEsqlWizardContext();
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<unknown>();
   const requestGeneration = useRef(0);
@@ -130,6 +130,7 @@ const EsqlQueryStepContent = () => {
     const trimmedQuery = state.query.trim();
 
     setQueryState({ columns: [], emittedTimeField: '', detectorFields: [], influencers: [] });
+    setQueryProbeState(trimmedQuery === '' ? 'idle' : 'loading');
     setError(undefined);
 
     if (trimmedQuery === '') {
@@ -144,12 +145,14 @@ const EsqlQueryStepContent = () => {
           if (generation !== requestGeneration.current) return;
 
           setQueryState({ columns: nextColumns, emittedTimeField: firstTimeField(nextColumns) });
+          setQueryProbeState('success');
           setIsLoading(false);
         },
         (nextError: unknown) => {
           if (generation !== requestGeneration.current) return;
 
           setError(nextError);
+          setQueryProbeState('error');
           setIsLoading(false);
         }
       );
@@ -159,7 +162,7 @@ const EsqlQueryStepContent = () => {
       window.clearTimeout(timeout);
       invalidateRequest(requestGeneration);
     };
-  }, [mlApi, setQueryState, state.query]);
+  }, [mlApi, setQueryProbeState, setQueryState, state.query]);
 
   return (
     <EuiForm component="form">

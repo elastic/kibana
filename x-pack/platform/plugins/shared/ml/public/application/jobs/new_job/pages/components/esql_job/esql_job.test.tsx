@@ -34,6 +34,10 @@ jest.mock('./esql_preview_panel', () => ({
   EsqlPreviewPanel: () => <div data-test-subj="mlEsqlPreviewPanel" />,
 }));
 
+jest.mock('./esql_create_flow', () => ({
+  EsqlCreateFlow: () => <div data-test-subj="mlEsqlCreateFlow" />,
+}));
+
 describe('ES|QL job page', () => {
   it('renders without a data source context', () => {
     renderWithI18n(<Page />);
@@ -43,5 +47,6 @@ describe('ES|QL job page', () => {
     expect(screen.getByTestId('mlEsqlQueryStep')).toBeInTheDocument();
     expect(screen.getByTestId('mlEsqlTimeRangeStep')).toBeInTheDocument();
     expect(screen.getByTestId('mlEsqlPreviewPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mlEsqlCreateFlow')).toBeInTheDocument();
   });
 });

@@ -16,9 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { buildEsqlJobPayload } from '../../../common/job_creator/esql_job_creator';
+import {
+  buildEsqlJobPayload,
+  createMeanDetectors,
+} from '../../../common/job_creator/esql_job_creator';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
@@ -94,10 +96,7 @@ export const EsqlPreviewPanel = () => {
 
   const preview = useCallback(async () => {
     const generation = ++requestGeneration.current;
-    const detectors: Detector[] = state.detectorFields.map((fieldName) => ({
-      function: 'mean',
-      field_name: fieldName,
-    }));
+    const detectors = createMeanDetectors(state.detectorFields);
     const { job, datafeed } = buildEsqlJobPayload({
       jobId: PREVIEW_JOB_ID,
       datafeedId: PREVIEW_DATAFEED_ID,

@@ -12,6 +12,7 @@ import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../../compone
 import { EsqlQueryStep } from './esql_query_step';
 import { EsqlTimeRangeStep } from './esql_time_range_step';
 import { EsqlPreviewPanel } from './esql_preview_panel';
+import { EsqlCreateFlow } from './esql_create_flow';
 import { EsqlWizardProvider } from './esql_wizard_context';
 
 export const Page: FC = () => {
@@ -29,6 +30,7 @@ export const Page: FC = () => {
         <EsqlQueryStep />
         <EsqlTimeRangeStep />
         <EsqlPreviewPanel />
+        <EsqlCreateFlow />
       </EsqlWizardProvider>
     </div>
   );

@@ -18,10 +18,15 @@ import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
 import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
 import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
-import type { Job, AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
+  Job,
+  AnalysisConfig,
+  EsqlJobConfig,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
 import type {
   Datafeed,
+  EsqlDatafeedConfig,
   IndicesOptions,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
@@ -118,7 +123,7 @@ export function mlApiProvider(httpService: HttpService) {
       });
     },
 
-    addJob({ jobId, job }: { jobId: string; job: Job }) {
+    addJob({ jobId, job }: { jobId: string; job: Job | EsqlJobConfig }) {
       const body = JSON.stringify(job);
       return httpService.http<estypes.MlPutJobResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}`,
@@ -250,7 +255,13 @@ export function mlApiProvider(httpService: HttpService) {
       });
     },
 
-    addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
+    addDatafeed({
+      datafeedId,
+      datafeedConfig,
+    }: {
+      datafeedId: string;
+      datafeedConfig: Datafeed | EsqlDatafeedConfig;
+    }) {
       const body = JSON.stringify(datafeedConfig);
       return httpService.http<estypes.MlPutDatafeedResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/datafeeds/${datafeedId}`,
@@ -298,8 +309,8 @@ export function mlApiProvider(httpService: HttpService) {
       end,
     }: {
       datafeedId: string;
-      start?: number;
-      end?: number;
+      start?: number | string;
+      end?: number | string;
     }) {
       // if the end timestamp is a number, add one ms to it to make it
       // inclusive of the end of the data

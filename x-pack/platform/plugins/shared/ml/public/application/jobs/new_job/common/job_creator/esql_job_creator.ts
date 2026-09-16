@@ -35,6 +35,9 @@ export interface EsqlJobPayload {
   datafeed: EsqlDatafeedConfig;
 }
 
+export const createMeanDetectors = (fieldNames: string[]): Detector[] =>
+  fieldNames.map((fieldName) => ({ function: 'mean', field_name: fieldName }));
+
 export const buildEsqlJobPayload = ({
   jobId,
   datafeedId,
