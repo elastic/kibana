@@ -6,6 +6,7 @@
  */
 
 import type { EpisodeDataSource } from '../types/episode_data_source';
+import { classicActionExtensions } from './action_extensions';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
@@ -70,4 +71,6 @@ export const createClassicEpisodeSource = ({
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
+
+  actionExtensions: classicActionExtensions,
 });
