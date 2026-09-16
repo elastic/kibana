@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_BUILTIN_AGENTS } from '@kbn/agent-builder-server/allow_lists';
 import { toEsqlStringLiteral, buildTraceQuery, buildTraceQueries } from './trace_queries';
 
 describe('toEsqlStringLiteral', () => {
@@ -89,6 +91,21 @@ describe('buildTraceQuery', () => {
       expect(query).toContain('"agent\\"quote"');
       // hashed value has no special chars, just confirm it is present
       expect(query).toContain('"custom-868decb72393bc99"');
+    });
+
+    it('matches the default built-in agent by raw id only', () => {
+      const trace = { type: 'elastic_agent' as const, value: agentBuilderDefaultAgentId };
+      expect(buildTraceQuery(trace, spaceId)).toBe(
+        `FROM traces-agent_builder.otel-default\n| WHERE attributes.gen_ai.agent.id IN ("${agentBuilderDefaultAgentId}")`
+      );
+    });
+
+    it('matches allow-listed built-in agents by raw id only', () => {
+      const builtinAgentId = AGENT_BUILDER_BUILTIN_AGENTS[0];
+      const trace = { type: 'elastic_agent' as const, value: builtinAgentId };
+      expect(buildTraceQuery(trace, spaceId)).toBe(
+        `FROM traces-agent_builder.otel-default\n| WHERE attributes.gen_ai.agent.id IN ("${builtinAgentId}")`
+      );
     });
   });
 });

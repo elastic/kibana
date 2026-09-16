@@ -6,8 +6,14 @@
  */
 
 import { createHash } from 'node:crypto';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_BUILTIN_AGENTS } from '../allow_lists';
 
 const HASH_HEX_LENGTH = 16;
+const BUILTIN_AGENT_IDS = new Set<string>([
+  agentBuilderDefaultAgentId,
+  ...AGENT_BUILDER_BUILTIN_AGENTS,
+]);
 
 function sha256Hex(value: string): string {
   return createHash('sha256').update(value).digest('hex');
@@ -29,4 +35,12 @@ const CUSTOM_HASH_PREFIX = 'custom-';
 /** Stable `custom-<hash>` label used for user-created agent/tool/skill ids. */
 export function toCustomHashedId(value: string): string {
   return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
+}
+
+/** Built-in agents keep their id; custom agents become `custom-<hash>`. */
+export function normalizeAgentIdForTelemetry(agentId?: string): string | undefined {
+  if (!agentId) {
+    return undefined;
+  }
+  return BUILTIN_AGENT_IDS.has(agentId) ? agentId : toCustomHashedId(agentId);
 }

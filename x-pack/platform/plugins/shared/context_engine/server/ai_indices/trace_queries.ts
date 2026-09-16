@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toCustomHashedId } from '@kbn/agent-builder-server/telemetry';
+import { normalizeAgentIdForTelemetry } from '@kbn/agent-builder-server/telemetry';
 import type { AiIndexTrace, AiIndexTraceWithQuery } from '../../common/http_api/ai_indices';
 import { buildAgentBuilderTracesIndexName, SAFE_INDEX_NAME_RE } from '../../common/constants';
 
@@ -26,10 +26,11 @@ export const buildTraceQuery = (trace: AiIndexTrace, spaceId: string): string =>
     return `FROM ${trace.value}`;
   }
 
-  const rawLiteral = toEsqlStringLiteral(trace.value);
-  const hashedLiteral = toEsqlStringLiteral(toCustomHashedId(trace.value));
+  const exportedAgentId = normalizeAgentIdForTelemetry(trace.value) ?? trace.value;
+  // Use a Set because builtin agents are exported as their id, so the same id may appear twice.
+  const literals = [...new Set([trace.value, exportedAgentId])].map(toEsqlStringLiteral).join(', ');
   const indexName = buildAgentBuilderTracesIndexName(spaceId);
-  return `FROM ${indexName}\n| WHERE attributes.gen_ai.agent.id IN (${rawLiteral}, ${hashedLiteral})`;
+  return `FROM ${indexName}\n| WHERE attributes.gen_ai.agent.id IN (${literals})`;
 };
 
 export const buildTraceQueries = (

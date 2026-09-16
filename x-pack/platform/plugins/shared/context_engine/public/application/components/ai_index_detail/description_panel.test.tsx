@@ -155,8 +155,8 @@ describe('DescriptionPanel', () => {
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [],
-            traces: [],
             description: 'Updated description',
+            traces: [],
           }),
         })
       );
