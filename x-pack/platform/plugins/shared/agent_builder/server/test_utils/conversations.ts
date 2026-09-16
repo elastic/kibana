@@ -72,6 +72,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     markRead: jest.fn(),
     setPinned: jest.fn(),
     list: jest.fn(),
+    bulkGet: jest.fn(),
     search: jest.fn(),
     delete: jest.fn(),
     updateAccessControl: jest.fn(),
