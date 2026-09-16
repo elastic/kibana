@@ -213,7 +213,8 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
     kind: 'kind',
     enabled: 'enabled',
     name: 'metadata.name.keyword',
-    // Phase 4: builder_type is keyword-indexed (model version '9').
+    // Phase 4: builder_type is keyword-indexed (squashed model version '6';
+    // originally designed as a standalone model version '9' on this POC branch).
     // builder_fields.risk_score targets the integer typed sub-field of the
     // flattened container — the only sub-field that supports numeric sort.
     builder_type: 'metadata.builder_type',

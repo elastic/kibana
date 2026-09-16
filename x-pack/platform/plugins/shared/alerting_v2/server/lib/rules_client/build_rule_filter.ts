@@ -43,7 +43,8 @@ const FIELD_MAP: Record<string, string> = {
   'metadata.name': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.name`,
   'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
   'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-  // Phase 4 fields — all indexed in model version '9'.
+  // Phase 4 fields — all indexed in the squashed model version '6'.
+  // (Originally designed as a standalone model version '9' on this POC branch.)
   'metadata.signature_id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id`,
   'metadata.source.type': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.type`,
   'metadata.source.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.source.id`,
