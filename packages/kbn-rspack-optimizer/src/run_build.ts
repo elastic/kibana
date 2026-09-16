@@ -19,6 +19,7 @@ import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
+import { buildSharedPackages } from './build_shared_packages';
 
 export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
@@ -64,6 +65,8 @@ export interface BuildOptions {
   basePath?: string;
   /** Override the limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml) */
   limitsPath?: string;
+  /** Build shared frontend bundles before creating the Rspack config. */
+  buildSharedDeps?: boolean;
 }
 
 export interface BuildResult {
@@ -106,6 +109,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     profile = false,
     profileStatsOnly = false,
     hmr: hmrFlag,
+    buildSharedDeps = true,
   } = options;
 
   const startTime = Date.now();
@@ -113,6 +117,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   let hmrServer: HmrServer | undefined;
 
   try {
+    if (buildSharedDeps) {
+      await buildSharedPackages({ repoRoot, dist, cache, log });
+    }
+
     // Resolve HMR enablement
     const hmr = isHmrEnabled({
       watch,
