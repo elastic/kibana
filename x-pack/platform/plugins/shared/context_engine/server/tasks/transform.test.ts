@@ -171,10 +171,10 @@ describe('build', () => {
     // NULL although the query returned rows. The signal must carry row_count
     // undefined — never 0 — and classify must not tag empty_retrieval.
     const row = toolRow();
-    (row as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] = JSON.stringify({
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] = JSON.stringify({
       query: 'FROM ai-index-idx-vp-knowledge | LIMIT 5',
     });
-    (row as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] = null;
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] = null;
     const [signal] = build({ toolRows: [row], convAgent: new Map() });
     expect(signal.data.query_kind).toBe('ki_retrieval');
     expect(signal.data.returned).toEqual({});
@@ -183,10 +183,10 @@ describe('build', () => {
 
   it('reports row_count 0 for a genuinely empty successful query', () => {
     const row = toolRow();
-    (row as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] = JSON.stringify({
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.arguments'] = JSON.stringify({
       query: 'FROM ai-index-idx-vp-knowledge | WHERE kind == "none"',
     });
-    (row as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] = JSON.stringify({
+    (row as unknown as Record<string, unknown>)['attributes.gen_ai.tool.call.result'] = JSON.stringify({
       results: [{ type: 'esqlResults', data: { columns: [], values: [] } }],
     });
     const [signal] = build({ toolRows: [row], convAgent: new Map() });

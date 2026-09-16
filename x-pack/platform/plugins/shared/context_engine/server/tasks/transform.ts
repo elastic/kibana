@@ -78,8 +78,6 @@ interface ParsedReturned {
   row_count: number;
 }
 
-const EMPTY_RETURNED: ParsedReturned = { columns: [], row_count: 0 };
-
 interface EsqlResultsData {
   columns?: Array<{ name?: string } | string>;
   values?: unknown[][];
