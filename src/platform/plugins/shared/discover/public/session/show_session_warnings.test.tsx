@@ -49,7 +49,7 @@ describe('showSessionWarnings', () => {
         type: 'dropped_panel',
         tab_id: 'tab-1',
         panel_id: 'control-1',
-        message: 'Unable to transform control panel [control-1].',
+        message: 'Unable to transform control panel [control-1].\nError: invalid control type.',
       },
       {
         type: 'dropped_property',
@@ -93,18 +93,20 @@ describe('showSessionWarnings', () => {
     renderWithI18n(<>{mountPointMock.mock.calls[0][0]}</>);
     const dialog = screen.getByRole('dialog', { name: 'Warning details' });
 
-    const titles = within(dialog).getAllByRole('term');
-    expect(titles.map((title) => title.textContent)).toEqual([
-      'Tab "Logs": control "control-1"',
-      'Tab "Metrics": property "some_future_property"',
-      'Tab "missing-tab": control "control-2"',
-    ]);
+    const items = within(dialog).getAllByRole('listitem');
+    expect(items).toHaveLength(3);
+    expect(within(items[0]).getByText('Tab "Logs": control "control-1"')).toBeVisible();
+    expect(
+      within(items[1]).getByText('Tab "Metrics": property "some_future_property"')
+    ).toBeVisible();
+    expect(within(items[2]).getByText('Tab "missing-tab": control "control-2"')).toBeVisible();
 
-    const descriptions = within(dialog).getAllByRole('definition');
-    expect(descriptions).toHaveLength(3);
-    expect(descriptions[0]).toHaveTextContent(warnings[0].message);
-    expect(descriptions[1]).toHaveTextContent(warnings[1].message);
-    expect(descriptions[2]).toHaveTextContent(warnings[2].message);
+    const multilineMessage = within(items[0]).getByText(warnings[0].message, {
+      normalizer: (text) => text,
+    });
+    expect(multilineMessage).toHaveStyle({ whiteSpace: 'pre-wrap' });
+    expect(items[1]).toHaveTextContent(warnings[1].message);
+    expect(items[2]).toHaveTextContent(warnings[2].message);
 
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(modal.close).toHaveBeenCalledTimes(1);
