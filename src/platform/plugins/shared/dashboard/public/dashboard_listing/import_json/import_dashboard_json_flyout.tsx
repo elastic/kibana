@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { ImportJsonFlyoutContent } from '@kbn/as-code-import-flyout-component';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
-import type { DashboardState } from '../../../common';
-import { dashboardClient } from '../../dashboard_client/dashboard_client';
+import { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '../../../common/constants';
+import type { DashboardCreateResponseBody } from '../../../server';
 import { coreServices } from '../../services/kibana_services';
 import { sanitizeDashboard } from '../../dashboard_app/top_nav/share/export_json/sanitize_dashboard';
 import { importDashboardJsonStrings } from './_import_dashboard_json_strings';
@@ -40,7 +41,13 @@ export const ImportDashboardJsonFlyout = ({
       getWarningsSummary={importDashboardJsonStrings.getWarningsBody}
       sanitizeImportJson={sanitizeDashboard}
       createFromJson={async (data) => {
-        const result = await dashboardClient.create(data);
+        const result = await coreServices.http.post<DashboardCreateResponseBody>(
+          DASHBOARD_API_PATH,
+          {
+            version: DASHBOARD_API_VERSION,
+            body: JSON.stringify(data),
+          }
+        );
         return { id: result.id, title: result.data.title ?? '' };
       }}
       onImportSuccess={onImportSuccess}

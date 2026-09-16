@@ -97,9 +97,7 @@ describe('ImportJsonFlyoutContent', () => {
     const oversized = new File(['{}'], 'big.json', { type: 'application/json' });
     Object.defineProperty(oversized, 'size', { value: 1_048_577 });
     await pickFile(oversized);
-    await waitFor(() =>
-      expect(screen.getByText(/maximum size is 1 MB/)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText(/maximum size is 1 MB/)).toBeInTheDocument());
     expect(sanitizeImportJson).not.toHaveBeenCalled();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
   });
@@ -123,7 +121,9 @@ describe('ImportJsonFlyoutContent', () => {
   });
 
   it('aborts sanitize when the file is cleared', async () => {
-    let resolveSanitize: ((value: { data: typeof VALID_STATE; warnings: string[] }) => void) | undefined;
+    let resolveSanitize:
+      | ((value: { data: typeof VALID_STATE; warnings: string[] }) => void)
+      | undefined;
     const sanitizeImportJson = jest.fn(
       (_raw: unknown, signal?: AbortSignal) =>
         new Promise<{ data: typeof VALID_STATE; warnings: string[] }>((resolve, reject) => {
@@ -156,7 +156,7 @@ describe('ImportJsonFlyoutContent', () => {
   it('aborts sanitize when the flyout unmounts', async () => {
     const sanitizeImportJson = jest.fn(
       (_raw: unknown, signal?: AbortSignal) =>
-        new Promise((_resolve, reject) => {
+        new Promise<never>((_resolve, reject) => {
           signal?.addEventListener('abort', () => {
             reject(new DOMException('The operation was aborted.', 'AbortError'));
           });

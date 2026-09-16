@@ -19,16 +19,11 @@ jest.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', ()
   sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
 }));
 
-const mockDashboardClientCreate = jest.fn();
-jest.mock('../../dashboard_client/dashboard_client', () => ({
-  dashboardClient: {
-    create: (...args: unknown[]) => mockDashboardClientCreate(...args),
-  },
-}));
-
 const mockAddDanger = jest.fn();
+const mockHttpPost = jest.fn();
 jest.mock('../../services/kibana_services', () => ({
   coreServices: {
+    http: { post: (...args: unknown[]) => mockHttpPost(...args) },
     notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
     application: {
       getUrlForApp: () => '/app/management/kibana/objects',
@@ -36,8 +31,9 @@ jest.mock('../../services/kibana_services', () => ({
   },
 }));
 
-const VALID_STATE = { title: 'My Dashboard', panels: [], description: '' };
-const VALID_FILE = new File([JSON.stringify(VALID_STATE)], 'dashboard.json', {
+const SANITIZED_STATE = { title: 'My Dashboard', panels: [], description: '' };
+const UNSANITIZED_STATE = { ...SANITIZED_STATE, property_removed_by_sanitizer: 'remove me' };
+const VALID_FILE = new File([JSON.stringify(UNSANITIZED_STATE)], 'dashboard.json', {
   type: 'application/json',
 });
 
@@ -62,8 +58,8 @@ const pickFile = async (file: File) => {
 describe('ImportDashboardJsonFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSanitizeDashboard.mockResolvedValue({ data: VALID_STATE, warnings: [] });
-    mockDashboardClientCreate.mockResolvedValue({ id: 'new-id', data: VALID_STATE });
+    mockSanitizeDashboard.mockResolvedValue({ data: SANITIZED_STATE, warnings: [] });
+    mockHttpPost.mockResolvedValue({ id: 'new-id', data: SANITIZED_STATE });
   });
 
   it('renders the file picker and NDJSON note', () => {
@@ -98,7 +94,7 @@ describe('ImportDashboardJsonFlyout', () => {
     renderFlyout();
     await pickFile(VALID_FILE);
     await waitFor(() =>
-      expect(mockSanitizeDashboard).toHaveBeenCalledWith(VALID_STATE, expect.any(AbortSignal))
+      expect(mockSanitizeDashboard).toHaveBeenCalledWith(UNSANITIZED_STATE, expect.any(AbortSignal))
     );
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
@@ -106,7 +102,7 @@ describe('ImportDashboardJsonFlyout', () => {
   it('displays sanitize warnings above the file picker but still allows import', async () => {
     const user = userEvent.setup();
     mockSanitizeDashboard.mockResolvedValue({
-      data: VALID_STATE,
+      data: SANITIZED_STATE,
       warnings: ['Panel "chart-1" could not be loaded'],
     });
     renderFlyout();
@@ -129,7 +125,7 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
-  it('creates a new dashboard and calls onImportSuccess', async () => {
+  it('creates a dashboard from the sanitized state instead of the uploaded state', async () => {
     const onImportSuccess = jest.fn();
     const closeFlyout = jest.fn();
     renderFlyout(onImportSuccess, closeFlyout);
@@ -140,7 +136,12 @@ describe('ImportDashboardJsonFlyout', () => {
     await act(async () => {
       await userEvent.click(screen.getByTestId('importDashboardJsonImportButton'));
     });
-    await waitFor(() => expect(mockDashboardClientCreate).toHaveBeenCalledWith(VALID_STATE));
+    await waitFor(() =>
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/dashboards', {
+        version: '2023-10-31',
+        body: JSON.stringify(SANITIZED_STATE),
+      })
+    );
     expect(onImportSuccess).toHaveBeenCalledWith('new-id', 'My Dashboard');
     expect(closeFlyout).toHaveBeenCalled();
   });
