@@ -17,10 +17,12 @@ import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { BuilderTypeRegistry } from '../lib/builder_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  RulesClientCallerOptions,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
@@ -43,7 +45,11 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Start).toDynamicValue(({ get }) => {
     const injection = get(CoreStart('injection'));
 
-    const buildScope = (request: KibanaRequest, spaceId?: SpaceId) => {
+    const buildScope = (
+      request: KibanaRequest,
+      spaceId?: SpaceId,
+      options?: RulesClientCallerOptions
+    ) => {
       const scope = injection.fork();
       scope.bind(Request).toConstantValue(request);
       scope.bind(Global).toConstantValue(Request);
@@ -51,18 +57,26 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
         scope.bind(Global).toConstantValue(RequestSpaceIdToken);
       }
+      if (options?.onBehalfOf !== undefined) {
+        scope.bind(CallerIdentityToken).toConstantValue(options.onBehalfOf);
+        scope.bind(Global).toConstantValue(CallerIdentityToken);
+      }
       return scope;
     };
 
     const contract: AlertingServerStart = {
-      async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
-        return buildScope(request).get(RulesClient);
+      async getRulesClientWithRequest(
+        request: KibanaRequest,
+        options?: RulesClientCallerOptions
+      ): Promise<RulesClientApi> {
+        return buildScope(request, undefined, options).get(RulesClient);
       },
       async getRulesClientWithRequestInSpace(
         request: KibanaRequest,
-        spaceId: SpaceId
+        spaceId: SpaceId,
+        options?: RulesClientCallerOptions
       ): Promise<RulesClientApi> {
-        return buildScope(request, spaceId).get(RulesClient);
+        return buildScope(request, spaceId, options).get(RulesClient);
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest
