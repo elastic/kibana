@@ -93,7 +93,7 @@ describe('AiIndexDataReadService', () => {
       const result = await service.describe('support');
 
       expect(result).toEqual({ response: contextBlock });
-      expect(aiIndexService.get).toHaveBeenCalledWith('support');
+      expect(aiIndexService.get).toHaveBeenCalledWith('support', 'marketing');
       expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
