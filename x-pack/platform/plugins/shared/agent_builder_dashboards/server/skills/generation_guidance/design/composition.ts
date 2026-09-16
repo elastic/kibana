@@ -8,7 +8,7 @@
 export const dashboardCompositionPrompt = `
 ## Dashboard Composition Guidelines
 
-A well-composed dashboard orders panels as summary metrics, then trends, then breakdowns and distributions:
+A well-composed dashboard tells a coherent story about the data:
 
 1. **Consider a markdown panel when it adds value** — to set context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one.
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
