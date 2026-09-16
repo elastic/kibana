@@ -120,7 +120,7 @@ export const ThreatQ: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
   auth: {
     types: [

@@ -9,7 +9,7 @@ applies_to:
 
 # ThreatQ connector
 
-The ThreatQ connector searches and updates intelligence in a hosted or on-premises ThreatQ instance through its REST API. Use it to read indicator context, record investigation findings, link objects, and run configured operations.
+The ThreatQ connector searches and updates intelligence in a hosted or on-premises ThreatQ instance through its REST API. Use it in Workflows or Agent Builder to read indicator context, record investigation findings, and link objects. Workflows can also run configured ThreatQ operations.
 
 ## Before you begin
 
