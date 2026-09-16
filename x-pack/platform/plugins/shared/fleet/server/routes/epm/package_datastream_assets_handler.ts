@@ -19,7 +19,7 @@ import {
   isInputPackageDatasetUsedByMultiplePolicies,
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.params>,
@@ -61,6 +61,7 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
     const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
       spaceId: '*',
+      perPage: SO_SEARCH_LIMIT,
     });
 
     const customDatasetStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
