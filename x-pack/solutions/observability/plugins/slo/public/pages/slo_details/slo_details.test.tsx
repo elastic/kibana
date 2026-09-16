@@ -330,6 +330,45 @@ describe('SLO Details Page', () => {
     expect(screen.queryByTestId('sloSyntheticsTimesliceWindowCallout')).not.toBeInTheDocument();
   });
 
+  it('does not look up a Synthetics monitor schedule for a remote SLO', async () => {
+    const slo = buildSlo({
+      indicator: {
+        type: 'sli.synthetics.availability',
+        params: {
+          index: 'synthetics-*',
+          monitorIds: [],
+          projects: [],
+          tags: [],
+        },
+      },
+      budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0.95,
+        timesliceWindow: '1m',
+      },
+      meta: {
+        synthetics: {
+          monitorId: 'remote-monitor',
+          locationId: 'remote-location',
+          configId: 'remote-monitor',
+        },
+      },
+      remote: { remoteName: 'remote-cluster', kibanaUrl: 'https://remote.kibana' },
+    });
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sloDetailsPage')).toBeInTheDocument();
+    });
+    expect(mockGetMonitor).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('sloSyntheticsTimesliceWindowCallout')).not.toBeInTheDocument();
+  });
+
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
     jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });

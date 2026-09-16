@@ -28,7 +28,7 @@ export function SyntheticsTimesliceWindowCallout({ slo }: { slo: SLOWithSummaryR
   const timesliceWindow = slo.objective.timesliceWindow;
   const schedule = useSyntheticsMonitorSchedule({
     configId,
-    enabled: isSyntheticsTimeslicesSlo && Boolean(timesliceWindow),
+    enabled: !slo.remote && isSyntheticsTimeslicesSlo && Boolean(timesliceWindow),
   });
 
   if (!timesliceWindow || !schedule) {
