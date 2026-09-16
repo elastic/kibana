@@ -30,7 +30,6 @@ export const getHistorySnapshotTaskId = (namespace: string): string =>
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
   signal: AbortSignal;
-  fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
 }
@@ -38,7 +37,6 @@ interface RunHistorySnapshotTaskParams {
 async function runHistorySnapshotTask({
   taskInstance,
   signal,
-  fakeRequest,
   core,
   logger,
 }: RunHistorySnapshotTaskParams): Promise<{
@@ -62,13 +60,8 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state, shouldDeleteTask: true };
   }
 
-  if (!fakeRequest) {
-    logger.error('No fake request found, skipping history snapshot task');
-    return { state: taskInstance.state };
-  }
-
-  const soClient = start.savedObjects.getScopedClient(fakeRequest);
-  const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  const soClient = start.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
+  const esClient = start.elasticsearch.client.asInternalUser;
   const taskLogger = logger.get(taskInstance.id);
 
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, taskLogger);
@@ -111,7 +104,7 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
+      createTaskRunner: ({ taskInstance, signal }) => ({
         run: () =>
           wrapTaskRun({
             spanName: 'entityStore.task.history_snapshot.run',
@@ -124,7 +117,6 @@ export function registerHistorySnapshotTask({
               runHistorySnapshotTask({
                 taskInstance,
                 signal,
-                fakeRequest,
                 core,
                 logger,
               }),
