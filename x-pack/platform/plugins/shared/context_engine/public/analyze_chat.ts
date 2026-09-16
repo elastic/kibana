@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { i18n } from '@kbn/i18n';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
@@ -73,7 +74,7 @@ export const buildAnalyzeChat = ({
   aiIndex,
   improvement,
 }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
-  agentId: aiIndex.feedback_analysis?.agent_id,
+  agentId: aiIndex.feedback_analysis?.agent_id ?? agentBuilderDefaultAgentId,
   newConversation: true,
   sessionTag: `context-engine-feedback:${aiIndex.id}`,
   attachments: [
