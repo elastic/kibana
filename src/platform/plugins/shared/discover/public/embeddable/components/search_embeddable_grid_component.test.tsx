@@ -136,7 +136,7 @@ describe('SearchEmbeddableGridComponent', () => {
     if (columnsMeta) {
       stateManager.columnsMeta.next(columnsMeta);
     }
-    
+
     render(
       <DiscoverTestProvider services={servicesOverride}>
         <SearchEmbeddableGridComponent
@@ -209,7 +209,7 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
   });
-  
+
   describe('searchContext', () => {
     const fetchContext: FetchContext = {
       isReload: false,
@@ -281,7 +281,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(nextRequestId).not.toBe(firstRequestId);
       });
     });
-   });
+  });
 
   describe('share direct link', () => {
     const expandedDoc = rows[0];
