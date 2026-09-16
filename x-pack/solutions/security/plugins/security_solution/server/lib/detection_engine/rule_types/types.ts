@@ -22,7 +22,6 @@ import type {
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutorServices,
-  CpsData,
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
@@ -110,8 +109,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
-  /** Cross-project search scope of the rule run, when CPS is enabled */
-  cpsData?: CpsData;
 }
 
 type SecurityActionGroupId = 'default';

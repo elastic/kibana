@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/esql-utils'
   - '@kbn/licensing-plugin'
-  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod

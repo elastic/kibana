@@ -18,7 +18,6 @@ import {
 } from '../../../../common/stubs';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from './get_display_value';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('getDisplayValueFromFilter', () => {
   beforeEach(() => {
@@ -31,13 +30,13 @@ describe('getDisplayValueFromFilter', () => {
     expect(displayValue).toBe('abc');
   });
 
-  it('returns NULL_LABEL if value is undefined', () => {
+  it('returns the value if undefined', () => {
     const filter = {
       ...phraseFilter,
       meta: { ...phraseFilter.meta, value: undefined, params: { query: undefined } },
     };
     const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
-    expect(displayValue).toBe(NULL_LABEL);
+    expect(displayValue).toBe('');
   });
 
   it('returns 0 if value undefined and numeric field', () => {

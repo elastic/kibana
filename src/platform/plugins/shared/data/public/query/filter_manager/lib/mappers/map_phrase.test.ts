@@ -10,7 +10,6 @@
 import { getPhraseDisplayValue, mapPhrase } from './map_phrase';
 import type { PhraseFilter, Filter } from '@kbn/es-query';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
@@ -46,36 +45,23 @@ describe('filter manager utilities', () => {
       expect(result).toMatchInlineSnapshot(`"hello"`);
     });
 
-    test('without formatter with empty string value returns blank label', () => {
+    test('without formatter empty value', () => {
       const filter = { meta: { value: '' } } as PhraseFilter;
       const result = getPhraseDisplayValue(filter);
-      expect(result).toBe(EMPTY_LABEL);
+      expect(result).toMatchInlineSnapshot(`""`);
     });
 
-    test('without formatter with undefined value returns null label', () => {
+    test('without formatter with undefined value', () => {
       const filter = { meta: { params: {} } } as PhraseFilter;
       const result = getPhraseDisplayValue(filter);
-      expect(result).toBe(NULL_LABEL);
+      expect(result).toMatchInlineSnapshot(`""`);
     });
 
-    test('without formatter with null value returns null label', () => {
-      const filter = { meta: { value: null } } as unknown as PhraseFilter;
-      const result = getPhraseDisplayValue(filter);
-      expect(result).toBe(NULL_LABEL);
-    });
-
-    test('with formatter delegates to formatter for all values', () => {
-      const formatter = { convertToText: (val: unknown) => `formatted:${val}` } as FieldFormat;
-
-      expect(getPhraseDisplayValue({ meta: { value: 'hello' } } as PhraseFilter, formatter)).toBe(
-        'formatted:hello'
-      );
-      expect(getPhraseDisplayValue({ meta: { value: '' } } as PhraseFilter, formatter)).toBe(
-        'formatted:'
-      );
-      expect(getPhraseDisplayValue({ meta: { params: {} } } as PhraseFilter, formatter)).toBe(
-        'formatted:undefined'
-      );
+    test('with formatter', () => {
+      const filter = { meta: { value: 'hello' } } as PhraseFilter;
+      const formatter = { convertToText: (val) => `formatted ${val}` } as FieldFormat;
+      const result = getPhraseDisplayValue(filter, formatter);
+      expect(result).toMatchInlineSnapshot(`"formatted hello"`);
     });
   });
 });

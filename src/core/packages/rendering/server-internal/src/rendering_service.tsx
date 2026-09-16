@@ -20,7 +20,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
-import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
@@ -205,7 +204,8 @@ export class RenderingService {
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
-      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
+      userSettingDarkMode,
+      userSettingLocale,
       userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
@@ -214,14 +214,18 @@ export class RenderingService {
             withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(true),
             uiSettings.globalClient?.getUserProvided(true),
-            userSettings?.getUserSettings(request),
+            // dark mode
+            userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
             // user storage
             this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<UserSettings> | undefined,
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined,
             Promise<Record<string, unknown>>
           ])
     );

@@ -4,5 +4,6 @@
   "author": "UX Management",
   "private": true,
   "version": "1.0.0",
+  "main": "index.ts",
   "license": "Elastic License 2.0"
 }

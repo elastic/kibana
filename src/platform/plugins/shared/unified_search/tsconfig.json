@@ -49,7 +49,6 @@
     "@kbn/scout",
     "@kbn/esql-utils",
     "@kbn/licensing-plugin",
-    "@kbn/field-formats-common",
   ],
   "exclude": ["target/**/*"]
 }

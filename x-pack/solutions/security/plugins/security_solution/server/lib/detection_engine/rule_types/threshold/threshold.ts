@@ -125,7 +125,6 @@ export const thresholdExecutor = async ({
         secondaryTimestamp,
         aggregatableTimestampField,
         isLoggedRequestsEnabled,
-        cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
       });
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
