@@ -1442,7 +1442,7 @@ components:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
         enabled:
-          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+          $ref: '#/components/schemas/QueryEnabled'
         id:
           $ref: '#/components/schemas/QueryId'
         platform:
@@ -1452,7 +1452,7 @@ components:
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
         result_type:
-          $ref: '#/components/schemas/ResultTypeOrUndefined'
+          $ref: '#/components/schemas/ResultType'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -1506,7 +1506,7 @@ components:
             name:
               $ref: '#/components/schemas/PackName'
             platform:
-              $ref: '#/components/schemas/Platform'
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
@@ -1518,7 +1518,7 @@ components:
                   ecs_mapping:
                     $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
                   enabled:
-                    $ref: '#/components/schemas/QueryEnabledOrUndefined'
+                    $ref: '#/components/schemas/QueryEnabled'
                   id:
                     type: string
                   interval:
@@ -1530,7 +1530,7 @@ components:
                   removed:
                     type: boolean
                   result_type:
-                    $ref: '#/components/schemas/ResultTypeOrUndefined'
+                    $ref: '#/components/schemas/ResultType'
                   rrule_schedule:
                     $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                   schedule_type:
@@ -1851,7 +1851,7 @@ components:
         name:
           $ref: '#/components/schemas/PackName'
         platform:
-          $ref: '#/components/schemas/Platform'
+          $ref: '#/components/schemas/PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
@@ -1919,7 +1919,7 @@ components:
             name:
               $ref: '#/components/schemas/PackName'
             platform:
-              $ref: '#/components/schemas/Platform'
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
@@ -2537,7 +2537,7 @@ components:
                 type: string
               type: array
             platform:
-              $ref: '#/components/schemas/Platform'
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
@@ -2628,7 +2628,7 @@ components:
               name:
                 $ref: '#/components/schemas/PackName'
               platform:
-                $ref: '#/components/schemas/Platform'
+                $ref: '#/components/schemas/PackPlatform'
               policy_ids:
                 $ref: '#/components/schemas/PolicyIdsOrUndefined'
               queries:
@@ -2640,7 +2640,7 @@ components:
                     ecs_mapping:
                       $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
                     enabled:
-                      $ref: '#/components/schemas/QueryEnabledOrUndefined'
+                      $ref: '#/components/schemas/QueryEnabled'
                     id:
                       type: string
                     interval:
@@ -2652,7 +2652,7 @@ components:
                     removed:
                       type: boolean
                     result_type:
-                      $ref: '#/components/schemas/ResultTypeOrUndefined'
+                      $ref: '#/components/schemas/ResultType'
                     rrule_schedule:
                       $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                     schedule_type:
@@ -3111,6 +3111,7 @@ components:
         Formatted as a semver string, e.g. `"5.10.0"`.
       example: 5.10.0
       maxLength: 64
+      minLength: 1
       type: string
     MinOsqueryVersionOrUndefined:
       $ref: '#/components/schemas/MinOsqueryVersion'
@@ -3126,7 +3127,7 @@ components:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
         enabled:
-          $ref: '#/components/schemas/QueryEnabledOrUndefined'
+          $ref: '#/components/schemas/QueryEnabled'
         id:
           $ref: '#/components/schemas/QueryId'
         interval:
@@ -3145,7 +3146,7 @@ components:
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
         result_type:
-          $ref: '#/components/schemas/ResultTypeOrUndefined'
+          $ref: '#/components/schemas/ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         saved_query_id:
@@ -3183,6 +3184,16 @@ components:
       description: The pack name.
       example: my_pack
       type: string
+    PackPlatform:
+      description: Pack-level platform restriction. To specify multiple platforms, use
+        commas. For example, `linux,darwin`.
+      example: linux,darwin
+      maxLength: 256
+      minLength: 1
+      type: string
+    PackPlatformOrUndefined:
+      $ref: '#/components/schemas/PackPlatform'
+      nullable: true
     PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -3198,7 +3209,6 @@ components:
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
       example: linux,darwin
-      maxLength: 256
       type: string
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
@@ -3223,9 +3233,6 @@ components:
         from the Fleet policy. Default is true.
       example: true
       type: boolean
-    QueryEnabledOrUndefined:
-      $ref: '#/components/schemas/QueryEnabled'
-      nullable: true
     QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334
@@ -3510,7 +3517,7 @@ components:
         name:
           $ref: '#/components/schemas/PackName'
         platform:
-          $ref: '#/components/schemas/PlatformOrUndefined'
+          $ref: '#/components/schemas/PackPlatformOrUndefined'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
@@ -3575,7 +3582,7 @@ components:
             name:
               $ref: '#/components/schemas/PackName'
             platform:
-              $ref: '#/components/schemas/Platform'
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
