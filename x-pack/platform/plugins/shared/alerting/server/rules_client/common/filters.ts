@@ -146,15 +146,33 @@ const isKueryNode = (value: unknown): value is KueryNode =>
  * `find()` rewrites `type.attributes.field` to `type.field` before querying
  * ES. `search()` does not, so KQL nodes built for find must be rewritten
  * before `toElasticsearchQuery`.
+ *
+ * Only rewrites field-name arguments (arguments[0] of is/range/exists nodes)
+ * to avoid mangling value literals that happen to contain `.attributes.`.
  */
+const FIELD_ARGUMENT_FUNCTIONS = new Set(['is', 'range', 'exists']);
+
 export const stripAttributesFromKueryFields = (node: KueryNode): KueryNode => {
   const next: KueryNode = { type: node.type };
+  const isFieldFunction = FIELD_ARGUMENT_FUNCTIONS.has(node.function);
   for (const [key, value] of Object.entries(node)) {
     if (key === 'type') {
       continue;
     }
-    if (key === 'value' && typeof value === 'string') {
-      next[key] = value.replace('.attributes.', '.');
+    if (key === 'arguments' && Array.isArray(value)) {
+      next[key] = value.map((item, index) => {
+        if (!isKueryNode(item)) return item;
+        const child = stripAttributesFromKueryFields(item);
+        if (
+          isFieldFunction &&
+          index === 0 &&
+          child.type === 'literal' &&
+          typeof child.value === 'string'
+        ) {
+          return { ...child, value: child.value.replace('.attributes.', '.') };
+        }
+        return child;
+      });
       continue;
     }
     if (Array.isArray(value)) {

@@ -529,6 +529,19 @@ describe('filters', () => {
         },
       });
     });
+
+    it('does not rewrite .attributes. that appears inside a value literal', () => {
+      const node = nodeBuilder.is(
+        'alerting_rule_template.attributes.tags',
+        'team.attributes.alerting'
+      );
+      expect(toSavedObjectEsQuery(node)).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ match: { 'alerting_rule_template.tags': 'team.attributes.alerting' } }],
+        },
+      });
+    });
   });
 
   describe('buildConsumersFilter', () => {

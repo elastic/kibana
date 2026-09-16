@@ -35,7 +35,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
 const isAlertingV1TemplateAttributes = (value: unknown): value is AlertingV1RawRuleTemplate => {
-  if (!isRecord(value) || value.engine === 'v2') {
+  if (!isRecord(value)) {
+    return false;
+  }
+  // Allowlist v1 and unset, matching buildAlertingV1RuleTemplateEngineFilter.
+  if (value.engine !== undefined && value.engine !== 'v1') {
     return false;
   }
   return typeof value.name === 'string' && typeof value.ruleTypeId === 'string';
