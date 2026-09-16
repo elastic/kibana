@@ -18,6 +18,7 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV9 } 
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV10 } from './v10';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV11 } from './v11';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV12 } from './v12';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV13 } from './v13';
 
 /** Attributes as stored up to model version 3, where artifacts carried `value: string`. */
 export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
@@ -32,7 +33,7 @@ export type RuleSavedObjectAttributesV4 = TypeOf<typeof ruleSavedObjectAttribute
 export type RuleSavedObjectAttributesV5 = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
 
 /** Latest attributes shape. */
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV12>;
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV13>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
@@ -47,6 +48,7 @@ export {
   ruleSavedObjectAttributesSchemaV10,
   ruleSavedObjectAttributesSchemaV11,
   ruleSavedObjectAttributesSchemaV12,
+  ruleSavedObjectAttributesSchemaV13,
 };
 
 /**
@@ -59,4 +61,4 @@ export {
  *
  * Ref: rule-data-migration.md "Rollback behavior"
  */
-export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV12;
+export const currentRuleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV13;
