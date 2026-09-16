@@ -62,6 +62,8 @@ apiTest.describe(
     let adminHeaders: Record<string, string>;
     let baselineUserErrors: number;
     let baselineFrameworkErrors: number;
+    let prefixQueryRuleId: string;
+    let ipLiteralRuleId: string;
 
     const baseRule = () => ({
       name: `Invalid query field type ${runId}`,
@@ -148,9 +150,13 @@ apiTest.describe(
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       adminHeaders = { ...apiKeyHeader, ...PUBLIC_HEADERS };
 
+      // Capture baseline BEFORE creating any rules so the metrics delta is clean.
       const metrics = await readQueryRuleMetrics(apiClient);
       baselineUserErrors = metrics?.user_errors ?? 0;
       baselineFrameworkErrors = metrics?.framework_errors ?? 0;
+
+      prefixQueryRuleId = await createRule(apiClient, { query: 'destination.ip: 10.*' });
+      ipLiteralRuleId = await createRule(apiClient, { query: 'destination.ip: exists' });
     });
 
     apiTest.afterAll(async ({ esClient, kbnClient }) => {
@@ -166,9 +172,7 @@ apiTest.describe(
     });
 
     apiTest('prefix query on an ip field fails as a user error', async ({ apiClient }) => {
-      const id = await createRule(apiClient, { query: 'destination.ip: 10.*' });
-
-      const executionSummary = await waitForFailedExecution(apiClient, id);
+      const executionSummary = await waitForFailedExecution(apiClient, prefixQueryRuleId);
 
       expect(executionSummary?.last_execution.status).toBe('failed');
       expect(executionSummary?.last_execution.message).toContain(
@@ -178,9 +182,7 @@ apiTest.describe(
     });
 
     apiTest('IP literal query on an ip field fails as a user error', async ({ apiClient }) => {
-      const id = await createRule(apiClient, { query: 'destination.ip: exists' });
-
-      const executionSummary = await waitForFailedExecution(apiClient, id);
+      const executionSummary = await waitForFailedExecution(apiClient, ipLiteralRuleId);
 
       expect(executionSummary?.last_execution.status).toBe('failed');
       expect(executionSummary?.last_execution.message).toContain('is not an IP string literal');
@@ -189,10 +191,16 @@ apiTest.describe(
     apiTest(
       'failed rules with query_shard_exception are counted as user errors, not framework errors, in task manager metrics',
       async ({ apiClient }) => {
-        // At least one of the two rules must surface as a user_error in TM metrics. Both rules
-        // log the user-error classification, but the task runner event propagates asynchronously;
-        // asserting >= 1 keeps the test stable while still proving the USER_ERROR_REASON_SUBSTRINGS
-        // classifier is active (if the substring check were absent both would be framework_errors).
+        // The per-execution user-error classification is only observable in the process-wide
+        // task manager counters (it is not written to the event log or any rule API), so this
+        // test asserts deltas on the global `alerting:siem__queryRule` counter after confirming
+        // both rules have failed. Waiting for both failures here is idempotent — if the earlier
+        // tests already drove them to `failed`, this returns immediately. If the classifier
+        // missed these errors they would land in `framework_errors` instead, which the equality
+        // assertion below would catch.
+        await waitForFailedExecution(apiClient, prefixQueryRuleId);
+        await waitForFailedExecution(apiClient, ipLiteralRuleId);
+
         await expect
           .poll(
             async () => {
