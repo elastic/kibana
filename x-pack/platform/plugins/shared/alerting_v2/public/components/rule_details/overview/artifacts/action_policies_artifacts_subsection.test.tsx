@@ -79,6 +79,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -96,6 +97,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: true,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -111,6 +113,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: true,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: new Error('boom'),
     });
@@ -134,6 +137,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 1,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -169,6 +173,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 1,
       isLoading: false,
       isError: false,
+      evaluatedCount: 0,
       isCountTruncated: false,
       error: null,
     });
@@ -183,13 +188,14 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
   });
 
-  it('shows a truncated count indicator when linked policy counts may be incomplete', () => {
+  it('shows the evaluated count when results are truncated', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
       totalCount: 5,
       catchAllCount: 2,
       matchingCriteriaCount: 3,
       isLoading: false,
       isError: false,
+      evaluatedCount: 50,
       isCountTruncated: true,
       error: null,
     });
@@ -198,7 +204,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('5+');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
-      'This space has more than 100 action policies, so this count may be low.'
+      `Only 50 action policies were evaluated, so this count may be low.`
     );
   });
 });
