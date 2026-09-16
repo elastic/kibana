@@ -66,13 +66,18 @@ export interface ConvertSOQueriesToPackOptions {
 export const convertSOQueriesToPack = (
   queries: PackQueryFormData[],
   { includeId = false }: ConvertSOQueriesToPackOptions = {}
-) =>
+): Record<string, PackSavedObjectQuery> =>
   reduce(
     queries,
-    (acc, { id: queryId, originalId, ...query }) => {
-      acc[queryId] = includeId ? { ...query, id: originalId ?? queryId } : query;
+    (acc, { id: queryId, originalId, version: formVersion, ...query }) => {
+      const version = storedQueryVersion(formVersion);
+      acc[queryId] = {
+        ...query,
+        ...(includeId ? { id: originalId ?? queryId } : {}),
+        ...(version ? { version } : {}),
+      };
 
       return acc;
     },
-    {} as Record<string, Omit<PackQueryFormData, 'id' | 'originalId'> & { id?: string }>
+    {} as Record<string, PackSavedObjectQuery>
   );

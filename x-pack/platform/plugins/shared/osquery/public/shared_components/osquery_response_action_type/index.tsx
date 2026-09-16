@@ -90,9 +90,11 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     if (packData?.queries) {
-      const queriesArray = map(packData?.queries, (query, queryId: string) => ({
-        ...query,
+      const queriesArray = map(packData.queries, (query, queryId: string) => ({
         id: queryId,
+        query: query.query,
+        ecs_mapping: (query.ecs_mapping ?? {}) as NonNullable<typeof query.ecs_mapping>,
+        timeout: query.timeout,
       }));
 
       replace(queriesArray);

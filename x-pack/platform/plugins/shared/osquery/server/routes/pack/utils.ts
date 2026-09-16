@@ -442,7 +442,10 @@ export const resolveEffectiveQueryExecution = (
   query: { version?: string | null; platform?: string | null },
   packExecutionDefaults?: PackExecutionDefaults
 ): { version?: string; platform?: string } => {
-  const effectiveVersion = query.version ?? packExecutionDefaults?.min_osquery_version ?? undefined;
+  // Normalize blank/empty version strings — an empty string is not a meaningful
+  // override; treat it as absent so the pack default can apply.
+  const perQueryVersion = query.version || undefined;
+  const effectiveVersion = perQueryVersion ?? packExecutionDefaults?.min_osquery_version ?? undefined;
 
   const perQueryPlatform = isEmptyOrAllPlatforms(query.platform)
     ? undefined

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiText, type EuiSuperSelectOption } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
@@ -14,6 +14,8 @@ import type { ResultType } from '../../../common/result_type';
 import { RESULT_TYPE_SELECT_OPTIONS } from '../../form/results_type_field';
 
 const EMPTY_VALUE = '' as const;
+
+type PackResultTypeOption = ResultType | typeof EMPTY_VALUE;
 
 interface PackResultTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -39,7 +41,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
   );
 
   const options = useMemo(
-    () => [
+    (): Array<EuiSuperSelectOption<PackResultTypeOption>> => [
       {
         value: EMPTY_VALUE,
         inputDisplay: (
@@ -57,7 +59,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
           </EuiText>
         ),
       },
-      ...RESULT_TYPE_SELECT_OPTIONS,
+      ...(RESULT_TYPE_SELECT_OPTIONS as Array<EuiSuperSelectOption<PackResultTypeOption>>),
     ],
     []
   );
@@ -80,7 +82,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
       }
       fullWidth
     >
-      <EuiSuperSelect
+      <EuiSuperSelect<PackResultTypeOption>
         data-test-subj="pack-result-type-field"
         options={options}
         fullWidth

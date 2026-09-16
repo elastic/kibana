@@ -51,7 +51,7 @@ import { PackVersionField } from './pack_version_field';
 import { PackResultTypeField } from './pack_result_type_field';
 import { PackPlatformField } from './pack_platform_field';
 import { PackMigrationAdvisory } from './pack_migration_advisory';
-import type { ResultType } from '../../../common/result_type';
+import { mapWireToResultType, type ResultType } from '../../../common/result_type';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries' | 'min_osquery_version' | 'result_type'> & {
   queries: PackQueryFormData[];
@@ -384,9 +384,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
       try {
         if (editMode && defaultValue?.saved_object_id) {
-          await updateAsync({ id: defaultValue?.saved_object_id, ...serializer(values) });
+          await updateAsync(
+            { id: defaultValue?.saved_object_id, ...serializer(values) } as Parameters<
+              typeof updateAsync
+            >[0]
+          );
         } else {
-          await createAsync(serializer(values));
+          await createAsync(serializer(values) as Parameters<typeof createAsync>[0]);
         }
         // eslint-disable-next-line no-empty
       } catch (e) {}
@@ -467,14 +471,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     const versions = new Set(queryList.map((q) => storedQueryVersion(q.version)));
     if (versions.size > 1) return true;
 
-    // Per-query result type, derived from the legacy snapshot/removed booleans.
+    // Per-query result type. Canonical `result_type` takes precedence (an
+    // API-created or previously-overridden query may carry it without any legacy
+    // booleans). Fall back to the wire-boolean pair for pre-V5 queries.
     const resultTypes = new Set(
-      queryList.map((q) => {
-        if (q.snapshot === false && q.removed === true) return 'differential';
-        if (q.snapshot === false && q.removed === false) return 'differential_added_only';
-
-        return 'snapshot';
-      })
+      queryList.map(
+        (q) =>
+          q.result_type ??
+          mapWireToResultType({ snapshot: q.snapshot, removed: q.removed }) ??
+          'snapshot'
+      )
     );
 
     // Non-uniform values always warrant a heads-up.

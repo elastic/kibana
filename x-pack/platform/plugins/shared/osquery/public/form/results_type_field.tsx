@@ -13,14 +13,15 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiText,
+  type EuiSuperSelectOption,
 } from '@elastic/eui';
 import { useController, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { isResultType } from '../../common/result_type';
+import { isResultType, type ResultType } from '../../common/result_type';
 
-export const SNAPSHOT_OPTION = {
+export const SNAPSHOT_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'snapshot',
   inputDisplay: (
     <FormattedMessage
@@ -30,7 +31,7 @@ export const SNAPSHOT_OPTION = {
   ),
 };
 
-export const DIFFERENTIAL_OPTION = {
+export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'differential',
   inputDisplay: (
     <FormattedMessage
@@ -40,7 +41,7 @@ export const DIFFERENTIAL_OPTION = {
   ),
 };
 
-export const DIFFERENTIAL_ADDED_ONLY_OPTION = {
+export const DIFFERENTIAL_ADDED_ONLY_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'differential_added_only',
   inputDisplay: (
     <FormattedMessage
@@ -50,7 +51,7 @@ export const DIFFERENTIAL_ADDED_ONLY_OPTION = {
   ),
 };
 
-export const RESULT_TYPE_SELECT_OPTIONS = [
+export const RESULT_TYPE_SELECT_OPTIONS: Array<EuiSuperSelectOption<ResultType>> = [
   SNAPSHOT_OPTION,
   DIFFERENTIAL_OPTION,
   DIFFERENTIAL_ADDED_ONLY_OPTION,
