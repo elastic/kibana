@@ -60,6 +60,8 @@ export const RULE_RESPONSE: RuleResponse = {
     source: { type: 'internal', version: 1 },
     version: 1,
     revision: 0,
+    // Step 4.4: server-derived ownership, immutable and response-only.
+    ownership: { managed: false },
   },
   created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',

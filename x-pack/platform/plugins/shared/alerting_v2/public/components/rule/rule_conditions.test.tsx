@@ -28,7 +28,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Events Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 } },
+  metadata: { name: 'Test Events Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 }, ownership: { managed: false } },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
@@ -45,7 +45,7 @@ const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 } },
+  metadata: { name: 'Test Alert Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 }, ownership: { managed: false } },
   recovery_strategy: 'query',
   query: {
     format: 'standalone',
