@@ -14,7 +14,7 @@
  *   version: Bundle (no version)
  */
 
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -107,6 +107,16 @@ export interface ScoutApiRequestOptions {
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   */
+  responseType?: ApiClientOptions['responseType'];
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
@@ -128,7 +138,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async getAgentPackagePolicies(
@@ -145,7 +156,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async getAgentPolicies(
@@ -162,7 +174,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async getAgentPolicy(
@@ -183,7 +196,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async getAgents(
@@ -195,7 +209,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/osquery/fleet_wrapper/agents`;
 
     return apiClient.get<GetAgentsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -203,7 +217,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -225,7 +240,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -249,7 +265,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -271,7 +288,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -293,7 +310,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -315,7 +332,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -336,7 +353,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -357,7 +375,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -376,7 +395,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     )}`;
 
     return apiClient.post<OsqueryExportLiveQueryResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -385,7 +404,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           ...options.headers,
         },
         body: props.body,
-        responseType: 'json',
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -405,7 +424,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     )}`;
 
     return apiClient.post<OsqueryExportScheduledQueryResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -414,7 +433,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           ...options.headers,
         },
         body: props.body,
-        responseType: 'json',
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -430,7 +449,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/osquery/live_queries`;
 
     return apiClient.get<OsqueryFindLiveQueriesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -438,7 +457,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -454,7 +474,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/osquery/packs`;
 
     return apiClient.get<OsqueryFindPacksResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -462,7 +482,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -478,7 +499,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/osquery/saved_queries`;
 
     return apiClient.get<OsqueryFindSavedQueriesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -486,7 +507,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -508,7 +530,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -526,7 +549,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     )}`;
 
     return apiClient.get<OsqueryGetLiveQueryResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -534,7 +557,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -556,7 +580,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -577,7 +602,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -596,7 +622,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     )}`;
 
     return apiClient.get<OsqueryGetScheduledActionResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -604,7 +630,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -624,7 +651,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     )}`;
 
     return apiClient.get<OsqueryGetScheduledQueryResultsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -632,7 +659,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -649,7 +677,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/osquery/history`;
 
     return apiClient.get<OsqueryGetUnifiedHistoryResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -657,7 +685,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -683,7 +712,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -708,7 +737,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   async readAssetsStatus(
@@ -720,7 +749,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/osquery/assets`;
 
     return apiClient.get<ReadAssetsStatusResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -728,7 +757,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -746,7 +776,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async readPrivilegesCheck(
@@ -763,7 +794,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async updateAssetsStatus(
@@ -775,7 +807,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/osquery/assets/update`;
 
     return apiClient.post<UpdateAssetsStatusResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -783,7 +815,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
