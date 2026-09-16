@@ -53,10 +53,12 @@ describe('detectDataPresence', () => {
 
   it("returns an empty set when no_data.strategy is 'ignore'", async () => {
     const { queryService, scopedEsClient } = setup();
+    const rule = buildRule({ no_data: { strategy: 'ignore' } });
 
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule({ no_data: { strategy: 'ignore' } }),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -67,10 +69,12 @@ describe('detectDataPresence', () => {
 
   it('returns an empty set when the rule carries no no_data configuration', async () => {
     const { queryService, scopedEsClient } = setup();
+    const rule = buildRule({ no_data: undefined });
 
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule({ no_data: undefined }),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -84,11 +88,13 @@ describe('detectDataPresence', () => {
     scopedEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
+    const rule = buildRule();
     const input = createRuleExecutionInput();
 
     await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input,
       logger: loggerService,
     });
@@ -111,9 +117,11 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const rule = buildRule();
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -127,9 +135,11 @@ describe('detectDataPresence', () => {
 
     scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
+    const rule = buildRule();
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -145,15 +155,21 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const rule = createRuleResponse({
+      kind: 'alert',
+      no_data_strategy: 'emit',
+      grouping: { fields: groupingFields },
+      query: {
+        format: 'composed',
+        base: baseQuery,
+        breach: { segment: 'WHERE AVG(cpu) > 0.9' },
+      },
+    });
     const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
-      rule: createRuleResponse({
-        kind: 'alert',
-        no_data: { strategy: 'alert' },
-        grouping: { fields: groupingFields },
-        query: { base: baseQuery, breach: { segment: 'WHERE AVG(cpu) > 0.9' } },
-      }),
+      rule,
+      effectiveQuery: rule.query,
       input,
       logger: loggerService,
     });
@@ -173,9 +189,11 @@ describe('detectDataPresence', () => {
       new errors.ResponseError({ statusCode: 400 })
     );
 
+    const rule = buildRule();
     const error = await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     }).catch((e: Error) => e);
@@ -191,9 +209,11 @@ describe('detectDataPresence', () => {
       new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
     );
 
+    const rule = buildRule();
     const error = await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     }).catch((e: Error) => e);
@@ -210,9 +230,11 @@ describe('detectDataPresence', () => {
       new errors.ResponseError({ statusCode: 503 } as DiagnosticResult)
     );
 
+    const rule = buildRule();
     const error = await detectDataPresence({
       queryService,
-      rule: buildRule(),
+      rule,
+      effectiveQuery: rule.query,
       input: createRuleExecutionInput(),
       logger: loggerService,
     }).catch((e: Error) => e);
@@ -226,14 +248,49 @@ describe('detectDataPresence', () => {
 
     scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
+    const rule = buildRule();
     const abortController = new AbortController();
     const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
-    await detectDataPresence({ queryService, rule: buildRule(), input, logger: loggerService });
+    await detectDataPresence({
+      queryService,
+      rule,
+      effectiveQuery: rule.query,
+      input,
+      logger: loggerService,
+    });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ signal: abortController.signal })
     );
+  });
+
+  it('uses the shared now from executionWindow for the no-data query payload', async () => {
+    const { queryService, scopedEsClient } = setup();
+    scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
+
+    const fixedEnd = '2025-04-15T08:00:00.000Z';
+    const lookback = '5m';
+    const expectedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
+
+    const rule = buildRule({ schedule: { every: '1m', lookback } });
+
+    await detectDataPresence({
+      queryService,
+      rule,
+      effectiveQuery: rule.query,
+      now: new Date(fixedEnd).getTime(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    });
+
+    const callArg = scopedEsClient.esql.query.mock.calls[0]?.[0] as {
+      filter: { bool: { filter: Array<{ range: Record<string, { lte: string; gt: string }> }> } };
+    };
+    const rangeFilter = callArg?.filter?.bool?.filter?.[0]?.range;
+    const tsRange = rangeFilter?.['@timestamp'];
+    expect(tsRange?.lte).toBe(fixedEnd);
+    expect(tsRange?.gt).toBe(expectedStart);
   });
 });
