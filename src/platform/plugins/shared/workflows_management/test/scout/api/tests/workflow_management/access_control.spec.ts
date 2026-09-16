@@ -645,8 +645,13 @@ steps:
         await expect
           .poll(
             async () => {
-              const execution = await apiClient.get(executionPath, { headers: ownerHeaders });
-              return execution.body.status;
+              const executions = await apiClient.get(`${workflowPath}/executions`, {
+                headers: ownerHeaders,
+              });
+              expect(executions).toHaveStatusCode(200);
+              return executions.body.results.find(
+                (execution: WorkflowExecutionDto) => execution.id === run.body.workflowExecutionId
+              )?.status;
             },
             { timeout: 60000 }
           )
