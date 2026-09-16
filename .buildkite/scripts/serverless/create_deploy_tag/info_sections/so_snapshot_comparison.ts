@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { readFileSync } from 'fs';
-import { exec } from '../shared';
+import { exec } from '../shared.ts';
 import { BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
 type VersionChanges = Record<string, { from: number; to: number; emoji: string }>;

@@ -362,6 +362,30 @@ describe('AlertEpisodesListPage', () => {
     expect(node).toBeTruthy();
   });
 
+  it('passes host-aware getRuleDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getRuleDetailsHref).toBe('function');
+    expect(node.props.getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
+    expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+  });
+
+  it('passes host-aware getEpisodeDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getEpisodeDetailsHref).toBe('function');
+    expect(node.props.getEpisodeDetailsHref('ep-1')).toBe('/mock-locator-url');
+    expect(mockLocators.episodesLocators.getRedirectUrl).toHaveBeenCalledWith({
+      episodeId: 'ep-1',
+    });
+  });
+
   it('renderDocumentView returns the ClassicAlertDetailsFlyout for classic-sourced rows', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const renderDocumentView = lastCall?.renderDocumentView as (hit: {
