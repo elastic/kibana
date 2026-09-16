@@ -88,11 +88,13 @@ import type {
   BulkCreateRulesResponse,
   BulkOperationError,
   BulkResponse,
+  BuilderFieldsValidation,
   CreateRuleData,
   CreateRuleParams,
   FindRulesArgs,
-  FindRulesResponse,
+  FindRulesResult,
   FindRulesSortField,
+  GetRuleResult,
   RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
@@ -417,6 +419,7 @@ export class RulesClient {
     actor,
     nowIso,
     version,
+    validateBuilderFields = true,
   }: {
     data: CreateRuleData;
     id?: string;
@@ -424,6 +427,7 @@ export class RulesClient {
     actor: RuleSavedObjectAttributes['createdBy'];
     nowIso: string;
     version: number;
+    validateBuilderFields?: boolean;
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
@@ -438,7 +442,9 @@ export class RulesClient {
       builderType: data.metadata?.builder_type,
     });
 
-    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data);
+    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data, {
+      validateBuilderFields,
+    });
 
     // Derive ownership from the builder type's registration.
     // Managed types stamp { managed: true, solution, domain }; everything else
@@ -638,6 +644,65 @@ export class RulesClient {
     );
   }
 
+  /**
+   * Validates `builder_fields` for a single rule against the registered type's
+   * schema and optional `validateFields` hook. Used by the read-path opt-in.
+   *
+   * Never throws. An unregistered type is reported as an ordinary validation
+   * error. The call itself must not fail because a rules list must not go
+   * blank because one rule predates a schema change.
+   *
+   * Ref: rule-validation.md "Read-path validation: off by default, opt-in per call"
+   * Ref: rule-validation.md "Rules whose builder type is not registered"
+   */
+  private validateBuilderFieldsForRule(rule: RuleResponse): BuilderFieldsValidation {
+    const builderType = rule.metadata.builder_type;
+    const builderFields = rule.metadata.builder_fields;
+
+    if (!builderType || builderFields == null) {
+      // No builder type — nothing to validate.
+      return { valid: true, errors: [] };
+    }
+
+    const definition = this.builderTypeRegistry.get(builderType);
+    if (!definition) {
+      // Unknown type: ordinary error, not a thrown exception.
+      // Ref: rule-validation.md "Rules whose builder type is not registered"
+      return {
+        valid: false,
+        errors: [{ path: '', message: `Unknown builder type: "${builderType}"` }],
+      };
+    }
+
+    let parseResult: ReturnType<typeof definition.builderFieldsSchema.safeParse>;
+    try {
+      parseResult = definition.builderFieldsSchema.safeParse(builderFields);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { valid: false, errors: [{ path: '', message }] };
+    }
+
+    if (!parseResult.success) {
+      const errors = parseResult.error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return { valid: false, errors };
+    }
+
+    if (definition.validateFields) {
+      const hookErrors = definition.validateFields(parseResult.data);
+      if (hookErrors.length > 0) {
+        return {
+          valid: false,
+          errors: hookErrors.map((message) => ({ path: '', message })),
+        };
+      }
+    }
+
+    return { valid: true, errors: [] };
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
@@ -699,6 +764,7 @@ export class RulesClient {
       actor,
       nowIso,
       version: this.getNextVersion(),
+      validateBuilderFields: params.options?.validateBuilderFields ?? true,
     });
 
     // Space-scoped uniqueness check. Application-level, shares the read-then-write
@@ -836,7 +902,9 @@ export class RulesClient {
     // source.type and source.id are immutable; only source.version can move.
     assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
 
-    const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
+    const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs, {
+      validateBuilderFields: options?.validateBuilderFields ?? true,
+    });
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, resolved, {
@@ -896,9 +964,16 @@ export class RulesClient {
   }
 
   @withApm
-  public async getRule({ id }: { id: string }): Promise<RuleResponse> {
+  public async getRule(
+    { id }: { id: string },
+    options?: { validateBuilderFields?: boolean }
+  ): Promise<GetRuleResult> {
     const { attrs, version, references } = await this.getExistingRule(id);
-    return this.toRuleApiResponse({ id, attrs, version, references });
+    const rule = this.toRuleApiResponse({ id, attrs, version, references });
+    if (options?.validateBuilderFields) {
+      return { ...rule, builder_fields_validation: this.validateBuilderFieldsForRule(rule) };
+    }
+    return rule;
   }
 
   @withApm
@@ -1171,7 +1246,9 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
+  public async findRules(
+    params: FindRulesArgs & { validateBuilderFields?: boolean } = {}
+  ): Promise<FindRulesResult> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
@@ -1188,15 +1265,21 @@ export class RulesClient {
       sortOrder: params.sortOrder,
     });
 
+    const items = res.saved_objects.map((so) => {
+      const rule = this.toRuleApiResponse({
+        id: so.id,
+        attrs: so.attributes,
+        version: so.version,
+        references: so.references,
+      });
+      if (params.validateBuilderFields) {
+        return { ...rule, builder_fields_validation: this.validateBuilderFieldsForRule(rule) };
+      }
+      return rule;
+    });
+
     return {
-      items: res.saved_objects.map((so) =>
-        this.toRuleApiResponse({
-          id: so.id,
-          attrs: so.attributes,
-          version: so.version,
-          references: so.references,
-        })
-      ),
+      items,
       total: res.total,
       page,
       per_page: perPage,
@@ -2024,9 +2107,20 @@ export class RulesClient {
   public async upsertRule({
     id,
     data,
+    options,
   }: {
     id: string;
     data: ReplaceRuleData;
+    options?: {
+      /**
+       * When false, the builder schema parse and `validateFields` hook are
+       * skipped on the replace branch. The wire schema always runs. For
+       * in-process callers only; the framework's HTTP routes never pass this.
+       *
+       * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
+       */
+      validateBuilderFields?: boolean;
+    };
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(replaceRuleBodySchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
@@ -2044,7 +2138,10 @@ export class RulesClient {
           builder_type: data.metadata.builder_type ?? undefined,
         },
       };
-      const rule = await this.createRule({ data: createData, options: { id } });
+      const rule = await this.createRule({
+        data: createData,
+        options: { id, validateBuilderFields: options?.validateBuilderFields },
+      });
       return { rule, created: true };
     }
 
@@ -2080,7 +2177,15 @@ export class RulesClient {
     // BUILDER_TYPE_NOT_CLEARED guard as the PATCH path, for every builder rule,
     // managed or not.
     // Ref: rule-types.md "What this design needs from the framework"
-    const resolved = resolveReplaceRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
+    const resolved = resolveReplaceRuleBuilder(
+      this.builderTypeRegistry,
+      id,
+      parsed,
+      existingAttrs,
+      {
+        validateBuilderFields: options?.validateBuilderFields ?? true,
+      }
+    );
     // Resolve source for replace: omit keeps stored value (a PUT that omits
     // source cannot silently reset an external rule to internal). When present,
     // assertRuleSourceUnchanged above already confirmed type/id are unchanged.
