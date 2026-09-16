@@ -54,9 +54,10 @@ public setup(core: CoreSetup, { encryptedSavedObjects }: PluginSetupDependencies
 ```
 
 Both `attributesToEncrypt` and `attributesToIncludeInAAD` accept top-level attribute names only - names are matched against the keys of
-the object's `attributes` with an exact string comparison, and a dot is never interpreted as a path into a nested attribute. See
-[Nested attributes](../../../../../docs/extend/key-concepts/security/encrypted-saved-objects.md#nested-attributes) for the failure modes
-and for the one case where a dotted name is correct.
+the object's `attributes` with an exact string comparison, and a dot is never interpreted as a path into a nested attribute. Registering
+a dotted key throws, apart from a small grandfathered allowlist. See
+[Nested attributes](../../../../../docs/extend/key-concepts/security/encrypted-saved-objects.md#nested-attributes) for why, and for what
+to do when you have nested data to protect.
 
 4. For any Saved Object operation that does not require retrieval of decrypted content, use standard REST or 
 programmatic Saved Object API, e.g.:

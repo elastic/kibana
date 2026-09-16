@@ -78,19 +78,21 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 
 **Nested attributes:** `attributesToEncrypt` and `attributesToIncludeInAAD` accept **top-level attribute names only**. Names are matched against the keys of `attributes` with an exact string comparison — a dot is never interpreted as a path, and nothing traverses into subfields. When an attribute is included in AAD, all of its subfields are inherently included, so cover nested data by naming the top-level attribute that contains it; if only part of an attribute belongs in AAD, restructure the object so that part becomes top-level.
 
-**A dotted path that is not a literal attribute key fails silently:**
-- In `attributesToEncrypt` it matches nothing — the secret is stored **in plaintext** and, because stripping uses the same names, is **not stripped** from `get`/`find` responses. The only signal is a debug-level log.
-- In `attributesToIncludeInAAD` it is silently dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both still succeed.
-- Contrast with Core: a model version `data_removal` change's `removedAttributePaths: ['auth.apiKey']` *does* resolve nested paths, but `attributesToEncrypt: ['auth.apiKey']` does not.
+**Enforcement: registering a dotted attribute key throws.** `EncryptedSavedObjectAttributesDefinition` rejects dotted keys in both sets at registration time, reporting every offending key at once:
 
-**Enforcement:** `@kbn/eslint/no_eso_registration_dotted_attribute_keys` rejects dotted names in both sets, resolving enums, constants, spreads and cross-file imports. Dotted names are valid **only** when the document genuinely stores a flat key containing a dot — e.g. `synthetics_monitor` uses Beats-style keys such as `'service.name'` and `'url.port'`. In that case, acknowledge it with a per-line disable rather than removing the dot:
-
-```ts
-// eslint-disable-next-line @kbn/eslint/no_eso_registration_dotted_attribute_keys
-attributesToIncludeInAAD: new Set(['service.name', 'url.port']),
+```
+Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level
+attribute names, not as nested paths, so these keys would not encrypt the nested values they appear to name: auth.apiKey
 ```
 
-This is a deliberate exception to the repo-wide rule against suppressing lint errors. The disable records that the author knows only top-level attributes resolve. Do not "fix" such a registration by flattening a key that the stored document really does spell with a dot.
+This is a runtime check, not a lint rule — there is no comment or config that disables it. Because it runs on the fully resolved sets, it catches keys arriving via enum members, imported constants and spreads. The one gap: a type behind a disabled config never registers, so it is never checked.
+
+**Why it throws rather than warns.** Without the check, a dotted key fails silently in the worst possible way:
+- In `attributesToEncrypt` it matches nothing — the secret is stored **in plaintext** and, because stripping uses the same names, is **not stripped** from `get`/`find` responses. The only signal is a debug-level log.
+- In `attributesToIncludeInAAD` it is silently dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both still succeed.
+- Contrast with Core: a model version `data_removal` change's `removedAttributePaths: ['auth.apiKey']` *does* resolve nested paths, but `attributesToEncrypt: ['auth.apiKey']` does not. The two look identical; only one works.
+
+**The only exception is a grandfathered allowlist.** `synthetics-monitor` and `synthetics-monitor-multi-space` genuinely use flat top-level names containing dots, matching the heartbeat config key format (`'service.name'`, `'url.port'`, `'ssl.key'`). Their keys are enumerated in `TYPES_WITH_DOTTED_ATTRIBUTE_KEYS` in the ESO plugin — spelled out per key rather than prefix-matched, and not shared between types, so a new dotted key is rejected even under an already-permitted prefix. **Do not add to this list.** It exists to grandfather in types that predate the check and should only ever shrink; a type that appears to need a new dotted key needs the Kibana Security team, not an allowlist entry.
 
 ## Partial Update Safety
 
@@ -276,7 +278,7 @@ When working with ESO-related code, verify:
    - [ ] `type` matches the Core Saved Object registration name
    - [ ] `attributesToEncrypt` contains only genuinely sensitive attributes
    - [ ] `attributesToIncludeInAAD` follows the inclusion/exclusion guidelines above
-   - [ ] `attributesToEncrypt` and `attributesToIncludeInAAD` contain top-level attribute names only; a dotted name is valid only if the object literally stores that key, and must carry a per-line `@kbn/eslint/no_eso_registration_dotted_attribute_keys` disable
+   - [ ] `attributesToEncrypt` and `attributesToIncludeInAAD` contain top-level attribute names only — no dotted keys (registration throws; only the grandfathered synthetics monitor keys are exempt, and that list must not grow)
    - [ ] `dangerouslyExposeValue` is only used with documented justification
 
 2. **Partial update safety**

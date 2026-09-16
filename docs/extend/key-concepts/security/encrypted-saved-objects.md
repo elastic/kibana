@@ -92,24 +92,29 @@ top-level attribute that contains it: when an attribute is included in AAD, all 
 as key-value pairs and the nested properties of an attribute are all part of its value. In this way, AAD inclusion is hierarchical. If some subfields of an attribute need
 different treatment than others, restructure the object so that the subfields you care about become top-level attributes.
 
-Registering a dotted path that is not a literal attribute key fails silently. If it is listed in `attributesToEncrypt`, it matches nothing, the sensitive value is stored
-in plaintext, and - because stripping uses the same names - it is also returned by the "standard" Saved Object Client APIs (e.g. get, find). The only signal is a
-debug-level log listing the attributes that should have been encrypted. If it is listed in `attributesToIncludeInAAD`, it is dropped from AAD, silently weakening the
-integrity binding of the encrypted attributes, while encryption and decryption both continue to succeed.
+Were a dotted key such as `auth.apiKey` accepted against a nested `auth: { apiKey }`, it would fail silently in the worst possible way. Listed in
+`attributesToEncrypt`, it would match nothing, so the sensitive value would be
+stored in plaintext and - because stripping uses the same names - would also be returned by the "standard" Saved Object Client APIs (e.g. get, find). Listed in
+`attributesToIncludeInAAD`, it would be dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both continued to
+succeed. In neither case is there an error, a failing test, or anything beyond a debug-level log.
 
-Because these failures are invisible, dotted names are a lint error. The `@kbn/eslint/no_eso_registration_dotted_attribute_keys` rule rejects them in both sets, and it
-resolves enums, constants, spreads and cross-file imports, so indirection will not hide a violation. A dotted name is only correct when the object genuinely stores a flat
-key containing a dot, and in that case you must acknowledge it with a per-line disable:
+Because those failures are invisible, registration rejects dotted attribute keys outright. Registering a type with a dotted key in either set throws, reporting every
+offending key at once:
 
-```ts
-  // eslint-disable-next-line @kbn/eslint/no_eso_registration_dotted_attribute_keys
-  attributesToIncludeInAAD: new Set(['service.name', 'url.port']),
+```
+Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level attribute names,
+not as nested paths, so these keys would not encrypt the nested values they appear to name: auth.apiKey
 ```
 
-This is a deliberate exception to the usual expectation that lint errors are fixed rather than suppressed. The disable comment is the point: it records that the author
-knows only top-level attributes resolve, and that this attribute really is a top-level key that happens to contain a dot. The `synthetics_monitor` type is the existing
-example, with literal attribute keys such as `'service.name'` and `'url.port'` that follow the Beats configuration convention. Those registrations are valid as written,
-so do not "correct" them.
+This is a runtime check rather than a lint rule, and it runs on the fully resolved attribute sets. That means it sees keys that arrive through enum members, imported
+constants and spreads without needing any static analysis, and it cannot be switched off by a comment or a config setting. The one gap is that a type behind a disabled
+config never registers, so it is never checked.
+
+The only dotted keys that are permitted are those grandfathered for the `synthetics-monitor` and `synthetics-monitor-multi-space` types, whose attributes are genuine
+flat top-level names that contain dots because they match the heartbeat config key format (`'service.name'`, `'url.port'`, `'ssl.key'`). That allowance lives in the ESO
+plugin, spells out every permitted key rather than matching by prefix, and does not extend from one type to another - so a new dotted key is rejected even when it sits
+under a prefix already in use. The list exists to grandfather in types that predate the check, not to make room for new ones, so it should only ever shrink. If you
+believe your type needs a dotted attribute key, consult the Kibana Security team rather than adding to it.
 
 Note that this behavior differs from Core's Model Version `data_removal` change, whose `removedAttributePaths` does resolve nested paths. Within the same type definition,
 `removedAttributePaths: ['auth.apiKey']` reaches a nested `apiKey` subfield, but `attributesToEncrypt: ['auth.apiKey']` does not.
@@ -359,9 +364,9 @@ encrypted attribute `apiKeyToUse`:
 ```
 
 This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. Note that `rule` can only be
-included in AAD as a whole. `attributesToIncludeInAAD` accepts top-level attribute names only, so a more granular key such as `rule.apiKeyOwner` is not supported - it
-would be silently ignored, and is a lint error. If only part of an attribute belongs in AAD, the attribute must be restructured so that part of it is top-level. For more
-information, see the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of this document.
+included in AAD as a whole. `attributesToIncludeInAAD` accepts top-level attribute names only, so a more granular key such as `rule.apiKeyOwner` is not supported -
+registering it would throw. If only part of an attribute belongs in AAD, the attribute must be restructured so that part of it is top-level. For more information, see
+the [Nested attributes](./encrypted-saved-objects.md#nested-attributes) section of this document.
 
 Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.
 
