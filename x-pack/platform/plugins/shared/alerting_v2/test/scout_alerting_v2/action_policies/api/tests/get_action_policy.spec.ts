@@ -45,7 +45,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
           name: 'policy-name',
           description: 'policy-description',
           destinations: [{ type: 'workflow', id: 'policy-workflow-id' }],
-          matcher: "env == 'production' && region == 'us-east-1'",
+          matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
           throttle: { interval: '10m' },
         })
@@ -63,7 +63,9 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'policy-workflow-id' },
       ]);
-      expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'production' && region == 'us-east-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
@@ -105,7 +107,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
       );
-      const matcher = `rule.id: "${rule.id}"`;
+      const matcher = { expression: `rule.id: "${rule.id}"` };
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
           name: 'rule-scoped-policy',
@@ -118,7 +120,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.matcher).toBe(matcher);
+      expect(response.body.matcher).toStrictEqual(matcher);
     }
   );
 
