@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionManager } from './document_version_manager';
 
 import type { SharedBulkItem } from '../../lib/shared_bulk';
@@ -34,6 +35,7 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   versionManager: DocumentVersionManager;
+  metadataManager: DataStreamMetadataManager;
   additionalIndexesToQuery?: string[];
   dateField: keyof TExecution;
   logger: Logger;
@@ -91,7 +93,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
 
     let backingIndexesForFallback: string[] = [];
     if (uncachedIds.length > 0) {
-      const { backingIndexes } = await this.deps.versionManager.getMeta();
+      const { backingIndexes } = this.deps.metadataManager.getMeta();
       backingIndexesForFallback = backingIndexes.slice(-2);
     }
 
@@ -224,7 +226,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (request.items.length === 0) {
       return { items: [], errors: false };
     }
-    const { backingIndexes } = await this.deps.versionManager.getMeta();
+    const { backingIndexes } = this.deps.metadataManager.getMeta();
     const fallbackIndexes = backingIndexes.slice(-2);
 
     const result = new Array<BulkItemResponse>(request.items.length);

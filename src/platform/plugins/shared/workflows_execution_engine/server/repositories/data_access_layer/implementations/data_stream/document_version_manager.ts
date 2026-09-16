@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionFields } from '../../types';
 
 export interface DocumentVersionManagerDeps {
   esClient: ElasticsearchClient;
   dataStreamName: string;
-  logger: Logger;
+  metadataManager: DataStreamMetadataManager;
 }
 
 export class DocumentVersionManager {
@@ -25,7 +26,43 @@ export class DocumentVersionManager {
     this.cache.set(id, version);
   }
 
-  async bulkGetFreshVersions(
+  bulkGetCachedVersions(ids: string[]): Record<string, Required<DocumentVersionFields>> {
+    const result: Record<string, Required<DocumentVersionFields>> = {};
+    for (const id of ids) {
+      const cached = this.cache.get(id);
+      if (cached) {
+        result[id] = cached;
+      }
+    }
+    return result;
+  }
+
+  async bulkGetVersions(ids: string[]): Promise<Record<string, Required<DocumentVersionFields>>> {
+    if (ids.length === 0) {
+      return {};
+    }
+
+    const result: Record<string, Required<DocumentVersionFields>> = {};
+    const uncached: string[] = [];
+
+    for (const id of ids) {
+      const cached = this.cache.get(id);
+      if (cached) {
+        result[id] = cached;
+      } else {
+        uncached.push(id);
+      }
+    }
+
+    if (uncached.length > 0) {
+      const fresh = await this.bulkGetFreshVersions(uncached);
+      Object.assign(result, fresh);
+    }
+
+    return result;
+  }
+
+  private async bulkGetFreshVersions(
     ids: string[],
     writeIndex?: string
   ): Promise<Record<string, Required<DocumentVersionFields>>> {
@@ -33,7 +70,8 @@ export class DocumentVersionManager {
       return {};
     }
 
-    const resolvedWriteIndex = writeIndex ?? (await this.getMeta()).backingIndexes.at(-1);
+    const resolvedWriteIndex =
+      writeIndex ?? this.deps.metadataManager.getMeta().backingIndexes.at(-1);
     const result: Record<string, Required<DocumentVersionFields>> = {};
 
     const mgetResponse = await this.deps.esClient.mget({
@@ -83,52 +121,5 @@ export class DocumentVersionManager {
     }
 
     return result;
-  }
-
-  bulkGetCachedVersions(ids: string[]): Record<string, Required<DocumentVersionFields>> {
-    const result: Record<string, Required<DocumentVersionFields>> = {};
-    for (const id of ids) {
-      const cached = this.cache.get(id);
-      if (cached) {
-        result[id] = cached;
-      }
-    }
-    return result;
-  }
-
-  async bulkGetVersions(ids: string[]): Promise<Record<string, Required<DocumentVersionFields>>> {
-    if (ids.length === 0) {
-      return {};
-    }
-
-    const result: Record<string, Required<DocumentVersionFields>> = {};
-    const uncached: string[] = [];
-
-    for (const id of ids) {
-      const cached = this.cache.get(id);
-      if (cached) {
-        result[id] = cached;
-      } else {
-        uncached.push(id);
-      }
-    }
-
-    if (uncached.length > 0) {
-      const fresh = await this.bulkGetFreshVersions(uncached);
-      Object.assign(result, fresh);
-    }
-
-    return result;
-  }
-
-  async getMeta(): Promise<{ retentionTime: string | undefined; backingIndexes: string[] }> {
-    const { data_streams: dataStreams } = await this.deps.esClient.indices.getDataStream({
-      name: this.deps.dataStreamName,
-    });
-
-    const dataStream = dataStreams[0];
-    const retentionTime = dataStream?.lifecycle?.data_retention as string | undefined;
-    const backingIndexes = (dataStream?.indices ?? []).map((idx) => idx.index_name);
-    return { retentionTime, backingIndexes };
   }
 }

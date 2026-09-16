@@ -14,6 +14,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
 } from './constants';
 import { DataStreamDataClient } from './data_stream_data_client';
+import { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import { DocumentVersionManager } from './document_version_manager';
 import {
   DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -29,6 +30,8 @@ import type {
 
 export class DataStreamDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
+  private workflowMetadataManager!: DataStreamMetadataManager;
+  private stepMetadataManager!: DataStreamMetadataManager;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
 
@@ -63,9 +66,25 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       coreStart.elasticsearch.client.asInternalUser,
       this.deps.logger
     );
+
+    this.workflowMetadataManager = DataStreamMetadataManager.getOrCreate({
+      esClient: this.esClient,
+      dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+      logger: this.deps.logger,
+    });
+    this.stepMetadataManager = DataStreamMetadataManager.getOrCreate({
+      esClient: this.esClient,
+      dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+      logger: this.deps.logger,
+    });
+
+    await Promise.all([this.workflowMetadataManager.start(), this.stepMetadataManager.start()]);
   }
 
-  async stop(): Promise<void> {}
+  async stop(): Promise<void> {
+    this.workflowMetadataManager.stop();
+    this.stepMetadataManager.stop();
+  }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
     return new DataStreamDataClient<EsWorkflowExecution>({
@@ -74,8 +93,9 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
         dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-        logger: this.deps.logger,
+        metadataManager: this.workflowMetadataManager,
       }),
+      metadataManager: this.workflowMetadataManager,
       additionalIndexesToQuery: ['.workflows-executions'],
       logger: this.deps.logger,
       dateField: 'createdAt',
@@ -83,14 +103,19 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
+    if (!this.stepMetadataManager) {
+      throw new Error('initStart must be called before creating data clients');
+    }
+
     return new DataStreamDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
       versionManager: new DocumentVersionManager({
         esClient: this.esClient,
         dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-        logger: this.deps.logger,
+        metadataManager: this.stepMetadataManager,
       }),
+      metadataManager: this.stepMetadataManager,
       additionalIndexesToQuery: ['.workflows-step-executions'],
       logger: this.deps.logger,
       dateField: 'startedAt',
