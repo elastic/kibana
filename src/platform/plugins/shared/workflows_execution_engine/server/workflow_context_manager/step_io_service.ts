@@ -228,15 +228,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private transientlyRehydratedIds = new Set<string>();
   /**
-   * Bumped on every output write, per step execution. Snapshotted by
-   * {@link rehydrateOutputs} before its fetch and re-checked after, so a
-   * response that was issued before a write cannot be applied on top of it.
-   *
-   * The evicted flag alone is not sufficient: an output larger than
-   * `evictionMinBytes` can be written, flushed and evicted again while a fetch
-   * from before the write is still outstanding, which makes the flag true a
-   * second time. The counter distinguishes "still the same eviction episode"
-   * from "a newer value exists", which the flag cannot.
+   * Bumped per step execution on every output write. {@link rehydrateOutputs}
+   * snapshots it before its fetch and re-checks after, so a response issued
+   * before a write cannot be applied on top of it. The evicted flag cannot
+   * carry this alone: an output over `evictionMinBytes` can be written, flushed
+   * and evicted again inside that window, making the flag true a second time.
    */
   private outputWriteGenerations = new Map<string, number>();
   /**
@@ -1090,11 +1086,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       'output',
       'workflowRunId',
     ]);
-    // Ids whose response we deliberately drop below. They must NOT be confused
-    // with ids Elasticsearch never returned: the cleanup at the end clears the
-    // evicted flag for those, which for a superseded id would leave it neither
-    // resident nor evicted -- so nothing would ever fetch it again -- and would
-    // log it as data loss.
+    // Responses we deliberately drop. Must not be mistaken for ids Elasticsearch
+    // never returned: the cleanup at the end clears the evicted flag for those,
+    // which here would leave the id neither resident nor evicted.
     const supersededIds = new Set<string>();
 
     // Defensive cross-execution filter: mget targets documents by `_id` only,
@@ -1110,19 +1104,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         );
         return false;
       }
-      // Staleness check. `idsToRehydrate` is snapshotted from `evictedOutputIds`
-      // BEFORE the fetch, and the fetch is a real await: by the time it returns,
-      // the owning step may have written a newer output (`setStepOutput` clears
-      // the evicted flag), or a concurrent rehydrate may already have restored
-      // this id. In both cases what is in memory is at least as fresh as this
-      // document, and applying it would replace a correct value with an older
-      // one -- `null`, when the step had not yet written an output at fetch time.
-      // A write during the fetch makes this response obsolete, whatever the
-      // evicted flag now says. Checked first because the flag can be true again
-      // for a second reason: an output over `evictionMinBytes` can be written,
-      // flushed and re-evicted inside this window, and then the flag alone would
-      // wave the stale document through -- installing an older value AND
-      // clearing the flag, so nothing would ever re-fetch the correct one.
+      // A write during the fetch supersedes this response, whatever the evicted
+      // flag now says. See `outputWriteGenerations`.
       if ((this.outputWriteGenerations.get(doc.id) ?? 0) !== generationsAtRequest.get(doc.id)) {
         this.logger?.debug(
           `Stale rehydration response discarded for step '${doc.id}': its output was rewritten while the fetch was in flight`
@@ -1152,11 +1135,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.outputs.set(doc.id, doc.output ?? null);
       // Track for transient release: predecessors brought back into memory
       // for one step's read should not stay there forever.
-      // A set, not a list: the same id is legitimately rehydrated more than
-      // once per tick (every branch of a `parallel` step names its enclosing
-      // scope), and duplicates used to outlive the single-occurrence removal in
-      // `forgetTransientRehydration` — leaving a stale entry that released an
-      // output its owner had already rewritten.
+      // A set: the same id is legitimately rehydrated more than once per tick
+      // (every branch names its enclosing scope), and a duplicate used to outlive
+      // `forgetTransientRehydration`, releasing an already-rewritten output.
       this.transientlyRehydratedIds.add(doc.id);
       restoredCount++;
 
@@ -1342,14 +1323,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * True when a newer output for this step is queued for the next bulk-upsert
-   * and therefore not in Elasticsearch yet.
-   *
-   * Evicting such a step is unsafe in a way ordinary eviction is not. Eviction
-   * is memory-only by contract *because* the ES doc still holds the same value
-   * — but here it does not: a rehydrate would read the pre-write doc and
-   * install that stale value (or `null`, when the step had not written an
-   * output before), silently overwriting the correct in-memory one.
+   * True when a newer output is queued for the next bulk-upsert and therefore
+   * not in Elasticsearch yet. Ordinary eviction is safe *because* the doc holds
+   * the same value; between a write and its flush it does not, so a rehydrate
+   * would install the pre-write value over the correct one.
    */
   private hasUnflushedOutput(stepExecutionId: string): boolean {
     const pending = this.pendingIoChanges.get(stepExecutionId);
