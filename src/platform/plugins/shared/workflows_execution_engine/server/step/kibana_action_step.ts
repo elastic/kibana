@@ -21,8 +21,8 @@ import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import {
   type BufferedRawBody,
-  type CallKibanaApiResult,
   CallKibanaApiResponseTooLargeError,
+  type CallKibanaApiResult,
   KibanaApiCallError,
 } from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';

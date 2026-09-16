@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { visitNestedSteps } from '../definition/definition_utils';
 import type { WorkflowYaml } from './schema';
+import { visitNestedSteps } from '../definition/definition_utils';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -16,10 +16,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 export const isKibanaWorkflowStepType = (stepType: string): boolean =>
   stepType.startsWith('kibana.');
 
-export const stepHasIgnoredKibanaFetcher = (step: {
-  type?: string;
-  with?: unknown;
-}): boolean => {
+export const stepHasIgnoredKibanaFetcher = (step: { type?: string; with?: unknown }): boolean => {
   if (
     typeof step.type !== 'string' ||
     !isKibanaWorkflowStepType(step.type) ||

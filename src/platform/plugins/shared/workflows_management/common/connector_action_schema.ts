@@ -20,7 +20,11 @@ import {
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { KibanaFetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '@kbn/workflows';
+import {
+  KibanaFetcherConfigSchema,
+  KibanaHttpMethodSchema,
+  KibanaStepMetaSchema,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {

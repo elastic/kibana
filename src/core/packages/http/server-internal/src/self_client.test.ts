@@ -316,7 +316,9 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('follows a same-origin redirect when maxRedirects allows it', async () => {
     (global.fetch as jest.Mock)
-      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: '/api/next' } }))
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ ok: true }), {
           status: 200,
@@ -361,7 +363,9 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('converts POST plus 302 into a GET follow-up without a body', async () => {
     (global.fetch as jest.Mock)
-      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: '/api/next' } }))
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ ok: true }), {
           status: 200,
@@ -387,7 +391,9 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('preserves PUT on a 302 follow-up', async () => {
     (global.fetch as jest.Mock)
-      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: '/api/next' } }))
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: '/api/next' } })
+      )
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ ok: true }), {
           status: 200,

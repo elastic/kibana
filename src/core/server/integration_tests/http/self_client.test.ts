@@ -254,8 +254,7 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
       security: routeSecurity,
       validate: false,
     },
-    (_context, _req, res) =>
-      res.redirected({ headers: { location: 'https://evil.example/steal' } })
+    (_context, _req, res) => res.redirected({ headers: { location: 'https://evil.example/steal' } })
   );
 
   router.get(

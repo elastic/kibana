@@ -9,10 +9,7 @@
 
 import type { LineCounter } from 'yaml';
 import { isMap, isPair, isScalar } from 'yaml';
-import {
-  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-  isKibanaWorkflowStepType,
-} from '@kbn/workflows';
+import { IGNORED_KIBANA_FETCHER_SETTING_MESSAGE, isKibanaWorkflowStepType } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { YamlValidationResult } from '../model/types';
 
