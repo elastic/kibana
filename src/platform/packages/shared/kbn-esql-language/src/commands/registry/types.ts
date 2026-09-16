@@ -344,6 +344,11 @@ export enum Location {
    * In the HIGHLIGHT command query expression (before ON)
    */
   HIGHLIGHT_QUERY = 'highlight_query',
+
+  /**
+   * In the DENSE_VECTOR command field list
+   */
+  DENSE_VECTOR = 'dense_vector',
 }
 
 export enum UnmappedFieldsStrategy {
