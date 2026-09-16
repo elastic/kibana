@@ -55,7 +55,7 @@ describe('OpenLensButton', () => {
 
     const { timeRange, ...rest } = lensVisualization;
 
-    expect(navigateToPrefilledEditor).toBeCalledWith(
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
       {
         id: props.savedObjectId,
         ...rest,

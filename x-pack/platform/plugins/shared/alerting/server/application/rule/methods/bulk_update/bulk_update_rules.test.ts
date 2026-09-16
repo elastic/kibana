@@ -560,7 +560,7 @@ describe('bulkUpdateRules', () => {
 
     test('prepare failure after API key mint invalidates the orphaned key', async () => {
       mockPit([so('id-1', { enabled: true }), so('id-2', { enabled: true })]);
-      (addMissingUiamKeyTagIfNeeded as jest.Mock).mockImplementationOnce(async () => {
+      (addMissingUiamKeyTagIfNeeded as jest.Mock).mockImplementationOnce(() => {
         throw new Error('uiam boom');
       });
 

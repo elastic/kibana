@@ -87,9 +87,19 @@ describe('createExecuteConnectorSubActionTool', () => {
         supportedFeatureIds: [],
       },
       actions: {
-        searchMessages: { isTool: true, input: {} as any, handler: jest.fn() },
-        listChannels: { isTool: true, input: {} as any, handler: jest.fn() },
-        sendMessage: { isTool: true, input: {} as any, handler: jest.fn() },
+        searchMessages: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        listChannels: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        sendMessage: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
       },
       test: { handler: jest.fn(), enabled: false },
     });
@@ -159,6 +169,76 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
   });
 
+  describe('connector_ids scoping', () => {
+    it('returns an error when connector_id is not in agentConfiguration.connector_ids', async () => {
+      const context = {
+        ...mockContext,
+        agentConfiguration: { connector_ids: ['other-id'] },
+      } as unknown as ToolHandlerContext;
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        context
+      );
+
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockExecute).not.toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      expect(
+        ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+      ).toContain("Connector 'conn-123' is not available to this agent");
+    });
+
+    it('proceeds normally when connector_id is in agentConfiguration.connector_ids', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+      const context = {
+        ...mockContext,
+        agentConfiguration: { connector_ids: ['conn-123'] },
+      } as unknown as ToolHandlerContext;
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        context
+      );
+
+      expect(mockGet).toHaveBeenCalledWith({ id: 'conn-123' });
+      expect(mockExecute).toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+
+    it('blocks all connectors when agentConfiguration.connector_ids is an empty array', async () => {
+      const context = {
+        ...mockContext,
+        agentConfiguration: { connector_ids: [] },
+      } as unknown as ToolHandlerContext;
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        context
+      );
+
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockExecute).not.toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('allows all connectors when agentConfiguration.connector_ids is not set', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        mockContext
+      );
+
+      expect(mockGet).toHaveBeenCalledWith({ id: 'conn-123' });
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+  });
+
   it('executes a sub-action successfully', async () => {
     mockExecute.mockResolvedValue({
       status: 'ok',
@@ -223,7 +303,14 @@ describe('createExecuteConnectorSubActionTool', () => {
         minimumLicense: 'enterprise' as const,
         supportedFeatureIds: [],
       },
-      actions: { internalAction: { isTool: false, input: {} as any, handler: jest.fn() } },
+      actions: {
+        internalAction: {
+          isTool: false,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+      },
       test: { handler: jest.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(false);

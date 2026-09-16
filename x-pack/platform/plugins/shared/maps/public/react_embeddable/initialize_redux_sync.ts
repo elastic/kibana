@@ -13,6 +13,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { debounce } from 'lodash';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
@@ -23,7 +24,6 @@ import {
   getMapBuffer,
   getMapCenter,
   getMapInitError,
-  getMapReady,
   getMapZoom,
   isMapLoading,
 } from '../selectors/map_selectors';
@@ -41,6 +41,7 @@ import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  getMapReady,
 } from '../reducers/non_serializable_instances';
 import type { SavedMap } from '../routes';
 
@@ -113,7 +114,8 @@ export function initializeReduxSync({
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-  const unsubscribeFromStore = store.subscribe(() => {
+  // sync embeddable state with map redux store
+  function syncWithStore() {
     if (!getMapReady(store.getState())) {
       return;
     }
@@ -148,7 +150,9 @@ export function initializeReduxSync({
     } else if (!nextMapInitError && blockingError$.value) {
       blockingError$.next(undefined);
     }
-  });
+  }
+
+  const unsubscribeFromStore = store.subscribe(debounce(syncWithStore, 100));
 
   store.dispatch(setReadOnly(true));
   store.dispatch(
@@ -234,6 +238,9 @@ export function initializeReduxSync({
       setEventHandlers: (eventHandlers: EventHandlers) => {
         store.dispatch(setEventHandlers(eventHandlers));
       },
+    },
+    internalApi: {
+      syncWithStore,
     },
     anyStateChange$: merge(
       hiddenLayers$.pipe(

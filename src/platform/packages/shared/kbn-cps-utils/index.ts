@@ -20,6 +20,7 @@ export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,
   ProjectTagsResponse,
+  CpsLinkedProject,
   ICPSManager,
   ProjectsData,
   CPSAppAccessResolver,

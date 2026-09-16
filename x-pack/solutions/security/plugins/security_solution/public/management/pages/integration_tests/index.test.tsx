@@ -69,6 +69,16 @@ describe('when in the Administration tab', () => {
       expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
     });
 
+    it('should display `no permission` if no `canReadTrustedDevices`', async () => {
+      mockedContext.setExperimentalFlag({ trustedDevices: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadTrustedDevices: false },
+      });
+
+      mockedContext.history.push('/administration/trusted_devices');
+      expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
+    });
+
     it('should display `no permission` if no `canReadEventFilters`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEventFilters: false },
@@ -93,6 +103,16 @@ describe('when in the Administration tab', () => {
       });
 
       mockedContext.history.push('/administration/blocklist');
+      expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
+    });
+
+    it('should display `no permission` if no `canReadCustomYaraSignatures`', async () => {
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadCustomYaraSignatures: false },
+      });
+
+      mockedContext.history.push('/administration/custom_yara_signatures');
       expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
     });
 
@@ -142,6 +162,16 @@ describe('when in the Administration tab', () => {
       expect(await render().findByTestId('trustedAppsListPage-container')).toBeTruthy();
     });
 
+    it('should display trusted devices list page when `canReadTrustedDevices` is TRUE', async () => {
+      mockedContext.setExperimentalFlag({ trustedDevices: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadTrustedDevices: true },
+      });
+
+      mockedContext.history.push('/administration/trusted_devices');
+      expect(await render().findByTestId('trustedDevicesList-container')).toBeTruthy();
+    });
+
     it('should display event filters list page when `canReadEventFilters` is TRUE', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEventFilters: true },
@@ -158,6 +188,16 @@ describe('when in the Administration tab', () => {
 
       mockedContext.history.push('/administration/blocklist');
       expect(await render().findByTestId('blocklistPage-container')).toBeTruthy();
+    });
+
+    it('should display custom YARA signatures list page when `canReadCustomYaraSignatures` is TRUE', async () => {
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: true });
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadCustomYaraSignatures: true },
+      });
+
+      mockedContext.history.push('/administration/custom_yara_signatures');
+      expect(await render().findByTestId('customYaraSignaturesList-container')).toBeTruthy();
     });
 
     it('should display response actions history page when `canReadActionsLogManagement` is TRUE', async () => {
@@ -190,6 +230,30 @@ describe('when in the Administration tab', () => {
       });
 
       mockedContext.history.push('/administration/endpoint_exceptions');
+      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+    });
+  });
+
+  describe('when `customYaraSignaturesEnabled` feature flag is disabled', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
+    });
+
+    it('should display `notFoundPage` for the custom YARA signatures page with read privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadCustomYaraSignatures: true },
+      });
+
+      mockedContext.history.push('/administration/custom_yara_signatures');
+      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+    });
+
+    it('should display `notFoundPage` for the custom YARA signatures page without read privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadCustomYaraSignatures: false },
+      });
+
+      mockedContext.history.push('/administration/custom_yara_signatures');
       expect(await render().findByTestId('notFoundPage')).toBeTruthy();
     });
   });

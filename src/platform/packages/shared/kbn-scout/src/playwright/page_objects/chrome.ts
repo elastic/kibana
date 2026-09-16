@@ -22,6 +22,15 @@ export class Chrome {
   private readonly nextChromeHeader: Locator;
   private readonly searchButton: Locator;
 
+  public readonly nav = {
+    hoverPrimaryItemById: async (id: string): Promise<void> => {
+      await this.navItemInPrimaryById(id).hover();
+    },
+    getPopoverItemById: (id: string): Locator => {
+      return this.page.testSubj.locator(`kbnChromeNav-popoverItem-${id}`);
+    },
+  };
+
   constructor(private readonly page: ScoutPage) {
     this.layoutNavigation = page.testSubj.locator('kbnChromeLayoutNavigation');
     this.primaryNavigation = page.testSubj.locator('kbnChromeNav-primaryNavigation');
@@ -36,9 +45,7 @@ export class Chrome {
     this.searchInput = page.testSubj.locator('nav-search-input');
     this.searchNoResults = page.getByRole('status').getByTestId('nav-search-no-results');
     this.nextChromeHeader = page.testSubj.locator('chromeNextGlobalHeader');
-    this.searchButton = page.testSubj
-      .locator('chromeNextGlobalHeaderSearchButton')
-      .or(page.testSubj.locator('nav-search-reveal'));
+    this.searchButton = page.testSubj.locator('chromeNextGlobalHeaderSearchButton');
   }
 
   async isNextChrome(): Promise<boolean> {

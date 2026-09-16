@@ -9,7 +9,7 @@ import { castArray } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
-import type { attachmentApiV2, userActionApiV1 } from '../../../../common/types/api';
+import type { attachmentApiV2Union, userActionApiV1 } from '../../../../common/types/api';
 import { UserActionInternalFindRequestRt } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -58,7 +58,7 @@ export const findUserActionsRoute = createCasesRoute({
       }
       const commentIds = Array.from(uniqueCommentIds);
 
-      let attachmentRes: attachmentApiV2.BulkGetAttachmentsResponseV2 = {
+      let attachmentRes: attachmentApiV2Union.BulkGetAttachmentsResponseV2 = {
         attachments: [],
         errors: [],
       };
@@ -67,10 +67,11 @@ export const findUserActionsRoute = createCasesRoute({
         attachmentRes = await casesClient.attachments.bulkGet({
           caseID: caseId,
           savedObjectIds: commentIds,
-          mode: 'unified',
         });
       }
 
+      // Historical attachments may predate migration and still be legacy-shaped
+      // (see `latestAttachments: AttachmentsV2` in UserActionInternalFindResponse).
       const res: userActionApiV1.UserActionInternalFindResponse = {
         ...userActionsResponse,
         latestAttachments: attachmentRes.attachments,

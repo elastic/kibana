@@ -23,14 +23,18 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   attachInvestigationToEvent,
   type SignificantEventTriggerFeedback,
 } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import {
+  cleanupStaleEvents,
+  type CleanupStaleEventsResult,
+} from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -91,7 +95,7 @@ const eventsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -156,7 +160,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -233,7 +237,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -273,7 +277,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -326,7 +330,7 @@ const eventsUpdateRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -350,6 +354,45 @@ const eventsUpdateRoute = createServerRoute({
   },
 });
 
+const cleanupStaleEventsRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/events/_cleanup',
+  options: {
+    access: 'internal',
+    summary: 'Close stale significant events',
+    description: 'Closes open significant events when none of their backing rules still exist.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z
+      .object({
+        candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
+      })
+      .nullish(),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<CleanupStaleEventsResult> => {
+    const scopedClients = await getScopedClients({ request });
+    const { getEventClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+    return cleanupStaleEvents({
+      eventClient: getEventClient(),
+      rulesClient,
+      candidateRuleIds: params?.body?.candidateRuleIds,
+    });
+  },
+});
+
 const investigationStatusesRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/investigations/_status',
   options: {
@@ -360,7 +403,7 @@ const investigationStatusesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -397,5 +440,6 @@ export const internalEventsRoutes = {
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
+  ...cleanupStaleEventsRoute,
   ...investigationStatusesRoute,
 };
