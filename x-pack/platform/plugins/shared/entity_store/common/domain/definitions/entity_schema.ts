@@ -212,7 +212,9 @@ export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; /
  * for the resolved mode - it shadows the declared field with the computed value (complement for
  * non-priority). Absent means every document passing `documentsFilter` is scanned.
  */
-export type GatedEntityDefinition<T = EntityDefinition> = T & { priorityExtractionGate?: Condition };
+export type GatedEntityDefinition<T = EntityDefinition> = T & {
+  priorityExtractionGate?: Condition;
+};
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;

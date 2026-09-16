@@ -98,9 +98,12 @@ describe('user extraction modes share identity logic', () => {
   it.each([
     ['priority', priority],
     ['nonPriority', nonPriority],
-  ])('%s is the registered definition with only priorityExtractionGate overwritten', (_name, resolved) => {
-    expect(keysDifferingFromSingle(resolved)).toEqual(['priorityExtractionGate']);
-  });
+  ])(
+    '%s is the registered definition with only priorityExtractionGate overwritten',
+    (_name, resolved) => {
+      expect(keysDifferingFromSingle(resolved)).toEqual(['priorityExtractionGate']);
+    }
+  );
 
   it.each([
     ['priority', priority],

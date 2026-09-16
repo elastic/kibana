@@ -91,7 +91,10 @@ export function getEntityDefinitionWithoutId(
     `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
-  const priorityExtractionGate = resolveExtractionGate(definition.priorityExtractionGate, extractionMode);
+  const priorityExtractionGate = resolveExtractionGate(
+    definition.priorityExtractionGate,
+    extractionMode
+  );
   if (!priorityExtractionGate) return definition;
 
   return { ...definition, priorityExtractionGate };
