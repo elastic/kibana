@@ -28,6 +28,9 @@ import { validateVariables } from './validate_variables';
 import { positionAt } from './__fixtures__/text_position';
 import { extendContextWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import { FOREACH_ITEM_SCHEMA_DESC } from '../context/get_foreach_state_schema';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('validateVariables for-loop integration', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
@@ -55,6 +58,7 @@ describe('validateVariables for-loop integration', () => {
 
   it('treats loop variable yy as valid when iterating steps.iterate_items.items', () => {
     const results = validateVariables(
+      emptyRegistry,
       [variableItemForKey('yy.name')],
       workflowGraph,
       forLoopValidationWorkflowDefinition,
@@ -70,6 +74,7 @@ describe('validateVariables for-loop integration', () => {
   it('does not report variable error for loop var when collection is invalid but collection validator does', () => {
     const badVar = variableItemForKey('xx');
     const varResults = validateVariables(
+      emptyRegistry,
       [badVar],
       workflowGraph,
       forLoopValidationWorkflowDefinition,
@@ -80,6 +85,7 @@ describe('validateVariables for-loop integration', () => {
     expect(xxVarResult?.severity).toBeNull();
 
     const collectionResults = validateLiquidForLoopCollections(
+      emptyRegistry,
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
       lineCounter,
@@ -140,6 +146,7 @@ steps:
     const end = positionAt(templateYaml, offset + match![0].length);
 
     const results = validateVariables(
+      emptyRegistry,
       [
         {
           id: 'forloop-index',
@@ -234,6 +241,7 @@ steps:
     const end = positionAt(yamlSource, varOffset + '{{ yy.name }}'.length);
 
     const results = validateVariables(
+      emptyRegistry,
       [
         {
           id: 'yy-literal',
@@ -268,6 +276,7 @@ steps:
     const innerEnd = positionAt(FOR_LOOP_NESTED_YAML, innerOffset + innerMatch![0].length);
 
     const innerResults = validateVariables(
+      emptyRegistry,
       [
         {
           id: 'inner-var',
@@ -304,6 +313,7 @@ steps:
     expect(collectionItem?.key).toBe('steps.run_query.output.values[0][0]');
 
     const results = validateVariables(
+      emptyRegistry,
       variableItems,
       esqlGraph,
       foreachStepEsqlCellWorkflowDefinition,

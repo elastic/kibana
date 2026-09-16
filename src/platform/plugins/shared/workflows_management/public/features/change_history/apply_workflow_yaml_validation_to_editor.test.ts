@@ -13,13 +13,14 @@ jest.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_
   validateEsqlSteps: jest.fn().mockResolvedValue([]),
 }));
 
-import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
+import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationFromComputed,
   applyWorkflowYamlValidationToEditor,
 } from './apply_workflow_yaml_validation_to_editor';
+import { createMockWorkflowContextRegistry } from '../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../entities/workflows/store/workflow_detail/utils/computation';
 import type { WorkflowYamlValidationContext } from '../validate_workflow_yaml/lib/collect_full_workflow_yaml_validation_results';
 import * as createMarkersAndDecorationsModule from '../validate_workflow_yaml/lib/create_yaml_validation_markers_and_decorations';
@@ -28,7 +29,10 @@ import {
   getCachedWorkflowYamlComputationAsync,
 } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
 
+const emptyRegistry = createMockWorkflowContextRegistry();
+
 const testValidationContext: WorkflowYamlValidationContext = {
+  registry: emptyRegistry,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

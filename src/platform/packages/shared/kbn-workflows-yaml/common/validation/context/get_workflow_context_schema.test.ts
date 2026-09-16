@@ -11,7 +11,9 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { resetWorkflowContextRegistry, setWorkflowContextRegistry } from './registry';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
@@ -80,7 +82,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       steps: [{ name: 'step1', type: 'console' }],
     };
 
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
     // Test that we can access nested properties
     // inputs.threatIndicator.type should be accessible
@@ -204,7 +206,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       steps: [{ name: 'step1', type: 'console' }],
     };
 
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
     // Test all the paths used in the workflow
     const paths = [
@@ -256,7 +258,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
 
       // Should not crash when properties contain null values
       expect(() => {
-        const contextSchema = getWorkflowContextSchema(workflow);
+        const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
     });
@@ -286,7 +288,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
 
       // Should not crash when properties contain undefined values
       expect(() => {
-        const contextSchema = getWorkflowContextSchema(workflow);
+        const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
     });
@@ -316,7 +318,7 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
 
       // Should not crash when properties contain invalid schema values
       expect(() => {
-        const contextSchema = getWorkflowContextSchema(workflow);
+        const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
     });
@@ -336,8 +338,8 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     steps: [{ name: 'step1', type: 'console' }],
   };
 
-  function getEventKeys(workflow: WorkflowYaml | WorkflowYaml): string[] {
-    const contextSchema = getWorkflowContextSchema(workflow);
+  function getEventKeys(workflow: WorkflowYaml | WorkflowYaml, registry = emptyRegistry): string[] {
+    const contextSchema = getWorkflowContextSchema(registry, workflow);
     const eventResult = getSchemaAtPath(contextSchema, 'event');
     expect(eventResult.schema).toBeDefined();
     return Object.keys(getShape(eventResult.schema!));
@@ -435,7 +437,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       ],
     } as WorkflowYaml;
 
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
     // event.inputs should exist as a key in the event schema
     const eventResult = getSchemaAtPath(contextSchema, 'event');
@@ -454,7 +456,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
 
   it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {
     const workflow: WorkflowYaml = { ...baseWorkflow, triggers: [{ type: 'alert' }] };
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
     expect(getSchemaAtPath(contextSchema, 'event.rule.id').schema).toBeDefined();
     expect(getSchemaAtPath(contextSchema, 'event.rule.name').schema).toBeDefined();
@@ -467,21 +469,11 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       triggers: [{ type: 'some.unknown_trigger' }],
     } as unknown as WorkflowYaml;
 
-    setWorkflowContextRegistry({
-      getStepOutput: () => undefined,
-      getConnector: () => undefined,
-      getTriggerDefinition: () => undefined,
-    });
+    const eventKeys = getEventKeys(workflow);
 
-    try {
-      const eventKeys = getEventKeys(workflow);
-
-      expect(eventKeys).toContain('spaceId');
-      expect(eventKeys).not.toContain('timestamp');
-      expect(eventKeys).toHaveLength(1);
-    } finally {
-      resetWorkflowContextRegistry();
-    }
+    expect(eventKeys).toContain('spaceId');
+    expect(eventKeys).not.toContain('timestamp');
+    expect(eventKeys).toHaveLength(1);
   });
 
   it('should include timestamp and custom trigger eventSchema when workflow has a custom trigger', () => {
@@ -501,27 +493,21 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       eventSchema: customEventSchema,
     };
 
-    setWorkflowContextRegistry({
-      getStepOutput: () => undefined,
-      getConnector: () => undefined,
+    const registry = createMockWorkflowContextRegistry({
       getTriggerDefinition: (triggerType: string) =>
         triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined,
     });
 
-    try {
-      const eventKeys = getEventKeys(workflow);
+    const eventKeys = getEventKeys(workflow, registry);
 
-      expect(eventKeys).toContain('spaceId');
-      expect(eventKeys).toContain('timestamp');
-      expect(eventKeys).toContain('severity');
-      expect(eventKeys).toContain('message');
+    expect(eventKeys).toContain('spaceId');
+    expect(eventKeys).toContain('timestamp');
+    expect(eventKeys).toContain('severity');
+    expect(eventKeys).toContain('message');
 
-      const contextSchema = getWorkflowContextSchema(workflow);
-      expect(getSchemaAtPath(contextSchema, 'event.severity').schema).toBeDefined();
-      expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
-    } finally {
-      resetWorkflowContextRegistry();
-    }
+    const contextSchema = getWorkflowContextSchema(registry, workflow);
+    expect(getSchemaAtPath(contextSchema, 'event.severity').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
   });
 });
 
@@ -538,7 +524,7 @@ describe('getWorkflowContextSchema - HITL template context', () => {
       steps: [],
     };
 
-    const contextSchema = getWorkflowContextSchema(workflow);
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalFormLink').schema).toBeDefined();
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalQueryLink').schema).toBeDefined();

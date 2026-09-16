@@ -14,6 +14,7 @@ import { isEnterForeach, shouldSuggestInnerSteps } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
+import type { WorkflowContextRegistry } from './registry';
 
 /**
  * Folds an array of graph nodes into a steps schema, skipping already-seen
@@ -21,6 +22,7 @@ import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
  * processed across multiple calls.
  */
 function addNodesToStepsSchema(
+  registry: WorkflowContextRegistry,
   nodes: GraphNodeUnion[],
   stepsSchema: z.ZodObject,
   seenStepIds: Set<string>,
@@ -45,7 +47,7 @@ function addNodesToStepsSchema(
     if (!isEnterForeach(node)) {
       batch[node.stepId] = z.lazy(() =>
         z.object({
-          output: getOutputSchemaForStepType(node).optional(),
+          output: getOutputSchemaForStepType(registry, node).optional(),
           error: z.any().optional(),
         })
       );
@@ -65,6 +67,7 @@ function addNodesToStepsSchema(
 }
 
 export function getStepsCollectionSchema(
+  registry: WorkflowContextRegistry,
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string,
@@ -98,6 +101,7 @@ export function getStepsCollectionSchema(
 
   const seenStepIds = new Set<string>();
   let stepsSchema = addNodesToStepsSchema(
+    registry,
     predecessors,
     z.object({}),
     seenStepIds,
@@ -110,7 +114,13 @@ export function getStepsCollectionSchema(
   if (shouldSuggestInnerSteps(stepNode)) {
     const subGraph = workflowExecutionGraph.getStepGraph(stepId);
     const innerNodes = subGraph.getAllNodes().filter((node) => node.stepId !== stepId);
-    stepsSchema = addNodesToStepsSchema(innerNodes, stepsSchema, seenStepIds, stepContextSchema);
+    stepsSchema = addNodesToStepsSchema(
+      registry,
+      innerNodes,
+      stepsSchema,
+      seenStepIds,
+      stepContextSchema
+    );
   }
 
   return stepsSchema;

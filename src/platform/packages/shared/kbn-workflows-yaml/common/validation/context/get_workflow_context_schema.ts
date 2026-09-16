@@ -20,7 +20,7 @@ import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trig
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../zod/infer_zod_type';
-import { getWorkflowContextRegistry } from './registry';
+import type { WorkflowContextRegistry } from './registry';
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;
@@ -28,11 +28,10 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
 
 /**
  * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
- * Custom trigger event schemas are resolved through the workflow context registry, which the
- * consuming plugin populates from `workflows_extensions` at start.
  * Uses shape spread instead of deprecated Zod v4 .merge().
  */
 function buildEventSchemaFromTriggers(
+  registry: WorkflowContextRegistry,
   triggers: Array<{ type?: string }>,
   inputsZodSchema: z.ZodType<Record<string, unknown>>
 ): z.ZodType {
@@ -56,7 +55,7 @@ function buildEventSchemaFromTriggers(
           inputs: inputsZodSchema,
         });
       } else if (!isTriggerType(type)) {
-        const def = getWorkflowContextRegistry().getTriggerDefinition(type);
+        const def = registry.getTriggerDefinition(type);
         if (def?.eventSchema && isZodObject(def.eventSchema)) {
           eventSchema = z.object({
             ...eventSchema.shape,
@@ -97,6 +96,7 @@ function extractFieldFromYaml<T>(
 }
 
 export function getWorkflowContextSchema(
+  registry: WorkflowContextRegistry,
   definition: WorkflowYaml,
   yamlDocument?: Document | null
 ): typeof DynamicWorkflowContextSchema {
@@ -110,7 +110,7 @@ export function getWorkflowContextSchema(
     buildFieldsZodValidator(normalizedInputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
-  const eventSchema = buildEventSchemaFromTriggers(triggers ?? [], inputsZodSchema);
+  const eventSchema = buildEventSchemaFromTriggers(registry, triggers ?? [], inputsZodSchema);
 
   return DynamicWorkflowContextSchema.extend({
     inputs: inputsZodSchema,

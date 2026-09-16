@@ -14,6 +14,7 @@ import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
+import { createMockWorkflowContextRegistry } from '../../../../../../common/lib/create_workflow_context_registry.mock';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
 import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
@@ -61,6 +62,7 @@ export function getFakeAutocompleteContextParams(
   } as WorkflowDetailState;
 
   return {
+    registry: createMockWorkflowContextRegistry(),
     model: mockModel as unknown as monaco.editor.ITextModel,
     position: position as monaco.Position,
     completionContext: {

@@ -21,10 +21,12 @@ import {
 import { getNearestStepPath } from '../context/get_nearest_step_path';
 import { getValueAtYamlPath } from '../context/get_value_at_yaml_path';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import type { WorkflowContextRegistry } from '../context/registry';
 
 const ROOT_CACHE_KEY: unique symbol = Symbol('root');
 
 export function validateVariables(
+  registry: WorkflowContextRegistry,
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
@@ -34,7 +36,7 @@ export function validateVariables(
   const errors: YamlValidationResult[] = [];
 
   const baseSchema = DynamicStepContextSchema.merge(
-    getWorkflowContextSchema(workflowDefinition, yamlDocument)
+    getWorkflowContextSchema(registry, workflowDefinition, yamlDocument)
   ) as typeof DynamicStepContextSchema;
 
   const stepSchemaCache = new Map<string | symbol, typeof DynamicStepContextSchema>();
@@ -56,7 +58,12 @@ export function validateVariables(
       let stepSchema = stepSchemaCache.get(cacheKey);
       if (!stepSchema) {
         if (nearestStep?.name) {
-          stepSchema = getContextSchemaForStep(baseSchema, workflowGraph, nearestStep.name);
+          stepSchema = getContextSchemaForStep(
+            registry,
+            baseSchema,
+            workflowGraph,
+            nearestStep.name
+          );
         } else {
           stepSchema = baseSchema;
         }
