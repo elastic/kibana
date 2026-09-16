@@ -87,7 +87,7 @@ export const RunQuotaExhaustionCallout = ({
         <p>
           {i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
             defaultMessage:
-              'An administrator with the Streams manage privilege in every space can change these limits.',
+              'An administrator with the Nightshift Manage engines privilege can change these limits.',
           })}
         </p>
       )}
