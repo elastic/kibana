@@ -23,6 +23,7 @@ import {
 } from '../ki_verification';
 import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
+import { isContextEngineEnabledInSpace } from '../utils/is_context_engine_enabled_in_space';
 import { withKiVerificationTelemetry } from './helpers';
 
 export interface WorkflowVerifierStepDependencies {
@@ -44,9 +45,13 @@ export const createVerifyKiStepDefinition = (
     handler: async (context) => {
       const [coreStart] = await coreSetup.getStartServices();
       const fakeRequest = context.contextManager.getFakeRequest();
-      const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-      const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-      const isEnabled = (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+      const { workflow, metadata, parent } = context.contextManager.getContext();
+      const { spaceId } = workflow;
+      const isEnabled = await isContextEngineEnabledInSpace({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        spaceId,
+      });
       if (!isEnabled) {
         throw new ExecutionError({
           type: 'FeatureDisabledError',
@@ -54,14 +59,11 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const { workflow, metadata, parent } = context.contextManager.getContext();
-
       const buildVerifiers = async (): Promise<Array<string | KiVerifier> | undefined> => {
         const entries = context.input.verifiers;
         if (entries === undefined) {
           return undefined;
         }
-        const { spaceId } = workflow;
         const builtInIds = entries.filter(
           (entry): entry is Exclude<typeof entry, { workflow_id: string }> =>
             typeof entry === 'string'
