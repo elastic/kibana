@@ -36,6 +36,23 @@ interface Candidate {
   input: ImprovementRevisionInput;
 }
 
+/**
+ * Returns the name of a required payload field that the proposal is missing, or undefined when the
+ * payload is complete. Mirrors the `required()` checks in `apply/index.ts` so incomplete
+ * suggestions are rejected at record time rather than only when the reviewer tries to apply them.
+ * Missing target fields are caught separately by `buildImprovementId`.
+ */
+const missingRequiredField = (proposal: ProposedImprovement): string | undefined => {
+  const { action, payload } = proposal;
+  if (action === 'add_ki' && !payload?.ki) return 'payload.ki';
+  if (action === 'edit_ki' && !payload?.ki_patch) return 'payload.ki_patch';
+  if ((action === 'add_workflow' || action === 'edit_workflow') && !payload?.workflow_yaml)
+    return 'payload.workflow_yaml';
+  if ((action === 'add_source' || action === 'edit_source') && !payload?.source)
+    return 'payload.source';
+  return undefined;
+};
+
 const describe = (proposal: unknown): { action?: string; title?: string } => {
   if (typeof proposal !== 'object' || proposal === null) {
     return {};
@@ -86,6 +103,17 @@ export const recordImprovements = async ({
     }
 
     const proposal = parsed.data;
+
+    const missing = missingRequiredField(proposal);
+    if (missing) {
+      skipped.push({
+        action: proposal.action,
+        title: proposal.title,
+        reason: 'invalid',
+        detail: `The ${proposal.action} proposal is missing ${missing}.`,
+      });
+      continue;
+    }
 
     if (!allowed.has(proposal.action)) {
       skipped.push({
