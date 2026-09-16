@@ -38,7 +38,7 @@ const memoryTypeSchema = z.enum(['memory.session', 'memory.session_fact']);
 
 const rememberSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
-    'The Context Engine AI index where the memory will be stored'
+    'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
   ),
   id: z
     .string()

@@ -55,12 +55,12 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('renders each catalog entry with its id, ES|QL target and description', () => {
+  it('renders each catalog entry with its registry ID, ES|QL target, and description', () => {
     const instructions = render();
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `elastic` (FROM sml-main) — Summaries of Kibana resources such as dashboards and connectors.'
+      '- Registry ID: `elastic`; ES|QL target: `sml-main` — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 
@@ -72,15 +72,17 @@ describe('getAiIndicesInstructions', () => {
       ],
     });
 
-    expect(instructions).toContain('- `elastic` (FROM sml-main)');
-    expect(instructions).toContain('- `my-custom` (FROM ai-index-idx-custom) — Support tickets.');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: `sml-main`');
+    expect(instructions).toContain(
+      '- Registry ID: `my-custom`; ES|QL target: `ai-index-idx-custom` — Support tickets.'
+    );
   });
 
   it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
     const instructions = render({ catalog: [...defaultCatalog, { id: 'unresolved-custom' }] });
 
     expect(instructions).toContain('Available to this agent:');
-    expect(instructions).toContain('- `elastic` (FROM sml-main)');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: `sml-main`');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
@@ -93,11 +95,11 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('unresolved-custom');
   });
 
-  it('renders an entry without a description with no trailing dash', () => {
+  it('renders both identifiers for an entry without a description', () => {
     const instructions = render({ catalog: [{ id: 'bare-id', esqlTarget: 'bare-target' }] });
 
-    expect(instructions).toContain('- `bare-id` (FROM bare-target)');
-    expect(instructions).not.toContain('(FROM bare-target) —');
+    expect(instructions).toContain('- Registry ID: `bare-id`; ES|QL target: `bare-target`');
+    expect(instructions).not.toContain('`bare-target` —');
   });
 
   it('points at list -> describe -> query and away from execute_esql', () => {
