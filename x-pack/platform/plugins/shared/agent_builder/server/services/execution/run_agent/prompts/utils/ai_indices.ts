@@ -48,7 +48,7 @@ ${catalogSection}
 
 Work with AI Indices through their dedicated tools, in this order:
 
-1. \`list_ai_indices\` — the AI Indices available to you in this space, each with its id and the ES|QL target to put in \`FROM\`. Entries whose visibility probe fails, or whose documents all belong to other spaces, are omitted; empty or unresolved targets may remain listed. Skip it when the list above already names the index you need.
+1. \`list_ai_indices\` — the AI Indices registered in this space that you can read, each with its id and the ES|QL target to put in \`FROM\`. An entry is left out when you cannot read its backing index; an empty one is still listed. Skip it when the list above already names the index you need.
 2. \`describe_ai_index\` — returns a context block for one index: what it holds, its fields, KI type and tag counts, and example ES|QL queries you can read and copy. Fields differ between AI Indices, so describe an index before filtering on one of its fields.
 3. \`query_ai_indices\` — runs your ES|QL and returns the rows.
 
