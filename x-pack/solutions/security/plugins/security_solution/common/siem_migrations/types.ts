@@ -16,6 +16,12 @@ import type {
   RuleMigrationRule,
 } from './model/rule_migration.gen';
 import type { SiemMigrationStatus } from './constants';
+import type {
+  OriginalWorkflow,
+  OriginalWorkflowVendor,
+  WorkflowMigration,
+  WorkflowMigrationWorkflow,
+} from './workflows/types';
 
 export interface SiemMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
@@ -32,10 +38,23 @@ export interface SiemMigrationFilters {
 
 export type SiemMigrationVendor = OriginalRuleVendor | OriginalDashboardVendor;
 
-export type MigrationDocument = RuleMigration | DashboardMigration;
-export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
+export type MigrationDocument = RuleMigration | DashboardMigration | WorkflowMigration;
+export type ItemDocument =
+  | RuleMigrationRule
+  | DashboardMigrationDashboard
+  | WorkflowMigrationWorkflow;
+
+/**
+ * Resolves the "original" nested document for a migration item.
+ * Keep the dashboard fallback last — dashboards pass `OriginalDashboard` as the
+ * ResourceIdentifier type param (not the full item document).
+ */
 export type OriginalItem<I> = I extends RuleMigrationRule
   ? RuleMigrationRule['original_rule']
+  : I extends WorkflowMigrationWorkflow | OriginalWorkflow
+  ? OriginalWorkflow
   : DashboardMigrationDashboard['original_dashboard'];
 
-export type MigrationType = 'rule' | 'dashboard';
+export type MigrationType = 'rule' | 'dashboard' | 'workflow';
+
+export type { OriginalWorkflowVendor };

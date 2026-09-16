@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { DashboardMigrationDataInputFlyout } from './data_input_flyout';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import type { MigrationsServiceTaskStats } from '../../../common/service/migrations_service_base';
 import type { DashboardMigrationStats } from '../../types';
 
 interface DashboardMigrationDataInputWrapperProps {
@@ -30,8 +31,8 @@ export const DashboardMigrationDataInputWrapper = React.memo<
   }, [closeFlyout, onFlyoutClosed]);
 
   const openFlyoutHandler = useCallback(
-    (migrationStats?: DashboardMigrationStats) => {
-      setFlyoutMigrationStats(migrationStats);
+    (migrationStats?: MigrationsServiceTaskStats) => {
+      setFlyoutMigrationStats(migrationStats as DashboardMigrationStats | undefined);
       openFlyout();
     },
     [openFlyout]

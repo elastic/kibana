@@ -16,6 +16,8 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export type UpdateMigrationBody<T extends MigrationType> = T extends 'rule'
   ? UpdateRuleMigrationRequestBody
+  : T extends 'workflow'
+  ? { name?: string }
   : UpdateDashboardMigrationRequestBody;
 
 export interface UpdateMigrationArgs<T extends MigrationType> {
@@ -48,9 +50,11 @@ export function useUpdateSiemMigration<T extends MigrationType>(
     (params: UpdateMigrationArgs<T>) => {
       if (migrationType === 'rule') {
         return siemMigrations.rules.api.updateMigration(params);
-      } else {
-        return siemMigrations.dashboards.api.updateDashboardMigration(params);
       }
+      if (migrationType === 'workflow') {
+        return siemMigrations.workflows.api.updateWorkflowMigration(params);
+      }
+      return siemMigrations.dashboards.api.updateDashboardMigration(params);
     },
     [siemMigrations, migrationType]
   );

@@ -7,12 +7,16 @@
 
 import { createDashboardMigrationClient } from '../dashboards/__mocks__/mocks';
 import { createRuleMigrationClient } from '../rules/__mocks__/mocks';
+import { createWorkflowMigrationClient } from '../workflows/__mocks__/mocks';
 
 export const mockSetup = jest.fn().mockResolvedValue(undefined);
 export const mockCreateClient = jest.fn().mockReturnValue(createRuleMigrationClient());
 export const mockCreateDashboardsClient = jest
   .fn()
   .mockReturnValue(createDashboardMigrationClient());
+export const mockCreateWorkflowsClient = jest
+  .fn()
+  .mockReturnValue(createWorkflowMigrationClient());
 export const mockStop = jest.fn();
 
 export const siemMigrationsServiceMock = {
@@ -21,8 +25,10 @@ export const siemMigrationsServiceMock = {
       setup: mockSetup,
       createRulesClient: mockCreateClient,
       createDashboardsClient: mockCreateDashboardsClient,
+      createWorkflowsClient: mockCreateWorkflowsClient,
       stop: mockStop,
     })),
   createRulesClient: () => createRuleMigrationClient(),
   createDashboardsClient: mockCreateDashboardsClient,
+  createWorkflowsClient: mockCreateWorkflowsClient,
 };
