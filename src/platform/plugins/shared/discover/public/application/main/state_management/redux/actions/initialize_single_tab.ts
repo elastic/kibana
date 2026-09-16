@@ -176,7 +176,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
 
-    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+    if (!initializationState.hasDataView && !canAccessWithoutPersistedDataView) {
       return { showNoDataPage: true };
     }
 
