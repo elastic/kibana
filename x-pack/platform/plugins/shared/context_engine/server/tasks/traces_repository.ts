@@ -123,9 +123,7 @@ export const isEsqlUnknownColumnError = (error: unknown): boolean => {
     return false;
   }
 
-  const [header, ...problemLines] = reason
-    .split('\n')
-    .filter((line) => line.trim().length > 0);
+  const [header, ...problemLines] = reason.split('\n').filter((line) => line.trim().length > 0);
   const declared = header?.match(PROBLEM_LIST_HEADER);
   if (!declared) {
     return false;

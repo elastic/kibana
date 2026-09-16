@@ -118,7 +118,11 @@ describe('isEsqlUnknownColumnError', () => {
     // surface as a real failure.
     expect(
       isEsqlUnknownColumnError(
-        responseError(400, 'verification_exception', 'Found 1 problem\nline 1:1: Unknown column [trace_id]')
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 1:1: Unknown column [trace_id]'
+        )
       )
     ).toBe(false);
     expect(
@@ -204,7 +208,11 @@ describe('isEsqlUnknownColumnError', () => {
   it('does not match a reason that is not a problem list at all', () => {
     expect(
       isEsqlUnknownColumnError(
-        responseError(400, 'verification_exception', 'Unknown column [attributes.gen_ai.tool.call.arguments]')
+        responseError(
+          400,
+          'verification_exception',
+          'Unknown column [attributes.gen_ai.tool.call.arguments]'
+        )
       )
     ).toBe(false);
   });
@@ -446,7 +454,7 @@ describe('signal generator task run()', () => {
     // problem, rather than being silently treated as an empty batch.
     const unrelatedUnknownColumn = new errors.ResponseError({
       warnings: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       meta: {} as any,
       statusCode: 400,
       body: {
