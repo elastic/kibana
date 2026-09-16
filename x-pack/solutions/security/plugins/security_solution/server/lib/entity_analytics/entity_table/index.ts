@@ -22,6 +22,7 @@ import {
   ENTITY_TYPE_FILTER,
   GROUP_SIZE_FIELD,
   LAST_SEEN_ALERT_FIELD,
+  RESOLVED_TO_FIELD,
   RISK_SCORE_CHANGE_FIELD,
   decodeCursor,
   encodeCursor,
@@ -72,20 +73,23 @@ const nativeEntityDataQuery = ({
   sort: { field, direction: dir },
   cursor,
   pageSize,
+  view,
 }: QueryArgs): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...(view === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : []),
     keepClause(),
     ...(cursor ? [cursorClause(cursor)] : []),
     `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${pageSize + 1}`,
   ].join('\n');
 
-const nativeEntityCountQuery = ({ namespace }: QueryArgs): string =>
+const nativeEntityCountQuery = ({ namespace, view }: QueryArgs): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...(view === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : []),
     `| STATS total = COUNT(*)`,
   ].join('\n');
 
@@ -147,6 +151,7 @@ const EntityGridRequestBody = z.object({
     .default({ field: 'entity.risk.calculated_score_norm', direction: 'desc' }),
   page_size: z.number().int().min(1).max(100).default(25),
   time_range: z.enum(['24h', '7d', '30d']).default('30d'),
+  view: z.enum(['resolved', 'raw']).default('resolved'),
 });
 
 const getSortedPage = async (
@@ -218,11 +223,13 @@ const enrichPageRows = async (
   pageRows: Row[],
   args: QueryArgs,
   enrichPageQuery: EsqlRunner,
-  handler: SortHandler
+  handler: SortHandler,
+  view: 'resolved' | 'raw'
 ): Promise<void> => {
   if (pageRows.length === 0) return;
 
   const skip = new Set(handler.providedFields);
+  if (view === 'raw') skip.add(GROUP_SIZE_FIELD);
 
   await Promise.all([
     enrichAlerts(logger, pageRows, args, skip, enrichPageQuery),
@@ -275,16 +282,17 @@ export const registerEntityGridRoute = ({
             cursor,
             time_range: timeRange,
             profile,
+            view,
           } = request.body;
 
           const runQuery = makeQuery(logger, esClient, 'page', { filter, profile });
           const enrichPageQuery = makeQuery(logger, esClient, 'enrich', { profile });
 
           const handler = SORT_HANDLERS[sort.field];
-          const args: QueryArgs = { namespace, timeRange, sort, cursor: cursor ?? null, pageSize };
+          const args: QueryArgs = { namespace, timeRange, sort, cursor: cursor ?? null, pageSize, view };
 
           const { pageRows, total, hasNextPage } = await getSortedPage(runQuery, args, handler);
-          await enrichPageRows(logger, pageRows, args, enrichPageQuery, handler);
+          await enrichPageRows(logger, pageRows, args, enrichPageQuery, handler, view);
           await enrichCaseCounts(logger, pageRows, soClient); // not ESQL
 
           return response.ok({

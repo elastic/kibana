@@ -6,34 +6,32 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
-import type { EuiDataGridColumn } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiDataGrid,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
   EuiProgress,
   EuiSpacer,
-  EuiTextColor,
   useEuiTheme,
+  type EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
-import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
-import { useQuery } from '@kbn/react-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
@@ -41,15 +39,44 @@ import {
   globalQuerySelector,
 } from '../../common/store/inputs/selectors';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import { ENTITY_GRID_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
-import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
-import { API_VERSIONS } from '../../../common/entity_analytics/constants';
-import { AssetCriticalityBadge } from '../components/asset_criticality';
-import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
+import { DataViewContext } from '../components/home/entities_table';
+import { LastUpdated } from '../components/home/last_updated';
+import { ResolvedView } from '../components/home/new_entities_table';
 import {
-  EntitySourceValue,
-  toEntitySourceArray,
-} from '../../flyout/entity_details/shared/components/entity_source_value';
+  useEntityGridData,
+  useChildRows,
+  useWatchlistNames,
+  renderEntityCell,
+  GRID_COLUMNS,
+  RAW_GRID_COLUMNS,
+  TIME_RANGE_OPTIONS,
+  PAGE_SIZE_OPTIONS,
+} from '../components/home/new_entities_table';
+import type { TimeRange } from '../components/home/new_entities_table';
+import { MultiselectFilter } from '../../common/components/multiselect_filter';
+import { RiskSeverity } from '../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../common/utils';
+import { RiskScoreLevel } from '../components/severity/common/index';
+import { CriticalityLevels } from '../../../common/entity_analytics/asset_criticality/constants';
+import { AssetCriticalityBadge } from '../components/asset_criticality';
+import { EntityType } from '../../../common/entity_analytics/types';
+import { EntityIconByType } from '../components/entity_store/entity_icon_by_type';
+
+const VIEW_BY_OPTIONS = [
+  { key: 'resolved', label: 'Resolved entities' },
+  { key: 'raw', label: 'Raw records' },
+];
+
+const GROUP_BY_OPTIONS = [{ key: 'resolution', label: 'Resolution' }];
+
+const ENTITY_TYPE_OPTIONS = [EntityType.host, EntityType.user, EntityType.service];
+const CRITICALITY_OPTIONS = [
+  CriticalityLevels.EXTREME_IMPACT,
+  CriticalityLevels.HIGH_IMPACT,
+  CriticalityLevels.MEDIUM_IMPACT,
+  CriticalityLevels.LOW_IMPACT,
+  'unassigned' as const,
+];
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.home.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -60,49 +87,6 @@ const MANAGEMENT_LABEL = i18n.translate(
   { defaultMessage: 'Management' }
 );
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
-
-const GRID_COLUMNS: EuiDataGridColumn[] = [
-  { id: 'actions', displayAsText: 'Actions', initialWidth: 100, isSortable: false },
-  { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, isSortable: true },
-  { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
-  { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
-  { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
-  { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140, isSortable: false },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 100, isSortable: true },
-  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: true },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: false },
-  {
-    id: 'entity.attributes.watchlists',
-    displayAsText: 'Watchlists',
-    initialWidth: 200,
-    isSortable: false,
-  },
-  {
-    id: 'entity.lifecycle.first_seen',
-    displayAsText: 'First seen',
-    initialWidth: 180,
-  },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
-];
-
-type TimeRange = '24h' | '7d' | '30d';
-
-const TIME_RANGE_OPTIONS: Array<{ id: TimeRange; label: string }> = [
-  { id: '24h', label: '24h' },
-  { id: '7d', label: '7d' },
-  { id: '30d', label: '30d' },
-];
-
-interface EntityGridResponse {
-  entities: Array<Record<string, unknown>>;
-  next_cursor: string | null;
-  total: number | null;
-}
-
 const pageWrapperOverride = css`
   [data-test-subj='pageContainer'].securityPageWrapper {
     padding-inline: 0 !important;
@@ -111,81 +95,6 @@ const pageWrapperOverride = css`
     padding-block: 0 !important;
   }
 `;
-
-const useEntityGridData = ({
-  sortField,
-  sortDirection,
-  pageIndex,
-  pageSize,
-  cursors,
-  onNextCursor,
-  filter,
-  timeRange,
-}: {
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
-  pageIndex: number;
-  pageSize: number;
-  cursors: Array<string | null>;
-  onNextCursor: (pageIndex: number, cursor: string) => void;
-  filter?: object;
-  timeRange: TimeRange;
-}) => {
-  const { http } = useKibana().services;
-  const cursor = cursors[pageIndex] ?? null;
-  // Keep the last known total so rowCount never collapses to 0 during page transitions.
-  const [cachedTotal, setCachedTotal] = useState(0);
-
-  const { data, isFetching } = useQuery(
-    ['entity-grid', sortField, sortDirection, pageIndex, pageSize, cursor, filter, timeRange],
-    async () => {
-      const result = await http.post<EntityGridResponse>(ENTITY_GRID_INTERNAL_URL, {
-        version: '1',
-        body: JSON.stringify({
-          sort: { field: sortField, direction: sortDirection },
-          page_size: pageSize,
-          profile: true,
-          time_range: timeRange,
-          ...(cursor ? { cursor } : {}),
-          ...(filter ? { filter } : {}),
-        }),
-      });
-      return result;
-    },
-    {
-      onSuccess: (result) => {
-        if (result.total != null) setCachedTotal(result.total);
-        if (result.next_cursor && !cursors[pageIndex + 1]) {
-          onNextCursor(pageIndex + 1, result.next_cursor);
-        }
-      },
-    }
-  );
-
-  return {
-    rows: data?.entities ?? [],
-    total: cachedTotal,
-    isFetching,
-    // True once the current page has loaded and there is no further page.
-    isLastPage: data != null && data.next_cursor == null,
-  };
-};
-
-const useWatchlistNames = (): Map<string, string> => {
-  const { http } = useKibana().services;
-  const { data } = useQuery(['watchlist-names'], () =>
-    http.get<Array<{ id?: string; name: string }>>(`${WATCHLISTS_URL}/list`, {
-      version: API_VERSIONS.public.v1,
-    })
-  );
-  return useMemo(() => {
-    const map = new Map<string, string>();
-    for (const w of data ?? []) {
-      if (w.id) map.set(w.id, w.name);
-    }
-    return map;
-  }, [data]);
-};
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const spaceId = useSpaceId();
@@ -212,14 +121,30 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const watchlistNames = useWatchlistNames();
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  const [viewBy, setViewBy] = useState<'resolved' | 'raw'>('resolved');
   const [sortField, setSortField] = useState('entity.risk.calculated_score_norm');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  // cursors[i] is the cursor to pass when loading page i; cursors[0] is always null (first page)
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[1]);
   const [cursors, setCursors] = useState<Array<string | null>>([null]);
-  // When the user jumps to a page beyond what we've loaded, we chain fetches to reach it.
   const [targetPageIndex, setTargetPageIndex] = useState<number | null>(null);
+
+  // Expansion state
+  const [groupBy, setGroupBy] = useState<'none' | 'resolution'>('none');
+  const [groupingPageIndex, setGroupingPageIndex] = useState(0);
+  const [groupingPageSize, setGroupingPageSize] = useState(25);
+
+  // Filter bar state
+  const [selectedEntityTypes, setSelectedEntityTypes] = useState<EntityType[]>([]);
+  const [selectedRiskLevels, setSelectedRiskLevels] = useState<RiskSeverity[]>([]);
+  const [selectedCriticalities, setSelectedCriticalities] = useState<string[]>([]);
+  const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
+
+  const watchlistOptions = useMemo(() => [...watchlistNames.keys()], [watchlistNames]);
+
+  // Expansion state (inline expansion in flat grid)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const { childMap, fetchChildren, resetChildren } = useChildRows();
 
   const resetPagination = useCallback(() => {
     setPageIndex(0);
@@ -227,14 +152,17 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setTargetPageIndex(null);
   }, []);
 
-  // Serialize esFilter so the effect only fires when the filter content actually changes,
-  // not on every render due to unstable object references from buildEsQuery/dataView.
+  const resetExpansion = useCallback(() => {
+    setExpandedIds(new Set());
+    resetChildren();
+  }, [resetChildren]);
+
   const esFilterJson = useMemo(() => JSON.stringify(esFilter), [esFilter]);
 
-  // Reset pagination when the search filter changes.
   useEffect(() => {
     resetPagination();
-  }, [esFilterJson, resetPagination]);
+    resetExpansion();
+  }, [esFilterJson, resetPagination, resetExpansion]);
 
   const onNextCursor = useCallback((idx: number, cursor: string) => {
     setCursors((prev) => {
@@ -244,7 +172,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     });
   }, []);
 
-  const { rows, total, isFetching, isLastPage } = useEntityGridData({
+  const columns = viewBy === 'raw' ? RAW_GRID_COLUMNS : GRID_COLUMNS;
+
+  const { rows, total, updatedAt, isFetching, isLastPage } = useEntityGridData({
     sortField,
     sortDirection,
     pageIndex,
@@ -253,10 +183,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     onNextCursor,
     filter: esFilter,
     timeRange,
+    view: viewBy,
   });
 
   // Chain-fetch forward when the user jumped to a page beyond what's been loaded.
-  // Each time a new cursor lands (cursors grows), advance one page toward the target.
   useEffect(() => {
     if (targetPageIndex == null) return;
     if (pageIndex >= targetPageIndex || isLastPage) {
@@ -269,140 +199,258 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
   }, [cursors, pageIndex, targetPageIndex, isLastPage]);
 
-  const [visibleColumns, setVisibleColumns] = useState(GRID_COLUMNS.map((c) => c.id));
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.id));
 
   const renderCellValue = useCallback(
-    (props: { rowIndex: number; columnId: string }) => {
-      const { rowIndex, columnId } = props;
-      const relativeIndex = rowIndex - pageIndex * pageSize;
-      const value = rows[relativeIndex]?.[columnId];
-      if (value == null) return <>{'—'}</>;
-      if (
-        columnId === 'last_seen_alert' ||
-        columnId === '@timestamp' ||
-        columnId === 'entity.lifecycle.first_seen'
-      ) {
-        const m = moment(value as string);
-        return <>{m.isValid() ? m.fromNow() : String(value)}</>;
-      }
-      if (columnId === 'risk_score_change') {
-        const delta = value as number;
-        if (delta > 0)
-          return <EuiTextColor color="danger">{`↑ ${Math.round(delta)}%`}</EuiTextColor>;
-        if (delta < 0)
-          return <EuiTextColor color="success">{`↓ ${Math.round(Math.abs(delta))}%`}</EuiTextColor>;
-        return <>{'→ 0%'}</>;
-      }
-      if (columnId === 'alert_count') {
-        const row = rows[relativeIndex];
-        const alertCount = value as number;
-        if (alertCount === 0) return <>{'—'}</>;
-        const severities = [
-          {
-            key: 'Critical',
-            count: (row?.alert_critical as number) ?? 0,
-            color: getSeverityColor('critical', euiTheme),
-          },
-          {
-            key: 'High',
-            count: (row?.alert_high as number) ?? 0,
-            color: getSeverityColor('high', euiTheme),
-          },
-          {
-            key: 'Medium',
-            count: (row?.alert_medium as number) ?? 0,
-            color: getSeverityColor('medium', euiTheme),
-          },
-          {
-            key: 'Low',
-            count: (row?.alert_low as number) ?? 0,
-            color: getSeverityColor('low', euiTheme),
-          },
-        ].filter((s) => s.count > 0);
-        return (
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              <DistributionBar stats={severities} hideLastTooltip />
-            </EuiFlexItem>
-            <EuiBadge color="hollow">{alertCount}</EuiBadge>
-          </EuiFlexGroup>
-        );
-      }
-      if (columnId === 'case_count') {
-        if ((value as number) === 0) return <>{'—'}</>;
-        return <>{String(value)}</>;
-      }
-      if (columnId === 'entity.attributes.watchlists') {
-        const ids = value as string[];
-        if (!Array.isArray(ids) || ids.length === 0) return <>{'—'}</>;
-        const names = ids.map((id) => watchlistNames.get(id) ?? id);
-        return (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false}>{names[0]}</EuiFlexItem>
-            {names.length > 1 && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge>{`+${names.length - 1}`}</EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      }
-      if (columnId === 'asset.criticality') {
-        return (
-          <AssetCriticalityBadge
-            criticalityLevel={(value as CriticalityLevelWithUnassigned) ?? 'unassigned'}
-          />
-        );
-      }
-      if (columnId === 'entity.source') {
-        return <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />;
-      }
-      return <>{String(value)}</>;
+    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+      const row = rows[rowIndex - pageIndex * pageSize];
+      if (!row) return null;
+      return renderEntityCell(columnId, row[columnId], row, watchlistNames, euiTheme);
     },
     [rows, pageIndex, pageSize, watchlistNames, euiTheme]
+  );
+
+  // Chevron leading column — only rendered in resolved view.
+  const expanderColumn = useMemo(
+    () => ({
+      id: 'expander',
+      width: 32,
+      headerCellRender: () => null,
+      rowCellRender: ({ rowIndex }: { rowIndex: number }) => {
+        const row = rows[rowIndex - pageIndex * pageSize];
+        if (!row) return null;
+        const entityId = row['entity.id'] as string;
+        const groupSize = (row['group_size'] as number) ?? 1;
+        if (groupSize <= 1) return null;
+        const isExpanded = expandedIds.has(entityId);
+        return (
+          <EuiButtonIcon
+            size="xs"
+            color="text"
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+            aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+            onClick={() => {
+              if (isExpanded) {
+                setExpandedIds((prev) => {
+                  const s = new Set(prev);
+                  s.delete(entityId);
+                  return s;
+                });
+              } else {
+                setExpandedIds((prev) => new Set([...prev, entityId]));
+                fetchChildren(entityId, timeRange);
+              }
+            }}
+          />
+        );
+      },
+    }),
+    [rows, pageIndex, pageSize, expandedIds, fetchChildren, timeRange]
+  );
+
+  const renderCustomGridBody = useCallback(
+    ({
+      Cell,
+      visibleColumns: visCols,
+      visibleRowData,
+      headerRow,
+      footerRow,
+    }: EuiDataGridCustomBodyProps) => {
+      return (
+        <>
+          {headerRow}
+          {rows.map((row, i) => {
+            const absoluteIndex = visibleRowData.startRow + i;
+            const entityId = row['entity.id'] as string;
+            const isExpanded = expandedIds.has(entityId);
+            const children = isExpanded ? childMap.get(entityId) ?? [] : [];
+            return (
+              <React.Fragment key={entityId ?? i}>
+                <div
+                  role="row"
+                  className="euiDataGridRow"
+                  css={css`
+                    inline-size: fit-content;
+                    min-inline-size: 100%;
+                    border-block-end: ${euiTheme.border.thin};
+                  `}
+                >
+                  <div
+                    css={css`
+                      display: flex;
+                    `}
+                  >
+                    {visCols.map((col, ci) => (
+                      <Cell
+                        colIndex={ci}
+                        visibleRowIndex={absoluteIndex}
+                        key={`${entityId}-${col.id}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {children.map((child, childIdx) => (
+                  <div
+                    role="row"
+                    className="euiDataGridRow"
+                    key={`${entityId}-child-${childIdx}`}
+                    css={css`
+                      inline-size: fit-content;
+                      min-inline-size: 100%;
+                      border-block-end: ${euiTheme.border.thin};
+                      background: ${euiTheme.colors.body};
+                    `}
+                  >
+                    <div
+                      css={css`
+                        display: flex;
+                      `}
+                    >
+                      {visCols.map((col) => {
+                        // Leading control column (expander) — render blank placeholder
+                        if (!columns.find((c) => c.id === col.id)) {
+                          return <div key={col.id} style={{ width: 32, flexShrink: 0 }} />;
+                        }
+                        const colDef = columns.find((c) => c.id === col.id)!;
+                        const w = colDef.initialWidth ?? 150;
+                        const value = child[col.id as string];
+                        return (
+                          <div
+                            key={col.id}
+                            role="gridcell"
+                            style={{
+                              width: w,
+                              flexShrink: 0,
+                              padding: '6px 12px',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {col.id === 'entity.name' ? (
+                              <EuiFlexGroup
+                                gutterSize="xs"
+                                alignItems="center"
+                                responsive={false}
+                                wrap={false}
+                              >
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon
+                                    type="returnKey"
+                                    size="s"
+                                    color="subdued"
+                                    css={css`
+                                      transform: scaleX(-1);
+                                    `}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  {renderEntityCell(
+                                    col.id as string,
+                                    value,
+                                    child,
+                                    watchlistNames,
+                                    euiTheme
+                                  )}
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            ) : (
+                              renderEntityCell(
+                                col.id as string,
+                                value,
+                                child,
+                                watchlistNames,
+                                euiTheme
+                              )
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </React.Fragment>
+            );
+          })}
+          {footerRow}
+        </>
+      );
+    },
+    [rows, expandedIds, childMap, columns, watchlistNames, euiTheme]
   );
 
   const sorting = useMemo(
     () => ({
       columns: [{ id: sortField, direction: sortDirection }],
       onSort: (cols: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
-        // EuiDataGrid appends new columns when clicking an unsorted header;
-        // pick the newly added column (id ≠ current sortField), falling back
-        // to cols[0] when the user is toggling direction on the existing sort.
         const col = cols.find((c) => c.id !== sortField) ?? cols[0];
         if (!col) return;
         setSortField(col.id);
         setSortDirection(col.direction);
         resetPagination();
+        resetExpansion();
       },
     }),
-    [sortField, sortDirection, resetPagination]
+    [sortField, sortDirection, resetPagination, resetExpansion]
   );
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      pageSizeOptions: PAGE_SIZE_OPTIONS,
-      onChangePage: (newPage: number) => {
-        if (cursors[newPage] !== undefined) {
-          // Cursor already available — navigate directly (covers backward jumps and next-page).
-          setTargetPageIndex(null);
-          setPageIndex(newPage);
-        } else {
-          // Cursor not yet fetched — chain-fetch toward the target starting from the furthest
-          // page we have a cursor for. The useEffect above advances one page per cursor received.
-          setTargetPageIndex(newPage);
-          setPageIndex(cursors.length - 1);
-        }
-      },
-      onChangeItemsPerPage: (newSize: number) => {
-        setPageSize(newSize);
-        resetPagination();
-      },
-    }),
-    [pageIndex, pageSize, cursors, resetPagination]
+  const handleChangePage = useCallback(
+    (nextPageIndex: number) => {
+      resetExpansion();
+      if (cursors[nextPageIndex] !== undefined) {
+        setPageIndex(nextPageIndex);
+      } else {
+        setTargetPageIndex(nextPageIndex);
+        setPageIndex(cursors.length - 1);
+      }
+    },
+    [cursors, resetExpansion]
   );
+
+  const handleChangeItemsPerPage = useCallback(
+    (newSize: number) => {
+      setPageSize(newSize);
+      resetPagination();
+      resetExpansion();
+    },
+    [resetPagination, resetExpansion]
+  );
+
+  const viewBySelector = (
+    <GroupSelector
+      groupingId="ea-new-home-view-by"
+      groupsSelected={[viewBy]}
+      onGroupChange={(key) => {
+        const next = key as 'resolved' | 'raw';
+        setViewBy(next);
+        resetPagination();
+        resetExpansion();
+        setVisibleColumns((next === 'raw' ? RAW_GRID_COLUMNS : GRID_COLUMNS).map((c) => c.id));
+      }}
+      options={VIEW_BY_OPTIONS}
+      fields={[]}
+      title="View by"
+      maxGroupingLevels={1}
+      settings={{ hideNoneOption: true, hideCustomFieldOption: true }}
+    />
+  );
+
+  const groupBySelector =
+    viewBy === 'resolved' ? (
+      <GroupSelector
+        groupingId="ea-new-home-group-by"
+        groupsSelected={groupBy === 'none' ? [] : [groupBy]}
+        onGroupChange={(key) => {
+          const next = key as 'none' | 'resolution';
+          setGroupBy((prev) => (prev === next ? 'none' : next));
+          resetPagination();
+          resetExpansion();
+        }}
+        options={GROUP_BY_OPTIONS}
+        fields={[]}
+        title="Group by"
+        maxGroupingLevels={1}
+        settings={{ hideCustomFieldOption: true }}
+      />
+    ) : null;
 
   const menu = useMemo<AppHeaderMenu>(
     () => ({
@@ -438,7 +486,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               padding-inline: ${euiTheme.size.base};
             `}
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem>
                 <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
               </EuiFlexItem>
@@ -450,27 +498,248 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                   onChange={(id) => {
                     setTimeRange(id as TimeRange);
                     resetPagination();
+                    resetExpansion();
                   }}
-                  buttonSize="m"
+                  buttonSize="s"
                   color="primary"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
 
+          <EuiSpacer size="s" />
+
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            css={css`
+              padding-inline: 16px;
+              padding-inline-start: 24px;
+            `}
+          >
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                <MultiselectFilter<EntityType>
+                  title="Entity type"
+                  items={ENTITY_TYPE_OPTIONS}
+                  selectedItems={selectedEntityTypes}
+                  onSelectionChange={setSelectedEntityTypes}
+                  renderLabel={(t) => t.charAt(0).toUpperCase() + t.slice(1)}
+                  renderItem={(t) => (
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      {EntityIconByType[t] && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type={EntityIconByType[t]} size="s" />
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem>{t.charAt(0).toUpperCase() + t.slice(1)}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiNotificationBadge size="s" color="subdued">
+                          0
+                        </EuiNotificationBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                  width={160}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                <MultiselectFilter<RiskSeverity>
+                  title="Risk level"
+                  items={SEVERITY_UI_SORT_ORDER}
+                  selectedItems={selectedRiskLevels}
+                  onSelectionChange={setSelectedRiskLevels}
+                  renderLabel={(s) => s}
+                  renderItem={(s) => (
+                    <EuiFlexGroup
+                      justifyContent="spaceBetween"
+                      alignItems="center"
+                      gutterSize="none"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <RiskScoreLevel severity={s} hideBackgroundColor />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiNotificationBadge size="s" color="subdued">
+                          0
+                        </EuiNotificationBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                  width={160}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                <MultiselectFilter<string>
+                  title="Asset criticality"
+                  items={CRITICALITY_OPTIONS}
+                  selectedItems={selectedCriticalities}
+                  onSelectionChange={setSelectedCriticalities}
+                  renderLabel={(c) => c.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                  renderItem={(c) => (
+                    <EuiFlexGroup
+                      justifyContent="spaceBetween"
+                      alignItems="center"
+                      gutterSize="none"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <AssetCriticalityBadge
+                          criticalityLevel={c as CriticalityLevels}
+                          css={{ lineHeight: 'inherit' }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiNotificationBadge size="s" color="subdued">
+                          0
+                        </EuiNotificationBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                  width={200}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                <MultiselectFilter<never>
+                  title="Data source"
+                  items={[]}
+                  selectedItems={[]}
+                  width={160}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFilterGroup compressed>
+                <MultiselectFilter<string>
+                  title="Watchlist"
+                  items={watchlistOptions}
+                  selectedItems={selectedWatchlists}
+                  onSelectionChange={setSelectedWatchlists}
+                  renderLabel={(id) => watchlistNames.get(id) ?? id}
+                  renderItem={(id) => (
+                    <EuiFlexGroup
+                      justifyContent="spaceBetween"
+                      alignItems="center"
+                      gutterSize="s"
+                      responsive={false}
+                    >
+                      <EuiFlexItem
+                        css={css`
+                          overflow: hidden;
+                          min-width: 0;
+                        `}
+                      >
+                        <span
+                          css={css`
+                            display: block;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                          `}
+                        >
+                          {watchlistNames.get(id) ?? id}
+                        </span>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        css={css`
+                          flex-shrink: 0;
+                        `}
+                      >
+                        <EuiNotificationBadge size="s" color="subdued">
+                          0
+                        </EuiNotificationBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                  width={200}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="m" />
 
           {isFetching && <EuiProgress size="xs" color="accent" position="fixed" />}
 
-          <EuiDataGrid
-            aria-label="Entity analytics grid"
-            columns={GRID_COLUMNS}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            rowCount={total}
-            renderCellValue={renderCellValue}
-            sorting={sorting}
-            pagination={pagination}
-          />
+          <div
+            css={css`
+              padding-inline: ${euiTheme.size.base};
+              padding-block-end: ${euiTheme.size.base};
+            `}
+          >
+            {groupBy === 'resolution' ? (
+              <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>
+                <ResolvedView
+                  groupingPageIndex={groupingPageIndex}
+                  groupingPageSize={groupingPageSize}
+                  onChangeGroupsPage={setGroupingPageIndex}
+                  onChangeGroupsItemsPerPage={setGroupingPageSize}
+                  timeRange={timeRange}
+                  watchlistNames={watchlistNames}
+                  esFilter={esFilter}
+                  groupSelectorComponent={
+                    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                      <EuiFlexItem grow={false}>{viewBySelector}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{groupBySelector}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                />
+              </DataViewContext.Provider>
+            ) : (
+              <EuiDataGrid
+                aria-label="Entity analytics grid"
+                leadingControlColumns={viewBy === 'resolved' ? [expanderColumn] : []}
+                columns={columns}
+                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                rowCount={total}
+                renderCellValue={renderCellValue}
+                renderCustomGridBody={renderCustomGridBody}
+                sorting={sorting}
+                pagination={{
+                  pageIndex,
+                  pageSize,
+                  pageSizeOptions: PAGE_SIZE_OPTIONS,
+                  onChangePage: handleChangePage,
+                  onChangeItemsPerPage: handleChangeItemsPerPage,
+                }}
+                toolbarVisibility={{
+                  showColumnSelector: false,
+                  showSortSelector: false,
+                  showDisplaySelector: false,
+                  showKeyboardShortcuts: false,
+                  additionalControls: {
+                    left: {
+                      prepend: updatedAt != null ? <LastUpdated updatedAt={updatedAt} /> : null,
+                    },
+                    right: (
+                      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                        <EuiFlexItem grow={false}>{viewBySelector}</EuiFlexItem>
+                        {groupBySelector && (
+                          <EuiFlexItem grow={false}>{groupBySelector}</EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    ),
+                  },
+                }}
+                gridStyle={{
+                  border: 'horizontal',
+                  header: 'underline',
+                  cellPadding: 'm',
+                  fontSize: 'm',
+                  stripes: false,
+                }}
+              />
+            )}
+          </div>
         </div>
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />

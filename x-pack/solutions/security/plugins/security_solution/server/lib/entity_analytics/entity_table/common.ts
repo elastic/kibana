@@ -62,6 +62,7 @@ export interface QueryArgs {
   sort: { field: string; direction: SortDir };
   cursor: PageCursor | null;
   pageSize: number;
+  view: 'resolved' | 'raw';
 }
 
 export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
