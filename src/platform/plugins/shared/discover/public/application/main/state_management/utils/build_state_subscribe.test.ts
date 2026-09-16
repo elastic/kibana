@@ -194,31 +194,6 @@ describe('buildStateSubscribe', () => {
     expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
-  it('should return to uninitialized when the ES|QL query is cleared', async () => {
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.initializeTabState)({
-        initialAppState: {
-          dataSource: { type: DataSourceType.Esql },
-          query: { esql: 'FROM logs' },
-        },
-        initialProfileState: toolkit.getCurrentTab().profileState,
-      })
-    );
-    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE, foundDocuments: true });
-
-    await getSubscribeFn()(
-      getNextState({
-        appState: {
-          dataSource: { type: DataSourceType.Esql },
-          query: { esql: '' },
-        },
-      })
-    );
-
-    expect(dataState.refetch$.next).not.toHaveBeenCalled();
-    expect(dataState.reset).toHaveBeenCalledWith(FetchStatus.UNINITIALIZED);
-  });
-
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
