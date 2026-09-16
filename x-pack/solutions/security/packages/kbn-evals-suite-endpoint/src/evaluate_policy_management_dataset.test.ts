@@ -30,7 +30,7 @@ const createMockEvaluators = (): DefaultEvaluators =>
       toolCalls: createTraceEvaluator('Tool Calls'),
       latency: createTraceEvaluator('Latency'),
     },
-  } as unknown as DefaultEvaluators);
+  }) as unknown as DefaultEvaluators;
 
 describe('evaluatePolicyManagementDataset', () => {
   it('attaches the finalized-step tool evaluator and generic trace evaluators', () => {

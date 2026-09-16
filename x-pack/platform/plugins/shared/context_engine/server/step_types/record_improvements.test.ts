@@ -219,7 +219,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     const get = jest.fn().mockResolvedValue({ id: 'orders' });
 
     const { handler } = getRecordImprovementsStepDefinition({
-      getAiIndexService: () => ({ get } as never),
+      getAiIndexService: () => ({ get }) as never,
       getImprovementsService,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled,

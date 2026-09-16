@@ -36,7 +36,7 @@ export interface BulkSeriesActionBody<TAction extends CreateSeriesAlertActionBod
 }
 
 interface CreateBulkSeriesActionRouteForTypeOptions<
-  TAction extends CreateSeriesAlertActionBody['action_type']
+  TAction extends CreateSeriesAlertActionBody['action_type'],
 > {
   actionType: TAction;
   pathSuffix: string;
@@ -47,7 +47,7 @@ interface CreateBulkSeriesActionRouteForTypeOptions<
 }
 
 export const createBulkSeriesActionRouteForType = <
-  TAction extends CreateSeriesAlertActionBody['action_type']
+  TAction extends CreateSeriesAlertActionBody['action_type'],
 >({
   actionType,
   pathSuffix,
@@ -111,7 +111,7 @@ export const createBulkSeriesActionRouteForType = <
             ({
               action_type: actionType,
               ...item,
-            } as BulkCreateSeriesAlertActionItemBody)
+            }) as BulkCreateSeriesAlertActionItemBody
         )
       );
 

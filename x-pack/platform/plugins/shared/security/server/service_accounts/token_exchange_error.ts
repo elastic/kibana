@@ -7,7 +7,11 @@
 
 /** Describes whether a failed service account token exchange can be retried. */
 export class ServiceAccountTokenExchangeError extends Error {
-  constructor(cause: Error, public readonly retryable: boolean, public readonly retryAfterMs = 0) {
+  constructor(
+    cause: Error,
+    public readonly retryable: boolean,
+    public readonly retryAfterMs = 0
+  ) {
     super('Error occurred during service account token exchange.', { cause });
     this.name = 'ServiceAccountTokenExchangeError';
   }

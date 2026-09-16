@@ -24,8 +24,8 @@ const getActiveInputs = (
     serviceVars.enabledDataStreams.length > 0
       ? serviceVars.enabledDataStreams
       : service.dataStreams.length > 0
-      ? service.dataStreams
-      : [service.id];
+        ? service.dataStreams
+        : [service.id];
 
   for (const dsId of activeDataStreams) {
     const dsInfo = service.varDefsByDataStream?.[dsId];
@@ -34,14 +34,14 @@ const getActiveInputs = (
     const activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : isSingleDs
-      ? dsInfo?.inputs ?? service.inputs ?? service.defaultEnabledInputs ?? []
-      : dsInfo?.defaultEnabledInputs?.length
-      ? dsInfo.defaultEnabledInputs
-      : dsInfo?.inputs?.length
-      ? dsInfo.inputs.slice(0, 1)
-      : service.defaultEnabledInputs?.length
-      ? service.defaultEnabledInputs.slice(0, 1)
-      : (service.inputs ?? []).slice(0, 1);
+        ? (dsInfo?.inputs ?? service.inputs ?? service.defaultEnabledInputs ?? [])
+        : dsInfo?.defaultEnabledInputs?.length
+          ? dsInfo.defaultEnabledInputs
+          : dsInfo?.inputs?.length
+            ? dsInfo.inputs.slice(0, 1)
+            : service.defaultEnabledInputs?.length
+              ? service.defaultEnabledInputs.slice(0, 1)
+              : (service.inputs ?? []).slice(0, 1);
 
     for (const input of activeInputs) {
       inputs.add(input);

@@ -28,7 +28,7 @@ import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
 
 interface CreateEpisodeActionRouteForTypeOptions<
-  TAction extends CreateEpisodeAlertActionBody['action_type']
+  TAction extends CreateEpisodeAlertActionBody['action_type'],
 > {
   actionType: TAction;
   pathSuffix: string;
@@ -41,7 +41,7 @@ interface CreateEpisodeActionRouteForTypeOptions<
 }
 
 export const createEpisodeActionRouteForType = <
-  TAction extends CreateEpisodeAlertActionBody['action_type']
+  TAction extends CreateEpisodeAlertActionBody['action_type'],
 >({
   actionType,
   pathSuffix,

@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
-const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
+const serviceWith = (list: jest.Mock) => ({ list }) as Pick<ActionsService, 'list'>;
 
 const run = async (
   service: Pick<ActionsService, 'list'>,

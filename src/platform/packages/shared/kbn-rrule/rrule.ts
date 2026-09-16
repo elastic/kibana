@@ -95,7 +95,7 @@ export class RRule {
       } else {
         const refDT = moment(current).tz(tzid);
         // The first iteration examines the dtstart period itself, so no interval is applied.
-        const appliedInterval = isFirstIteration ? 0 : this.options.interval ?? 1;
+        const appliedInterval = isFirstIteration ? 0 : (this.options.interval ?? 1);
         getNextRecurrences({
           refDT,
           ...this.options,

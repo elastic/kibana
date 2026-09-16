@@ -44,7 +44,7 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
       },
     ],
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 const calibrate = (overrides: Partial<Parameters<typeof getCalibratedSeverity>[0]> = {}) =>
   getCalibratedSeverity({

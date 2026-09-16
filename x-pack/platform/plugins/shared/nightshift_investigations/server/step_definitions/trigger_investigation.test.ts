@@ -22,7 +22,7 @@ const createContext = (input: Record<string, unknown>) =>
       getFakeRequest: jest.fn().mockReturnValue(request),
       getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'test-space' } }),
     },
-  } as never);
+  }) as never;
 
 const createDefinition = (start: jest.Mock) => {
   const getInvestigationsClient = jest

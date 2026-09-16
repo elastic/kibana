@@ -38,7 +38,7 @@ const createCoreStartServices = () => {
 
 const signal = new AbortController().signal;
 
-const runContext = (state = {}) => ({ taskInstance: { state }, signal } as unknown as RunContext);
+const runContext = (state = {}) => ({ taskInstance: { state }, signal }) as unknown as RunContext;
 
 beforeEach(() => {
   jest.clearAllMocks();

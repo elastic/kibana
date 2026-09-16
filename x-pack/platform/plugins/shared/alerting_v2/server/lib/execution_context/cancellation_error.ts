@@ -29,7 +29,9 @@ export const isRuleExecutionCancellationError = (
     'code' in error &&
     error.code === CANCELLATION_ERROR_CODE);
 
-export const toRuleExecutionCancellationError = (reason: unknown): RuleExecutionCancellationError =>
+export const toRuleExecutionCancellationError = (
+  reason: unknown
+): RuleExecutionCancellationError =>
   isRuleExecutionCancellationError(reason)
     ? reason
     : new RuleExecutionCancellationError(undefined, { cause: reason });

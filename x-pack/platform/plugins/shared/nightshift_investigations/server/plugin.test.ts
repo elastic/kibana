@@ -19,7 +19,7 @@ const createSetupDeps = () =>
     taskManager: {
       registerTaskDefinitions: jest.fn(),
     },
-  } as unknown as NightshiftInvestigationsSetupDeps);
+  }) as unknown as NightshiftInvestigationsSetupDeps;
 
 describe('NightshiftInvestigationsPlugin setup', () => {
   it('accepts one investigation quota callback', () => {
