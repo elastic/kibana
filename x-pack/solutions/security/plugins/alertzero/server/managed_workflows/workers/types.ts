@@ -15,9 +15,9 @@ export type WorkerSettingsPatch = Pick<
 
 export interface WorkerSettingsRegistration {
   createDefaultValues(): ManagedWorkflowTemplateValues;
+  /** Validate stored values and return the complete current value set. */
   migrate(values: Record<string, unknown>): {
     values: ManagedWorkflowTemplateValues;
-    migrated: boolean;
   };
   applyPatch(
     values: ManagedWorkflowTemplateValues,

@@ -367,6 +367,42 @@ describe('WorkersService', () => {
     expect(worker?.settingsRevision).toBeNull();
   });
 
+  const seedUnprojectedStoredValue = async (
+    harness: ReturnType<typeof createPersistentHarness>
+  ) => {
+    const service = harness.createService();
+    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    const document = harness.documents.get(`${TRIAGE}-${SPACE}`);
+    if (!document?.values) throw new Error('Expected an installed document with values');
+    document.values = { ...document.values, retiredField: true };
+    return { service, document };
+  };
+
+  it('projects unavailable when the stored values carry a key the Worker does not project', async () => {
+    const harness = createPersistentHarness();
+    const { service } = await seedUnprojectedStoredValue(harness);
+
+    const worker = await service.get(TRIAGE, request, SPACE);
+
+    expect(worker?.state).toBe('unavailable');
+    expect(worker?.stateReason).toBe('Worker settings could not be read from durable storage');
+  });
+
+  it('refuses a settings save that would rewrite stored values it cannot carry', async () => {
+    const harness = createPersistentHarness();
+    const { service, document } = await seedUnprojectedStoredValue(harness);
+
+    await expect(
+      service.update(
+        TRIAGE,
+        { autonomyLevel: 'assisted', settingsRevision: document.version },
+        SPACE,
+        request
+      )
+    ).rejects.toThrow(/retiredField/);
+    expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.values).toHaveProperty('retiredField');
+  });
+
   it('installs on enable and leaves the per-space document in place on disable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();

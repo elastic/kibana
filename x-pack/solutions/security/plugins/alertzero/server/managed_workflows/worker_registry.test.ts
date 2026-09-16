@@ -48,6 +48,14 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
 };
 
+/**
+ * The only place a YAML `consts.worker_settings` key may differ from the template value that
+ * renders it; a new settings key belongs in the same edit as this map.
+ */
+const WORKER_SETTINGS_KEY_RENAMES: Record<string, string> = {
+  autonomy: 'autonomyLevel',
+};
+
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
   const definition = getManagedWorkflowDefinition(workerId);
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
@@ -98,6 +106,38 @@ describe('workerRegistry', () => {
       }
 
       expect(yaml).not.toContain('candidateLimit');
+    }
+  );
+
+  it.each(SYSTEM_SECURITY_WORKER_CATALOG)(
+    '$id declares only worker_settings keys its template values carry',
+    (catalog) => {
+      const registration = workerRegistry.get(catalog.id);
+      if (!registration) {
+        throw new Error(`Worker "${catalog.id}" is not registered`);
+      }
+      const values = registration.settings.createDefaultValues();
+      const yaml = getYamlTemplate(catalog.id)(values);
+      const parsed = parse(yaml) as { consts?: { worker_settings?: Record<string, unknown> } };
+      const declared = Object.keys(parsed.consts?.worker_settings ?? {});
+
+      // The block is hand-written in the YAML while the values it renders from are built in
+      // worker_settings.ts, and the expected set is read off the YAML so growth fails here.
+      const carried = Object.keys(values).sort();
+      const projected = declared.map((key) => WORKER_SETTINGS_KEY_RENAMES[key] ?? key).sort();
+      if (projected.join(',') !== carried.join(',')) {
+        throw new Error(
+          `Worker "${catalog.id}" declares consts.worker_settings keys [${declared.join(
+            ', '
+          )}] but its template values carry [${carried.join(
+            ', '
+          )}]. Carry the declared setting in createDefaultValues()/parseWorkerValues() and name any ` +
+            `difference in WORKER_SETTINGS_KEY_RENAMES, or remove the key from the YAML.`
+        );
+      }
+
+      // A placeholder no renderer replaces survives into the stored document as a literal.
+      expect(yaml).not.toMatch(/__WORKER_[A-Z_]+__/);
     }
   );
 

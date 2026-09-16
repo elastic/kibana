@@ -69,18 +69,38 @@ const parseWorkerValues = (
 
   const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
   if (scheduleDefault === undefined) {
-    return {
+    return assertProjectedKeys(workerId, raw, {
       settingsVersion: currentVersion,
       autonomyLevel: parsedAutonomyLevel.data,
-    };
+    });
   }
 
   // Absent means the install predates the setting, so it takes the default.
-  return {
+  return assertProjectedKeys(workerId, raw, {
     settingsVersion: currentVersion,
     autonomyLevel: parsedAutonomyLevel.data,
     scheduleInterval: scheduleInterval ?? scheduleDefault,
-  };
+  });
+};
+
+/**
+ * A stored document may only carry the keys this Worker projects. Dropping the rest is not a
+ * migration: the projection is what the next install writes back, so the field is lost silently.
+ */
+const assertProjectedKeys = (
+  workerId: RegisteredWorkerId,
+  raw: Record<string, unknown>,
+  values: WorkerTemplateValues
+): WorkerTemplateValues => {
+  const unrecognised = Object.keys(raw).filter((key) => !Object.hasOwn(values, key));
+  if (unrecognised.length > 0) {
+    throw new Error(
+      `AlertZero worker "${workerId}" settings contain unrecognised keys: ${unrecognised.join(
+        ', '
+      )}. Supported keys: ${Object.keys(values).join(', ')}`
+    );
+  }
+  return values;
 };
 
 export const createWorkerSettingsRegistration = (
@@ -94,15 +114,9 @@ export const createWorkerSettingsRegistration = (
       ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
     };
   },
-  migrate: (raw: Record<string, unknown>) => {
-    const values = parseWorkerValues(workerId, raw);
-    return {
-      values,
-      migrated:
-        raw.settingsVersion !== WORKER_SETTINGS_VERSIONS[workerId] ||
-        Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
-    };
-  },
+  migrate: (raw: Record<string, unknown>) => ({
+    values: parseWorkerValues(workerId, raw),
+  }),
   applyPatch: (raw, patch) => {
     const values = parseWorkerValues(workerId, raw);
     if (patch.scheduleInterval != null && WORKER_SCHEDULE_DEFAULTS[workerId] === undefined) {
