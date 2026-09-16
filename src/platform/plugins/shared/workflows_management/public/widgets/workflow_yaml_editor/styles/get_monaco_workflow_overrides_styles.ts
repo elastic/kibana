@@ -108,8 +108,8 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
     }
 
     .monaco-editor .suggest-widget {
-      border-radius: 6px !important;
-      ${euiShadow(euiThemeContext, 'm')}
+      --vscode-cornerRadius-large: 6px;
+      --vscode-shadow-lg: ${euiShadow(euiThemeContext, 'm').replace('box-shadow:', '')};
       border-width: 0 !important;
       overflow: hidden !important; // so border-radius is applied correctly
     }
