@@ -648,26 +648,6 @@ export class SandboxConnectionManager {
     );
   }
 
-  async backupState(
-    conversationId: string,
-    destinationUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    return this.apiClient.backupState(conversationId, destinationUrl, targetPath);
-  }
-
-  async restoreState(
-    conversationId: string,
-    sourceUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    return this.apiClient.restoreState(conversationId, sourceUrl, targetPath);
-  }
-
-  setRestoreCallback(cb: (conversationId: string) => Promise<void>): void {
-    this.restoreCallback = cb;
-  }
-
   /** On UNAVAILABLE (pod self-exited), clear init state so the next call re-runs restore + manifest write.
    *  Only clears if the init generation this call ran under is still current, so a late failure
    *  from a dead pod cannot evict the fresh init a later call already installed. */
