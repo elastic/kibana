@@ -7,7 +7,7 @@
 
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { SourceRuleData } from '../../types/source_rule_data';
 
 const CLASSIC_RULES_FIND_API_PATH = '/internal/alerting/rules/_find' as const;
 const CLASSIC_RULE_SO_TYPE = 'alert' as const;
@@ -24,15 +24,44 @@ const buildClassicRuleIdsFilter = (ids: string[]): string =>
     )
   );
 
-interface ClassicFindRulesResponse {
-  data: Array<{ id: string; name: string; [key: string]: unknown }>;
+interface ClassicRule {
+  id: string;
+  name: string;
+  tags?: string[];
+  enabled?: boolean;
+  schedule?: { interval?: string };
+  rule_type_id?: string;
+  consumer?: string;
+  params?: Record<string, unknown>;
+  alert_delay?: { active?: number };
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: unknown;
 }
 
-const adaptClassicRule = (rule: ClassicFindRulesResponse['data'][number]): RuleResponse =>
-  ({
-    id: rule.id,
-    metadata: { name: rule.name },
-  } as unknown as RuleResponse);
+interface ClassicFindRulesResponse {
+  data: ClassicRule[];
+}
+
+const adaptClassicRule = (rule: ClassicRule): SourceRuleData => ({
+  id: rule.id,
+  enabled: rule.enabled ?? false,
+  metadata: {
+    name: rule.name,
+    tags: rule.tags ?? [],
+  },
+  schedule: rule.schedule?.interval ? { interval: rule.schedule.interval } : undefined,
+  created_by: rule.created_by ?? null,
+  updated_by: rule.updated_by ?? null,
+  created_at: rule.created_at ?? '',
+  updated_at: rule.updated_at ?? '',
+  rule_type_id: rule.rule_type_id,
+  consumer: rule.consumer,
+  params: rule.params,
+  alert_delay: rule.alert_delay,
+});
 
 export interface ResolveClassicRulesParams {
   ids: string[];
@@ -42,7 +71,7 @@ export interface ResolveClassicRulesParams {
 export const resolveClassicRules = async ({
   ids,
   services: { http },
-}: ResolveClassicRulesParams): Promise<RuleResponse[]> => {
+}: ResolveClassicRulesParams): Promise<SourceRuleData[]> => {
   if (ids.length === 0) {
     return [];
   }

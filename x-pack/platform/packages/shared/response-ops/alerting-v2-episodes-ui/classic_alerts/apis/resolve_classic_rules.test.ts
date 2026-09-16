@@ -24,7 +24,23 @@ describe('resolveClassicRules', () => {
 
   it('resolves rules through the classic find API using the saved-object prefixed filter', async () => {
     mockHttp.post.mockResolvedValueOnce({
-      data: [{ id: 'classic-rule', name: 'Classic Rule' }],
+      data: [
+        {
+          id: 'classic-rule',
+          name: 'Classic Rule',
+          tags: ['infra'],
+          enabled: true,
+          schedule: { interval: '5m' },
+          rule_type_id: '.es-query',
+          consumer: 'stackAlerts',
+          params: { index: ['logs-*'], timeField: '@timestamp' },
+          alert_delay: { active: 3 },
+          created_by: 'elastic',
+          updated_by: 'admin',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-06-01T00:00:00.000Z',
+        },
+      ],
     });
 
     const result = await resolveClassicRules({
@@ -38,7 +54,22 @@ describe('resolveClassicRules', () => {
         body: expect.stringContaining('alert.id: \\"alert:classic-rule\\"'),
       })
     );
-    expect(result).toMatchObject([{ id: 'classic-rule', metadata: { name: 'Classic Rule' } }]);
+    expect(result).toMatchObject([
+      {
+        id: 'classic-rule',
+        enabled: true,
+        metadata: { name: 'Classic Rule', tags: ['infra'] },
+        schedule: { interval: '5m' },
+        rule_type_id: '.es-query',
+        consumer: 'stackAlerts',
+        params: { index: ['logs-*'], timeField: '@timestamp' },
+        alert_delay: { active: 3 },
+        created_by: 'elastic',
+        updated_by: 'admin',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-06-01T00:00:00.000Z',
+      },
+    ]);
   });
 
   it('returns an empty array when the classic find API fails', async () => {

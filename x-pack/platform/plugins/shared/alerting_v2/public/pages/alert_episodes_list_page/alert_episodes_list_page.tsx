@@ -215,6 +215,8 @@ const AlertEpisodesListPageContent = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const [isSourceRuleToView, setIsSourceRuleToView] = useState(false);
+  const [ruleCategoryToView, setRuleCategoryToView] = useState<string | undefined>();
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
     flyout: composeFlyout,
@@ -225,10 +227,15 @@ const AlertEpisodesListPageContent = () => {
 
   // The rule and the episode flyout occupy the same edge of the screen, so only one of them
   // can be open at a time.
-  const openRuleFlyout = useCallback((ruleId: string) => {
-    setExpandedDoc(undefined);
-    setRuleIdToView(ruleId);
-  }, []);
+  const openRuleFlyout = useCallback(
+    (ruleId: string, isSourceRule: boolean, ruleCategory?: string) => {
+      setExpandedDoc(undefined);
+      setRuleIdToView(ruleId);
+      setIsSourceRuleToView(isSourceRule);
+      setRuleCategoryToView(ruleCategory);
+    },
+    []
+  );
 
   const expandDoc = useCallback((doc?: DataTableRecord) => {
     if (doc) {
@@ -676,6 +683,9 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
+          isSourceRule={isSourceRuleToView}
+          ruleCategory={ruleCategoryToView}
+          type="overlay"
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

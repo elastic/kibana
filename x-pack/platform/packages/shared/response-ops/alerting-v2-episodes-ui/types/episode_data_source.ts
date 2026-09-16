@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { SourceRuleData } from './source_rule_data';
 import type {
   AlertEpisode,
   EpisodesFilterState,
@@ -95,7 +95,8 @@ export interface EpisodeDataSource {
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
-  resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  resolveRules?: (params: ResolveSourceRulesParams) => Promise<SourceRuleData[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  getRuleDetailsHref?: (ruleId: string) => string | null;
 }
