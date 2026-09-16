@@ -189,6 +189,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               </FlyoutTemplate.Body.Section.Subsection>
               <FlyoutTemplate.Body.Section.Subsection id="service" title="Service">
                 <EuiText size="s">
+                  {/* TODO(a11y-review): this Section passes no hasBorder, so isBordered is false and
+                      the subsections render no border either — the sentence below is inaccurate. */}
                   <p>With subsections present, each one carries the border the section drops.</p>
                 </EuiText>
               </FlyoutTemplate.Body.Section.Subsection>

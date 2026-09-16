@@ -55,6 +55,8 @@ const badges = () => [
 
 /** Renders enough info blocks to fill the grid and make the header collapsible. */
 const infoBlocks = () => [
+  // TODO(a11y-review): metaBlocks() already uses key="owner" and headerBlocks() spreads both into
+  // one array, so React warns about a duplicate key.
   <FlyoutTemplate.Header.InfoBlock key="owner" id="owner" title="Owner">
     Platform
   </FlyoutTemplate.Header.InfoBlock>,
