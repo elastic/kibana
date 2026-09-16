@@ -86,7 +86,7 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
 
     // Thicker ring so it stands out next to the strong high contrast borders around it.
     ${highContrastModeStyles(useEuiTheme, {
-      preferred: `outline-width: calc(${useEuiTheme.euiTheme.focus.width} * 2);`,
+      preferred: `outline-width: calc(${useEuiTheme.euiTheme.border.width.thin} * 2);`,
     })}
   }
 `;
