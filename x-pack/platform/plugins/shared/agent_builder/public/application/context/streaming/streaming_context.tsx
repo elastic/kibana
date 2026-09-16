@@ -16,13 +16,12 @@
  *   - `activeStreams`: `Map<conversationId, { type }>`. Each in-flight stream owns one
  *     entry. Set synchronously when each mutation kicks off; deleted in the mutation's
  *     `finally`. Multiple entries can coexist — concurrent streams.
- *   - `byConversationId`: per-conversation pending message, error, and errorSteps.
- *     Persists across stream end so a user can hit Retry after a failure.
+ *   - `byConversationId`: per-conversation pending message, kept until its saved copy is
+ *     fetched or the stream is stopped.
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import produce from 'immer-v9';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ConversationStreamService } from '../../../services/events';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
@@ -38,13 +37,11 @@ export interface StreamingContextValue {
   mutateResumeRound: (vars: ResumeRoundVars) => void;
   cancelStream: (conversationId: string) => void;
   cancelAllStreams: () => void;
-  removeError: (conversationId: string) => void;
-  removeAllErrors: () => void;
 }
 
 const StreamingContext = createContext<StreamingContextValue | null>(null);
 
-const emptyRecord: StreamRecord = { errorSteps: [] };
+const emptyRecord: StreamRecord = {};
 
 export const StreamingProvider = ({
   conversationStreamService,
@@ -72,8 +69,7 @@ export const StreamingProvider = ({
   const setPendingMessage = useCallback((conversationId: string, message: string) => {
     setByConversationId(
       produce((draft) => {
-        if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-        draft[conversationId].pendingMessage = message;
+        draft[conversationId] = { ...draft[conversationId], pendingMessage: message };
       })
     );
   }, []);
@@ -88,54 +84,15 @@ export const StreamingProvider = ({
     );
   }, []);
 
-  const setError = useCallback(
-    (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => {
-      setByConversationId(
-        produce((draft) => {
-          if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-          draft[conversationId].error = error;
-          draft[conversationId].errorSteps = errorSteps;
-        })
-      );
-    },
-    []
-  );
-
-  const removeError = useCallback((conversationId: string) => {
-    setByConversationId(
-      produce((draft) => {
-        const record = draft[conversationId];
-        if (record) {
-          delete record.error;
-          record.errorSteps = [];
-        }
-      })
-    );
-  }, []);
-
-  const removeAllErrors = useCallback(() => {
-    setByConversationId(
-      produce((draft) => {
-        for (const id of Object.keys(draft)) {
-          delete draft[id].error;
-          draft[id].errorSteps = [];
-        }
-      })
-    );
-  }, []);
-
   const sendMutation = useSendMessageMutation({
     conversationStreamService,
     setPendingMessage,
     clearPendingMessage,
-    setError,
-    clearError: removeError,
     clearActiveStream,
   });
 
   const resumeMutation = useResumeRoundMutation({
     conversationStreamService,
-    setError,
     clearActiveStream,
   });
 
@@ -198,8 +155,6 @@ export const StreamingProvider = ({
       mutateResumeRound,
       cancelStream,
       cancelAllStreams,
-      removeError,
-      removeAllErrors,
     }),
     [
       conversationStreamService,
@@ -209,8 +164,6 @@ export const StreamingProvider = ({
       mutateResumeRound,
       cancelStream,
       cancelAllStreams,
-      removeError,
-      removeAllErrors,
     ]
   );
 

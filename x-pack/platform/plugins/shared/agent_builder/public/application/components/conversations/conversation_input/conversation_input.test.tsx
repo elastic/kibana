@@ -129,7 +129,6 @@ describe('ConversationInput', () => {
 
     mockedUseConversationStream.mockReturnValue({
       pendingMessage: undefined,
-      error: undefined,
       isResuming: false,
       isResponseLoading: false,
     } as never);
