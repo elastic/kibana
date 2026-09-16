@@ -67,6 +67,7 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   sourceType: 'adhoc' as const,
   topRelatedEntities: [],
   relatedEntityCounts: {},
+  origin: 'observations' as const,
   ...overrides,
 });
 
@@ -140,6 +141,28 @@ describe('ThreatHuntingLeadsFlyout', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.queryByTestId('leadsCountBadge')).not.toBeInTheDocument();
+  });
+
+  it('does not render the exploratory badge for an observations-origin lead', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [createApiLead({ origin: 'observations' })], total: 1 },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.queryByTestId('leadExploratoryBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders the exploratory badge for an exploratory-origin lead', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [createApiLead({ origin: 'exploratory' })], total: 1 },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('leadExploratoryBadge')).toBeInTheDocument();
   });
 
   it('shows a no-matching-leads message when the search query matches nothing', () => {

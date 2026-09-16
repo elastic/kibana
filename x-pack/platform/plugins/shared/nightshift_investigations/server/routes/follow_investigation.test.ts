@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { InvestigationStatusEvent } from '../../common';
-import { InvestigationNotFoundError } from '../client/investigations_client';
+import { InvestigationNotFoundError } from '../client/errors';
 import { followInvestigationRoute } from './follow_investigation';
 
 const { handler } = followInvestigationRoute['GET /internal/nightshift/investigations/{id}/follow'];

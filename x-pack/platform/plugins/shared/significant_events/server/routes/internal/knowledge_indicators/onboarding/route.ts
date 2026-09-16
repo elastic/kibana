@@ -14,7 +14,8 @@ import {
   type KIsOnboardingStatusResult,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -46,7 +47,7 @@ const onboardingExecuteRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -99,13 +100,15 @@ const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
       body,
     } = params;
+
+    await streamsClient.ensureStream(streamName);
 
     if (body.action === 'schedule') {
       await assertNotPaused({ maintenanceService, request });
@@ -148,7 +151,7 @@ const onboardingStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -166,12 +169,14 @@ const onboardingStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { streamName },
     } = params;
+
+    await streamsClient.assertReadAccess(streamName);
 
     return streamsKIsOnboardingClient.getStatus({ streamName });
   },
@@ -183,11 +188,11 @@ const onboardingBulkStatusRoute = createServerRoute({
     access: 'internal',
     summary: 'Check the onboarding status of multiple streams',
     description:
-      'Check the status of onboarding progress for a list of streams in a single request.',
+      'Check the status of onboarding progress for a list of streams in a single request. Streams the caller cannot read are omitted from the response.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -210,14 +215,19 @@ const onboardingBulkStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, streamsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
       body: { streamNames },
     } = params;
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames });
+    const readableStreamNames = await streamsClient.getReadableStreamNames(streamNames);
+    if (readableStreamNames.length === 0) {
+      return {};
+    }
+
+    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames });
   },
 });
 

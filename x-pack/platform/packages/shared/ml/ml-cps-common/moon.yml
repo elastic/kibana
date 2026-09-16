@@ -17,6 +17,7 @@ project:
   owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ml/ml-cps-common
 dependsOn:
+  - '@kbn/cps-common'
   - '@kbn/ml-common-types'
 tags:
   - shared-common
