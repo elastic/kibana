@@ -20,6 +20,7 @@ import {
   COMMON_HEADERS,
   EXTRA_CLUSTER_NAMES,
   MISSING_CLUSTER_NAME,
+  REMOTE_CLUSTERS_MONITOR_ONLY_ROLE,
 } from '../fixtures/constants';
 
 const OWNED_CLUSTER_NAMES = [CLUSTER_NAME, ...EXTRA_CLUSTER_NAMES];
@@ -40,8 +41,8 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
     nodeSeed = await getOwnTransportAddress(esClient);
   });
 
-  // Remote clusters are cluster-global, so clean up on both sides of every test: a leftover from
-  // an interrupted run would break the empty-list expectation.
+  // Clean up on both sides of every test; names are unique per run, so this never touches
+  // remotes owned by a concurrent run.
   apiTest.beforeEach(async ({ esClient }) => {
     await removeOwnedClusters(esClient);
   });
@@ -80,6 +81,29 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ acknowledged: true });
   });
+
+  // Proves `manage` is required, not just sufficient.
+  apiTest(
+    'rejects a write from a role without the manage cluster privilege',
+    async ({ apiClient, requestAuth }) => {
+      const monitorOnly = await requestAuth.getApiKeyForCustomRole(
+        REMOTE_CLUSTERS_MONITOR_ONLY_ROLE
+      );
+
+      const response = await apiClient.post(API_BASE_PATH, {
+        headers: { ...COMMON_HEADERS, ...monitorOnly.apiKeyHeader },
+        responseType: 'json',
+        body: {
+          name: CLUSTER_NAME,
+          seeds: [nodeSeed],
+          skipUnavailable: true,
+          mode: 'sniff',
+        },
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 
   apiTest('rejects a cluster whose name already exists', async ({ apiClient, esClient }) => {
     await seedSniffCluster(esClient, CLUSTER_NAME, { seeds: [nodeSeed] });
@@ -141,11 +165,13 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
     await expect
       .poll(
         async () => {
-          const { body } = await apiClient.get(API_BASE_PATH, {
+          const response = await apiClient.get(API_BASE_PATH, {
             headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
             responseType: 'json',
           });
-          return body.filter((cluster: { name: string }) => cluster.name === CLUSTER_NAME);
+          // Fail fast on a non-200.
+          expect(response).toHaveStatusCode(200);
+          return response.body.filter((cluster: { name: string }) => cluster.name === CLUSTER_NAME);
         },
         { timeout: 120_000 }
       )
