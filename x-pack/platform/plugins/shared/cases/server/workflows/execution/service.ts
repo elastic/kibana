@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isPlainObject } from 'lodash';
+import { isPlainObject, omit } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -28,10 +28,15 @@ import type { CasesWorkflowOperations } from '../../client/workflows/operations'
 import type { CasesRequestHandlerContext } from '../../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { buildActivityOrigin } from './build_activity_origin';
-import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
+import type {
+  ResolvedWorkflowAttachmentOrigin,
+  TriggerSelectionType,
+  WorkflowSelectionTarget,
+} from './validate_origin';
 import {
-  parseSelectedAlertPairs,
-  parseSelectedDocumentPairs,
+  getTriggerSelectionType,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
   validateOrigin,
 } from './validate_origin';
 
@@ -97,6 +102,25 @@ interface CasesWorkflowRunServiceDeps {
   audit: SecurityPluginSetup['audit'];
   attachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
+
+const buildTrustedTriggerInputs = (
+  inputs: Record<string, unknown>,
+  selectionType: TriggerSelectionType,
+  selectedTargets: WorkflowSelectionTarget[]
+): Record<string, unknown> => {
+  const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : {};
+  const selectionKey = selectionType === 'alert' ? 'alertIds' : 'documentIds';
+  const selection = selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }));
+
+  return {
+    ...inputs,
+    event: {
+      ...omit(event, ['alerts', 'documents', 'alertIds', 'documentIds', 'querySelection']),
+      triggerType: selectionType,
+      [selectionKey]: selection,
+    },
+  };
+};
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
@@ -165,7 +189,7 @@ export class CasesWorkflowRunService {
       throw Boom.forbidden('Workflows require an active Enterprise license.');
     }
 
-    const { caseIds } = body;
+    const { caseIds, origin } = body;
 
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
@@ -179,10 +203,18 @@ export class CasesWorkflowRunService {
     // was not looking at any specific sub-entity, alert/document inputs are not permitted,
     // and no case fetch is needed. When present the run is scoped to a single case with a
     // specific sub-entity context; origin-entity membership and attachment are validated.
-    // Parse and validate input shapes eagerly — any malformed entry throws 400 here,
-    // before any case fetch, so the validated sets equal what processing later uses.
-    const selectedAlerts = parseSelectedAlertPairs(body.inputs);
-    const selectedDocuments = parseSelectedDocumentPairs(body.inputs);
+    // Cases only accepts concrete trigger selections so membership can be validated before any
+    // document is fetched or workflow execution is scheduled. Parse and validate input shapes
+    // eagerly — any malformed entry throws 400 here, before any case fetch.
+    rejectQuerySelection(body.inputs);
+    const triggerSelectionType = getTriggerSelectionType(body.inputs);
+    const selectedTargets =
+      triggerSelectionType !== undefined
+        ? parseSelectedTriggerPairs(body.inputs, triggerSelectionType)
+        : [];
+    const selectedPairs = selectedTargets.map(({ id, index }) => ({ _id: id, _index: index }));
+    const selectedAlerts = triggerSelectionType === 'alert' ? selectedPairs : [];
+    const selectedDocuments = triggerSelectionType === 'document' ? selectedPairs : [];
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     let resolvedAttachmentOrigin: ResolvedWorkflowAttachmentOrigin | undefined;
     // Observable inputs (observableIds / observableTypeKeys) are server-owned and stripped before
@@ -198,31 +230,28 @@ export class CasesWorkflowRunService {
     );
     if (
       hasObservableInputs &&
-      body.origin?.type !== OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
-      body.origin?.type !== OBSERVABLES_WORKFLOW_ORIGIN_TYPE
+      origin?.type !== OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
+      origin?.type !== OBSERVABLES_WORKFLOW_ORIGIN_TYPE
     ) {
       throw Boom.badRequest('Observable inputs can only be used with observable origins.');
     }
 
-    if (body.origin === undefined) {
-      if (selectedAlerts.length > 0) {
-        throw Boom.badRequest('Alert inputs can only be used with a single case.');
-      }
-      if (selectedDocuments.length > 0) {
-        throw Boom.badRequest('Document inputs can only be used with a single case.');
+    if (origin === undefined) {
+      if (triggerSelectionType !== undefined) {
+        throw Boom.badRequest('Trigger selections can only be used with a single case.');
       }
     } else {
       if (caseIds.length > 1) {
         throw Boom.badRequest(
-          `Workflow origin type "${body.origin.type}" can only be used with a single case.`
+          `Workflow origin type "${origin.type}" can only be used with a single case.`
         );
       }
       // Only attachment origins consume `theCase.comments`; fetching them for every other
       // origin type would load all case attachments from ES (up to MAX_DOCS_PER_PAGE) and
       // io-ts-decode the full case, only to discard the result immediately.
       const needsComments =
-        body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
-        body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
+        origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
+        origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
       theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments });
       // Fetch alert and event attachments in parallel, each only when their inputs are present.
       // Separate fetches (instead of a combined [alert, event] call) prevent cross-type false matches
@@ -242,7 +271,7 @@ export class CasesWorkflowRunService {
           : Promise.resolve([]),
       ]);
       resolvedAttachmentOrigin = validateOrigin({
-        origin: body.origin,
+        origin,
         theCase,
         inputs: body.inputs,
         attachmentTypeRegistry: this.attachmentTypeRegistry,
@@ -267,10 +296,16 @@ export class CasesWorkflowRunService {
 
     // Strip client-supplied values for server-owned event keys so callers cannot
     // pre-seed them. The server re-injects the authoritative values via eventOverrides
-    // after alert preprocessing runs (which replaces the whole `event` object).
+    // after trigger-input preprocessing runs (which can replace the whole `event` object).
     // Keep this set in sync with the keys injected in eventOverrides below.
+    // Pre-expanded selections are reduced to their validated identities so preprocessing refetches
+    // authoritative document sources instead of trusting client-supplied event content.
     const SERVER_OWNED_EVENT_KEYS = new Set(['caseIds', 'observableIds', 'observableTypeKeys']);
-    const { event: rawEvent, ...otherInputs } = body.inputs;
+    const trustedInputs =
+      triggerSelectionType !== undefined
+        ? buildTrustedTriggerInputs(body.inputs, triggerSelectionType, selectedTargets)
+        : body.inputs;
+    const { event: rawEvent, ...otherInputs } = trustedInputs;
     const strippedEvent = isPlainObject(rawEvent)
       ? Object.fromEntries(
           Object.entries(rawEvent as Record<string, unknown>).filter(
@@ -285,13 +320,13 @@ export class CasesWorkflowRunService {
     // origins. Values and descriptions are deliberately excluded — see resolveObservableEventFields.
     // Enrichment is always derived from the case object (not from client inputs) so a
     // case-authorized caller cannot inject arbitrary observable data into the workflow.
-    const resolvedObservableEventFields = resolveObservableEventFields(body.origin, theCase);
+    const resolvedObservableEventFields = resolveObservableEventFields(origin, theCase);
 
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,
       caseIds,
-      origin: body.origin,
+      origin,
     });
 
     // Use runWorkflow instead of executeWorkflow so the call returns as soon as the execution
@@ -335,7 +370,7 @@ export class CasesWorkflowRunService {
           executionId: workflowExecutionId,
         },
         origin: buildActivityOrigin({
-          origin: body.origin,
+          origin,
           theCase,
           resolvedAttachmentOrigin,
         }),

@@ -13,8 +13,10 @@ import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
 import {
+  getTriggerSelectionType,
   parseSelectedAlertPairs,
-  parseSelectedDocumentPairs,
+  parseSelectedTriggerPairs,
+  rejectQuerySelection,
   validateOrigin as validateOriginWithAttachments,
 } from './validate_origin';
 
@@ -104,8 +106,16 @@ const validateOrigin = (
       params.theCase.comments as Parameters<typeof getEventInfoFromComments>[0]
     )
   );
-  const selectedAlerts = parseSelectedAlertPairs(params.inputs);
-  const selectedDocuments = parseSelectedDocumentPairs(params.inputs);
+  const selectionType = getTriggerSelectionType(params.inputs);
+  const selectedPairs =
+    selectionType !== undefined
+      ? parseSelectedTriggerPairs(params.inputs, selectionType).map(({ id, index }) => ({
+          _id: id,
+          _index: index,
+        }))
+      : [];
+  const selectedAlerts = selectionType === 'alert' ? selectedPairs : [];
+  const selectedDocuments = selectionType === 'document' ? selectedPairs : [];
   validateOriginWithAttachments({
     ...params,
     alerts: { selected: selectedAlerts, attached: attachedAlerts },
@@ -512,49 +522,15 @@ describe('parseSelectedAlertPairs', () => {
     expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
   });
 
-  it('rejects query-based alert selections', () => {
-    expect(() =>
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'alert',
-          querySelection: { index: '.alerts-*', query: { match_all: {} } },
-        },
-      })
-    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects a query selection even when attached alert IDs are also provided', () => {
-    expect(() =>
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'alert',
-          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
-          querySelection: { index: '.alerts-*', query: { match_all: {} } },
-        },
-      })
-    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects id-based document trigger selections', () => {
-    expect(() =>
+  it('ignores document selections', () => {
+    expect(
       parseSelectedAlertPairs({
         event: {
           triggerType: 'document',
           documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
         },
       })
-    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects query-based document trigger selections', () => {
-    expect(() =>
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'document',
-          querySelection: { index: 'logs-*', query: { match_all: {} } },
-        },
-      })
-    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
+    ).toEqual([]);
   });
 
   it('allows a document trigger with pre-expanded documents (no server-side expansion)', () => {
@@ -623,6 +599,130 @@ describe('parseSelectedAlertPairs', () => {
       { _id: 'alert-1', _index: '.alerts-a' },
       { _id: 'alert-2', _index: '.alerts-b' },
     ]);
+  });
+});
+
+describe('trigger selection parsing', () => {
+  it('detects alert and document trigger selections', () => {
+    expect(getTriggerSelectionType({ event: { triggerType: 'alert' } })).toBe('alert');
+    expect(getTriggerSelectionType({ event: { triggerType: 'document' } })).toBe('document');
+    expect(
+      getTriggerSelectionType({
+        event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] },
+      })
+    ).toBe('alert');
+    expect(
+      getTriggerSelectionType({
+        event: { documents: [{ id: 'event-1', index: 'logs-default', data: {} }] },
+      })
+    ).toBe('document');
+    expect(getTriggerSelectionType({ event: { triggerType: 'manual' } })).toBeUndefined();
+  });
+
+  it('rejects conflicting trigger selection types', () => {
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+          documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+        },
+      })
+    ).toThrow('Case workflow inputs cannot mix alert and document selections.');
+    expect(() =>
+      getTriggerSelectionType({
+        event: {
+          triggerType: 'manual',
+          documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+        },
+      })
+    ).toThrow('Case workflow document selection requires triggerType "document".');
+  });
+
+  it('rejects query-based selections', () => {
+    expect(() =>
+      rejectQuerySelection({
+        event: { querySelection: { index: '.alerts-*', query: { match_all: {} } } },
+      })
+    ).toThrow('Query-based trigger selections are not supported for case workflows.');
+  });
+
+  it('parses explicit alert and document IDs', () => {
+    expect(
+      parseSelectedTriggerPairs(
+        { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+  });
+
+  it('parses pre-expanded alert and document selections', () => {
+    expect(
+      parseSelectedTriggerPairs(
+        { event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+    expect(
+      parseSelectedTriggerPairs(
+        {
+          event: {
+            documents: [{ _id: 'legacy-event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'legacy-event-1', index: 'logs-default' }]);
+  });
+
+  it('rejects an empty trigger selection', () => {
+    expect(() => parseSelectedTriggerPairs({ event: { documentIds: [] } }, 'document')).toThrow(
+      'Case workflow document selection cannot be empty.'
+    );
+  });
+
+  it('rejects a document selection that is not an array', () => {
+    expect(() =>
+      parseSelectedTriggerPairs({ event: { documents: 'event-1' } }, 'document')
+    ).toThrow('Case workflow document selection must be an array.');
+  });
+
+  it('rejects document entries without string id and index', () => {
+    for (const documents of [
+      [{ _id: 4242, _index: '.idx' }],
+      [{ _id: 'event-1', _index: 99 }],
+      ['event-1'],
+    ]) {
+      expect(() => parseSelectedTriggerPairs({ event: { documents } }, 'document')).toThrow(
+        'Every selected document must contain string id and index properties.'
+      );
+    }
+  });
+
+  it('rejects a document selection over the cap', () => {
+    const oversized = Array.from({ length: 1001 }, (_, i) => ({ _id: `e${i}`, _index: '.idx' }));
+    expect(() =>
+      parseSelectedTriggerPairs({ event: { documentIds: oversized } }, 'document')
+    ).toThrow('Case workflow document selection cannot contain more than 1000 entries.');
   });
 });
 
@@ -788,61 +888,6 @@ describe('event attachment origin', () => {
         theCase: caseWithEvent,
       })
     ).not.toThrow();
-  });
-});
-
-// ── parseSelectedDocumentPairs input validation ───────────────────────────────
-
-describe('parseSelectedDocumentPairs', () => {
-  it('returns empty array when documents is absent or null', () => {
-    expect(parseSelectedDocumentPairs({})).toEqual([]);
-    expect(parseSelectedDocumentPairs({ event: {} })).toEqual([]);
-    expect(parseSelectedDocumentPairs({ event: { documents: null } })).toEqual([]);
-    expect(parseSelectedDocumentPairs({ event: { documents: undefined } })).toEqual([]);
-  });
-
-  it('throws when documents is not an array', () => {
-    expect(() => parseSelectedDocumentPairs({ event: { documents: 'event-1' } })).toThrow(
-      'inputs.event.documents must be an array.'
-    );
-  });
-
-  it('throws when an entry is missing _id or _index', () => {
-    expect(() =>
-      parseSelectedDocumentPairs({ event: { documents: [{ _id: 4242, _index: '.idx' }] } })
-    ).toThrow('string "_id"');
-    expect(() =>
-      parseSelectedDocumentPairs({ event: { documents: [{ _id: 'event-1', _index: 99 }] } })
-    ).toThrow('string "_id"');
-    expect(() => parseSelectedDocumentPairs({ event: { documents: ['event-1'] } })).toThrow(
-      'string "_id"'
-    );
-  });
-
-  it('throws when the array exceeds the cap', () => {
-    const oversized = Array.from({ length: 1001 }, (_, i) => ({
-      _id: `e${i}`,
-      _index: `.idx`,
-    }));
-    expect(() => parseSelectedDocumentPairs({ event: { documents: oversized } })).toThrow(
-      /cannot contain more than/
-    );
-  });
-
-  it('returns the correct pairs for a valid array', () => {
-    expect(
-      parseSelectedDocumentPairs({
-        event: {
-          documents: [
-            { _id: 'event-1', _index: '.ds-logs-a' },
-            { _id: 'event-2', _index: '.ds-logs-b' },
-          ],
-        },
-      })
-    ).toEqual([
-      { _id: 'event-1', _index: '.ds-logs-a' },
-      { _id: 'event-2', _index: '.ds-logs-b' },
-    ]);
   });
 });
 

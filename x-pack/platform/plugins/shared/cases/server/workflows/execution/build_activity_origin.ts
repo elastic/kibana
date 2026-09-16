@@ -25,7 +25,7 @@ import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
  * `theCase` is optional because multi-case runs have no sub-entity origin to enrich.
  *
  * We derive enrichment from the case object (not from `inputs.event.*`) because
- * `preprocessAlertInputs` rewrites `event` into a different shape before the run, so
+ * `preprocessTriggerInputs` rewrites `event` into a different shape before the run, so
  * reading from `inputs` post-processing would be fragile.
  */
 export const buildActivityOrigin = ({
