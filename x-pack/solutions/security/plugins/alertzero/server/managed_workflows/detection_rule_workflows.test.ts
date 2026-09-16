@@ -465,8 +465,21 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
         ]);
+        // Dismissals come from either gate: the proposal gate (query, manual) or the
+        // interim in-run gate (exception, risk score); missing either leaves alerts
+        // unreviewed and the next sweep re-proposes the same rule.
         expect(dismissed.if).toContain(
           'steps.record_proposal_action_decision.output.dismissed == true'
+        );
+        expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
+        const closeDismissed = reviewSteps.find(
+          ({ name }) => name === 'close_investigation_dismissed'
+        )!;
+        expect(String(closeDismissed.if)).toContain(
+          'steps.record_proposal_action_decision.output.dismissed == true'
+        );
+        expect(String(closeDismissed.if)).toContain(
+          'steps.review_tuning.output.response.approved == false'
         );
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',

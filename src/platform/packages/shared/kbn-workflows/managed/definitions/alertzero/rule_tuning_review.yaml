@@ -586,6 +586,7 @@ steps:
         Apply the recommended change in the Detection Rules UI.
         {% endif %}
 
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
@@ -763,9 +764,13 @@ steps:
           or steps.record_apply_results.output.exception_applied == true
           or steps.record_apply_results.output.risk_score_applied == true }}
 
+  # Dismissals arrive from either gate: the proposal gate for query and manual,
+  # the interim in-run gate for exception and risk score.
   - name: mark_alerts_dismissed
     type: security.setAlertTags
-    if: "${{ steps.record_proposal_action_decision.output.dismissed == true }}"
+    if: >-
+      ${{ steps.record_proposal_action_decision.output.dismissed == true
+        or steps.review_tuning.output.response.approved == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
@@ -816,11 +821,14 @@ steps:
     on-failure:
       continue: true
 
+  # Liquid evaluates right-to-left, so the conversation check gates both
+  # dismissal sources without parentheses.
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_proposal_action_decision.output.dismissed == true }}
+        and steps.record_proposal_action_decision.output.dismissed == true
+        or steps.review_tuning.output.response.approved == false }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
