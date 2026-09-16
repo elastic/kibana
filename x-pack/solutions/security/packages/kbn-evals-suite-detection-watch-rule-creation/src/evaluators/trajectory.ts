@@ -40,7 +40,6 @@ const fetchToolCalls = async (
   where: string
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
-    // Only calls the LLM issued carry a tool.call.id; tools' internal helper spans do not.
     query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
   })) as unknown as EsqlResponse;
 
