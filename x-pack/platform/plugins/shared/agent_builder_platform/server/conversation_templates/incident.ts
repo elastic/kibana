@@ -54,7 +54,7 @@ export const incidentTemplate: ConversationTemplate = {
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
     },
-    investigation_ids: {
+    linked_investigations: {
       input_type: 'TEXT_ARRAY',
       description: 'A list of investigation ids that should be linked to the incident',
     },

@@ -25,7 +25,9 @@
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server"
   ],
   "exclude": ["target/**/*"]
 }

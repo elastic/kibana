@@ -23,6 +23,8 @@ import { createProposalUserResolver } from './proposals/services/resolve_proposa
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import { IncidentsService } from './incidents/services/incidents_service';
+import { registerIncidentRoutes } from './incidents/routes/register_routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -44,6 +46,7 @@ export class AgenticInvestigationsPlugin
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private incidentsService?: IncidentsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -73,12 +76,20 @@ export class AgenticInvestigationsPlugin
       resolveUser: (request) => this.requireUserResolver()(request),
     });
 
+    const router = coreSetup.http.createRouter();
+
     registerRoutes({
-      router: coreSetup.http.createRouter(),
+      router,
       logger: this.logger,
       getProposalsService: () => this.requireProposalsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
+    registerIncidentRoutes({
+      router,
+      logger: this.logger,
+      getIncidentsService: () => this.requireIncidentsService(),
     });
 
     return {};
@@ -108,6 +119,15 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
+    this.incidentsService = new IncidentsService({
+      logger: this.logger,
+      // Per-request and space-scoped by agent_builder. There is no internal-user path:
+      // a conversation's owner and ACL are derived from the caller's own identity.
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+      conversationTemplates: plugins.agentBuilder.conversationTemplates,
+    });
+
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
@@ -121,6 +141,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getIncidentsService: () => this.requireIncidentsService(),
     };
   }
 
@@ -140,6 +161,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  private requireIncidentsService(): IncidentsService {
+    if (!this.incidentsService) {
+      throw new Error(
+        'Incidents service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.incidentsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

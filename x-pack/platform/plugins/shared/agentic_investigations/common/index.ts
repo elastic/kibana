@@ -70,3 +70,23 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export {
+  INCIDENT_BY_ID_URL,
+  INCIDENT_LINKED_INVESTIGATIONS_FIELD,
+  INCIDENT_TEMPLATE_ID,
+  INCIDENTS_INTERNAL_URL,
+  INCIDENTS_UI_CAPABILITY_MANAGE,
+  INVESTIGATION_TEMPLATE_ID,
+  MAX_INCIDENT_LINKED_INVESTIGATIONS,
+  createIncidentRequestSchema,
+  incidentVisibilitySchema,
+  updateIncidentRequestSchema,
+} from './incidents';
+
+export type {
+  CreateIncidentRequest,
+  IncidentConversation,
+  IncidentVisibility,
+  UpdateIncidentRequest,
+} from './incidents';

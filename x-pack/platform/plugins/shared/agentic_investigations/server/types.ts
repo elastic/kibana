@@ -12,7 +12,9 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
+import type { IncidentsService } from './incidents/services/incidents_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
@@ -23,6 +25,12 @@ export interface AgenticInvestigationsSetupDependencies {
 export interface AgenticInvestigationsStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  /**
+   * agentBuilder is a required plugin (added to kibana.jsonc requiredPlugins).
+   * IncidentsService uses it to obtain a per-request conversation client;
+   * nothing is registered against agent_builder at setup time.
+   */
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 /**
@@ -32,6 +40,7 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  getIncidentsService: () => IncidentsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

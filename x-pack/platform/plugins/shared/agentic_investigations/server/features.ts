@@ -13,10 +13,12 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
+import { INCIDENTS_UI_CAPABILITY_MANAGE } from '../common/incidents/constants';
 import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
+import { INCIDENTS_API_PRIVILEGE_MANAGE } from './incidents/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -48,5 +50,36 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [PROPOSALS_UI_CAPABILITY_SHOW],
       },
     },
+    // Note: adding the first sub-feature means minimal_all and minimal_read stop
+    // being equivalent to all and read — until now (README.md:42) stated they were
+    // because no sub-feature privileges existed. Update README accordingly.
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.agenticInvestigations.incidentsSubFeatureName', {
+          defaultMessage: 'Incidents',
+        }),
+        privilegeGroups: [
+          {
+            // `independent` with a single privilege today. It becomes `mutually_exclusive`
+            // when the List endpoint lands (follow-up gated on elastic/kibana#290659) and
+            // adds an `incidents_read` privilege alongside this `incidents_all`.
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'incidents_all',
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.incidentsAllPrivilegeName',
+                  { defaultMessage: 'Create and update incidents' }
+                ),
+                includeIn: 'all',
+                api: [INCIDENTS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [INCIDENTS_UI_CAPABILITY_MANAGE],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

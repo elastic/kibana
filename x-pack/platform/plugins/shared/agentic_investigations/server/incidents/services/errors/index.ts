@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type {
-  ConversationCreatePublicRequest,
-  ConversationPublicClient,
-  ConversationUpdatePublicRequest,
-} from './types';
+export { InvalidLinkedInvestigationError } from './invalid_linked_investigation_error';

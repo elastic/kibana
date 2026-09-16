@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage, their API, and their workflow steps, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds one entity, **proposals**. **Investigations** and **incidents** are next, which is why the plugin is an umbrella rather than one plugin per entity.
+Today it holds two entities: **proposals** and **incidents**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity.
 
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
@@ -39,9 +39,9 @@ One Kibana feature, `agenticInvestigations`, shown in the Roles and Spaces picke
 | `all`             | `read_proposals`, `manage_proposals` | `showProposals`, `decideProposals`   |
 | `read`            | `read_proposals`                     | `showProposals`                      |
 
-So `read` can see the queue but cannot decide it. Because there are no sub-feature privileges to withhold, `minimal_all` and `minimal_read` grant the same as `all` and `read`. The feature carries `minimumLicense: 'enterprise'`.
+So `read` can see the queue but cannot decide it. The feature carries `minimumLicense: 'enterprise'`.
 
-When a second entity lands and needs to be grantable on its own, its capabilities belong in a sub-feature pulled up through `includeIn` rather than in more inline privileges.
+**Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. Incidents landed as a sub-feature (see below), and sub-feature privileges are included in the base privilege levels through `includeIn: 'all'` / `includeIn: 'read'` — but `minimal_all` and `minimal_read` only grant sub-features marked `groupType: 'independent'` when the user holds them explicitly. Any new entity should follow the same pattern: put its capabilities in a sub-feature with `includeIn` rather than in additional inline privileges.
 
 ## Proposals
 
@@ -208,7 +208,7 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 ## Index naming
 
-`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
+`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field. **Incidents are the documented exception:** they live in Agent Builder's `.chat-conversations` index (a conversation with `template_id: 'incident'`), and this plugin owns no storage for them. The reasons are: (a) Agent Builder's conversation model already provides everything an incident needs — metadata, access control, space scoping, OCC writes; (b) adding an incidents index would duplicate that infrastructure for no benefit; (c) the visibility and collaborator model that agents and investigations already use must apply to incidents for free. Any future entity that fits the conversation model should do the same rather than adding an index by default.
 
 ## Manual verification
 
@@ -243,4 +243,46 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
-- **Only one entity so far.** The directory convention is designed for investigations and incidents, but neither exists yet, so the umbrella's seams are unproven.
+- **Two entities, umbrella seams exercised.** Proposals and incidents both exist. The directory convention holds across both.
+
+## Incidents
+
+### Model
+
+An **incident** is a durable, shareable record that an analyst creates when a collection of investigations warrants formal escalation. Unlike proposals — which live in a bespoke index — incidents live in Agent Builder's `.chat-conversations` index as conversations with `template_id: 'incident'`. That choice buys the full conversation stack: OCC-safe metadata writes, access control, space scoping, and Agent Builder's conversation template validation.
+
+`IncidentsService` is a thin orchestration façade over `agentBuilder.conversations.getScopedClient({ request })`. It owns no Elasticsearch client and no index.
+
+### Privileges
+
+Incidents use an `incidents` sub-feature on the `agenticInvestigations` Kibana feature:
+
+| Sub-feature privilege | API | UI |
+| --- | --- | --- |
+| `incidents_all` (included in `all`) | `read_incidents`, `manage_incidents` | `showIncidents`, `manageIncidents` |
+
+There is no `incidents_read` sub-privilege yet because there is no list or get route; it will be added when the list endpoint lands.
+
+### API
+
+All routes are internal and versioned (`/internal/investigations/incidents`, version `1`):
+
+- `POST /internal/investigations/incidents` — create an incident from a linked investigation; needs `manage_incidents`
+- `PATCH /internal/investigations/incidents/{id}` — update title or append linked investigations; needs `manage_incidents`
+
+The **list** endpoint is deferred (blocked on [elastic/kibana#290659](https://github.com/elastic/kibana/pull/290659) which adds KQL filtering and sorting to the conversation client).
+
+### Create behaviour
+
+`POST` takes `{ linked_investigation_id, visibility, collaborators? }`. The handler:
+
+1. Fetches the investigation through the caller's scoped client — this enforces that the caller can see the investigation they are escalating.
+2. Validates that the target is an `investigation` conversation (throws a `400` otherwise).
+3. Resolves the incident template's declared fields at runtime via `agentBuilder.conversationTemplates.get('incident')`.
+4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the incident opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_id`, which is declared on the investigation template but not on the incident template.
+5. Creates the conversation with `templateId: 'incident'` and no explicit `agentId` — the default agent is used, so collaborators can always see the incident regardless of their access to the investigation's agent.
+
+### MVP limitations
+
+- **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
+- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
