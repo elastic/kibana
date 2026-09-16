@@ -364,7 +364,7 @@ describe('createOpIdGenerator', () => {
     test('throws when two routes declare the same ID', () => {
       getOpId({ method: 'get', path: '/api/one', operationId: 'shared-id' });
       expect(() => getOpId({ method: 'get', path: '/api/two', operationId: 'shared-id' })).toThrow(
-        /Duplicate operationId "shared-id" for route "GET \/api\/two"/
+        /Duplicate operationId "shared-id" for route "GET \/api\/two".*Prefer kebab-case verb-resource names such as "create-dashboard"/
       );
     });
 

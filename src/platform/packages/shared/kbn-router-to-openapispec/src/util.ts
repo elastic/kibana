@@ -242,7 +242,7 @@ export const createOpIdGenerator = (): GetOpId => {
       idMap.set(operationId, explicitCount + 1);
       if (explicitCount > 0) {
         throw new Error(
-          `Duplicate operationId "${operationId}" for route "${method.toUpperCase()} ${path}". Operation IDs must be unique.`
+          `Duplicate operationId "${operationId}" for route "${method.toUpperCase()} ${path}". Operation IDs must be unique. Prefer kebab-case verb-resource names such as "create-dashboard".`
         );
       }
       return operationId;

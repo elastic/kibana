@@ -463,6 +463,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * command and method names, so set it explicitly on public APIs where the
    * derived name would read poorly.
    *
+   * Prefer kebab-case `verb-resource` names such as `create-dashboard`. That
+   * keeps CLI command names consistent across resources.
+   *
    * IDs must be unique across the generated document. A duplicate raises an
    * error during OAS generation.
    *
@@ -472,7 +475,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *  path: '/api/dashboards/{id}',
    *  access: 'public',
    *  summary: `Upsert a dashboard`,
-   *  options: { operationId: 'upsert-dashboard' },
+   *  operationId: 'upsert-dashboard',
    * })
    * ```
    */
