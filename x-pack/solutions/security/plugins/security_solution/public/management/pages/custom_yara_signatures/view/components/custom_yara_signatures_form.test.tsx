@@ -324,6 +324,14 @@ describe('Custom YARA signatures form', () => {
       expect(titles).toEqual(['Details', 'Definition']);
     });
 
+    it('should render a vertically resizable editor container', () => {
+      render();
+
+      expect(
+        screen.getByTestId('customYaraSignatures-form-signature-input-container')
+      ).toBeInTheDocument();
+    });
+
     it('should populate the editor from the existing entry value', () => {
       const signature = 'rule Example { condition: true }';
       render(

@@ -12,12 +12,14 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiResizeObserver,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import { CodeEditor, type monaco } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
@@ -62,6 +64,17 @@ const EMPTY_YARA_ENTRY: CustomYaraSignatureEntry = {
   value: '',
 };
 
+const SIGNATURE_EDITOR_DEFAULT_HEIGHT = 300;
+const SIGNATURE_EDITOR_MIN_HEIGHT = 120;
+
+const signatureEditorContainerCss = css({
+  resize: 'vertical',
+  overflow: 'hidden',
+  height: SIGNATURE_EDITOR_DEFAULT_HEIGHT,
+  minHeight: SIGNATURE_EDITOR_MIN_HEIGHT,
+  maxHeight: '70vh',
+});
+
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OperatingSystem>> = [
   {
     label: OS_TITLES[OperatingSystem.WINDOWS],
@@ -102,6 +115,10 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     const [isYaraSyntaxValid, setIsYaraSyntaxValid] = useState(false);
     const [signatureEditorInstance, setSignatureEditorInstance] =
       useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const [signatureEditorHeight, setSignatureEditorHeight] = useState(
+      SIGNATURE_EDITOR_DEFAULT_HEIGHT
+    );
+    const signatureEditorHeightRef = useRef(SIGNATURE_EDITOR_DEFAULT_HEIGHT);
 
     const selectedOsOptions = useMemo(
       () =>
@@ -167,6 +184,16 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     const handleSignatureEditorDidMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
         setSignatureEditorInstance(editor);
+      },
+      []
+    );
+
+    const handleSignatureEditorResize = useCallback(
+      ({ height }: { width: number; height: number }) => {
+        if (height > 0 && height !== signatureEditorHeightRef.current) {
+          signatureEditorHeightRef.current = height;
+          setSignatureEditorHeight(height);
+        }
       },
       []
     );
@@ -345,27 +372,45 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           isDisabled={disabled}
           data-test-subj={getTestId('signature-input-formRow')}
         >
-          <CodeEditor
-            languageId="plaintext"
-            value={yaraEntry.value}
-            onChange={handleOnSignatureChange}
-            editorDidMount={handleSignatureEditorDidMount}
-            width="100%"
-            height={200}
-            options={{
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              automaticLayout: true,
-              readOnly: disabled,
-            }}
-            aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
-            dataTestSubj={getTestId('signature-input')}
-            data-test-subj={getTestId('signature-input')}
-          />
+          <EuiResizeObserver onResize={handleSignatureEditorResize}>
+            {(resizeRef) => (
+              <div
+                ref={resizeRef}
+                css={signatureEditorContainerCss}
+                data-test-subj={getTestId('signature-input-container')}
+              >
+                <CodeEditor
+                  languageId="plaintext"
+                  value={yaraEntry.value}
+                  onChange={handleOnSignatureChange}
+                  editorDidMount={handleSignatureEditorDidMount}
+                  width="100%"
+                  height={signatureEditorHeight}
+                  options={{
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    readOnly: disabled,
+                  }}
+                  aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
+                  dataTestSubj={getTestId('signature-input')}
+                  data-test-subj={getTestId('signature-input')}
+                />
+              </div>
+            )}
+          </EuiResizeObserver>
         </EuiFormRow>
       ),
-      [disabled, getTestId, handleOnSignatureChange, handleSignatureEditorDidMount, yaraEntry.value]
+      [
+        disabled,
+        getTestId,
+        handleOnSignatureChange,
+        handleSignatureEditorDidMount,
+        handleSignatureEditorResize,
+        signatureEditorHeight,
+        yaraEntry.value,
+      ]
     );
 
     return (
