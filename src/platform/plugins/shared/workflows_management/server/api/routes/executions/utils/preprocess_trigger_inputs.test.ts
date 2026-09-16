@@ -820,5 +820,41 @@ describe('preprocessTriggerInputs', () => {
       expect(event.query).toBe('host.name: "test-host"');
       expect(mockEsClient.closePointInTime).toHaveBeenCalled();
     });
+
+    it('should throw when no documents are found by id', async () => {
+      mockEsClient.mget.mockResolvedValue({
+        docs: [{ found: false, _id: 'doc-1', _index: 'logs-default' }],
+      });
+
+      const inputs = {
+        event: {
+          triggerType: 'document',
+          documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+        },
+      };
+
+      await expect(
+        preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
+      ).rejects.toThrow('No documents found with the provided selection');
+    });
+
+    it('should throw when the query matches no documents', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        pit_id: 'test-pit-id',
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+      });
+
+      const inputs = {
+        event: {
+          triggerType: 'document',
+          querySelection: { query: { match_all: {} }, index: 'logs-*' },
+        },
+      };
+
+      await expect(
+        preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
+      ).rejects.toThrow('No documents found with the provided selection');
+      expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+    });
   });
 });
