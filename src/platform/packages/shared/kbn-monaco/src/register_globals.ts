@@ -32,8 +32,10 @@ declare module 'monaco-editor/editor/editor.api' {
               value?: {
                 // these methods are not documented in monaco but are available on the vscode upstream,
                 // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts#L149-L150
-                onDidHide?: (cb: () => void) => void;
-                onDidShow?: (cb: () => void) => void;
+                // these methods map to an event listener registrar that returns a disposable (see https://github.com/microsoft/vscode/blob/main/src/vs/base/common/event.ts#L46)
+                // so we type them to return a disposable
+                onDidHide?: (cb: () => void) => monaco.IDisposable;
+                onDidShow?: (cb: () => void) => monaco.IDisposable;
               };
             };
           })
