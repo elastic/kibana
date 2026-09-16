@@ -90,14 +90,20 @@ apiTest.describe(
               params: {
                 query: esql,
                 dropNullColumns: true,
-                filter: {
-                  range: {
-                    [timeField]: {
-                      gte: ESQL_CONVERSION_DATE_RANGE.fromDate,
-                      lte: ESQL_CONVERSION_DATE_RANGE.toDate,
-                    },
-                  },
-                },
+                // No range filter for cases modeling a data view without
+                // a time field.
+                ...(timeField
+                  ? {
+                      filter: {
+                        range: {
+                          [timeField]: {
+                            gte: ESQL_CONVERSION_DATE_RANGE.fromDate,
+                            lte: ESQL_CONVERSION_DATE_RANGE.toDate,
+                          },
+                        },
+                      },
+                    }
+                  : {}),
                 ...(esql.includes('?_tstart')
                   ? {
                       params: [

@@ -36,7 +36,8 @@ export type EsqlConversionDatasetId = 'ecommerce' | 'logs';
 export interface EsqlConversionDataset {
   readonly id: EsqlConversionDatasetId;
   readonly index: string;
-  readonly timeField: string;
+  /** Undefined models a data view without a time field (no WHERE clause is generated). */
+  readonly timeField?: string;
   /** Field name → stub type used by the index-pattern stub. */
   readonly fieldTypes: Readonly<Record<string, string>>;
 }
@@ -92,6 +93,11 @@ export interface EsqlConversionSuccess {
    * consumers and against esAggsIdMap keys by unit consumers.
    */
   readonly columnNames: readonly string[];
+  /**
+   * Optional per-output-column format expectations for the generated
+   * esAggsIdMap; asserted by unit consumers only (no ES-side semantics).
+   */
+  readonly expectedFormats?: Readonly<Record<string, unknown>>;
 }
 
 export interface EsqlConversionFailure {
@@ -218,6 +224,13 @@ const dateHistogram = (
 export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
   const ecommerce = ESQL_CONVERSION_DATASETS.ecommerce;
   const logs = ESQL_CONVERSION_DATASETS.logs;
+  // Same physical index, but modeled as a data view without a time field:
+  // generation must omit the WHERE clause. Scout consumers install by dataset
+  // id, so this adds no extra install.
+  const ecommerceWithoutTimeField: EsqlConversionDataset = {
+    ...ecommerce,
+    timeField: undefined,
+  };
 
   const ecommerceFrom = `FROM ${ecommerce.index}`;
   const ecommerceWhere = `WHERE ${ecommerce.timeField} >= ?_tstart AND ${ecommerce.timeField} <= ?_tend`;
@@ -325,6 +338,82 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
         columnNames: ['COUNT(*) WHERE KQL("taxful_total_price >= 20")'],
       },
     },
+    {
+      group: 'core',
+      dataset: ecommerce,
+      description: 'metric with KQL filter containing escaped quotes',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: count({ filter: { language: 'kuery', query: 'customer_gender:"MALE"' } }),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"") BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: [
+          'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")',
+          'BUCKET(order_date, 75, ?_tstart, ?_tend)',
+        ],
+      },
+    },
+    {
+      group: 'core',
+      dataset: ecommerceWithoutTimeField,
+      description: 'no WHERE clause when the data view has no time field',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+      },
+    },
+    {
+      group: 'core',
+      dataset: ecommerce,
+      description: 'preserves user-configured currency format in esAggsIdMap',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: metric('sum', 'taxful_total_price', {
+          params: { format: { id: 'currency', params: { decimals: 2, pattern: '$0,0.00' } } },
+        }),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['SUM(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedFormats: {
+          'SUM(taxful_total_price)': {
+            id: 'currency',
+            params: { decimals: 2, pattern: '$0,0.00' },
+          },
+        },
+      },
+    },
+    {
+      group: 'core',
+      dataset: ecommerce,
+      description: 'preserves user-configured bytes format in esAggsIdMap',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: metric('average', 'taxful_total_price', {
+          params: { format: { id: 'bytes', params: { decimals: 2 } } },
+        }),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['AVG(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        expectedFormats: {
+          'AVG(taxful_total_price)': { id: 'bytes', params: { decimals: 2 } },
+        },
+      },
+    },
     // --- failure cases (unit-only; Scout consumers skip these) ---
     {
       group: 'core',
@@ -365,7 +454,7 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
       dataset: ecommerce,
       description: 'date histogram (auto interval) with count',
       columns: {
-        col1: dateHistogram(ecommerce.timeField, { interval: 'auto' }),
+        col1: dateHistogram('order_date', { interval: 'auto' }),
         col2: count(),
       },
       columnOrder: ['col1', 'col2'],
@@ -380,7 +469,7 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
       dataset: ecommerce,
       description: 'date histogram (fixed interval) with average',
       columns: {
-        col1: dateHistogram(ecommerce.timeField, { interval: '1h' }),
+        col1: dateHistogram('order_date', { interval: '1h' }),
         col2: metric('average', 'taxful_total_price'),
       },
       columnOrder: ['col1', 'col2'],
@@ -393,9 +482,20 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
     {
       group: 'date_histogram',
       dataset: ecommerce,
+      description: 'date histogram with drop partial buckets is not convertible',
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto', dropPartials: true }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: { success: false, reason: 'drop_partials_not_supported' },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
       description: 'date histogram with include empty rows is not convertible',
       columns: {
-        col1: dateHistogram(ecommerce.timeField, { interval: '1h', includeEmptyRows: true }),
+        col1: dateHistogram('order_date', { interval: '1h', includeEmptyRows: true }),
         col2: count(),
       },
       columnOrder: ['col1', 'col2'],
@@ -455,7 +555,7 @@ export const buildEsqlConversionCases = (): EsqlConversionCase[] => {
       description: 'terms alongside a second bucket dimension is not convertible',
       columns: {
         col1: terms('host.keyword', {}),
-        col2: dateHistogram(logs.timeField, { interval: '1h' }),
+        col2: dateHistogram('timestamp', { interval: '1h' }),
         col3: count(),
       },
       columnOrder: ['col1', 'col2', 'col3'],

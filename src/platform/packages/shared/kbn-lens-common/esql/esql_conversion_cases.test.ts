@@ -53,6 +53,11 @@ const runCase = (conversionCase: EsqlConversionCase) => {
       expect(Object.keys(result.esAggsIdMap).sort()).toEqual(
         [...conversionCase.expected.columnNames].sort()
       );
+      for (const [columnName, format] of Object.entries(
+        conversionCase.expected.expectedFormats ?? {}
+      )) {
+        expect(result.esAggsIdMap[columnName][0].format).toEqual(format);
+      }
     }
   } else {
     expect(result).toMatchObject({ success: false, reason: conversionCase.expected.reason });
