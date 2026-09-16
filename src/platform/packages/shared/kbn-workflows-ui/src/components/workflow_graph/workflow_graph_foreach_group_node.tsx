@@ -12,8 +12,9 @@ import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
+import { resolveExecutionState, resolveNodeColors } from './workflow_graph_node';
+import { getStepFamily, getStepIconType } from '../step_icons';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -24,39 +25,20 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 }
 
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
-  const { label, stepExecution } = node.data;
+  const { label, stepType, stepExecution } = node.data;
   const { euiTheme } = useEuiTheme();
-  const { colors } = euiTheme;
   // Display-only, mirrors workflow_graph_node.tsx: `label` itself must stay
   // untouched since it's used to key execution status.
   const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
-  const execStatus = stepExecution?.status;
-  const isSuccess = execStatus === ExecutionStatus.COMPLETED;
-  const isFailed =
-    execStatus === ExecutionStatus.FAILED ||
-    execStatus === ExecutionStatus.TIMED_OUT ||
-    execStatus === ExecutionStatus.CANCELLED;
-
-  // Match the regular step card (workflow_graph_node.tsx): the same Borealis
-  // tokens for the tinted border + header pane, `primary` icon, and flat look.
-  const borderColor = isSuccess
-    ? colors.success
-    : isFailed
-    ? colors.danger
-    : colors.borderBasePlain;
-  const headerBg = isSuccess
-    ? colors.backgroundBaseSuccess
-    : isFailed
-    ? colors.backgroundBaseDanger
-    : colors.backgroundBaseAccentSecondary;
-  const iconColor = isSuccess
-    ? colors.success
-    : isFailed
-    ? colors.danger
-    : colors.textAccentSecondary;
+  // Reuse the same execution-state + colour pipeline as regular step cards so
+  // the container border and chip colours stay in sync (including CANCELLED
+  // being neutral, matching the step-card behaviour).
+  const family = getStepFamily(stepType, false);
+  const execState = resolveExecutionState(stepExecution?.status);
+  const { chip, cardBorderColor, stepLabelColor } = resolveNodeColors(euiTheme, family, execState);
 
   return (
     <>
@@ -67,41 +49,58 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
           height: '100%',
           // Semi-transparent white body (50%) so the canvas dot pattern shows
           // through softly; token-based so it adapts to dark mode.
-          background: transparentize(colors.backgroundBasePlain, 0.5),
-          border: `1px solid ${borderColor}`,
+          background: transparentize(euiTheme.colors.backgroundBasePlain, 0.5),
+          border: `1px solid ${cardBorderColor}`,
           borderRadius: euiTheme.border.radius.medium,
           position: 'relative',
           transition: 'border-color 120ms ease',
         }}
       >
-        {/* Full-width header with refresh icon + label. Sized to match
-            GROUP_PADDING_TOP in apply_graph_layout.ts so inner nodes sit
-            just below the header. */}
+        {/* Transparent header row: icon chip + label. The header has no
+            background so the canvas dot pattern remains visible behind it.
+            Sized to match WORKFLOW_COMPOUND_PADDING.top in
+            workflow_layout_pipeline.ts so inner nodes sit just below. */}
         <div
+          data-test-subj="workflowGraphForeachGroupHeader"
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: 16,
-            padding: '8px 16px',
-            background: headerBg,
-            borderTopLeftRadius: euiTheme.border.radius.medium,
-            borderTopRightRadius: euiTheme.border.radius.medium,
-            borderBottom: `1px solid ${borderColor}`,
-            fontFamily: euiTheme.font.family,
-            fontSize: 12,
-            fontWeight: 500,
-            color: colors.textHeading,
-            lineHeight: '24px',
-            transition: 'background 120ms ease',
+            gap: 12,
+            // Asymmetric: chip sits 12px from the left edge, matching step
+            // cards; right and vertical gutters are symmetric at 8px.
+            padding: '8px 16px 8px 12px',
           }}
         >
-          <EuiIcon type="refresh" size="m" color={iconColor} aria-hidden />
+          {/* Icon chip — 28×28, matching the step-card chip size. */}
+          <div
+            data-test-subj="workflowGraphForeachGroupChip"
+            css={{
+              flex: '0 0 auto',
+              width: 28,
+              height: 28,
+              background: chip.fill,
+              border: `1px solid ${chip.border}`,
+              borderRadius: euiTheme.border.radius.small,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 120ms ease, border-color 120ms ease',
+            }}
+          >
+            <EuiIcon type={getStepIconType(stepType)} size="m" color={chip.icon} aria-hidden />
+          </div>
           <span
             css={{
+              flex: '1 1 auto',
+              fontFamily: euiTheme.font.family,
+              fontSize: 12,
+              fontWeight: 500,
+              lineHeight: '24px',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               minWidth: 0,
+              color: stepLabelColor,
             }}
             title={displayLabel}
           >
