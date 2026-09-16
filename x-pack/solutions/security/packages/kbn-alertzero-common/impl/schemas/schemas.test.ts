@@ -56,7 +56,7 @@ describe('AlertZero schema smoke tests', () => {
     const worker = Worker.parse({
       id: 'system-security-hunt-continuous-threat-hunt',
       name: 'Continuous Threat Hunt',
-      watchIds: ['system-security-watch-dark'],
+      watchIds: ['system-security-watch-hunt'],
       enabled: false,
       lastRun: null,
       state: 'paused',

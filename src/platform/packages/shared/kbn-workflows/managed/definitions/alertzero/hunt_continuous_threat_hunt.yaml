@@ -9,7 +9,7 @@ description: >
 enabled: false
 tags:
   - watch
-  - watch-dark
+  - watch-hunt
 triggers:
   - type: scheduled
     with:

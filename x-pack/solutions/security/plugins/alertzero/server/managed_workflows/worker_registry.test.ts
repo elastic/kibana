@@ -44,7 +44,6 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     scheduleInterval: '4h',
     triggerTypes: ['scheduled', 'manual'],
   },
-  // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
