@@ -108,30 +108,22 @@ consts:
   # `attack_discoveries` omitted, `null` (validation failed), or `[]` (genuine zero).
   no_discoveries: []
 steps:
-  # Alert batching (https://github.com/elastic/security-team/issues/18967) replacing
-  # this call site, as #19276 anticipated. Previously a single
-  # `security.attack-discovery.run`, which analysed one truncated slice of the open
-  # alert population; the child retrieves the whole population for its lookback
-  # window and runs the same pipeline once per batch, in parallel.
+  # Batched generation (https://github.com/elastic/security-team/issues/18967),
+  # the call site #19276 reserved for it.
   #
-  # Synchronous (`workflow.execute`, not `executeAsync`) because the fan-out below
-  # needs the discoveries inline, and because child failure must propagate. The run
-  # holds its one per-space concurrency slot for the whole child.
+  # Synchronous (`workflow.execute`, not `executeAsync`): the fan-out below needs
+  # the discoveries inline, and child failure must propagate. Holds the one
+  # per-space concurrency slot for the whole child.
   #
-  # A batch that fails is a gap, not a run failure: the child runs `mode: settled`
-  # and reports failures in `batch_errors` / `batches_failed`. The run itself still
-  # fails if the child fails outright, which is what #19276 requires — no
-  # `on-failure` here, so that propagation is the default. Adding `continue: true`
-  # would fan out over a partial result.
+  # A failed batch is a gap, not a run failure — the child runs `mode: settled`.
+  # A failed CHILD still fails the run, which is why there is no `on-failure`
+  # here: `continue: true` would fan out over a partial result.
   - name: run_generation
     type: workflow.execute
-    # The child fans out over batches, so this bounds N pipelines, not one. No
-    # literal can cover the theoretical worst case: the child runs
-    # `concurrency: max 2` with a 30m `branch-timeout`, so its own ceiling of 100
-    # batches is ~50 waves, and 4h does not come close. That is deliberate — 4h
-    # is sized for the realistic ceiling (a handful of waves over a 24h lookback)
-    # while still bounding a wedged child, and a single stuck batch is attributed
-    # by the child's per-branch timeout rather than by this one.
+    # Bounds N pipelines, not one. No literal covers the worst case (100 batches
+    # at `concurrency: max 2` x 30m branch-timeout is ~50 waves); 4h is sized for
+    # a realistic 24h lookback while still bounding a wedged child. A single stuck
+    # batch is attributed by the child's per-branch timeout, not by this.
     #
     # Must stay a literal: the engine hands `timeout` to the duration parser
     # unrendered (elastic/kibana#290258).
@@ -165,11 +157,8 @@ steps:
     type: console
     if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
     with:
-      # Batch counts rather than a single `status`: the child has none, and with
-      # batching "no attacks" is genuinely ambiguous in a way it was not before.
-      # Every batch succeeding and finding nothing is a normal quiet run; batches
-      # having failed means the emptiness is unexplained. One status field could
-      # not express that difference.
+      # Batch counts, not a single `status`: the child emits none, and they
+      # separate a quiet run from one where batches failed.
       message: >-
         Attack Discovery generation produced no attacks
         (alerts analyzed: {{ steps.run_generation.output.alerts_analyzed }},
@@ -233,25 +222,15 @@ steps:
               workflow-id: system-security-attack-discovery-review
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
-                # stringifies. `alert_ids` holds DETECTION alert ids. There is no
-                # persisted Attack Discovery `_id` to pass yet. #19022 / #19214 will
-                # use it once the generation output carries document ids in-context.
+                # stringifies. `alert_ids` holds DETECTION alert ids; there is no
+                # persisted Attack Discovery `_id` to pass yet (#19022 / #19214).
                 #
-                # Bracket access, not `foreach.item.title`: since generation moved to
-                # the batched child these are the persisted alert `_source` documents,
-                # whose discovery fields are namespaced and written as FLAT dotted keys
-                # (`transform_to_alert_documents` uses computed keys like
-                # `[ALERT_ATTACK_DISCOVERY_TITLE]`, so the key is literally
-                # "kibana.alert.attack_discovery.title" rather than a nested object).
-                # Dotted-path access silently resolves to empty against that shape,
-                # which would dispatch every review with no title and no alert ids --
-                # invisible today only because the review steps are `console` stubs
-                # and an empty title still satisfies the child's `required: [title]`.
+                # Bracket access: these are persisted alert `_source` documents whose
+                # discovery fields are FLAT dotted keys, so `foreach.item.title`
+                # silently resolves to empty.
                 #
-                # Deliberately the anonymized fields, not their `*_with_replacements`
-                # twins: that matches what the previous inline `discoveriesToPersist`
-                # handover passed. Switching reviews to de-anonymized values is a
-                # behaviour change and belongs with #19022 / #19211.
+                # Anonymized fields, not `*_with_replacements` — de-anonymizing
+                # reviews is a behaviour change owned by #19022 / #19211.
                 title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
                 alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
                 summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
