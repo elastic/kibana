@@ -806,6 +806,72 @@ describe('regroupRelationships', () => {
     expect(result2[0].actorNodeId).not.toBe(result[0].actorNodeId);
     expect(result2[0].relationshipNodeId).toMatch(/-communicates_with$/);
   });
+
+  it('aggregates risk score and asset criticality separately for merged actors and merged targets', () => {
+    // One STATS row with two same-type actors and two same-type targets, each side carrying
+    // different scores/levels. The actor and target aggregates must be computed from their own
+    // entity sets — swapping them, or dropping one, has to fail here.
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'svc:a',
+        { type: 'Service', subType: 'lambda', riskScore: 91, assetCriticality: 'extreme_impact' },
+      ],
+      [
+        'svc:b',
+        { type: 'Service', subType: 'lambda', riskScore: 40, assetCriticality: 'low_impact' },
+      ],
+      ['host:x', { type: 'Host', subType: 'ec2', riskScore: 12, assetCriticality: 'low_impact' }],
+      ['host:y', { type: 'Host', subType: 'ec2', riskScore: 55, assetCriticality: 'low_impact' }],
+    ]);
+    const row: RelationshipEsqlRow = {
+      actorIds: ['svc:a', 'svc:b'],
+      actorEntityType: 'Service',
+      actorEntitySubType: 'lambda',
+      actorDocData: ['{"id":"svc:a","type":"entity"}', '{"id":"svc:b","type":"entity"}'],
+      relationship: 'communicates_with',
+      targetIds: ['host:x', 'host:y'],
+      targetDocData: ['{"id":"host:x","type":"entity"}', '{"id":"host:y","type":"entity"}'],
+      // Both actors point at both targets, so they stay merged in one group.
+      actorTargetMap: ['svc:a\nhost:x', 'svc:a\nhost:y', 'svc:b\nhost:x', 'svc:b\nhost:y'],
+      pinned: null,
+      badge: 4,
+    };
+
+    const [group] = regroupRelationships([row], enrichmentMap);
+
+    expect(group.actorIdsCount).toBe(2);
+    expect(group.targetIdsCount).toBe(2);
+
+    // Actor side: spread over 91/40, and two distinct levels ordered most severe first.
+    expect(group.actorRiskScore).toEqual({ min: 40, max: 91 });
+    expect(group.actorAssetCriticality).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 1 },
+    ]);
+
+    // Target side: its own spread over 12/55, and both targets share one level so the
+    // distribution is a single entry with count 2.
+    expect(group.targetRiskScore).toEqual({ min: 12, max: 55 });
+    expect(group.targetAssetCriticality).toEqual([{ level: 'low_impact', count: 2 }]);
+  });
+
+  it('omits risk score and asset criticality when the relationship entities have neither', () => {
+    const record = buildRelationshipEsqlRow({
+      actorId: 'host:webserver',
+      targetId: 'user:alice',
+    });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:webserver', { type: 'host', riskScore: null, assetCriticality: null }],
+      ['user:alice', { type: 'user' }],
+    ]);
+
+    const [group] = regroupRelationships([record], enrichmentMap);
+
+    expect(group.actorRiskScore).toBeUndefined();
+    expect(group.actorAssetCriticality).toBeUndefined();
+    expect(group.targetRiskScore).toBeUndefined();
+    expect(group.targetAssetCriticality).toBeUndefined();
+  });
 });
 
 describe('enrichRelationshipDocData', () => {
