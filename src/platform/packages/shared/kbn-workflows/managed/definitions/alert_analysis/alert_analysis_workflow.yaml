@@ -51,6 +51,48 @@ tags:
 
 triggers:
   - type: alert
+    # Optional caller-supplied inputs. When provided (e.g. by the AlertZero Alert Triage Worker
+    # via workflow.execute), they override the space's uiSettings runtime_config values.
+    # Absent inputs leave the standalone path byte-identical (success criterion 7 / R8).
+    inputs:
+      additionalProperties: false
+      properties:
+        autoCloseEnabled:
+          type: boolean
+          description: >
+            When provided, overrides the space's uiSettings autoCloseEnabled value.
+            The Worker sets this to false because it owns closing via proposals.
+        autoCloseConfidenceScoreMinThreshold:
+          type: number
+          description: >
+            Minimum confidence score for FP auto-close. Overrides the uiSettings value.
+            When supplied, the max threshold is collapsed to 1 (range becomes a floor).
+        agentId:
+          type: string
+          description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
+        tagPrefix:
+          type: string
+          description: Tag prefix for workflow tags. Overrides the uiSettings tagPrefix.
+        connectorIdByFeature:
+          type: string
+          description: >
+            Model Management feature id used to resolve the LLM connector at run time.
+            Mutually exclusive with the uiSettings-derived connectorId: supplying this
+            tells the sub-workflow to use the feature registry instead of uiSettings.
+
+# Structured output emitted by the `emit_workflow_output` step at the end of each run.
+# Always present, even when analysis is skipped (empty arrays / zero counts).
+outputs:
+  - name: verdicts
+    type: array
+  - name: false_positive_count
+    type: number
+  - name: true_positive_count
+    type: number
+  - name: inconclusive_count
+    type: number
+  - name: auto_closed_ids
+    type: array
 
 settings:
   on-failure:
@@ -63,7 +105,7 @@ settings:
 # Adjust these values to tune workflow behaviour without editing step logic.
 
 consts:
-  workflow_version: "v0.0.3"
+  workflow_version: "v0.0.4"
 
   # When false, the workflow skips alerts that already carry the workflow tag prefix.
   # Set to true to re-evaluate previously analyzed alerts.
@@ -122,6 +164,11 @@ steps:
       batch_input_tokens: 0
       batch_output_tokens: 0
       batch_llm_calls: 0
+      # Initialised empty; set to a real feature id by apply_caller_input_overrides when
+      # a caller (e.g. the Alert Triage Worker) supplies connectorIdByFeature as an input.
+      # Kept at the same level as connector_id so the analysis_enabled guard and the
+      # ai.agent step can check both with a single variable.
+      connector_id_by_feature: ""
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -158,6 +205,45 @@ steps:
       tag_prefix: "{{ steps.fetch_runtime_config.output.tagPrefix }}"
 
   # ---------------------------------------------------------------------------
+  # Apply caller-supplied input overrides (Worker path)
+  # ---------------------------------------------------------------------------
+  # When a caller (e.g. the Alert Triage Worker) supplies inputs, those values take
+  # precedence over the space's uiSettings read above. Gated on connectorIdByFeature
+  # because that field is always present when the Worker calls; its absence means
+  # standalone mode, which must remain byte-identical to the pre-Worker path (R8).
+  - name: apply_caller_input_overrides
+    type: if
+    condition: "${{ inputs.connectorIdByFeature != null }}"
+    steps:
+      - name: set_caller_overrides
+        type: data.set
+        with:
+          # Swap to the feature-registry connector; clear the uiSettings connector so
+          # the ai.agent step's superRefine never sees both non-empty (Z1 invariant).
+          connector_id: ""
+          connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
+          # Boolean inputs: ${{ }} preserves the type; | default: would swallow false
+          # because Liquid treats false as falsy.
+          auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
+          # When min threshold arrives as an input, collapse max to 1: the range
+          # degenerates to a floor, so the Worker can close at any score >= min.
+          auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold }}"
+          auto_close_confidence_score_max_threshold: 1
+          agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
+          tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
+
+  # ---------------------------------------------------------------------------
+  # Pre-compute connector_configured helper
+  # ---------------------------------------------------------------------------
+  # The analysis_enabled guard cannot use parentheses (the YAML template parser reads
+  # `(` as range syntax). Pre-computing the two-connector OR here keeps the guard a
+  # simple `and` chain with no operator-precedence risk.
+  - name: set_connector_configured
+    type: data.set
+    with:
+      connector_configured: "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
+
+  # ---------------------------------------------------------------------------
   # Select the alerts to analyze
   # ---------------------------------------------------------------------------
   # The pending set is never materialised into a variable: it is a `reject_exp` applied
@@ -188,7 +274,7 @@ steps:
   # as range syntax.
   - name: analysis_enabled
     type: if
-    condition: "${{ variables.workflow_enabled and variables.connector_id != '' and variables.pending_alert_count > 0 }}"
+    condition: "${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}"
     steps:
 
       # Logged inside the guard so a space with the workflow disabled does not claim, on every rule
@@ -990,6 +1076,12 @@ steps:
             type: ai.agent
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
+            # INVARIANT: exactly one of connector-id / connector-id-by-feature is non-empty at
+            # execution time. Liquid renders "" for the unused variable; the ai.agent step's
+            # superRefine only fires when BOTH are non-empty, so they coexist safely (Z1 spike,
+            # DONE/PASS). Standalone path: connector_id_by_feature="", connector_id=<real id>.
+            # Worker path: connector_id="", connector_id_by_feature=<feature id>.
+            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
@@ -1318,3 +1410,20 @@ steps:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+
+  # ---------------------------------------------------------------------------
+  # Emit structured output for callers (Worker path)
+  # ---------------------------------------------------------------------------
+  # workflow.output is at the TOP LEVEL (outside analysis_enabled) so it always fires.
+  # When the guard short-circuits (workflow disabled, no connector, zero pending alerts),
+  # the accumulators are still at their initialised values ([] / 0) and the output is
+  # well-formed — callers receive an empty verdict list rather than a missing output.
+  - name: emit_workflow_output
+    type: workflow.output
+    status: completed
+    with:
+      verdicts: "${{ variables.all_verdicts }}"
+      false_positive_count: "${{ variables.all_verdicts | where: 'classification', 'false_positive' | size }}"
+      true_positive_count: "${{ variables.all_verdicts | where: 'classification', 'true_positive' | size }}"
+      inconclusive_count: "${{ variables.all_verdicts | where: 'classification', 'inconclusive' | size }}"
+      auto_closed_ids: "${{ variables.auto_close_ids }}"
