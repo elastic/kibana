@@ -100,6 +100,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             },
             dataStreamDetails: {
               initial: 'fetching',
+              on: {
+                QUALITY_ISSUES_CHART_CHANGE: {
+                  actions: ['storeQualityIssuesChart'],
+                },
+              },
               states: {
                 fetching: {
                   invoke: {
@@ -131,10 +136,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target:
                         '#DatasetQualityDetailsController.initializing.checkBreakdownFieldIsEcs.fetching',
                       actions: ['storeBreakDownField'],
-                    },
-                    QUALITY_ISSUES_CHART_CHANGE: {
-                      target: 'done',
-                      actions: ['storeQualityIssuesChart'],
                     },
                   },
                 },
