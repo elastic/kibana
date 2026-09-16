@@ -10,7 +10,6 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
-import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -338,67 +337,6 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           expect(lastFormProps.error).toBeInstanceOf(Error);
           expect(lastFormProps.disabled).toBe(false);
         });
-      });
-    });
-
-    describe('and a custom Submit handler is used', () => {
-      let handleSubmitCallback: jest.Mock;
-      let releaseSuccessSubmit: () => void;
-      let releaseFailureSubmit: () => void;
-
-      beforeEach(async () => {
-        const deferred = getDeferred();
-        releaseSuccessSubmit = () => act(() => deferred.resolve());
-        releaseFailureSubmit = () => act(() => deferred.reject(new Error('oh oh. No good')));
-
-        handleSubmitCallback = jest.fn(async (item) => {
-          await deferred.promise;
-
-          return new ExceptionsListItemGenerator().generateTrustedApp(item);
-        });
-
-        await render({ onFormSubmit: handleSubmitCallback });
-
-        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-      });
-
-      afterEach(() => {
-        if (releaseSuccessSubmit) {
-          releaseSuccessSubmit();
-        }
-      });
-
-      it('should use custom submit handler when submit button is used', async () => {
-        expect(handleSubmitCallback).toHaveBeenCalled();
-
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
-      });
-
-      it('should catch and show error if one is encountered', async () => {
-        releaseFailureSubmit();
-        await waitFor(() => {
-          expect(renderResult.getByTestId('formError')).toBeTruthy();
-        });
-      });
-
-      it('should show a success toast', async () => {
-        releaseSuccessSubmit();
-
-        await waitFor(() => {
-          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
-        });
-
-        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          '"some name" has been added.'
-        );
-      });
-
-      it('should clear the URL params', () => {
-        releaseSuccessSubmit();
-
-        expect(location.search).toBe('');
       });
     });
 

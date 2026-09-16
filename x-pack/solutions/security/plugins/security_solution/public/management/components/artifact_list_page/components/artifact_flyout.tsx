@@ -175,10 +175,6 @@ export interface ArtifactFlyoutProps {
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onSuccess(): void;
   onClose(): void;
-  submitHandler?: (
-    item: ArtifactFormComponentOnChangeCallbackProps['item'],
-    mode: ArtifactFormComponentProps['mode']
-  ) => Promise<ExceptionListItemSchema>;
   /**
    * If the artifact data is provided and it matches the id in the URL, then it will not be
    * retrieved again via the API
@@ -205,7 +201,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     FormComponent,
     onSuccess,
     onClose,
-    submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
@@ -241,33 +236,18 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
-    // TODO:PT Refactor internal/external state into the `useWithArtifactSubmitData()` hook
-    const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
-    const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
-      IHttpFetchError | undefined
-    >(undefined);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
-    const [internalSubmitError, setInternalSubmitError] = useState<IHttpFetchError | undefined>(
-      undefined
-    );
-    const { isLoading: internalIsSubmittingData, createOrUpdateArtifact } =
+    const [submitError, setSubmitError] = useState<IHttpFetchError | undefined>(undefined);
+    const { isLoading: isSubmittingData, createOrUpdateArtifact } =
       useCreateOrUpdateArtifact(apiClient);
 
     const { mutateAsync: markInsightAsRemediated } = useMarkInsightAsRemediated(
       sourceInsight?.back_url
     );
-
-    const isSubmittingData = useMemo(() => {
-      return submitHandler ? externalIsSubmittingData : internalIsSubmittingData;
-    }, [externalIsSubmittingData, internalIsSubmittingData, submitHandler]);
-
-    const submitError = useMemo(() => {
-      return submitHandler ? externalSubmitHandlerError : internalSubmitError;
-    }, [externalSubmitHandlerError, internalSubmitError, submitHandler]);
 
     const {
       isRefetching: isLoadingItemForEdit,
@@ -377,36 +357,18 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const submitItem = useCallback(
       (itemToSubmit: ArtifactFormComponentOnChangeCallbackProps['item']) => {
-        if (submitHandler) {
-          setExternalIsSubmittingData(true);
-
-          submitHandler(itemToSubmit, formMode)
-            .then(handleSuccess)
-            .catch((submitHandlerError) => {
-              if (isMounted()) {
-                setExternalSubmitHandlerError(submitHandlerError);
-              }
-            })
-            .finally(() => {
-              if (isMounted()) {
-                setExternalIsSubmittingData(false);
-              }
-            });
-        } else if (formState.confirmModalLabels) {
+        if (formState.confirmModalLabels) {
           setShowConfirmModal(true);
         } else if (createOrUpdateArtifact) {
           createOrUpdateArtifact(itemToSubmit, formState.additionalEntries)
             .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
-            .catch((err) => setInternalSubmitError(err));
+            .catch((err) => setSubmitError(err));
         }
       },
       [
-        submitHandler,
         formState.confirmModalLabels,
         formState.additionalEntries,
-        formMode,
         handleSuccess,
-        isMounted,
         createOrUpdateArtifact,
       ]
     );
@@ -439,7 +401,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       () =>
         createOrUpdateArtifact?.(formState.item, formState.additionalEntries)
           .then((createdOrUpdatedItems) => handleSuccess(createdOrUpdatedItems[0]))
-          .catch((err) => setInternalSubmitError(err)),
+          .catch((err) => setSubmitError(err)),
       [createOrUpdateArtifact, formState.additionalEntries, formState.item, handleSuccess]
     );
 
