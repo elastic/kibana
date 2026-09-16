@@ -162,6 +162,9 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.5+
+          The **Dashboards** list fetches at most `1000` dashboards, even when this setting is higher. Use the search field and **Tags** filters to find additional dashboards.
 
       - setting: "csv:separator"
         id: csv-separator
