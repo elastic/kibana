@@ -165,9 +165,17 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
 };
 
 const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
-  if (event.status !== 'open') {
+  if (!canManage || event.status !== 'open') {
     return null;
   }
 
