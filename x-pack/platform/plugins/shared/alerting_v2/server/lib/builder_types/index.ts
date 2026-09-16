@@ -7,10 +7,20 @@
 
 export type {
   BuilderTypeDefinition,
-  RegisteredBuilderType,
-  OpaqueBuilderFields,
+  BuilderTypeManifest,
+  BuilderTypeVersion,
+  DerivedRuleFields,
+  GenerateQuery,
   GeneratedQuery,
+  MappingProperty,
+  OpaqueBuilderFields,
+  QueryGenerationInput,
+  RegisteredBuilderType,
+  RuleEventEnrichment,
+  RuleEventEnrichmentInput,
 } from './types';
 export { BuilderTypeRegistry } from './builder_type_registry';
 export type { BuilderTypeRegistryContract } from './builder_type_registry';
 export { assertValidDefinition } from './assert_valid_definition';
+export { addFoldedVersion, globalFoldedVersions, FoldedVersionsSet } from './folded_versions';
+export type { FoldedVersionsRecord } from './folded_versions';
