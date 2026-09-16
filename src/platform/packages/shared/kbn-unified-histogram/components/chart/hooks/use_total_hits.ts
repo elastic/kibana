@@ -13,7 +13,6 @@ import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import { useStableCallback } from '@kbn/react-hooks';
-import type { DataSource } from '@kbn/data-source';
 import { DataViewSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetch$,
@@ -87,13 +86,10 @@ const fetchTotalHits = async ({
   timeRange,
   onTotalHitsChange,
   isPlainRecord,
-}: {
-  dataSource: DataSource;
-  searchSessionId: UnifiedHistogramFetch$Arguments['fetchParams']['searchSessionId'];
-  requestAdapter: UnifiedHistogramFetch$Arguments['fetchParams']['requestAdapter'];
-  filters: UnifiedHistogramFetch$Arguments['fetchParams']['filters'];
-  query: UnifiedHistogramFetch$Arguments['fetchParams']['query'];
-  timeRange: UnifiedHistogramFetch$Arguments['fetchParams']['timeRange'];
+}: Pick<
+  UnifiedHistogramFetch$Arguments['fetchParams'],
+  'dataSource' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
+> & {
   services: UnifiedHistogramServices;
   abortController: MutableRefObject<AbortController | undefined>;
   hits: UnifiedHistogramHitsContext | undefined;
@@ -145,13 +141,10 @@ const fetchTotalHitsSearchSource = async ({
   filters: originalFilters,
   query,
   timeRange,
-}: {
-  dataSource: DataSource;
-  searchSessionId: UnifiedHistogramFetch$Arguments['fetchParams']['searchSessionId'];
-  requestAdapter: UnifiedHistogramFetch$Arguments['fetchParams']['requestAdapter'];
-  filters: UnifiedHistogramFetch$Arguments['fetchParams']['filters'];
-  query: UnifiedHistogramFetch$Arguments['fetchParams']['query'];
-  timeRange: UnifiedHistogramFetch$Arguments['fetchParams']['timeRange'];
+}: Pick<
+  UnifiedHistogramFetch$Arguments['fetchParams'],
+  'dataSource' | 'searchSessionId' | 'requestAdapter' | 'filters' | 'query' | 'timeRange'
+> & {
   services: UnifiedHistogramServices;
   abortController: AbortController;
 }) => {
