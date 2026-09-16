@@ -15,7 +15,7 @@
             }
         ] */
 
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
+import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
 import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.

@@ -154,6 +154,25 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     ...options,
   });
 }
+
+export function useGetAgentStatusQuery(
+  query: GetAgentStatusRequest['query'],
+  options: { enabled?: boolean; refetchInterval?: number | false } = {}
+) {
+  const { enabled, refetchInterval } = options;
+  return useQuery(
+    ['agent-status', query],
+    () =>
+      sendRequestForRq<GetAgentStatusResponse>({
+        method: 'get',
+        path: agentRouteService.getStatusPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    { enabled, refetchInterval, refetchIntervalInBackground: false }
+  );
+}
+
 export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
   return sendRequest<GetAgentIncomingDataResponse>({
     method: 'get',
