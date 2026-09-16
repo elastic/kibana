@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import {
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
@@ -26,13 +25,10 @@ import type {
   MemorySearchResult,
   MemoryVersionRecord,
 } from '../lib/memory';
-import { MemoryServiceImpl } from '../lib/memory';
+import { createMemoryService } from '../lib/memory';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 import { assertNotPaused } from '../../routes/utils/assert_not_paused';
-
-const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
-  new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -60,7 +56,11 @@ const createEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -94,7 +94,11 @@ const getEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.get({ id: params.path.id });
   },
@@ -119,7 +123,11 @@ const getEntryByNameRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
@@ -157,7 +165,11 @@ const updateEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -196,7 +208,11 @@ const deleteEntryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -237,7 +253,11 @@ const searchRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const results = await memory.search({
       query: params.body.query,
@@ -275,7 +295,11 @@ const getCategoryTreeRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.getCategoryTree();
   },
@@ -312,7 +336,11 @@ const getHistoryRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const history = await memory.getHistory({
       entryId: params.path.id,
@@ -350,7 +378,11 @@ const getVersionRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     return memory.getVersion({
       entryId: params.path.id,
@@ -389,7 +421,11 @@ const recentChangesRoute = createServerRoute({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing });
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = await createMemoryService(
+      scopedClusterClient.asCurrentUser,
+      server.core.dataStreams,
+      logger
+    );
 
     const changes = await memory.getRecentChanges({
       size: params.query?.size,

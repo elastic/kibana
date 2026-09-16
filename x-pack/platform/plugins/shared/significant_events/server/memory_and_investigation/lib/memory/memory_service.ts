@@ -12,11 +12,15 @@ import type {
   RetrieverContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
-import { DataStreamClient } from '@kbn/data-streams';
-import type { IDataStreamClient } from '@kbn/data-streams';
+import type { DataStreamsStart, IDataStreamClient } from '@kbn/core-data-streams-server';
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import { createMemoryHistoryStorage } from './history_storage';
 import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
+import {
+  memoryHistoryDataStream,
+  type memoryHistoryMappings,
+  type StoredMemoryHistoryRecord,
+} from './history_data_stream';
 import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 import { resolveSearchMode, type SearchMode } from '../../../../common/queries';
 import { bulkCreateWithInferenceFallback } from '../../../lib/knowledge_indicators/knowledge_indicator_client/bulk_with_inference_fallback';
@@ -55,21 +59,34 @@ const MAX_PAGES = 10000;
  */
 export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
-  private readonly dataStreamClient: IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>;
+  private readonly dataStreamClient: Pick<
+    IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>,
+    'create'
+  >;
   private readonly historyStorage: ReturnType<typeof createMemoryHistoryStorage>;
   private readonly logger: Logger;
 
-  constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
+  constructor({
+    logger,
+    esClient,
+    dataStreamClient,
+    historyDataStreamClient,
+  }: {
+    logger: Logger;
+    esClient: ElasticsearchClient;
+    dataStreamClient: Pick<IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>, 'create'>;
+    historyDataStreamClient: Pick<
+      IDataStreamClient<typeof memoryHistoryMappings, StoredMemoryHistoryRecord>,
+      'create'
+    >;
+  }) {
     this.logger = logger;
     this.esClient = esClient;
-    this.dataStreamClient = DataStreamClient.fromDefinition<
-      typeof memoriesMappings,
-      StoredMemoryPage
-    >({
-      dataStream: memoriesDataStream,
-      elasticsearchClient: esClient,
+    this.dataStreamClient = dataStreamClient;
+    this.historyStorage = createMemoryHistoryStorage({
+      esClient,
+      dataStreamClient: historyDataStreamClient,
     });
-    this.historyStorage = createMemoryHistoryStorage({ esClient });
   }
 
   // ── Write helpers ──
@@ -811,6 +828,23 @@ export class MemoryServiceImpl implements MemoryService {
     await this.historyStorage.getClient().index({ document: record });
   }
 }
+
+export const createMemoryService = async (
+  esClient: ElasticsearchClient,
+  dataStreams: DataStreamsStart,
+  logger: Logger
+): Promise<MemoryService> => {
+  const [dataStreamClient, historyDataStreamClient] = await Promise.all([
+    dataStreams.initializeClient<typeof memoriesMappings, StoredMemoryPage>(
+      memoriesDataStream.name
+    ),
+    dataStreams.initializeClient<typeof memoryHistoryMappings, StoredMemoryHistoryRecord>(
+      memoryHistoryDataStream.name
+    ),
+  ]);
+
+  return new MemoryServiceImpl({ logger, esClient, dataStreamClient, historyDataStreamClient });
+};
 
 /**
  * Build a category tree from all memory entries.

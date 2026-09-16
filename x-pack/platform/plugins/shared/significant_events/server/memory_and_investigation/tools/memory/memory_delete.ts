@@ -31,8 +31,6 @@ export const createMemoryDeleteTool = ({
   schema: memoryDeleteSchema,
   confirmation: { askUser: 'never' },
   handler: async ({ id, name }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     if (!name && !id) {
       return {
         results: [createErrorResult({ message: 'Either "name" or "id" must be provided.' })],
@@ -40,6 +38,7 @@ export const createMemoryDeleteTool = ({
     }
 
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       const { request, esClient } = context;
       const { username: user } = await getUserFromRequest({
         request,

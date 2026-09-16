@@ -58,7 +58,6 @@ export const createMemoryWriteTool = ({
     { name, title, content, categories, references, tags, change_summary: changeSummary },
     context
   ) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
@@ -67,6 +66,7 @@ export const createMemoryWriteTool = ({
     });
 
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       // Check if page exists with this name
       const existing = await memoryService.getByName({ name });
 

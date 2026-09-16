@@ -34,6 +34,9 @@ const event: SignificantEvent = {
 
 const findLatestPaginated = jest.fn();
 const findByEventId = jest.fn();
+const getDataStreams = jest.fn().mockResolvedValue({
+  initializeClient: jest.fn().mockResolvedValue({}),
+});
 
 const createGetScopedClients = (
   events: SignificantEvent[]
@@ -65,6 +68,7 @@ describe('createSignificantEventSmlType', () => {
   it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
     });
 
     expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
@@ -74,6 +78,7 @@ describe('createSignificantEventSmlType', () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
     });
 
     const iterator = smlType.list({
@@ -99,6 +104,7 @@ describe('createSignificantEventSmlType', () => {
     findByEventId.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
     });
 
     const result = await smlType.getSmlEntry('payment-outage', {
@@ -121,6 +127,7 @@ describe('createSignificantEventSmlType', () => {
   it('getPermissions returns the streams read API privilege', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
+      getDataStreams,
     });
     const permissions = smlType.getPermissions!('payment-outage', {
       esClient: {} as never,
@@ -135,6 +142,7 @@ describe('createSignificantEventSmlType', () => {
   it('converts an SML document into an attachment', async () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([event]),
+      getDataStreams,
     });
 
     await expect(

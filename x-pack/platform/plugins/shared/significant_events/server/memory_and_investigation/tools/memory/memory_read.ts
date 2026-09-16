@@ -88,8 +88,6 @@ export const createMemoryReadTool = ({
     'When both name and id are available, provide both so a stale ID can fall back to the name.',
   schema: memoryReadSchema,
   handler: async ({ name, id, heading, offset, limit }, context) => {
-    const memoryService = getMemoryService(context.esClient.asCurrentUser);
-
     if (!name && !id) {
       return {
         results: [
@@ -101,6 +99,7 @@ export const createMemoryReadTool = ({
     }
 
     try {
+      const memoryService = await getMemoryService(context.esClient.asCurrentUser);
       let entry: MemoryEntry | undefined;
       if (id) {
         try {

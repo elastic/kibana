@@ -6,19 +6,23 @@
  */
 
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { GetScopedClients } from '../../routes/types';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
 export const registerAgentBuilderSmlTypes = ({
   agentBuilderSml,
   getScopedClients,
+  getDataStreams,
 }: {
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   getScopedClients: GetScopedClients;
+  getDataStreams: () => Promise<DataStreamsStart>;
 }): void => {
   agentBuilderSml?.registerType(
     createSignificantEventSmlType({
       getScopedClients,
+      getDataStreams,
     })
   );
 };

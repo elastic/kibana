@@ -11,7 +11,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { DataStreamClient } from '@kbn/data-streams';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
@@ -54,13 +53,11 @@ export class KnowledgeIndicatorService {
       coreStart.featureFlags
     );
 
-    const dataStreamClient: KnowledgeIndicatorDataStreamClient = DataStreamClient.fromDefinition<
-      typeof knowledgeIndicatorsMappings,
-      StoredKnowledgeIndicator & Record<string, unknown>
-    >({
-      dataStream: knowledgeIndicatorsDataStream,
-      elasticsearchClient: esClient,
-    });
+    const dataStreamClient: KnowledgeIndicatorDataStreamClient =
+      await coreStart.dataStreams.initializeClient<
+        typeof knowledgeIndicatorsMappings,
+        StoredKnowledgeIndicator & Record<string, unknown>
+      >(knowledgeIndicatorsDataStream.name);
 
     return new KnowledgeIndicatorClient(
       {

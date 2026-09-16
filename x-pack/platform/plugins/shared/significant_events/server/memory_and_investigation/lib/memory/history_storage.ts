@@ -6,9 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { IDataStreamClient } from '@kbn/core-data-streams-server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { memoryHistoryDataStreamName } from './history_data_stream';
+import {
+  memoryHistoryDataStreamName,
+  type memoryHistoryMappings,
+  type StoredMemoryHistoryRecord,
+} from './history_data_stream';
 import type { MemoryVersionRecord } from './types';
+import { throwOnBulkCreateErrors } from '../../../lib/significant_events/query_utils';
 
 interface HistoryClientDocument {
   document: MemoryVersionRecord;
@@ -33,18 +39,25 @@ export interface MemoryHistoryStorage {
 
 export const createMemoryHistoryStorage = ({
   esClient,
+  dataStreamClient,
 }: {
   esClient: ElasticsearchClient;
+  dataStreamClient: Pick<
+    IDataStreamClient<typeof memoryHistoryMappings, StoredMemoryHistoryRecord>,
+    'create'
+  >;
 }): MemoryHistoryStorage => {
   const client: HistoryClient = {
     async index({ document }) {
-      await esClient.index({
-        index: memoryHistoryDataStreamName,
-        document: {
-          ...document,
-          '@timestamp': document.created_at,
-        },
+      const response = await dataStreamClient.create({
+        documents: [
+          {
+            ...document,
+            '@timestamp': document.created_at,
+          },
+        ],
       });
+      throwOnBulkCreateErrors(response);
     },
 
     async search(params) {

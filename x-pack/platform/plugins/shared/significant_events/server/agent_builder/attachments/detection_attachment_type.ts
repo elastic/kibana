@@ -60,7 +60,7 @@ export const createSignificantEventDetectionAttachmentType = ({
     const { getDetectionClient } = await getScopedClients({ request: context.request });
 
     try {
-      const { hits } = await getDetectionClient().findById(detectionId);
+      const { hits } = await (await getDetectionClient()).findById(detectionId);
       const latestHit = hits.at(-1);
       return latestHit ? toLifecycleDetection(latestHit) : undefined;
     } catch (error) {

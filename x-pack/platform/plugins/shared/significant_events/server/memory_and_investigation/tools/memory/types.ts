@@ -13,7 +13,7 @@ import type { MemoryService } from '../../lib/memory';
 import type { GetScopedClients } from '../../../routes/types';
 
 export interface MemoryToolsOptions {
-  getMemoryService: (esClient: ElasticsearchClient) => MemoryService;
+  getMemoryService: (esClient: ElasticsearchClient) => Promise<MemoryService>;
   getSecurity: () => SecurityServiceStart;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
