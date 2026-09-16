@@ -109,6 +109,7 @@ describe('useInvestigateAlert', () => {
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
     expect(result.current.isInvestigating).toBe(true);
+    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?alertId=alert-1');
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',

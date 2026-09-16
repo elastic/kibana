@@ -67,7 +67,7 @@ export const useInvestigateAlert = ({
   const isInvestigating = isStarting || hasOngoingInvestigation;
   const showInvestigateAction = availability?.available === true;
   const viewInvestigationUrl =
-    alertId && investigations?.results.some(({ status }) => status === 'completed')
+    alertId && investigations?.results.length
       ? application.getUrlForApp(NIGHTSHIFT_APP_ID, {
           path: `?${new URLSearchParams({ alertId }).toString()}`,
         })
