@@ -13,7 +13,10 @@ import {
   waitForTransformPropagation,
   seedScenario,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupResponseActionsData } from '../../src/data_generators/cleanup';
+import {
+  cleanupResponseActionsData,
+  RESPONSE_ACTIONS_AGENT_ID_PREFIX,
+} from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
 
@@ -47,10 +50,17 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       policyStatus: 'success',
     });
 
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: 2,
-      metadataUnited: 2,
-    });
+    // The propagation wait must count the ids THIS suite seeds
+    // (`eval-agent-era-*`), not the troubleshooting suite's default
+    // `eval-agent-ts-*` prefix — otherwise it polls for docs that never exist
+    // and times out after 180s with metadataCurrent=0.
+    await waitForTransformPropagation(
+      esClient,
+      log,
+      { metadataCurrent: 2, metadataUnited: 2 },
+      180_000,
+      RESPONSE_ACTIONS_AGENT_ID_PREFIX
+    );
   });
 
   evaluate.afterAll(async ({ esClient, internalEsClient }) => {
