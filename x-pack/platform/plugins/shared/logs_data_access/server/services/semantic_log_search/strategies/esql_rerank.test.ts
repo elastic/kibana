@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SemanticLogSearchParams } from '../../../../common/services/semantic_log_search/types';
-import { esqlRowsToObjects, parseEsqlPatternResponse, searchWithEsqlRerank } from './esql_rerank';
+import {
+  esqlRowsToObjects,
+  parseEsqlPatternResponse,
+  searchWithEsqlRerank,
+  toTemplateText,
+} from './esql_rerank';
 
 describe('searchWithEsqlRerank', () => {
   const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
@@ -67,6 +72,24 @@ describe('searchWithEsqlRerank', () => {
     const { query } = await runQuery({ kqlFilter: 'service.name:"checkout" | DROP message' });
 
     expect(query).toContain('WHERE KQL("service.name:\\"checkout\\" | DROP message")');
+  });
+
+  it('returns strategy esql_rerank when the query succeeds', async () => {
+    const esClient = {
+      esql: { query: jest.fn().mockResolvedValue(emptyResponse) },
+    } as unknown as ElasticsearchClient;
+
+    const result = await searchWithEsqlRerank(
+      {
+        esClient,
+        target: 'logs-*',
+        nlQuery: 'connection failures',
+        timeRange: { start: 1704067200000, end: 1704153600000 },
+      },
+      loggerMock.create()
+    );
+
+    expect(result).toEqual({ patterns: [], strategy: 'esql_rerank' });
   });
 
   it('reports unavailable and warns when the query fails', async () => {
@@ -148,14 +171,14 @@ describe('esql rerank helpers', () => {
         ],
         values: [
           [
-            'Connection to .* timed out',
+            '.*?Connection.+?to.+?timed.+?out.*?',
             100,
             '2024-01-01T00:00:00.000Z',
             '2024-01-01T12:00:00.000Z',
             'Connection to db-server timed out',
           ],
           [
-            'User .* logged in',
+            '.*?User.+?logged.+?in.*?',
             50,
             '2024-01-01T00:00:00.000Z',
             '2024-01-01T06:00:00.000Z',
@@ -169,7 +192,7 @@ describe('esql rerank helpers', () => {
       expect(patterns).toHaveLength(2);
       expect(patterns[0]).toEqual({
         field: 'message',
-        pattern: 'Connection to .* timed out',
+        pattern: 'Connection to timed out',
         count: 100,
         firstSeen: '2024-01-01T00:00:00.000Z',
         lastSeen: '2024-01-01T12:00:00.000Z',
@@ -177,7 +200,7 @@ describe('esql rerank helpers', () => {
       });
       expect(patterns[1]).toEqual({
         field: 'message',
-        pattern: 'User .* logged in',
+        pattern: 'User logged in',
         count: 50,
         firstSeen: '2024-01-01T00:00:00.000Z',
         lastSeen: '2024-01-01T06:00:00.000Z',
@@ -201,7 +224,7 @@ describe('esql rerank helpers', () => {
           { name: 'pattern', type: 'keyword' },
           { name: 'count', type: 'long' },
         ],
-        values: [['Error pattern', 25]],
+        values: [['.*?Error.+?pattern.*?', 25]],
       };
 
       const patterns = parseEsqlPatternResponse(response);
@@ -260,6 +283,25 @@ describe('esql rerank helpers', () => {
       expect(patterns).toHaveLength(1);
       expect(patterns[0].pattern).toBe('Valid');
       expect(patterns[0].count).toBe(5);
+    });
+  });
+
+  describe('toTemplateText', () => {
+    it('normalises CATEGORIZE wildcards to template text', () => {
+      expect(toTemplateText('.*?Shutting.+?down.+?process.*?')).toBe('Shutting down process');
+    });
+
+    it('normalises a single-token pattern', () => {
+      expect(toTemplateText('.*?Restarting.*?')).toBe('Restarting');
+    });
+
+    it('keeps apostrophes inside literals', () => {
+      expect(toTemplateText(".+?the.+?won't.+?do.+?anything.*?")).toBe("the won't do anything");
+    });
+
+    it('falls back to the raw value when the pattern is only wildcards', () => {
+      expect(toTemplateText('.*?')).toBe('.*?');
+      expect(toTemplateText('.+?')).toBe('.+?');
     });
   });
 });

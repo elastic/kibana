@@ -47,6 +47,21 @@ export function esqlRowsToObjects<T>(response: ESQLSearchResponse): T[] {
 }
 
 /**
+ * CATEGORIZE emits `.*?` as anchors and `.+?` between literal tokens
+ * (e.g. `.*?Shutting.+?down.+?process.*?`). The service contract is template
+ * text ("Shutting down process"), so those delimiters are stripped here rather
+ * than handed to callers.
+ */
+const CATEGORIZE_WILDCARD = /\.[*+]\?/g;
+
+export function toTemplateText(raw: string): string {
+  const text = raw.split(CATEGORIZE_WILDCARD).filter(Boolean).join(' ').trim();
+  // A pattern made only of wildcards would normalise to nothing; keep the raw
+  // value rather than emitting an empty template.
+  return text || raw;
+}
+
+/**
  * Parse ES|QL response into LogPattern array.
  *
  * Expected columns from the ES|QL query:
@@ -70,7 +85,7 @@ export function parseEsqlPatternResponse(
     .filter((row) => row.pattern != null && row.count != null)
     .map((row) => ({
       field,
-      pattern: String(row.pattern),
+      pattern: toTemplateText(String(row.pattern)),
       count: Number(row.count),
       firstSeen: row.first_seen ? new Date(row.first_seen).toISOString() : new Date().toISOString(),
       lastSeen: row.last_seen ? new Date(row.last_seen).toISOString() : new Date().toISOString(),
@@ -84,8 +99,8 @@ export function parseEsqlPatternResponse(
 /**
  * Execute semantic search using ES|QL RERANK + CATEGORIZE.
  *
- * This is the fallback path when no semantic_text field is available but
- * the cluster has the RERANK inference endpoint configured.
+ * This is the implemented search path. The pre-indexed rungs
+ * (semantic_text / pattern_text) are stubbed.
  *
  * Flow:
  * 1. CATEGORIZE extracts patterns from log messages
@@ -136,6 +151,7 @@ export async function searchWithEsqlRerank(
 
     return {
       patterns: parseEsqlPatternResponse(response as ESQLSearchResponse, 'message'),
+      strategy: 'esql_rerank',
     };
   } catch (error) {
     // Handle missing index gracefully (lazy initialization before first write)

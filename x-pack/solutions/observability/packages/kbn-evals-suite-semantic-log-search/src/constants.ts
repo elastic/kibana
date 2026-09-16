@@ -6,8 +6,9 @@
  */
 
 /**
- * The tool under evaluation. Everything else that a run depends on (target,
+ * The tools under evaluation. Everything else that a run depends on (target,
  * time range, k, threshold) varies per corpus and lives in the profiles under
  * `corpora/`.
  */
 export const GET_LOGS_TOOL_ID = 'observability.get_logs';
+export const GET_LOGS_SEMANTIC_TOOL_ID = 'observability.get_logs_semantic';

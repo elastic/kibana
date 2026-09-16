@@ -55,8 +55,14 @@ export interface SemanticLogSearchParams {
 export interface SemanticLogSearchResult {
   patterns: LogPattern[];
   /**
-   * True when the service cannot operate because the target lacks semantic_text fields.
-   * Callers should fall back to existing lexical search capabilities.
+   * Which ranking strategy produced this result. Debug / eval signal only:
+   * callers should not branch on it. Currently always `esql_rerank` when
+   * the service can run; omitted when `unavailable` is true.
+   */
+  strategy?: string;
+  /**
+   * True when the service cannot operate because the cluster has no RERANK
+   * inference endpoint. Callers should fall back to existing lexical search.
    */
   unavailable?: boolean;
 }
@@ -87,13 +93,12 @@ export interface ExpandPatternResult {
 /**
  * Service for semantic log search and pattern expansion.
  *
- * The service returns log patterns ranked by semantic relevance to the query,
- * with counts and time bounds for each pattern. The `expand` method retrieves
- * the raw documents belonging to a specific pattern.
+ * The implemented search path is RERANK + CATEGORIZE. The pre-indexed rungs
+ * (semantic_text / pattern_text) and `expand` are not implemented; the planned
+ * direction is to feed patterns from Knowledge Indicators in the AI Index.
  *
- * Resolution strategy is hidden from callers: when `pattern_text` is mapped,
- * expand uses an exact term filter; otherwise it uses `getCategoryQuery` which
- * is approximate.
+ * The service returns log patterns ranked by semantic relevance to the query,
+ * with counts and time bounds for each pattern.
  */
 export interface SemanticLogSearchService {
   /**
@@ -104,14 +109,16 @@ export interface SemanticLogSearchService {
    * - `count`: prevalence in the time window
    * - `firstSeen` / `lastSeen`: time bounds
    * - `sample`: a representative document
+   *
+   * `strategy` names the ranking path that produced the result. It is a debug
+   * and eval signal, not something callers should branch on.
    */
   search(params: SemanticLogSearchParams): Promise<SemanticLogSearchResult>;
 
   /**
    * Expand a pattern to retrieve its raw documents.
    *
-   * Pagination uses `searchAfter` (Elasticsearch search_after).
-   * Pass the `searchAfter` from the previous response to get the next page.
+   * To be implemented.
    */
   expand(params: ExpandPatternParams): Promise<ExpandPatternResult>;
 }

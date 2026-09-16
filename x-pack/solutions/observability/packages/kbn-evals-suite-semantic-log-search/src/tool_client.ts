@@ -7,23 +7,25 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GET_LOGS_TOOL_ID } from './constants';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from './constants';
 import type { CorpusProfile } from './corpora';
 import type { RetrievedPattern } from './metrics';
 
 /**
- * The slice of `get_logs` output this suite reads. Declared structurally rather
- * than imported, because the tool's result type is internal to the Observability
- * Agent Builder plugin and the eval should not be coupled to its internals.
+ * The slice of tool output this suite reads. Declared structurally rather
+ * than imported, because the tools' result types are internal to the
+ * Observability Agent Builder plugin and the eval should not be coupled to
+ * their internals.
  */
-interface GetLogsCategory {
+interface PatternLike {
   pattern?: string;
   count?: number;
   sample?: { message?: string; [key: string]: unknown };
 }
 
-interface GetLogsData {
-  categories?: GetLogsCategory[];
+interface ToolData {
+  categories?: PatternLike[];
+  patterns?: PatternLike[];
   totalCount?: number;
   warnings?: string[];
 }
@@ -40,54 +42,50 @@ export interface GetLogsRun {
   error?: string;
 }
 
-export interface ExecuteGetLogsParams {
+export interface ExecuteRetrievalParams {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
   corpus: CorpusProfile;
-  /** Natural language question. Omit to exercise the keyword-only arm. */
   semanticFilter?: string;
   kqlFilter?: string;
 }
 
-const toRetrievedPatterns = (categories: GetLogsCategory[]): RetrievedPattern[] =>
-  categories.map((category) => ({
-    pattern: category.pattern ?? '',
-    message: category.sample?.message ?? category.pattern ?? '',
-    count: category.count ?? 0,
+const toRetrievedPatterns = (items: PatternLike[]): RetrievedPattern[] =>
+  items.map((item) => ({
+    pattern: item.pattern ?? '',
+    message: item.sample?.message ?? item.pattern ?? '',
+    count: item.count ?? 0,
   }));
 
-/**
- * Runs `observability.get_logs` through the tool execution API.
- *
- * This bypasses the agent's tool selection on purpose: the retrieval arm measures
- * ranking quality, so the tool call has to be deterministic. It still goes
- * through the real registered tool and the real `semanticLogSearch` service, so
- * nothing about the production path is stubbed.
- */
-export const executeGetLogs = async ({
+const executeTool = async ({
   fetch,
   log,
   connectorId,
   corpus,
-  semanticFilter,
-  kqlFilter,
-}: ExecuteGetLogsParams): Promise<GetLogsRun> => {
-  const { target, timeRange, maxPatterns } = corpus;
-
+  toolId,
+  toolParams,
+  toPatterns,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  connectorId: string;
+  corpus: CorpusProfile;
+  toolId: string;
+  toolParams: Record<string, unknown>;
+  toPatterns: (data: ToolData) => RetrievedPattern[];
+}): Promise<GetLogsRun> => {
   const response = await fetch<ToolExecuteResponse>('/api/agent_builder/tools/_execute', {
     method: 'POST',
     version: '2023-10-31',
     body: JSON.stringify({
-      tool_id: GET_LOGS_TOOL_ID,
+      tool_id: toolId,
       connector_id: connectorId,
       tool_params: {
-        start: timeRange.start,
-        end: timeRange.end,
-        index: target,
-        limit: maxPatterns,
-        ...(semanticFilter ? { semanticFilter } : {}),
-        ...(kqlFilter ? { kqlFilter } : {}),
+        start: corpus.timeRange.start,
+        end: corpus.timeRange.end,
+        index: corpus.target,
+        ...toolParams,
       },
     }),
   });
@@ -97,20 +95,69 @@ export const executeGetLogs = async ({
 
   if (errorResult) {
     const message = (errorResult.data as { message?: string } | undefined)?.message ?? 'unknown';
-    log.error(`${GET_LOGS_TOOL_ID} returned an error: ${message}`);
+    log.error(`${toolId} returned an error: ${message}`);
     return { patterns: [], totalCount: 0, warnings: [], error: message };
   }
 
-  const data = (results[0]?.data ?? {}) as GetLogsData;
+  const data = (results[0]?.data ?? {}) as ToolData;
   const warnings = data.warnings ?? [];
 
   if (warnings.length > 0) {
-    log.warning(`${GET_LOGS_TOOL_ID} warnings: ${warnings.join('; ')}`);
+    log.warning(`${toolId} warnings: ${warnings.join('; ')}`);
   }
 
   return {
-    patterns: toRetrievedPatterns(data.categories ?? []),
+    patterns: toPatterns(data),
     totalCount: data.totalCount ?? 0,
     warnings,
   };
 };
+
+/**
+ * Runs `observability.get_logs` through the tool execution API (keyword arm).
+ */
+export const executeGetLogs = async ({
+  fetch,
+  log,
+  connectorId,
+  corpus,
+  kqlFilter,
+}: ExecuteRetrievalParams): Promise<GetLogsRun> =>
+  executeTool({
+    fetch,
+    log,
+    connectorId,
+    corpus,
+    toolId: GET_LOGS_TOOL_ID,
+    toolParams: {
+      ...(kqlFilter ? { kqlFilter } : {}),
+    },
+    toPatterns: (data) => toRetrievedPatterns(data.categories ?? []),
+  });
+
+/**
+ * Runs `observability.get_logs_semantic` through the tool execution API
+ * (semantic arm). Bypasses the agent's tool selection on purpose: the retrieval
+ * arm measures ranking quality, so the tool call has to be deterministic.
+ */
+export const executeGetLogsSemantic = async ({
+  fetch,
+  log,
+  connectorId,
+  corpus,
+  semanticFilter,
+  kqlFilter,
+}: ExecuteRetrievalParams): Promise<GetLogsRun> =>
+  executeTool({
+    fetch,
+    log,
+    connectorId,
+    corpus,
+    toolId: GET_LOGS_SEMANTIC_TOOL_ID,
+    toolParams: {
+      semanticFilter,
+      maxPatterns: corpus.maxPatterns,
+      ...(kqlFilter ? { kqlFilter } : {}),
+    },
+    toPatterns: (data) => toRetrievedPatterns(data.patterns ?? []),
+  });

@@ -17,26 +17,16 @@ Services are registered during plugin [start](./server/plugin.ts) phase and defi
 The `semanticLogSearch` service provides natural language search for log patterns:
 
 ```typescript
-const { patterns } = await logsDataAccess.services.semanticLogSearch.search({
+const { patterns, strategy } = await logsDataAccess.services.semanticLogSearch.search({
   esClient,
   target: 'logs-*',
   nlQuery: 'connection failures',
   timeRange: { start: Date.now() - 3600000, end: Date.now() },
 });
-
-// Expand a pattern to get raw documents
-const { documents } = await logsDataAccess.services.semanticLogSearch.expand({
-  esClient,
-  target: 'logs-*',
-  field: patterns[0].field,
-  pattern: patterns[0].pattern,
-  timeRange: { start: Date.now() - 3600000, end: Date.now() },
-});
 ```
 
-The service automatically detects index capabilities:
-- If `semantic_text` is mapped: uses semantic ranking
-- If `pattern_text` is mapped: uses exact template matching for expansion
-- Otherwise: falls back to `categorize_text` aggregation
+The implemented path is ES|QL `RERANK` + `CATEGORIZE`. If the cluster has no RERANK inference endpoint, `search` returns `{ patterns: [], unavailable: true }`.
 
-See [scripts/semantic_log_search/README.md](./scripts/semantic_log_search/README.md) for the evaluation harness.
+The pre-indexed rungs (`semantic_text` / `pattern_text`) and `expand` are not implemented. Detection of those mappings is still in `detectCapabilities`; the planned direction is to feed patterns from Knowledge Indicators in the AI Index rather than querying logs at request time.
+
+`strategy` names the ranking path that produced the result. It is a debug and eval signal, not something callers should branch on.

@@ -41,9 +41,9 @@ const ANSWER_CRITERIA = [
  * latency and tool selection become measurable.
  *
  * The baseline is the default agent: the standard tool set with no log-specific
- * tool, which is what a user gets today. The keyword and semantic arms both get
- * `observability.get_logs`; only the keyword arm is forbidden from using
- * `semanticFilter`.
+ * tool, which is what a user gets today. The keyword arm gets
+ * `observability.get_logs`; the semantic arm gets both log tools and is not
+ * told which one to use.
  */
 evaluate.describe(
   'Semantic log search: agent',

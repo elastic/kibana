@@ -56,6 +56,10 @@ import {
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID, createGetLogsTool } from './get_logs/tool';
 import {
+  OBSERVABILITY_GET_LOGS_SEMANTIC_TOOL_ID,
+  createGetLogsSemanticTool,
+} from './get_logs_semantic/tool';
+import {
   OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
   createGetApmCorrelationsTool,
 } from './get_apm_correlations/tool';
@@ -84,6 +88,7 @@ export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
   OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_LOGS_SEMANTIC_TOOL_ID,
   OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
 ];
 
@@ -114,6 +119,7 @@ export async function registerTools({
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
     createGetLogsTool({ core, logger }),
+    createGetLogsSemanticTool({ core, logger }),
     createGetApmCorrelationsTool({ core, plugins, logger }),
   ];
 
