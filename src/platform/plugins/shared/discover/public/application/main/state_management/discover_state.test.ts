@@ -369,20 +369,23 @@ describe('Discover state', () => {
     test.each([
       { warnings: [], toastCount: 0 },
       { warnings: [warning], toastCount: 1 },
-    ])('shows $toastCount warning toasts when loading $warnings', async ({ warnings, toastCount }) => {
-      const { internalState, services } = getDiscoverInternalStateMock();
-      const session = createDiscoverSessionMock();
-      jest.spyOn(services.sessionService, 'get').mockResolvedValueOnce({ session, warnings });
+    ])(
+      'shows $toastCount warning toasts when loading $warnings',
+      async ({ warnings, toastCount }) => {
+        const { internalState, services } = getDiscoverInternalStateMock();
+        const session = createDiscoverSessionMock();
+        jest.spyOn(services.sessionService, 'get').mockResolvedValueOnce({ session, warnings });
 
-      await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
-      await internalState
-        .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
-        .unwrap();
+        await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
+        await internalState
+          .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
+          .unwrap();
 
-      expect(services.sessionService.get).toHaveBeenCalledWith(session.id);
-      expect(internalState.getState().persistedDiscoverSession).toEqual(session);
-      expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
-    });
+        expect(services.sessionService.get).toHaveBeenCalledWith(session.id);
+        expect(internalState.getState().persistedDiscoverSession).toEqual(session);
+        expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
+      }
+    );
   });
 
   describe('Loading a session with an inline data view', () => {
