@@ -42,6 +42,15 @@ export const NETWORK_PREVIEW_BANNER = {
   textColor: 'warning',
 };
 
+/**
+ * Zoom level at which entity nodes switch from the compact default view to the
+ * "with layers on" expanded view showing additional metadata rows.
+ *
+ * The graph's maxZoom is 1.3 and fitView caps at 0.85, so anything above 1.1
+ * is clearly "intentionally zoomed in" by the user.
+ */
+export const LAYERS_ZOOM_THRESHOLD = 1.1;
+
 export {
   NODE_WIDTH,
   NODE_HEIGHT,
