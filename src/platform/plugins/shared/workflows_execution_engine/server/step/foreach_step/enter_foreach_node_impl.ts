@@ -48,15 +48,22 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     const foreachInput = Array.isArray(foreachConfig)
       ? JSON.stringify(foreachConfig)
       : foreachConfig;
-    this.stepExecutionRuntime.setInput({
-      foreach: foreachInput,
-    });
 
-    const evaluatedItems = this.getItems();
-    this.stepExecutionRuntime.setInput({
-      foreach: foreachInput,
-      items: evaluatedItems,
-    });
+    let evaluatedItems: unknown[];
+
+    try {
+      evaluatedItems = this.getItems();
+      this.stepExecutionRuntime.setInput({
+        foreach: foreachInput,
+        items: evaluatedItems,
+      });
+    } catch (error) {
+      this.stepExecutionRuntime.setInput({
+        foreach: foreachInput,
+      });
+
+      throw error;
+    }
 
     if (evaluatedItems.length === 0) {
       // No iterations will run — release the pin we just took.

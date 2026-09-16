@@ -93,12 +93,10 @@ describe('EnterForeachNodeImpl', () => {
         expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
       });
 
-      it('should persist foreach before items after evaluation succeeds', async () => {
+      it('should persist foreach and items after evaluation succeeds', async () => {
         await underTest.run();
-        expect(stepExecutionRuntime.setInput).toHaveBeenNthCalledWith(1, {
-          foreach: JSON.stringify(['item1', 'item2', 'item3']),
-        });
-        expect(stepExecutionRuntime.setInput).toHaveBeenNthCalledWith(2, {
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['item1', 'item2', 'item3']),
           items: ['item1', 'item2', 'item3'],
         });

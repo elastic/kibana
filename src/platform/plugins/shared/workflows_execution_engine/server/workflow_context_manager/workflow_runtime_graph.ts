@@ -106,21 +106,7 @@ export class WorkflowRuntimeGraph {
 
   /** Node the cursor or a step should run, by id. Missing id is `undefined`. */
   public getNode(nodeId: string): GraphNodeUnion | undefined {
-    const fromOrder = this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
-    if (fromOrder) {
-      return fromOrder;
-    }
-
-    if (this.compiledGraph.getNode(nodeId)) {
-      return undefined;
-    }
-
-    const existingSynthetic = this.syntheticNodesById.get(nodeId);
-    if (existingSynthetic) {
-      return existingSynthetic.node;
-    }
-
-    return this.hydrateMissingSynthetic(nodeId);
+    return this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
   }
 
   /**
@@ -276,61 +262,6 @@ export class WorkflowRuntimeGraph {
 
   private requireNodeList(nodeId: string): GraphNodeUnion[] {
     return [this.requireNode(nodeId)];
-  }
-
-  /**
-   * Resume can persist a synthetic current id while omitting that node from
-   * `scopeStack`. Rebuild the pair under its compiled owner when nothing is minted yet.
-   */
-  private hydrateMissingSynthetic(nodeId: string): GraphNodeUnion | undefined {
-    const parsed = this.parseSyntheticNodeId(nodeId);
-    if (!parsed) {
-      return undefined;
-    }
-
-    if (this.mintedSyntheticAt(parsed.ownerId)) {
-      return undefined;
-    }
-
-    const owner = this.compiledGraph.getNode(parsed.ownerId);
-    if (!owner) {
-      return undefined;
-    }
-
-    this.insertSyntheticScope(parsed.ownerId, parsed.stepId, `${owner.stepType}-iteration`);
-    return this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
-  }
-
-  private parseSyntheticNodeId(nodeId: string): { ownerId: string; stepId: string } | undefined {
-    const enterId = nodeId.startsWith(EXIT_NODE_ID_PREFIX)
-      ? nodeId.replace(EXIT_NODE_ID_PREFIX, ENTER_NODE_ID_PREFIX)
-      : nodeId;
-
-    if (!enterId.startsWith(ENTER_SYNTHETIC_PREFIX)) {
-      return undefined;
-    }
-
-    const remainder = enterId.slice(ENTER_SYNTHETIC_PREFIX.length);
-    let ownerId: string | undefined;
-    for (const compiledId of this.compiledGraph.topologicalOrder) {
-      if (
-        remainder.startsWith(`${compiledId}_`) &&
-        (ownerId == null || compiledId.length > ownerId.length)
-      ) {
-        ownerId = compiledId;
-      }
-    }
-
-    if (!ownerId) {
-      return undefined;
-    }
-
-    const stepId = remainder.slice(ownerId.length + 1);
-    if (!stepId) {
-      return undefined;
-    }
-
-    return { ownerId, stepId };
   }
 
   private mintedSyntheticAt(ownerNodeId: string): SyntheticGraphNode | undefined {
