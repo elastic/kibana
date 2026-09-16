@@ -7,3 +7,5 @@
 
 export { Page } from './esql_job';
 export { EsqlJobTypeCard } from './esql_job_type_card';
+export { EsqlTimeRangeStep } from './esql_time_range_step';
+export { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';

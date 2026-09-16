@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import React, { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -21,7 +21,11 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { ErrorType } from '@kbn/ml-common-types/errors';
 
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
-import { GOLD_ESQL_DATAFEED_QUERY } from './gold_query';
+import {
+  EsqlWizardProvider,
+  useEsqlWizardContext,
+  useOptionalEsqlWizardContext,
+} from './esql_wizard_context';
 
 const DEBOUNCE_MS = 300;
 const NUMERIC_ESQL_TYPES = new Set([
@@ -63,45 +67,36 @@ export interface EsqlQueryStepState {
  * The state is intentionally independent of a DataView so later wizard steps can
  * use the user's ES|QL output directly when building the job and datafeed.
  */
-export const EsqlQueryStep = () => {
+const EsqlQueryStepContent = () => {
   const mlApi = useMlApi();
-  const [query, setQuery] = useState(GOLD_ESQL_DATAFEED_QUERY);
-  const [sourceTimeField, setSourceTimeField] = useState('@timestamp');
-  const [bucketSpan, setBucketSpan] = useState('1h');
-  const [columns, setColumns] = useState<ESQLFieldWithMetadata[]>([]);
-  const [emittedTimeField, setEmittedTimeField] = useState('');
-  const [detectorFields, setDetectorFields] = useState<string[]>([]);
-  const [influencers, setInfluencers] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<unknown>();
+  const { state, setQueryState } = useEsqlWizardContext();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<unknown>();
   const requestGeneration = useRef(0);
 
-  const allOptions = useMemo(() => toOptions(columns), [columns]);
+  const allOptions = useMemo(() => toOptions(state.columns), [state.columns]);
   const detectorOptions = useMemo(
-    () => toOptions(columns.filter(({ type }) => NUMERIC_ESQL_TYPES.has(type))),
-    [columns]
+    () => toOptions(state.columns.filter(({ type }) => NUMERIC_ESQL_TYPES.has(type))),
+    [state.columns]
   );
   const selectedEmittedTime = useMemo(
-    () => allOptions.filter(({ label }) => label === emittedTimeField),
-    [allOptions, emittedTimeField]
+    () => allOptions.filter(({ label }) => label === state.emittedTimeField),
+    [allOptions, state.emittedTimeField]
   );
   const selectedDetectorFields = useMemo(
-    () => detectorOptions.filter(({ label }) => detectorFields.includes(label)),
-    [detectorOptions, detectorFields]
+    () => detectorOptions.filter(({ label }) => state.detectorFields.includes(label)),
+    [detectorOptions, state.detectorFields]
   );
   const selectedInfluencers = useMemo(
-    () => allOptions.filter(({ label }) => influencers.includes(label)),
-    [allOptions, influencers]
+    () => allOptions.filter(({ label }) => state.influencers.includes(label)),
+    [allOptions, state.influencers]
   );
 
   useEffect(() => {
     const generation = ++requestGeneration.current;
-    const trimmedQuery = query.trim();
+    const trimmedQuery = state.query.trim();
 
-    setColumns([]);
-    setEmittedTimeField('');
-    setDetectorFields([]);
-    setInfluencers([]);
+    setQueryState({ columns: [], emittedTimeField: '', detectorFields: [], influencers: [] });
     setError(undefined);
 
     if (trimmedQuery === '') {
@@ -111,12 +106,11 @@ export const EsqlQueryStep = () => {
 
     setIsLoading(true);
     const timeout = window.setTimeout(() => {
-      void mlApi.getEsqlQueryColumns({ query }).then(
+      void mlApi.getEsqlQueryColumns({ query: state.query }).then(
         ({ columns: nextColumns }) => {
           if (generation !== requestGeneration.current) return;
 
-          setColumns(nextColumns);
-          setEmittedTimeField(firstTimeField(nextColumns));
+          setQueryState({ columns: nextColumns, emittedTimeField: firstTimeField(nextColumns) });
           setIsLoading(false);
         },
         (nextError: unknown) => {
@@ -132,7 +126,7 @@ export const EsqlQueryStep = () => {
       window.clearTimeout(timeout);
       invalidateRequest(requestGeneration);
     };
-  }, [mlApi, query]);
+  }, [mlApi, setQueryState, state.query]);
 
   return (
     <EuiForm component="form">
@@ -140,8 +134,8 @@ export const EsqlQueryStep = () => {
         <EuiTextArea
           aria-label="ES|QL query"
           fullWidth
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          value={state.query}
+          onChange={(event) => setQueryState({ query: event.target.value })}
           data-test-subj="mlEsqlQuery"
         />
       </EuiFormRow>
@@ -150,8 +144,8 @@ export const EsqlQueryStep = () => {
         <EuiFieldText
           aria-label="Source time field"
           fullWidth
-          value={sourceTimeField}
-          onChange={(event) => setSourceTimeField(event.target.value)}
+          value={state.sourceTimeField}
+          onChange={(event) => setQueryState({ sourceTimeField: event.target.value })}
           data-test-subj="mlEsqlSourceTimeField"
         />
       </EuiFormRow>
@@ -160,8 +154,8 @@ export const EsqlQueryStep = () => {
         <EuiFieldText
           aria-label="Bucket span"
           fullWidth
-          value={bucketSpan}
-          onChange={(event) => setBucketSpan(event.target.value)}
+          value={state.bucketSpan}
+          onChange={(event) => setQueryState({ bucketSpan: event.target.value })}
           data-test-subj="mlEsqlBucketSpan"
         />
       </EuiFormRow>
@@ -172,8 +166,8 @@ export const EsqlQueryStep = () => {
           singleSelection
           options={allOptions}
           selectedOptions={selectedEmittedTime}
-          onChange={(options) => setEmittedTimeField(options[0]?.label ?? '')}
-          isDisabled={isLoading || columns.length === 0}
+          onChange={(options) => setQueryState({ emittedTimeField: options[0]?.label ?? '' })}
+          isDisabled={isLoading || state.columns.length === 0}
           data-test-subj="mlEsqlEmittedTimeField"
         />
       </EuiFormRow>
@@ -183,8 +177,10 @@ export const EsqlQueryStep = () => {
           aria-label="Detector fields"
           options={detectorOptions}
           selectedOptions={selectedDetectorFields}
-          onChange={(options) => setDetectorFields(options.map(({ label }) => label))}
-          isDisabled={isLoading || columns.length === 0}
+          onChange={(options) =>
+            setQueryState({ detectorFields: options.map(({ label }) => label) })
+          }
+          isDisabled={isLoading || state.columns.length === 0}
           data-test-subj="mlEsqlDetectorFields"
         />
       </EuiFormRow>
@@ -194,8 +190,8 @@ export const EsqlQueryStep = () => {
           aria-label="Influencers"
           options={allOptions}
           selectedOptions={selectedInfluencers}
-          onChange={(options) => setInfluencers(options.map(({ label }) => label))}
-          isDisabled={isLoading || columns.length === 0}
+          onChange={(options) => setQueryState({ influencers: options.map(({ label }) => label) })}
+          isDisabled={isLoading || state.columns.length === 0}
           data-test-subj="mlEsqlInfluencers"
         />
       </EuiFormRow>
@@ -219,5 +215,17 @@ export const EsqlQueryStep = () => {
         </p>
       </EuiText>
     </EuiForm>
+  );
+};
+
+export const EsqlQueryStep = () => {
+  const context = useOptionalEsqlWizardContext();
+
+  return context === undefined ? (
+    <EsqlWizardProvider>
+      <EsqlQueryStepContent />
+    </EsqlWizardProvider>
+  ) : (
+    <EsqlQueryStepContent />
   );
 };

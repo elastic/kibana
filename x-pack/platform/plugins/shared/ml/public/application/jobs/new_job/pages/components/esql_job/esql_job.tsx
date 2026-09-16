@@ -10,6 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../../components/ml_app_header';
 import { EsqlQueryStep } from './esql_query_step';
+import { EsqlTimeRangeStep } from './esql_time_range_step';
+import { EsqlWizardProvider } from './esql_wizard_context';
 
 export const Page: FC = () => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
@@ -22,7 +24,10 @@ export const Page: FC = () => {
         })}
         back={anomalyDetectionJobsBack}
       />
-      <EsqlQueryStep />
+      <EsqlWizardProvider>
+        <EsqlQueryStep />
+        <EsqlTimeRangeStep />
+      </EsqlWizardProvider>
     </div>
   );
 };
