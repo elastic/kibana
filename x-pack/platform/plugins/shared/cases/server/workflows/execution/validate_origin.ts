@@ -79,7 +79,8 @@ const parseIndexedPairs = (value: unknown, inputPath: string, max: number): Docu
 };
 
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds`.
+ * Reads the (id, index) pairs from `inputs.event.alertIds` and rejects query-based alert
+ * selections, which cannot be proven to belong to the case before trigger preprocessing.
  *
  * Malformed entries are rejected, never skipped. The pairs returned here are the ones
  * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
@@ -88,7 +89,14 @@ const parseIndexedPairs = (value: unknown, inputPath: string, max: number): Docu
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
 export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): DocumentPair[] => {
-  const { alertIds } = getRecord(inputs.event) ?? {};
+  const { alertIds, querySelection, triggerType } = getRecord(inputs.event) ?? {};
+
+  if (triggerType === 'alert' && querySelection != null) {
+    throw Boom.badRequest(
+      'Query-based alert selections are not supported when running workflows from cases.'
+    );
+  }
+
   // A selected alert must be attached to the case, and a case holds at most MAX_ALERTS_PER_CASE
   // alerts, so anything larger cannot be legitimate — and would become an mget of that size.
   return parseIndexedPairs(alertIds, 'inputs.event.alertIds', MAX_ALERTS_PER_CASE);

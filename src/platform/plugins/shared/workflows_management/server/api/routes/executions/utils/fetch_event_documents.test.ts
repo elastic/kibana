@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   fetchDocumentsByIds,
   fetchDocumentsByQuery,
+  MAX_TRIGGER_EVENT_BYTES,
   MAX_TRIGGER_EVENT_DOCS,
 } from './fetch_event_documents';
 
@@ -60,14 +61,29 @@ describe('fetch_event_documents', () => {
         logger
       );
 
-      expect(mockEsClient.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'a', _index: 'idx' },
-          { _id: 'b', _index: 'idx' },
-        ],
-      });
+      expect(mockEsClient.mget).toHaveBeenCalledWith(
+        {
+          docs: [
+            { _id: 'a', _index: 'idx' },
+            { _id: 'b', _index: 'idx' },
+          ],
+        },
+        { maxResponseSize: MAX_TRIGGER_EVENT_BYTES }
+      );
       expect(hits).toEqual([{ _id: 'a', _index: 'idx', _source: { foo: 'bar' } }]);
       expect(logger.warn).toHaveBeenCalledWith('Document not found: b in index idx');
+    });
+
+    it('rejects an explicit selection larger than MAX_TRIGGER_EVENT_DOCS', async () => {
+      const ids = Array.from({ length: MAX_TRIGGER_EVENT_DOCS + 1 }, (_, index) => ({
+        _id: `doc-${index}`,
+        _index: 'idx',
+      }));
+
+      await expect(fetchDocumentsByIds(ids, asEsClient(), logger)).rejects.toThrow(
+        `cannot contain more than ${MAX_TRIGGER_EVENT_DOCS} document IDs`
+      );
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
     it('rethrows and logs on mget failure', async () => {
@@ -109,6 +125,12 @@ describe('fetch_event_documents', () => {
         { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
         { _shard_doc: 'asc' },
       ]);
+      expect(mockEsClient.search.mock.calls[0][0].allow_partial_search_results).toBe(false);
+      expect(mockEsClient.search.mock.calls[0][0].track_total_hits).toBe(true);
+      expect(mockEsClient.search.mock.calls[1][0].track_total_hits).toBe(false);
+      expect(mockEsClient.search.mock.calls[0][1]).toEqual({
+        maxResponseSize: MAX_TRIGGER_EVENT_BYTES,
+      });
       // First call has no search_after, subsequent calls do.
       expect(mockEsClient.search.mock.calls[0][0].search_after).toBeUndefined();
       expect(mockEsClient.search.mock.calls[1][0].search_after).toEqual(['b']);
@@ -133,6 +155,58 @@ describe('fetch_event_documents', () => {
       expect(result.total).toBe(10);
       expect(result.truncated).toBe(true);
       expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+    });
+
+    it('counts source-less search hits toward maxDocs', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        pit_id: 'pit-1',
+        hits: {
+          total: { value: 10, relation: 'eq' },
+          hits: [
+            { _id: 'a', _index: 'idx', sort: ['a'] },
+            { _id: 'b', _index: 'idx', sort: ['b'] },
+          ],
+        },
+      });
+
+      const result = await fetchDocumentsByQuery(
+        { query: { match_all: {} }, index: 'idx', maxDocs: 2 },
+        asEsClient(),
+        logger
+      );
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ hits: [], total: 10, truncated: true });
+    });
+
+    it('rejects accumulated document sources that exceed maxBytes', async () => {
+      mockEsClient.search.mockResolvedValueOnce(page(['a', 'b'], 2));
+
+      await expect(
+        fetchDocumentsByQuery(
+          { query: { match_all: {} }, index: 'idx', maxBytes: 10 },
+          asEsClient(),
+          logger
+        )
+      ).rejects.toThrow('Trigger event document sources exceed the 10 byte limit');
+      expect(mockEsClient.search.mock.calls[0][1]).toEqual({ maxResponseSize: 10 });
+      expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['times out', { timed_out: true }],
+      ['has failed shards', { _shards: { failed: 1 } }],
+    ])('rejects an incomplete response that %s', async (_description, incompleteResponse) => {
+      mockEsClient.search.mockResolvedValueOnce({
+        ...page(['a'], 1),
+        ...incompleteResponse,
+        pit_id: 'pit-2',
+      });
+
+      await expect(
+        fetchDocumentsByQuery({ query: { match_all: {} }, index: 'idx' }, asEsClient(), logger)
+      ).rejects.toThrow('Incomplete document query response');
+      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-2' });
     });
 
     it('defaults to MAX_TRIGGER_EVENT_DOCS when maxDocs is not provided', async () => {

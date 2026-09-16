@@ -512,6 +512,29 @@ describe('parseSelectedAlertPairs', () => {
     expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
   });
 
+  it('rejects query-based alert selections', () => {
+    expect(() =>
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'alert',
+          querySelection: { index: '.alerts-*', query: { match_all: {} } },
+        },
+      })
+    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
+  });
+
+  it('rejects a query selection even when attached alert IDs are also provided', () => {
+    expect(() =>
+      parseSelectedAlertPairs({
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+          querySelection: { index: '.alerts-*', query: { match_all: {} } },
+        },
+      })
+    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
+  });
+
   it('throws 400 when alertIds is not an array', () => {
     expect(() => parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })).toThrow(
       'inputs.event.alertIds must be an array.'

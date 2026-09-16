@@ -456,6 +456,23 @@ describe('CasesWorkflowRunService', () => {
       ).rejects.toThrow('Observable inputs can only be used with observable origins.');
       expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
     });
+
+    it('rejects query-based alert inputs when origin is absent', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              querySelection: { index: '.alerts-*', query: { match_all: {} } },
+            },
+          },
+        })
+      ).rejects.toThrow(
+        'Query-based alert selections are not supported when running workflows from cases.'
+      );
+      expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   describe('single-case (sub-entity) origin types reject multiple caseIds', () => {
