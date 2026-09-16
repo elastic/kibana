@@ -53,6 +53,58 @@ const emptyAiIndex = (destValue: string) => ({
   sources: [],
 });
 
+apiTest.describe('AI-index memory toggle', { tag: tags.stateful.classic }, () => {
+  apiTest('round-trips the toggle', async ({ apiClient, esClient, requestAuth }) => {
+    const id = 'scout_memory_toggle_ai_index';
+    const path = aiIndexPath(id);
+    const dest = 'ai-index-ds-scout-memory-toggle';
+    const credentials = await requestAuth.getApiKey('admin');
+    const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+    const body = {
+      description: 'Memory toggle integration test',
+      dest: dataStreamDest(dest),
+      automations: [],
+      sources: [],
+    };
+
+    await apiClient.delete(path, { headers, responseType: 'json' });
+    await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
+
+    try {
+      const createResponse = await apiClient.post(COLLECTION, {
+        headers,
+        responseType: 'json',
+        body: { id, ...body },
+      });
+      expect(createResponse).toHaveStatusCode(201);
+
+      const defaultResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(defaultResponse).toHaveStatusCode(200);
+      expect(defaultResponse.body.memory_enabled).toBe(false);
+
+      const updateResponse = await apiClient.put(path, {
+        headers,
+        responseType: 'json',
+        body: { ...body, memory_enabled: true },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+
+      const enabledResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(enabledResponse).toHaveStatusCode(200);
+      expect(enabledResponse.body.memory_enabled).toBe(true);
+    } finally {
+      await apiClient.delete(path, { headers, responseType: 'json' });
+      await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+    }
+  });
+});
+
 // Failing: See https://github.com/elastic/kibana/issues/291053
 apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
@@ -114,6 +166,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
+      expect(response.body.memory_enabled).toBe(false);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -135,7 +188,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description' },
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: true },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -146,6 +199,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
+      expect(updatedResponse.body.memory_enabled).toBe(true);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 

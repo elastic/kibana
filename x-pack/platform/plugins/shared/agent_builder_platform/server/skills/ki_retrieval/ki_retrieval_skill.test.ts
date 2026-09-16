@@ -38,6 +38,28 @@ describe('kiRetrievalSkill', () => {
   it('requires the prompt-provided space filter on every AI-index query', () => {
     expect(kiRetrievalSkill.content).toContain('pass its exact `filter`');
     expect(kiRetrievalSkill.content).toContain('on every AI-index query');
+    expect(kiRetrievalSkill.content).toContain('`permissions.kibana.privileges`');
+    expect(kiRetrievalSkill.content).toContain('including memory queries');
+    expect(kiRetrievalSkill.content).not.toContain('`spaces` keyword field');
+  });
+
+  it('documents memory exclusion and recall', () => {
+    expect(kiRetrievalSkill.content).toContain(
+      'type != "memory.session" AND type != "memory.session_fact"'
+    );
+    expect(kiRetrievalSkill.content).toContain('Use `describe_ai_index`');
+    expect(kiRetrievalSkill.content).toContain('expires_at IS NULL OR expires_at > NOW()');
+    expect(kiRetrievalSkill.content).toContain('INLINE STATS latest_at = MAX(@timestamp) BY id');
+    expect(kiRetrievalSkill.content).toContain(
+      'governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"'
+    );
+    expect(kiRetrievalSkill.content).toContain('FIELD_EXTRACT(attributes, "memory.session_id")');
+    expect(kiRetrievalSkill.content).toContain(
+      'references.uri, references.relation, references.description'
+    );
+    expect(kiRetrievalSkill.content.indexOf('| WHERE @timestamp == latest_at')).toBeLessThan(
+      kiRetrievalSkill.content.indexOf('expires_at IS NULL OR expires_at > NOW()')
+    );
   });
 
   it('has no referencedContent', () => {
