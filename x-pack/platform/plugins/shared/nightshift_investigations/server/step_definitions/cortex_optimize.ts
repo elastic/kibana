@@ -12,8 +12,15 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { runCortexOptimize } from '../cortex/register_cortex';
+import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
+
+/**
+ * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
+ * investigation, but it should not leave a task hanging on a stuck inference call either.
+ */
+const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const cortexOptimizeStepDefinition = ({
   getInference,
@@ -46,16 +53,23 @@ export const cortexOptimizeStepDefinition = ({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
     }),
     handler: async (context) => {
-      await runCortexOptimize({
-        request: context.contextManager.getFakeRequest(),
-        agentId: context.input.agent_id,
-        userMessage: context.input.prompt,
-        assistantMessage: context.input.response,
-        esClient: context.contextManager.getScopedEsClient(),
-        getInference,
-        getSearchInferenceEndpoints,
-        logger,
-      });
+      await withTimeout(
+        (signal) =>
+          runCortexOptimize({
+            request: context.contextManager.getFakeRequest(),
+            agentId: context.input.agent_id,
+            userMessage: context.input.prompt,
+            assistantMessage: context.input.response,
+            esClient: context.contextManager.getScopedEsClient(),
+            spaceId: context.contextManager.getContext().workflow.spaceId,
+            signal,
+            logger,
+            getInference,
+            getSearchInferenceEndpoints,
+          }),
+        OPTIMIZE_TIMEOUT_MS,
+        `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+      );
 
       return { output: { status: 'ok' as const } };
     },

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "95efe502d9f7098aced596b0ce283cb3073595c3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 67,
-        "column": 28
+        "line": 89,
+        "column": 18
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 161,
-        "column": 24
+        "line": 180,
+        "column": 73
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 175,
-        "column": 59
+        "line": 194,
+        "column": 55
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 197,
-        "column": 5
+        "line": 214,
+        "column": 22
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 204,
-        "column": 7
+        "line": 223,
+        "column": 73
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 213,
-        "column": 21
+        "line": 229,
+        "column": 13
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 222,
-        "column": 22
+        "line": 237,
+        "column": 71
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 231,
-        "column": 59
+        "line": 247,
+        "column": 21
       }
     },
     {
@@ -126,8 +126,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 238,
+        "line": 255,
+        "column": 73
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-7de293b8246ac86",
+      "title": "context engine AI indices API deletes the dest when it is the last AI index using it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 281,
         "column": 12
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-e42452f80aacc10",
+      "title": "context engine AI indices API skips dest delete while another AI index still uses it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 307,
+        "column": 62
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-5728a6f6f346108",
+      "title": "context engine AI indices API does not delete an index-pattern dest when deleting knowledge indicators",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 358,
+        "column": 16
       }
     }
   ]

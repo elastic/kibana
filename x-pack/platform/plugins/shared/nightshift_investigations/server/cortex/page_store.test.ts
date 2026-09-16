@@ -69,6 +69,7 @@ describe('createCortexPageStore', () => {
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'default',
     });
 
     const result = await store.list({ entityType: 'service' });
@@ -116,6 +117,7 @@ describe('createCortexPageStore', () => {
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'default',
     });
 
     const result = await store.list();
@@ -134,6 +136,7 @@ describe('createCortexPageStore', () => {
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'default',
     });
 
     const page = await store.upsert({
@@ -144,15 +147,19 @@ describe('createCortexPageStore', () => {
       status: 'tentative',
     });
 
+    // The space lives in the stored id so two spaces cannot overwrite each other's page, while
+    // the id the caller sees stays logical.
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'cortex_service_checkout',
+        id: 'default:cortex_service_checkout',
         document: expect.objectContaining({
           type: 'service',
           title: 'Checkout',
           tags: ['cortex', 'service'],
+          attributes: expect.objectContaining({ space_id: 'default' }),
         }),
-      })
+      }),
+      expect.anything()
     );
     expect(page.id).toBe('cortex_service_checkout');
     expect(page.corroborations).toBe(0);
@@ -171,6 +178,7 @@ describe('createCortexPageStore', () => {
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'default',
     });
 
     const page = await store.corroborate('cortex_service_checkout');
@@ -181,8 +189,35 @@ describe('createCortexPageStore', () => {
         document: expect.objectContaining({
           attributes: expect.objectContaining({ corroborations: 4 }),
         }),
-      })
+      }),
+      expect.anything()
     );
+  });
+
+  // Corroborating revives an archived page, but it has to earn its way back rather than jumping
+  // straight to the status the optimizer retired it from.
+  it('revives an archived page as tentative, not established', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'cortex_service_checkout',
+        _source: {
+          ...source,
+          attributes: { ...source.attributes, status: 'archived' },
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.corroborate('cortex_service_checkout');
+
+    expect(page?.status).toBe('tentative');
   });
 
   it('prunes prefixed duplicate ids onto the canonical document', async () => {
@@ -211,10 +246,10 @@ describe('createCortexPageStore', () => {
         },
       }),
       get: jest.fn().mockImplementation(async ({ id }: { id: string }) => {
-        if (id === 'cortex_service_cortex-service-email-service') {
+        if (id === 'default:cortex_service_cortex-service-email-service') {
           return { found: true, _id: id, _source: prefixed };
         }
-        if (id === 'cortex_service_email-service') {
+        if (id === 'default:cortex_service_email-service') {
           return { found: true, _id: id, _source: canonical };
         }
         return { found: false };
@@ -226,19 +261,93 @@ describe('createCortexPageStore', () => {
     const store = createCortexPageStore({
       esClient: esClient as never,
       logger,
+      spaceId: 'default',
     });
 
     await expect(store.pruneDuplicates()).resolves.toBe(1);
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'cortex_service_email-service',
+        id: 'default:cortex_service_email-service',
         document: expect.objectContaining({
           attributes: expect.objectContaining({ corroborations: 2, slug: 'email-service' }),
         }),
-      })
+      }),
+      expect.anything()
     );
     expect(esClient.delete).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'cortex_service_cortex-service-email-service' })
+      expect.objectContaining({ id: 'default:cortex_service_cortex-service-email-service' }),
+      expect.anything()
     );
+  });
+
+  it('only reads pages belonging to its own space', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'marketing',
+    });
+
+    await store.list();
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { tags: 'cortex' } },
+              { term: { 'attributes.space_id': 'marketing' } },
+            ],
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('keeps two spaces on separate documents for the same entity', async () => {
+    const indexFor = async (spaceId: string) => {
+      const esClient = {
+        get: jest.fn().mockResolvedValue({ found: false }),
+        index: jest.fn().mockResolvedValue({}),
+      };
+      const store = createCortexPageStore({
+        esClient: esClient as never,
+        logger,
+        spaceId,
+      });
+      await store.upsert({
+        entityType: 'service',
+        slug: 'checkout',
+        title: 'Checkout',
+        content: 'same entity, different space',
+        status: 'tentative',
+      });
+      return esClient.index.mock.calls[0][0].id;
+    };
+
+    expect(await indexFor('default')).toBe('default:cortex_service_checkout');
+    expect(await indexFor('marketing')).toBe('marketing:cortex_service_checkout');
+  });
+
+  it('hands callers logical ids even though storage is namespaced', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: { hits: [{ _id: 'marketing:cortex_service_checkout', _source: source }] },
+      }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'marketing',
+    });
+
+    const { pages } = await store.list();
+
+    expect(pages[0].id).toBe('cortex_service_checkout');
   });
 });

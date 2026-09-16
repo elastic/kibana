@@ -7,10 +7,6 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { GetCortexPageResponse, ListCortexPagesResponse } from './types';
-
-const CORTEX_PAGES_PATH = '/internal/nightshift/cortex/pages';
-const CORTEX_AVAILABILITY_PATH = '/internal/nightshift/cortex/availability';
 
 const cortexKeys = {
   availability: ['cortex', 'availability'] as const,
@@ -19,16 +15,31 @@ const cortexKeys = {
 };
 
 /**
- * Reports whether xpack.nightshift_investigations.cortex.enabled is on. A failed request means
- * the plugin is disabled or absent, which is treated the same as Cortex being off.
+ * Typed client for the Nightshift routes, or undefined when the plugin is not installed. Every
+ * query below stays disabled in that case.
+ */
+const useCortexClient = () => {
+  const {
+    dependencies: {
+      start: { nightshiftInvestigations },
+    },
+  } = useKibana();
+
+  return nightshiftInvestigations?.investigationsClient;
+};
+
+/**
+ * Reports whether Cortex is usable: the Nightshift plugin has to be installed, and
+ * `xpack.nightshift_investigations.cortex.enabled` has to be on.
  */
 export const useCortexEnabled = (): boolean => {
-  const { core } = useKibana();
+  const client = useCortexClient();
 
   const { data } = useQuery({
     queryKey: cortexKeys.availability,
     queryFn: ({ signal }) =>
-      core.http.get<{ enabled: boolean }>(CORTEX_AVAILABILITY_PATH, { signal }),
+      client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
+    enabled: client !== undefined,
     retry: false,
   });
 
@@ -36,21 +47,26 @@ export const useCortexEnabled = (): boolean => {
 };
 
 export const useCortexPages = () => {
-  const { core } = useKibana();
+  const client = useCortexClient();
 
   return useQuery({
     queryKey: cortexKeys.pages,
-    queryFn: ({ signal }) => core.http.get<ListCortexPagesResponse>(CORTEX_PAGES_PATH, { signal }),
+    queryFn: ({ signal }) =>
+      client!.fetch('GET /internal/nightshift/cortex/pages', { signal: signal ?? null }),
+    enabled: client !== undefined,
   });
 };
 
 export const useCortexPage = (id: string | undefined) => {
-  const { core } = useKibana();
+  const client = useCortexClient();
 
   return useQuery({
     queryKey: cortexKeys.page(id ?? ''),
     queryFn: ({ signal }) =>
-      core.http.get<GetCortexPageResponse>(`${CORTEX_PAGES_PATH}/${id}`, { signal }),
-    enabled: id !== undefined,
+      client!.fetch('GET /internal/nightshift/cortex/pages/{id}', {
+        signal: signal ?? null,
+        params: { path: { id: id! } },
+      }),
+    enabled: id !== undefined && client !== undefined,
   });
 };

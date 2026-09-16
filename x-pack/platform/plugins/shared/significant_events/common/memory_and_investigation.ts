@@ -6,6 +6,7 @@
  */
 
 /**
- * Sigevents memory data stream backing MemoryServiceImpl.
+ * Sigevents memory standard index backing MemoryServiceImpl.
+ * Must carry the `ai-index-idx-` prefix to align with Context Engine dynamic templates.
  */
-export const MEMORIES_DATA_STREAM = '.significant_events-memories';
+export const MEMORIES_DATA_STREAM = 'ai-index-idx-significant-events-memories';

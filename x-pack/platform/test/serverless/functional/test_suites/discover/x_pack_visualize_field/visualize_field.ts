@@ -52,7 +52,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover field visualize button', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/290942
+  describe.skip('discover field visualize button', () => {
     before(async () => {
       // Security project requires admin role, search/oblt project passes with developer/editor.
       await PageObjects.svlCommonPage.loginAsAdmin();

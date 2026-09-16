@@ -211,7 +211,12 @@ export const applyCortexEdits = async ({
       title: edit.title,
       description: edit.description ?? existing?.description,
       content: edit.content ?? existing?.content ?? '',
-      status: edit.status ?? existing?.status ?? 'tentative',
+      // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
+      // proposal cannot promote a retired fact straight back to established.
+      status:
+        existing?.status === 'archived'
+          ? 'tentative'
+          : edit.status ?? existing?.status ?? 'tentative',
       corroborations: existing?.corroborations,
     });
     logger.info(`Upserted Cortex page ${id}`);

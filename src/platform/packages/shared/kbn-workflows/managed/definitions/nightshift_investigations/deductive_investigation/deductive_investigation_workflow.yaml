@@ -228,6 +228,9 @@ steps:
         max-attempts: 3
         delay: 5s
         strategy: exponential
+      # Without this, exhausting the retries aborts the run before emit_investigation_failed, so
+      # nothing ever signals the failure.
+      continue: true
 
   - name: emit_investigation_completed
     type: kibana.request

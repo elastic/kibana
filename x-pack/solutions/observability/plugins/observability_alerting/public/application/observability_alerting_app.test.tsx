@@ -65,11 +65,11 @@ const mockAlertingVTwo = {
   ),
   CreateRuleOptionsFlyout: () => null,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
-    rules: { app: appId, basePath: paths.rules },
-    ruleLibrary: { app: appId, basePath: paths.ruleLibrary },
-    episodes: { app: appId, basePath: paths.episodes },
-    actionPolicies: { app: appId, basePath: paths.actionPolicies },
-    executionHistory: { app: appId, basePath: paths.executionHistory },
+    rules: { app: appId, pathPrefix: paths.rules },
+    ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
+    episodes: { app: appId, pathPrefix: paths.episodes },
+    actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
+    executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })),
 };
 
@@ -81,12 +81,12 @@ const createTestHistory = (pathname: string): ScopedHistory => {
 };
 
 const mockTriggersActionsUi = {
-  getClassicRulesPage: ({ tabs }: ClassicRulesPageProps) => (
+  getClassicRulesPage: jest.fn(({ tabs }: ClassicRulesPageProps) => (
     <>
       <Placeholder name="classicRulesPage" />
       <HostTabs tabs={tabs} />
     </>
-  ),
+  )),
 };
 
 const renderAt = (pathname: string) => {
@@ -109,6 +109,10 @@ const renderAt = (pathname: string) => {
 };
 
 describe('ObservabilityAlertingApp', () => {
+  beforeEach(() => {
+    mockTriggersActionsUi.getClassicRulesPage.mockClear();
+  });
+
   it('redirects / to inbox', () => {
     const { history } = renderAt('/');
 
@@ -130,6 +134,16 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(history.createSubHistory).toHaveBeenCalledWith(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideListBackButton: true,
+        history,
+        host: {
+          app: OBSERVABILITY_ALERTING_APP_ID,
+          pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+        },
+      })
+    );
   });
 
   it('passes observability v1/v2 tab hrefs to the classic rules page', async () => {

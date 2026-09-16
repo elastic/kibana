@@ -15,11 +15,12 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
@@ -31,7 +32,7 @@ interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
   node: GraphNodeUnion;
@@ -60,7 +61,7 @@ interface StepExecutionRuntimeInit {
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
-  private workflowGraph: WorkflowGraph;
+  private runtimeGraph: RuntimeGraphView;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -82,7 +83,7 @@ export class StepExecutionRuntime {
   }
 
   private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
+    return this.runtimeGraph.topologicalOrder;
   }
 
   private getStepName(): string {
@@ -102,7 +103,7 @@ export class StepExecutionRuntime {
   }
 
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
-    this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
+    this.runtimeGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
 
     // Use workflow execution ID as traceId for APM compatibility

@@ -18,11 +18,12 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import {
   callKibanaApi,
@@ -36,7 +37,7 @@ import { isSerializedError } from '../utils/errors';
 export interface ContextManagerInit {
   // New properties for logging
   templateEngine: WorkflowTemplatingEngine;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   node: GraphNodeUnion;
@@ -57,7 +58,7 @@ type ContextPathSegment = string | number;
 type ContextPath = ContextPathSegment[];
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: WorkflowGraph;
+  private workflowExecutionGraph: RuntimeGraphView;
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;

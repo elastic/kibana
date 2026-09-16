@@ -31,8 +31,11 @@ import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { memoryHydrateStepDefinition } from './step_definitions/memory_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex, createMemoryStore } from './memory/register_memory';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
@@ -47,6 +50,7 @@ import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { writeElasticManifest } from './tools/sandbox_bash/elastic_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
+import { scopeConversationId } from './tools/sandbox_bash/tool_utils';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -57,6 +61,7 @@ import {
   scheduleInvestigationReconciliationTask,
 } from './tasks/investigation_reconciliation_task';
 import type {
+  InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
@@ -85,6 +90,7 @@ export class NightshiftInvestigationsPlugin
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
+  private investigationQuotaCallback?: InvestigationQuotaCallback;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -101,6 +107,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -214,7 +221,10 @@ export class NightshiftInvestigationsPlugin
               handler: (context) => {
                 const { conversationId, request } = context;
                 if (!conversationId) return;
-                const scopedConversationId = `${getSpaceId(request)}:${conversationId}`;
+                const scopedConversationId = scopeConversationId(
+                  getSpaceId(request),
+                  conversationId
+                );
                 workspaceManager.backupWorkspace(scopedConversationId).catch((err) => {
                   sandboxLogger
                     .get('workspace')
@@ -246,10 +256,23 @@ export class NightshiftInvestigationsPlugin
             })
           );
           plugins.workflowsExtensions.registerStepDefinition(
+            memoryHydrateStepDefinition({
+              getConnectionManager: () => this.sandboxConnectionManager,
+              logger: this.logger.get('memory'),
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
               logger: this.logger.get('cortex'),
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
+            memoryOptimizeStepDefinition({
+              getInference: () => this.inference,
+              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              logger: this.logger.get('memory'),
             })
           );
         }
@@ -272,6 +295,7 @@ export class NightshiftInvestigationsPlugin
             return createCortexStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('cortex'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
         },
@@ -284,6 +308,15 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
+
+    return {
+      registerInvestigationQuota: (callback) => {
+        if (this.investigationQuotaCallback) {
+          throw new Error('Investigation quota callback is already registered');
+        }
+        this.investigationQuotaCallback = callback;
+      },
+    };
   }
 
   start(
@@ -352,6 +385,7 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       isAvailable: () =>
         isInvestigationAvailable({

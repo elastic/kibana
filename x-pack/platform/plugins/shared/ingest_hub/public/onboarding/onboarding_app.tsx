@@ -12,8 +12,14 @@ import { Router, Route } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { FleetStatusProvider, sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
+import {
+  FleetStatusProvider,
+  FlyoutContextProvider,
+  KibanaVersionContext,
+  sendGetCloudOnboardingDeployment,
+} from '@kbn/fleet-plugin/public';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -116,7 +122,11 @@ export async function hydrateOnboardingSession(
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
-  deps: IngestHubStartDependencies
+  deps: IngestHubStartDependencies,
+  // kibanaVersion is threaded here so Fleet components that call useKibanaVersion() (e.g.
+  // AgentEnrollmentFlyout → installation_message.tsx) don't throw. The context is provided
+  // at app root alongside FleetStatusProvider. See: fleet/public/hooks/use_kibana_version.ts
+  kibanaVersion?: string
 ) {
   // Write session storage before any hooks initialize.
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
@@ -152,24 +162,51 @@ export async function renderOnboardingApp(
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider
-        services={{ ...coreStart, cloud: deps.cloud, fleet: deps.fleet, spaces: deps.spaces }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <FleetStatusProvider>
-            <OnboardingFlowProvider>
-              <Router history={params.history}>
-                <Route exact path="/">
-                  <RootRedirect />
-                </Route>
-                <Route path="/:integrationId">
-                  <OnboardingShell />
-                </Route>
-              </Router>
-            </OnboardingFlowProvider>
-          </FleetStatusProvider>
-        </QueryClientProvider>
-      </KibanaContextProvider>
+      // EuiThemeProvider (styled-components bridge) is required by any Fleet component that uses
+      // `props.theme.eui.*` in styled-components (e.g. AgentPolicyCreateInlineForm at line 36).
+      // Without it, styled-components receives undefined theme and throws at render time.
+      // Fleet's own app root adds this provider for the same reason; we mirror it here.
+      // See: fleet/public/applications/fleet/app.tsx lines 219-221.
+      <EuiThemeProvider darkMode={coreStart.theme.getTheme().darkMode}>
+        {/* authz must be part of the Kibana context so that Fleet's useAuthz() hook can read it
+            when AgentEnrollmentFlyout is rendered. Without it, authz.fleet.readAgentPolicies throws.
+            See: fleet/public/hooks/use_authz.ts */}
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            cloud: deps.cloud,
+            fleet: deps.fleet,
+            spaces: deps.spaces,
+            authz: deps.fleet.authz,
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <FleetStatusProvider>
+              {/* FlyoutContextProvider is required by AgentEnrollmentFlyout → EnrollmentRecommendation
+                  → useFlyoutContext(). The hook throws if the context is absent.
+                  See: fleet/public/hooks/use_flyout_context.tsx */}
+              <FlyoutContextProvider>
+                {/* KibanaVersionContext must wrap any Fleet component that calls useKibanaVersion().
+                  AgentEnrollmentFlyout reaches it via installation_message.tsx → useAgentVersion.
+                  Without this provider the hook throws by design (null context → Error).
+                  See: fleet/public/hooks/use_kibana_version.ts */}
+                <KibanaVersionContext.Provider value={kibanaVersion ?? ''}>
+                  <OnboardingFlowProvider>
+                    <Router history={params.history}>
+                      <Route exact path="/">
+                        <RootRedirect />
+                      </Route>
+                      <Route path="/:integrationId">
+                        <OnboardingShell />
+                      </Route>
+                    </Router>
+                  </OnboardingFlowProvider>
+                </KibanaVersionContext.Provider>
+              </FlyoutContextProvider>
+            </FleetStatusProvider>
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
     )
   );
   return () => root.unmount();

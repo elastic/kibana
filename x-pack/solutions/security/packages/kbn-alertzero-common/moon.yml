@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/i18n'
   - '@kbn/deeplinks-security'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package

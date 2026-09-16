@@ -19,6 +19,7 @@ import {
 
 const MAX_LIST_SIZE = 500;
 const CORTEX_TAG = 'cortex';
+const SPACE_ID_FIELD = 'attributes.space_id';
 
 interface CortexKiSource {
   '@timestamp'?: string;
@@ -31,6 +32,7 @@ interface CortexKiSource {
     status?: string;
     corroborations?: number | string;
     slug?: string;
+    space_id?: string;
   };
 }
 
@@ -196,28 +198,49 @@ const collapseDuplicatePages = (pages: CortexPageSummary[]): CortexPageSummary[]
 export const createCortexPageStore = ({
   esClient,
   logger,
+  spaceId,
+  signal,
   destValue = CORTEX_AI_INDEX_DEST,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
+  /** Aborts in-flight Elasticsearch requests when the calling step times out. */
+  signal?: AbortSignal;
   destValue?: string;
 }): CortexPageStore => {
+  // Every space keeps its own wiki in the shared AI index. Page ids are stable per space
+  // (`cortex_<type>_<slug>`), so the space has to live in the stored `_id` as well: without it two
+  // spaces writing the same entity would overwrite each other's page. Ids stay logical everywhere
+  // outside this module — callers, the optimizer and the UI never see the prefix.
+  const toStoredId = (pageId: string): string => `${spaceId}:${pageId}`;
+  const toPageId = (storedId: string): string =>
+    storedId.startsWith(`${spaceId}:`) ? storedId.slice(spaceId.length + 1) : storedId;
+
   const listAllRaw = async (): Promise<CortexPageSummary[]> => {
-    const response = await esClient.search<CortexKiSource>({
-      index: destValue,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: MAX_LIST_SIZE,
-      track_total_hits: false,
-      query: { term: { tags: CORTEX_TAG } },
-      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-    });
+    const response = await esClient.search<CortexKiSource>(
+      {
+        index: destValue,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: MAX_LIST_SIZE,
+        track_total_hits: false,
+        // `attributes` is a flattened field, so its leaves are keywords and need no mapping change.
+        query: {
+          bool: {
+            filter: [{ term: { tags: CORTEX_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
+          },
+        },
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+      },
+      { signal }
+    );
 
     return response.hits.hits.flatMap((hit) => {
       if (hit._id === undefined || hit._source === undefined) {
         return [];
       }
-      const summary = toSummary(hit._id, hit._source);
+      const summary = toSummary(toPageId(hit._id), hit._source);
       return summary ? [summary] : [];
     });
   };
@@ -239,14 +262,17 @@ export const createCortexPageStore = ({
     id: string
   ): Promise<{ id: string; source: CortexKiSource } | undefined> => {
     try {
-      const response = await esClient.get<CortexKiSource>({
-        index: destValue,
-        id,
-      });
+      const response = await esClient.get<CortexKiSource>(
+        {
+          index: destValue,
+          id: toStoredId(id),
+        },
+        { signal }
+      );
       if (!response.found || response._source === undefined) {
         return undefined;
       }
-      return { id: response._id, source: response._source };
+      return { id: toPageId(response._id), source: response._source };
     } catch (error) {
       const statusCode =
         typeof error === 'object' && error !== null && 'statusCode' in error
@@ -313,15 +339,19 @@ export const createCortexPageStore = ({
           status,
           corroborations: nextCorroborations,
           slug: canonicalSlug,
+          space_id: spaceId,
         },
       };
 
-      await esClient.index({
-        index: destValue,
-        id,
-        document,
-        refresh: 'wait_for',
-      });
+      await esClient.index(
+        {
+          index: destValue,
+          id: toStoredId(id),
+          document,
+          refresh: 'wait_for',
+        },
+        { signal }
+      );
 
       logger.debug(`Upserted Cortex page ${id}`);
 
@@ -347,7 +377,9 @@ export const createCortexPageStore = ({
         title: page.title,
         description: page.description,
         content: page.content,
-        status: page.status === 'archived' ? 'established' : page.status,
+        // Corroborating a retired fact brings it back, but only as tentative: one mention should
+        // not restore something to established that the optimizer deliberately archived.
+        status: page.status === 'archived' ? 'tentative' : page.status,
         corroborations: page.corroborations + 1,
       });
     },
@@ -412,11 +444,14 @@ export const createCortexPageStore = ({
         });
 
         for (const extra of extras) {
-          await esClient.delete({
-            index: destValue,
-            id: extra.id,
-            refresh: 'wait_for',
-          });
+          await esClient.delete(
+            {
+              index: destValue,
+              id: toStoredId(extra.id),
+              refresh: 'wait_for',
+            },
+            { signal }
+          );
           removed += 1;
         }
 

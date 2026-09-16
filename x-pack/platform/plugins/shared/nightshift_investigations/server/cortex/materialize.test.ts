@@ -58,12 +58,21 @@ describe('materializeCortex', () => {
       'conv-1',
       expect.arrayContaining(['/workspace/cortex', '/workspace/cortex/services'])
     );
-    expect(apiClient.writeFiles).toHaveBeenCalledWith(
+    // Pages are written before the index, so a partial failure cannot leave an INDEX.md
+    // advertising pages that were never written.
+    expect(apiClient.writeFiles).toHaveBeenNthCalledWith(
+      1,
+      'conv-1',
+      expect.arrayContaining([
+        expect.objectContaining({ path: '/workspace/cortex/services/checkout.md' }),
+      ])
+    );
+    expect(apiClient.writeFiles).toHaveBeenNthCalledWith(
+      2,
       'conv-1',
       expect.arrayContaining([
         expect.objectContaining({ path: '/workspace/cortex/README.md' }),
         expect.objectContaining({ path: '/workspace/cortex/INDEX.md' }),
-        expect.objectContaining({ path: '/workspace/cortex/services/checkout.md' }),
       ])
     );
   });
@@ -119,12 +128,13 @@ describe('materializeCortex', () => {
 
     expect(store.get).not.toHaveBeenCalledWith('cortex_service_legacy');
 
-    const [, files] = apiClient.writeFiles.mock.calls[0];
-    const paths = files.map((file: { path: string }) => file.path);
+    const [, pageFiles] = apiClient.writeFiles.mock.calls[0];
+    const paths = pageFiles.map((file: { path: string }) => file.path);
     expect(paths).toContain('/workspace/cortex/services/checkout.md');
     expect(paths).not.toContain('/workspace/cortex/services/legacy.md');
 
-    const index = files.find((file: { path: string }) => file.path.endsWith('INDEX.md'));
+    const [, indexFiles] = apiClient.writeFiles.mock.calls[1];
+    const index = indexFiles.find((file: { path: string }) => file.path.endsWith('INDEX.md'));
     expect(index.content.toString('utf8')).not.toContain('Legacy');
   });
 });

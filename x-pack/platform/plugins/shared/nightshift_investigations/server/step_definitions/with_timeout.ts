@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-/** Rejects if `promise` does not settle before `ms`. The original work may still run. */
-export const withTimeout = <T>(promise: Promise<T>, ms: number, message: string): Promise<T> => {
-  // `finally` re-rejects when `promise` rejects. Swallow that so a late gRPC
-  // failure after the timeout cannot become an unhandledRejection and crash Kibana.
-  void promise.finally(() => undefined).catch(() => undefined);
+/**
+ * Runs `work` with a signal that aborts after `ms`, so the work can stop itself rather than being
+ * abandoned while it keeps running.
+ */
+export const withTimeout = <T>(
+  work: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+  message: string
+): Promise<T> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+
+  const promise = work(controller.signal);
+  // Callers that ignore the signal still settle late. Swallow that rejection so it cannot surface
+  // as an unhandledRejection and take Kibana down after we have already rejected below.
+  void promise.catch(() => undefined);
 
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error(message));
-      }, ms);
-      void promise.finally(() => clearTimeout(timer)).catch(() => undefined);
+      const onAbort = () => reject(new Error(message));
+      controller.signal.addEventListener('abort', onAbort, { once: true });
     }),
-  ]);
+  ]).finally(() => clearTimeout(timer));
 };
