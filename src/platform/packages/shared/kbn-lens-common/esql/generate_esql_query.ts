@@ -324,9 +324,6 @@ export function generateEsqlQuery(
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      if (bucketEsAggsEntries.length !== 1) {
-        return getEsqlQueryFailedResult('terms_not_supported');
-      }
       const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
       if (termsFailure) {
         return getEsqlQueryFailedResult(termsFailure);
@@ -447,11 +444,13 @@ export function generateEsqlQuery(
   const validMetrics = metricsResult.map((m) => m.esql);
   const validBuckets = bucketsResult.map((b) => b.esql);
 
-  const singleTermsColumn =
-    bucketEsAggsEntries.length === 1 &&
-    isColumnOfType<TermsIndexPatternColumn>('terms', bucketEsAggsEntries[0][1])
-      ? bucketEsAggsEntries[0][1]
-      : undefined;
+  // Inner top-N terms = last terms bucket in order; remaining buckets are LIMIT BY groups.
+  const termsBucketIndexes = bucketEsAggsEntries
+    .map(([, col], index) => ({ col, index }))
+    .filter(({ col }) => isColumnOfType<TermsIndexPatternColumn>('terms', col));
+  const innerTermsBucket = termsBucketIndexes[termsBucketIndexes.length - 1] as
+    | { col: TermsIndexPatternColumn; index: number }
+    | undefined;
 
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
@@ -459,12 +458,12 @@ export function generateEsqlQuery(
       queryParts.push(`STATS ${statsBody}`);
     }
 
-    if (singleTermsColumn) {
-      const { orderBy, orderDirection, size } = singleTermsColumn.params;
+    if (innerTermsBucket) {
+      const { orderBy, orderDirection, size } = innerTermsBucket.col.params;
       let sortField: string | undefined;
 
       if (orderBy.type === 'alphabetical') {
-        sortField = resolvedBucketExprs.get(0);
+        sortField = resolvedBucketExprs.get(innerTermsBucket.index);
       } else if (orderBy.type === 'column') {
         sortField = metricOutputNamesByColId.get(orderBy.columnId);
         if (!sortField) {
@@ -479,7 +478,17 @@ export function generateEsqlQuery(
       }
 
       queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
-      queryParts.push(`LIMIT ${size}`);
+
+      const outerGroupExprs = [...resolvedBucketExprs.entries()]
+        .filter(([index]) => index !== innerTermsBucket.index)
+        .sort(([a], [b]) => a - b)
+        .map(([, expr]) => expr);
+
+      if (outerGroupExprs.length > 0) {
+        queryParts.push(`LIMIT ${size} BY ${outerGroupExprs.join(', ')}`);
+      } else {
+        queryParts.push(`LIMIT ${size}`);
+      }
     } else {
       // Build sort fields, excluding date fields (date_histogram columns)
       // The first .map() attaches the original index so we can reference
