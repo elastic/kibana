@@ -36,7 +36,6 @@ export const useFindTemplatesQuery = ({
   sortField,
   sortOrder,
   search,
-  defaultSearchOperator,
   ruleTypeId,
   tags,
 }: UseFindTemplatesQueryParams) => {
@@ -48,7 +47,6 @@ export const useFindTemplatesQuery = ({
       sortField,
       sortOrder,
       search,
-      defaultSearchOperator,
       ruleTypeId,
       tags,
     });
@@ -93,7 +91,6 @@ export const useFindTemplatesQuery = ({
       sortOrder,
       refresh,
       page,
-      defaultSearchOperator,
       ruleTypeId,
       tags,
     }),

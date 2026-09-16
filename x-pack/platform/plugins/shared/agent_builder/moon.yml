@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/inference-langchain'
   - '@kbn/storage-adapter'
+  - '@kbn/es-query'
   - '@kbn/sse-utils'
   - '@kbn/sse-utils-client'
   - '@kbn/sse-utils-server'
