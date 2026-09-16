@@ -44,21 +44,31 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   };
 };
 
+/** A dest value may be a comma-separated list of index expressions; each is quoted on its own. */
+const fromSources = (destValue: string): string =>
+  destValue
+    .split(',')
+    .map((expression) => JSON.stringify(expression.trim()))
+    .join(', ');
+
 /**
  * One row per KI: the latest revision by `@timestamp` for each logical id,
  * excluding KIs whose lifecycle status is deleted. On an index dest the same
  * id may exist in several backing indices, so those are distinct KIs.
+ * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
-const currentKisQuery = (dest: AiIndexDest, has: (field: KiListField) => boolean): string =>
-  [
-    `FROM ${JSON.stringify(dest.value)} METADATA _id, _index`,
+const currentKisQuery = (dest: AiIndexDest, has: (field: KiListField) => boolean): string => {
+  const key = dest.type === 'data_stream' ? 'id' : '_index, id';
+  return [
+    `FROM ${fromSources(dest.value)} METADATA _id, _index`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
-          `INLINE STATS latest = MAX(@timestamp) BY ${
-            dest.type === 'data_stream' ? 'id' : '_index, id'
-          }`,
-          'WHERE @timestamp == latest',
+          'EVAL revision_time = COALESCE(@timestamp, TO_DATETIME("1970-01-01T00:00:00Z"))',
+          `INLINE STATS latest = MAX(revision_time) BY ${key}`,
+          'WHERE revision_time == latest',
+          `INLINE STATS latest_doc = MAX(_id) BY ${key}`,
+          'WHERE _id == latest_doc',
         ]
       : []),
     ...(has('governance.lifecycle.status')
@@ -67,6 +77,7 @@ const currentKisQuery = (dest: AiIndexDest, has: (field: KiListField) => boolean
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
   ].join('\n| ');
+};
 
 export const getKis = async (
   esClient: ElasticsearchClient,
@@ -88,7 +99,7 @@ export const getKis = async (
   const rowsQuery = [
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
-    has('@timestamp') ? 'SORT @timestamp DESC, id ASC' : 'SORT id ASC',
+    has('@timestamp') ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC',
     'KEEP _index, id, type, title',
     `LIMIT ${size}`,
   ].join('\n| ');

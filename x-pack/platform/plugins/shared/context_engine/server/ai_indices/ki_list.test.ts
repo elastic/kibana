@@ -81,10 +81,13 @@ describe('ki_list', () => {
       [
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = COALESCE(id, _id)',
-        'INLINE STATS latest = MAX(@timestamp) BY _index, id',
-        'WHERE @timestamp == latest',
+        'EVAL revision_time = COALESCE(@timestamp, TO_DATETIME("1970-01-01T00:00:00Z"))',
+        'INLINE STATS latest = MAX(revision_time) BY _index, id',
+        'WHERE revision_time == latest',
+        'INLINE STATS latest_doc = MAX(_id) BY _index, id',
+        'WHERE _id == latest_doc',
         'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
-        'SORT @timestamp DESC, id ASC',
+        'SORT revision_time DESC, id ASC',
         'KEEP _index, id, type, title',
         'LIMIT 25',
       ].join('\n| ')
@@ -103,7 +106,22 @@ describe('ki_list', () => {
 
     await getKis(esClient, { dest: DATA_STREAM_DEST, size: 25 });
 
-    expect(queryText(0)).toContain('| INLINE STATS latest = MAX(@timestamp) BY id\n');
+    expect(queryText(0)).toContain('| INLINE STATS latest = MAX(revision_time) BY id\n');
+    expect(queryText(0)).toContain('| INLINE STATS latest_doc = MAX(_id) BY id\n');
+  });
+
+  it('quotes each expression of a comma-separated dest separately', async () => {
+    query
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, {
+      dest: { type: 'index', value: 'ai-index-idx-a, ai-index-idx-b*' },
+      size: 25,
+    });
+
+    expect(queryText(0)).toContain('FROM "ai-index-idx-a", "ai-index-idx-b*" METADATA _id, _index');
   });
 
   it('filters rows and the total by type but keeps unfiltered type counts', async () => {
