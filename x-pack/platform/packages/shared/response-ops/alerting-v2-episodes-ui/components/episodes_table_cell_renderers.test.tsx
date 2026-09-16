@@ -352,6 +352,49 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
   });
 
+  it('renders source_grouping tags next to the embedded rule name when the rule SO is missing', () => {
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      'rule.name': 'Classic CPU Rule',
+      source_grouping: { host: { name: 'web-01' } },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
+    expect(screen.getByText('web-01')).toBeInTheDocument();
+  });
+
+  it('renders source_grouping tags next to data.rule_name when the rule SO is missing', () => {
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
+      source_grouping: { host: { name: 'web-01' } },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
+  });
+
   it('renders a shortened rule id with no link when the rule and every name are missing', () => {
     const row = makeRow({ 'rule.id': 'deleted-rule-1234567890' });
     render(

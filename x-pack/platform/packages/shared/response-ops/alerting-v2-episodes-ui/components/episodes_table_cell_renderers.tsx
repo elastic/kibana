@@ -45,6 +45,51 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 /** Characters of the rule id shown when a rule has no name to display. */
 const SHORT_RULE_ID_LENGTH = 7;
 
+const getEpisodeGroupingFromRow = (
+  row: CellRendererProps['row'],
+  ruleGroupingFields: readonly string[] = []
+): { groupingFields: string[]; groupingData: Record<string, unknown> } => {
+  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
+  const sourceGrouping = isPlainObject(row.flattened.source_grouping)
+    ? row.flattened.source_grouping
+    : undefined;
+  const groupingFields =
+    ruleGroupingFields.length > 0
+      ? [...ruleGroupingFields]
+      : getGroupingFieldsFromSource(sourceGrouping);
+  // `episode_data` can be a name-only object (`{ rule_name }`) on unresolved rows.
+  // Keep `source_grouping` values underneath so classic grouping tags still resolve.
+  const groupingData = { ...(sourceGrouping ?? {}), ...episodeData };
+  return { groupingFields, groupingData };
+};
+
+const EpisodeRuleGroupingTags = ({
+  fields,
+  data,
+  dataView,
+}: {
+  fields: readonly string[];
+  data: Record<string, unknown>;
+  dataView?: DataView;
+}) => {
+  if (fields.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {' '}
+      <AlertingEpisodeGroupingTags
+        inline
+        fields={fields}
+        data={data}
+        dataView={dataView}
+        data-test-subj="episodeRuleCellGroupingTags"
+      />
+    </>
+  );
+};
+
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
 
@@ -184,7 +229,17 @@ export const EpisodeRuleCell = ({
     const displayName = dataRuleName ?? eventRuleName;
 
     if (displayName) {
-      return <span css={nameCss}>{displayName}</span>;
+      const { groupingFields, groupingData } = getEpisodeGroupingFromRow(row);
+      return (
+        <span data-test-subj="episodeRuleCell">
+          <span css={nameCss}>{displayName}</span>
+          <EpisodeRuleGroupingTags
+            fields={groupingFields}
+            data={groupingData}
+            dataView={ruleId ? sourceDataViewsByRule?.get(ruleId) : undefined}
+          />
+        </span>
+      );
     }
 
     if (!ruleId) {
@@ -254,18 +309,12 @@ export const EpisodeRuleCell = ({
     );
   }
 
-  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  const ruleGroupingFields = rule.grouping?.fields ?? [];
-  const sourceGrouping = isPlainObject(row.flattened.source_grouping)
-    ? row.flattened.source_grouping
-    : undefined;
-  const groupingFields =
-    ruleGroupingFields.length > 0
-      ? ruleGroupingFields
-      : getGroupingFieldsFromSource(sourceGrouping);
   // Classic alerts always have `episode_data: null`. If the resolved rule still has v2
   // grouping.fields, keep those field names but read values from `source_grouping`.
-  const groupingData = Object.keys(episodeData).length > 0 ? episodeData : sourceGrouping ?? {};
+  const { groupingFields, groupingData } = getEpisodeGroupingFromRow(
+    row,
+    rule.grouping?.fields ?? []
+  );
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
@@ -278,18 +327,11 @@ export const EpisodeRuleCell = ({
       <EuiLink {...nameLinkProps} css={nameCss} data-test-subj="episodeRuleCellNameLink">
         {rule.metadata.name}
       </EuiLink>
-      {groupingFields.length > 0 ? (
-        <>
-          {' '}
-          <AlertingEpisodeGroupingTags
-            inline
-            fields={groupingFields}
-            data={groupingData}
-            dataView={sourceDataViewsByRule?.get(ruleId)}
-            data-test-subj="episodeRuleCellGroupingTags"
-          />
-        </>
-      ) : null}
+      <EpisodeRuleGroupingTags
+        fields={groupingFields}
+        data={groupingData}
+        dataView={sourceDataViewsByRule?.get(ruleId)}
+      />
       {showQuery && rule.query ? (
         <>
           <br />
