@@ -233,6 +233,14 @@ export const metadataSchema = z
     tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
     routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
     signature_id: metadataSignatureIdSchema.optional().describe(METADATA_SIGNATURE_ID_DESCRIPTION),
+    // `builder.type` is stored as `metadata.builder_type`, which is indexed and
+    // filterable: the Detections API needs to filter by it. On the PUT (upsert
+    // replace) path `null` explicitly clears a stored builder relationship; that
+    // path uses `replaceRuleBodySchema`, which extends this schema with a nullable
+    // override. This base schema does not accept null so that POST (create) and
+    // the rule response never advertise it.
+    // Ref: rule-types.md "The discriminator must be indexed and filterable"
+    //      rule-types.md "What this design needs from the framework"
     builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
     builder_fields: metadataBuilderFieldsSchema
       .optional()
@@ -1058,6 +1066,86 @@ export const createRuleDataSchema = applyCreateRuleRefinements(
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
+
+// ---------------------------------------------------------------------------
+// PUT (upsert replace) body schema
+//
+// Identical to `createRuleDataSchema` except that `metadata.builder_type`
+// accepts `null` as an explicit escape hatch: the PUT caller sends null to
+// confirm they want to clear a stored builder relationship and switch the rule
+// to direct ES|QL editing. The replace branch of `upsertRule` normalises null
+// to `undefined` before writing to storage, so null never reaches the SO and
+// the response schema never advertises it.
+//
+// The shared `createRuleDataSchema` (POST) does not accept null because there
+// is no builder relationship to clear on initial creation. The response schema
+// inherits the non-nullable definition from `metadataSchema`.
+//
+// Ref: rule-types.md "What this design needs from the framework"
+// ---------------------------------------------------------------------------
+
+export const replaceRuleMetadataSchema = metadataSchema
+  .extend({
+    // Override: accept null on PUT to clear a stored builder relationship.
+    builder_type: builderTypeSchema
+      .optional()
+      .nullable()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
+          'Absent for rules authored directly in ES|QL. ' +
+          'Send null on a PUT replace to explicitly clear the builder relationship ' +
+          'and switch the rule to ES|QL mode. (min length: 1, max length: 64)'
+      ),
+  })
+  .meta({ id: 'alerting_replace_rule_metadata' });
+
+export const replaceRuleBodySchema = createRuleDataBaseSchema
+  .extend({
+    query: querySchema.optional(),
+    metadata: replaceRuleMetadataSchema,
+  })
+  .refine(isStateTransitionAllowed, {
+    message: 'state_transition is only allowed when kind is "alert".',
+    path: ['state_transition'],
+  })
+  .refine((data) => data.metadata.builder_fields != null || isSignalUsingStandaloneFormat(data), {
+    message: 'kind "signal" requires query.format "standalone".',
+    path: ['query', 'format'],
+  })
+  .refine(isSignalQueryBreachOnly, {
+    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+    path: ['recovery_strategy'],
+  })
+  .refine(isRecoveryQueryConsistentWithStrategy, {
+    message: 'query.recovery is only allowed when recovery_strategy is "query".',
+    path: ['query', 'recovery'],
+  })
+  .refine(
+    (data) => data.metadata.builder_fields != null || isRecoveryQueryProvidedForStrategy(data),
+    {
+      message: 'query.recovery is required when recovery_strategy is "query".',
+      path: ['query', 'recovery'],
+    }
+  )
+  .refine(isNoDataQueryConsistentWithStrategy, {
+    message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+    path: ['query', 'no_data'],
+  })
+  .refine(isNoDataQueryProvidedForStrategy, {
+    message:
+      'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+    path: ['query', 'no_data'],
+  })
+  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+  .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
+  .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
+  .refine(isQueryProvidedWithoutBuilderFields, {
+    message: 'query is required unless metadata.builder_fields is set.',
+    path: ['query'],
+  })
+  .meta({ id: 'alerting_replace_rule' });
+
+export type ReplaceRuleData = z.infer<typeof replaceRuleBodySchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the

@@ -72,6 +72,15 @@ export const ALERTING_ERROR_CODES = {
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression is not valid KQL. */
   INVALID_FILTER_SYNTAX: 'INVALID_FILTER_SYNTAX',
+  /**
+   * The caller has no identity or a mismatched solution identity for the rule's
+   * owning solution. Managed rules may only be written through the owning
+   * solution's rules client (created with a matching `onBehalfOf.solution`).
+   * The error details carry the rule's `solution` and `domain`.
+   *
+   * Ref: rule-ownership.md "The write gate"
+   */
+  RULE_IS_MANAGED: 'RULE_IS_MANAGED',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
