@@ -25,7 +25,6 @@ import {
   DeployPrivateLocationMonitors,
   formatFailedCreates,
 } from './deploy_private_location_monitors';
-import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -80,7 +79,7 @@ export class SyncPrivateLocationMonitorsTask {
       [TASK_TYPE]: {
         title: 'Synthetics Sync Private Location Monitors Task',
         description:
-          'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
+          'This task syncs private location monitor package policies, handling maintenance window changes.',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
@@ -169,30 +168,9 @@ export class SyncPrivateLocationMonitorsTask {
         schedule: { interval },
       };
 
-      const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
-        soClient,
-        taskState
-      );
-
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        taskState.hasAlreadyDoneCleanup = true;
         return { state: taskState, schedule: { interval } };
-      }
-      if (performCleanupSync) {
-        this.debugLog(
-          `Syncing private location monitors because cleanup performed a change, ` +
-            `locations count: ${allPrivateLocations.length}`
-        );
-
-        for (const location of allPrivateLocations) {
-          await runTaskPerPrivateLocation({
-            server: this.serverSetup,
-            privateLocationId: location.id,
-          });
-        }
-        this.debugLog(`Scheduled post-cleanup sync per private location`);
-        return defaultState;
       }
 
       if (taskState.disableAutoSync) {
@@ -390,13 +368,6 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  async cleanUpDuplicatedPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    taskState: SyncTaskState
-  ) {
-    return await cleanUpDuplicatedPackagePolicies(this.serverSetup, soClient, taskState);
-  }
-
   debugLog = (message: string) => {
     this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message}`);
   };
@@ -441,34 +412,6 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
     );
     throw error;
   }
-};
-
-export const resetSyncPrivateCleanUpState = async ({
-  server,
-  hasAlreadyDoneCleanup = false,
-  retries,
-}: {
-  server: SyntheticsServerSetup;
-  hasAlreadyDoneCleanup: boolean;
-  /** Scheduling attempts before giving up; bounds how long the caller blocks. */
-  retries?: number;
-}) => {
-  const {
-    logger,
-    pluginsStart: { taskManager },
-  } = server;
-  logger.debug(`Resetting Synthetics sync private location monitors cleanup state`);
-  await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
-    ...state,
-    hasAlreadyDoneCleanup,
-    // Requesting cleanup must also restore the retry budget. The budget is shared
-    // with the periodic runs, so without this an explicit request could inherit a
-    // budget those runs had already spent — cleanup would then be skipped outright
-    // while this call still reported success.
-    ...(hasAlreadyDoneCleanup ? {} : { maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES }),
-  }));
-  await runSynPrivateLocationMonitorsTaskSoon({ server, retries });
-  logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
 };
 
 export const disableSyncPrivateLocationTask = async ({

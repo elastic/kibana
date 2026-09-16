@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from '../../tasks/sync_private_locations_monitors_task';
-import { scheduleCleanUpTask } from '../../synthetics_service/private_location/clean_up_task';
+import { scheduleCleanUpTask } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 

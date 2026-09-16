@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
-import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
+import { getFilterForTestNowRun } from './test_now_run_filter';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
   LEFTOVER_CLEANUP_SCAN_VERSION,
@@ -49,10 +49,8 @@ export async function cleanUpDuplicatedPackagePolicies(
   // Same budget for leftover deletes and recreate. Clearing it on every
   // extras pass would retry a failing delete forever.
   if (taskState.maxCleanUpRetries <= 0) {
-    // `warn`, not `debug`: this is cleanup giving up, and the caller still gets a
-    // success response. Leave the spent budget on the state so the exhaustion is
-    // visible — `resetSyncPrivateCleanUpState` restores it when cleanup is
-    // explicitly requested again.
+    // `warn`, not `debug`: this is cleanup giving up for this invocation. The
+    // package-policy task passes a fresh budget on the next run.
     logger.warn(
       `[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached. ` +
         `Request cleanup again to retry.`

@@ -7,15 +7,16 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { cleanupPrivateLocationRoute } from './cleanup_private_locations';
-import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
+import { triggerCleanUpPackagePoliciesTask } from '../../../tasks/clean_up_package_policies_task';
 
-jest.mock('../../../tasks/sync_private_locations_monitors_task', () => ({
-  resetSyncPrivateCleanUpState: jest.fn(),
+jest.mock('../../../tasks/clean_up_package_policies_task', () => ({
+  triggerCleanUpPackagePoliciesTask: jest.fn(),
 }));
 
-const resetSyncPrivateCleanUpStateMock = resetSyncPrivateCleanUpState as jest.MockedFunction<
-  typeof resetSyncPrivateCleanUpState
->;
+const triggerCleanUpPackagePoliciesTaskMock =
+  triggerCleanUpPackagePoliciesTask as jest.MockedFunction<
+    typeof triggerCleanUpPackagePoliciesTask
+  >;
 
 describe('cleanupPrivateLocationRoute', () => {
   const server = { logger: { debug: jest.fn(), error: jest.fn() } };
@@ -35,18 +36,16 @@ describe('cleanupPrivateLocationRoute', () => {
   });
 
   it('reports success once cleanup has been scheduled', async () => {
-    resetSyncPrivateCleanUpStateMock.mockResolvedValue(undefined);
+    triggerCleanUpPackagePoliciesTaskMock.mockResolvedValue(undefined);
 
     const { result } = await callRoute();
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(triggerCleanUpPackagePoliciesTaskMock).toHaveBeenCalledWith(server);
   });
 
   it('fails the request when cleanup could not be scheduled', async () => {
-    // Reporting success here would claim cleanup was scheduled when it was not,
-    // leaving the caller polling for work that only happens whenever the periodic
-    // sync next runs.
-    resetSyncPrivateCleanUpStateMock.mockRejectedValue(new Error('already running'));
+    triggerCleanUpPackagePoliciesTaskMock.mockRejectedValue(new Error('already running'));
 
     const { response } = await callRoute();
 
