@@ -75,6 +75,11 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+export const MAX_AI_INDEX_TRACES = 100;
+export const MAX_AI_INDEX_TRACE_VALUE_LENGTH = 10240;
+
+/** Legal ES index / data-stream / alias / pattern characters for `traces` of type `index`. */
+export const SAFE_INDEX_NAME_RE = /^[a-zA-Z0-9_.+\-*,:<>]+$/;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;

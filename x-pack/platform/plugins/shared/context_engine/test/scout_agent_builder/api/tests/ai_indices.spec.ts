@@ -51,12 +51,14 @@ const aiIndexBody = {
   dest: dataStreamDest(DEST.dataStream),
   automations: [{ type: 'workflow', value: 'scout-automation' }],
   sources: [{ type: 'esql', value: `FROM ${DEST.dataStream} | LIMIT 1` }],
+  traces: [],
 };
 
 const emptyAiIndex = (destValue: string) => ({
   dest: dataStreamDest(destValue),
   automations: [],
   sources: [],
+  traces: [],
 });
 
 // Failing: See https://github.com/elastic/kibana/issues/291053
@@ -207,7 +209,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     const createResponse = await apiClient.put(path, {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
-      body: { dest, automations: [], sources: [] },
+      body: { dest, automations: [], sources: [], traces: [] },
     });
     expect(createResponse).toHaveStatusCode(201);
     expect(createResponse.body).toStrictEqual({ status: 'created' });

@@ -188,6 +188,7 @@ describe('getCreateKiStepDefinition', () => {
       dest: { type: 'index', value: 'ai-index-idx-new-ai-index' },
       automations: [],
       sources: [],
+      traces: [],
     });
     expect(esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'ai-index-idx-new-ai-index' }),
