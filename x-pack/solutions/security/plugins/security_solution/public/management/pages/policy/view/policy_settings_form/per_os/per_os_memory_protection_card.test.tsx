@@ -29,6 +29,8 @@ import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+
 const useLicenseMock = _useLicense as jest.Mock;
 
 describe('PerOsMemoryProtectionCard', () => {

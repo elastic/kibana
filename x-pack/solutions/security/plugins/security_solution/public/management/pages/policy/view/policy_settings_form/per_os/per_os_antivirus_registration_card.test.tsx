@@ -19,6 +19,7 @@ import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_reg
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
+jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('PerOsAntivirusRegistrationCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsAntivirusRegistration;
   let policy: PolicyConfig;

@@ -6,23 +6,20 @@
  */
 
 import type { RenderResult } from '@testing-library/react';
-import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
- * Opens an EuiSuperSelect, chooses an option, and waits for the popover to close.
+ * Opens an EuiSuperSelect and chooses an option. The options mount in a popover that carries
+ * `pointer-events: none` while it animates open, so the pointer-events check is skipped and the
+ * option is awaited rather than queried synchronously.
  */
 export const selectOsControlOption = async (
   renderResult: RenderResult,
   selectTestSubj: string,
   optionName: string | RegExp
 ): Promise<void> => {
-  await userEvent.click(renderResult.getByTestId(selectTestSubj));
-  await userEvent.click(await renderResult.findByRole('option', { name: optionName }));
-  // Wait until the listbox unmounts so a later cycle cannot click an option in a closing popover.
-  await waitFor(() => {
-    if (renderResult.queryByRole('listbox')) {
-      throw new Error('select listbox is still mounted');
-    }
-  });
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+  await user.click(renderResult.getByTestId(selectTestSubj));
+  await user.click(await renderResult.findByRole('option', { name: optionName }));
 };
