@@ -1,5 +1,5 @@
 {
-  "sha1": "9a8024c701c17c098b1704ad7ccc5a183aac27c1",
+  "sha1": "964347403c0f9850f8b6d8311683bccb452e1c2c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -560,8 +560,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 23
+      }
+    },
+    {
+      "id": "e0b988e124225db-0f25f9c6be81e76",
+      "title": "CreateProjectMonitors project monitors - handles api monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 203,
+        "column": 23
+      }
+    },
+    {
+      "id": "e0b988e124225db-f18b0d16fd5723f",
+      "title": "CreateProjectMonitors project monitors - rejects api monitors on Serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 324,
+        "column": 27
       }
     },
     {
@@ -574,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 202,
-        "column": 23
+        "line": 358,
+        "column": 77
       }
     },
     {
@@ -588,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 336,
-        "column": 11
+        "line": 496,
+        "column": 13
       }
     },
     {
@@ -602,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 446,
-        "column": 13
+        "line": 604,
+        "column": 25
       }
     },
     {
@@ -616,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 542,
-        "column": 16
+        "line": 698,
+        "column": 29
       }
     },
     {
@@ -630,8 +658,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 564,
-        "column": 33
+        "line": 722,
+        "column": 17
       }
     },
     {
@@ -644,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 620,
-        "column": 29
+        "line": 779,
+        "column": 12
       }
     },
     {
@@ -658,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 709,
-        "column": 9
+        "line": 870,
+        "column": 71
       }
     },
     {
@@ -672,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 741,
-        "column": 28
+        "line": 896,
+        "column": 9
       }
     },
     {
@@ -686,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 763,
-        "column": 16
+        "line": 927,
+        "column": 25
       }
     },
     {
@@ -700,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 731,
+        "line": 876,
         "column": 27
       }
     },
@@ -784,7 +812,35 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 121,
+        "line": 122,
+        "column": 13
+      }
+    },
+    {
+      "id": "56988dd905e60b5-476d714506a6965",
+      "title": "GetProjectMonitors project monitors - fetches all monitors - api",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 138,
+        "column": 75
+      }
+    },
+    {
+      "id": "56988dd905e60b5-2bdfc7159abf2d3",
+      "title": "GetProjectMonitors project monitors - rejected api monitors on Serverless are not listed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 159,
         "column": 13
       }
     },
@@ -798,8 +854,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 137,
-        "column": 75
+        "line": 185,
+        "column": 7
       }
     },
     {
@@ -812,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 156,
-        "column": 7
+        "line": 195,
+        "column": 11
       }
     },
     {
@@ -826,7 +882,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 170,
+        "line": 211,
         "column": 15
       }
     },
@@ -840,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 189,
-        "column": 15
+        "line": 231,
+        "column": 71
       }
     },
     {
@@ -854,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
-        "line": 209,
-        "column": 15
+        "line": 252,
+        "column": 13
       }
     }
   ]
