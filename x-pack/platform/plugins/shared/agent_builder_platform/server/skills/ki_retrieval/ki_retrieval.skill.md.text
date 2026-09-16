@@ -231,17 +231,24 @@ FROM <target>
   AND (expires_at IS NULL OR expires_at > NOW())
 | EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")
 | WHERE session_id == "<conversation-id>"
-| SORT @timestamp DESC
+| SORT updated_at DESC
 | LIMIT <n>
 | SORT @timestamp ASC
 | KEEP id, title, description, content, type, tags, updated_at,
        references.uri, references.relation, references.description
 ```
 
-The double sort is intentional: `DESC` first keeps the *most recent* memories when `LIMIT` is
-applied, then `ASC` restores chronological order for the agent to read. Start `<n>` at 10 and
-adjust — session memories form a narrative, so more may be needed than for cross-session fact
-recall.
+The double sort is intentional: `DESC` selects the most recently *written* memories when `LIMIT`
+is applied, then `ASC` restores chronological order for reading. `updated_at` is used rather than
+`@timestamp` because `@timestamp` stays at creation time for index-backed memories and only
+advances on data-stream revisions; `updated_at` is always the last-write timestamp regardless of
+destination type. Start `<n>` at 10 and adjust — session memories form a narrative, so more may be
+needed than for cross-session fact recall.
+
+When invoking `execute_esql` to run this query, set the tool's result limit to the same value as
+`<n>`. The tool appends its own `LIMIT` after `KEEP` when the query does not end with one; if that
+limit is smaller than `<n>`, it selects the chronologically earliest subset of the recalled
+memories rather than the most recent ones.
 
 Memory references identify the Agent Builder conversations from which the memory was derived.
 
