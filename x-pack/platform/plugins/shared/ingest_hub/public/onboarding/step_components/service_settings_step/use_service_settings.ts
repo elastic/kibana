@@ -12,6 +12,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useResolveIacBlueprints } from '../../use_resolve_iac_blueprints';
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
@@ -313,14 +314,19 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
+  const resolveIacBlueprints = useResolveIacBlueprints();
+
   const handleNext = useCallback(() => {
     // Flush instances to session storage so step 4 can read them without going through step 2 again.
     setPersisted({
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
     });
+    // Ask the IaC Provisioner which identity workflows are deployable for the
+    // configured services. Fire-and-forget: navigation never waits on it.
+    resolveIacBlueprints(persisted?.serviceVars ?? {});
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances]);
+  }, [onContinue, persisted, setPersisted, instances, resolveIacBlueprints]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);

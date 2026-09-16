@@ -13,8 +13,12 @@ jest.mock('react-use/lib/useSessionStorage');
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
+jest.mock('../../use_resolve_iac_blueprints', () => ({
+  useResolveIacBlueprints: jest.fn(),
+}));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useResolveIacBlueprints } from '../../use_resolve_iac_blueprints';
 import { useServiceSettings } from './use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
@@ -22,6 +26,11 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
+const mockUseResolveIacBlueprints = useResolveIacBlueprints as jest.MockedFunction<
+  typeof useResolveIacBlueprints
+>;
+
+let mockResolveIacBlueprints: jest.Mock;
 
 beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
@@ -30,6 +39,8 @@ beforeEach(() => {
     removeDeployInstance: jest.fn(),
     awsServicesMap: AWS_SERVICES_MAP,
   } as unknown as ReturnType<typeof useOnboardingFlow>);
+  mockResolveIacBlueprints = jest.fn();
+  mockUseResolveIacBlueprints.mockReturnValue(mockResolveIacBlueprints);
 });
 
 // --- helpers for synthetic matrix entries ---
@@ -216,5 +227,43 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     expect(ids).toContain('guardduty__dup-2'); // still present
     expect(ids).toContain('guardduty__dup-3'); // new — not a collision
     expect(new Set(ids).size).toBe(ids.length); // all unique
+  });
+});
+
+describe('useServiceSettings — handleNext', () => {
+  it('fires the IaC blueprint resolve with the persisted vars and continues', () => {
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useServiceSettings({ onContinue }));
+
+    const vars = {
+      enabledDataStreams: ['guardduty'],
+      varsByDataStream: {},
+    };
+    act(() => {
+      result.current.setServiceFieldsAndInputs('guardduty', {}, ['guardduty']);
+    });
+    act(() => {
+      result.current.handleNext();
+    });
+
+    expect(mockResolveIacBlueprints).toHaveBeenCalledTimes(1);
+    expect(mockResolveIacBlueprints).toHaveBeenCalledWith(
+      expect.objectContaining({
+        guardduty: expect.objectContaining({ enabledDataStreams: vars.enabledDataStreams }),
+      })
+    );
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues even when no vars were persisted yet', () => {
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useServiceSettings({ onContinue }));
+
+    act(() => {
+      result.current.handleNext();
+    });
+
+    expect(mockResolveIacBlueprints).toHaveBeenCalledWith({});
+    expect(onContinue).toHaveBeenCalledTimes(1);
   });
 });

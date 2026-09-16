@@ -10,6 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type {
   AwsStaticKeyCredentials,
   CloudOnboardingDeploymentAuthMethod,
+  IacBlueprintCoverage,
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
@@ -128,6 +129,16 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /**
+   * Blueprint coverage from the IaC Provisioner resolve call fired on
+   * Service Settings → Next. Undefined until a resolve succeeds — also after
+   * a resolve failure or a page refresh — in which case the
+   * Authenticate & Deploy step falls back to manifest-derived capability.
+   * Held in memory only: coverage describes the current selection and must
+   * not outlive it.
+   */
+  iacBlueprintCoverage: IacBlueprintCoverage[] | undefined;
+  setIacBlueprintCoverage: (coverage: IacBlueprintCoverage[] | undefined) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -144,6 +155,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     getOnboardingSessionKey('aws', 'servicesStep'),
     { selectedServiceIds: DEFAULT_SELECTED_IDS }
   );
+
+  const [iacBlueprintCoverage, setIacBlueprintCoverage] = useState<
+    IacBlueprintCoverage[] | undefined
+  >(undefined);
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
@@ -417,6 +432,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        iacBlueprintCoverage,
+        setIacBlueprintCoverage,
       }}
     >
       {children}
