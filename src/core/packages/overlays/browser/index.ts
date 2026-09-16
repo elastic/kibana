@@ -14,6 +14,12 @@ export type { OverlaySystemFlyoutStart, OverlaySystemFlyoutOpenOptions } from '.
 export type { SystemFlyoutType, SystemFlyoutTypeContextValue } from './src/system_flyout_type';
 export { SystemFlyoutTypeContext, useSystemFlyoutType } from './src/system_flyout_type';
 export type {
+  OverlayFlyoutTemplateStart,
+  OverlayFlyoutTemplateOpenOptions,
+  OverlayFlyoutTemplateContent,
+  OverlayFlyoutTemplateContentProps,
+} from './src/system_flyout';
+export type {
   OverlayModalStart,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
