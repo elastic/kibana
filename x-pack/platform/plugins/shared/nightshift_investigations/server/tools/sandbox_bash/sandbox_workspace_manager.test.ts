@@ -155,4 +155,18 @@ describe('createSandboxWorkspaceManager', () => {
 
     expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
   });
+
+  it('retries manifest write on next call when previous write failed', async () => {
+    mockWriteConnectorManifest.mockRejectedValueOnce(new Error('transient error'));
+    const session = createSessionMock(false);
+    const callContext = createCallContext(['connector-1']);
+
+    // First call — write fails, key must NOT be recorded
+    await manager.ensureWorkspaceReady({ session, callContext });
+    mockWriteConnectorManifest.mockClear();
+
+    // Second call — same connector set, but since first write failed, must retry
+    await manager.ensureWorkspaceReady({ session, callContext });
+    expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
+  });
 });

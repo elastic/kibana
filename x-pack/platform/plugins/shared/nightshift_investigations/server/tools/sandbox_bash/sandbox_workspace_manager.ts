@@ -39,18 +39,17 @@ export const createSandboxWorkspaceManager = ({
 
       if (!session.isReset && lastKey === currentKey) return;
 
-      lastConnectorIds.set(session, currentKey);
-
       const { actions } = getDeps();
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
 
-      await writeConnectorManifest({ session, callContext, getActionsClient, logger }).catch(
-        (err: Error) => {
-          logger.warn(`Connector manifest write failed: ${err.message}`);
-        }
-      );
+      try {
+        await writeConnectorManifest({ session, callContext, getActionsClient, logger });
+        lastConnectorIds.set(session, currentKey);
+      } catch (err) {
+        logger.warn(`Connector manifest write failed: ${(err as Error).message}`);
+      }
     },
   };
 };
