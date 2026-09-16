@@ -418,4 +418,17 @@ describe('DetectionRulesClient.createCustomRule', () => {
       })
     );
   });
+
+  it('forwards cloneApiKey so a borrowed caller credential is not persisted on the rule', async () => {
+    await detectionRulesClient.createCustomRule({
+      params: getCreateRulesSchemaMock(),
+      cloneApiKey: true,
+    });
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ cloneApiKey: true }),
+      })
+    );
+  });
 });

@@ -112,6 +112,7 @@ class MockServer {
       body: this.maybeValidate(request.body, validations.body),
       query: this.maybeValidate(request.query, validations.query),
       params: this.maybeValidate(request.params, validations.params),
+      headers: request.headers,
     });
 
     return validatedRequest;

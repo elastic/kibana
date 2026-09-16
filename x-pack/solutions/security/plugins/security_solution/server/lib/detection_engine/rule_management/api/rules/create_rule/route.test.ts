@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   getEmptyFindResult,
@@ -22,7 +24,6 @@ import {
   getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
@@ -78,6 +79,34 @@ describe('Create rule route', () => {
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
+    });
+
+    test('forwards the clone API key header to createCustomRule', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: getCreateRulesSchemaMock(),
+        headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(clients.detectionRulesClient.createCustomRule).toHaveBeenCalledWith(
+        expect.objectContaining({ cloneApiKey: true })
+      );
+    });
+
+    test('does not set cloneApiKey when the header is absent', async () => {
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(clients.detectionRulesClient.createCustomRule).toHaveBeenCalledWith({
+        params: expect.any(Object),
+      });
     });
   });
 

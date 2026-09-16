@@ -20,17 +20,30 @@ export interface DispatchApiRequestParams {
   request: KibanaRequest;
 }
 
+const SPACE_PREFIX = /^\/s\/[^/]+/;
+
+const stripSpacePrefix = (path: string): string => path.replace(SPACE_PREFIX, '');
+
 // Matches POST /api/alerting/rule and /api/alerting/rule/{id} (create with a caller-chosen id).
 const ALERTING_RULE_CREATE_PATH = /^\/api\/alerting\/rule(?:\/[^/]+)?$/;
 
-const isAlertingRuleCreate = (method: string, path: string): boolean =>
-  method.toUpperCase() === 'POST' && ALERTING_RULE_CREATE_PATH.test(path);
+// Detection Engine custom-rule create. Sub-paths (_find, _import, _bulk_action, preview) are not creates.
+const DETECTION_ENGINE_RULE_CREATE_PATH = '/api/detection_engine/rules';
+
+const isBorrowedKeyRuleCreate = (method: string, path: string): boolean => {
+  if (method.toUpperCase() !== 'POST') {
+    return false;
+  }
+  const pathname = stripSpacePrefix(path);
+  return ALERTING_RULE_CREATE_PATH.test(pathname) || pathname === DETECTION_ENGINE_RULE_CREATE_PATH;
+};
 
 // The agent's requests authenticate with the API key Task Manager granted for this run-agent
 // task, which TM invalidates once the task drains. Alerting persists an API-key caller's
 // credential on created rules by default ("the user owns this key"), which for this borrowed key
 // would kill every rule from the conversation about an hour after the task completes. This header
-// tells alerting to mint the rule its own framework-managed key instead.
+// tells alerting (and Detection Engine, which creates via RulesClient) to mint the rule its own
+// framework-managed key instead.
 const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
 
 /**
@@ -55,7 +68,7 @@ export const dispatchApiRequest = async ({
       method,
       query: toSelfFetchQuery(querystring),
       body,
-      ...(isAlertingRuleCreate(method, path) ? { headers: cloneApiKeyHeaders } : {}),
+      ...(isBorrowedKeyRuleCreate(method, path) ? { headers: cloneApiKeyHeaders } : {}),
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }

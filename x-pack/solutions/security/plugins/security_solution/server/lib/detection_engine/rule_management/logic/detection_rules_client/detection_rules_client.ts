@@ -121,6 +121,7 @@ export const createDetectionRulesClient = ({
           },
           mlAuthz,
           changeTracking: args.changeTracking,
+          cloneApiKey: args.cloneApiKey,
         });
       });
     },

@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
@@ -96,8 +97,15 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
               ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
           });
 
+          // A Kibana-internal caller running on a borrowed API key (e.g. an Agent Builder task)
+          // declares it with this header so the rule is minted its own key instead of keeping the
+          // caller's. Detection Engine creates via RulesClient, not the alerting HTTP create route,
+          // so it must forward the directive itself.
+          const cloneApiKey = request.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true';
+
           const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
+            ...(cloneApiKey ? { cloneApiKey } : {}),
           });
 
           return response.ok({

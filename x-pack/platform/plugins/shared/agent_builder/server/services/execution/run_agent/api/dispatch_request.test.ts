@@ -99,5 +99,61 @@ describe('dispatchApiRequest', () => {
       );
       expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
     });
+
+    it('covers space-prefixed alerting rule creation', async () => {
+      await dispatch({
+        method: 'POST',
+        path: '/s/marketing/api/alerting/rule',
+        body: { name: 'my rule' },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/s/marketing/api/alerting/rule',
+        expect.objectContaining({
+          headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+        })
+      );
+    });
+  });
+
+  describe('detection engine rule creation', () => {
+    it('sets the clone header on Detection Engine rule create', async () => {
+      await dispatch({
+        method: 'POST',
+        path: '/api/detection_engine/rules',
+        body: { name: 'siem rule', type: 'esql' },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules',
+        expect.objectContaining({
+          headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+        })
+      );
+    });
+
+    it('covers space-prefixed Detection Engine rule creation', async () => {
+      await dispatch({
+        method: 'POST',
+        path: '/s/abbott/api/detection_engine/rules',
+        body: { name: 'siem rule', type: 'esql' },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/s/abbott/api/detection_engine/rules',
+        expect.objectContaining({
+          headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+        })
+      );
+    });
+
+    it('does not touch Detection Engine sub-paths', async () => {
+      await dispatch({
+        method: 'POST',
+        path: '/api/detection_engine/rules/_import',
+      });
+
+      expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
+    });
   });
 });
