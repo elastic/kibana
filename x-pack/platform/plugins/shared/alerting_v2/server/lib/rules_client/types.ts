@@ -42,17 +42,29 @@ export type {
 export type BulkOperationError = BulkResponse['errors'][number];
 
 /**
- * Create data whose `query` is settled — either generated from
- * `metadata.builder_fields` or supplied by the caller. The create schema
- * accepts exactly one of the two, so resolution always produces a query.
+ * Create data whose builder metadata has been normalised and whose `query` has
+ * been settled. For write-time builder rules and plain ES|QL rules, `query` is
+ * always present (generated or supplied). For execution-time builder rules,
+ * `query` is absent — they compile a query on every run.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
  */
-export type ResolvedCreateRuleData = CreateRuleData & { query: Query };
+export type ResolvedCreateRuleData = CreateRuleData;
 
 /**
  * Update data whose builder metadata has been normalized and whose `query` has
  * been regenerated if the builder fields changed.
+ *
+ * Extends `UpdateRuleData` to allow `query: null` as a sentinel that tells
+ * `buildUpdateRuleAttributes` to clear any previously stored query. This is
+ * needed for execution-time builder rules: when a PATCH switches a rule to an
+ * execution-time type, the old compiled query (if any) must not be preserved in
+ * the saved object. `null` is normalised to `undefined` (absent SO attribute) by
+ * `buildUpdateRuleAttributes` and never reaches storage or the response schema.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
  */
-export type ResolvedUpdateRuleData = UpdateRuleData;
+export type ResolvedUpdateRuleData = Omit<UpdateRuleData, 'query'> & { query?: Query | null };
 
 /** An enabled rule whose executor task API key is a candidate for rotation. */
 export interface RotationCandidate {

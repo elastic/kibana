@@ -34,7 +34,12 @@ import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BuilderTypeRegistry } from '../builder_types';
 import type { CallerIdentity } from './caller_identity';
-import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
+import type {
+  BulkOperationError,
+  ResolvedCreateRuleData,
+  ResolvedUpdateRuleData,
+  RotationCandidate,
+} from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -619,7 +624,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: data.query,
+    // Absent for execution-time builder rules, which compile a query on every
+    // run and persist nothing in `query`.
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    ...(data.query !== undefined ? { query: data.query } : {}),
     ...toStoredLifecycle(data),
     state_transition: data.state_transition ?? undefined,
     grouping: data.grouping,
@@ -641,7 +649,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
-  updateData: UpdateRuleData,
+  updateData: ResolvedUpdateRuleData,
   serverFields: {
     updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
@@ -697,7 +705,15 @@ export function buildUpdateRuleAttributes(
     // `query`, `recovery`, and `no_data` are replaced wholesale: each is a
     // closed shape (two of them discriminated unions), so a partial merge could
     // produce a member that never validates. Omitted = preserved.
-    query: updateData.query ?? existingAttrs.query,
+    //
+    // `query` semantics for the resolved update data:
+    //   undefined  → preserve existing (ordinary PATCH with no query change)
+    //   null       → clear (execution-time type; must carry no stored query, even
+    //                if an old write-time type compiled one)
+    //   Query      → replace with the new value
+    //
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    query: updateData.query === null ? undefined : updateData.query ?? existingAttrs.query,
     recovery: updateData.recovery ?? existingAttrs.recovery,
     no_data: updateData.no_data ?? existingAttrs.no_data,
     // `null` → clear. Stored as absent, never as `null`.
@@ -803,6 +819,9 @@ function isMergedRecoverySegmentComposable(attrs: RuleSavedObjectAttributes): bo
   if (attrs.recovery?.strategy !== recoveryStrategy.condition) {
     return true;
   }
+  if (attrs.query == null) {
+    return true;
+  }
   return validateComposedEsqlQuery(attrs.query.base, attrs.recovery.segment) == null;
 }
 
@@ -844,7 +863,8 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    query: toApiQuery(attrs.query),
+    // Execution-compiled rules persist no query and must not emit one.
+    query: attrs.query ? toApiQuery(attrs.query) : undefined,
     recovery: attrs.recovery,
     no_data: attrs.no_data,
     state_transition: toApiStateTransition(attrs.state_transition),
