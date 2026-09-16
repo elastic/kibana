@@ -531,7 +531,7 @@ describe('conversations utils', () => {
       // The converter treats `events` as the full stored projection when both `events` and
       // `rounds` are supplied; `createConversation$` is responsible for composing them so the
       // stored timeline contains the round-derived events *and* the attachment events.
-      expect(args.events.map((e: { id: string }) => e.id)).toEqual([
+      expect(args.events?.map((e: { id: string }) => e.id)).toEqual([
         'round-1::user_message',
         'round-1::execution_started',
         'round-1::execution_terminated',

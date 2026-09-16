@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  ConversationRoundStep,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  TimelineEventType,
+  attachmentTools,
+} from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { createRound } from '../../../test_utils';
-import { reconcileAttachments, upsertRound } from './round_writes';
+import { createEmptyConversation, createRound } from '../../../test_utils';
+import { composeRoundUpsert, reconcileAttachments, upsertRound } from './round_writes';
 
 const ids = (rounds: ConversationRound[]) => rounds.map(({ id }) => id);
 
@@ -207,5 +217,156 @@ describe('reconcileAttachments', () => {
     });
 
     expect(result).toEqual([concurrentlyRenamed, edited]);
+  });
+
+  describe('permanent-delete guard against the rounds stored at write time', () => {
+    const referencingRound = (attachmentId: string) =>
+      createRound({
+        id: 'round-ref',
+        steps: [
+          {
+            type: ConversationRoundStepType.toolCall,
+            tool_call_id: 'tc-1',
+            tool_id: attachmentTools.read,
+            params: { attachment_id: attachmentId },
+            results: [],
+          } as unknown as ConversationRoundStep,
+        ],
+      });
+
+    it('rejects removing an attachment that a stored round now references (stale eligibility check)', () => {
+      const purged = attachment('purged');
+
+      expect(() =>
+        reconcileAttachments({
+          snapshot: [purged],
+          stored: [purged],
+          produced: [],
+          storedRounds: [referencingRound('purged')],
+        })
+      ).toThrow(
+        expect.objectContaining({
+          code: 'attachmentPermanentDeleteBlocked',
+          meta: expect.objectContaining({ reason: 'referenced_in_rounds' }),
+        })
+      );
+    });
+
+    it('allows the removal when no stored round references the attachment', () => {
+      const purged = attachment('purged');
+
+      expect(
+        reconcileAttachments({
+          snapshot: [purged],
+          stored: [purged],
+          produced: [],
+          storedRounds: [referencingRound('some-other-attachment')],
+        })
+      ).toEqual([]);
+    });
+
+    it('does not guard when storedRounds is omitted (in-execution producers never remove)', () => {
+      const purged = attachment('purged');
+
+      expect(reconcileAttachments({ snapshot: [purged], stored: [purged], produced: [] })).toEqual(
+        []
+      );
+    });
+  });
+});
+
+describe('composeRoundUpsert', () => {
+  const additiveEvent = (id: string, createdAt: string): TimelineEvent =>
+    ({
+      id,
+      type: TimelineEventType.attachmentAdded,
+      created_at: createdAt,
+      actor: { type: 'user', id: 'u1' },
+      execution_id: 'round-1::execution',
+      data: {
+        attachment_id: 'att-1',
+        attachment_type: 'text',
+        current_version: 1,
+        render_inline: false,
+        source: 'chat_input',
+      },
+    } as TimelineEvent);
+
+  const completedRound = (id: string, startedAt: string) =>
+    createRound({
+      id,
+      status: ConversationRoundStatus.completed,
+      started_at: startedAt,
+      time_to_last_token: 1000,
+    });
+
+  it('leaves events undefined when there are no additive events (rounds-only write shape)', () => {
+    const current = createEmptyConversation({ rounds: [], events: [] });
+    const round = completedRound('round-1', '2024-01-01T00:00:00.000Z');
+
+    const composed = composeRoundUpsert({ current, round, additiveEvents: [] });
+
+    expect(composed.rounds.map(({ id }) => id)).toEqual(['round-1']);
+    expect(composed.events).toBeUndefined();
+    expect(composed.writtenEvents).toEqual([]);
+  });
+
+  it('regenerates the upserted round`s own events alongside the additive ones (regression: upsertRound with events used to drop the round projection)', () => {
+    const current = createEmptyConversation({ rounds: [], events: [] });
+    const round = completedRound('round-1', '2024-01-01T00:00:00.000Z');
+    const attachmentEvent = additiveEvent('att-evt-1', '2024-01-01T00:00:01.500Z');
+
+    const composed = composeRoundUpsert({ current, round, additiveEvents: [attachmentEvent] });
+
+    expect(composed.writtenEvents).toEqual([attachmentEvent]);
+    expect(composed.events?.map(({ id }) => id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::execution_terminated',
+      'att-evt-1',
+    ]);
+  });
+
+  it('keeps previously stored additive events and dedups re-supplied ids', () => {
+    const stored = additiveEvent('att-evt-stored', '2024-01-01T00:00:00.500Z');
+    const current = createEmptyConversation({
+      rounds: [completedRound('round-0', '2024-01-01T00:00:00.000Z')],
+      events: [stored],
+    });
+    const round = completedRound('round-1', '2024-01-01T00:00:02.000Z');
+    const fresh = additiveEvent('att-evt-fresh', '2024-01-01T00:00:03.500Z');
+
+    const composed = composeRoundUpsert({ current, round, additiveEvents: [stored, fresh] });
+
+    // only the genuinely new event counts as written (drives the trigger notification)
+    expect(composed.writtenEvents).toEqual([fresh]);
+    const eventIds = composed.events?.map(({ id }) => id) ?? [];
+    expect(eventIds.filter((id) => id === 'att-evt-stored')).toHaveLength(1);
+    expect(eventIds).toContain('att-evt-fresh');
+    expect(eventIds).toContain('round-0::execution_terminated');
+    expect(eventIds).toContain('round-1::execution_terminated');
+  });
+
+  it('drops the superseded round`s derived events on regenerate but keeps additive events', () => {
+    const stored = additiveEvent('att-evt-stored', '2024-01-01T00:00:00.500Z');
+    const current = createEmptyConversation({
+      rounds: [completedRound('round-old', '2024-01-01T00:00:00.000Z')],
+      events: [stored],
+    });
+    const replacement = completedRound('round-new', '2024-01-01T00:00:02.000Z');
+    const fresh = additiveEvent('att-evt-fresh', '2024-01-01T00:00:03.500Z');
+
+    const composed = composeRoundUpsert({
+      current,
+      round: replacement,
+      replacesRoundId: 'round-old',
+      additiveEvents: [fresh],
+    });
+
+    const eventIds = composed.events?.map(({ id }) => id) ?? [];
+    expect(composed.rounds.map(({ id }) => id)).toEqual(['round-new']);
+    expect(eventIds.some((id) => id.startsWith('round-old::'))).toBe(false);
+    expect(eventIds).toContain('round-new::execution_terminated');
+    expect(eventIds).toEqual(expect.arrayContaining(['att-evt-stored', 'att-evt-fresh']));
   });
 });

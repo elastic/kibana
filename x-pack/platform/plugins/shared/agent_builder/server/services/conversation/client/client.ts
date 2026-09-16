@@ -85,7 +85,7 @@ import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
+import { composeRoundUpsert, reconcileAttachments } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
@@ -632,6 +632,7 @@ class ConversationClientImpl implements ConversationClient {
             snapshot: attachments.snapshot,
             stored: current.attachments ?? [],
             produced: attachments.produced,
+            storedRounds: current.rounds,
           }),
         };
       },
@@ -661,16 +662,22 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       fields: (current) => {
-        const currentEvents = current.events ?? [];
-        const existingIds = new Set(currentEvents.map((event) => event.id));
-        const newEvents = (additiveEvents ?? []).filter((event) => !existingIds.has(event.id));
-        writtenEvents = newEvents;
-        const eventsField =
-          newEvents.length > 0 ? { events: [...currentEvents, ...newEvents] } : {};
+        // When additive events are written, `composeRoundUpsert` returns the fully reconciled
+        // projection (round-derived events for every round, including the upserted one, plus the
+        // additive events) because `updateConversation` takes an explicit `events` update verbatim.
+        // Otherwise `events` is omitted and `updateConversation` reconciles from `rounds` as for
+        // any rounds-path write.
+        const composed = composeRoundUpsert({
+          current,
+          round,
+          replacesRoundId,
+          additiveEvents: additiveEvents ?? [],
+        });
+        writtenEvents = composed.writtenEvents;
         return {
-          rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
+          rounds: composed.rounds,
           status: round.status,
-          ...eventsField,
+          ...(composed.events ? { events: composed.events } : {}),
           ...(state ? { state } : {}),
           ...(attachments
             ? {
@@ -678,6 +685,9 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  // Guard against the post-upsert rounds: a permanent delete must not orphan a
+                  // reference that the round being written (or a concurrent one) introduced.
+                  storedRounds: composed.rounds,
                 }),
               }
             : {}),
@@ -724,6 +734,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
@@ -781,6 +792,7 @@ class ConversationClientImpl implements ConversationClient {
                   snapshot: attachments.snapshot,
                   stored: current.attachments ?? [],
                   produced: attachments.produced,
+                  storedRounds: current.rounds,
                 }),
               }
             : {}),
