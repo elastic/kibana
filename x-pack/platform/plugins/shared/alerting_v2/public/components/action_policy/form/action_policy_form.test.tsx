@@ -135,6 +135,16 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
   });
 
+  it('renders rule tags selector', () => {
+    renderForm();
+    expect(screen.getByTestId('ruleTagsSelector')).toBeInTheDocument();
+  });
+
+  it('renders advanced matching accordion', () => {
+    renderForm();
+    expect(screen.getByText('Advanced matching')).toBeInTheDocument();
+  });
+
   it('shows required errors for name on blur', async () => {
     const user = userEvent.setup();
     renderForm();

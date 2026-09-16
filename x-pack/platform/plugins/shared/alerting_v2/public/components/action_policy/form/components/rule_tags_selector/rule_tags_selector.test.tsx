@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { RuleTagsSelector } from './rule_tags_selector';
+
+const mockUseFetchRuleTags = jest.fn();
+jest.mock('../../../../../hooks/use_fetch_rule_tags', () => ({
+  useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
+}));
+
+const MOCK_TAGS = ['production', 'staging', 'critical'];
+
+const USER_EVENT_OPTIONS = {
+  pointerEventsCheck: PointerEventsCheckLevel.Never,
+};
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
+const getComboBoxInput = () => {
+  const combobox = screen.getByTestId('ruleTagsSelector');
+  return within(combobox).getByRole('combobox');
+};
+
+describe('RuleTagsSelector', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    user = userEvent.setup(USER_EVENT_OPTIONS);
+    mockUseFetchRuleTags.mockReturnValue({ data: MOCK_TAGS, isLoading: false });
+  });
+
+  it('fetches rule tags eagerly on mount (enabled: true always)', () => {
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+  });
+
+  it('fetches only kind: alert tags', () => {
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ kind: 'alert' }));
+  });
+
+  it('shows API tags under Recommended group when dropdown is open', async () => {
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    await user.click(getComboBoxInput());
+
+    expect(await screen.findByText('Recommended')).toBeInTheDocument();
+    expect(screen.getByText('production')).toBeInTheDocument();
+    expect(screen.getByText('staging')).toBeInTheDocument();
+    expect(screen.getByText('critical')).toBeInTheDocument();
+  });
+
+  it('shows empty state message when no API tags and no custom tags', () => {
+    mockUseFetchRuleTags.mockReturnValue({ data: [], isLoading: false });
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    expect(screen.getByTestId('ruleTagsSelectorEmptyState')).toBeInTheDocument();
+    expect(
+      screen.getByText('No rule tags in this space yet. Add a tag to scope this policy.')
+    ).toBeInTheDocument();
+  });
+
+  it('calls onChange with the selected tag when a tag is selected', async () => {
+    const onChange = jest.fn();
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
+
+    await user.click(getComboBoxInput());
+
+    await user.click(await screen.findByText('production'));
+
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: ['production'] }));
+  });
+
+  it('calls onChange with null tags when all tags are cleared', async () => {
+    const onChange = jest.fn();
+    renderWithI18n(
+      <RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />
+    );
+
+    const clearButton = screen.getByLabelText('Clear input');
+    await user.click(clearButton);
+
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: null }));
+  });
+
+  it('shows pre-existing orphaned tags from matcher as selected pills', () => {
+    renderWithI18n(
+      <RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />
+    );
+
+    const combobox = screen.getByTestId('ruleTagsSelector');
+    expect(within(combobox).getByText('legacy-tag')).toBeInTheDocument();
+  });
+
+  it('adds a newly created tag and calls onChange with it', async () => {
+    const onChange = jest.fn();
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
+
+    await user.type(getComboBoxInput(), 'my-new-tag');
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: expect.arrayContaining(['my-new-tag']) })
+    );
+  });
+
+  it('shows cap guidance text when apiTags length is at limit', () => {
+    const cappedTags = Array.from({ length: TAGS_RESPONSE_LIMIT }, (_, i) => `tag-${i}`);
+    mockUseFetchRuleTags.mockReturnValue({ data: cappedTags, isLoading: false });
+
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    expect(
+      screen.getByText(
+        `Showing first ${TAGS_RESPONSE_LIMIT} most-used tags. Type to search for more.`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('does not show cap guidance when apiTags length is below limit', () => {
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    expect(
+      screen.queryByText(
+        `Showing first ${TAGS_RESPONSE_LIMIT} most-used tags. Type to search for more.`
+      )
+    ).not.toBeInTheDocument();
+  });
+});
