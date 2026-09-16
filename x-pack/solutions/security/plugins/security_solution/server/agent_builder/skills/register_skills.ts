@@ -140,7 +140,7 @@ export const registerSkills = async ({
   }
 
   if (experimentalFeatures.endpointResponseActionsSkill) {
-    agentBuilder.skills.register(
+    await agentBuilder.skills.register(
       createEndpointResponseActionsSkill(options.endpointAppContextService)
     );
   }
