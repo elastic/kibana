@@ -54,6 +54,44 @@ describe('createWorkerSettingsRegistration', () => {
     }
   );
 
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s carries every default key back through migrate',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const defaults = registration.createDefaultValues();
+
+      // migrate is the only way stored values re-enter the projection, and the projection is what
+      // the next install persists. A key the round trip loses is a setting the Worker silently
+      // stops carrying, so current-shape values must come back unchanged.
+      expect(registration.migrate(defaults).values).toEqual(defaults);
+    }
+  );
+
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s rejects a stored key it does not project',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      // A stored document is the one input that cannot be read off this file, so it has to fail
+      // rather than silently drop the key.
+      expect(() =>
+        registration.migrate({ ...registration.createDefaultValues(), retiredField: true })
+      ).toThrow(/retiredField/);
+    }
+  );
+
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s migrate returns only the value set its call sites read',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      // Both call sites read `.values` and nothing else.
+      expect(Object.keys(registration.migrate(registration.createDefaultValues()))).toEqual([
+        'values',
+      ]);
+    }
+  );
+
   describe('schedule interval — attack discovery (opted in)', () => {
     const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
 
