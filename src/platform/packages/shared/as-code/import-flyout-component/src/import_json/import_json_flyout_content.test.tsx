@@ -10,26 +10,33 @@
 import React from 'react';
 import { render, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { ImportJsonFlyoutContent } from './import_json_flyout_content';
 import type { ImportJsonFlyoutServices } from './types';
+
+const mockCaptureError = jest.fn();
+jest.mock('@elastic/apm-rum', () => ({
+  apm: {
+    captureError: (...args: unknown[]) => mockCaptureError(...args),
+  },
+}));
 
 const VALID_STATE = { title: 'My Object', panels: [] };
 const VALID_FILE = new File([JSON.stringify(VALID_STATE)], 'object.json', {
   type: 'application/json',
 });
 
-const createServices = (): ImportJsonFlyoutServices => ({
-  application: {
-    getUrlForApp: () => '/app/management/kibana/objects',
-  },
-  notifications: {
-    toasts: {
-      addDanger: jest.fn(),
-    },
-  },
-});
+const createServices = (): ImportJsonFlyoutServices => {
+  const application = applicationServiceMock.createStartContract();
+  application.getUrlForApp.mockReturnValue('/app/management/kibana/objects');
+  return {
+    application,
+    notifications: notificationServiceMock.createStartContract(),
+  };
+};
 
 const renderFlyout = ({
   sanitizeImportJson = jest.fn().mockResolvedValue({ data: VALID_STATE, warnings: [] }),
@@ -72,6 +79,10 @@ const pickFile = async (file: File) => {
 };
 
 describe('ImportJsonFlyoutContent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the file picker and info callout with NDJSON note', () => {
     renderFlyout();
     expect(screen.getByTestId('testFilePicker')).toBeInTheDocument();
@@ -95,9 +106,12 @@ describe('ImportJsonFlyoutContent', () => {
   it('shows a file size error without reading an oversized file', async () => {
     const { sanitizeImportJson } = renderFlyout();
     const oversized = new File(['{}'], 'big.json', { type: 'application/json' });
+    const readFile = jest.fn();
     Object.defineProperty(oversized, 'size', { value: 1_048_577 });
+    Object.defineProperty(oversized, 'text', { value: readFile });
     await pickFile(oversized);
     await waitFor(() => expect(screen.getByText(/maximum size is 1 MB/)).toBeInTheDocument());
+    expect(readFile).not.toHaveBeenCalled();
     expect(sanitizeImportJson).not.toHaveBeenCalled();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
   });
@@ -109,6 +123,12 @@ describe('ImportJsonFlyoutContent', () => {
     await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
     expect(screen.getByText(/could not be imported/)).toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        labels: { error_type: 'SanitizeImportJsonFailure' },
+      })
+    );
   });
 
   it('enables Import after a valid file is chosen', async () => {
@@ -146,6 +166,7 @@ describe('ImportJsonFlyoutContent', () => {
     expect(signal.aborted).toBe(true);
     expect(screen.queryByTestId('testServerError')).not.toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
+    expect(mockCaptureError).not.toHaveBeenCalled();
     // Ensure a late resolve from the aborted request cannot enable import
     await act(async () => {
       resolveSanitize?.({ data: VALID_STATE, warnings: [] });
@@ -227,7 +248,11 @@ describe('ImportJsonFlyoutContent', () => {
 
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
     expect(screen.getByText('Review import warnings')).toBeInTheDocument();
-    expect(screen.getByText(/123 related items might not exist/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /This import references 123 related items. Please ensure these items exist in this cluster or space/
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText('Showing the first 2.')).toBeInTheDocument();
     expect(screen.queryByTestId('testRelatedItemsList')).not.toBeInTheDocument();
 
@@ -255,7 +280,11 @@ describe('ImportJsonFlyoutContent', () => {
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
     expect(screen.getAllByTestId('testWarnings')).toHaveLength(1);
     expect(screen.getByText(/1 item removed from the imported JSON/)).toBeInTheDocument();
-    expect(screen.getByText(/1 related item might not exist/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /This import references 1 related item. Please ensure these items exist in this cluster or space/
+      )
+    ).toBeInTheDocument();
 
     const warningsAccordion = screen.getByTestId('testWarningsAccordion');
     const relatedItemsAccordion = screen.getByTestId('testRelatedItemsAccordion');

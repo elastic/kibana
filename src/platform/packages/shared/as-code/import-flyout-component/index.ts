@@ -9,9 +9,7 @@
 
 export type {
   CreateFromJson,
-  CreateFromJsonResult,
   ImportJsonFlyoutServices,
   SanitizeImportJson,
-  SanitizeImportJsonResult,
 } from './src/import_json/types';
 export { ImportJsonFlyoutContent } from './src/import_json/import_json_flyout_content';

@@ -56,10 +56,6 @@ export const importJsonFlyoutStrings = {
     i18n.translate('asCodeImport.importJson.reviewWarningsTitle', {
       defaultMessage: 'Review import warnings',
     }),
-  getReviewWarningsSummary: () =>
-    i18n.translate('asCodeImport.importJson.reviewWarningsSummary', {
-      defaultMessage: 'Review the following before importing this JSON.',
-    }),
   getWarningsTitle: () =>
     i18n.translate('asCodeImport.importJson.warningsTitle', {
       defaultMessage: 'Unsupported properties were removed',
@@ -81,7 +77,7 @@ export const importJsonFlyoutStrings = {
   getRelatedItemsSummary: (count: number) =>
     i18n.translate('asCodeImport.importJson.relatedItemsSummary', {
       defaultMessage:
-        '{count} related item{count, plural, one {} other {s}} might not exist in this cluster or space.',
+        'This import references {count} related item{count, plural, one {} other {s}}. Please ensure these items exist in this cluster or space.',
       values: { count },
     }),
   getRelatedItemsTruncatedSummary: (displayedCount: number) =>
@@ -99,6 +95,6 @@ export const importJsonFlyoutStrings = {
     }),
   getRelatedItemsTableCaption: () =>
     i18n.translate('asCodeImport.importJson.relatedItemsTableCaption', {
-      defaultMessage: 'Related items that might not exist in this cluster or space',
+      defaultMessage: 'Related items that should exist in this cluster or space',
     }),
 };

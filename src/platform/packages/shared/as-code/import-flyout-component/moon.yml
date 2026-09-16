@@ -17,9 +17,13 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/as-code/import-flyout-component
 dependsOn:
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-application-browser'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-notifications-browser-mocks'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
-  - '@kbn/test-jest-helpers'
   - '@kbn/ui-callout'
 tags:
   - shared-browser

@@ -8,6 +8,8 @@
  */
 
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface SanitizeImportJsonResult<SanitizedState> {
   data: SanitizedState;
@@ -30,14 +32,7 @@ export type CreateFromJson<SanitizedState> = (
   data: SanitizedState
 ) => Promise<CreateFromJsonResult>;
 
-/** Narrow CoreStart slice used by the import flyout (no Core package dependency). */
 export interface ImportJsonFlyoutServices {
-  application: {
-    getUrlForApp: (appId: string, options?: { path?: string }) => string;
-  };
-  notifications: {
-    toasts: {
-      addDanger: (input: { title: string; text?: string }) => unknown;
-    };
-  };
+  application: ApplicationStart;
+  notifications: NotificationsStart;
 }
