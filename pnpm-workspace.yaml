@@ -84,7 +84,7 @@ overrides:
   '@types/react': '18.2.79'
   '@types/react-dom': '18.2.25'
   '@typescript-eslint/utils': '8.60.0'
-  'adm-zip': '0.6.0'
+  'adm-zip': '0.6.1'
   'apache-arrow': '20.x - 21.x'
   'baseline-browser-mapping': '2.9.14'
   'cheerio': '1.0.0-rc.12'
