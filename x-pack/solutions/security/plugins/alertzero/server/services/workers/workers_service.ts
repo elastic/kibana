@@ -32,6 +32,25 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
 
+interface AlertTriageAttachmentService {
+  getRuleAttachmentSelection(params: {
+    search: string;
+    attachmentFilter: 'all' | 'attached' | 'not_attached';
+  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
+  updateRuleAttachments(params: {
+    attachRuleIds: string[];
+    detachRuleIds: string[];
+  }): Promise<unknown>;
+}
+
+interface AlertTriageOpts {
+  alertTriageWorkerEnabled: boolean;
+  getAttachmentService?: (
+    request: KibanaRequest,
+    workflowId: string
+  ) => Promise<AlertTriageAttachmentService>;
+}
+
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
   const managedDef: ManagedWorkflowDefinition | undefined = getManagedWorkflowDefinition(
     registration.id
@@ -77,22 +96,7 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: {
-      alertTriageWorkerEnabled: boolean;
-      getAttachmentService?: (
-        request: KibanaRequest,
-        workflowId: string
-      ) => Promise<{
-        getRuleAttachmentSelection(params: {
-          search: string;
-          attachmentFilter: 'all' | 'attached' | 'not_attached';
-        }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
-        updateRuleAttachments(params: {
-          attachRuleIds: string[];
-          detachRuleIds: string[];
-        }): Promise<unknown>;
-      }>;
-    } = { alertTriageWorkerEnabled: false }
+    private readonly alertTriageOpts: AlertTriageOpts = { alertTriageWorkerEnabled: false }
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
