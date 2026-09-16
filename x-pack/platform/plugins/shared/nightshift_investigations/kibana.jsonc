@@ -17,6 +17,7 @@
       "actions",
       "agentBuilder",
       "ruleRegistry",
+      "sandbox",
       "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",

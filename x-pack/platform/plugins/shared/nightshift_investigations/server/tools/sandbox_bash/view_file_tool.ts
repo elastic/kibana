@@ -10,8 +10,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxConnectionManager } from './grpc_client';
-import { getScopedConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
@@ -39,11 +40,13 @@ const viewFileSchema = z.object({
 });
 
 export const createSandboxViewFileTool = ({
-  connectionManager,
+  getSandboxStart,
+  sandboxWorkspaceManager,
   getSpaceId,
   logger,
 }: {
-  connectionManager: SandboxConnectionManager;
+  getSandboxStart: () => SandboxPluginStart | undefined;
+  sandboxWorkspaceManager: SandboxWorkspaceManager;
   getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof viewFileSchema> => ({
@@ -61,14 +64,34 @@ export const createSandboxViewFileTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const conversationId = getScopedConversationId(context, getSpaceId);
-    if (!conversationId) {
+    const rawConversationId = getConversationId(context);
+    if (!rawConversationId) {
       return {
         results: [
           { type: ToolResultType.error, data: { message: 'No conversation context available.' } },
         ],
       };
     }
+
+    const spaceId = getSpaceId(context.request);
+    const session = getSandboxStart()?.getSession(spaceId, rawConversationId);
+    if (!session) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: 'Sandbox is not configured in this deployment.' },
+          },
+        ],
+      };
+    }
+
+    const conversationId = `${spaceId}:${rawConversationId}`;
+    await sandboxWorkspaceManager.ensureWorkspaceReady({
+      session,
+      conversationId,
+      callContext: getSandboxCallContext(context),
+    });
 
     const resolvedPath = resolveAbsolutePath(params.file_path);
     logger.debug(
@@ -78,11 +101,7 @@ export const createSandboxViewFileTool = ({
     );
 
     try {
-      const [stat] = await connectionManager.statFiles(
-        conversationId,
-        [resolvedPath],
-        getSandboxCallContext(context)
-      );
+      const [stat] = await session.statFiles([resolvedPath]);
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -108,11 +127,9 @@ export const createSandboxViewFileTool = ({
         };
       }
 
-      const [readResult] = await connectionManager.readFiles(
-        conversationId,
-        [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
-        getSandboxCallContext(context)
-      );
+      const [readResult] = await session.readFiles([
+        { path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES },
+      ]);
       if (!readResult.success) {
         return {
           results: [

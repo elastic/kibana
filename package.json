@@ -1084,6 +1084,7 @@
     "@kbn/saml-provider-plugin": "workspace:*",
     "@kbn/sample-data-ingest": "workspace:*",
     "@kbn/sample-task-plugin": "workspace:*",
+    "@kbn/sandbox-plugin": "workspace:*",
     "@kbn/saved-object-export-transforms-plugin": "workspace:*",
     "@kbn/saved-object-import-warnings-plugin": "workspace:*",
     "@kbn/saved-object-test-plugin": "workspace:*",

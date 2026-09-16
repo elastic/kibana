@@ -11,8 +11,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxConnectionManager } from './grpc_client';
-import { getScopedConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
 
@@ -30,11 +31,13 @@ const writeFileSchema = z.object({
 });
 
 export const createSandboxWriteFileTool = ({
-  connectionManager,
+  getSandboxStart,
+  sandboxWorkspaceManager,
   getSpaceId,
   logger,
 }: {
-  connectionManager: SandboxConnectionManager;
+  getSandboxStart: () => SandboxPluginStart | undefined;
+  sandboxWorkspaceManager: SandboxWorkspaceManager;
   getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof writeFileSchema> => ({
@@ -52,8 +55,8 @@ export const createSandboxWriteFileTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const conversationId = getScopedConversationId(context, getSpaceId);
-    if (!conversationId) {
+    const rawConversationId = getConversationId(context);
+    if (!rawConversationId) {
       return {
         results: [
           { type: ToolResultType.error, data: { message: 'No conversation context available.' } },
@@ -61,21 +64,37 @@ export const createSandboxWriteFileTool = ({
       };
     }
 
+    const spaceId = getSpaceId(context.request);
+    const session = getSandboxStart()?.getSession(spaceId, rawConversationId);
+    if (!session) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: 'Sandbox is not configured in this deployment.' },
+          },
+        ],
+      };
+    }
+
+    const conversationId = `${spaceId}:${rawConversationId}`;
+    await sandboxWorkspaceManager.ensureWorkspaceReady({
+      session,
+      conversationId,
+      callContext: getSandboxCallContext(context),
+    });
+
     const resolvedPath = resolveAbsolutePath(params.file_path);
     logger.debug(`sandbox_write_file: ${resolvedPath} (${params.content.length} chars)`);
 
     try {
       const parentDir = path.posix.dirname(resolvedPath);
       if (parentDir && parentDir !== '.' && parentDir !== '/') {
-        await connectionManager.mkdirs(conversationId, [parentDir], getSandboxCallContext(context));
+        await session.mkdirs([parentDir]);
       }
 
       const contentBuf = Buffer.from(params.content, 'utf8');
-      const writeResult = await connectionManager.writeFiles(
-        conversationId,
-        [{ path: resolvedPath, content: contentBuf }],
-        getSandboxCallContext(context)
-      );
+      const writeResult = await session.writeFiles([{ path: resolvedPath, content: contentBuf }]);
 
       if (!writeResult[0]?.success) {
         return {

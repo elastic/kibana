@@ -10,10 +10,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxConnectionManager } from './grpc_client';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getScopedConversationId, getSandboxCallContext } from './tool_utils';
+import { getConversationId, getSandboxCallContext } from './tool_utils';
+import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -42,12 +43,14 @@ const sandboxBashSchema = z.object({
 });
 
 export const createSandboxBashTool = ({
-  connectionManager,
+  getSandboxStart,
+  sandboxWorkspaceManager,
   resolveConnectorCredentials,
   getSpaceId,
   logger,
 }: {
-  connectionManager: SandboxConnectionManager;
+  getSandboxStart: () => SandboxPluginStart | undefined;
+  sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
@@ -68,9 +71,8 @@ export const createSandboxBashTool = ({
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds, connector_id } = params;
 
-    const conversationId = getScopedConversationId(context, getSpaceId);
-
-    if (!conversationId) {
+    const rawConversationId = getConversationId(context);
+    if (!rawConversationId) {
       return {
         results: [
           {
@@ -81,7 +83,27 @@ export const createSandboxBashTool = ({
       };
     }
 
+    const spaceId = getSpaceId(context.request);
+    const session = getSandboxStart()?.getSession(spaceId, rawConversationId);
+    if (!session) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: 'Sandbox is not configured in this deployment.' },
+          },
+        ],
+      };
+    }
+
+    const conversationId = `${spaceId}:${rawConversationId}`;
     const callContext = getSandboxCallContext(context);
+
+    await sandboxWorkspaceManager.ensureWorkspaceReady({
+      session,
+      conversationId,
+      callContext,
+    });
 
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.
@@ -119,16 +141,12 @@ export const createSandboxBashTool = ({
         ...credentialEnv,
       };
 
-      const result = await connectionManager.runCommand(
-        conversationId,
-        {
-          command,
-          directory: working_directory,
-          env: mergedEnv,
-          timeout_seconds,
-        },
-        callContext
-      );
+      const result = await session.runCommand({
+        command,
+        directory: working_directory,
+        env: mergedEnv,
+        timeout_seconds,
+      });
 
       const { exit_code, timed_out } = result;
       const stdout = redactSecrets(result.stdout, secretValues);

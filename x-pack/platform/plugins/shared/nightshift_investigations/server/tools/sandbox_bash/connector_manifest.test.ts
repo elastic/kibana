@@ -7,11 +7,9 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SandboxApiClient } from './grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
-
-const CONVERSATION_ID = 'conversation-1';
 
 /**
  * Values that must never reach the manifest. They are attached to the raw connector
@@ -45,7 +43,8 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createApiClientMock = () => ({
+const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
+  isReset: false,
   writeFiles: jest.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
 });
 
@@ -69,23 +68,21 @@ const renderManifest = async ({
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
 } = {}) => {
-  const apiClient = createApiClientMock();
+  const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
   const logger = loggingSystemMock.createLogger();
 
   await writeConnectorManifest({
-    conversationId: CONVERSATION_ID,
-    apiClient: apiClient as unknown as SandboxApiClient,
+    session: session as unknown as SandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
     logger,
   });
 
-  const [conversationId, files] = apiClient.writeFiles.mock.calls[0];
+  const [files] = session.writeFiles.mock.calls[0];
   return {
-    apiClient,
+    session,
     logger,
-    conversationId: conversationId as string,
     files: files as Array<{ path: string; content: Buffer }>,
     content: (files as Array<{ path: string; content: Buffer }>)[0].content.toString('utf8'),
   };
@@ -97,10 +94,9 @@ describe('writeConnectorManifest', () => {
   });
 
   describe('file writing', () => {
-    it('writes the manifest to /workspace/connectors.md for the conversation', async () => {
-      const { conversationId, files } = await renderManifest();
+    it('writes the manifest to /workspace/connectors.md', async () => {
+      const { files } = await renderManifest();
 
-      expect(conversationId).toBe(CONVERSATION_ID);
       expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/workspace/connectors.md');
       expect(files[0].content).toBeInstanceOf(Buffer);

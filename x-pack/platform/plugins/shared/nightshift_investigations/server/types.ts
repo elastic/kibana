@@ -20,6 +20,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
@@ -49,6 +50,7 @@ export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
+  sandbox?: SandboxPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaces?: SpacesPluginStart;
   taskManager: TaskManagerStartContract;

@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/investigation-output'
+  - '@kbn/sandbox-plugin'
 tags:
   - plugin
   - prod
