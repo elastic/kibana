@@ -117,6 +117,14 @@ export const mappings = (specService: SpecDefinitionsService) => {
               DenseVectorIndexOptions,
             ],
           },
+          chunking_settings: {
+            strategy: {
+              __one_of: ['sentence', 'word', 'none'],
+            },
+            max_chunk_size: 250,
+            sentence_overlap: 1,
+            overlap: 1,
+          },
           analyzer: 'standard',
           search_analyzer: 'standard',
           include_in_all: {
