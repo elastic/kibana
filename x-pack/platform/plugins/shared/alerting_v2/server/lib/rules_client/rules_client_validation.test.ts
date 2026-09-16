@@ -694,4 +694,76 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
       expect(Object.keys(args)).not.toContain('validateBuilderFields');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Kind-pin check (check 5 per-write half, rule-type-registration.md)
+  // -------------------------------------------------------------------------
+
+  describe('kind-pin check: RULE_KIND_MISMATCH on createRule', () => {
+    /** Register a fixture type that pins kind: 'signal'. */
+    function registerSignalPinnedType(): void {
+      jest.spyOn(builderTypeRegistry, 'get').mockImplementation((type: string) =>
+        type === EXECUTION_TYPE_ID
+          ? ({
+              ...makeExecutionTypeDefinition(),
+              kind: 'signal' as const,
+            } as RegisteredBuilderType)
+          : undefined
+      );
+    }
+
+    it('accepts create when the write kind matches the pin', async () => {
+      registerSignalPinnedType();
+      rulesSavedObjectService.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      });
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-ok' });
+
+      const client = createClient({ solution: 'security' });
+      // kind: 'signal' matches the pin — should succeed.
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            kind: 'signal',
+          },
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects create when the write kind does not match the pin', async () => {
+      registerSignalPinnedType();
+      rulesSavedObjectService.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      });
+
+      const client = createClient({ solution: 'security' });
+      // kind: 'alert' violates the pin (pin is 'signal').
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            kind: 'alert',
+          },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        data: {
+          code: ALERTING_ERROR_CODES.RULE_KIND_MISMATCH,
+          details: expect.objectContaining({
+            write_kind: 'alert',
+            required_kind: 'signal',
+            builder_type: EXECUTION_TYPE_ID,
+          }),
+        },
+      });
+    });
+  });
 });
