@@ -319,6 +319,16 @@ describe('rule template create-rule schema coupling', () => {
                   ],
                   "type": "object",
                 },
+                "builder_fields": Object {
+                  "additionalProperties": Object {},
+                  "description": "Structured parameters for the rule builder identified by \`builder.type\`. The server generates the rule query from these fields.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
                 "description": Object {
                   "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
                   "maxLength": 1024,
@@ -697,7 +707,11 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/alerting_rule_query",
+                },
+              ],
             },
             "recovery": Object {
               "allOf": Array [
@@ -729,7 +743,6 @@ describe('rule template create-rule schema coupling', () => {
             "metadata",
             "time_field",
             "schedule",
-            "query",
           ],
           "type": "object",
         },
