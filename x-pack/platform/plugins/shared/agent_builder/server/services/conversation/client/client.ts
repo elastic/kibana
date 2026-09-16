@@ -106,11 +106,11 @@ import {
   type Document,
 } from './converters';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
-import type { ConversationEventsServiceStart } from '../../conversation_events';
-import {
+import type { ConversationEventsServiceStart, ConversationEventAddInput } from '../../conversation_events';
+import {  
   materializeConversationEvents,
-  type ConversationEventAddInput,
-} from '../../conversation_events/materialize_events';
+  validateConversationEvents,
+} from '../../conversation_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -719,9 +719,9 @@ class ConversationClientImpl implements ConversationClient {
       id: this.user.id ?? this.user.username,
       ...(this.user.username ? { username: this.user.username } : {}),
     };
+    const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
-      inputs,
-      registry: this.conversationEvents,
+      events: validatedEvents,
       actor,
       now: new Date(),
     });

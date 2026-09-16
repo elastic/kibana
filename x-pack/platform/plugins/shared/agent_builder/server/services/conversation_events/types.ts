@@ -15,3 +15,13 @@ export interface ConversationEventsServiceStart {
   getDefinition(type: string): ConversationEventTypeDefinition | undefined;
   list(): ConversationEventTypeDefinition[];
 }
+
+export interface ConversationEventAddInput {
+  type: string;
+  data: unknown;
+}
+
+export interface ValidatedConversationEventAddInput {
+  type: string;
+  data: Record<string, unknown>;
+}

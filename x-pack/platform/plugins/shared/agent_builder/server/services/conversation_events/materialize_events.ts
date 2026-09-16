@@ -5,60 +5,24 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid_v4 } from 'uuid';
 import type { ConversationEvent, EventActor } from '@kbn/agent-builder-common';
-import { createBadRequestError, isBuiltInConversationEventType } from '@kbn/agent-builder-common';
-import type { ConversationEventsServiceStart } from './types';
+import type { ValidatedConversationEventAddInput } from './types';
 
-export interface ConversationEventAddInput {
-  type: string;
-  data: unknown;
-}
-
-/** Validates events against their registered type and stamps the server-assigned fields. */
 export const materializeConversationEvents = ({
-  inputs,
-  registry,
+  events,
   actor,
   now,
 }: {
-  inputs: ConversationEventAddInput[];
-  registry: Pick<ConversationEventsServiceStart, 'getDefinition'>;
+  events: ValidatedConversationEventAddInput[];
   actor: EventActor;
   now: Date;
 }): ConversationEvent[] => {
-  const materialized: ConversationEvent[] = [];
-
-  // Validate every input before returning any, so a bad event rejects the whole batch.
-  for (const { type, data } of inputs) {
-    if (isBuiltInConversationEventType(type)) {
-      throw createBadRequestError(
-        `Conversation event type "${type}" is internal and cannot be added directly`
-      );
-    }
-
-    const definition = registry.getDefinition(type);
-
-    if (!definition) {
-      throw createBadRequestError(`Unknown conversation event type "${type}"`);
-    }
-
-    const result = definition.payloadSchema.safeParse(data);
-    if (!result.success) {
-      const issues = result.error.issues
-        .map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
-        .join('; ');
-      throw createBadRequestError(`Invalid payload for event type "${type}": ${issues}`);
-    }
-
-    materialized.push({
-      type,
-      data: result.data,
-      actor,
-      id: uuidv4(),
-      created_at: now.toISOString(),
-    });
-  }
-
-  return materialized;
+  const created_at = now.toISOString();
+  return events.map((event) => ({
+    ...event,
+    id: uuid_v4(),
+    actor,
+    created_at,
+  }));
 };

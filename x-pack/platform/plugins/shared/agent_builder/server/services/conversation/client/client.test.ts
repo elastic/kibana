@@ -40,6 +40,7 @@ import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
+import { exampleNoteEventType } from '../../conversation_events/example_event_type';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
