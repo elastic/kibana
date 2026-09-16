@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-detections-plugin",
+  "owner": [
+    "@elastic/security-detection-engineering"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "securityDetections",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "securityDetections"
+    ],
+    "requiredPlugins": [
+      "alertingVTwo"
+    ]
+  }
+}
