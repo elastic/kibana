@@ -9,10 +9,11 @@ import {
   actionPolicyDestinationSchema,
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  findActionPoliciesRequestSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
-import { MAX_BULK_ITEMS } from './constants';
+import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -396,6 +397,71 @@ describe('updateActionPolicyDataSchema', () => {
           throttle: { strategy: 'time_interval' },
         })
       ).toThrow('requires an interval');
+    });
+  });
+});
+
+describe('findActionPoliciesRequestSchema', () => {
+  it('accepts an empty query', () => {
+    expect(findActionPoliciesRequestSchema.parse({})).toEqual({});
+  });
+
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findActionPoliciesRequestSchema.parse({ page: '3', per_page: '10' })).toEqual({
+      page: 3,
+      per_page: 10,
+    });
+  });
+
+  it.each([0, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1])('rejects page %p', (page) => {
+    expect(findActionPoliciesRequestSchema.safeParse({ page }).success).toBe(false);
+  });
+
+  it.each([0, 1.5, 101])('rejects per_page %p', (perPage) => {
+    expect(findActionPoliciesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
+  });
+
+  it('rejects a page beyond the result window', () => {
+    expect(findActionPoliciesRequestSchema.safeParse({ page: 100, per_page: 100 }).success).toBe(
+      true
+    );
+    expect(findActionPoliciesRequestSchema.safeParse({ page: 101, per_page: 100 }).success).toBe(
+      false
+    );
+  });
+
+  describe('tags', () => {
+    it('wraps a single tag in an array', () => {
+      expect(findActionPoliciesRequestSchema.parse({ tags: 'production' }).tags).toEqual([
+        'production',
+      ]);
+    });
+
+    it('trims each tag', () => {
+      expect(findActionPoliciesRequestSchema.parse({ tags: [' a ', 'b '] }).tags).toEqual([
+        'a',
+        'b',
+      ]);
+    });
+
+    it('rejects a whitespace-only tag', () => {
+      expect(findActionPoliciesRequestSchema.safeParse({ tags: ['  '] }).success).toBe(false);
+    });
+
+    it('accepts up to 10 tags', () => {
+      const tags = Array.from({ length: 10 }, (_, index) => `tag-${index}`);
+      expect(findActionPoliciesRequestSchema.parse({ tags }).tags).toEqual(tags);
+    });
+
+    it('rejects more than 10 tags', () => {
+      const tags = Array.from({ length: 11 }, (_, index) => `tag-${index}`);
+      expect(findActionPoliciesRequestSchema.safeParse({ tags }).success).toBe(false);
+    });
+
+    it('rejects a tag longer than 128 characters', () => {
+      expect(findActionPoliciesRequestSchema.safeParse({ tags: 'a'.repeat(129) }).success).toBe(
+        false
+      );
     });
   });
 });
