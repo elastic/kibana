@@ -38,6 +38,6 @@ export function hasAccessToCases(capabilities: Capabilities): boolean {
   return Boolean(capabilities[CASES_FEATURE_ID]?.read_cases);
 }
 
-export function isSecuritySolutionAccessible(capabilities: Capabilities) {
+export function isSecuritySolutionAccessible(capabilities: Capabilities): boolean {
   return hasAccessToSecuritySolution(capabilities) || hasAccessToCases(capabilities);
 }

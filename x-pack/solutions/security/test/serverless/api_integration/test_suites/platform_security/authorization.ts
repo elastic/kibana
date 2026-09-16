@@ -15591,33 +15591,28 @@ if (sourceFilePath === 'authorization.ts') {
         `);
       });
 
-      it('registers Dashboard, Discover, Visualize, and Maps privileges', async () => {
+      it('registers Dashboard and Discover privileges', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(adminCredentials)
           .expect(200);
 
-        for (const featureId of [
-          'dashboard',
-          'dashboard_v2',
-          'discover',
-          'discover_v2',
-          'visualize',
-          'maps',
-        ]) {
+        for (const featureId of ['dashboard', 'dashboard_v2', 'discover', 'discover_v2']) {
           expect(body.features[featureId]).not.to.be(undefined);
         }
       });
 
-      it('does not register Visualize v2 or Maps v2 privileges', async () => {
+      it('does not register Visualize or Maps privileges', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(adminCredentials)
           .expect(200);
 
+        expect(body.features.visualize).to.be(undefined);
         expect(body.features.visualize_v2).to.be(undefined);
+        expect(body.features.maps).to.be(undefined);
         expect(body.features.maps_v2).to.be(undefined);
       });
 
@@ -15651,7 +15646,12 @@ if (sourceFilePath === 'authorization.ts') {
           .set(adminCredentials)
           .expect(200);
 
-        const features = body as Array<{ id: string; hidden?: boolean; category?: { id: string } }>;
+        const features = body as Array<{
+          id: string;
+          hidden?: boolean;
+          order?: number;
+          category?: { id: string };
+        }>;
         const dashboardV2 = features.find((feature) => feature.id === 'dashboard_v2');
         const discoverV2 = features.find((feature) => feature.id === 'discover_v2');
 
@@ -15659,6 +15659,8 @@ if (sourceFilePath === 'authorization.ts') {
         expect(discoverV2?.hidden).not.to.be(true);
         expect(dashboardV2?.category?.id).to.be('securitySolution');
         expect(discoverV2?.category?.id).to.be('securitySolution');
+        expect(discoverV2?.order).to.be(1101);
+        expect(dashboardV2?.order).to.be(1102);
       });
     });
   });

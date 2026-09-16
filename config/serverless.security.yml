@@ -11,12 +11,18 @@ xpack.observabilityAIAssistant.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
-  ### Dashboards and Discover features are moved from Analytics category to the Security one.
-  dashboard_v2.category: 'security'
-  discover_v2.category: 'security'
-  ### Visualize v2 and Maps v2 stay hidden; they are granted through Dashboard.
-  visualize_v2.hidden: true
-  maps_v2.hidden: true
+  ### Dashboards and Discover are shown in the Security section, after Security (1100)
+  ### and before ML (1103).
+  discover_v2:
+    category: 'security'
+    order: 1101
+  dashboard_v2:
+    category: 'security'
+    order: 1102
+  ### Keep deprecated Visualize/Maps v1 out of role management. v2 variants stay
+  ### hidden via config/serverless.yml and are granted through Dashboard.
+  visualize.hidden: true
+  maps.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"

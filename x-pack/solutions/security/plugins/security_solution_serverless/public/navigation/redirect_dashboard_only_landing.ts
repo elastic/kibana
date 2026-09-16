@@ -7,20 +7,12 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
-import {
-  ALERTS_FEATURE_ID,
-  ALERTS_UI_READ,
-  RULES_UI_READ,
-} from '@kbn/security-solution-features/constants';
-import {
-  APP_PATH,
-  CASES_FEATURE_ID,
-  RULES_FEATURE_ID,
-  SECURITY_FEATURE_ID,
-} from '@kbn/security-solution-plugin/common';
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
+import { isSecuritySolutionAccessible } from '@kbn/security-solution-plugin/public';
 import type { Services } from '../common/services';
 
 const DASHBOARDS_APP_ID = 'dashboards';
+const DISCOVER_APP_ID = 'discover';
 const SECURITY_GET_STARTED_PATH = `${APP_PATH}/get_started`;
 
 const landingPaths = new Set(['/', APP_PATH, SECURITY_GET_STARTED_PATH]);
@@ -28,52 +20,78 @@ const landingPaths = new Set(['/', APP_PATH, SECURITY_GET_STARTED_PATH]);
 const normalizePath = (pathname: string): string =>
   pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 
+const pathnameFromLocation = (location: string): string => location.split('#')[0] ?? location;
+
 /**
- * Same access signal Security uses to mark `securitySolutionUI` inaccessible.
- * `capabilities.navLinks.securitySolutionUI` is not reliable: Core defaults every
- * registered app to `true`, and the client updater never mounts Get started.
+ * Prefer Dashboards, then Discover, for users who cannot open Get started.
+ * `capabilities.navLinks.securitySolutionUI` is not a reliable Get started
+ * signal: Core defaults every registered app to `true`.
  */
-export const canAccessSecurityLanding = (capabilities: Capabilities): boolean =>
-  Boolean(
-    capabilities[SECURITY_FEATURE_ID]?.show ||
-      capabilities.securitySolutionAttackDiscovery?.['attack-discovery'] ||
-      capabilities[RULES_FEATURE_ID]?.[RULES_UI_READ] ||
-      capabilities[ALERTS_FEATURE_ID]?.[ALERTS_UI_READ] ||
-      capabilities[CASES_FEATURE_ID]?.read_cases
-  );
+export const getRestrictedLandingAppId = ({
+  canAccessGetStarted,
+  canAccessDashboards,
+  canAccessDiscover,
+}: {
+  canAccessGetStarted: boolean;
+  canAccessDashboards: boolean;
+  canAccessDiscover: boolean;
+}): string | undefined => {
+  if (canAccessGetStarted) {
+    return undefined;
+  }
+  if (canAccessDashboards) {
+    return DASHBOARDS_APP_ID;
+  }
+  if (canAccessDiscover) {
+    return DISCOVER_APP_ID;
+  }
+  return undefined;
+};
 
 export const canAccessDashboardsApp = (capabilities: Capabilities): boolean =>
   Boolean(capabilities.dashboard_v2?.show);
+
+export const canAccessDiscoverApp = (capabilities: Capabilities): boolean =>
+  Boolean(capabilities.discover_v2?.show);
 
 export const shouldRedirectDashboardOnlyLanding = ({
   pathname,
   canAccessGetStarted,
   canAccessDashboards,
+  canAccessDiscover,
 }: {
   pathname: string;
   canAccessGetStarted: boolean;
   canAccessDashboards: boolean;
+  canAccessDiscover: boolean;
 }): boolean =>
-  !canAccessGetStarted && canAccessDashboards && landingPaths.has(normalizePath(pathname));
+  getRestrictedLandingAppId({
+    canAccessGetStarted,
+    canAccessDashboards,
+    canAccessDiscover,
+  }) !== undefined && landingPaths.has(normalizePath(pathname));
 
-export const redirectDashboardOnlyLanding = (services: Services): void => {
-  const { application, http } = services;
+export const redirectDashboardOnlyLanding = (services: Services, location: string): void => {
+  const { application } = services;
   const { capabilities } = application;
+  const destination = getRestrictedLandingAppId({
+    canAccessGetStarted: isSecuritySolutionAccessible(capabilities),
+    canAccessDashboards: canAccessDashboardsApp(capabilities),
+    canAccessDiscover: canAccessDiscoverApp(capabilities),
+  });
 
   if (
-    shouldRedirectDashboardOnlyLanding({
-      pathname: http.basePath.remove(window.location.pathname),
-      canAccessGetStarted: canAccessSecurityLanding(capabilities),
-      canAccessDashboards: canAccessDashboardsApp(capabilities),
-    })
+    destination !== undefined &&
+    landingPaths.has(normalizePath(pathnameFromLocation(location)))
   ) {
-    application.navigateToApp(DASHBOARDS_APP_ID, { replace: true });
+    application.navigateToApp(destination, { replace: true });
   }
 };
 
 export const subscribeDashboardOnlyLanding = (services: Services): Subscription => {
-  const run = () => redirectDashboardOnlyLanding(services);
   // currentAppId$ never emits for an inaccessible Security app (App Not Found).
-  // currentLocation$ emits the initial history entry and every later path change.
-  return services.application.currentLocation$.subscribe(run);
+  // currentLocation$ emits the basePath-stripped path#hash on start and every later change.
+  return services.application.currentLocation$.subscribe((location) => {
+    redirectDashboardOnlyLanding(services, location);
+  });
 };

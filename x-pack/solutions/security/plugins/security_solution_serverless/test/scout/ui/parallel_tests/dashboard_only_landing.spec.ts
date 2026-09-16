@@ -9,7 +9,7 @@ import { spaceTest, tags } from '@kbn/scout-security';
 import type { KibanaRole } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const DASHBOARD_VIEWER_ROLE: KibanaRole = {
+const DASHBOARD_AND_DISCOVER_VIEWER_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [],
@@ -26,6 +26,22 @@ const DASHBOARD_VIEWER_ROLE: KibanaRole = {
   ],
 };
 
+const DISCOVER_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        discover_v2: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 spaceTest.describe(
   'serverless security dashboard-only landing',
   { tag: [...tags.serverless.security.complete] },
@@ -33,11 +49,20 @@ spaceTest.describe(
     spaceTest(
       'redirects a dashboard-only user from Get started to dashboards',
       async ({ page, browserAuth }) => {
-        await browserAuth.loginWithCustomRole(DASHBOARD_VIEWER_ROLE);
+        await browserAuth.loginWithCustomRole(DASHBOARD_AND_DISCOVER_VIEWER_ROLE);
         await page.gotoApp('security/get_started');
         // URL is the acceptance signal. Listing chrome/empty-state locators vary
         // when other Scout suites leave dashboards in the shared space.
         await expect(page).toHaveURL(/\/app\/dashboards/);
+      }
+    );
+
+    spaceTest(
+      'redirects a discover-only user from Get started to discover',
+      async ({ page, browserAuth }) => {
+        await browserAuth.loginWithCustomRole(DISCOVER_VIEWER_ROLE);
+        await page.gotoApp('security/get_started');
+        await expect(page).toHaveURL(/\/app\/discover/);
       }
     );
 

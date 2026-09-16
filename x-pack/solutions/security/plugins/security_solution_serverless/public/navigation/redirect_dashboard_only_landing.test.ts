@@ -9,46 +9,29 @@ import { Subject } from 'rxjs';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import {
   canAccessDashboardsApp,
-  canAccessSecurityLanding,
+  canAccessDiscoverApp,
+  getRestrictedLandingAppId,
   redirectDashboardOnlyLanding,
   shouldRedirectDashboardOnlyLanding,
   subscribeDashboardOnlyLanding,
 } from './redirect_dashboard_only_landing';
 
-const originalLocation = window.location;
-
-const mockLocationPathname = (pathname: string) => {
-  Object.defineProperty(window, 'location', {
-    configurable: true,
-    value: { ...originalLocation, pathname },
-  });
-};
+jest.mock('@kbn/security-solution-plugin/public', () => ({
+  isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
+    Boolean(siemV5?.show),
+}));
 
 const setCapabilities = (overrides: {
   navLinks?: Record<string, boolean>;
   siemV5?: Record<string, boolean>;
   dashboard_v2?: Record<string, boolean>;
+  discover_v2?: Record<string, boolean>;
 }) => {
   mockServices.application.capabilities = {
     ...mockServices.application.capabilities,
     ...overrides,
   };
 };
-
-describe('canAccessSecurityLanding', () => {
-  it('returns false for a dashboard-only capability set', () => {
-    expect(
-      canAccessSecurityLanding({
-        navLinks: { securitySolutionUI: true, dashboards: true },
-        dashboard_v2: { show: true },
-      } as never)
-    ).toBe(false);
-  });
-
-  it('returns true when Security show is granted', () => {
-    expect(canAccessSecurityLanding({ siemV5: { show: true } } as never)).toBe(true);
-  });
-});
 
 describe('canAccessDashboardsApp', () => {
   it('returns true for dashboard_v2.show', () => {
@@ -57,6 +40,48 @@ describe('canAccessDashboardsApp', () => {
 
   it('returns false when only navLinks.dashboards is set', () => {
     expect(canAccessDashboardsApp({ navLinks: { dashboards: true } } as never)).toBe(false);
+  });
+});
+
+describe('canAccessDiscoverApp', () => {
+  it('returns true for discover_v2.show', () => {
+    expect(canAccessDiscoverApp({ discover_v2: { show: true } } as never)).toBe(true);
+  });
+
+  it('returns false when only navLinks.discover is set', () => {
+    expect(canAccessDiscoverApp({ navLinks: { discover: true } } as never)).toBe(false);
+  });
+});
+
+describe('getRestrictedLandingAppId', () => {
+  it('prefers dashboards over discover', () => {
+    expect(
+      getRestrictedLandingAppId({
+        canAccessGetStarted: false,
+        canAccessDashboards: true,
+        canAccessDiscover: true,
+      })
+    ).toBe('dashboards');
+  });
+
+  it('falls back to discover when dashboards are not granted', () => {
+    expect(
+      getRestrictedLandingAppId({
+        canAccessGetStarted: false,
+        canAccessDashboards: false,
+        canAccessDiscover: true,
+      })
+    ).toBe('discover');
+  });
+
+  it('returns undefined when the user can access Get started', () => {
+    expect(
+      getRestrictedLandingAppId({
+        canAccessGetStarted: true,
+        canAccessDashboards: true,
+        canAccessDiscover: true,
+      })
+    ).toBeUndefined();
   });
 });
 
@@ -69,10 +94,22 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
           pathname,
           canAccessGetStarted: false,
           canAccessDashboards: true,
+          canAccessDiscover: false,
         })
       ).toBe(true);
     }
   );
+
+  it('returns true for discover-only users on Get started', () => {
+    expect(
+      shouldRedirectDashboardOnlyLanding({
+        pathname: '/app/security/get_started',
+        canAccessGetStarted: false,
+        canAccessDashboards: false,
+        canAccessDiscover: true,
+      })
+    ).toBe(true);
+  });
 
   it('returns false when the user can access Get started', () => {
     expect(
@@ -80,16 +117,18 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
         pathname: '/app/security/get_started',
         canAccessGetStarted: true,
         canAccessDashboards: true,
+        canAccessDiscover: true,
       })
     ).toBe(false);
   });
 
-  it('returns false when the user cannot access dashboards', () => {
+  it('returns false when the user cannot access dashboards or discover', () => {
     expect(
       shouldRedirectDashboardOnlyLanding({
         pathname: '/app/security/get_started',
         canAccessGetStarted: false,
         canAccessDashboards: false,
+        canAccessDiscover: false,
       })
     ).toBe(false);
   });
@@ -100,6 +139,7 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
         pathname: '/app/discover',
         canAccessGetStarted: false,
         canAccessDashboards: true,
+        canAccessDiscover: false,
       })
     ).toBe(false);
   });
@@ -110,6 +150,7 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
         pathname: '/app/security',
         canAccessGetStarted: false,
         canAccessDashboards: true,
+        canAccessDiscover: false,
       })
     ).toBe(true);
   });
@@ -117,7 +158,6 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
 
 describe('redirectDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
-  const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -125,20 +165,11 @@ describe('redirectDashboardOnlyLanding', () => {
       navLinks: {},
       siemV5: {},
       dashboard_v2: {},
-    });
-    removeBasePath.mockImplementation((pathname: string) => pathname);
-  });
-
-  afterEach(() => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: originalLocation,
+      discover_v2: {},
     });
   });
 
   it('navigates dashboard-only users from Get started to dashboards', () => {
-    mockLocationPathname('/s/default/app/security/get_started');
-    removeBasePath.mockReturnValue('/app/security/get_started');
     setCapabilities({
       navLinks: {
         dashboards: true,
@@ -147,26 +178,44 @@ describe('redirectDashboardOnlyLanding', () => {
       dashboard_v2: { show: true },
     });
 
-    redirectDashboardOnlyLanding(mockServices);
+    redirectDashboardOnlyLanding(mockServices, '/app/security/get_started');
 
-    expect(removeBasePath).toHaveBeenCalledWith('/s/default/app/security/get_started');
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
   });
 
+  it('strips a hash from the emitted location before matching', () => {
+    setCapabilities({
+      dashboard_v2: { show: true },
+    });
+
+    redirectDashboardOnlyLanding(mockServices, '/app/security/get_started#/');
+
+    expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
+  });
+
+  it('navigates discover-only users from Get started to discover', () => {
+    setCapabilities({
+      navLinks: { securitySolutionUI: true },
+      discover_v2: { show: true },
+    });
+
+    redirectDashboardOnlyLanding(mockServices, '/app/security/get_started');
+
+    expect(navigateToApp).toHaveBeenCalledWith('discover', { replace: true });
+  });
+
   it('does not treat navLinks.securitySolutionUI as Get started access', () => {
-    mockLocationPathname('/app/security/get_started');
     setCapabilities({
       navLinks: { securitySolutionUI: true },
       dashboard_v2: { show: true },
     });
 
-    redirectDashboardOnlyLanding(mockServices);
+    redirectDashboardOnlyLanding(mockServices, '/app/security/get_started');
 
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
   });
 
   it('does not navigate editors away from Get started', () => {
-    mockLocationPathname('/app/security/get_started');
     setCapabilities({
       navLinks: {
         dashboards: true,
@@ -176,7 +225,7 @@ describe('redirectDashboardOnlyLanding', () => {
       dashboard_v2: { show: true },
     });
 
-    redirectDashboardOnlyLanding(mockServices);
+    redirectDashboardOnlyLanding(mockServices, '/app/security/get_started');
 
     expect(navigateToApp).not.toHaveBeenCalled();
   });
@@ -184,7 +233,6 @@ describe('redirectDashboardOnlyLanding', () => {
 
 describe('subscribeDashboardOnlyLanding', () => {
   const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
-  const removeBasePath = jest.spyOn(mockServices.http.basePath, 'remove');
   const currentLocation$ = new Subject<string>();
 
   beforeEach(() => {
@@ -198,22 +246,12 @@ describe('subscribeDashboardOnlyLanding', () => {
       dashboard_v2: { show: true },
       siemV5: {},
     });
-    removeBasePath.mockImplementation((pathname: string) => pathname);
-  });
-
-  afterEach(() => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: originalLocation,
-    });
   });
 
   it('redirects when location emits Get started for an inaccessible Security app', () => {
-    mockLocationPathname('/app/dashboards');
     const subscription = subscribeDashboardOnlyLanding(mockServices);
     expect(navigateToApp).not.toHaveBeenCalled();
 
-    mockLocationPathname('/app/security/get_started');
     currentLocation$.next('/app/security/get_started');
 
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { replace: true });
