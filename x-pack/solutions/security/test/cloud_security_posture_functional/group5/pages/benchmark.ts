@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'rule',
     'benchmark',
     'findings',
+    'security',
   ]);
 
   describe('Access with custom roles', async () => {
@@ -34,6 +35,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({
         types: ['cloud-security-posture-settings'],
       });
+    });
+
+    after(async () => {
+      // This suite logs in as the limited-privilege `csp_read_user`; restore the default
+      // superuser session so the flyout suites loaded after this file don't inherit it.
+      await cspSecurity.logout();
+      await pageObjects.security.login();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/239363
