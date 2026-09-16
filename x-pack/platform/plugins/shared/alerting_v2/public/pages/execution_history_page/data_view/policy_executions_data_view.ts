@@ -93,8 +93,7 @@ export const POLICY_RECORD_EXTRA_FIELDS = {
 // Projects a policy execution into a `DataTableRecord` for `UnifiedDataTable`. Reading the payload
 // through the typed `item` is the drift guard: a shape change in `PolicyExecutionHistoryItem` fails
 // to compile here. Structured columns (policy, rules, workflows) carry their objects/arrays as-is
-// for the custom renderers to consume. `raw` holds the full item so the grid's "copy as JSON" /
-// JSON source views serialize the real record.
+// for the custom renderers to consume. `raw` holds the full item
 export const policyExecutionToDataTableRecord = (
   item: PolicyExecutionHistoryItem,
   index: number

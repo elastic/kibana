@@ -44,8 +44,8 @@ describe('policyExecutionToDataTableRecord', () => {
 
   it('flattens the structured columns and the renderer-only extras', () => {
     const item = buildItem({
-      failure_reason: 'no_connector',
-      error: { message: 'Connector missing' },
+      failure_reason: 'workflow_not_found',
+      error: { message: 'Workflow not found' },
     });
     const record = policyExecutionToDataTableRecord(item, 0);
 
@@ -53,7 +53,7 @@ describe('policyExecutionToDataTableRecord', () => {
     expect(record.flattened[POLICY_EXECUTION_FIELDS.rules]).toBe(item.rules);
     expect(record.flattened[POLICY_EXECUTION_FIELDS.workflows]).toBe(item.workflows);
     expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.totalRuleCount]).toBe(1);
-    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.failureReason]).toBe('no_connector');
-    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.errorMessage]).toBe('Connector missing');
+    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.failureReason]).toBe('workflow_not_found');
+    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.errorMessage]).toBe('Workflow not found');
   });
 });
