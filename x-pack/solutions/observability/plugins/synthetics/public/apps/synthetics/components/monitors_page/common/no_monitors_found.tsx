@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useUrlParams } from '../../../hooks';
+import { getClearedMonitorFilterParams } from '../../../utils/filters/clear_monitor_filter_params';
 
 export function NoMonitorsFound() {
   return (
@@ -29,7 +30,10 @@ export function NoMonitorsFound() {
 export function ClearFilters() {
   const [_, updateUrlParams] = useUrlParams();
   return (
-    <EuiLink data-test-subj="syntheticsClearFiltersLink" onClick={() => updateUrlParams(null)}>
+    <EuiLink
+      data-test-subj="syntheticsClearFiltersLink"
+      onClick={() => updateUrlParams(getClearedMonitorFilterParams())}
+    >
       {CLEAR_FILTERS_LABEL}
     </EuiLink>
   );

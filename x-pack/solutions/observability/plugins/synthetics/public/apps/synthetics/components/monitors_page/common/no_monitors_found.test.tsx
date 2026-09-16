@@ -31,7 +31,15 @@ describe('NoMonitorsFound', () => {
     fireEvent.click(getByText('Clear filters'));
 
     await waitFor(() => {
-      expect(updateUrlParamsMock).toHaveBeenCalledWith(null);
+      expect(updateUrlParamsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: undefined,
+          statusFilter: undefined,
+          tags: undefined,
+          locations: undefined,
+          monitorTypes: undefined,
+        })
+      );
     });
   }, 30_000);
 });
