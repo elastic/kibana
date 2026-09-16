@@ -6,3 +6,4 @@
  */
 
 export { Page } from './esql_job';
+export { EsqlJobTypeCard } from './esql_job_type_card';

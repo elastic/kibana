@@ -30,6 +30,7 @@ import {
   useMlLink,
 } from '../../../../contexts/kibana/use_create_url';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
+import { EsqlJobTypeCard } from '../components/esql_job';
 
 export const Page: FC = () => {
   const {
@@ -360,7 +361,23 @@ export const Page: FC = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGrid gutterSize="l" columns={4}>
-        {jobTypes.map(({ onClick, icon, title, description, id }) => (
+        {jobTypes.slice(0, 2).map(({ onClick, icon, title, description, id }) => (
+          <EuiFlexItem key={id}>
+            <LinkCard
+              data-test-subj={id}
+              onClick={onClick}
+              icon={icon.type}
+              iconAreaLabel={icon.ariaLabel}
+              title={title}
+              description={description}
+              isDisabled={!isTimeBasedIndex}
+            />
+          </EuiFlexItem>
+        ))}
+        <EsqlJobTypeCard
+          onClick={() => navigateToManagementPath(`/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL}`)}
+        />
+        {jobTypes.slice(2).map(({ onClick, icon, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard
               data-test-subj={id}
