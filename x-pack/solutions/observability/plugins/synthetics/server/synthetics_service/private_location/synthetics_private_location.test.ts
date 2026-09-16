@@ -13,6 +13,10 @@ import {
   ScheduleUnit,
   SourceType,
 } from '../../../common/runtime_types';
+import {
+  BROWSER_TEST_NOW_RUN,
+  LIGHTWEIGHT_TEST_NOW_RUN,
+} from '../synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
@@ -1168,6 +1172,27 @@ describe('SyntheticsPrivateLocation', () => {
     });
   });
 
+  describe('generateNewPolicy test-now policy name', () => {
+    it.each([
+      [MonitorTypeEnum.BROWSER, BROWSER_TEST_NOW_RUN],
+      [MonitorTypeEnum.API, BROWSER_TEST_NOW_RUN],
+      [MonitorTypeEnum.HTTP, LIGHTWEIGHT_TEST_NOW_RUN],
+    ] as const)('names %s test-now policies %s', async (type, expectedName) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        { ...testConfig, type },
+        mockPrivateLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        'test-run-id'
+      );
+
+      expect(policy?.name).toBe(expectedName);
+    });
+  });
+
   it('formats monitors stream properly', () => {
     const expectedInlineSource = Buffer.from(
       handleMultilineStringFormatter(dummyBrowserConfig['source.inline.script'] as string)
@@ -1189,8 +1214,7 @@ describe('SyntheticsPrivateLocation', () => {
       vars: {
         __ui: {
           type: 'yaml',
-          value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
+          value: null,
         },
         config_id: {
           type: 'text',
@@ -1238,7 +1262,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         screenshots: {
           type: 'text',
-          value: 'on',
+          value: null,
         },
         'service.name': {
           type: 'text',

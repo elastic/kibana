@@ -7,7 +7,7 @@
 
 import assert from 'assert';
 
-import type { EntityType } from './entity_schema';
+import type { EntityType, ExtractionMode } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
 import { hostEntityDefinition } from './host';
 import { userEntityDefinition } from './user';
@@ -20,6 +20,18 @@ const entitiesDefinitionRegistry = {
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
 } as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+
+/** Stub: always false until priority definition variants are registered. */
+export const hasPriorityVariant = (_type: EntityType): boolean => false;
+
+/** 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly. */
+export const resolveExtractionMode = (
+  isDualProcessEnabled: boolean,
+  entityType: EntityType
+): Extract<ExtractionMode, 'priority' | 'single'> => {
+  if (isDualProcessEnabled && hasPriorityVariant(entityType)) return 'priority';
+  return 'single';
+};
 
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
   `security_${entityType}_${space}`;

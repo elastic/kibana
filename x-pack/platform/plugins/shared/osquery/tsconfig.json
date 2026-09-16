@@ -17,6 +17,7 @@
     "common/schemas/*/*.json"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
 

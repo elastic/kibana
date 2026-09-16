@@ -9,7 +9,7 @@ steps:
 
     steps:
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+          node .buildkite/scripts/lifecycle/comment_on_pr.ts \
             --message "Project deployments require a Github label, please add one or more of \`ci:project-deploy-(elasticsearch|observability|security)\` and trigger the job through the checkbox again." \
             --context "project-deploy-job" \
             --clear-previous
@@ -39,7 +39,7 @@ steps:
               limit: 1
 
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+          node .buildkite/scripts/lifecycle/comment_on_pr.ts \
             --message "PR Project deployment started at: $BUILDKITE_BUILD_URL" \
             --context "project-deploy-job" \
             --clear-previous
@@ -83,7 +83,7 @@ steps:
       - wait: ~
 
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+          node .buildkite/scripts/lifecycle/comment_on_pr.ts \
             --message "Project deployed, see credentials at: $BUILDKITE_BUILD_URL" \
             --context "project-deploy-job" \
             --clear-previous

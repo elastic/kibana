@@ -89,6 +89,7 @@ test.describe(
       // Both seeded streams render as their own destination node.
       await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
       await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.canvasEmptyState).toHaveCount(0);
     });
 
     test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
