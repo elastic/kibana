@@ -78,10 +78,6 @@ export async function cleanHostLoadMetrics(esClient: Client, log?: ToolingLog): 
   try {
     await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
   } catch (error) {
-    try {
-      await esClient.indices.delete({ index: HOST_METRICS_INDEX, ignore_unavailable: true });
-    } catch (deleteError) {
-      log?.warning(`Failed to clean ${HOST_METRICS_INDEX}: ${(deleteError as Error).message}`);
-    }
+    log?.warning(`Failed to clean ${HOST_METRICS_INDEX}: ${(error as Error).message}`);
   }
 }

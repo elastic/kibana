@@ -82,4 +82,14 @@ describe('columnsReferToSameExpression', () => {
       columnsReferToSameExpression('response.keyword', goldQuery, 'host.keyword', actualQuery)
     ).toBe(false);
   });
+
+  it('does not treat quoted equals or BY as STATS syntax', () => {
+    const gold = `FROM kibana_sample_data_logs
+| STATS \`x=y\` = COUNT(*) BY \`foo BY bar\` = response.keyword`;
+    const actual = `FROM kibana_sample_data_logs
+| STATS count = COUNT(*) BY response.keyword`;
+
+    expect(columnsReferToSameExpression('x=y', gold, 'count', actual)).toBe(true);
+    expect(columnsReferToSameExpression('foo BY bar', gold, 'response.keyword', actual)).toBe(true);
+  });
 });

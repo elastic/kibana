@@ -76,10 +76,18 @@ export function createVisualizationConfigVsIntentEvaluator<
 
       const goldQuery = extractGoldQuery(expected);
       const details = visualizations.map((visualization, index) => {
-        const { matched, mismatches } = matchGoldConfig(goldConfig, visualization, goldQuery);
+        const mismatches: string[] = [];
+        matchValue(
+          goldConfig,
+          actualConfig(visualization),
+          '',
+          goldQuery,
+          visualization.esql,
+          mismatches
+        );
         return {
           index,
-          matched,
+          matched: mismatches.length === 0,
           mismatches,
           actualChartType: visualization.chartType ?? null,
           renderer: visualization.renderer ?? null,
@@ -106,30 +114,21 @@ export function createVisualizationConfigVsIntentEvaluator<
   };
 }
 
-function matchGoldConfig(
-  gold: VisualizationGoldConfig,
-  visualization: ExtractedVisualization,
-  goldQuery: string
-): { matched: boolean; mismatches: string[] } {
-  const mismatches: string[] = [];
-  matchValue(gold, actualConfig(visualization), '', goldQuery, visualization.esql, mismatches);
-  return { matched: mismatches.length === 0, mismatches };
-}
-
 function actualConfig(visualization: ExtractedVisualization): Record<string, unknown> {
   const actual: Record<string, unknown> = { ...(visualization.visualization ?? {}) };
   if (typeof actual.type !== 'string' && visualization.chartType) {
     actual.type = visualization.chartType;
   }
-  if (typeof actual.spec === 'string') {
-    try {
-      const parsed: unknown = JSON.parse(actual.spec);
-      if (isRecord(parsed)) {
-        actual.spec = parsed;
-      }
-    } catch {
-      // Leave the string; subset matching will fail against an object gold spec.
+  if (typeof actual.spec !== 'string') {
+    return actual;
+  }
+  try {
+    const parsed: unknown = JSON.parse(actual.spec);
+    if (isRecord(parsed)) {
+      actual.spec = parsed;
     }
+  } catch {
+    // Leave the string; subset matching will fail against an object gold spec.
   }
   return actual;
 }
@@ -145,32 +144,26 @@ function matchValue(
   if (gold === undefined) {
     return;
   }
-  if (typeof gold === 'string' || typeof gold === 'number' || typeof gold === 'boolean') {
-    if (gold !== actual && String(gold).toLowerCase() !== String(actual ?? '').toLowerCase()) {
-      mismatches.push(`${path || 'value'}: expected ${String(gold)}, got ${String(actual)}`);
+  if (isStringAlternatives(gold)) {
+    if (!typeMatches(gold, actual)) {
+      mismatches.push(
+        `${path || 'value'}: expected ${formatExpected(gold)}, got ${
+          readType(actual) ?? 'undefined'
+        }`
+      );
     }
     return;
   }
   if (Array.isArray(gold)) {
-    matchArray(gold, actual, path, goldQuery, actualQuery, mismatches);
+    matchObjectArray(gold, actual, path, goldQuery, actualQuery, mismatches);
     return;
   }
   if (!isRecord(gold)) {
     return;
   }
-  matchObject(gold, actual, path, goldQuery, actualQuery, mismatches);
-}
 
-function matchObject(
-  gold: Record<string, unknown>,
-  actual: unknown,
-  path: string,
-  goldQuery: string,
-  actualQuery: string,
-  mismatches: string[]
-): void {
   const goldColumn = readColumn(gold);
-  if (goldColumn && isColumnBinding(gold)) {
+  if (goldColumn) {
     const actualColumn = readColumn(actual);
     if (!actualColumn) {
       mismatches.push(`${path}: missing column`);
@@ -187,60 +180,22 @@ function matchObject(
     return;
   }
 
-  if (hasUnorderedAxes(gold)) {
-    matchUnorderedAxes(gold, actual, path, goldQuery, actualQuery, mismatches);
-  }
-
   for (const [key, goldChild] of Object.entries(gold)) {
     if (goldChild === undefined || SKIP_KEYS.has(key)) {
       continue;
     }
-    if (hasUnorderedAxes(gold) && (key === 'x' || key === 'y')) {
-      continue;
-    }
-    const childPath = path ? `${path}.${key}` : key;
-    if (key === 'type' || key === 'mark') {
-      matchTypeOrMark(goldChild, actual[key], childPath, mismatches);
-      continue;
-    }
-    matchValue(goldChild, actual[key], childPath, goldQuery, actualQuery, mismatches);
+    matchValue(
+      goldChild,
+      actual[key],
+      path ? `${path}.${key}` : key,
+      goldQuery,
+      actualQuery,
+      mismatches
+    );
   }
 }
 
-function hasUnorderedAxes(gold: Record<string, unknown>): boolean {
-  return (
-    gold.layers === undefined &&
-    !Array.isArray(gold.x) &&
-    !Array.isArray(gold.y) &&
-    readColumn(gold.x) !== undefined &&
-    readColumn(gold.y) !== undefined
-  );
-}
-
-function matchUnorderedAxes(
-  gold: Record<string, unknown>,
-  actual: Record<string, unknown>,
-  path: string,
-  goldQuery: string,
-  actualQuery: string,
-  mismatches: string[]
-): void {
-  const goldAxes = [readColumn(gold.x), readColumn(gold.y)].filter(
-    (column): column is string => typeof column === 'string'
-  );
-  if (goldAxes.length === 0) {
-    return;
-  }
-  const actualAxes = [readColumn(actual.x), readColumn(actual.y)].filter(
-    (column): column is string => typeof column === 'string'
-  );
-  const missing = findMissingColumns(goldAxes, actualAxes, goldQuery, actualQuery);
-  if (missing.length > 0) {
-    mismatches.push(`${path ? `${path}.` : ''}axes: missing ${missing.join(', ')}`);
-  }
-}
-
-function matchArray(
+function matchObjectArray(
   gold: unknown[],
   actual: unknown,
   path: string,
@@ -248,10 +203,6 @@ function matchArray(
   actualQuery: string,
   mismatches: string[]
 ): void {
-  if (gold.every((item) => typeof item === 'string')) {
-    matchTypeOrMark(gold, actual, path, mismatches);
-    return;
-  }
   if (!Array.isArray(actual) || actual.length < gold.length) {
     mismatches.push(
       `${path}: expected at least ${gold.length}, got ${Array.isArray(actual) ? actual.length : 0}`
@@ -269,74 +220,49 @@ function matchArray(
       return nested.length === 0;
     });
     if (matchIndex < 0) {
-      const nested: string[] = [];
-      matchValue(goldItem, actual[0], `${path}[${goldIndex}]`, goldQuery, actualQuery, nested);
-      mismatches.push(
-        nested.length > 0 ? nested.join('; ') : `${path}[${goldIndex}]: no matching item`
-      );
+      mismatches.push(`${path}[${goldIndex}]: no matching item`);
       return;
     }
     used.add(matchIndex);
   });
 }
 
-function matchTypeOrMark(gold: unknown, actual: unknown, path: string, mismatches: string[]): void {
-  const expected = asTypeAlternatives(gold);
-  if (!expected) {
-    return;
-  }
-  const actualType = readTypeOrMark(actual);
-  if (!matchesAny(actualType, expected)) {
-    mismatches.push(
-      `${path}: expected ${formatExpected(expected)}, got ${actualType ?? 'undefined'}`
-    );
-  }
+function isStringAlternatives(value: unknown): value is string | string[] {
+  return (
+    typeof value === 'string' ||
+    (Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === 'string'))
+  );
 }
 
-function readTypeOrMark(value: unknown): string | undefined {
+function typeMatches(gold: unknown, actual: unknown): boolean {
+  const expected = (Array.isArray(gold) ? gold : [gold])
+    .filter((value): value is string => typeof value === 'string')
+    .map((value) => value.trim().toLowerCase());
+  const got = readType(actual);
+  if (expected.length === 0 || !got) {
+    return false;
+  }
+  return (
+    expected.includes(got) ||
+    (SCATTER_MARKS.has(got) && expected.some((value) => SCATTER_MARKS.has(value)))
+  );
+}
+
+function readType(value: unknown): string | undefined {
   if (typeof value === 'string' && value.trim().length > 0) {
     return value.trim().toLowerCase();
   }
-  if (isRecord(value) && typeof value.type === 'string') {
+  if (isRecord(value) && typeof value.type === 'string' && value.type.trim().length > 0) {
     return value.type.trim().toLowerCase();
   }
   return undefined;
 }
 
-function asTypeAlternatives(value: unknown): string | string[] | undefined {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) {
-    return value;
-  }
-  return undefined;
-}
-
-function isColumnBinding(value: Record<string, unknown>): boolean {
-  const keys = Object.keys(value);
-  return keys.length > 0 && keys.every((key) => key === 'column' || key === 'field');
-}
-
-function findMissingColumns(
-  goldColumns: string[],
-  actualColumns: string[],
-  goldQuery: string,
-  actualQuery: string
-): string[] {
-  const unused = [...actualColumns];
-  const missing: string[] = [];
-  for (const goldColumn of goldColumns) {
-    const matchIndex = unused.findIndex((actualColumn) =>
-      columnsReferToSameExpression(goldColumn, goldQuery, actualColumn, actualQuery)
-    );
-    if (matchIndex < 0) {
-      missing.push(goldColumn);
-      continue;
-    }
-    unused.splice(matchIndex, 1);
-  }
-  return missing;
+function formatExpected(gold: unknown): string {
+  const values = (Array.isArray(gold) ? gold : [gold]).filter(
+    (value): value is string => typeof value === 'string'
+  );
+  return values.join(' | ');
 }
 
 function readColumn(value: unknown): string | undefined {
@@ -350,24 +276,4 @@ function readColumn(value: unknown): string | undefined {
     return value.field;
   }
   return undefined;
-}
-
-function matchesAny(actual: string | undefined, expected: string | readonly string[]): boolean {
-  if (!actual) {
-    return false;
-  }
-  const expectedValues = (Array.isArray(expected) ? expected : [expected]).map((value) =>
-    value.trim().toLowerCase()
-  );
-  if (expectedValues.includes(actual.trim().toLowerCase())) {
-    return true;
-  }
-  return (
-    SCATTER_MARKS.has(actual.trim().toLowerCase()) &&
-    expectedValues.some((value) => SCATTER_MARKS.has(value))
-  );
-}
-
-function formatExpected(expected: string | readonly string[]): string {
-  return typeof expected === 'string' ? expected : expected.join(' | ');
 }
