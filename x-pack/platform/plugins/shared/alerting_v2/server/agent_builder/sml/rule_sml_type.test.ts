@@ -43,7 +43,12 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: baseRuleAttrs.metadata,
+  metadata: {
+    ...baseRuleAttrs.metadata,
+    signature_id: 'base-rule-sig-id',
+    source: { type: 'internal' as const, version: 1 },
+    revision: baseRuleAttrs.metadata?.revision ?? 0,
+  },
 };
 
 const buildToAttachmentContext = () => ({
