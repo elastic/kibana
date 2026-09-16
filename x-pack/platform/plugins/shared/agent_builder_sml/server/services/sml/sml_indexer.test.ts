@@ -38,6 +38,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     bulk: bulkMock,
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     count: jest.fn().mockResolvedValue({ count: 0 }),
+    get: jest.fn().mockResolvedValue({ found: false }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -282,6 +283,44 @@ describe('createSmlIndexer', () => {
           },
         },
       });
+    });
+
+    it('re-indexing keeps the original creation time and creator', async () => {
+      const smlEntry = { type: 'lens', title: 'My Viz', content: 'v2' };
+      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const createdBy = { uri: 'user://u-1', metadata: { ingestion_method: 'manual' } };
+      (esClient.get as jest.Mock).mockResolvedValue({
+        found: true,
+        _source: {
+          '@timestamp': '2025-01-01T00:00:00.000Z',
+          governance: { provenance: { created_by: createdBy } },
+        },
+      });
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-2',
+          attachmentType: 'lens',
+          action: 'update',
+          esClient,
+        })
+      );
+
+      expect(esClient.get).toHaveBeenCalledWith(expect.objectContaining({ id: 'lens:att-2' }), {
+        ignore: [404],
+      });
+      const document = bulkMock.mock.calls[0][0].operations[1];
+      expect(document['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+      expect(document.governance.provenance.created_by).toEqual(createdBy);
+      expect(document.governance.provenance.updated_by).toEqual({
+        uri: 'crawler://sml',
+        metadata: { ingestion_method: 'crawled' },
+      });
+      expect(document.updated_at).not.toBe('2025-01-01T00:00:00.000Z');
     });
 
     it('producer attributes cannot override the SML bookkeeping fields', async () => {

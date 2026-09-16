@@ -247,15 +247,18 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
+    const entryId = smlEntryId(attachmentType, originId);
+    const creation = await this.readCreation({ entryId, esClient });
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
-      entryId: smlEntryId(attachmentType, originId),
+      entryId,
       entry: smlEntry,
       originId,
       spaces,
       ingestionMethod: 'crawled',
       resolvedPermissions,
+      ...creation,
     });
 
     if (!indexOp) {
@@ -311,6 +314,31 @@ class SmlIndexerImpl implements SmlIndexer {
     return { kibana: { privileges: { name: [] } } };
   }
 
+  /** Creation time and creator of the existing entry, so re-indexing keeps them. */
+  private async readCreation({
+    entryId,
+    esClient,
+  }: {
+    entryId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<{ createdAt?: string; createdBy?: SmlWriter }> {
+    const response = await esClient.get<Pick<SmlDocument, '@timestamp' | 'governance'>>(
+      {
+        index: smlIndexName,
+        id: entryId,
+        _source_includes: ['@timestamp', 'governance.provenance.created_by'],
+      },
+      { ignore: [404] }
+    );
+    if (!response.found || !response._source) {
+      return {};
+    }
+    return {
+      createdAt: response._source['@timestamp'],
+      createdBy: response._source.governance?.provenance?.created_by,
+    };
+  }
+
   private buildIndexOp({
     entryId,
     entry,
@@ -319,6 +347,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod,
     resolvedPermissions,
     createdAt,
+    createdBy,
   }: {
     entryId: string;
     entry: SmlEntry;
@@ -327,6 +356,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod: SmlIngestionMethod;
     resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
+    createdBy?: SmlWriter;
   }) {
     const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
 
@@ -364,7 +394,7 @@ class SmlIndexerImpl implements SmlIndexer {
         { uri: smlOriginUri(entry.type, originId), relation: 'derived_from' },
         ...(entry.references ?? []),
       ],
-      governance: { provenance: { created_by: writer, updated_by: writer } },
+      governance: { provenance: { created_by: createdBy ?? writer, updated_by: writer } },
       permissions: { kibana: { privileges } },
     };
     if (entry.description !== undefined) {
