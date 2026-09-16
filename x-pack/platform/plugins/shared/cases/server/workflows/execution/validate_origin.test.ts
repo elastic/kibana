@@ -9,7 +9,10 @@ import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
 import {
+  getTriggerSelectionType,
+  parseProcessedSelectionPairs,
   parseSelectedAlertPairs,
+  validateSelectionMembership,
   validateOrigin as validateOriginWithAttachments,
 } from './validate_origin';
 
@@ -363,49 +366,31 @@ describe('parseSelectedAlertPairs', () => {
     expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
   });
 
-  it('rejects query-based alert selections', () => {
-    expect(() =>
+  it('leaves query and document selections for post-preprocessing validation', () => {
+    expect(
       parseSelectedAlertPairs({
         event: {
           triggerType: 'alert',
           querySelection: { index: '.alerts-*', query: { match_all: {} } },
         },
       })
-    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects a query selection even when attached alert IDs are also provided', () => {
-    expect(() =>
-      parseSelectedAlertPairs({
-        event: {
-          triggerType: 'alert',
-          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
-          querySelection: { index: '.alerts-*', query: { match_all: {} } },
-        },
-      })
-    ).toThrow('Query-based alert selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects id-based document trigger selections', () => {
-    expect(() =>
+    ).toEqual([]);
+    expect(
       parseSelectedAlertPairs({
         event: {
           triggerType: 'document',
           documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
         },
       })
-    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
-  });
-
-  it('rejects query-based document trigger selections', () => {
-    expect(() =>
+    ).toEqual([]);
+    expect(
       parseSelectedAlertPairs({
         event: {
           triggerType: 'document',
           querySelection: { index: 'logs-*', query: { match_all: {} } },
         },
       })
-    ).toThrow('Document trigger selections are not supported when running workflows from cases.');
+    ).toEqual([]);
   });
 
   it('allows a document trigger with pre-expanded documents (no server-side expansion)', () => {
@@ -474,5 +459,74 @@ describe('parseSelectedAlertPairs', () => {
       { _id: 'alert-1', _index: '.alerts-a' },
       { _id: 'alert-2', _index: '.alerts-b' },
     ]);
+  });
+});
+
+describe('processed trigger selection membership', () => {
+  it('detects alert and document trigger selections', () => {
+    expect(getTriggerSelectionType({ event: { triggerType: 'alert' } })).toBe('alert');
+    expect(getTriggerSelectionType({ event: { triggerType: 'document' } })).toBe('document');
+    expect(getTriggerSelectionType({ event: { triggerType: 'manual' } })).toBeUndefined();
+  });
+
+  it('parses the concrete alert and document pairs produced by preprocessing', () => {
+    expect(
+      parseProcessedSelectionPairs(
+        { event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        'alert'
+      )
+    ).toEqual([{ id: 'alert-1', index: '.alerts' }]);
+    expect(
+      parseProcessedSelectionPairs(
+        {
+          event: {
+            documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'event-1', index: 'logs-default' }]);
+    expect(
+      parseProcessedSelectionPairs(
+        {
+          event: {
+            documents: [{ _id: 'legacy-event-1', _index: 'logs-default' }],
+          },
+        },
+        'document'
+      )
+    ).toEqual([{ id: 'legacy-event-1', index: 'logs-default' }]);
+  });
+
+  it('rejects a processed selection containing a document outside the case', () => {
+    expect(() =>
+      validateSelectionMembership({
+        selectionType: 'document',
+        selectedTargets: [{ id: 'outside-event', index: 'logs-default' }],
+        attachedDocuments: [
+          {
+            id: 'event-1',
+            index: 'logs-default',
+            attached_at: '2026-09-16T00:00:00.000Z',
+          },
+        ],
+      })
+    ).toThrow('All selected documents must belong to the case.');
+  });
+
+  it('accepts a processed selection when every pair is attached', () => {
+    expect(() =>
+      validateSelectionMembership({
+        selectionType: 'alert',
+        selectedTargets: [{ id: 'alert-1', index: '.alerts' }],
+        attachedDocuments: [
+          {
+            id: 'alert-1',
+            index: '.alerts',
+            attached_at: '2026-09-16T00:00:00.000Z',
+          },
+        ],
+      })
+    ).not.toThrow();
   });
 });

@@ -174,6 +174,124 @@ describe('CasesWorkflowRunService', () => {
     );
   });
 
+  describe('expanded trigger selection membership', () => {
+    it('runs a query-based alert selection when every expanded alert is attached', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            triggerType: 'alert',
+            querySelection: { index: '.alerts-*', query: { match_all: {} } },
+          },
+        },
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
+      };
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
+        createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
+      );
+      management.runWorkflowWithPreprocessing.mockImplementationOnce(
+        async ({ validateProcessedInputs }) => {
+          await validateProcessedInputs?.({
+            event: { alerts: [{ _id: 'alert-1', _index: '.alerts' }] },
+          });
+          return { workflowExecutionId: 'execution-1' };
+        }
+      );
+
+      await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachmentTypes: ['alert'],
+      });
+    });
+
+    it('rejects a query-based alert selection when an expanded alert is not attached', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            triggerType: 'alert',
+            querySelection: { index: '.alerts-*', query: { match_all: {} } },
+          },
+        },
+        origin: { type: 'cases.case', caseId: 'case-1' },
+      };
+      management.runWorkflowWithPreprocessing.mockImplementationOnce(
+        async ({ validateProcessedInputs }) => {
+          await validateProcessedInputs?.({
+            event: { alerts: [{ _id: 'outside-alert', _index: '.alerts' }] },
+          });
+          return { workflowExecutionId: 'execution-1' };
+        }
+      );
+
+      await expect(run(body)).rejects.toThrow('All selected alerts must belong to the case.');
+    });
+
+    it('runs a document selection when every expanded event is attached', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            triggerType: 'document',
+            documentIds: [{ _id: 'event-1', _index: 'logs-default' }],
+          },
+        },
+        origin: { type: 'cases.case', caseId: 'case-1' },
+      };
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        {
+          id: 'event-1',
+          index: 'logs-default',
+          attached_at: '2026-09-16T00:00:00.000Z',
+        },
+      ]);
+      management.runWorkflowWithPreprocessing.mockImplementationOnce(
+        async ({ validateProcessedInputs }) => {
+          await validateProcessedInputs?.({
+            event: {
+              triggerType: 'document',
+              documents: [{ id: 'event-1', index: 'logs-default', data: {} }],
+            },
+          });
+          return { workflowExecutionId: 'execution-1' };
+        }
+      );
+
+      await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachmentTypes: ['event'],
+      });
+    });
+
+    it('rejects a document selection when an expanded event is not attached', async () => {
+      const body: RunCaseWorkflowRequest = {
+        caseIds: ['case-1'],
+        inputs: {
+          event: {
+            triggerType: 'document',
+            querySelection: { index: 'logs-*', query: { match_all: {} } },
+          },
+        },
+        origin: { type: 'cases.case', caseId: 'case-1' },
+      };
+      management.runWorkflowWithPreprocessing.mockImplementationOnce(
+        async ({ validateProcessedInputs }) => {
+          await validateProcessedInputs?.({
+            event: {
+              triggerType: 'document',
+              documents: [{ id: 'outside-event', index: 'logs-default', data: {} }],
+            },
+          });
+          return { workflowExecutionId: 'execution-1' };
+        }
+      );
+
+      await expect(run(body)).rejects.toThrow('All selected documents must belong to the case.');
+    });
+  });
+
   describe('bulk runs (no origin)', () => {
     const bulkBody: RunCaseWorkflowRequest = {
       caseIds: ['case-a', 'case-b', 'case-c'],
@@ -250,7 +368,7 @@ describe('CasesWorkflowRunService', () => {
           caseIds: ['case-a', 'case-b'],
           inputs: { event: { alertIds: [{ _id: 'a-1', _index: '.alerts' }] } },
         })
-      ).rejects.toThrow('Alert inputs can only be used with a single case.');
+      ).rejects.toThrow('Trigger selections can only be used with a single case.');
       expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
     });
 
@@ -265,9 +383,22 @@ describe('CasesWorkflowRunService', () => {
             },
           },
         })
-      ).rejects.toThrow(
-        'Query-based alert selections are not supported when running workflows from cases.'
-      );
+      ).rejects.toThrow('Trigger selections can only be used with a single case.');
+      expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects document inputs when origin is absent', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {
+            event: {
+              triggerType: 'document',
+              documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+            },
+          },
+        })
+      ).rejects.toThrow('Trigger selections can only be used with a single case.');
       expect(management.runWorkflowWithPreprocessing).not.toHaveBeenCalled();
     });
   });

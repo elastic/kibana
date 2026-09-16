@@ -225,6 +225,10 @@ export interface RunWorkflowWithPreprocessingParams {
   preprocessingContext: TriggerInputPreprocessingContext;
   metadata?: Record<string, unknown>;
   /**
+   * Validates the concrete event produced by trigger preprocessing before workflow execution.
+   */
+  validateProcessedInputs?: (processedInputs: Record<string, unknown>) => void | Promise<void>;
+  /**
    * Fields to merge into `event` *after* trigger-input preprocessing. Use this to inject
    * server-owned values (e.g. `caseIds`) that preprocessing would otherwise overwrite when
    * replacing the whole `event` object with an expanded event.
@@ -553,6 +557,7 @@ export class WorkflowsManagementApi {
     request,
     preprocessingContext,
     metadata,
+    validateProcessedInputs,
     eventOverrides,
   }: RunWorkflowWithPreprocessingParams): Promise<RunWorkflowWithPreprocessingResult> {
     const processedInputs = await preprocessTriggerInputs(
@@ -561,6 +566,8 @@ export class WorkflowsManagementApi {
       spaceId,
       this.logger
     );
+
+    await validateProcessedInputs?.(processedInputs);
 
     const finalInputs =
       eventOverrides != null
