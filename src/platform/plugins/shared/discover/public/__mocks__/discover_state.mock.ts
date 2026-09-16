@@ -240,7 +240,7 @@ export function getDiscoverInternalStateMock({
       }
 
       internalState.dispatch(
-        internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: true })
       );
 
       // Populate savedDataViews before initializing tabs,
