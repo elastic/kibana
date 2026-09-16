@@ -76,13 +76,16 @@ class StepSchemas {
    */
   public getStepOutput(stepTypeId: string): RegisteredStepOutput | undefined {
     const stepDefinition = this.getStepDefinition(stepTypeId);
-    if (!stepDefinition || !this.isPublicStepDefinition(stepDefinition)) {
+    if (!stepDefinition) {
       return undefined;
     }
-    const getOutputSchema = stepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema;
+    // Narrow on the property being read: `editorHandlers` is public-only, while
+    // `label` is required on BaseStepDefinition and so cannot discriminate.
+    const dynamicSchema =
+      'editorHandlers' in stepDefinition ? stepDefinition.editorHandlers?.dynamicSchema : undefined;
     return {
       outputSchema: stepDefinition.outputSchema,
-      getDynamicOutputSchema: getOutputSchema ? (args) => getOutputSchema(args) : undefined,
+      getDynamicOutputSchema: dynamicSchema?.getOutputSchema?.bind(dynamicSchema),
     };
   }
 
