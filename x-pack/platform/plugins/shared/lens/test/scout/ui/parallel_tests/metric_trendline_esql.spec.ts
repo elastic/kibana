@@ -110,8 +110,9 @@ spaceTest.describe(
 
     spaceTest(
       'renders trendline for a FORK query',
-      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
-        const dashboardId = await apiServices.dashboard.create(
+      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+        const dashboardId = await createDashboard(
+          kbnClient,
           {
             title: 'ESQL FORK metric trendline',
             time_range: testData.LOGSTASH_IN_RANGE_DATES,
@@ -145,7 +146,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(pageObjects.lens.metric.trendline).toBeVisible();
+        await expect(getMetricTrendline(page)).toBeVisible();
       }
     );
   }
