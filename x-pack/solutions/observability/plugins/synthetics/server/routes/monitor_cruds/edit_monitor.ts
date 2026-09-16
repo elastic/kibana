@@ -48,6 +48,7 @@ import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import { isSecretConnectionsEnabled } from '../../config';
+import { restoreMaskedMonitorParams } from '../../../common/utils/mask_monitor_params';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -68,6 +69,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
+        preserveMaskedParams: queryBoolean
+          .optional()
+          .default(false)
+          .describe('For internal use only.'),
       }),
       body: editMonitorRequestBody,
     },
@@ -76,7 +81,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { request, response, spaceId, server, monitorConfigRepository } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
-    const reqQuery = request.query as { internal?: boolean };
+    const reqQuery = request.query as { internal?: boolean; preserveMaskedParams?: boolean };
     const { id: monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
@@ -112,7 +117,17 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         return response.badRequest(getInvalidOriginError(monitor));
       }
 
-      let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
+      const monitorWithRestoredParams = reqQuery.preserveMaskedParams
+        ? {
+            ...monitor,
+            [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
+              previousParams: normalizedPreviousMonitor[ConfigKey.PARAMS],
+              submittedParams: monitor[ConfigKey.PARAMS],
+            }),
+          }
+        : monitor;
+
+      let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitorWithRestoredParams);
 
       editMonitorAPI.validateMonitorType(
         editedMonitor as MonitorFields,
@@ -139,7 +154,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
-        monitor as CreateMonitorPayLoad,
+        monitorWithRestoredParams as CreateMonitorPayLoad,
         previousMonitor.attributes.locations,
         maintenanceWindows
       );
