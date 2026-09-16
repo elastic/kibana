@@ -39,7 +39,7 @@ This section is the single source of truth for where Scout UI helpers live and w
 Every rule carries a tag that says how it is enforced:
 
 - `lint:<rule>` is an ESLint rule and fails the PR.
-- `script:<check>` is a deterministic fact reported by `node scripts/scout audit` (in progress). It never decides on its own.
+- `script:<check>` is a deterministic fact reported by `node scripts/scout audit` (in progress), which is run manually on a cadence, not in CI. It never decides on its own.
 - `judgment` is a call a maintainer (or the audit skill) makes by reading the code. The audit reports it, a human acts.
 
 A rule with no tag is not a rule. Prose that nothing checks is what rots first.
@@ -121,7 +121,7 @@ When the audit flags something and the decision is to keep it, record that next 
 export class UnifiedTabs {
 ```
 
-The audit skill and the PR reviewer skill treat marked items as decided and do not re-flag them. Deterministic checks use a baseline file next to the audit script instead, edited in the same PR under appex-qa review.
+The audit skill and the PR reviewer skill treat marked items as decided and do not re-flag them. The marker is the only exception mechanism. The audit is run manually on a cadence rather than on every PR, so there is nothing to gate and no separate baseline file to keep in sync.
 
 ### API services [scout-page-objects-api-services]
 
