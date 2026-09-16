@@ -1383,6 +1383,8 @@
       "@kbn/evals-suite-security-esql-generation-regression/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/*"],
       "@kbn/evals-suite-security-persona-matrix": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix"],
       "@kbn/evals-suite-security-persona-matrix/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/*"],
+      "@kbn/evals-suite-semantic-log-search": ["./x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search"],
+      "@kbn/evals-suite-semantic-log-search/*": ["./x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search/*"],
       "@kbn/evals-suite-siem-readiness": ["./x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness"],
       "@kbn/evals-suite-siem-readiness/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/*"],
       "@kbn/evals-suite-significant-events": ["./x-pack/solutions/observability/packages/kbn-evals-suite-significant-events"],

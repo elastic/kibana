@@ -1870,6 +1870,7 @@
     "@kbn/evals-suite-security-automatic-migrations": "workspace:*",
     "@kbn/evals-suite-security-esql-generation-regression": "workspace:*",
     "@kbn/evals-suite-security-persona-matrix": "workspace:*",
+    "@kbn/evals-suite-semantic-log-search": "workspace:*",
     "@kbn/evals-suite-siem-readiness": "workspace:*",
     "@kbn/evals-suite-significant-events": "workspace:*",
     "@kbn/evals-suite-smoke-tests": "workspace:*",
