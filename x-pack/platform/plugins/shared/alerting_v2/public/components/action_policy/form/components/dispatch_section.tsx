@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -197,10 +196,7 @@ export const DispatchSection = () => {
   };
 
   const optionsPanelCss = css`
-    margin-top: ${euiTheme.size.s};
-    padding: ${euiTheme.size.m};
-    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${euiTheme.border.radius.medium};
+    margin-top: ${euiTheme.size.m};
   `;
 
   const howOftenControls = (
@@ -280,32 +276,30 @@ export const DispatchSection = () => {
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4>{SEND_DATA_LABEL}</h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <Controller
         name="groupingMode"
         control={control}
         render={({ field }) => (
-          <EuiButtonGroup
-            legend={SEND_DATA_LABEL}
-            options={GROUPING_MODE_UI_OPTIONS}
-            idSelected={selectedUiOption}
-            onChange={(id) => {
-              const mode = uiOptionToGroupingMode(id as GroupingModeUiOption);
-              field.onChange(mode);
-              setValue('throttleStrategy', DEFAULT_STRATEGY_FOR_MODE[mode]);
-              setValue(
-                'throttleInterval',
-                needsInterval(DEFAULT_STRATEGY_FOR_MODE[mode]) ? DEFAULT_THROTTLE_INTERVAL : ''
-              );
-            }}
-            buttonSize="compressed"
-            isFullWidth
-            type="single"
-            data-test-subj="groupingModeToggle"
-          />
+          <EuiFormRow label={SEND_DATA_LABEL} fullWidth>
+            <EuiButtonGroup
+              legend={SEND_DATA_LABEL}
+              options={GROUPING_MODE_UI_OPTIONS}
+              idSelected={selectedUiOption}
+              onChange={(id) => {
+                const mode = uiOptionToGroupingMode(id as GroupingModeUiOption);
+                field.onChange(mode);
+                setValue('throttleStrategy', DEFAULT_STRATEGY_FOR_MODE[mode]);
+                setValue(
+                  'throttleInterval',
+                  needsInterval(DEFAULT_STRATEGY_FOR_MODE[mode]) ? DEFAULT_THROTTLE_INTERVAL : ''
+                );
+              }}
+              buttonSize="compressed"
+              isFullWidth
+              type="single"
+              data-test-subj="groupingModeToggle"
+            />
+          </EuiFormRow>
         )}
       />
 

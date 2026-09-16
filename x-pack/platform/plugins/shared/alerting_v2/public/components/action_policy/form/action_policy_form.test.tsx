@@ -347,7 +347,7 @@ describe('ActionPolicyForm', () => {
 
     expect(screen.getByTestId('dispatchConfigCallout')).toBeInTheDocument();
     expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
-      'Per alert. Best when you need visibility into each alert separately.'
+      'Per alert: Best when you need visibility into each alert separately.'
     );
     expect(screen.queryByTestId('dispatchOptionDiagram')).not.toBeInTheDocument();
 

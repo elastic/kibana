@@ -36,7 +36,7 @@ describe('DispatchConfigSummary', () => {
     renderSummary({ groupingMode: 'per_episode' });
 
     expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
-      'Per alert. Best when you need visibility into each alert separately.'
+      'Per alert: Best when you need visibility into each alert separately.'
     );
   });
 
@@ -44,7 +44,7 @@ describe('DispatchConfigSummary', () => {
     renderSummary({ groupingMode: 'per_field', throttleStrategy: 'time_interval' });
 
     expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
-      'Combined. Best when many related alerts should share one send per field value, for example per host or service.'
+      'Combined: Best when many related alerts should share one send per field value, for example per host or service.'
     );
   });
 
@@ -52,7 +52,7 @@ describe('DispatchConfigSummary', () => {
     renderSummary({ groupingMode: 'all', throttleStrategy: 'time_interval' });
 
     expect(screen.getByTestId('dispatchConfigModeHelp')).toHaveTextContent(
-      'Combined. Best for periodic roll-ups when individual alerts are not needed.'
+      'Combined: Best for periodic roll-ups when individual alerts are not needed.'
     );
   });
 

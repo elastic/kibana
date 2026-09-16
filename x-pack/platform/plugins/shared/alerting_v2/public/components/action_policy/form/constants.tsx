@@ -7,7 +7,11 @@
 
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { type ReactNode } from 'react';
 import type { ActionPolicyFormState } from './types';
+
+const boldChunks = (chunks: ReactNode) => <strong>{chunks}</strong>;
 
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
@@ -54,17 +58,28 @@ export const groupingModeToUiOption = (groupingMode: GroupingMode): GroupingMode
 export const uiOptionToGroupingMode = (option: GroupingModeUiOption): GroupingMode =>
   option === 'per_episode' ? 'per_episode' : 'all';
 
-export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.perAlert.help', {
-    defaultMessage: 'Per alert. Best when you need visibility into each alert separately.',
-  }),
-  per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedGroup.help', {
-    defaultMessage:
-      'Combined. Best when many related alerts should share one send per field value, for example per host or service.',
-  }),
-  all: i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedAll.help', {
-    defaultMessage: 'Combined. Best for periodic roll-ups when individual alerts are not needed.',
-  }),
+export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, ReactNode> = {
+  per_episode: (
+    <FormattedMessage
+      id="xpack.alertingV2.actionPolicy.form.dispatch.mode.perAlert.help"
+      defaultMessage="<bold>Per alert</bold>: Best when you need visibility into each alert separately."
+      values={{ bold: boldChunks }}
+    />
+  ),
+  per_field: (
+    <FormattedMessage
+      id="xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedGroup.help"
+      defaultMessage="<bold>Combined</bold>: Best when many related alerts should share one send per field value, for example per host or service."
+      values={{ bold: boldChunks }}
+    />
+  ),
+  all: (
+    <FormattedMessage
+      id="xpack.alertingV2.actionPolicy.form.dispatch.mode.combinedAll.help"
+      defaultMessage="<bold>Combined</bold>: Best for periodic roll-ups when individual alerts are not needed."
+      values={{ bold: boldChunks }}
+    />
+  ),
 };
 
 export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
