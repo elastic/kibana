@@ -31,8 +31,10 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
-      // Grid items default to min-height: auto (content size). Without this the wrapper grows with
-      // the content instead of constraining the scroll container below.
+      // Grid items default to min-width/min-height: auto (content size). Without this the wrapper
+      // grows with the content (e.g. push flyout padding) instead of constraining the scroll
+      // container below.
+      min-width: 0;
       min-height: 0;
 
       z-index: ${layoutLevels.content};
