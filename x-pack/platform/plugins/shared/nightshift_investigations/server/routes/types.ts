@@ -21,8 +21,7 @@ export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> 
 
 export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
-export interface NightshiftInvestigationsRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface NightshiftInvestigationsRouteHandlerResources extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;

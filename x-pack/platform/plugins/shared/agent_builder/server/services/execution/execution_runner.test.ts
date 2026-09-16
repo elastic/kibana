@@ -137,7 +137,7 @@ const createDeps = ({
     savedObjects: {
       getScopedClient: jest.fn().mockReturnValue({}),
     },
-  } as never);
+  }) as never;
 
 /**
  * Factories for the two `ChatAgentEvent`s that show up in every persistence-flow test.

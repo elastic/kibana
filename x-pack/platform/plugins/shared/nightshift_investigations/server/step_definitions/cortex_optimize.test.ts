@@ -36,7 +36,7 @@ describe('cortexOptimizeStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'optimize_cortex',
       stepType: 'nightshift.cortexOptimize',
-    } as never);
+    }) as never;
 
   it('optimizes with the request-scoped ES client', async () => {
     const definition = cortexOptimizeStepDefinition({

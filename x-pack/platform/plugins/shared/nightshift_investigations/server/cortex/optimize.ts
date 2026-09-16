@@ -216,7 +216,7 @@ export const applyCortexEdits = async ({
       status:
         existing?.status === 'archived'
           ? 'tentative'
-          : edit.status ?? existing?.status ?? 'tentative',
+          : (edit.status ?? existing?.status ?? 'tentative'),
       corroborations: existing?.corroborations,
     });
     logger.info(`Upserted Cortex page ${id}`);

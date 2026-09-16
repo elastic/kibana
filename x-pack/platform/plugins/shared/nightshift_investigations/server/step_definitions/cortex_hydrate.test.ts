@@ -38,11 +38,11 @@ describe('cortexHydrateStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'hydrate_cortex',
       stepType: 'nightshift.cortexHydrate',
-    } as never);
+    }) as never;
 
   it('hydrates the sandbox with the request-scoped ES client', async () => {
     const definition = cortexHydrateStepDefinition({
-      getConnectionManager: () => ({ apiClient } as never),
+      getConnectionManager: () => ({ apiClient }) as never,
       logger: loggerMock.create(),
     });
 
@@ -63,7 +63,7 @@ describe('cortexHydrateStepDefinition', () => {
   // write the wiki into a workspace the agent never reads.
   it('scopes the workspace to the space the workflow runs in', async () => {
     const definition = cortexHydrateStepDefinition({
-      getConnectionManager: () => ({ apiClient } as never),
+      getConnectionManager: () => ({ apiClient }) as never,
       logger: loggerMock.create(),
     });
 
