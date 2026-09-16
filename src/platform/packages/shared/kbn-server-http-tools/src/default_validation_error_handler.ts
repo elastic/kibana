@@ -16,10 +16,11 @@ const htmlEscapes: Record<string, string> = {
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#x27;',
+  '`': '&#x60;',
 };
 
 const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"']/g, (character) => htmlEscapes[character]);
+  value.replace(/[&<>"'`]/g, (character) => htmlEscapes[character]);
 
 /**
  * Hapi extends the ValidationError interface to add this output key with more data.

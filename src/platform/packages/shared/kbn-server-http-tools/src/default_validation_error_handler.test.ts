@@ -50,7 +50,7 @@ describe('defaultValidationErrorHandler', () => {
 
   it('HTML-escapes validation keys', () => {
     expect.assertions(1);
-    const key = '<script>&"\'';
+    const key = '<script>&"\'`';
     const schema = Joi.object({
       [key]: Joi.string().required(),
     });
@@ -61,7 +61,7 @@ describe('defaultValidationErrorHandler', () => {
     try {
       defaultValidationErrorHandler({} as Request, {} as ResponseToolkit, error);
     } catch (err) {
-      expect(err.output.payload.validation.keys).toEqual(['&lt;script&gt;&amp;&quot;&#x27;']);
+      expect(err.output.payload.validation.keys).toEqual(['&lt;script&gt;&amp;&quot;&#x27;&#x60;']);
     }
   });
 });
