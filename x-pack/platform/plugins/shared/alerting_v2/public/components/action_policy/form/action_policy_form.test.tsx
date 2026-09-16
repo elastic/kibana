@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -306,10 +306,12 @@ describe('ActionPolicyForm', () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.click(screen.getByTestId('destinationsInput'));
-    expect(await screen.findByTestId('workflowOption-workflow-1')).toBeInTheDocument();
-    expect(screen.getByText('Slack notification workflow')).toBeInTheDocument();
-    expect(screen.getByText('Sends alerts to Slack')).toBeInTheDocument();
+    const destinationsCombo = screen.getByTestId('destinationsInput');
+    await user.click(within(destinationsCombo).getByRole('combobox'));
+    expect(
+      await screen.findByRole('option', { name: 'Slack notification workflow' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Email digest workflow' })).toBeInTheDocument();
     expect(screen.getByTestId('createDestinationButton')).toBeInTheDocument();
   });
 
