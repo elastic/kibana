@@ -148,9 +148,11 @@ export const createSkillsStoreMock = (): SkillsStoreMock => {
 
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
-    validate: jest.fn(),
+    validateAttachmentInputs: jest.fn(),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
+    createStateManager: jest.fn(),
+    mergeAttachmentInputs: jest.fn(),
   };
 };
 
@@ -364,6 +366,14 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       createSubAgent: jest.fn(),
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
+    },
+    agentRegistry: {
+      has: jest.fn().mockResolvedValue(false),
+      get: jest.fn(),
+      list: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn().mockResolvedValue(false),
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),

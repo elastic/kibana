@@ -18,7 +18,6 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
@@ -37,7 +36,6 @@ import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
-import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import {
@@ -50,6 +48,7 @@ import {
   scheduleInvestigationReconciliationTask,
 } from './tasks/investigation_reconciliation_task';
 import type {
+  InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
@@ -75,6 +74,7 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
+  private investigationQuotaCallback?: InvestigationQuotaCallback;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -144,16 +144,6 @@ export class NightshiftInvestigationsPlugin
           logger: sandboxLogger.get('connector_credentials'),
         });
 
-        const workspaceManager = new WorkspaceManager({
-          config: config.sandbox,
-          connectionManager,
-          logger: sandboxLogger.get('workspace'),
-        });
-
-        connectionManager.setRestoreCallback((conversationId) =>
-          workspaceManager.restoreWorkspace(conversationId)
-        );
-
         plugins.agentBuilder.tools.register(
           createSandboxBashTool({
             connectionManager,
@@ -171,27 +161,6 @@ export class NightshiftInvestigationsPlugin
         plugins.agentBuilder.tools.register(
           createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
-
-        plugins.agentBuilder.hooks.register({
-          id: 'nightshift-sandbox-workspace-backup',
-          hooks: {
-            [HookLifecycle.afterExecution]: {
-              mode: HookExecutionMode.nonBlocking,
-              handler: (context) => {
-                const { conversationId, request } = context;
-                if (!conversationId) return;
-                const scopedConversationId = `${getSpaceId(request)}:${conversationId}`;
-                workspaceManager.backupWorkspace(scopedConversationId).catch((err) => {
-                  sandboxLogger
-                    .get('workspace')
-                    .warn(
-                      `Workspace backup failed for conversation ${scopedConversationId}: ${err}`
-                    );
-                });
-              },
-            },
-          },
-        });
       }
     }
 
@@ -223,6 +192,15 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
+
+    return {
+      registerInvestigationQuota: (callback) => {
+        if (this.investigationQuotaCallback) {
+          throw new Error('Investigation quota callback is already registered');
+        }
+        this.investigationQuotaCallback = callback;
+      },
+    };
   }
 
   start(
@@ -289,6 +267,7 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       isAvailable: () =>
         isInvestigationAvailable({

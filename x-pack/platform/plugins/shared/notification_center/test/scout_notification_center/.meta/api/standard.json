@@ -1,5 +1,5 @@
 {
-  "sha1": "b2fbebec52d5f862acebddb133d128990b6f8ff9",
+  "sha1": "9df86faca1d24ea90d5b73dbe9e10ff3acd688aa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,6 +33,20 @@
       }
     },
     {
+      "id": "95cda9a57ffdcd7-45f8787405266c5",
+      "title": "Notification Center - read-state routes without a user profile unread status is forbidden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
       "id": "95cda9a57ffdcd7-f958a9963f88500",
       "title": "Notification Center - read-state routes without a user profile listing notifications stays available",
       "expectedStatus": "passed",
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/forbidden.spec.ts",
-        "line": 29,
-        "column": 26
+        "line": 32,
+        "column": 52
       }
     },
     {
@@ -226,6 +240,20 @@
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
         "line": 119,
         "column": 14
+      }
+    },
+    {
+      "id": "6f397048bbb5cea-2b6b1e79a87aafa",
+      "title": "Notification Center - unread status tracks read-state transitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/unread_status.spec.ts",
+        "line": 35,
+        "column": 5
       }
     }
   ]
