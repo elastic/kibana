@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSelect, EuiTextArea } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFieldText, EuiFormRow, EuiSelect, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -37,6 +38,7 @@ export function CreateDatasetDetailsFields({
   initialIdNormalized = '',
   autoFocusName = false,
 }: CreateDatasetDetailsFieldsProps) {
+  const { euiTheme } = useEuiTheme();
   const { field: nameField, fieldState: nameFieldState } = useController({
     name: 'name',
     control,
@@ -86,6 +88,8 @@ export function CreateDatasetDetailsFields({
     },
   });
 
+  const isDataSourceEmpty = !dataSourceIdField.value;
+
   const dataSourceOptions = useMemo(() => {
     const placeholder = {
       value: '',
@@ -98,12 +102,18 @@ export function CreateDatasetDetailsFields({
     return [placeholder, ...fromSources];
   }, [dataSources]);
 
+  const dataSourceSelectCss = css({
+    color: isDataSourceEmpty ? euiTheme.colors.textSubdued : undefined,
+    '& option': {
+      color: euiTheme.colors.textParagraph,
+    },
+  });
+
   return (
     <>
       <EuiFormRow
         label={createDatasetFlyoutStrings.dataSourceLabel()}
         fullWidth
-        helpText={createDatasetFlyoutStrings.dataSourceHelp()}
         isInvalid={Boolean(dataSourceFieldState.error)}
         error={dataSourceFieldState.error?.message}
       >
@@ -118,6 +128,7 @@ export function CreateDatasetDetailsFields({
           inputRef={dataSourceIdField.ref}
           disabled={dataSources.length === 0}
           isInvalid={Boolean(dataSourceFieldState.error)}
+          css={dataSourceSelectCss}
         />
       </EuiFormRow>
       <EuiFormRow

@@ -59,11 +59,14 @@ describe('CreateDatasetWizardPage', () => {
   };
 
   it('walks through dataset, advanced, and confirm steps then saves', async () => {
-    const { getByTestId, getByText, queryByTestId, history, add, loadDataSets } = renderWizard();
+    const { getByTestId, getByText, queryByTestId, queryByText, history, add, loadDataSets } =
+      renderWizard();
 
     expect(getByTestId('createDatasetWizardContent')).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
     expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
+    expect(getByText('Select an existing data source or connect a new one')).toBeInTheDocument();
+    expect(queryByText('Select the external data source this dataset belongs to.')).toBeNull();
     expect(
       getByText('URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)')
     ).toBeInTheDocument();

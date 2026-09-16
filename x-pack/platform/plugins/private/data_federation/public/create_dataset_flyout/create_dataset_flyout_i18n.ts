@@ -73,17 +73,12 @@ export const createDatasetFlyoutStrings = {
 
   dataSourcePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourcePlaceholder', {
-      defaultMessage: 'Select a data source',
+      defaultMessage: 'Select an existing data source or connect a new one',
     }),
 
   dataSourceEmptyHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceEmptyHelp', {
       defaultMessage: 'Create a data source on the Sources tab before adding a dataset.',
-    }),
-
-  dataSourceHelp: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceHelp', {
-      defaultMessage: 'Select the external data source this dataset belongs to.',
     }),
 
   resourceLabel: () =>
