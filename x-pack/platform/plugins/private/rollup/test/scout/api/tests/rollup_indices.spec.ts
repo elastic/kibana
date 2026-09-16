@@ -7,17 +7,18 @@
 
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ROLLUP_ADMIN_ROLE } from '../../common/fixtures/constants';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, ROLLUP_ADMIN_ROLE, TEST_RESOURCE_PREFIX } from '../fixtures/constants';
 import {
   cleanupRollupState,
   createSourceIndex,
   getJobPayload,
   rollupApi,
+  uniqueJobId,
+  uniqueTargetIndex,
 } from '../fixtures/rollup_jobs';
 
-// Local stateful only: both tests assert that the cluster has *no* rollup usage at all, which is
-// only guaranteed on a fresh local cluster. Rollup does not exist on serverless.
+// Local stateful only: `rejects job creation` needs a cluster with *no* rollup usage at all, which
+// only a fresh local cluster guarantees. Rollup does not exist on serverless.
 apiTest.describe(
   'Rollup indices without rollup usage in the cluster',
   { tag: ['@local-stateful-classic'] },
@@ -37,11 +38,13 @@ apiTest.describe(
       await cleanupRollupState(esClient);
     });
 
-    apiTest('returns no rollup indices', async ({ apiClient }) => {
+    apiTest('reports no rollup indices owned by these tests', async ({ apiClient }) => {
       const response = await rollupApi(apiClient, headers).getIndices();
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({});
+      expect(
+        Object.keys(response.body).filter((name) => name.startsWith(TEST_RESOURCE_PREFIX))
+      ).toStrictEqual([]);
     });
 
     // Since 8.15 ES only allows creating a rollup job when the cluster already has rollup usage.
@@ -49,7 +52,7 @@ apiTest.describe(
       const indexName = await createSourceIndex(esClient, 'no-usage');
 
       const response = await rollupApi(apiClient, headers).createJob(
-        getJobPayload(indexName, 'no-rollup-usage-job')
+        getJobPayload(indexName, uniqueJobId('no-usage'), uniqueTargetIndex('no-usage'))
       );
 
       expect(response).toHaveStatusCode(400);

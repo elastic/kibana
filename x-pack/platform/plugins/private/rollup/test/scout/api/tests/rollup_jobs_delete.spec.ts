@@ -7,23 +7,23 @@
 
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ROLLUP_ADMIN_ROLE } from '../../common/fixtures/constants';
-import { createMockRollupIndex } from '../../common/fixtures/rollup_api';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, ROLLUP_ADMIN_ROLE } from '../fixtures/constants';
 import {
   cleanupRollupState,
+  createMockRollupUsage,
   createSourceIndex,
   getJobPayload,
   rollupApi,
+  uniqueJobId,
+  uniqueTargetIndex,
 } from '../fixtures/rollup_jobs';
-
-const JOB_ID = 'delete-job';
 
 apiTest.describe(
   'Rollup jobs deletion',
   { tag: ['@local-stateful-classic', '@cloud-stateful-classic'] },
   () => {
     let headers: Record<string, string>;
+    let jobId: string;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(ROLLUP_ADMIN_ROLE);
@@ -34,9 +34,12 @@ apiTest.describe(
       await cleanupRollupState(esClient);
       // Since 8.15 ES only allows creating a rollup job when the cluster already has rollup usage,
       // which the mock index simulates.
-      await createMockRollupIndex(esClient);
+      await createMockRollupUsage(esClient, 'delete');
       const indexName = await createSourceIndex(esClient, 'delete');
-      await rollupApi(apiClient, headers).createJob(getJobPayload(indexName, JOB_ID));
+      jobId = uniqueJobId('delete');
+      await rollupApi(apiClient, headers).createJob(
+        getJobPayload(indexName, jobId, uniqueTargetIndex('delete'))
+      );
     });
 
     // `cleanupRollupState` stops jobs before deleting them, which also covers the test that leaves
@@ -47,9 +50,9 @@ apiTest.describe(
 
     apiTest('deletes a stopped job', async ({ apiClient }) => {
       const api = rollupApi(apiClient, headers);
-      await api.stopJob([JOB_ID]);
+      await api.stopJob([jobId]);
 
-      const response = await api.deleteJob([JOB_ID]);
+      const response = await api.deleteJob([jobId]);
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ success: true });
@@ -57,9 +60,9 @@ apiTest.describe(
 
     apiTest('refuses to delete a started job', async ({ apiClient }) => {
       const api = rollupApi(apiClient, headers);
-      await api.startJob([JOB_ID]);
+      await api.startJob([jobId]);
 
-      const response = await api.deleteJob([JOB_ID]);
+      const response = await api.deleteJob([jobId]);
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toContain('Job must be [STOPPED] before deletion');

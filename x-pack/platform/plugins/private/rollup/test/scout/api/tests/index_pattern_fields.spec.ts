@@ -12,17 +12,17 @@ import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/con
 import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ROLLUP_ADMIN_ROLE } from '../../common/fixtures/constants';
-import { createMockRollupIndex } from '../../common/fixtures/rollup_api';
-import { COMMON_HEADERS, TARGET_INDEX_PREFIX } from '../fixtures/constants';
+import { COMMON_HEADERS, ROLLUP_ADMIN_ROLE, SOURCE_INDEX_PREFIX } from '../fixtures/constants';
 import {
   cleanupRollupState,
+  createMockRollupUsage,
   createSourceIndex,
   getJobPayload,
   rollupApi,
+  seedRollupTargetDoc,
+  uniqueJobId,
+  uniqueTargetIndex,
 } from '../fixtures/rollup_jobs';
-
-const TARGET_INDEX = `${TARGET_INDEX_PREFIX}-fields`;
 
 apiTest.describe(
   'Data view fields for a rollup index',
@@ -66,27 +66,35 @@ apiTest.describe(
     });
 
     apiTest('returns 404 when the rollup index does not exist', async ({ apiClient }) => {
+      const missingPattern = `${SOURCE_INDEX_PREFIX}-missing`;
       const response = await getFieldsForWildcard(
         apiClient,
-        `?pattern=foo&type=${DataViewType.ROLLUP}&rollup_index=bar`
+        `?pattern=${missingPattern}&type=${DataViewType.ROLLUP}&rollup_index=${uniqueTargetIndex(
+          'fields-missing'
+        )}`
       );
 
       expect(response).toHaveStatusCode(404);
-      expect(response.body.message).toContain('No indices match "foo"');
+      expect(response.body.message).toContain(`No indices match "${missingPattern}"`);
     });
 
     apiTest('returns the rolled-up fields of a matching index', async ({ apiClient, esClient }) => {
       // Since 8.15 ES only allows creating a rollup job when the cluster already has rollup
       // usage, which the mock index simulates.
-      await createMockRollupIndex(esClient);
+      await createMockRollupUsage(esClient, 'fields');
       const indexName = await createSourceIndex(esClient, 'fields');
-      await rollupApi(apiClient, headers).createJob(
-        getJobPayload(indexName, 'fields-job', TARGET_INDEX)
-      );
+      const targetIndex = uniqueTargetIndex('fields');
+      const jobId = uniqueJobId('fields');
+      await rollupApi(apiClient, headers).createJob(getJobPayload(indexName, jobId, targetIndex));
+      // The route reads the pattern's field caps, which only cover the rollup fields once the
+      // target index holds rolled-up data.
+      await seedRollupTargetDoc(esClient, targetIndex, jobId);
 
+      // `type=rollup` routes into the rollup-capabilities branch of `IndexPatternsFetcher`, and the
+      // pattern is the rollup index itself — matching how a rollup data view queries this route.
       const response = await getFieldsForWildcard(
         apiClient,
-        `?pattern=${indexName}&rollup_index=${TARGET_INDEX}`
+        `?pattern=${targetIndex}&type=${DataViewType.ROLLUP}&rollup_index=${targetIndex}`
       );
 
       expect(response).toHaveStatusCode(200);

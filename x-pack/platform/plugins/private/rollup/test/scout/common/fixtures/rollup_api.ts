@@ -16,7 +16,8 @@ import { MOCK_ROLLUP_INDEX_NAME, ROLLUP_INDEX_NAME } from './constants';
  */
 export const createMockRollupIndex = async (
   esClient: EsClient,
-  index: string = MOCK_ROLLUP_INDEX_NAME
+  index: string = MOCK_ROLLUP_INDEX_NAME,
+  rollupIndex: string = ROLLUP_INDEX_NAME
 ) => {
   await esClient.indices.create({
     index,
@@ -26,7 +27,7 @@ export const createMockRollupIndex = async (
           logs_job: {
             id: 'mockRollupJob',
             index_pattern: index,
-            rollup_index: ROLLUP_INDEX_NAME,
+            rollup_index: rollupIndex,
             cron: '0 0 0 ? * 7',
             page_size: 1000,
             groups: {
@@ -52,15 +53,14 @@ export const createMockRollupIndex = async (
 };
 
 /**
- * Stop and delete every rollup job in the cluster. Rollup jobs are cluster-global, so run this
- * defensively before a spec (a crashed prior run can leave a job that breaks an empty-list
- * precondition) and in teardown. Best-effort: ignore jobs that are already gone.
+ * Stop and delete the rollup jobs whose id starts with `idPrefix`. Rollup jobs are cluster-global
+ * and the cluster may be shared, so cleanup must only touch jobs owned by the calling suite.
  */
-export const deleteAllRollupJobs = async (esClient: EsClient) => {
+export const deleteRollupJobsMatching = async (esClient: EsClient, idPrefix: string) => {
   const { jobs = [] } = await esClient.rollup.getJobs({ id: '_all' });
   for (const job of jobs) {
     const id = job.config?.id;
-    if (!id) continue;
+    if (!id || !id.startsWith(idPrefix)) continue;
     try {
       await esClient.rollup.stopJob({ id, wait_for_completion: true });
     } catch {
@@ -73,6 +73,12 @@ export const deleteAllRollupJobs = async (esClient: EsClient) => {
     }
   }
 };
+
+/**
+ * Stop and delete every rollup job in the cluster. Kept only for the pre-existing UI suite;
+ * API specs must use `deleteRollupJobsMatching` so they never touch jobs owned by other suites.
+ */
+export const deleteAllRollupJobs = (esClient: EsClient) => deleteRollupJobsMatching(esClient, '');
 
 /**
  * ES blocks wildcard/`_all` deletes (`action.destructive_requires_name`), so resolve the patterns

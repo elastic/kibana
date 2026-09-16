@@ -7,9 +7,8 @@
 
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ROLLUP_ADMIN_ROLE } from '../../common/fixtures/constants';
 import { deleteIndicesMatching } from '../../common/fixtures/rollup_api';
-import { COMMON_HEADERS, SOURCE_INDEX_PREFIX } from '../fixtures/constants';
+import { COMMON_HEADERS, ROLLUP_ADMIN_ROLE, SOURCE_INDEX_PREFIX } from '../fixtures/constants';
 import { createSourceIndex, rollupApi } from '../fixtures/rollup_jobs';
 
 apiTest.describe(
@@ -63,7 +62,7 @@ apiTest.describe(
 
     apiTest("reports no fields when the pattern doesn't match any index", async ({ apiClient }) => {
       const response = await rollupApi(apiClient, headers).getIndexPatternValidity(
-        'index-does-not-exist'
+        `${SOURCE_INDEX_PREFIX}-does-not-exist`
       );
 
       expect(response).toHaveStatusCode(200);

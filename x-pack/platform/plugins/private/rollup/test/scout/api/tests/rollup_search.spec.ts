@@ -7,17 +7,16 @@
 
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ROLLUP_ADMIN_ROLE } from '../../common/fixtures/constants';
-import { createMockRollupIndex } from '../../common/fixtures/rollup_api';
-import { COMMON_HEADERS, TARGET_INDEX_PREFIX } from '../fixtures/constants';
+import { COMMON_HEADERS, ROLLUP_ADMIN_ROLE } from '../fixtures/constants';
 import {
   cleanupRollupState,
+  createMockRollupUsage,
   createSourceIndex,
   getJobPayload,
   rollupApi,
+  uniqueJobId,
+  uniqueTargetIndex,
 } from '../fixtures/rollup_jobs';
-
-const TARGET_INDEX = `${TARGET_INDEX_PREFIX}-search`;
 
 apiTest.describe(
   'Rollup search',
@@ -40,23 +39,26 @@ apiTest.describe(
     });
 
     apiTest('returns 404 for a missing rollup index', async ({ apiClient }) => {
+      const missingIndex = uniqueTargetIndex('search-missing');
+
       const response = await rollupApi(apiClient, headers).search([
-        { index: 'unknown', query: {} },
+        { index: missingIndex, query: {} },
       ]);
 
       expect(response).toHaveStatusCode(404);
-      expect(response.body.message).toContain('no such index [unknown]');
+      expect(response.body.message).toContain(`no such index [${missingIndex}]`);
     });
 
     apiTest('searches an existing rollup index', async ({ apiClient, esClient }) => {
       const api = rollupApi(apiClient, headers);
       // Since 8.15 ES only allows creating a rollup job when the cluster already has rollup usage,
       // which the mock index simulates.
-      await createMockRollupIndex(esClient);
+      await createMockRollupUsage(esClient, 'search');
       const indexName = await createSourceIndex(esClient, 'search');
-      await api.createJob(getJobPayload(indexName, 'search-job', TARGET_INDEX));
+      const targetIndex = uniqueTargetIndex('search');
+      await api.createJob(getJobPayload(indexName, uniqueJobId('search'), targetIndex));
 
-      const response = await api.search([{ index: TARGET_INDEX, query: { size: 0 } }]);
+      const response = await api.search([{ index: targetIndex, query: { size: 0 } }]);
 
       expect(response).toHaveStatusCode(200);
       // `hits.total` must be an integer, not the `{ value, relation }` object the ES search API

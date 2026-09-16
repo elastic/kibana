@@ -20,7 +20,7 @@ Cover the `api/rollup/*` routes plus the data-views `fields_for_wildcard` extens
 - `api/tests/rollup_job_actions.spec.ts` — start/stop job state transitions.
 - `api/tests/rollup_search.spec.ts` — `POST /search` against a missing and an existing rollup index.
 
-Local + cloud stateful only (except the two local-only specs noted above, which assert on cluster-wide rollup state): the Rollup feature does not exist on serverless.
+Local + cloud stateful only (except the two local-only specs noted above, which need a cluster without pre-existing rollup usage): the Rollup feature does not exist on serverless.
 
 De-scoped from the FTR suites:
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "2e8c845e11216fc85ef4c89c821b2b6733b82fe3",
+  "sha1": "13a6222b9b63439a0c7acc365e69239008760344",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -43,7 +43,7 @@
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/index_pattern_fields.spec.ts",
         "line": 59,
-        "column": 56
+        "column": 72
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/index_pattern_validity.spec.ts",
-        "line": 31,
+        "line": 30,
         "column": 13
       }
     },
@@ -70,20 +70,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/index_pattern_validity.spec.ts",
-        "line": 71,
+        "line": 70,
         "column": 23
       }
     },
     {
-      "id": "47f6fb325b80399-57af5f4940ab906",
-      "title": "Rollup indices without rollup usage in the cluster returns no rollup indices",
+      "id": "47f6fb325b80399-4807d0618e84c63",
+      "title": "Rollup indices without rollup usage in the cluster reports no rollup indices owned by these tests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_indices.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 33
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_indices.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 47
       }
     },
@@ -110,7 +110,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_job_actions.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 7
       }
     },
@@ -124,7 +124,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_job_actions.spec.ts",
-        "line": 56,
+        "line": 59,
         "column": 14
       }
     },
@@ -138,7 +138,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_job_actions.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 7
       }
     },
@@ -152,20 +152,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_job_actions.spec.ts",
-        "line": 81,
+        "line": 84,
         "column": 14
       }
     },
     {
-      "id": "27f98cf5675b78a-e3c7e3286fa64c1",
-      "title": "Rollup jobs creation returns an empty job list when no jobs exist",
+      "id": "27f98cf5675b78a-9c2c54fe86b4d31",
+      "title": "Rollup jobs creation lists no jobs owned by these tests before any is created",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 37,
+        "line": 36,
         "column": 5
       }
     },
@@ -178,7 +178,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 43,
+        "line": 42,
         "column": 11
       }
     },
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 46,
-        "column": 84
+        "line": 45,
+        "column": 96
       }
     },
     {
@@ -204,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 54,
-        "column": 22
+        "line": 62,
+        "column": 5
       }
     },
     {
@@ -217,7 +217,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 63,
+        "line": 68,
         "column": 24
       }
     },
@@ -230,7 +230,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_crud.spec.ts",
-        "line": 75,
+        "line": 80,
         "column": 17
       }
     },
@@ -244,7 +244,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_delete.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 13
       }
     },
@@ -258,7 +258,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_jobs_delete.spec.ts",
-        "line": 49,
+        "line": 52,
         "column": 19
       }
     },
@@ -272,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_search.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 33
       }
     },
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/api/tests/rollup_search.spec.ts",
-        "line": 42,
-        "column": 64
+        "line": 41,
+        "column": 80
       }
     }
   ]

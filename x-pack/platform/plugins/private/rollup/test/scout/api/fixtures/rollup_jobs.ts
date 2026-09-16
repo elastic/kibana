@@ -6,14 +6,27 @@
  */
 
 import type { ApiClientFixture, EsClient } from '@kbn/scout';
-import { MOCK_ROLLUP_INDEX_NAME, ROLLUP_INDEX_NAME } from '../../common/fixtures/constants';
-import { deleteAllRollupJobs, deleteIndicesMatching } from '../../common/fixtures/rollup_api';
+import {
+  createMockRollupIndex,
+  deleteIndicesMatching,
+  deleteRollupJobsMatching,
+} from '../../common/fixtures/rollup_api';
 import {
   API_BASE_PATH,
   INDEX_TO_ROLLUP_MAPPINGS,
+  JOB_ID_PREFIX,
+  MOCK_INDEX_PREFIX,
   SOURCE_INDEX_PREFIX,
   TARGET_INDEX_PREFIX,
 } from './constants';
+
+// Every job and index this suite creates gets a run-unique name.
+const uniqueSuffix = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+export const uniqueJobId = (scope: string) => `${JOB_ID_PREFIX}-${scope}-${uniqueSuffix()}`;
+export const uniqueTargetIndex = (scope: string) =>
+  `${TARGET_INDEX_PREFIX}-${scope}-${uniqueSuffix()}`;
+export const uniqueMockIndex = (scope: string) => `${MOCK_INDEX_PREFIX}-${scope}-${uniqueSuffix()}`;
 
 /** Shape of a job as returned by `GET /api/rollup/jobs`, narrowed to what the specs assert on. */
 export interface RollupJobSummary {
@@ -25,9 +38,42 @@ export interface RollupJobPayload {
   job: Record<string, unknown>;
 }
 
+export const createMockRollupUsage = async (esClient: EsClient, scope: string) => {
+  const index = uniqueMockIndex(scope);
+  await createMockRollupIndex(esClient, index, `${index}-target`);
+  return index;
+};
+
+/**
+ * Index one rolled-up-format document into a job's target index. ES only maps the rollup fields
+ * once the job has written data, and the job under test never runs in test time (weekly cron plus
+ * 1d delay), so specs that need a populated rollup index seed it directly, like the UI fixtures do.
+ */
+export const seedRollupTargetDoc = async (
+  esClient: EsClient,
+  targetIndex: string,
+  jobId: string
+) => {
+  const timestamp = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+  await esClient.index({
+    index: targetIndex,
+    refresh: 'wait_for',
+    document: {
+      '_rollup.version': 2,
+      '_rollup.id': jobId,
+      'testCreatedField.date_histogram.timestamp': timestamp,
+      'testTagField.terms.value': 'foo',
+      'testTotalField.terms.value': 100,
+      'testTotalField.histogram.value': 100,
+      'testTotalField.avg.value': 100,
+      'testTotalField.value_count.value': 1,
+    },
+  });
+};
+
 /** Create a source index with the mappings the rollup jobs under test group and aggregate on. */
-export const createSourceIndex = async (esClient: EsClient, suffix: string) => {
-  const index = `${SOURCE_INDEX_PREFIX}-${suffix}`;
+export const createSourceIndex = async (esClient: EsClient, scope: string) => {
+  const index = `${SOURCE_INDEX_PREFIX}-${scope}-${uniqueSuffix()}`;
   await esClient.indices.create({ index, mappings: INDEX_TO_ROLLUP_MAPPINGS });
   return index;
 };
@@ -40,7 +86,7 @@ export const createSourceIndex = async (esClient: EsClient, suffix: string) => {
 export const getJobPayload = (
   indexPattern: string,
   id: string,
-  rollupIndex: string = ROLLUP_INDEX_NAME
+  rollupIndex: string
 ): RollupJobPayload => ({
   job: {
     id,
@@ -98,16 +144,15 @@ export const findJob = (body: { jobs: RollupJobSummary[] }, id: string) =>
   body.jobs.find((job) => job.config.id === id);
 
 /**
- * Rollup jobs and indices are cluster-global, so every spec both arranges and tears down this
- * state: a job or rollup index left behind by an interrupted run would break the empty-list and
- * whole-response assertions. Jobs go first, since they write into the target index.
+ * Delete only the rollup jobs and indices owned by this suite (identified by its name prefixes):
+ * the cluster may be shared. Clears leftovers of interrupted runs; jobs go first, since they write
+ * into the target indices.
  */
 export const cleanupRollupState = async (esClient: EsClient) => {
-  await deleteAllRollupJobs(esClient);
+  await deleteRollupJobsMatching(esClient, JOB_ID_PREFIX);
   await deleteIndicesMatching(esClient, [
     `${SOURCE_INDEX_PREFIX}*`,
     `${TARGET_INDEX_PREFIX}*`,
-    ROLLUP_INDEX_NAME,
-    MOCK_ROLLUP_INDEX_NAME,
+    `${MOCK_INDEX_PREFIX}*`,
   ]);
 };
