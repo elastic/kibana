@@ -47,6 +47,7 @@ import type {
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import {
+  assertBuilderTypeTransitionNotManaged,
   resolveCreateRuleBuilder,
   resolveReplaceRuleBuilder,
   resolveUpdateRuleBuilder,
@@ -120,6 +121,44 @@ const signalBuilderCreateData = {
   ...builderCreateData,
   kind: 'signal',
 } as unknown as CreateRuleData;
+
+// ---------------------------------------------------------------------------
+// Managed/unmanaged fixture builder types (for BUILDER_TYPE_IS_MANAGED tests)
+// ---------------------------------------------------------------------------
+
+/**
+ * A fixture managed builder type. Its registration declares `ownership` so
+ * the registry check treats it as managed.
+ */
+const MANAGED_BUILDER_TYPE = 'test.managed';
+const UNMANAGED_EXPLICIT_BUILDER_TYPE = 'test.unmanaged-explicit';
+
+const managedTypeDefinition: Partial<RegisteredBuilderType> = {
+  type: MANAGED_BUILDER_TYPE,
+  // No `compilation` field — write-time (default). Tests that need to call
+  // generate() on this type pass a generate mock to the registry helper.
+  ownership: { solution: 'security', domain: 'detection' },
+  builderFieldsSchema: z.object({}) as unknown as RegisteredBuilderType['builderFieldsSchema'],
+};
+
+const unmanagedExplicitTypeDefinition: Partial<RegisteredBuilderType> = {
+  type: UNMANAGED_EXPLICIT_BUILDER_TYPE,
+  ownership: undefined,
+  builderFieldsSchema: z.object({}) as unknown as RegisteredBuilderType['builderFieldsSchema'],
+};
+
+/**
+ * Creates a registry that knows about both the managed and the unmanaged
+ * fixture types. The unregistered test types (BUILDER_TYPE, OTHER_BUILDER_TYPE)
+ * still return `undefined` from `get()`.
+ */
+function createRegistryWithManagedTypes(): BuilderTypeRegistry {
+  const typeMap = new Map<string, Partial<RegisteredBuilderType>>([
+    [MANAGED_BUILDER_TYPE, managedTypeDefinition],
+    [UNMANAGED_EXPLICIT_BUILDER_TYPE, unmanagedExplicitTypeDefinition],
+  ]);
+  return createMockRegistryWithTypes(typeMap);
+}
 
 // Existing SO attributes for a plain (non-builder) rule.
 const plainExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
@@ -547,6 +586,203 @@ describe('resolveUpdateRuleBuilder', () => {
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting);
 
       expect(result).toBe(data);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // BUILDER_TYPE_IS_MANAGED guard
+  // -------------------------------------------------------------------------
+
+  describe('BUILDER_TYPE_IS_MANAGED guard', () => {
+    // Existing SO attributes for a managed builder rule.
+    const managedBuilderExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
+      metadata: {
+        name: 'detection-rule',
+        builder_type: MANAGED_BUILDER_TYPE,
+        ownership: { managed: true, solution: 'security', domain: 'detection' },
+      },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    });
+
+    // Existing SO attributes for an unmanaged-explicit builder rule.
+    const unmanagedExplicitBuilderExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
+      metadata: {
+        name: 'unmanaged-rule',
+        builder_type: UNMANAGED_EXPLICIT_BUILDER_TYPE,
+        ownership: { managed: false },
+      },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    });
+
+    // Existing SO attributes for a rule whose stored ownership is managed but
+    // whose builder_type is no longer registered (plugin disabled).
+    const orphanManagedExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
+      metadata: {
+        name: 'orphan-rule',
+        builder_type: 'test.plugin-disabled-type',
+        ownership: { managed: true, solution: 'security', domain: 'detection' },
+      },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    });
+
+    it('rejects a plain rule adopting a managed type with builder_fields (without onBehalfOf identity)', () => {
+      // A plain rule requesting a managed builder_type + fields must be rejected
+      // before any query compilation runs.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: expect.objectContaining({
+            code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            details: expect.objectContaining({
+              rule_id: RULE_ID,
+              builder_type: MANAGED_BUILDER_TYPE,
+              solution: 'security',
+              domain: 'detection',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('rejects a plain rule adopting a managed type even when a matching onBehalfOf identity would pass the write gate', () => {
+      // Caller identity does NOT bypass the managed-type transition check.
+      // The gate here is on type change, not on write permission.
+      // assertBuilderTypeTransitionNotManaged has no identity parameter — there
+      // is no bypass path.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
+        })
+      );
+    });
+
+    it('rejects an unmanaged builder rule switching to a managed type', () => {
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          unmanagedExplicitBuilderExisting.metadata.builder_type,
+          unmanagedExplicitBuilderExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
+        })
+      );
+    });
+
+    it('rejects a managed rule switching to an unmanaged type', () => {
+      // The stored rule is managed (ownership.managed === true and type is registered
+      // as managed), so any transition away from it is rejected.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          UNMANAGED_EXPLICIT_BUILDER_TYPE,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
+        })
+      );
+    });
+
+    it('rejects clearing a managed builder type via builder_type: null', () => {
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          null,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
+        })
+      );
+    });
+
+    it('passes when restating the same managed type with new builder_fields', () => {
+      // Restatement (requested === stored) is always allowed.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
+      ).not.toThrow();
+    });
+
+    it('rejects transitions from a managed rule even when the type is unregistered (stored-mark half of the predicate)', () => {
+      // The stored ownership.managed === true covers plugin-disabled states.
+      // BUILDER_TYPE_IS_MANAGED must fire even when the type is no longer in
+      // the registry.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          null,
+          orphanManagedExisting.metadata.builder_type,
+          orphanManagedExisting.metadata.ownership
+        )
+      ).toThrow(
+        expect.objectContaining({
+          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
+        })
+      );
+    });
+
+    it('does not interfere with an unmanaged type adoption (the guard passes without throwing)', () => {
+      // BUILDER_TYPE_IS_MANAGED does not fire for unmanaged transitions. The
+      // guard passes without throwing; subsequent checks (INVALID_BUILDER_FIELDS
+      // for missing builder_fields) handle the rest.
+      const registry = createRegistryWithManagedTypes();
+
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          UNMANAGED_EXPLICIT_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).not.toThrow();
     });
   });
 
@@ -1184,6 +1420,127 @@ describe('resolveReplaceRuleBuilder', () => {
         expect(() =>
           resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting)
         ).not.toThrow();
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // BUILDER_TYPE_IS_MANAGED guard — upsert replace branch
+    // -----------------------------------------------------------------------
+
+    describe('BUILDER_TYPE_IS_MANAGED guard on the replace branch', () => {
+      // A plain (non-managed) stored rule to test adoption of a managed type.
+      const plainExistingForReplace: RuleSavedObjectAttributes = createRuleSoAttributes({
+        metadata: { name: 'test-rule', ownership: { managed: false } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      // A managed stored rule to test same-type restatement.
+      const managedBuilderExistingForReplace: RuleSavedObjectAttributes = createRuleSoAttributes({
+        metadata: {
+          name: 'managed-rule',
+          builder_type: MANAGED_BUILDER_TYPE,
+          ownership: { managed: true, solution: 'security', domain: 'detection' },
+        },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      it('rejects a plain rule adopting a managed type via PUT with builder_fields', () => {
+        // PUT body supplies builder_type (managed) + builder_fields: the
+        // managed-type transition guard fires before builder regeneration.
+        const registry = createRegistryWithManagedTypes();
+
+        expect(() =>
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            MANAGED_BUILDER_TYPE,
+            plainExistingForReplace.metadata.builder_type,
+            plainExistingForReplace.metadata.ownership
+          )
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            }),
+          })
+        );
+      });
+
+      it('passes when restating the same managed type on the replace branch', () => {
+        // Carrying the same builder_type as stored (restatement) is always
+        // allowed.
+        const registry = createRegistryWithManagedTypes();
+
+        expect(() =>
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            MANAGED_BUILDER_TYPE,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
+        ).not.toThrow();
+      });
+
+      it('rejects clearing a managed builder type via builder_type: null on the replace branch', () => {
+        // PUT body explicitly clears the builder_type (escape hatch), but the
+        // stored rule is managed — rule-types.md closes this path for managed
+        // types with BUILDER_TYPE_IS_MANAGED.
+        const registry = createRegistryWithManagedTypes();
+
+        expect(() =>
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            null,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            }),
+          })
+        );
+      });
+
+      it('rejects switching between managed types on the replace branch', () => {
+        // Two different managed types — any transition between them (even
+        // managed-to-managed) must be rejected with BUILDER_TYPE_IS_MANAGED.
+        const SECOND_MANAGED_TYPE = 'test.managed_other';
+        const secondManagedDefinition: Partial<RegisteredBuilderType> = {
+          type: SECOND_MANAGED_TYPE,
+          ownership: { solution: 'security', domain: 'endpoint' },
+          builderFieldsSchema: z.object(
+            {}
+          ) as unknown as RegisteredBuilderType['builderFieldsSchema'],
+        };
+        const registry = createMockRegistryWithTypes(
+          new Map<string, Partial<RegisteredBuilderType>>([
+            [MANAGED_BUILDER_TYPE, managedTypeDefinition],
+            [SECOND_MANAGED_TYPE, secondManagedDefinition],
+          ])
+        );
+
+        expect(() =>
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            SECOND_MANAGED_TYPE,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            }),
+          })
+        );
       });
     });
   });
