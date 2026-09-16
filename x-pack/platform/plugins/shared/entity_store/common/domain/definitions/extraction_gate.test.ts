@@ -63,5 +63,15 @@ describe('resolveExtractionGate', () => {
         /must be a single-field condition/
       );
     });
+
+    /**
+     * An `exists: false` gate matches missing-field documents. Its complement `{ or: [exists: false, { not: exists: false }] }`
+     * also matches missing-field documents, so priority and non-priority would both process them.
+     */
+    it('rejects an exists: false gate because its complement is not a strict partition', () => {
+      expect(() =>
+        resolveExtractionGate({ field: 'event.kind', exists: false }, 'nonPriority')
+      ).toThrow(/cannot use exists: false/);
+    });
   });
 });

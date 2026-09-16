@@ -212,7 +212,8 @@ export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; /
 /**
  * A definition resolved for an extraction mode, carrying the predicate that selects which logs that
  * mode handles. Derived from `priorityExtractionGate` on lookup rather than authored, so it is kept
- * out of `entitySchema`. Absent means every document passing `documentsFilter` is scanned.
+ * separate from the declared field and out of `entitySchema`. Absent means every document passing
+ * `documentsFilter` is scanned.
  */
 export type GatedEntityDefinition<T = EntityDefinition> = T & { extractionGate?: Condition };
 export type EuidField = z.infer<typeof euidFieldSchema>;

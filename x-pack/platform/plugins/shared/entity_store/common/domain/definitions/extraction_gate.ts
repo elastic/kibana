@@ -27,6 +27,10 @@ const complementOf = (gate: Condition): Condition => {
     isFilterCondition(gate),
     'A priority extraction gate must be a single-field condition, so its complement can cover the null case'
   );
+  assert(
+    (gate as { exists?: unknown }).exists !== false,
+    'A priority extraction gate cannot use exists: false — it matches missing-field documents, and its complement would too, creating overlap between the two processes'
+  );
 
   return { or: [{ field: gate.field, exists: false }, { not: gate }] };
 };
