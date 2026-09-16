@@ -8,6 +8,7 @@
 import { createWorkflowEvidenceEvaluator } from './workflow_evidence_evaluator';
 import type {
   AttackDiscoveryAgentBuilderExample,
+  AttackDiscoveryAgentBuilderExpected,
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
 
@@ -34,8 +35,8 @@ const baseOutput = (
 });
 
 const baseExpected = (
-  overrides: Partial<AttackDiscoveryAgentBuilderExample['output']>
-): AttackDiscoveryAgentBuilderExample['output'] => ({
+  overrides: Partial<AttackDiscoveryAgentBuilderExpected>
+): AttackDiscoveryAgentBuilderExpected => ({
   expectedToolPath: [],
   expectedWorkflowStages: [],
   expectedRetrievedAlertCount: null,
@@ -127,5 +128,60 @@ describe('createWorkflowEvidenceEvaluator', () => {
     // that never ran.
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
+  });
+
+  // ABSENT (undefined) is the only "do not score the passed count" state:
+  // `null` asserts `null` (see the Fix-3 tests above), so a dataset that wants
+  // the passed count unscored must omit the key. Dense live-retrieval relies
+  // on this — under a `null` pin its one complete-evidence run scored 0 on
+  // golden no matter how well triage went.
+  it('does not score the passed count when expectedPassedAlertCount is absent', async () => {
+    // Build `expected` as a concrete object first: the key must be ABSENT, and
+    // `delete` needs a non-optional receiver (example.output is optional).
+    const expected = baseExpected({ expectedRetrievedAlertCount: 95 });
+    delete expected.expectedPassedAlertCount;
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({ retrievedAlertCount: 95, passedAlertCount: 23 }),
+      expected,
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(1);
+  });
+
+  it('still fails on a retrieved-count mismatch when the passed count is unscored', async () => {
+    const expected = baseExpected({ expectedRetrievedAlertCount: 95 });
+    delete expected.expectedPassedAlertCount;
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({ retrievedAlertCount: 12, passedAlertCount: 23 }),
+      expected,
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(0);
+  });
+
+  it('treats a null retrieved expectation as dont-care, matching clean-profile behaviour', async () => {
+    const params: Params = {
+      input: {} as Params['input'],
+      // Golden data: clean provided-alerts runs report retrieved=4 against a
+      // `null` expectation and legitimately score 1.
+      output: baseOutput({ retrievedAlertCount: 4, passedAlertCount: 4 }),
+      expected: baseExpected({ expectedRetrievedAlertCount: null, expectedPassedAlertCount: 4 }),
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(1);
   });
 });

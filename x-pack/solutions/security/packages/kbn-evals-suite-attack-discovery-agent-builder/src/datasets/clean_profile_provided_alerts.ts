@@ -99,6 +99,20 @@ export const cleanProfileProvidedAlertsExamples: AttackDiscoveryAgentBuilderExam
   wmiLateralProvidedAlertsExample,
 ];
 
+/**
+ * The four clean chains' reference discoveries, shared with the dense profile.
+ *
+ * Dense seeds the same four chains verbatim (plus background noise), so its
+ * ground truth IS this list. The dense live-retrieval dataset must carry it as
+ * `output.attackDiscoveries`: without a reference the Rubric evaluator
+ * structurally returns N/A (measured 7/7 N/A on golden before this export
+ * existed), which silently removes the suite's main quality signal on exactly
+ * the profile whose whole point is measurability.
+ */
+export const CLEAN_PROFILE_REFERENCE_DISCOVERIES = cleanProfileProvidedAlertsExamples.flatMap(
+  (example) => example.output?.attackDiscoveries ?? []
+);
+
 export const cleanProfileProvidedAlertsDataset = {
   name: 'attack-discovery-agent-builder: scenario-registry (clean profile)',
   description:

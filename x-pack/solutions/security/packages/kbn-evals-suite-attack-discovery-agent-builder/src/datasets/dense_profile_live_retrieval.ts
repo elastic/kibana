@@ -8,6 +8,7 @@
 import { AD2_CLEAN_SCENARIO_KEYS } from '../scenario_registry';
 import { AD2_DENSE_TARGET_ALERTS } from '../scenario_registry/dense_scenarios';
 import type { AttackDiscoveryAgentBuilderExample } from '../types';
+import { CLEAN_PROFILE_REFERENCE_DISCOVERIES } from './clean_profile_provided_alerts';
 
 /**
  * Dense-profile live retrieval.
@@ -33,10 +34,20 @@ export const denseProfileLiveRetrievalExample: AttackDiscoveryAgentBuilderExampl
     expectedWorkflowStages: ['generation', 'validation'],
     // The model retrieves the whole seeded population.
     expectedRetrievedAlertCount: AD2_DENSE_TARGET_ALERTS,
-    // Deliberately null: how many alerts SHOULD survive triage is a judgement,
-    // and pinning a number here would score correlation behaviour against an
-    // assumption rather than against evidence.
-    expectedPassedAlertCount: null,
+    // Deliberately ABSENT (not `null`): how many alerts SHOULD survive triage
+    // is a judgement, and pinning a number here would score correlation
+    // behaviour against an assumption rather than against evidence. Under the
+    // evaluator's contract `null` asserts the run reports `null` — a
+    // guaranteed 0 on any run that passes alerts (measured on golden: the one
+    // dense run with complete evidence scored 0 for exactly this reason).
+    // Omitting the key leaves the passed count unscored.
+    //
+    // The reference discoveries make the Rubric evaluator fire on this
+    // profile; without them it is structurally N/A (7/7 N/A on golden).
+    attackDiscoveries: CLEAN_PROFILE_REFERENCE_DISCOVERIES.map((discovery) => ({
+      ...discovery,
+      alertIds: [...discovery.alertIds],
+    })),
     criteria: [
       'The response identifies attack chains rather than restating individual alerts.',
       'Discoveries are grounded in alerts that exist in the retrieved set.',

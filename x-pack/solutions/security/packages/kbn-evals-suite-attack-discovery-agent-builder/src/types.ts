@@ -29,8 +29,13 @@ export interface AttackDiscovery {
 export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unknown> {
   expectedToolPath: string[];
   expectedWorkflowStages: string[];
-  expectedRetrievedAlertCount: number | null;
-  expectedPassedAlertCount: number | null;
+  // Count-expectation contract (see workflow_evidence_evaluator.ts): a number
+  // asserts equality. `null` means don't-care for retrieved but ASSERTS `null`
+  // for passed — so an ABSENT key is the only way to leave the passed count
+  // unscored. Dense live-retrieval relies on that: `null` there would be a
+  // guaranteed 0 on any run that passes alerts, not an opt-out.
+  expectedRetrievedAlertCount?: number | null;
+  expectedPassedAlertCount?: number | null;
   attackDiscoveries?: AttackDiscovery[];
   criteria?: string[];
 }

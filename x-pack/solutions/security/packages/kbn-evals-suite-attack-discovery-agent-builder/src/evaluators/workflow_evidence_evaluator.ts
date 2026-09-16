@@ -26,13 +26,21 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
     const expectedRetrievedAlertCount = expected?.expectedRetrievedAlertCount;
     const expectedPassedAlertCount = expected?.expectedPassedAlertCount;
 
+    // Count-expectation contract, deliberately asymmetric for back-compat:
+    //   retrieved: number asserts equality; `null` or ABSENT means don't-care
+    //              (golden data: clean provided-alerts runs report retrieved=4
+    //              against a `null` expectation and legitimately score 1 —
+    //              making retrieved-`null` strict would flip every clean cell).
+    //   passed:    number asserts equality; `null` asserts the run reports
+    //              `null` (Fix 3); ABSENT (undefined) means do not score the
+    //              passed count at all. Dense live-retrieval uses ABSENT — a
+    //              `null` there is a guaranteed 0 on any run that passes
+    //              alerts, which is an unwinnable evaluator, not an opt-out.
+    // `== null` covers both `null` and `undefined`, so availability is
+    // unchanged by the absent state: an expectation that cannot be checked
+    // (number expected, nothing reported) marks the evidence incomplete.
     const retrievedCountAvailable =
       expectedRetrievedAlertCount == null || output.workflow.retrievedAlertCount !== null;
-    // A `null` expectation asserts the value IS `null` (e.g. the pipeline
-    // never reported a passed count for this example) rather than excusing
-    // the evaluator from scoring it. `passedCountMatches` below already does
-    // strict equality, so `null === null` matches once this stops gating on
-    // `expectedPassedAlertCount != null`.
     const passedCountAvailable =
       expectedPassedAlertCount == null || output.workflow.passedAlertCount !== null;
     const hasCompleteWorkflowEvidence = retrievedCountAvailable && passedCountAvailable;
@@ -41,7 +49,9 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
     const retrievedCountMatches =
       expectedRetrievedAlertCount == null ||
       output.workflow.retrievedAlertCount === expectedRetrievedAlertCount;
-    const passedCountMatches = output.workflow.passedAlertCount === expectedPassedAlertCount;
+    const passedCountMatches =
+      expectedPassedAlertCount === undefined ||
+      output.workflow.passedAlertCount === expectedPassedAlertCount;
     const matchesExpectedWorkflow = stagesMatch && retrievedCountMatches && passedCountMatches;
 
     return {
