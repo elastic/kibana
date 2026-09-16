@@ -289,7 +289,9 @@ export const WatchDetailPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem grow={false}>{renderWorkers()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div data-test-subj="alertZeroWatchWorkersSection">{renderWorkers()}</div>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </WatchesSectionLayout>
   );

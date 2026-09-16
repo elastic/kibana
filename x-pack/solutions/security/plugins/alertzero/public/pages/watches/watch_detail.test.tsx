@@ -39,6 +39,19 @@ jest.mock('./components/watches_section_layout', () => ({
   ),
 }));
 
+// jsdom ships no IntersectionObserver; the two-column layout's scroll-spy depends on it.
+class IntersectionObserverMock {
+  observe = jest.fn();
+  unobserve = jest.fn();
+  disconnect = jest.fn();
+  takeRecords = jest.fn(() => []);
+  root = null;
+  rootMargin = '';
+  thresholds: number[] = [];
+}
+
+global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
+
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
@@ -176,10 +189,20 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
     );
 
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(24);
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
     expect(
-      within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveValue(24);
+    expect(
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveValue('h');
+    expect(
+      within(alertTriage).queryByTestId(
+        `alertZeroTriggerRow-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -377,9 +400,14 @@ describe('WatchDetailPage', () => {
       screen.getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
       ),
-      within(ruleTuning).getByTestId('alertZeroAutonomyCard-manual'),
-      within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue'),
-      within(ruleTuning).getByTestId('alertZeroScheduleIntervalUnit'),
+      // EuiCheckableCard puts the test subject on its wrapper; the disabled state is on the input.
+      within(within(ruleTuning).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio'),
+      within(ruleTuning).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
+      within(ruleTuning).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      ),
       within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays'),
     ];
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
@@ -484,7 +512,9 @@ describe('WatchDetailPage', () => {
     const attackDiscovery = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
     );
-    const value = within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue');
+    const value = within(attackDiscovery).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
     fireEvent.change(value, { target: { value: '1' } });
@@ -507,7 +537,9 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
     );
     const window = within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays');
-    const interval = within(ruleTuning).getByTestId('alertZeroScheduleIntervalValue');
+    const interval = within(ruleTuning).getByTestId(
+      `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
 
     fireEvent.change(window, { target: { value: '7' } });
     fireEvent.change(interval, { target: { value: '6' } });
