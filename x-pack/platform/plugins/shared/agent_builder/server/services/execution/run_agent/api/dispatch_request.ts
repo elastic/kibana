@@ -20,23 +20,19 @@ export interface DispatchApiRequestParams {
   request: KibanaRequest;
 }
 
-const SPACE_PREFIX = /^\/s\/[^/]+/;
-
-const stripSpacePrefix = (path: string): string => path.replace(SPACE_PREFIX, '');
-
 // Matches POST /api/alerting/rule and /api/alerting/rule/{id} (create with a caller-chosen id).
 const ALERTING_RULE_CREATE_PATH = /^\/api\/alerting\/rule(?:\/[^/]+)?$/;
 
-// Detection Engine custom-rule create. Sub-paths (_find, _import, _bulk_action, preview) are not creates.
-const DETECTION_ENGINE_RULE_CREATE_PATH = '/api/detection_engine/rules';
+// Detection Engine paths that create rules: the custom-rule endpoint, and _bulk_action, whose
+// `duplicate` action creates. Paths here are never space-prefixed; selfClient prepends the base path.
+const DETECTION_ENGINE_RULE_CREATE_PATHS = new Set([
+  '/api/detection_engine/rules',
+  '/api/detection_engine/rules/_bulk_action',
+]);
 
-const isBorrowedKeyRuleCreate = (method: string, path: string): boolean => {
-  if (method.toUpperCase() !== 'POST') {
-    return false;
-  }
-  const pathname = stripSpacePrefix(path);
-  return ALERTING_RULE_CREATE_PATH.test(pathname) || pathname === DETECTION_ENGINE_RULE_CREATE_PATH;
-};
+const isBorrowedKeyRuleCreate = (method: string, path: string): boolean =>
+  method.toUpperCase() === 'POST' &&
+  (ALERTING_RULE_CREATE_PATH.test(path) || DETECTION_ENGINE_RULE_CREATE_PATHS.has(path));
 
 // The agent's requests authenticate with the API key Task Manager granted for this run-agent
 // task, which TM invalidates once the task drains. Alerting persists an API-key caller's
