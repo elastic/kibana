@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
 } from '../../../common/fixtures/constants';
@@ -20,12 +21,17 @@ const HISTORY_SNAPSHOT_TASK_ID = 'entity_store:v2:history_snapshot_task:default'
 
 apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
     await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
   });
@@ -116,6 +122,59 @@ apiTest.describe('Entity Store history snapshot enable/disable', { tag: ENTITY_S
         body: {},
       });
       expect(response.statusCode).toBe(404);
+    }
+  );
+
+  apiTest(
+    'disables history snapshot task and clears existing snapshot indices',
+    async ({ apiClient, kbnClient, esClient }) => {
+      await install(apiClient);
+
+      // Force an immediate snapshot to create at least one history index
+      const forceResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
+      expect(forceResponse.statusCode).toBe(200);
+
+      const historyIndexPattern = '.entities.v2.history.default.*';
+      const indicesBefore = await esClient.indices.resolveIndex({ name: historyIndexPattern });
+      expect(indicesBefore.indices.length).toBeGreaterThan(0);
+
+      const disableResponse = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.DISABLE_HISTORY_SNAPSHOT,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { clearHistorySnapshots: true },
+        }
+      );
+      expect(disableResponse.statusCode).toBe(200);
+      expect(disableResponse.body).toStrictEqual({ ok: true });
+
+      const disabledTask = await getHistorySnapshotTask(kbnClient);
+      expect(disabledTask.attributes?.enabled).toBe(false);
+
+      const disabledGlobalState = await getGlobalState(kbnClient);
+      expect(disabledGlobalState.attributes?.historySnapshot?.status).toBe('stopped');
+
+      // Deletion fires in the background — poll until indices are gone
+      await expect
+        .poll(
+          async () => {
+            const result = await esClient.indices.resolveIndex({
+              name: historyIndexPattern,
+              ignore_unavailable: true,
+            });
+            return result.indices.length;
+          },
+          { timeout: 30_000, intervals: [500] }
+        )
+        .toBe(0);
     }
   );
 });

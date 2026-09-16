@@ -1,3 +1,23 @@
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          clearHistorySnapshots:
+            type: boolean
+            description: >
+              When set to `true`, all existing history snapshot indices for this namespace are
+              deleted in the background after the task is disabled. The response returns
+              immediately without waiting for deletion to complete.
+      examples:
+        disableOnly:
+          summary: Disable without clearing
+          value: {}
+        disableAndClear:
+          summary: Disable and clear all history snapshot indices
+          value:
+            clearHistorySnapshots: true
 responses:
   200:
     description: Indicates a successful response.
@@ -26,6 +46,20 @@ x-codeSamples:
     source: |
       curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
         "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
+  - lang: curl
+    label: Disable and clear indices
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -d '{"clearHistorySnapshots":true}' \
+        "${KIBANA_URL}/api/security/entity_store/history_snapshot/disable"
   - lang: Console
     source: |
       PUT kbn://api/security/entity_store/history_snapshot/disable
+  - lang: Console
+    label: Disable and clear indices
+    source: |
+      PUT kbn://api/security/entity_store/history_snapshot/disable
+      {
+        "clearHistorySnapshots": true
+      }

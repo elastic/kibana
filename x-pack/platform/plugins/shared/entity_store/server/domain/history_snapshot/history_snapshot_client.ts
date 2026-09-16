@@ -14,14 +14,22 @@ import type {
   EntityStoreGlobalStateClient,
   HistorySnapshotStatus,
 } from '../saved_objects';
-import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
+import {
+  createIndex,
+  deleteIndex,
+  reindex,
+  updateByQueryWithScript,
+} from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
 import {
   getHistorySnapshotIndexName,
   getLegacySecurityHistorySnapshotIndexName,
 } from '../asset_manager/history_snapshot_index';
-import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
+import {
+  resolveHistorySnapshotIndexPatterns,
+  resolveLatestEntitiesIndexName,
+} from '../asset_manager/resolve_entity_store_indices';
 import { getHistorySnapshotTaskId } from '../../tasks/config';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
@@ -75,8 +83,45 @@ export class HistorySnapshotClient {
     await this.setTaskEnabled(true, request);
   }
 
-  public async disable(request: KibanaRequest): Promise<void> {
+  public async disable(
+    request: KibanaRequest,
+    options?: { clearHistorySnapshots?: boolean }
+  ): Promise<void> {
     await this.setTaskEnabled(false, request);
+    if (options?.clearHistorySnapshots === true) {
+      // Do not block response waiting for indices to finish clearing
+      this.clearSnapshotIndices()
+        .then((numIndices: number) => {
+          if (numIndices === 0) {
+            this.logger.info(`No history snapshot indices to delete.`);
+          } else {
+            this.logger.info(`Deleted ${numIndices} history snapshot indices after disabling`);
+          }
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to clear history snapshot indices: ${getErrorMessage(err)}`);
+        });
+    }
+  }
+
+  private async clearSnapshotIndices(): Promise<number> {
+    const patterns = await resolveHistorySnapshotIndexPatterns(this.esClient, this.namespace);
+    const resolvedPerPattern = await Promise.all(
+      patterns.map(async (pattern) => {
+        try {
+          const { indices } = await this.esClient.indices.resolveIndex({ name: pattern });
+          return indices.map((index) => index.name);
+        } catch {
+          return [];
+        }
+      })
+    );
+    const indices = resolvedPerPattern.flat();
+    if (indices.length > 0) {
+      await Promise.all(indices.map((index) => deleteIndex(this.esClient, index)));
+      this.logger.debug(`Cleared history snapshot indices: ${indices.join(', ')}`);
+    }
+    return indices.length;
   }
 
   public async runHistorySnapshot(

@@ -6,6 +6,7 @@
  */
 
 import path from 'node:path';
+import { z } from '@kbn/zod/v4';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -13,6 +14,11 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
+
+const bodySchema = z.object({
+  clearHistorySnapshots: z.boolean().optional(),
+});
 
 export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) {
   router.versioned
@@ -33,7 +39,11 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: {
+            body: buildStrictRouteValidationWithZod(bodySchema),
+          },
+        },
         options: {
           oasOperationObject: () =>
             path.join(__dirname, 'examples/entity_store_disable_history_snapshot.yaml'),
@@ -46,7 +56,9 @@ export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) 
         logger.debug('Disable history snapshot API invoked');
 
         try {
-          await historySnapshotClient.disable(req);
+          await historySnapshotClient.disable(req, {
+            clearHistorySnapshots: req.body?.clearHistorySnapshots,
+          });
         } catch (error) {
           if (error instanceof EntityStoreNotInstalledError) {
             return res.notFound({ body: error });

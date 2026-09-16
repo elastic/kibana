@@ -10,17 +10,30 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
-import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
+import {
+  createIndex,
+  deleteIndex,
+  reindex,
+  updateByQueryWithScript,
+} from '../../infra/elasticsearch';
+import {
+  resolveHistorySnapshotIndexPatterns,
+  resolveLatestEntitiesIndexName,
+} from '../asset_manager/resolve_entity_store_indices';
 
 jest.mock('../../infra/elasticsearch');
 jest.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
+const mockDeleteIndex = deleteIndex as jest.MockedFunction<typeof deleteIndex>;
 const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
 const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
   typeof updateByQueryWithScript
 >;
+const mockResolveHistorySnapshotIndexPatterns =
+  resolveHistorySnapshotIndexPatterns as jest.MockedFunction<
+    typeof resolveHistorySnapshotIndexPatterns
+  >;
 const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as jest.MockedFunction<
   typeof resolveLatestEntitiesIndexName
 >;
@@ -51,24 +64,29 @@ function createMockTaskManager() {
   };
 }
 
+const flushPromises = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 describe('HistorySnapshotClient', () => {
   const namespace = 'default';
   const taskId = 'entity_store:v2:history_snapshot_task:default';
   const request = { headers: {} } as KibanaRequest;
+  let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockTaskManager: ReturnType<typeof createMockTaskManager>;
   let client: HistorySnapshotClient;
 
-  const createClient = () =>
-    new HistorySnapshotClient({
-      logger: loggerMock.create(),
+  const createClient = () => {
+    mockLogger = loggerMock.create();
+    return new HistorySnapshotClient({
+      logger: mockLogger,
       esClient: mockEsClient,
       namespace,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
       taskManager: mockTaskManager as unknown as TaskManagerStartContract,
     });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -324,6 +342,99 @@ describe('HistorySnapshotClient', () => {
         'Failed to disable history snapshot task: Not Found'
       );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+    });
+
+    describe('with clearHistorySnapshots', () => {
+      let mockResolveIndex: jest.Mock;
+
+      beforeEach(() => {
+        mockResolveIndex = jest.fn().mockResolvedValue({
+          indices: [
+            { name: '.entities.v2.history.default.2024-01-01-00' },
+            { name: '.entities.v2.history.default.2024-01-02-00' },
+          ],
+          aliases: [],
+          data_streams: [],
+        });
+        mockEsClient = {
+          ...mockEsClient,
+          indices: { resolveIndex: mockResolveIndex },
+        } as unknown as jest.Mocked<ElasticsearchClient>;
+        mockResolveHistorySnapshotIndexPatterns.mockResolvedValue([
+          '.entities.v2.history.default.*',
+        ]);
+        mockDeleteIndex.mockResolvedValue(undefined as never);
+        client = createClient();
+      });
+
+      it('does not clear indices when option is not set', async () => {
+        await client.disable(request);
+        await flushPromises();
+
+        expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
+        expect(mockDeleteIndex).not.toHaveBeenCalled();
+      });
+
+      it('does not clear indices when clearHistorySnapshots is false', async () => {
+        await client.disable(request, { clearHistorySnapshots: false });
+        await flushPromises();
+
+        expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
+        expect(mockDeleteIndex).not.toHaveBeenCalled();
+      });
+
+      it('asynchronously deletes all resolved history snapshot indices', async () => {
+        await client.disable(request, { clearHistorySnapshots: true });
+
+        // deletion fires in the background — not yet called synchronously
+        expect(mockDeleteIndex).not.toHaveBeenCalled();
+
+        await flushPromises();
+
+        expect(mockResolveHistorySnapshotIndexPatterns).toHaveBeenCalledWith(
+          mockEsClient,
+          namespace
+        );
+        expect(mockResolveIndex).toHaveBeenCalledWith({
+          name: '.entities.v2.history.default.*',
+        });
+        expect(mockDeleteIndex).toHaveBeenCalledTimes(2);
+        expect(mockDeleteIndex).toHaveBeenCalledWith(
+          mockEsClient,
+          '.entities.v2.history.default.2024-01-01-00'
+        );
+        expect(mockDeleteIndex).toHaveBeenCalledWith(
+          mockEsClient,
+          '.entities.v2.history.default.2024-01-02-00'
+        );
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'Deleted 2 history snapshot indices after disabling'
+        );
+      });
+
+      it('logs info when no history snapshot indices exist to clear', async () => {
+        mockResolveIndex.mockResolvedValue({ indices: [], aliases: [], data_streams: [] });
+
+        await client.disable(request, { clearHistorySnapshots: true });
+        await flushPromises();
+
+        expect(mockDeleteIndex).not.toHaveBeenCalled();
+        expect(mockLogger.info).toHaveBeenCalledWith('No history snapshot indices to delete.');
+      });
+
+      it('does not throw and logs an error if index deletion fails', async () => {
+        mockDeleteIndex.mockRejectedValue(new Error('ES unavailable'));
+
+        await expect(
+          client.disable(request, { clearHistorySnapshots: true })
+        ).resolves.toBeUndefined();
+
+        await flushPromises();
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to clear history snapshot indices')
+        );
+      });
     });
   });
 });
