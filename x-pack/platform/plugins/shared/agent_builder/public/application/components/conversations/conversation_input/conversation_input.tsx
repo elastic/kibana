@@ -15,6 +15,8 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
@@ -120,7 +122,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const submitMessage = useSubmitMessage();
-  const [isAgentExecutionEnabled, setIsAgentExecutionEnabled] = useState(true);
+  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
+  const isExperimentalEnabled = useExperimentalFeatures();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -219,7 +222,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    if (!isAgentExecutionEnabled) {
+    if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
           messageEditorController.clear();
@@ -279,9 +282,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
               messageEditorController.setContent(pendingMessage);
             }
           }}
-          showAgentToggle={!isNewConversation}
-          isAgentExecutionEnabled={isAgentExecutionEnabled}
-          onAgentExecutionEnabledChange={setIsAgentExecutionEnabled}
+          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          triggerMode={triggerMode}
+          onTriggerModeChange={setTriggerMode}
         />
       )}
     </InputContainer>

@@ -10,6 +10,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { queryKeys } from '../query_keys';
+import { ChatTriggerMode } from '../../../common/http_api/chat';
 import { useSendUserMessage } from './use_send_user_message';
 
 jest.mock('./use_agent_builder_service');
@@ -65,6 +66,7 @@ describe('useSendUserMessage', () => {
     expect(sendUserMessage).toHaveBeenCalledWith({
       conversationId,
       input: 'hello group',
+      triggerMode: ChatTriggerMode.Never,
       attachments: [
         {
           id: 'a-1',

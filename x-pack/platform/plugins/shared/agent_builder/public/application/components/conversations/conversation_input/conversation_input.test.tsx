@@ -69,20 +69,20 @@ jest.mock('./message_editor', () => ({
 }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
-    showAgentToggle,
-    isAgentExecutionEnabled,
-    onAgentExecutionEnabledChange,
+    showTriggerModeToggle,
+    triggerMode,
+    onTriggerModeChange,
   }: {
-    showAgentToggle: boolean;
-    isAgentExecutionEnabled: boolean;
-    onAgentExecutionEnabledChange: (enabled: boolean) => void;
+    showTriggerModeToggle: boolean;
+    triggerMode: string;
+    onTriggerModeChange: (mode: string) => void;
   }) =>
-    showAgentToggle ? (
+    showTriggerModeToggle ? (
       <input
         data-test-subj="mock-agent-toggle"
         type="checkbox"
-        checked={isAgentExecutionEnabled}
-        onChange={(event) => onAgentExecutionEnabledChange(event.target.checked)}
+        checked={triggerMode === 'always'}
+        onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
       />
     ) : null,
 }));
@@ -221,6 +221,15 @@ describe('ConversationInput', () => {
 
   describe('run agent toggle', () => {
     it('is not offered for a new conversation', () => {
+      render(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+    });
+
+    it('is not offered when experimental features are off', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+
       render(<ConversationInput />);
 
       expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();

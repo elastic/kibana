@@ -12,6 +12,7 @@ import { flattenAttachments } from '../context/conversation/flatten_attachments'
 import { queryKeys } from '../query_keys';
 import { mutationKeys } from '../mutation_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { ChatTriggerMode } from '../../../common/http_api/chat';
 
 /**
  * Posts a user message to the current conversation without running the agent. The response is
@@ -33,6 +34,7 @@ export const useSendUserMessage = () => {
         conversationId,
         input: message,
         attachments: flattenAttachments(attachments ?? []),
+        triggerMode: ChatTriggerMode.Never,
       });
     },
     onSuccess: (conversation) => {

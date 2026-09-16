@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const connectorFlexItemStyles = css`
   flex-shrink: 1;
@@ -26,18 +27,18 @@ interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
-  showAgentToggle: boolean;
-  isAgentExecutionEnabled: boolean;
-  onAgentExecutionEnabledChange: (enabled: boolean) => void;
+  showTriggerModeToggle: boolean;
+  triggerMode: ChatTriggerMode;
+  onTriggerModeChange: (mode: ChatTriggerMode) => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
-  showAgentToggle,
-  isAgentExecutionEnabled,
-  onAgentExecutionEnabledChange,
+  showTriggerModeToggle,
+  triggerMode,
+  onTriggerModeChange,
 }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup
@@ -51,14 +52,17 @@ export const InputActions: React.FC<InputActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          {showAgentToggle && (
+          {showTriggerModeToggle && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 compressed
                 label={runAgentLabel}
-                checked={isAgentExecutionEnabled}
-                onChange={(event) => onAgentExecutionEnabledChange(event.target.checked)}
-                data-test-subj="agentBuilderConversationInputAgentToggle"
+                checked={triggerMode === ChatTriggerMode.Always}
+                onChange={(event) =>
+                  onTriggerModeChange(
+                    event.target.checked ? ChatTriggerMode.Always : ChatTriggerMode.Never
+                  )
+                }
               />
             </EuiFlexItem>
           )}
