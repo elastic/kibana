@@ -15,15 +15,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  CONVERSATION_QUEUE_CATEGORIES,
-  type Investigation,
-  type RecommendedAction,
-} from '@kbn/alertzero-common';
-import {
   ConversationQueue,
+  CONVERSATION_QUEUE_CATEGORIES,
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
+  type Investigation,
+  type RecommendedAction,
   ConversationDetailsFlyout,
   BlastRadius,
   AssignActionModal,
@@ -71,7 +69,7 @@ export const ConversationsPage: React.FC = () => {
   // Raw proposals indexed by id so that approve can submit the original
   // actionInput without it needing a field on Investigation.
   const proposalsById = useMemo((): Map<string, ProposalItem> => {
-    const all: ProposalItem[] = (Object.values(data?.groups ?? {}) as ProposalItem[][]).flat();
+    const all: ProposalItem[] = Object.values(data?.groups ?? {}).flat();
     return new Map(all.map((p) => [p.id, p]));
   }, [data?.groups]);
 
@@ -87,9 +85,10 @@ export const ConversationsPage: React.FC = () => {
   // "3 actions need you" must not count decisions already made.
   const openCount = useMemo(
     () =>
-      (Object.entries(data?.groups ?? {}) as Array<[string, ProposalItem[]]>)
-        .filter(([key]) => key !== CLOSED_GROUP_KEY)
-        .reduce((sum, [, items]) => sum + items.length, 0),
+      Object.entries(data?.groups ?? {}).reduce(
+        (sum, [key, items]) => (key === CLOSED_GROUP_KEY ? sum : sum + items.length),
+        0
+      ),
     [data?.groups]
   );
 
@@ -277,7 +276,7 @@ export const ConversationsPage: React.FC = () => {
               <EuiFlexItem key={group.id} grow={false}>
                 <ConversationQueue
                   briefingId={group.id}
-                  briefingType={group.id as RecommendedAction}
+                  briefingType={group.id}
                   briefingList={group.items}
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
                   onClickRecommendedAction={onClickRecommendedAction}

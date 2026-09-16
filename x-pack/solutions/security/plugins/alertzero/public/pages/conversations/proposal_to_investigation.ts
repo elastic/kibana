@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Investigation, RecommendedAction } from '@kbn/alertzero-common';
+import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 

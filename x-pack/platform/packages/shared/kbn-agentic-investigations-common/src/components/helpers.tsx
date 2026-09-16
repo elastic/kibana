@@ -17,6 +17,8 @@ const ACTION_ICONS_MAP: Record<RecommendedAction, IconType> = {
   closed: 'check',
 };
 
+const PRIMARY_COLOR_ACTIONS: RecommendedAction[] = ['investigate', 'configure'];
+
 export const getActionButtonIconProps = (
   investigation: Investigation
 ): {
@@ -34,12 +36,6 @@ export const getActionButtonIconProps = (
   }
   return {
     type: ACTION_ICONS_MAP[investigation.recommendedAction],
-    // Use typed array so a stale literal becomes a compile error rather than
-    // silently turning every non-matching bucket's card button red.
-    color: (['investigate', 'configure'] as RecommendedAction[]).includes(
-      investigation.recommendedAction
-    )
-      ? 'primary'
-      : 'danger',
+    color: PRIMARY_COLOR_ACTIONS.includes(investigation.recommendedAction) ? 'primary' : 'danger',
   };
 };
