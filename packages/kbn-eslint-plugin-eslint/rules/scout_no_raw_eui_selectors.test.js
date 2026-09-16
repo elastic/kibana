@@ -50,6 +50,14 @@ ruleTester.run('@kbn/eslint/scout_no_raw_eui_selectors', rule, {
       code: `page.locator(someVariable);`,
       options,
     },
+    {
+      code: `page.locator('.euiComboBoxPill__cross');`,
+      options,
+    },
+    {
+      code: `page.locator('.euiComboBoxPillButton');`,
+      options,
+    },
   ],
 
   invalid: [
@@ -70,6 +78,16 @@ ruleTester.run('@kbn/eslint/scout_no_raw_eui_selectors', rule, {
     },
     {
       code: 'page.locator(`[data-test-subj="filterParams"] .euiComboBoxPill`);',
+      options,
+      errors: [{ message }],
+    },
+    {
+      code: 'page.locator(`${scope} .euiComboBoxPill`);',
+      options,
+      errors: [{ message }],
+    },
+    {
+      code: `filterEditor.locator('.euiComboBoxPill').first();`,
       options,
       errors: [{ message }],
     },
