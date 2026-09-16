@@ -5,70 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { checkDecidePrivilegesStepCommonDefinition } from '../../../common/proposals/step_types/check_decide_privileges_step';
-import { cloneProposalStepCommonDefinition } from '../../../common/proposals/step_types/clone_proposal_step';
-import { createProposalStepCommonDefinition } from '../../../common/proposals/step_types/create_proposal_step';
-import { getProposalStepCommonDefinition } from '../../../common/proposals/step_types/get_proposal_step';
-import { updateProposalStepCommonDefinition } from '../../../common/proposals/step_types/update_proposal_step';
 
 /**
  * The browser registry backs YAML editor validation, autocomplete and icons.
  * Registering server-side alone leaves the steps invisible to the editor.
+ *
+ * Every definition is registered as a loader rather than a value, so none of it
+ * reaches the page-load bundle. A step definition drags in its zod input and
+ * output schemas, its i18n strings and `@kbn/workflows`, and only the YAML
+ * editor ever needs any of that — so it belongs in an async chunk that loads
+ * with the editor. `registerStepDefinition` accepts a
+ * `() => Promise<PublicStepDefinition>` for exactly this.
  */
-export const createProposalPublicStepDefinition = createPublicStepDefinition({
-  ...createProposalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-});
-
-export const updateProposalPublicStepDefinition = createPublicStepDefinition({
-  ...updateProposalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/check').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-});
-
-export const checkDecidePrivilegesPublicStepDefinition = createPublicStepDefinition({
-  ...checkDecidePrivilegesStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/lock').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-});
-
-export const getProposalPublicStepDefinition = createPublicStepDefinition({
-  ...getProposalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/inspect').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-});
-
-export const cloneProposalPublicStepDefinition = createPublicStepDefinition({
-  ...cloneProposalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/copy').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-});
-
 export const registerProposalsPublicStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
-  workflowsExtensions.registerStepDefinition(createProposalPublicStepDefinition);
-  workflowsExtensions.registerStepDefinition(updateProposalPublicStepDefinition);
-  workflowsExtensions.registerStepDefinition(checkDecidePrivilegesPublicStepDefinition);
-  workflowsExtensions.registerStepDefinition(getProposalPublicStepDefinition);
-  workflowsExtensions.registerStepDefinition(cloneProposalPublicStepDefinition);
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_proposal_step').then((m) => m.createProposalPublicStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./update_proposal_step').then((m) => m.updateProposalPublicStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./check_decide_privileges_step').then(
+      (m) => m.checkDecidePrivilegesPublicStepDefinition
+    )
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_proposal_step').then((m) => m.getProposalPublicStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./clone_proposal_step').then((m) => m.cloneProposalPublicStepDefinition)
+  );
 };
