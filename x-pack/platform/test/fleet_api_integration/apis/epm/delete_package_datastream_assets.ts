@@ -51,32 +51,25 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx');
   };
 
-  const createAgentPolicy = async (spaceId?: string): Promise<string> => {
-    const prefix = spaceId ? `/s/${spaceId}` : '';
+  const createAgentPolicy = async (): Promise<string> => {
     const res = await supertest
-      .post(`${prefix}/api/fleet/agent_policies`)
+      .post(`/api/fleet/agent_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send({ name: `Test agent policy ${Date.now()}`, namespace: 'default' })
       .expect(200);
     return res.body.item.id;
   };
 
-  const deleteAgentPolicy = async (agentPolicyId: string, spaceId?: string) => {
-    const prefix = spaceId ? `/s/${spaceId}` : '';
+  const deleteAgentPolicy = async (agentPolicyId: string) => {
     await supertest
-      .post(`${prefix}/api/fleet/agent_policies/delete`)
+      .post(`/api/fleet/agent_policies/delete`)
       .set('kbn-xsrf', 'xxxx')
       .send({ agentPolicyId });
   };
 
-  const createPackagePolicy = async (
-    agentPolicyId: string,
-    dataset: string,
-    spaceId?: string
-  ): Promise<string> => {
-    const prefix = spaceId ? `/s/${spaceId}` : '';
+  const createPackagePolicy = async (agentPolicyId: string, dataset: string): Promise<string> => {
     const res = await supertest
-      .post(`${prefix}/api/fleet/package_policies`)
+      .post(`/api/fleet/package_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send({
         policy_id: agentPolicyId,
@@ -129,29 +122,26 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('space isolation', () => {
       const spaceA = 'fleet-test-space-a';
-      const spaceB = 'fleet-test-space-b';
 
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await createSpace(spaceA);
-        await createSpace(spaceB);
         await installPackage();
       });
 
       after(async () => {
         await uninstallPackage();
         await deleteSpace(spaceA);
-        await deleteSpace(spaceB);
       });
 
       it('should return 404 when the package policy belongs to a different space', async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
-        const agentPolicyId = await createAgentPolicy(spaceB);
+        // Create policy in the default space; spaceA cannot see it.
+        const agentPolicyId = await createAgentPolicy();
         const packagePolicyId = await createPackagePolicy(
           agentPolicyId,
-          `dataset-b-${Date.now()}`,
-          spaceB
+          `dataset-default-${Date.now()}`
         );
 
         try {
@@ -159,25 +149,25 @@ export default function (providerContext: FtrProviderContext) {
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.contain(packagePolicyId);
         } finally {
-          await deleteAgentPolicy(agentPolicyId, spaceB);
+          await deleteAgentPolicy(agentPolicyId);
         }
       });
 
       it('should return 200 when the package policy belongs to the request space', async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
-        const agentPolicyId = await createAgentPolicy(spaceA);
+        // Create policy in the default space; delete from the default space succeeds.
+        const agentPolicyId = await createAgentPolicy();
         const packagePolicyId = await createPackagePolicy(
           agentPolicyId,
-          `dataset-a-${Date.now()}`,
-          spaceA
+          `dataset-default2-${Date.now()}`
         );
 
         try {
-          const res = await deleteDatastreamAssets(packagePolicyId, spaceA, 200);
+          const res = await deleteDatastreamAssets(packagePolicyId, undefined, 200);
           expect(res.body).to.eql({ success: true });
         } finally {
-          await deleteAgentPolicy(agentPolicyId, spaceA);
+          await deleteAgentPolicy(agentPolicyId);
         }
       });
     });
