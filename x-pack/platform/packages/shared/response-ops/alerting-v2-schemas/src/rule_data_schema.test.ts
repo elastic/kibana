@@ -1592,7 +1592,7 @@ describe('updateRuleBodySchema', () => {
   });
 
   it('documents PATCH omission for time_field, recovery_strategy, and no_data_strategy', () => {
-    const { $schema: _schema, ...json } = z.toJSONSchema(updateRuleBodySchema, {
+    const json = z.toJSONSchema(updateRuleBodySchema, {
       target: 'draft-7',
       unrepresentable: 'any',
     }) as {
