@@ -206,25 +206,32 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      // Clean up the remote output
+      // Clean up the remote output (tolerate 404 if setup aborted before it was created)
       await supertest
         .delete('/api/fleet/outputs/remote-elasticsearch1')
         .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+        .ok((res) => [200, 404].includes(res.status));
 
       // Clean up the local output on remote
       const response = await axios.delete('http://localhost:5621/api/fleet/outputs/es', {
         auth: { username: 'elastic', password: 'changeme' },
         headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
+        validateStatus: (status) => [200, 404].includes(status),
       });
-      expect(response.status).to.be(200);
+      expect([200, 404]).to.contain(response.status);
 
-      await localEs.indices.delete({
-        index: 'fleet-synced-integrations',
-      });
-      await remoteEs.indices.delete({
-        index: 'fleet-synced-integrations-ccr-local',
-      });
+      await localEs.indices.delete(
+        {
+          index: 'fleet-synced-integrations',
+        },
+        { ignore: [404] }
+      );
+      await remoteEs.indices.delete(
+        {
+          index: 'fleet-synced-integrations-ccr-local',
+        },
+        { ignore: [404] }
+      );
       await security.testUser.restoreDefaults();
     });
   });
