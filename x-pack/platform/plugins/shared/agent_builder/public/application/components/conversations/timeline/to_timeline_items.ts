@@ -258,7 +258,6 @@ export interface SavedReplacement {
   userMessage: boolean;
 }
 
-// A saved turn that is still `running` does not count: the live draft is the more complete copy.
 export const findSavedReplacement = (
   savedItems: TimelineItem[],
   activeExecution: Pick<ActiveExecutionDraft, 'executionId' | 'triggerEventId'> | null | undefined
@@ -268,10 +267,7 @@ export const findSavedReplacement = (
   return {
     turn:
       executionId !== undefined &&
-      savedItems.some(
-        (item) =>
-          item.kind === 'agentTurn' && item.executionId === executionId && item.status !== 'running'
-      ),
+      savedItems.some((item) => item.kind === 'agentTurn' && item.executionId === executionId),
     userMessage:
       triggerEventId !== undefined &&
       savedItems.some((item) => item.kind === 'userMessage' && item.key === triggerEventId),

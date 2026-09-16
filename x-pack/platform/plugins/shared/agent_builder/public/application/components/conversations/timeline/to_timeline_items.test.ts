@@ -470,22 +470,6 @@ describe('toTimelineItems - dedupe', () => {
     expect(agentTurns[0].key).toBe('exec-real');
   });
 
-  it('keeps the draft when the persisted turn with the same executionId is still running', () => {
-    const started = createExecutionStartedEvent({ id: 'start-1', execution_id: 'exec-real' });
-    const draft: ActiveExecutionDraft = {
-      status: 'running',
-      steps: [],
-      message: 'streaming',
-      executionId: 'exec-real',
-    };
-
-    const items = toTimelineItems({ events: [started], activeExecution: draft });
-
-    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
-    expect(agentTurns).toHaveLength(2);
-    expect(agentTurns[1]).toMatchObject({ key: 'exec-real', response: { message: 'streaming' } });
-  });
-
   it('appends the draft when its executionId is not yet in persisted items', () => {
     const terminated = createExecutionTerminatedEvent({
       id: 'term-other',
