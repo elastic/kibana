@@ -130,6 +130,36 @@ steps:
       expect(validate('Hello { not liquid } world')).toEqual([]);
     });
 
+    it('should not return errors for pure ${{ }} conditional expressions', () => {
+      // Use string concatenation to avoid JS template-literal interpolation on ${{ }}
+      const dollar = '$';
+      const yamlString =
+        'name: test\nvalue: "' +
+        dollar +
+        '{{ inputs.flag != null ? inputs.flag : variables.flag }}"';
+      expect(validate(yamlString)).toEqual([]);
+    });
+
+    it('should not return errors for ${{ }} mixed with valid Liquid in the same value', () => {
+      const dollar = '$';
+      const yamlString =
+        'name: test\nvalue: "' +
+        dollar +
+        "{{ inputs.flag != null ? inputs.flag : false }} {{ other | default: 'x' }}\"";
+      expect(validate(yamlString)).toEqual([]);
+    });
+
+    it('should still catch invalid Liquid when ${{ }} and {{ }} coexist in the same value', () => {
+      const dollar = '$';
+      const yamlString =
+        'name: test\nvalue: "' +
+        dollar +
+        '{{ inputs.flag != null ? inputs.flag : false }} {{ var | unknownFilter }}"';
+      const result = validate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
+    });
+
     it('should still return errors for invalid liquid on non-comment lines even when comments are present', () => {
       const yamlString = `# valid comment with {{ var }}
 name: test
