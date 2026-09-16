@@ -19,16 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDecisionTreeStatusLabel } from './labels';
-import type {
-  DecisionTreeStatusFilter,
-  DecisionTreeSummary,
-  DecisionTreeStatus,
-} from './types';
+import type { DecisionTreeStatusFilter, DecisionTreeSummary, DecisionTreeStatus } from './types';
 import { DECISION_TREE_STATUSES } from './types';
 
-export type DecisionTreeSidebarSelection =
-  | { kind: 'home' }
-  | { kind: 'tree'; symptom: string };
+export type DecisionTreeSidebarSelection = { kind: 'home' } | { kind: 'tree'; symptom: string };
 
 interface DecisionTreeSidebarProps {
   trees: DecisionTreeSummary[];
@@ -107,9 +101,7 @@ export function DecisionTreeSidebar({
           fullWidth
           options={statusOptions}
           value={statusFilter}
-          onChange={(event) =>
-            onStatusFilterChange(event.target.value as DecisionTreeStatusFilter)
-          }
+          onChange={(event) => onStatusFilterChange(event.target.value as DecisionTreeStatusFilter)}
           data-test-subj="nightshiftDecisionTreeStatusFilter"
         />
       </EuiFlexItem>

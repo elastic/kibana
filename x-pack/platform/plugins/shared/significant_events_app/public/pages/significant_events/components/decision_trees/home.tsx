@@ -70,10 +70,9 @@ export function DecisionTreeHome({ trees, stats, onSelectTree }: DecisionTreeHom
           <EuiPanel hasBorder hasShadow={false} paddingSize="m">
             <EuiStat
               title={stats.total}
-              description={i18n.translate(
-                'xpack.significantEventsApp.decisionTrees.stats.total',
-                { defaultMessage: 'Trees' }
-              )}
+              description={i18n.translate('xpack.significantEventsApp.decisionTrees.stats.total', {
+                defaultMessage: 'Trees',
+              })}
               titleSize="l"
             />
           </EuiPanel>
