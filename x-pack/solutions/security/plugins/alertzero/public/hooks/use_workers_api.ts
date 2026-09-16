@@ -11,7 +11,12 @@ import type { IToasts } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { API_VERSIONS, ALERTZERO_WORKERS_URL, buildWorkerUrl } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  ALERTZERO_WORKERS_URL,
+  buildWorkerUrl,
+  touchesWorkerSettings,
+} from '@kbn/alertzero-common';
 import type {
   ListWorkersResponse,
   UpdateWorkerRequestBody,
@@ -63,22 +68,23 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
   toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
 };
 
-const touchesSettings = ({ autonomyLevel, scheduleInterval }: UpdateWorkerRequestBody): boolean =>
-  autonomyLevel != null || scheduleInterval != null;
-
 const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worker => {
   const enabled = patch.enabled ?? worker.enabled;
-  const autonomy = patch.autonomyLevel ?? worker.settings.autonomy;
-  const scheduleInterval = patch.scheduleInterval ?? worker.settings.scheduleInterval;
+  const settings = patch.settings
+    ? {
+        ...worker.settings,
+        ...(patch.settings.autonomy === undefined ? {} : { autonomy: patch.settings.autonomy }),
+        ...(patch.settings.scheduleInterval === undefined
+          ? {}
+          : { scheduleInterval: patch.settings.scheduleInterval }),
+        ...(patch.settings.extras == null ? {} : { extras: patch.settings.extras }),
+      }
+    : worker.settings;
   return {
     ...worker,
     enabled,
     state: worker.state === 'unavailable' ? 'unavailable' : enabled ? 'ok' : 'paused',
-    settings: {
-      ...worker.settings,
-      autonomy,
-      ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
-    },
+    settings,
   };
 };
 
@@ -118,9 +124,10 @@ export const useUpdateWorker = () => {
         const current = queryClient
           .getQueryData<ListWorkersResponse>(queryKey)
           ?.workers.find((worker) => worker.id === workerId);
-        const body = touchesSettings(patch)
-          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
-          : patch;
+        const body =
+          touchesWorkerSettings(patch) || patch.enabled !== undefined
+            ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
+            : patch;
         const response = await services.http!.patch<UpdateWorkerResponse>(
           buildWorkerUrl(workerId),
           {

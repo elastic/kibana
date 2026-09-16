@@ -5,135 +5,135 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { WORKER_SCHEDULE_UNITS, type WorkerScheduleUnit } from '@kbn/alertzero-common';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiText,
+} from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
-interface ScheduleIntervalFieldProps {
-  current: string;
-  isDisabled?: boolean;
-  onChange: (scheduleInterval: string) => void;
-}
+/** Schedule units offered by the "Every N unit" trigger control. */
+const UNIT_OPTIONS = [
+  { value: 'm', text: i18n.SCHEDULE_UNIT_MINUTES },
+  { value: 'h', text: i18n.SCHEDULE_UNIT_HOURS },
+  { value: 'd', text: i18n.SCHEDULE_UNIT_DAYS },
+] as const;
 
-interface ParsedInterval {
-  value: number;
-  unit: WorkerScheduleUnit;
-}
+type ScheduleUnit = (typeof UNIT_OPTIONS)[number]['value'];
 
-const DEFAULT_PARSED_INTERVAL: ParsedInterval = { value: 24, unit: 'h' };
-const INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
-
-const parseInterval = (interval: string): ParsedInterval | undefined => {
-  const match = INTERVAL_PATTERN.exec(interval);
-  return match ? { value: Number(match[1]), unit: match[2] as WorkerScheduleUnit } : undefined;
+const parseInterval = (interval: string | undefined): { amount: number; unit: ScheduleUnit } => {
+  const match = /^(\d+)([mhd])$/.exec(interval ?? '');
+  if (!match) return { amount: 1, unit: 'h' };
+  return { amount: Number(match[1]), unit: match[2] as ScheduleUnit };
 };
 
+const formatInterval = (amount: number, unit: ScheduleUnit): string => {
+  const safe = Number.isFinite(amount) && amount >= 1 ? Math.floor(amount) : 1;
+  return `${safe}${unit}`;
+};
+
+interface ScheduleIntervalFieldProps {
+  workerId: string;
+  current: string;
+  isDisabled?: boolean;
+  onChange: (interval: string) => void;
+}
+
 /**
- * Interval control for a schedule-driven Worker, mirroring the Attack Discovery schedule form's
- * number + unit pairing.
- *
- * EuiFieldNumber fires onChange per keystroke, so the value is persisted on blur (and immediately
- * on a unit change) — otherwise typing "30" would save "3h" and then "30h", rewriting the workflow
- * and re-registering its Task Manager schedule twice.
+ * Trigger row ported from the Sep 14 prototype (notdaybreak_mvp
+ * WorkerSettingsForm): plain "Every N unit" amount + unit select. Commits on
+ * change; invalid amounts keep the last valid interval.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
+  workerId,
   current,
   isDisabled,
   onChange,
 }) => {
-  const parsedCurrent = parseInterval(current) ?? DEFAULT_PARSED_INTERVAL;
-  const [draft, setDraft] = useState<ParsedInterval>(parsedCurrent);
-  const draftRef = useRef<ParsedInterval>(parsedCurrent);
-  const lastPersistedRef = useRef(current);
-  const onChangeRef = useRef(onChange);
+  const { amount, unit } = useMemo(() => parseInterval(current), [current]);
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
 
-  onChangeRef.current = onChange;
-
-  // Re-sync when the server echoes a different value than the one typed — the mutation is
-  // optimistic and rolls back on a settings conflict.
-  useEffect(() => {
-    lastPersistedRef.current = current;
-    const next = parseInterval(current);
-    if (!next) {
-      return;
-    }
-    draftRef.current = next;
-    setDraft(next);
-  }, [current]);
-
-  const persist = useCallback(({ value, unit }: ParsedInterval) => {
-    const interval = `${value}${unit}`;
-    if (interval === lastPersistedRef.current) {
-      return;
-    }
-    lastPersistedRef.current = interval;
-    onChangeRef.current(interval);
-  }, []);
-
-  const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = event.target.value.trim();
-    if (!/^[1-9][0-9]*$/.test(raw)) {
-      return;
-    }
-    const next = { ...draftRef.current, value: Number(raw) };
-    draftRef.current = next;
-    setDraft(next);
-  }, []);
-
-  const onUnitChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const unit = event.target.value as WorkerScheduleUnit;
-      const next = { ...draftRef.current, unit };
-      draftRef.current = next;
-      setDraft(next);
-      persist(next);
+  const commit = useCallback(
+    (nextAmount: number, nextUnit: ScheduleUnit) => {
+      if (!Number.isFinite(nextAmount) || nextAmount < 1) {
+        setAmountDraft(null);
+        return;
+      }
+      setAmountDraft(null);
+      onChange(formatInterval(nextAmount, nextUnit));
     },
-    [persist]
+    [onChange]
   );
 
-  const onValueBlur = useCallback(() => {
-    persist(draftRef.current);
-  }, [persist]);
-
-  const unitOptions = useMemo(
-    () =>
-      WORKER_SCHEDULE_UNITS.map((unit) => ({
-        value: unit,
-        text: i18n.scheduleUnitLabel(unit, draft.value),
-      })),
-    [draft.value]
-  );
+  const amountValue = amountDraft ?? String(amount);
+  const amountInvalid =
+    amountDraft != null && (!/^\d+$/.test(amountDraft) || Number(amountDraft) < 1);
 
   return (
     <EuiFormRow
-      label={i18n.SCHEDULE_INTERVAL_LABEL}
-      helpText={i18n.SCHEDULE_INTERVAL_HELP_TEXT}
+      label={i18n.TRIGGER_LABEL}
+      helpText={i18n.TRIGGER_HELP_TEXT}
       fullWidth
-      data-test-subj="alertZeroScheduleIntervalField"
+      data-test-subj={`alertZeroTriggerRow-${workerId}`}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" aria-hidden="true">
+            <span>{i18n.TRIGGER_EVERY}</span>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 88px;
+            flex: 0 0 88px;
+          `}
+        >
           <EuiFieldNumber
+            value={amountValue}
+            compressed
             fullWidth
             min={1}
-            value={draft.value}
+            step={1}
+            isInvalid={amountInvalid}
             disabled={isDisabled}
-            onChange={onValueChange}
-            onBlur={onValueBlur}
-            aria-label={i18n.SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalValue"
+            aria-label={i18n.TRIGGER_AMOUNT_ARIA_LABEL}
+            data-test-subj={`alertZeroTriggerAmount-${workerId}`}
+            onChange={(event) => {
+              const raw = event.target.value;
+              if (raw === '') {
+                setAmountDraft('');
+                return;
+              }
+              const next = Number(raw);
+              if (Number.isFinite(next)) {
+                commit(next, unit);
+              }
+            }}
+            onBlur={() => setAmountDraft(null)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 120px;
+            flex: 0 0 120px;
+          `}
+        >
           <EuiSelect
+            options={UNIT_OPTIONS.map(({ value, text }) => ({ value, text }))}
+            value={unit}
+            compressed
             fullWidth
-            value={draft.unit}
-            options={unitOptions}
             disabled={isDisabled}
-            onChange={onUnitChange}
-            aria-label={i18n.SCHEDULE_INTERVAL_UNIT_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalUnit"
+            aria-label={i18n.TRIGGER_UNIT_ARIA_LABEL}
+            data-test-subj={`alertZeroTriggerUnit-${workerId}`}
+            onChange={(event) => commit(amount, event.target.value as ScheduleUnit)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

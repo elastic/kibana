@@ -34,6 +34,57 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   }
 );
 
+export const SAVE_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.saveWatchSettings',
+  { defaultMessage: 'Save' }
+);
+
+export const DISCARD_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.discardWatchSettings',
+  { defaultMessage: 'Discard' }
+);
+
+export const RUN_WORKER = i18n.translate('xpack.alertzero.watches.settings.runWorker', {
+  defaultMessage: 'Run',
+});
+
+export const RUN_WORKER_DIRTY = i18n.translate('xpack.alertzero.watches.settings.runWorkerDirty', {
+  defaultMessage: 'Save or discard unsaved changes before running this Worker.',
+});
+
+export const TUNING_THRESHOLDS_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.tuningThresholds.title',
+  { defaultMessage: 'Tuning thresholds' }
+);
+
+export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.label',
+  { defaultMessage: 'Analysis window (days)' }
+);
+
+export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.help',
+  {
+    defaultMessage:
+      'How many days of alerts Rule Tuning analyses. Applies to this Worker only. Between 1 and 30.',
+  }
+);
+
+export const ANALYSIS_WINDOW_DAYS_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.ariaLabel',
+  { defaultMessage: 'Analysis window in days' }
+);
+
+export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.saveError',
+  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
+);
+
+export const WATCH_SETTINGS_INVALID = i18n.translate(
+  'xpack.alertzero.watches.settings.invalidDrafts',
+  { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
@@ -157,12 +208,47 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
 };
 
+export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.radiogroupAriaLabel',
+  { defaultMessage: 'Autonomy level' }
+);
+
 export const autonomyLevelName = (levelId: string): string =>
   AUTONOMY_LEVEL_NAMES[levelId] ?? levelId;
 
 export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.autonomy.rangeAriaLabel',
   { defaultMessage: 'Autonomy level' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Autonomy level control (Sep 11 prototype port)                             */
+/* -------------------------------------------------------------------------- */
+
+export const AUTONOMY_LEVEL_MANUAL_LABEL = AUTONOMY_LEVEL_NAMES.manual;
+export const AUTONOMY_LEVEL_ASSISTED_LABEL = AUTONOMY_LEVEL_NAMES.assisted;
+export const AUTONOMY_LEVEL_SUPERVISED_LABEL = AUTONOMY_LEVEL_NAMES.supervised;
+
+export const AUTONOMY_ACTOR_YOU = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.you',
+  { defaultMessage: 'You' }
+);
+
+export const AUTONOMY_ACTOR_WORKER = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.worker',
+  { defaultMessage: 'Worker' }
+);
+
+export const AUTONOMY_TRACK_ARIA_LABEL = AUTONOMY_RANGE_ARIA_LABEL;
+
+export const AUTONOMY_SCALE_LEFT = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.scaleLeft',
+  { defaultMessage: 'You do more' }
+);
+
+export const AUTONOMY_SCALE_RIGHT = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.scaleRight',
+  { defaultMessage: 'Worker does more' }
 );
 
 /* -------------------------------------------------------------------------- */
@@ -174,19 +260,46 @@ export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
   { defaultMessage: 'Run every' }
 );
 
-export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.helpText',
+/* -------------------------------------------------------------------------- */
+/* Trigger (Sep 14 prototype: plain "Every N unit")                            */
+/* -------------------------------------------------------------------------- */
+
+export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
+  defaultMessage: 'Trigger',
+});
+
+export const TRIGGER_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpText',
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
 );
 
-export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.numberAriaLabel',
-  { defaultMessage: 'Schedule interval' }
+export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
+  defaultMessage: 'Every',
+});
+
+export const SCHEDULE_UNIT_MINUTES = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.minutes',
+  { defaultMessage: 'minutes' }
 );
 
-export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.unitAriaLabel',
-  { defaultMessage: 'Schedule interval unit' }
+export const SCHEDULE_UNIT_HOURS = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.hours',
+  { defaultMessage: 'hours' }
+);
+
+export const SCHEDULE_UNIT_DAYS = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.days',
+  { defaultMessage: 'days' }
+);
+
+export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.amountAriaLabel',
+  { defaultMessage: 'Interval amount' }
+);
+
+export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unitAriaLabel',
+  { defaultMessage: 'Interval unit' }
 );
 
 const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
@@ -206,6 +319,24 @@ const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
     defaultMessage: '{intervalValue, plural, one {day} other {days}}',
     values: { intervalValue },
   });
+
+export const CANDIDATE_LIMIT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.label',
+  { defaultMessage: 'Candidate limit' }
+);
+
+export const CANDIDATE_LIMIT_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.helpText',
+  {
+    defaultMessage:
+      'Attack Discovery only. Maximum candidates considered per run. Other Workers do not have this setting.',
+  }
+);
+
+export const CANDIDATE_LIMIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.ariaLabel',
+  { defaultMessage: 'Candidate limit' }
+);
 
 /** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
 export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
@@ -462,6 +593,74 @@ export const STATUS_DEGRADED = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Workers summary rail (two-column Worker layout)                            */
+/* -------------------------------------------------------------------------- */
+
+export const WORKERS_RAIL_HEADING = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.heading',
+  {
+    defaultMessage: 'Workers in this Watch',
+  }
+);
+
+export const RAIL_STATUS_ENABLED = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.status.enabled',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
+
+export const RAIL_STATUS_DISABLED = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.status.disabled',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
+export const RAIL_STATUS_PAUSED = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.status.paused',
+  {
+    defaultMessage: 'Paused',
+  }
+);
+
+export const RAIL_STATUS_UNAVAILABLE = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.status.unavailable',
+  {
+    defaultMessage: 'Unavailable',
+  }
+);
+
+export const RAIL_STATUS_DEGRADED = i18n.translate(
+  'xpack.alertzero.watches.settings.rail.status.degraded',
+  {
+    defaultMessage: 'Degraded',
+  }
+);
+
+export const RAIL_LAST_RUN = i18n.translate('xpack.alertzero.watches.settings.rail.lastRun', {
+  defaultMessage: 'Last run',
+});
+
+export const RAIL_AUTONOMY = i18n.translate('xpack.alertzero.watches.settings.rail.autonomy', {
+  defaultMessage: 'Autonomy',
+});
+
+export const WORKERS_EMPTY_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.title',
+  {
+    defaultMessage: 'No Workers in this Watch',
+  }
+);
+
+export const WORKERS_EMPTY_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.body',
+  {
+    defaultMessage: 'This Watch has no Workers yet.',
+  }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Approval gates                                                             */
 /* -------------------------------------------------------------------------- */
 
@@ -650,6 +849,28 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
     defaultMessage: 'Completed',
   }),
 };
+
+/* -------------------------------------------------------------------------- */
+/* Detection config (confidence / false-positive thresholds)                  */
+/* -------------------------------------------------------------------------- */
+
+export const AUTO_CLOSE_GROUP_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.title',
+  { defaultMessage: 'Auto-close' }
+);
+
+export const MIN_CONFIDENCE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.minConfidenceHelp',
+  {
+    defaultMessage:
+      'When the analysis classifies an alert as a false positive at or above the confidence score, it is closed — automatically or as a proposal, depending on the autonomy level.',
+  }
+);
+
+export const MIN_CONFIDENCE_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.minConfidenceAriaLabel',
+  { defaultMessage: 'Minimum confidence score' }
+);
 
 /* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */

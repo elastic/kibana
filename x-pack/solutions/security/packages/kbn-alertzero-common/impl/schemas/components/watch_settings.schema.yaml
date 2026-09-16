@@ -14,6 +14,18 @@ components:
         There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see
         https://github.com/elastic/security-team/issues/18718.
 
+    AllowedAutonomyLevels:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/WatchAutonomyLevel'
+      description: >-
+        Autonomy levels this Worker actually supports, derived from its complete settings schema
+        rather than a hand-maintained list (worker-settings-page-decisions-3, item 3). A Worker
+        whose gate cannot run unattended narrows this to the levels it can honour; the UI renders
+        a selector only when more than one level is allowed, and the server rejects a PATCH
+        naming a level outside the set.
+
     WorkerScheduleInterval:
       type: string
       pattern: '^[1-9][0-9]*[mhd]$'
@@ -22,6 +34,14 @@ components:
         Interval between runs for a schedule-driven Worker, as a positive count and a unit of
         minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled`
         trigger. Seconds are not supported.
+
+    AnalysisWindowDays:
+      type: integer
+      minimum: 1
+      maximum: 30
+      description: >-
+        How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
+        analysis_window_days input. Omitted for every Worker except Rule Tuning.
 
     WorkerRunState:
       type: string
@@ -253,9 +273,98 @@ components:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
 
+    SharedOnlyWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete settings for a Worker that only carries the shared autonomy dial. Watch-owned
+        custom fields are absent by construction.
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    ScheduledWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: Complete settings for a schedule-driven Worker with no Watch-owned custom fields.
+      required:
+        - workerId
+        - autonomy
+        - scheduleInterval
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+
+    RuleTuningWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Detection Watch / Rule Tuning settings. Owned by Detection Watch; CWL reviews
+        the field list and UI, the Watch team owns the values.
+      required:
+        - workerId
+        - autonomy
+        - scheduleInterval
+        - extras
+      properties:
+        workerId:
+          type: string
+          enum: [system-security-detection-rule-tuning]
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/RuleTuningWorkerExtras'
+
+    AlertTriageWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Alert Triage settings. Detection tuning thresholds were removed from the
+        contract: the Alert Triage workflow is a classification stub with no auto-close step
+        to consume them, so exposing thresholds would be settings storage without a consumer
+        (worker-settings-page-decisions-3, item 9).
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+          enum: [system-security-floor-alert-triage]
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    RuleTuningWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Watch-owned custom fields for Detection Rule Tuning. Closed per-Worker schema; unknown
+        keys are rejected with the field name so a misspelled custom setting cannot silently
+        persist. Replaces whole-object on write (worker-settings-page-decisions-3, items 5+12).
+      required:
+        - analysisWindowDays
+      properties:
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
+
     WorkerSettings:
       type: object
-      description: Durable per-Worker settings stored as managed template values.
+      additionalProperties: false
+      description: >-
+        Durable per-Worker settings stored as managed template values. Shared fields plus any
+        Watch-owned custom fields that Worker declares. Unknown keys are rejected. Completeness
+        for a given Worker is the matching SharedOnlyWorkerSettings, ScheduledWorkerSettings,
+        RuleTuningWorkerSettings, or AlertTriageWorkerSettings schema.
       required:
         - workerId
         - autonomy
@@ -269,7 +378,42 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        extras:
+          type: object
+          additionalProperties: false
+          description: >-
+            Watch-owned custom fields this Worker declares. Which keys exist is decided by the
+            Worker's complete schema (e.g. RuleTuningWorkerExtras); the shape here is the union
+            for API read. Replaces whole-object on write. Omitted when the Worker owns none.
+          properties:
+            analysisWindowDays:
+              $ref: '#/components/schemas/AnalysisWindowDays'
 
+    WorkerSettingsWrite:
+      type: object
+      additionalProperties: false
+      description: >-
+        Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored
+        values; unknown keys and wrong-Worker fields are rejected. extras replaces the whole
+        stored object when present.
+      properties:
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsWriteExtras'
+
+    WorkerSettingsWriteExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Watch-owned custom fields a Client may write. Union of all Workers' custom fields;
+        the server validates against the target Worker's complete schema, so a field another
+        Worker owns is rejected here.
+      properties:
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
     Worker:
       type: object
       description: A live registered Worker with Watch membership and durable settings.
@@ -282,6 +426,7 @@ components:
         - state
         - settings
         - settingsRevision
+        - allowedAutonomyLevels
       properties:
         id:
           type: string
@@ -305,6 +450,8 @@ components:
           $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
         settings:
           $ref: '#/components/schemas/WorkerSettings'
+        allowedAutonomyLevels:
+          $ref: '#/components/schemas/AllowedAutonomyLevels'
         settingsRevision:
           type: integer
           format: int64

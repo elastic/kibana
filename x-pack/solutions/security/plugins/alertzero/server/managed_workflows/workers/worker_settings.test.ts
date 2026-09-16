@@ -11,6 +11,8 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
+  getWorkerExtrasFields,
+  workerOwnsSchedule,
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
@@ -18,11 +20,15 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 
-const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+/**
+ * Capability membership is READ OFF THE SCHEMA rather than restated here
+ * (worker-settings-page-decisions-3, item 14). A parallel list in the test would
+ * re-introduce exactly the drift the contract consistency check exists to prevent.
+ */
+const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter((id) => !workerOwnsSchedule(id));
 
-/** Every other Worker is alert- or event-triggered and owns no schedule. */
-const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
-  (id) => !SCHEDULED_WORKER_IDS.includes(id)
+const NO_ANALYSIS_WINDOW_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => !getWorkerExtrasFields(id).includes('analysisWindowDays')
 );
 
 describe('createWorkerSettingsRegistration', () => {
@@ -128,7 +134,7 @@ describe('createWorkerSettingsRegistration', () => {
     it('leaves the interval untouched when only autonomy is patched', () => {
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
-        { autonomyLevel: 'assisted' }
+        { autonomy: 'assisted' }
       );
 
       expect(applied).toEqual({
@@ -145,11 +151,15 @@ describe('createWorkerSettingsRegistration', () => {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '2h',
+        analysisWindowDays: 14,
       });
+      // The public projection nests worker-owned fields under settings.extras (item 5);
+      // internal template values stay flat because the workflow engine reads them that way.
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '2h',
+        extras: { analysisWindowDays: 14 },
       });
     });
 
@@ -159,17 +169,90 @@ describe('createWorkerSettingsRegistration', () => {
       });
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '6h' },
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '6h',
+          analysisWindowDays: 14,
+        },
       });
+    });
+
+    it('defaults a missing analysis window and projects it', () => {
+      const { values } = registration.migrate({
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '2h',
+      });
+
+      expect(values).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '2h',
+        analysisWindowDays: 14,
+      });
+    });
+
+    it('preserves omitted fields on a custom-only patch', () => {
+      const applied = registration.applyPatch(
+        {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '6h',
+          analysisWindowDays: 14,
+        },
+        { extras: { analysisWindowDays: 7 } }
+      );
+
+      expect(applied).toEqual({
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '6h',
+          analysisWindowDays: 7,
+        },
+      });
+    });
+
+    it.each([7.5, 0, 31])('rejects analysis window %s', (analysisWindowDays) => {
+      expect(() =>
+        registration.migrate({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '2h',
+          analysisWindowDays,
+        })
+      ).toThrow(/invalid analysis window/);
+    });
+  });
+
+  describe('analysis window — Workers that do not own it', () => {
+    it.each(NO_ANALYSIS_WINDOW_WORKER_IDS)('%s rejects an analysis window patch', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { analysisWindowDays: 7 },
+        })
+      ).toEqual({ rejected: 'an analysis window' });
+    });
+
+    it('rejects an analysis window on Attack Discovery', () => {
+      const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { analysisWindowDays: 7 },
+        })
+      ).toEqual({ rejected: 'an analysis window' });
     });
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {
-    it.each(UNSCHEDULED_WORKER_IDS)('%s default values are unchanged', (workerId) => {
-      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-      });
+    it.each(UNSCHEDULED_WORKER_IDS)('%s default values omit the interval', (workerId) => {
+      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).not.toHaveProperty(
+        'scheduleInterval'
+      );
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s omits the interval from public settings', (workerId) => {
@@ -189,10 +272,11 @@ describe('createWorkerSettingsRegistration', () => {
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
+      const defaults = registration.createDefaultValues();
 
-      expect(
-        registration.applyPatch(registration.createDefaultValues(), { autonomyLevel: 'assisted' })
-      ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'assisted' } });
+      expect(registration.applyPatch(defaults, { autonomy: 'assisted' })).toEqual({
+        values: { ...defaults, autonomyLevel: 'assisted' },
+      });
     });
   });
 });

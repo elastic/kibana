@@ -11,7 +11,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -35,6 +37,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   lastRun: null,
   state: 'paused',
   settingsRevision: 1,
+  allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
   settings: {
     workerId: TRIAGE,
     autonomy: 'manual',
@@ -116,7 +119,7 @@ describe('useUpdateWorker', () => {
 
     act(() => {
       result.current.mutate({ workerId: TRIAGE, patch: { enabled: true } });
-      result.current.mutate({ workerId: TRIAGE, patch: { autonomyLevel: 'assisted' } });
+      result.current.mutate({ workerId: TRIAGE, patch: { settings: { autonomy: 'assisted' } } });
     });
 
     await waitFor(() => expect(resolveEnable).toBeDefined());
@@ -134,7 +137,7 @@ describe('useUpdateWorker', () => {
 
     const autonomyBody = JSON.parse(patch.mock.calls[1][1].body);
     expect(autonomyBody).toEqual({
-      autonomyLevel: 'assisted',
+      settings: { autonomy: 'assisted' },
       settingsRevision: 2,
     });
   });
@@ -168,13 +171,97 @@ describe('useUpdateWorker', () => {
     const { result } = renderUpdateWorker(scheduledWorker, patch);
 
     await act(async () => {
-      result.current.mutate({ workerId: TRIAGE, patch: { scheduleInterval: '15m' } });
+      result.current.mutate({ workerId: TRIAGE, patch: { settings: { scheduleInterval: '15m' } } });
     });
 
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
-      scheduleInterval: '15m',
+      settings: { scheduleInterval: '15m' },
       settingsRevision: 4,
     });
+  });
+
+  const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+
+  const tuningWorker = createWorker({
+    id: RULE_TUNING,
+    name: 'Rule Tuning',
+    watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    settingsRevision: 6,
+    settings: {
+      workerId: RULE_TUNING,
+      autonomy: 'manual',
+      scheduleInterval: '2h',
+      extras: { analysisWindowDays: 14 },
+    },
+  });
+
+  it('treats an extras-only patch as a settings write and sends the revision', async () => {
+    const patch = jest.fn().mockResolvedValue({
+      worker: createWorker({
+        id: RULE_TUNING,
+        settingsRevision: 7,
+        settings: {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras: { analysisWindowDays: 21 },
+        },
+      }),
+    });
+    const { result } = renderUpdateWorker(tuningWorker, patch);
+
+    await act(async () => {
+      result.current.mutate({
+        workerId: RULE_TUNING,
+        patch: { settings: { extras: { analysisWindowDays: 21 } } },
+      });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
+      settings: { extras: { analysisWindowDays: 21 } },
+      settingsRevision: 6,
+    });
+  });
+
+  it('REPLACES extras in the optimistic cache entry rather than merging field-by-field', async () => {
+    // decisions item 12: extras is written whole. A partial extras patch must not be deep-merged
+    // into the cached object, or the UI would show a value the server will not persist.
+    let resolvePatch: ((worker: Worker) => void) | undefined;
+    const patch = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolvePatch = (worker) => resolve({ worker });
+        })
+    );
+    const { result, queryClient } = renderUpdateWorker(tuningWorker, patch);
+
+    act(() => {
+      result.current.mutate({
+        workerId: RULE_TUNING,
+        patch: { settings: { extras: { analysisWindowDays: 7 } } },
+      });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+
+    const cached = queryClient
+      .getQueryData<{ workers: Worker[] }>(queryKeys.workers.list())
+      ?.workers.find((worker) => worker.id === RULE_TUNING);
+    expect(cached?.settings.extras).toEqual({ analysisWindowDays: 7 });
+
+    resolvePatch!(
+      createWorker({
+        settingsRevision: 7,
+        settings: {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras: { analysisWindowDays: 7 },
+        },
+      })
+    );
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
   });
 });

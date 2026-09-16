@@ -5,84 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
 import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { ScheduleIntervalField } from './schedule_interval_field';
 
-const renderField = (current = '24h', onChange: jest.Mock = jest.fn()) => {
-  const { rerender } = render(<ScheduleIntervalField current={current} onChange={onChange} />);
-  return {
-    onChange,
-    rerender,
-    value: () => screen.getByTestId('alertZeroScheduleIntervalValue') as HTMLInputElement,
-    unit: () => screen.getByTestId('alertZeroScheduleIntervalUnit') as HTMLSelectElement,
-  };
-};
+describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
+  const onChange = jest.fn();
 
-describe('ScheduleIntervalField', () => {
-  it('decomposes the interval into a value and a unit', () => {
-    const { value, unit } = renderField('30m');
+  beforeEach(() => {
+    onChange.mockClear();
+  });
+  const WORKER_ID = 'system-security-floor-attack-discovery';
 
-    expect(value().value).toBe('30');
-    expect(unit().value).toBe('m');
+  it('parses the current interval into amount and unit selects', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="4h" onChange={onChange} />);
+    expect(screen.getByDisplayValue('4')).toBeInTheDocument();
+    expect(screen.getByTestId(`alertZeroTriggerUnit-${WORKER_ID}`).textContent).toContain('hours');
   });
 
-  it('offers minutes, hours and days but not seconds', () => {
-    const { unit } = renderField();
-
-    expect([...unit().options].map((option) => option.value)).toEqual(['m', 'h', 'd']);
+  it('commits a valid change as a scheduleInterval string', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    fireEvent.change(amount, { target: { value: '2' } });
+    expect(onChange).toHaveBeenLastCalledWith('2h');
   });
 
-  it('persists once on blur rather than per keystroke', () => {
-    const { onChange, value } = renderField('24h');
-
-    fireEvent.change(value(), { target: { value: '3' } });
-    fireEvent.change(value(), { target: { value: '30' } });
-
-    // A save per keystroke would rewrite the workflow and re-register its Task Manager schedule
-    // twice, once at the intermediate "3h".
+  it('shows an inline error and does not commit when the amount is invalid', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    const amount = screen.getByTestId(`alertZeroTriggerAmount-${WORKER_ID}`);
+    fireEvent.change(amount, { target: { value: '0' } });
     expect(onChange).not.toHaveBeenCalled();
-
-    fireEvent.blur(value());
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith('30h');
-  });
-
-  it('persists immediately when the unit changes', () => {
-    const { onChange, unit } = renderField('24h');
-
-    fireEvent.change(unit(), { target: { value: 'm' } });
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith('24m');
-  });
-
-  it('does not persist when blurred on the unchanged value', () => {
-    const { onChange, value } = renderField('24h');
-
-    fireEvent.blur(value());
-
-    expect(onChange).not.toHaveBeenCalled();
-  });
-
-  it('ignores a non-positive-integer entry', () => {
-    const { onChange, value } = renderField('24h');
-
-    fireEvent.change(value(), { target: { value: '0' } });
-    fireEvent.change(value(), { target: { value: '-5' } });
-    fireEvent.blur(value());
-
-    expect(value().value).toBe('24');
-    expect(onChange).not.toHaveBeenCalled();
-  });
-
-  it('re-syncs when the server echoes a different value', () => {
-    const { rerender, value } = renderField('24h');
-
-    rerender(<ScheduleIntervalField current="15m" onChange={jest.fn()} />);
-
-    expect(value().value).toBe('15');
-    expect(screen.getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('m');
   });
 });

@@ -84,6 +84,7 @@ describe('detection rule workflows', () => {
         ['run_rule_tuning', 'workflow.executeAsync'],
       ]);
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
+      expect(calls[0].with?.inputs).toEqual({ analysis_window_days: 14 });
     });
   });
 

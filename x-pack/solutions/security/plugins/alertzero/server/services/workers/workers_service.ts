@@ -9,6 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  getAllowedAutonomyLevels,
+  touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -43,12 +45,24 @@ const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYa
   return null;
 };
 
+const templateValueEqual = (left: unknown, right: unknown): boolean => {
+  if (left === right) {
+    return true;
+  }
+  if (typeof left !== 'object' || typeof right !== 'object' || left === null || right === null) {
+    return false;
+  }
+  const leftRecord = left as Record<string, unknown>;
+  const rightRecord = right as Record<string, unknown>;
+  return Object.keys(rightRecord).every(
+    (key) => Object.hasOwn(leftRecord, key) && templateValueEqual(leftRecord[key], rightRecord[key])
+  );
+};
+
 const templateValuesEqual = (
   left: Record<string, unknown> | null,
   right: Record<string, unknown>
-): boolean =>
-  left != null &&
-  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
+): boolean => left != null && templateValueEqual(left, right);
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
@@ -143,7 +157,7 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = patch.autonomyLevel != null || patch.scheduleInterval != null;
+    const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -151,7 +165,17 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
-    if (touchesSettings) {
+    // worker-settings-page-decisions-3, item 15: the revision guard covers ALL user-visible
+    // state that can race — settings AND the enabled toggle. An enabled-only patch on an already
+    // installed Worker must carry settingsRevision, because toggling enabled is a concurrent-write
+    // surface too. The exception is the FIRST enable of a Worker that has no document yet: there is
+    // no persisted revision to conflict with, so the guard is vacuous and would only force callers
+    // to send a meaningless `settingsRevision: null`. Settings writes always require the revision
+    // regardless of install state. This is the explicit decision the doc asks to record at the check.
+    const revisionGuardApplies =
+      touchesSettings || (patch.enabled !== undefined && status.installed);
+
+    if (revisionGuardApplies) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
       }
@@ -166,7 +190,7 @@ export class WorkersService {
       const currentValues = state?.templateValues
         ? registration.settings.migrate(state.templateValues).values
         : registration.settings.createDefaultValues();
-      const applied = registration.settings.applyPatch(currentValues, patch);
+      const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
       if ('rejected' in applied) {
         return { outcome: 'rejected', what: applied.rejected };
       }
@@ -301,6 +325,7 @@ export class WorkersService {
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
       settings: registration.settings.toSettings(values),
+      allowedAutonomyLevels: [...getAllowedAutonomyLevels(registration.id)],
       settingsRevision,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };

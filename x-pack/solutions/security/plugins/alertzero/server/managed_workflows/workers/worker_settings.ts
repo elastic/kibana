@@ -6,13 +6,21 @@
  */
 
 import {
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   WatchAutonomyLevel,
+  AnalysisWindowDays,
+  parseCompleteWorkerSettings,
+  rejectUnsupportedWorkerSettingsWrite,
+  workerOwnsSchedule,
+  getAllowedAutonomyLevels,
+  getWorkerExtrasFields,
   type WorkerSettings,
+  type WorkerSettingsWrite,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
 import type { WorkerSettingsRegistration } from './types';
@@ -34,14 +42,21 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
 };
 
 /**
- * Default interval per schedule-driven Worker. Presence in this map is what opts a Worker into the
- * schedule setting — the other Workers are alert- or event-triggered and own no schedule, so the
- * setting is absent from their template values and from their projected settings entirely.
+ * Default interval per schedule-driven Worker. VALUES only — capability (which
+ * Workers own a schedule) is declared by the per-Worker complete schema via
+ * workerOwnsSchedule, not by this map.
  */
 const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
-  // Matches the Attack Discovery schedule form default.
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
+};
+
+/**
+ * Default analysis window for the Worker whose extras own it. VALUES only —
+ * capability is declared by getWorkerExtrasFields.
+ */
+const WORKER_ANALYSIS_WINDOW_DEFAULTS: Partial<Record<RegisteredWorkerId, number>> = {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ANALYSIS_WINDOW_DAYS_DEFAULT,
 };
 
 /**
@@ -51,49 +66,79 @@ const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
 const readScheduleInterval = (values: WorkerTemplateValues): string | undefined =>
   typeof values.scheduleInterval === 'string' ? values.scheduleInterval : undefined;
 
+const readAnalysisWindowDays = (values: WorkerTemplateValues): number | undefined =>
+  'analysisWindowDays' in values && typeof values.analysisWindowDays === 'number'
+    ? values.analysisWindowDays
+    : undefined;
+
+/**
+ * Validates raw template values against the schema-derived capability set.
+ * Fields a Worker does not own are dropped (matching the pre-existing behavior
+ * for an unscheduled Worker's stray interval); out-of-range values throw so a
+ * corrupted persisted document surfaces loudly.
+ */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
 ): WorkerTemplateValues => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval } = raw;
+  const { settingsVersion, autonomyLevel, scheduleInterval, analysisWindowDays } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
     );
   }
-  const parsedAutonomyLevel = WatchAutonomyLevel.safeParse(autonomyLevel);
+  // An absent autonomy level means "not yet chosen", not "corrupt": defaults
+  // materialise from {} on first read. A PRESENT but unparseable value is still a
+  // hard error so a corrupted persisted document surfaces loudly.
+  const allowedLevels = getAllowedAutonomyLevels(workerId);
+  const parsedAutonomyLevel = WatchAutonomyLevel.safeParse(
+    autonomyLevel === undefined ? allowedLevels[0] ?? 'manual' : autonomyLevel
+  );
   if (!parsedAutonomyLevel.success) {
     throw new Error(`AlertZero worker "${workerId}" settings contain an invalid autonomy level`);
   }
-
-  const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-  if (scheduleDefault === undefined) {
-    return {
-      settingsVersion: currentVersion,
-      autonomyLevel: parsedAutonomyLevel.data,
-    };
+  if (!allowedLevels.includes(parsedAutonomyLevel.data)) {
+    throw new Error(
+      `AlertZero worker "${workerId}" does not allow autonomy level "${parsedAutonomyLevel.data}"`
+    );
   }
 
-  // Absent means the install predates the setting, so it takes the default.
+  const scheduleDefault = workerOwnsSchedule(workerId)
+    ? WORKER_SCHEDULE_DEFAULTS[workerId] ?? '24h'
+    : undefined;
+  const ownsAnalysisWindow = getWorkerExtrasFields(workerId).includes('analysisWindowDays');
+  const parsedAnalysisWindow =
+    ownsAnalysisWindow && WORKER_ANALYSIS_WINDOW_DEFAULTS[workerId] !== undefined
+      ? AnalysisWindowDays.safeParse(
+          analysisWindowDays === undefined
+            ? WORKER_ANALYSIS_WINDOW_DEFAULTS[workerId]
+            : analysisWindowDays
+        )
+      : undefined;
+  if (parsedAnalysisWindow && !parsedAnalysisWindow.success) {
+    throw new Error(`AlertZero worker "${workerId}" settings contain an invalid analysis window`);
+  }
+
   return {
     settingsVersion: currentVersion,
     autonomyLevel: parsedAutonomyLevel.data,
-    scheduleInterval: scheduleInterval ?? scheduleDefault,
+    ...(scheduleDefault === undefined
+      ? {}
+      : {
+          scheduleInterval:
+            typeof scheduleInterval === 'string' ? scheduleInterval : scheduleDefault,
+        }),
+    ...(parsedAnalysisWindow === undefined
+      ? {}
+      : { analysisWindowDays: parsedAnalysisWindow.data }),
   };
 };
 
 export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
-  createDefaultValues: (): WorkerTemplateValues => {
-    const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-    return {
-      settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
-      autonomyLevel: 'manual',
-      ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
-    };
-  },
+  createDefaultValues: (): WorkerTemplateValues => parseWorkerValues(workerId, {}),
   migrate: (raw: Record<string, unknown>) => {
     const values = parseWorkerValues(workerId, raw);
     return {
@@ -103,28 +148,47 @@ export const createWorkerSettingsRegistration = (
         Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
     };
   },
-  applyPatch: (raw, patch) => {
+  applyPatch: (raw, patch: WorkerSettingsWrite) => {
     const values = parseWorkerValues(workerId, raw);
-    if (patch.scheduleInterval != null && WORKER_SCHEDULE_DEFAULTS[workerId] === undefined) {
-      return { rejected: 'a schedule interval' };
+    const rejected = rejectUnsupportedWorkerSettingsWrite(workerId, patch);
+    if (rejected) {
+      return { rejected };
     }
+    // The route schema constrains autonomy to the global enum, but each Worker's allowed set is
+    // a subset of it (schema-derived). Validate the patch against the Worker's own allowed
+    // levels so a narrowed schema rejects at the service layer too, not only in the UI.
+    if (
+      patch.autonomy !== undefined &&
+      !getAllowedAutonomyLevels(workerId).includes(patch.autonomy)
+    ) {
+      return { rejected: 'an autonomy level' };
+    }
+    // extras replaces the whole stored object (worker-settings-page-decisions-3,
+    // item 12): a partial extras patch is not merged field-by-field.
+    const nextExtras =
+      patch.extras == null ? {} : Object.keys(patch.extras).length === 0 ? {} : { ...patch.extras };
+    const nextAnalysisWindow =
+      nextExtras.analysisWindowDays === undefined
+        ? readAnalysisWindowDays(values)
+        : nextExtras.analysisWindowDays;
     return {
       values: {
         ...values,
-        autonomyLevel: patch.autonomyLevel ?? values.autonomyLevel,
+        autonomyLevel: patch.autonomy ?? values.autonomyLevel,
         ...(patch.scheduleInterval == null ? {} : { scheduleInterval: patch.scheduleInterval }),
+        ...(nextAnalysisWindow === undefined ? {} : { analysisWindowDays: nextAnalysisWindow }),
       },
     };
   },
   toSettings: (raw): WorkerSettings => {
     const values = parseWorkerValues(workerId, raw);
     const scheduleInterval = readScheduleInterval(values);
-    return {
+    const analysisWindowDays = readAnalysisWindowDays(values);
+    return parseCompleteWorkerSettings({
       workerId,
       autonomy: values.autonomyLevel,
-      // Spread rather than assign undefined: the registry test asserts the projection's keys
-      // survive WorkerSettings.parse unchanged.
       ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
-    };
+      ...(analysisWindowDays === undefined ? {} : { extras: { analysisWindowDays } }),
+    });
   },
 });

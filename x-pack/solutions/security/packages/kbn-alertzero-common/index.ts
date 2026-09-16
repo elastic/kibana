@@ -14,6 +14,9 @@
  */
 
 export {
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
   API_VERSIONS,
   CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
@@ -60,10 +63,12 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
+  WORKER_CUSTOM_SETTING_FIELDS,
   buildInvestigationUrl,
   buildSkillUrl,
   buildWatchUrl,
   buildWorkerUrl,
+  getWorkerCustomSettingFields,
 } from './constants';
 
 export type {
@@ -115,10 +120,15 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  AnalysisWindowDays,
+  RuleTuningWorkerSettings,
+  ScheduledWorkerSettings,
+  SharedOnlyWorkerSettings,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsWrite,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
@@ -149,9 +159,19 @@ export {
   getMockProposalById,
   getMockProposalsByInvestigationId,
 } from './impl/samples';
+export {
+  getAllowedAutonomyLevels,
+  getCompleteWorkerSettingsSchema,
+  getWorkerExtrasFields,
+  parseCompleteWorkerSettings,
+  rejectUnsupportedWorkerSettingsWrite,
+  touchesWorkerSettings,
+  workerOwnsSchedule,
+} from './impl/worker_settings_contract';
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
+  WorkerCustomSettingField,
   WorkerScheduleUnit,
 } from './constants';
 export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';

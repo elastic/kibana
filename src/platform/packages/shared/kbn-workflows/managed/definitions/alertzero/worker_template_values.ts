@@ -12,6 +12,8 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Worker-specific settings bag. Present only when that Worker owns unique settings. */
+  extras?: Record<string, unknown>;
 }
 
 export const renderCommonWorkerYaml = (
@@ -37,4 +39,21 @@ export const renderScheduledWorkerYaml = (
   renderCommonWorkerYaml(yaml, values).replaceAll(
     '__WORKER_SCHEDULE_INTERVAL__',
     values.scheduleInterval
+  );
+
+/**
+ * Rule Tuning stores the analysis window beside the shared scheduled values so a
+ * settings save re-renders YAML and the per-space Worker can pass it to the sweep.
+ */
+export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  analysisWindowDays: number;
+}
+
+export const renderRuleTuningWorkerYaml = (
+  yaml: string,
+  values: RuleTuningWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_ANALYSIS_WINDOW_DAYS__',
+    String(values.analysisWindowDays)
   );

@@ -72,6 +72,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '2h',
+    analysisWindowDays: 14,
   },
   [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -158,7 +159,7 @@ it.each([
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
     '2:de85a75a',
   ],
-  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '4:b1cbd09c'],
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '5:06631fbb'],
   [
     ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
     DETECTION_RULE_CREATION_YAML,
