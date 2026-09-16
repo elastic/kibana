@@ -113,9 +113,7 @@ export const searchRuleTemplatesSo = async (
   const nameSort = {
     [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.${sortField ?? 'name'}`]: { order: sortOrder ?? 'asc' },
   };
-  const sort: Sort = searchQuery
-    ? [{ _score: { order: 'desc' } }, nameSort]
-    : [nameSort];
+  const sort: Sort = searchQuery ? [{ _score: { order: 'desc' } }, nameSort] : [nameSort];
 
   const result = await savedObjectsClient.search({
     type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
