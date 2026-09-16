@@ -22,7 +22,7 @@ export interface ServiceDataStreamVars {
    * Var values keyed by input type, then var name.
    * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
    */
-  varsByInput: Record<string, Record<string, string>>;
+  varsByInput: Record<string, Record<string, string | string[]>>;
 }
 
 export interface ServiceVars {
@@ -112,7 +112,9 @@ function mergeVarsByDataStream(
   const result: Record<string, ServiceDataStreamVars> = { ...base };
   for (const [dsId, dsVars] of Object.entries(incoming)) {
     const existing = result[dsId] ?? { enabledInputs: [], varsByInput: {} };
-    const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
+    const mergedByInput: Record<string, Record<string, string | string[]>> = {
+      ...existing.varsByInput,
+    };
     for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
       mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
     }

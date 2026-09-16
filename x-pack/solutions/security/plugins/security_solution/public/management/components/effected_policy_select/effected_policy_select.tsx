@@ -225,7 +225,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 options={toggleGlobal}
                 idSelected={selectedAssignmentType}
                 onChange={handleGlobalButtonChange}
-                color="primary"
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
                 isDisabled={disabled}
               />
