@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ANALYSIS_WINDOW_DAYS_MAX, ANALYSIS_WINDOW_DAYS_MIN } from '@kbn/alertzero-common';
-import * as i18n from './detection_translations';
+import * as i18n from './translations';
 
 interface AnalysisWindowDaysFieldProps {
   current: number;
