@@ -176,11 +176,12 @@ describe('createTrajectoryEvaluators', () => {
     }
   });
 
-  it('labels every series potentially_incomplete when the span set never settled', async () => {
-    const { client } = esWith((_q, call) => rows(Array(call).fill(CREATE)));
+  it('scores null, not a number, when the span set never settled', async () => {
+    const { client } = esWith((_q, call) => rows(Array(call).fill(SKILL)));
     for (const r of await evaluateAll(client, result(), 2)) {
+      expect(r.score).toBeNull();
       expect(r.label).toBe('potentially_incomplete');
-      expect((r.metadata as Record<string, unknown>).incomplete).toBe(true);
+      expect(r.metadata).toMatchObject({ incomplete: true, agentTraceId: AGENT_TRACE });
     }
   });
 });

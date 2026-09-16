@@ -196,7 +196,7 @@ export const assertToolSpansReachable = async ({
   for (const clause of clauses) {
     try {
       const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${TOOL_KIND}\n| STATS tool_spans = COUNT(*)`,
+        query: `FROM traces-*\n| WHERE ${clause.where} AND ${TOOL_KIND} AND attributes.gen_ai.tool.call.id IS NOT NULL\n| STATS tool_spans = COUNT(*)`,
       })) as unknown as EsqlResponse;
       if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
         log.info(`Tool spans reachable via ${clause.name}`);

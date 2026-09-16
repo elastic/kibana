@@ -158,16 +158,27 @@ const trajectoryEvaluator = (
         metadata: undefined,
       };
     }
+    if (!trajectory.settled) {
+      return {
+        score: null,
+        label: 'potentially_incomplete',
+        explanation: `Span set never settled (joined on ${trajectory.joinedOn})`,
+        metadata: {
+          incomplete: true,
+          toolNames: trajectory.toolNames,
+          agentTraceId: trajectory.agentTraceId,
+        },
+      };
+    }
     const { score, explanation, metadata } = scoreFn(trajectory);
     return {
       score,
-      label: trajectory.settled ? undefined : 'potentially_incomplete',
+      label: undefined,
       explanation: `${explanation} (joined on ${trajectory.joinedOn})`,
       metadata: {
         ...metadata,
         toolNames: trajectory.toolNames,
         agentTraceId: trajectory.agentTraceId,
-        ...(trajectory.settled ? {} : { incomplete: true }),
       },
     };
   },
