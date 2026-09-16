@@ -49,3 +49,7 @@ export const RULE_TAGS_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Rule tags',
   }
 );
+
+export const SOURCE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sourceFieldLabel', {
+  defaultMessage: 'Source',
+});

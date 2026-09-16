@@ -39,6 +39,9 @@ const knownFieldsOverrides: Record<string, KnownFieldOverrides> = {
   severity: {
     customLabel: i18n.SEVERITY_FIELD_LABEL,
   },
+  source: {
+    customLabel: i18n.SOURCE_FIELD_LABEL,
+  },
 };
 
 const computedFields: Record<string, RuntimeField> = {
