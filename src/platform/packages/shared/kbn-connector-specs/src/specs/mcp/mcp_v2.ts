@@ -64,6 +64,7 @@ export const McpV2Connector: ConnectorSpec = {
   actions: {
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the configured MCP server. Use this to discover available capabilities before calling a tool.',
       input: ListToolsInputSchema,
@@ -76,6 +77,7 @@ export const McpV2Connector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call a tool on the configured MCP server by name. Use listTools first to discover tool names and their argument schemas.',
       input: CallToolInputSchema,

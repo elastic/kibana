@@ -768,7 +768,7 @@ describe('generateExecutorFunction', () => {
         return {};
       });
       const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
