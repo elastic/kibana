@@ -8,5 +8,7 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning/src'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning/src',
+  ],
 };

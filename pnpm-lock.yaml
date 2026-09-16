@@ -5244,6 +5244,9 @@ importers:
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
+      '@kbn/evals-suite-detection-watch-rule-tuning':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning
       '@kbn/evals-suite-endpoint':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
@@ -5268,9 +5271,6 @@ importers:
       '@kbn/evals-suite-pci-compliance':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance
-      '@kbn/evals-suite-rule-tuning':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning
       '@kbn/evals-suite-security-ai-rules':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
@@ -9437,6 +9437,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-tuning: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics: {}
@@ -9444,8 +9446,6 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-lead-generation: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance: {}
-
-  x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules: {}
 
