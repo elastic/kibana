@@ -80,9 +80,9 @@ describe('describeAiIndex', () => {
     });
     expect(response).toBe(
       [
-        'AI index: support',
+        'AI-index registry ID: support',
         'Support KIs',
-        'Query with ES|QL against: ai-index-idx-support*',
+        'Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-support*',
         '',
         'Fields',
         'content.semantic: semantic_text, searchable',
@@ -111,8 +111,8 @@ describe('describeAiIndex', () => {
     const response = await describeAiIndex({ ...params, aiIndex: withoutDescription });
 
     expect(response.split('\n').slice(0, 2)).toEqual([
-      'AI index: support',
-      'Query with ES|QL against: ai-index-idx-support*',
+      'AI-index registry ID: support',
+      'Backing Elasticsearch target (use only in ES|QL queries): ai-index-idx-support*',
     ]);
   });
 
