@@ -267,6 +267,18 @@ export const updateTabs: InternalStateThunkActionCreator<
             query: currentQuery,
           }),
         };
+
+        // Empty ES|QL has no dataViewId in app state. Keep the previous tab's
+        // data view so init does not fall back to the default and refetch fields.
+        if (isOfAggregateQueryType(currentQuery)) {
+          tab.initialInternalState = {
+            ...tab.initialInternalState,
+            serializedSearchSource: {
+              ...tab.initialInternalState?.serializedSearchSource,
+              index: currentDataView.isPersisted() ? currentDataView.id : currentDataView.toSpec(),
+            },
+          };
+        }
       }
 
       return tab;
