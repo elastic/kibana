@@ -31,4 +31,5 @@ steps:
     with:
       workflow-id: system-security-rule-tuning-worker
       inputs:
+        autonomy_level: "{{ consts.worker_settings.autonomy }}"
         analysis_window_days: __WORKER_ANALYSIS_WINDOW_DAYS__
