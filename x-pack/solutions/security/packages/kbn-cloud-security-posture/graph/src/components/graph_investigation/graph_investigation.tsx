@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SearchBar, FilterItems } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -145,8 +145,10 @@ const DefaultFilterItems = ({ filters, dataView }: { filters: Filter[]; dataView
     {filters.map((filter) => (
       <EuiFlexItem grow={false} key={`${filter.meta.key}-${filter.meta.type}`}>
         <EuiBadge color="hollow" title="" data-test-subj="graphDefaultFilter">
-          {filter.meta.key}:{' '}
-          <EuiTextColor color="success">{getDisplayValueFromFilter(filter, [dataView])}</EuiTextColor>
+          {`${filter.meta.key}: `}
+          <EuiTextColor color="success">
+            {getDisplayValueFromFilter(filter, [dataView])}
+          </EuiTextColor>
         </EuiBadge>
       </EuiFlexItem>
     ))}

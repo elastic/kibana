@@ -68,6 +68,22 @@ describe('getEntityTimelineFilter', () => {
     expect(serialized).not.toContain('entity.id');
   });
 
+  it('uses the available identity building block when an entity node lacks namespace source fields', () => {
+    const id = 'user:multi-actor-2@example.com@gcp';
+    const serialized = JSON.stringify(
+      getFilterDsl(createNode(id, { 'user.id': 'multi-actor-2@example.com' }))
+    );
+
+    expect(serialized).toContain(
+      JSON.stringify({ match_phrase: { 'user.id': 'multi-actor-2@example.com' } })
+    );
+    expect(serialized).toContain(
+      JSON.stringify({ match_phrase: { 'user.target.id': 'multi-actor-2@example.com' } })
+    );
+    expect(serialized).not.toContain(JSON.stringify({ exists: { field: 'user.email' } }));
+    expect(serialized).not.toContain(JSON.stringify({ exists: { field: 'user.target.email' } }));
+  });
+
   it('returns no filter when the node has no identity source fields', () => {
     expect(getEntityTimelineFilter(createNode('host:missing'), 'data-view', euid)).toBeUndefined();
   });

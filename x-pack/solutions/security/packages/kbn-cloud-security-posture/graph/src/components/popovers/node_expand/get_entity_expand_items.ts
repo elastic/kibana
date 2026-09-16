@@ -198,7 +198,10 @@ export const getEntityFilterSpec = (
 ): EntityFilterSpec | undefined => {
   if (!sourceFields || Object.keys(sourceFields).length === 0) return undefined;
 
-  const dsl = buildEntityDsl(nodeId, sourceFields, euidApi, role);
+  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+  const dsl = hasNamespaceSourceField(entityType, sourceFields, euidApi)
+    ? buildEntityDsl(nodeId, sourceFields, euidApi, role)
+    : undefined;
   // A DSL we cannot translate without dropping clauses is worse than none: the filter would be
   // wider than the entity. Condition-based namespaces (a `local` user, asset discovery) produce
   // `match` / `terms` clauses with no filter-bar equivalent, so fall through to the identity
@@ -206,7 +209,6 @@ export const getEntityFilterSpec = (
   if (dsl && isEuidDslTranslatable(dsl)) {
     // Ask the entity store which source fields are prefix-matched for this entity type so we
     // replace exactly those prefix clauses with observed exact values — no more, no less.
-    const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
     const prefixFields = euidApi
       ? new Set(euidApi.getEuidNamespaceSourceFields(entityType).prefixMatchFields)
       : new Set<string>();
@@ -224,7 +226,6 @@ export const getEntityFilterSpec = (
   // Use the entity store's own identifier resolution to get only the fields that compose the EUID
   // for this document. Collected attributes (e.g. `user.id` on a `local` user that resolved via
   // `user.name`) are excluded — including them in an AND filter would drop events that lack them.
-  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
   const doc = { ...sourceFields, 'entity.id': nodeId };
   let rawIdentifiers: Record<string, string> | undefined;
   try {
@@ -248,6 +249,36 @@ export const getEntityFilterSpec = (
   return Object.keys(candidateFields).length > 0
     ? { kind: 'candidateFields', fields: candidateFields }
     : undefined;
+};
+
+/**
+ * A user EUID's namespace is evaluated from event fields. Entity-store relationship records can
+ * supply only retained identity fields (for example `user.id`) and omit those event fields. In
+ * that case, the document DSL would treat the namespace as `unknown` and add ranking guards that
+ * exclude otherwise matching events. Let the Entity Store's identifier helper provide the safe,
+ * available identity building blocks instead.
+ */
+const hasNamespaceSourceField = (
+  entityType: EntityType,
+  sourceFields: Record<string, string | string[]>,
+  euidApi: EuidFilterApi | undefined
+): boolean => {
+  if (!euidApi) return true;
+
+  let namespaceSourceFields: string[];
+  try {
+    const { exactMatchFields, prefixMatchFields } =
+      euidApi.getEuidNamespaceSourceFields(entityType);
+    namespaceSourceFields = [...exactMatchFields, ...prefixMatchFields];
+  } catch {
+    // Let buildEntityDsl handle an unregistered type and fall back to its identity fields.
+    return true;
+  }
+
+  return (
+    namespaceSourceFields.length === 0 ||
+    namespaceSourceFields.some((field) => sourceFields[field] != null)
+  );
 };
 
 const buildEntityDsl = (

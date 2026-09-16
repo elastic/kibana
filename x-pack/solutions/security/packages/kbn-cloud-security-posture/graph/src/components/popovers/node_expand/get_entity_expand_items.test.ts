@@ -396,6 +396,20 @@ describe('getEntityFilterSpec', () => {
     expect(JSON.stringify(dsl.bool.must)).toContain('must_not');
   });
 
+  it('uses the resolved identity when a user node has no namespace source fields', () => {
+    const spec = getEntityFilterSpec(
+      'user:multi-actor-2@example.com@gcp',
+      { 'user.id': 'multi-actor-2@example.com' },
+      euidApi,
+      'actor'
+    );
+
+    expect(spec).toEqual({
+      kind: 'resolvedIdentity',
+      fields: { 'user.id': 'multi-actor-2@example.com' },
+    });
+  });
+
   it('rewrites identity fields to the target namespace for the target role', () => {
     const spec = getEntityFilterSpec(
       'user:multi-actor-1@example.com@gcp',
