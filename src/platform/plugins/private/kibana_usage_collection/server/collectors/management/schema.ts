@@ -576,6 +576,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
+  },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
