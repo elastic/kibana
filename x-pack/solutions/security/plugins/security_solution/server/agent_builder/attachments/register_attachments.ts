@@ -43,8 +43,10 @@ export const registerAttachments = async (
   if (experimentalFeatures.riskScoreHistoryEnabled) {
     agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());
   }
-  agentBuilder.attachments.registerType(createInvestigationTimelineAttachmentType());
-  agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    agentBuilder.attachments.registerType(createInvestigationTimelineAttachmentType());
+    agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
+  }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());

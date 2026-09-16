@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -77,8 +77,8 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
         'Reconstructs the host attack timeline and recommends containment from installed actions.',
     }
   ),
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.darkContinuousThreatHunt.description',
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.huntContinuousThreatHunt.description',
     {
       defaultMessage: 'Hunts continuously for threats and coverage gaps nobody has reported yet.',
     }
@@ -113,8 +113,8 @@ export const WORKER_NAMES: Record<string, string> = {
     'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.name',
     { defaultMessage: 'Endpoint Forensic Analysis' }
   ),
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.darkContinuousThreatHunt.name',
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.huntContinuousThreatHunt.name',
     { defaultMessage: 'Continuous Threat Hunt' }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(

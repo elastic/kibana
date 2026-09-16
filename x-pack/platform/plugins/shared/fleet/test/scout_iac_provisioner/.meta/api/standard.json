@@ -1,5 +1,5 @@
 {
-  "sha1": "30056b574c534471e802b84e7c121fc9b33375b9",
+  "sha1": "60d95629aa0fc2bfb4de1bc3b5630c5899ae5076",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 35,
-        "column": 31
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -42,8 +42,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 53,
-        "column": 28
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "c44a76f06065e66-7bd4dffb0c9ec1b",
+      "title": "Fleet IaC Provisioner render route returns 400 when workflow is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
+        "line": 60,
+        "column": 13
       }
     },
     {
@@ -56,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 68,
-        "column": 26
+        "line": 69,
+        "column": 10
       }
     },
     {
@@ -70,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 78,
-        "column": 47
+        "line": 80,
+        "column": 51
       }
     },
     {
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_iac_provisioner/api/tests/render_template.spec.ts",
-        "line": 99,
-        "column": 20
+        "line": 101,
+        "column": 23
       }
     }
   ]

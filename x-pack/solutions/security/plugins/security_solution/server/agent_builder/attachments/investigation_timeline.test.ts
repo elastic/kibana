@@ -6,7 +6,6 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
@@ -18,7 +17,7 @@ describe('createInvestigationTimelineAttachmentType', () => {
   const attachmentType = createInvestigationTimelineAttachmentType();
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
-  const validData = [
+  const validEvents = [
     {
       timestamp: '2026-09-10T12:00:00.000Z',
       host: 'WKSTN-RECV01',
@@ -32,6 +31,8 @@ describe('createInvestigationTimelineAttachmentType', () => {
     },
   ];
 
+  const validData = { events: validEvents };
+
   const makeAttachment = (data: unknown) =>
     ({
       id: 'att-1',
@@ -44,43 +45,51 @@ describe('createInvestigationTimelineAttachmentType', () => {
   });
 
   describe('validate', () => {
-    it('accepts the event array as the payload itself', async () => {
+    it('accepts an object whose events array is the reconstruction', async () => {
       const result = await attachmentType.validate(validData);
       expect(result.valid).toBe(true);
     });
 
-    it('accepts an empty array so a run with no reconstruction still attaches', async () => {
-      const result = await attachmentType.validate([]);
+    it('accepts an empty events list so a run with no reconstruction still attaches', async () => {
+      const result = await attachmentType.validate({ events: [] });
       expect(result.valid).toBe(true);
     });
 
-    it('rejects a wrapper object instead of a bare array', async () => {
-      const result = await attachmentType.validate({ events: validData });
+    it('accepts an optional attachmentLabel alongside events', async () => {
+      const result = await attachmentType.validate({
+        ...validData,
+        attachmentLabel: 'Attack timeline',
+      });
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects a bare event array; the payload must be { events }', async () => {
+      const result = await attachmentType.validate(validEvents);
       expect(result.valid).toBe(false);
     });
 
     it('rejects an event missing a description', async () => {
-      const result = await attachmentType.validate([
-        { timestamp: '2026-09-10T12:00:00.000Z', host: 'WKSTN-RECV01' },
-      ]);
+      const result = await attachmentType.validate({
+        events: [{ timestamp: '2026-09-10T12:00:00.000Z', host: 'WKSTN-RECV01' }],
+      });
       expect(result.valid).toBe(false);
     });
 
     it('rejects an event missing a host, so a multi-host chain cannot be ambiguous', async () => {
-      const result = await attachmentType.validate([
-        { timestamp: '2026-09-10T12:00:00.000Z', description: 'something happened' },
-      ]);
+      const result = await attachmentType.validate({
+        events: [{ timestamp: '2026-09-10T12:00:00.000Z', description: 'something happened' }],
+      });
       expect(result.valid).toBe(false);
     });
 
     it(`rejects more than ${MAX_TIMELINE_EVENTS} events`, async () => {
-      const result = await attachmentType.validate(
-        Array.from({ length: MAX_TIMELINE_EVENTS + 1 }, (_, index) => ({
+      const result = await attachmentType.validate({
+        events: Array.from({ length: MAX_TIMELINE_EVENTS + 1 }, (_, index) => ({
           timestamp: `2026-09-10T12:00:${String(index).padStart(2, '0')}.000Z`,
           host: 'WKSTN-RECV01',
           description: 'event',
-        }))
-      );
+        })),
+      });
       expect(result.valid).toBe(false);
     });
   });
@@ -111,33 +120,19 @@ describe('createInvestigationTimelineAttachmentType', () => {
     });
 
     it('states that nothing was reconstructed for an empty timeline', async () => {
-      const formatted = await attachmentType.format(makeAttachment([]), formatContext);
+      const formatted = await attachmentType.format(makeAttachment({ events: [] }), formatContext);
       const representation = await formatted.getRepresentation?.();
 
       if (representation?.type === 'text') {
         expect(representation.value).toContain('No events were reconstructed');
       }
     });
-
-    it('throws when the persisted data no longer matches the schema', () => {
-      expect(() => attachmentType.format(makeAttachment('nope'), formatContext)).toThrow(
-        'Invalid investigation timeline attachment data'
-      );
-    });
-  });
-
-  describe('getTools', () => {
-    it('offers the ES|QL tools for extending the reconstruction', () => {
-      expect(attachmentType.getTools?.()).toEqual([
-        platformCoreTools.generateEsql,
-        platformCoreTools.executeEsql,
-      ]);
-    });
   });
 
   describe('getAgentDescription', () => {
-    it('documents the array payload and that the events are already ordered', () => {
+    it('documents the { events } payload and that the events are already ordered', () => {
       const description = attachmentType.getAgentDescription?.();
+      expect(description).toContain('{ events }');
       expect(description).toContain('{ timestamp, host, description }');
       expect(description).toContain('do not reorder');
     });

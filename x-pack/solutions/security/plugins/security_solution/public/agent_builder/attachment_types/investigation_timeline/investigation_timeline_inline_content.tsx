@@ -12,21 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import type { InvestigationTimelineEvent } from './types';
 
 export const INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID =
   'securitySolutionAgentBuilderInvestigationTimelineAttachment';
-
-export interface InvestigationTimelineEvent {
-  timestamp: string;
-  host: string;
-  description: string;
-}
-
-export type InvestigationTimelineAttachment = Attachment<
-  typeof SecurityAgentBuilderAttachments.investigationTimeline,
-  InvestigationTimelineEvent[]
->;
 
 interface TimelineRow extends InvestigationTimelineEvent {
   id: string;
@@ -60,8 +49,11 @@ const isTimelineEvent = (value: unknown): value is InvestigationTimelineEvent =>
   );
 };
 
-export const parseTimelineEvents = (data: unknown): InvestigationTimelineEvent[] =>
-  Array.isArray(data) ? data.filter(isTimelineEvent) : [];
+export const parseTimelineEvents = (data: unknown): InvestigationTimelineEvent[] => {
+  if (typeof data !== 'object' || data === null) return [];
+  const { events } = data as { events?: unknown };
+  return Array.isArray(events) ? events.filter(isTimelineEvent) : [];
+};
 
 const wrappingCellCss = css`
   overflow-wrap: anywhere;

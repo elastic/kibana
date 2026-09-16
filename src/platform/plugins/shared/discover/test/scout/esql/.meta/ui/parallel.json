@@ -1,5 +1,5 @@
 {
-  "sha1": "f83b158a9fc278c50e47a36b4ac2c9321143d1ca",
+  "sha1": "ca4f3a88b856d2846a3c4a856757b4da5d31ea4d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -234,6 +234,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_formatting.spec.ts",
         "line": 42,
         "column": 48
+      }
+    },
+    {
+      "id": "d5d6fefb1a43799-3ee7ecfb7a5fe79",
+      "title": "Discover ES|QL starred queries stars a query, persists it across reload, and runs it from Starred",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_starred.spec.ts",
+        "line": 34,
+        "column": 93
       }
     },
     {

@@ -39,12 +39,16 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationSearchOptions,
+  SerializedMetadataValue,
+  MetadataFieldValue,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
-import type { ConversationSearchOptions } from '../../../../common/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildPinnedFilter,
@@ -74,6 +78,7 @@ import {
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
+import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
@@ -84,6 +89,7 @@ import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
+import { buildSearchSort, compileConversationFilter } from '../search';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -143,6 +149,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -185,6 +192,14 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'template_id',
   'template_version',
   'metadata',
+  'attachments.id',
+  'attachments.type',
+  'attachments.active',
+];
+
+const CONVERSATION_BULK_GET_SOURCE_FIELDS = [
+  ...CONVERSATION_LIST_SOURCE_FIELDS,
+  'parent_conversation',
 ];
 
 /**
@@ -295,15 +310,56 @@ class ConversationClientImpl implements ConversationClient {
     return this.mapListResponse(response);
   }
 
+  async bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>> {
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const idsFilter = buildConversationIdsFilter(ids);
+
+    const agentIds = await this.resolveAccessibleAgentIds();
+    if (agentIds.length === 0) {
+      return new Map();
+    }
+
+    const response = await this.storage.getClient().search({
+      size: ids.length,
+      track_total_hits: false,
+      seq_no_primary_term: true,
+      _source: CONVERSATION_BULK_GET_SOURCE_FIELDS,
+      query: {
+        bool: {
+          filter: [
+            ...this.buildBaseFilters(agentIds, { includeSubAgentConversations: true }),
+            idsFilter,
+          ],
+        },
+      },
+    });
+
+    const { results } = this.mapListResponse(response);
+
+    return new Map(results.map((conversation) => [conversation.id, conversation]));
+  }
+
   async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
-    const { query, agentId, page = 1, perPage = MAX_CONVERSATION_SEARCH_PER_PAGE } = options;
+    const {
+      query,
+      filter,
+      sort,
+      agentId,
+      page = 1,
+      perPage = MAX_CONVERSATION_SEARCH_PER_PAGE,
+    } = options;
+
+    const compiledFilter = compileConversationFilter(filter);
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
     if (agentIds.length === 0) {
       return { results: [], total: 0 };
     }
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = query?.trim();
     const titleMatch = trimmedQuery
       ? [
           {
@@ -341,17 +397,12 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: MAX_RESULT_WINDOW,
       from: (page - 1) * perPage,
       size: perPage,
-      // Relevance first; updated_at/created_at break the frequent _score ties so paging is stable.
-      sort: [
-        { _score: { order: 'desc' } },
-        { updated_at: { order: 'desc' } },
-        { created_at: { order: 'desc' } },
-      ],
+      sort: buildSearchSort({ sort, hasQuery: titleMatch.length > 0 }),
       seq_no_primary_term: true,
       _source: CONVERSATION_LIST_SOURCE_FIELDS,
       query: {
         bool: {
-          filter: this.buildBaseFilters(agentIds),
+          filter: [...this.buildBaseFilters(agentIds), ...(compiledFilter ? [compiledFilter] : [])],
           must: titleMatch,
         },
       },
@@ -376,15 +427,19 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /**
-   * Filter clauses shared by every conversation list/search query: space scoping, read access,
-   * and hiding sub-agent conversations from the nav list - hardcoded until we need to do better.
+   * Filter clauses shared by every conversation list/search query: space scoping and read access.
    * Query-specific filters (e.g. `pinned`, a title match) are appended by the caller.
    */
-  private buildBaseFilters(agentIds: string[]): QueryDslQueryContainer[] {
+  private buildBaseFilters(
+    agentIds: string[],
+    { includeSubAgentConversations = false }: { includeSubAgentConversations?: boolean } = {}
+  ): QueryDslQueryContainer[] {
     return [
       createSpaceDslFilter(this.space),
       buildReadAccessFilter({ user: this.user, agentIds }),
-      { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+      ...(includeSubAgentConversations
+        ? []
+        : [{ bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } }]),
     ];
   }
 

@@ -21,37 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import type { InvestigationIoc, InvestigationIocCategory } from './types';
+import { INVESTIGATION_IOC_CATEGORIES } from './types';
 
 export const INVESTIGATION_IOCS_ATTACHMENT_TEST_ID =
   'securitySolutionAgentBuilderInvestigationIocsAttachment';
-
-export interface InvestigationIoc {
-  value: string;
-  comment?: string;
-}
-
-export const INVESTIGATION_IOC_CATEGORIES = [
-  'shas',
-  'ips',
-  'file_paths',
-  'malicious_commands',
-  'ransom_note',
-  'encryption_marker',
-  'compromised_identities',
-  'affected_hosts',
-] as const;
-
-export type InvestigationIocCategory = (typeof INVESTIGATION_IOC_CATEGORIES)[number];
-
-export type InvestigationIocsAttachmentData = {
-  attachmentLabel?: string;
-} & Partial<Record<InvestigationIocCategory, InvestigationIoc[]>>;
-
-export type InvestigationIocsAttachment = Attachment<
-  typeof SecurityAgentBuilderAttachments.investigationIocs,
-  InvestigationIocsAttachmentData
->;
 
 interface IocCategoryRow {
   id: InvestigationIocCategory;

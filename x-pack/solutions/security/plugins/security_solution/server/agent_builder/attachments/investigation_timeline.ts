@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 /**
  * Caps the number of events a single timeline attachment can carry. Forensic reconstructions
@@ -29,17 +29,17 @@ const investigationTimelineEventSchema = z.object({
   description: z.string().min(1).max(2000),
 });
 
-/** The payload is the ordered event list itself, earliest first — there is no wrapper object. */
-export const investigationTimelineAttachmentDataSchema = z
-  .array(investigationTimelineEventSchema)
-  .max(MAX_TIMELINE_EVENTS);
+export const investigationTimelineAttachmentDataSchema = securityAttachmentDataSchema.extend({
+  events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
+});
 
 export type InvestigationTimelineAttachmentData = z.infer<
   typeof investigationTimelineAttachmentDataSchema
 >;
 
-const formatTimelineForAgent = (events: InvestigationTimelineAttachmentData): string => {
+const formatTimelineForAgent = (data: InvestigationTimelineAttachmentData): string => {
   const header = 'Forensic attack timeline';
+  const { events } = data;
 
   if (events.length === 0) {
     return `${header}\nNo events were reconstructed from the available telemetry.`;
@@ -67,26 +67,21 @@ export const createInvestigationTimelineAttachmentType = (): AttachmentTypeDefin
       return { valid: false, error: parseResult.error.message };
     },
     format: (attachment) => {
-      const parseResult = investigationTimelineAttachmentDataSchema.safeParse(attachment.data);
-      if (!parseResult.success) {
-        throw new Error(
-          `Invalid investigation timeline attachment data for attachment ${attachment.id}`
-        );
-      }
-      const data = parseResult.data;
       return {
-        getRepresentation: () => ({ type: 'text', value: formatTimelineForAgent(data) }),
+        getRepresentation: () => ({
+          type: 'text',
+          value: formatTimelineForAgent(attachment.data as InvestigationTimelineAttachmentData),
+        }),
       };
     },
-    getTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
     getAgentDescription: () => {
       return `A ${SecurityAgentBuilderAttachments.investigationTimeline} attachment holds the chronological attack reconstruction for an investigation.
 
-The payload is the event list itself, ordered earliest first: an array of { timestamp, host, description }.
+The payload is an object \`{ events }\`. \`events\` is the ordered event list, earliest first: an array of { timestamp, host, description }.
 
 Every event names the host it occurred on, so a chain that moves between hosts can be read directly. \`description\` already carries the specifics (processes, PIDs, users, paths, command lines, addresses) — quote it rather than re-summarizing it into a classification.
 
-The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them. To extend the reconstruction beyond what is attached, run a new scoped ES|QL query rather than inferring additional events.`;
+The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them.`;
     },
   };
 };

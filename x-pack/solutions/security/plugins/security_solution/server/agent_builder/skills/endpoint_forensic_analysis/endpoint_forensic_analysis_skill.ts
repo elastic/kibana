@@ -139,10 +139,11 @@ destination over which protocol.
 
 Where the timeline goes depends on how you were asked to answer:
 - Answering an analyst directly: render it as the timestamp-labeled sequence described above.
-- Answering with a structured output schema that has a timeline field: that field is the ordered event array
-  itself, earliest first, with each event as \`{ timestamp, host, description }\`. \`description\` carries the same
-  detail you would have written for an analyst — do not shorten it to a label because it is going into a
-  structured field. Do not also render the timeline in a free-text field.
+- Answering with a structured output schema that has a timeline field: that field is
+  \`{ events }\`, where \`events\` is the ordered event array, earliest first, with each event as
+  \`{ timestamp, host, description }\`. \`description\` carries the same detail you would have written
+  for an analyst — do not shorten it to a label because it is going into a structured field.
+  Do not also render the timeline in a free-text field.
 
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and
@@ -171,14 +172,22 @@ svc.exe on SRV-DC01"). A C2 address's says which hosts contacted it and over wha
 was compromised and what it was then used for. An affected host's says its role — patient zero, encrypted domain
 controller, spread with no alert coverage.
 
-Omit a category entirely when the reconstruction found nothing in it. Never emit a category whose values you cannot
-tie to evidence.
+Never emit a category whose values you cannot tie to evidence.
 
 Where the indicators go depends on how you were asked to answer:
-- Answering an analyst directly: render one labelled group per category, one line per indicator, as
-  \`value — comment\`. Never present IoCs as a prose paragraph.
-- Answering with a structured output schema that has an indicators field: return the categories in that field and do
-  not also render them in a free-text field.
+- Answering an analyst directly: render a markdown table — never a prose paragraph — so downstream hunts and
+  response actions can cite specific values. One row per indicator (repeat the type), with columns:
+
+| Indicator type | Value | First seen | Source event |
+|---|---|---|---|
+
+  Echo each \`value\` verbatim. Source event is the indicator's \`comment\`, enriched from the reconstruction.
+  First seen is the earliest timestamp you have for that indicator; use "—" when you do not have one.
+  Surface every category listed above; if a category has no hits, show one row with Value "—".
+- Answering with a structured output schema that has an indicators field: that field is the categories
+  themselves, each a list of \`{ value, comment }\`. \`comment\` carries the same detail you would have written
+  for an analyst — do not shorten it to a label because it is going into a structured field. Omit a category
+  entirely when the reconstruction found nothing in it. Do not also render the indicators in a free-text field.
 
 ### 6. Lateral movement
 

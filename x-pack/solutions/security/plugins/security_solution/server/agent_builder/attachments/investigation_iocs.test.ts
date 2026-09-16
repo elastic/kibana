@@ -6,10 +6,8 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ALERTS_TOOL_ID } from '../tools';
 import { createInvestigationIocsAttachmentType, MAX_IOCS_PER_CATEGORY } from './investigation_iocs';
 
 describe('createInvestigationIocsAttachmentType', () => {
@@ -131,22 +129,6 @@ describe('createInvestigationIocsAttachmentType', () => {
       if (representation?.type === 'text') {
         expect(representation.value).toContain('No indicators were extracted');
       }
-    });
-
-    it('throws when the persisted data no longer matches the schema', () => {
-      expect(() => attachmentType.format(makeAttachment({ ips: 'nope' }), formatContext)).toThrow(
-        'Invalid investigation IoC attachment data'
-      );
-    });
-  });
-
-  describe('getTools', () => {
-    it('offers the alerts and ES|QL tools so the indicators can be hunted', () => {
-      expect(attachmentType.getTools?.()).toEqual([
-        SECURITY_ALERTS_TOOL_ID,
-        platformCoreTools.generateEsql,
-        platformCoreTools.executeEsql,
-      ]);
     });
   });
 

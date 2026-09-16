@@ -10,6 +10,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
   RoundInput,
@@ -19,7 +20,11 @@ import type {
   SerializedMetadataValue,
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -139,10 +144,17 @@ const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
   return events;
 };
 
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
+
 export const fromEsWithoutRounds = (
   document: Document,
   user: CurrentUser
-): ConversationWithoutRounds => {
+): Omit<ConversationWithoutRounds, 'attachments'> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -427,8 +439,12 @@ export const toResponseConversationWithoutRounds = ({
   user: CurrentUser;
   resolveTemplate: ConversationTemplateResolver;
 }): ConversationWithoutRoundsWithPermissions => {
+  const attachments = toAttachmentSummaries(document._source?.attachments);
   const conversation = withDeserializedMetadata(
-    fromEsWithoutRounds(document, user),
+    {
+      ...fromEsWithoutRounds(document, user),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    },
     resolveTemplate
   );
 

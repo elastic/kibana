@@ -29,12 +29,15 @@ import {
   ConversationRoundStepType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 import {
   fromEs,
+  fromEsWithoutRounds,
+  toAttachmentSummaries,
   toEs,
   toConversationResponse,
   toConversationResponseFromDocument,
@@ -802,6 +805,86 @@ describe('conversation model converters', () => {
       ],
     };
   };
+
+  describe('attachment summaries', () => {
+    const documentWithAttachments = (attachments: VersionedAttachment[]): ConversationDocument => ({
+      _id: 'conv_id',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        attachments,
+      },
+    });
+
+    const textAttachment = (id: string, active?: boolean): VersionedAttachment => ({
+      id,
+      type: 'text',
+      versions: [
+        {
+          version: 1,
+          data: { content: 'Hello' },
+          created_at: creationDate,
+          content_hash: 'abc123',
+          estimated_tokens: 5,
+        },
+      ],
+      current_version: 1,
+      ...(active === undefined ? {} : { active }),
+    });
+
+    it('reduces attachments to id and type, dropping version content', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1'), textAttachment('att-2')])).toEqual([
+        { id: 'att-1', type: 'text' },
+        { id: 'att-2', type: 'text' },
+      ]);
+    });
+
+    it('treats an attachment with no active field as active', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1')])).toEqual([
+        { id: 'att-1', type: 'text' },
+      ]);
+    });
+
+    it('omits soft-deleted attachments', () => {
+      expect(
+        toAttachmentSummaries([textAttachment('att-1', true), textAttachment('att-2', false)])
+      ).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('summarizes a conversation with no attachments to nothing', () => {
+      expect(toAttachmentSummaries([])).toEqual([]);
+      expect(toAttachmentSummaries(undefined)).toEqual([]);
+    });
+
+    it('leaves the rounds-less row itself free of attachments', () => {
+      const deserialized = fromEsWithoutRounds(
+        documentWithAttachments([textAttachment('att-1')]),
+        requestingUser
+      );
+
+      expect(deserialized).not.toHaveProperty('attachments');
+    });
+
+    it('keeps soft-deleted attachments on the full conversation', () => {
+      const deserialized = fromEs(
+        documentWithAttachments([textAttachment('att-1'), textAttachment('att-2', false)]),
+        requestingUser
+      );
+
+      expect(deserialized.attachments).toEqual([
+        expect.objectContaining({ id: 'att-1', current_version: 1 }),
+        expect.objectContaining({ id: 'att-2', active: false }),
+      ]);
+    });
+  });
 
   describe('toConversationResponse', () => {
     it('strips internal fields from normalized conversations', () => {
