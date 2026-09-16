@@ -54,7 +54,7 @@ const transitionalBreach = schema.maybe(
   })
 );
 
-const querySchema = schema.object({
+export const querySchema = schema.object({
   base: schema.string(),
   breach: transitionalBreach,
   format: schema.maybe(schema.oneOf([schema.literal('composed'), schema.literal('standalone')])),
