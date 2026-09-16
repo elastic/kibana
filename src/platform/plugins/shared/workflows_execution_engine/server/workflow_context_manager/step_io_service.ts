@@ -1090,18 +1090,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       'output',
       'workflowRunId',
     ]);
-    // Defensive cross-execution filter: mget targets documents by `_id` only,
-    // and step execution IDs are constructed from the workflow execution ID,
-    // so a collision is improbable but not impossible (e.g. someone running
-    // a custom resume path with mis-typed IDs). Drop any doc whose
-    // workflowRunId disagrees with the current execution rather than
-    // restoring foreign output into memory.
     // Ids whose response we deliberately drop below. They must NOT be confused
     // with ids Elasticsearch never returned: the cleanup at the end clears the
     // evicted flag for those, which for a superseded id would leave it neither
     // resident nor evicted -- so nothing would ever fetch it again -- and would
     // log it as data loss.
     const supersededIds = new Set<string>();
+
+    // Defensive cross-execution filter: mget targets documents by `_id` only,
+    // and step execution IDs are constructed from the workflow execution ID,
+    // so a collision is improbable but not impossible (e.g. someone running
+    // a custom resume path with mis-typed IDs). Drop any doc whose
+    // workflowRunId disagrees with the current execution rather than
+    // restoring foreign output into memory.
     const docs = fetched.filter((doc) => {
       if (doc.workflowRunId && doc.workflowRunId !== expectedRunId) {
         this.logger?.error(
