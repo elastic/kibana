@@ -68,6 +68,7 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
   maintenanceWindows: z.array(z.string()).optional(),
   remote: remoteMonitorInfoSchema.optional(),
   origin: MonitorOriginCodec.optional(),
+  locked: z.boolean().optional(),
 });
 
 export const OverviewStatusCodec = z.looseObject({

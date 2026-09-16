@@ -55,6 +55,7 @@ export const ProjectMonitorCodec = t.intersection([
     }),
     params: t.record(t.string, t.unknown),
     enabled: t.boolean,
+    locked: t.boolean,
     alert: AlertConfigsCodec,
     urls: t.union([t.string, t.array(t.string)]),
     hosts: t.union([t.string, t.array(t.string)]),

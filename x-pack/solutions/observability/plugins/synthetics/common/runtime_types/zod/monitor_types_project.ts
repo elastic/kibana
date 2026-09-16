@@ -38,6 +38,7 @@ export const ProjectMonitorCodec = z.looseObject({
   filter: z.looseObject({ match: z.string() }).optional(),
   params: z.record(z.string(), z.unknown()).optional(),
   enabled: z.boolean().optional(),
+  locked: z.boolean().optional(),
   alert: AlertConfigsCodec.optional(),
   urls: z.union([z.string(), z.array(z.string())]).optional(),
   hosts: z.union([z.string(), z.array(z.string())]).optional(),

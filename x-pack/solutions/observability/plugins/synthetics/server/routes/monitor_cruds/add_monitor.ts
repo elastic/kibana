@@ -69,6 +69,9 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
+    // `locked` is source-owned; the public create API cannot set it.
+    delete (request.body as { [ConfigKey.LOCKED]?: boolean })[ConfigKey.LOCKED];
+
     const {
       locations,
       private_locations: privateLocations,
@@ -222,3 +225,9 @@ export const invalidOriginError = (origin: string) => {
     },
   });
 };
+
+export const monitorLockedError = () =>
+  i18n.translate('xpack.synthetics.server.monitors.lockedError', {
+    defaultMessage:
+      'This monitor is locked. Enable, disable, and other edits must be made in the source project and pushed again.',
+  });

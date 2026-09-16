@@ -6,7 +6,7 @@
  */
 
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
-import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
+import { ConfigKey, isMonitorLocked, SourceType } from '../../../../../../../common/runtime_types';
 
 export const monitorUsesPublicLocations = (monitor: EncryptedSyntheticsSavedMonitor): boolean =>
   (monitor[ConfigKey.LOCATIONS] ?? []).some((location) => location.isServiceManaged);
@@ -71,6 +71,9 @@ export const isMonitorBulkStatusEditable = (
   monitor: EncryptedSyntheticsSavedMonitor,
   canUsePublicLocations: boolean
 ): boolean => {
+  if (isMonitorLocked(monitor)) {
+    return false;
+  }
   if (monitorUsesPublicLocations(monitor) && !canUsePublicLocations) {
     return false;
   }

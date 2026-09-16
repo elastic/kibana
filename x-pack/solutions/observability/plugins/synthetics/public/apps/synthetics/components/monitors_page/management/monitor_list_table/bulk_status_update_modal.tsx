@@ -45,8 +45,8 @@ export const BulkStatusUpdateModal = ({
 
   // Only monitors that can actually be patched are sent to the bulk API. Unlike
   // other bulk edits, enable/disable IS allowed on project/terraform monitors
-  // (an `enabled`-only patch, reconciled on the next push); the only ineligible
-  // ones here use public locations without the elastic-managed-locations
+  // (an `enabled`-only patch, reconciled on the next push); ineligible ones are
+  // locked, or use public locations without the elastic-managed-locations
   // capability. Ineligible monitors are surfaced as skipped so the user
   // understands why.
   //
@@ -151,7 +151,7 @@ export const BulkStatusUpdateModal = ({
               'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
               {
                 defaultMessage:
-                  'Monitors using Elastic managed locations require additional permissions to enable or disable.',
+                  'Locked monitors, and monitors using Elastic managed locations without permission, cannot be enabled or disabled here.',
               }
             )}
           >

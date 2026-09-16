@@ -99,6 +99,7 @@ const commonFields = {
   [ConfigKey.LABELS]: { env: 'test', team: 'obs' },
   [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-1', 'mw-2'],
   [ConfigKey.KIBANA_SPACES]: ['default'],
+  [ConfigKey.LOCKED]: true,
   retest_on_failure: true,
 };
 
@@ -191,6 +192,7 @@ export const commonFieldTypeViolations: Array<[string, unknown]> = [
   [ConfigKey.NAME, 42],
   [ConfigKey.NAMESPACE, 'Invalid Namespace'], // Fleet namespace rules
   [ConfigKey.ENABLED, 'yes'],
+  [ConfigKey.LOCKED, 'yes'],
   [ConfigKey.SCHEDULE, { number: 5, unit: 'm' }], // number must be a string
   [ConfigKey.SCHEDULE, { number: '5', unit: 'h' }], // unit outside ScheduleUnit
   [ConfigKey.TAGS, 'tag-one'], // must be an array

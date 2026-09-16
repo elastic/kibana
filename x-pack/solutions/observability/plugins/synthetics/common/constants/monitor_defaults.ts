@@ -160,6 +160,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MAX_ATTEMPTS]: 2,
   [ConfigKey.MAINTENANCE_WINDOWS]: [],
   [ConfigKey.KIBANA_SPACES]: [],
+  [ConfigKey.LOCKED]: false,
   revision: 1,
 };
 

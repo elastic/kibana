@@ -8,7 +8,7 @@
 import type * as t from 'io-ts';
 import { tEnum } from '../../utils/t_enum';
 import { ConfigKey } from '../../constants/monitor_management';
-export { ConfigKey } from '../../constants/monitor_management';
+export { ConfigKey, isMonitorLocked } from '../../constants/monitor_management';
 
 export const ConfigKeyCodec = tEnum<ConfigKey>('ConfigKey', ConfigKey);
 export type ConfigKeyType = t.TypeOf<typeof ConfigKeyCodec>;

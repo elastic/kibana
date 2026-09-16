@@ -112,6 +112,7 @@ export const getNormalizeCommonFields = ({
       maintenanceWindows
     ),
     [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
+    [ConfigKey.LOCKED]: monitor.locked ?? defaultFields[ConfigKey.LOCKED],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
     }),

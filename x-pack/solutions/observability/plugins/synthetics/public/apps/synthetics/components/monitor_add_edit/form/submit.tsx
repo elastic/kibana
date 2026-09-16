@@ -19,7 +19,7 @@ import { useMonitorSave } from '../hooks/use_monitor_save';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
 import type { SyntheticsMonitor } from '../types';
-import { ConfigKey, SourceType } from '../types';
+import { ConfigKey, isMonitorLocked, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
 
@@ -109,7 +109,12 @@ export const ActionBar = ({
               isLoading={loading}
               onClick={handleSubmit(formSubmitter)}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
-              disabled={!canEditSynthetics || !canUsePublicLocations || !isServiceAllowed}
+              disabled={
+                !canEditSynthetics ||
+                !canUsePublicLocations ||
+                !isServiceAllowed ||
+                isMonitorLocked(defaultValues)
+              }
             >
               {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
             </EuiButton>

@@ -101,6 +101,7 @@ const commonOptional = {
   [ConfigKey.LABELS]: z.record(z.string(), z.string()).optional(),
   [ConfigKey.MAINTENANCE_WINDOWS]: z.array(z.string()).optional(),
   [ConfigKey.KIBANA_SPACES]: z.array(z.string()).optional(),
+  [ConfigKey.LOCKED]: z.boolean().optional(),
   retest_on_failure: z.boolean().optional(),
 };
 

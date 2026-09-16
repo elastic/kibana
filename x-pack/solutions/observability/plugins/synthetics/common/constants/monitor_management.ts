@@ -18,6 +18,7 @@ export enum ConfigKey {
   CONFIG_ID = 'config_id',
   CONFIG_HASH = 'hash',
   ENABLED = 'enabled',
+  LOCKED = 'locked',
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
@@ -82,6 +83,9 @@ export enum ConfigKey {
   MAINTENANCE_WINDOWS = 'maintenance_windows',
   KIBANA_SPACES = 'spaces',
 }
+
+export const isMonitorLocked = (monitor?: { [ConfigKey.LOCKED]?: boolean } | null): boolean =>
+  Boolean(monitor?.[ConfigKey.LOCKED]);
 
 export const secretKeys = [
   ConfigKey.PROXY_HEADERS,
