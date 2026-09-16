@@ -29,6 +29,7 @@ export interface ContextState {
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
   allowedRootFieldTypes?: readonly string[];
   closeCreateFieldOnOutsideClick?: boolean;
+  autoFocusCreateFieldType?: boolean;
   inlineOptionalDateFormatField?: {
     label: string;
     helpText?: string;

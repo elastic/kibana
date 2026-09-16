@@ -376,6 +376,9 @@ describe('InferredSchemaMappingsEditor', () => {
     expect(queryByTestId('createFieldForm')).toBeNull();
     expect(getByTestId('datasetWizardAddField')).not.toHaveAttribute('aria-hidden', 'true');
     expect(getByTestId('datasetWizardTimestampMappingSection')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardFieldMappingsSectionTitle')).toHaveTextContent(
+      'Field mappings'
+    );
 
     fireEvent.click(getByTestId('datasetWizardAddField'));
 
@@ -424,13 +427,13 @@ describe('InferredSchemaMappingsEditor', () => {
     );
   });
 
-  it('uses path copy for the mapped field source input in flow 3 9.6', () => {
+  it('uses field name copy for the mapped field source input in flow 3 9.6', () => {
     const { getByTestId } = render(
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
     );
 
     expect(JSON.parse(getByTestId('fakeSourceNameField').textContent ?? 'null')).toEqual({
-      label: 'Path',
+      label: 'Field name',
       helpText: 'Source column or JSON path.',
       placeholder: 'e.g. event_time or $.@timestamp',
       requiredErrorMessage: 'Enter a path.',

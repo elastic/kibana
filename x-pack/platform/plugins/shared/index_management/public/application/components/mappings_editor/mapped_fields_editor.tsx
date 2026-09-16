@@ -42,6 +42,7 @@ export interface MappedFieldsEditorProps {
   autoOpenCreateFieldWhenEmpty?: boolean;
   allowedRootFieldTypes?: readonly string[];
   closeCreateFieldOnOutsideClick?: boolean;
+  autoFocusCreateFieldType?: boolean;
   inlineOptionalDateFormatField?: {
     label: string;
     helpText?: string;
@@ -68,6 +69,7 @@ export const MappedFieldsEditor = React.memo(
     autoOpenCreateFieldWhenEmpty,
     allowedRootFieldTypes,
     closeCreateFieldOnOutsideClick,
+    autoFocusCreateFieldType,
     inlineOptionalDateFormatField,
     indexSettings,
     docLinks,
@@ -113,6 +115,7 @@ export const MappedFieldsEditor = React.memo(
         onFieldSourceNameChange: showFieldRename ? stableOnFieldSourceNameChange : undefined,
         allowedRootFieldTypes,
         closeCreateFieldOnOutsideClick,
+        autoFocusCreateFieldType,
         inlineOptionalDateFormatField,
       });
     }, [
@@ -127,6 +130,7 @@ export const MappedFieldsEditor = React.memo(
       stableOnFieldSourceNameChange,
       allowedRootFieldTypes,
       closeCreateFieldOnOutsideClick,
+      autoFocusCreateFieldType,
       inlineOptionalDateFormatField,
     ]);
 

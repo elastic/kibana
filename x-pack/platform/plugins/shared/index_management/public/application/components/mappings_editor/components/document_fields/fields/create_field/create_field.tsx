@@ -111,7 +111,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const {
-    value: { closeCreateFieldOnOutsideClick = true, inlineOptionalDateFormatField },
+    value: {
+      closeCreateFieldOnOutsideClick = true,
+      inlineOptionalDateFormatField,
+      autoFocusCreateFieldType = true,
+    },
   } = useConfig();
   const { euiTheme } = useEuiTheme();
   const { fields, mappingViewFields } = useMappingsState();
@@ -154,8 +158,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const isSemanticText = form.getFormData().type === 'semantic_text';
 
   useEffect(() => {
-    if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
-  }, [createFieldFormRef]);
+    if (!autoFocusCreateFieldType) {
+      return;
+    }
+
+    createFieldFormRef?.current?.focus();
+  }, [autoFocusCreateFieldType, createFieldFormRef]);
 
   useEffect(() => {
     if (isSemanticText) {
@@ -215,7 +223,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (!clickOutside && fieldTypeInputRef.current) {
+    if (!clickOutside && autoFocusCreateFieldType && fieldTypeInputRef.current) {
       fieldTypeInputRef.current.focus();
     }
   };
@@ -260,7 +268,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         isMultiField={isMultiField}
         showDocLink
         isSemanticTextEnabled={isSemanticTextEnabled}
-        fieldTypeInputRef={fieldTypeInputRef}
+        fieldTypeInputRef={autoFocusCreateFieldType ? fieldTypeInputRef : undefined}
       />
     );
 

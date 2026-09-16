@@ -72,6 +72,7 @@ export const MappedFieldsEditorWithContext = React.memo(
     autoOpenCreateFieldWhenEmpty,
     allowedRootFieldTypes,
     closeCreateFieldOnOutsideClick,
+    autoFocusCreateFieldType,
     inlineOptionalDateFormatField,
   }: MappedFieldsEditorWithContextProps) => {
     const onChangeRef = useRef(onChange);
@@ -131,11 +132,13 @@ export const MappedFieldsEditorWithContext = React.memo(
         onFieldSourceNameChange: showFieldRename ? onFieldSourceNameChange : undefined,
         allowedRootFieldTypes,
         closeCreateFieldOnOutsideClick,
+        autoFocusCreateFieldType,
         inlineOptionalDateFormatField,
       }),
       [
         allowMultiFields,
         allowedRootFieldTypes,
+        autoFocusCreateFieldType,
         closeCreateFieldOnOutsideClick,
         core.docLinks,
         fieldEditDisplay,
@@ -169,6 +172,7 @@ export const MappedFieldsEditorWithContext = React.memo(
                   autoOpenCreateFieldWhenEmpty={autoOpenCreateFieldWhenEmpty}
                   allowedRootFieldTypes={allowedRootFieldTypes}
                   closeCreateFieldOnOutsideClick={closeCreateFieldOnOutsideClick}
+                  autoFocusCreateFieldType={autoFocusCreateFieldType}
                   inlineOptionalDateFormatField={inlineOptionalDateFormatField}
                   docLinks={core.docLinks}
                 />

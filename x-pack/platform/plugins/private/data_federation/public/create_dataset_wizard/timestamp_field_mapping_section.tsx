@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -27,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TIMESTAMP_FIELD_MAPPING_TYPE_OPTIONS } from './inferred_field_type_options';
 import { datasetWizardStrings } from './dataset_wizard_i18n';
+import { MappingSubsectionTitle } from './mapping_subsection_title';
 
 const timestampFieldCode = <EuiCode>@timestamp</EuiCode>;
 
@@ -74,13 +74,6 @@ export const TimestampFieldMappingSection: FunctionComponent<TimestampFieldMappi
     ];
   }, [fieldType]);
 
-  const titleRowCss = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-    flex-wrap: wrap;
-  `;
-
   const typeFieldCss = css`
     flex: 0 0 auto;
     width: ${MAPPED_FIELDS_TYPE_FIELD_WIDTH_PX}px;
@@ -92,21 +85,18 @@ export const TimestampFieldMappingSection: FunctionComponent<TimestampFieldMappi
   `;
 
   const sectionCss = css`
-    border-bottom: ${euiTheme.border.thin};
     padding-block-end: ${euiTheme.size.m};
-    margin-block-end: ${euiTheme.size.xs};
   `;
 
   return (
     <>
       <EuiSpacer size="xl" />
       <div css={sectionCss} data-test-subj="datasetWizardTimestampMappingSection">
-        <div css={titleRowCss}>
-          <EuiTitle size="xxs">
-            <h5>{datasetWizardStrings.timestampMappingSectionTitle()}</h5>
-          </EuiTitle>
-          <TimestampRequirementBadge isRequired={isRequired} />
-        </div>
+        <MappingSubsectionTitle
+          title={datasetWizardStrings.timestampMappingSectionTitle()}
+          data-test-subj="datasetWizardTimestampMappingSectionTitle"
+          trailing={<TimestampRequirementBadge isRequired={isRequired} />}
+        />
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>

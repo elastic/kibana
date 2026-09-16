@@ -620,6 +620,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Timestamp field',
     }),
 
+  fieldMappingsSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fieldMappingsSectionTitle', {
+      defaultMessage: 'Field mappings',
+    }),
+
   timestampMappingRequiredBadge: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingRequiredBadge', {
       defaultMessage: 'Required',
@@ -646,7 +651,7 @@ export const datasetWizardStrings = {
 
   timestampMappingPathLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingPathLabel', {
-      defaultMessage: 'Path',
+      defaultMessage: 'Field name',
     }),
 
   timestampMappingPathHelp: () =>

@@ -219,6 +219,11 @@ export interface MappedFieldsEditorProps {
   allowedRootFieldTypes?: readonly string[];
   /** When false, clicking outside the create-field form does not cancel or submit it. Defaults to true. */
   closeCreateFieldOnOutsideClick?: boolean;
+  /**
+   * When false, the create-field form does not focus the field type combobox on open or after submit.
+   * Defaults to true.
+   */
+  autoFocusCreateFieldType?: boolean;
   /** When set, date and date_nanos add/edit forms show an inline optional format field. */
   inlineOptionalDateFormatField?: {
     label: string;

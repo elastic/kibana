@@ -46,6 +46,7 @@ import { DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES } from '../inferred_field_ty
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
+import { MappingSubsectionTitle } from '../mapping_subsection_title';
 import { TimestampFieldMappingSection } from '../timestamp_field_mapping_section';
 
 export interface InferredSchemaMappingsEditorProps {
@@ -145,6 +146,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   /** Holds the header row still while the button gives way to the inline add form. */
   const mappedFieldsHeaderCss = css`
     min-block-size: ${euiTheme.size.xl};
+  `;
+  const fieldMappingsListDividerCss = css`
+    border-bottom: ${euiTheme.border.thin};
   `;
   const mappedFieldsAccordionId = useGeneratedHtmlId({
     prefix: 'datasetWizardMappedFieldsAccordion',
@@ -330,9 +334,21 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   const timestampFieldMappingSection = useMemo(
     () =>
       isFlow396 ? (
-        <TimestampFieldMappingSection isRequired={false} />
+        <>
+          <TimestampFieldMappingSection isRequired={false} />
+          <EuiSpacer size="xl" />
+          <MappingSubsectionTitle
+            title={datasetWizardStrings.fieldMappingsSectionTitle()}
+            data-test-subj="datasetWizardFieldMappingsSectionTitle"
+          />
+          <EuiSpacer size="m" />
+          <div
+            css={fieldMappingsListDividerCss}
+            data-test-subj="datasetWizardFieldMappingsSectionDivider"
+          />
+        </>
       ) : undefined,
-    [isFlow396]
+    [fieldMappingsListDividerCss, isFlow396]
   );
 
   useEffect(() => {
@@ -474,6 +490,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
                 autoOpenCreateFieldWhenEmpty: false as const,
                 allowedRootFieldTypes: DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
                 closeCreateFieldOnOutsideClick: false,
+                autoFocusCreateFieldType: false as const,
                 inlineOptionalDateFormatField: {
                   label: datasetWizardStrings.timestampMappingFormatLabel(),
                   helpText: datasetWizardStrings.timestampMappingFormatHelp(),
