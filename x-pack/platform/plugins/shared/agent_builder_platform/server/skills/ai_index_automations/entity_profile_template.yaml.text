@@ -35,7 +35,8 @@ consts:
   # A second field whose per-entity distribution characterises the entity.
   breakdown_field: my_breakdown_field
   # Upper bound on the number of entities profiled in one run. Each costs a model call, so keep
-  # this deliberate: a high-cardinality field will produce one KI per value.
+  # this deliberate: a high-cardinality field will produce one KI per value. The loop below fans
+  # out over at most 100 items, so this cannot exceed that.
   max_entities: 25
 
 tags:
@@ -55,12 +56,16 @@ steps:
         | LIMIT {{ consts.max_entities }}
         | KEEP {{ consts.entity_field }}
 
+  # Profiling one entity costs three ES|QL queries and a model call, and no entity's profile
+  # depends on another's, so five run at a time rather than the batch running end to end.
   - name: loop_entities
-    type: foreach
+    type: parallel
     foreach: "{{ steps.discover_entities.output.values | json }}"
-    # One entity that fails to profile should not cost the rest of the batch.
-    iteration-on-failure:
-      continue: true
+    concurrency: 5
+    # One entity that fails to profile should not cost the rest of the batch: `settled` runs
+    # every branch to a terminal state, where the default `fail-fast` stops scheduling on the
+    # first failure. This is what `iteration-on-failure: continue` does for a sequential loop.
+    mode: settled
     steps:
       # `KEEP` above leaves one column, so the entity is item[0]. Adding columns to that query
       # moves this index.

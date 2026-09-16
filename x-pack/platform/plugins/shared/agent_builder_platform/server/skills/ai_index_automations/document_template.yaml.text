@@ -33,7 +33,8 @@ consts:
   body_field: body
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: "| WHERE published_at >= NOW() - 365 days"
-  # Upper bound on documents summarised in one run. Each costs a model call.
+  # Upper bound on documents summarised in one run. Each costs a model call. The loop below fans
+  # out over at most 100 items, so this cannot exceed that.
   max_documents: 50
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
@@ -65,12 +66,16 @@ steps:
         | KEEP _id, {{ consts.title_field }}, body
         | LIMIT {{ consts.max_documents }}
 
+  # Summarising a document costs a model call, and no document's summary depends on another's,
+  # so five run at a time rather than the batch running end to end.
   - name: loop_documents
-    type: foreach
+    type: parallel
     foreach: "{{ steps.discover_documents.output.values | json }}"
-    # One document that fails to summarise should not cost the rest of the batch.
-    iteration-on-failure:
-      continue: true
+    concurrency: 5
+    # One document that fails to summarise should not cost the rest of the batch: `settled` runs
+    # every branch to a terminal state, where the default `fail-fast` stops scheduling on the
+    # first failure. This is what `iteration-on-failure: continue` does for a sequential loop.
+    mode: settled
     steps:
       # Column order comes from the `KEEP` above: _id, title, body. Changing that list moves
       # these indices.
