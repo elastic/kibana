@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKis } from './ki_list';
 
 const BACKING_INDEX = 'ai-index-idx-sample';
+const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
+const DATA_STREAM_DEST = { type: 'data_stream' as const, value: 'ai-index-ds-sample' };
 
 const fieldCapsFor = (fields: string[]) => ({
   indices: [BACKING_INDEX],
@@ -20,7 +22,11 @@ const rowsResponse = (rows: Array<[string, string, string | null, string | null]
   columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
   values: rows,
 });
-const countsResponse = (rows: Array<[number, string | null]>) => ({
+const totalsResponse = (total: number, filtered?: number) =>
+  filtered === undefined
+    ? { columns: [{ name: 'total' }], values: [[total]] }
+    : { columns: [{ name: 'total' }, { name: 'filtered' }], values: [[total, filtered]] };
+const bucketsResponse = (rows: Array<[number, string]>) => ({
   columns: [{ name: 'count' }, { name: 'type' }],
   values: rows,
 });
@@ -38,7 +44,7 @@ describe('ki_list', () => {
     fieldCaps.mockResolvedValue(fieldCapsFor(ALL_FIELDS));
   });
 
-  it('returns the current revision of each KI with unfiltered type counts', async () => {
+  it('returns the current revision of each KI with exact totals and capped type buckets', async () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
@@ -46,15 +52,16 @@ describe('ki_list', () => {
           [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy'],
         ])
       )
+      .mockResolvedValueOnce(totalsResponse(6))
       .mockResolvedValueOnce(
-        countsResponse([
+        bucketsResponse([
           [4, 'faq'],
           [1, 'playbook'],
           [1, 'policy'],
         ])
       );
 
-    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 25 })).resolves.toEqual({
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).resolves.toEqual({
       total: 6,
       summary: {
         total: 6,
@@ -74,7 +81,7 @@ describe('ki_list', () => {
       [
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = COALESCE(id, _id)',
-        'INLINE STATS latest = MAX(@timestamp) BY id',
+        'INLINE STATS latest = MAX(@timestamp) BY _index, id',
         'WHERE @timestamp == latest',
         'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
         'SORT @timestamp DESC, id ASC',
@@ -82,21 +89,36 @@ describe('ki_list', () => {
         'LIMIT 25',
       ].join('\n| ')
     );
-    expect(queryText(1)).toContain('| STATS count = COUNT(*) BY type');
+    expect(queryText(1)).toContain('| STATS total = COUNT(*)');
+    expect(queryText(2)).toContain(
+      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
+    );
   });
 
-  it('filters rows by type but keeps unfiltered type counts', async () => {
+  it('collapses revisions by id alone on a data stream', async () => {
+    query
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, { dest: DATA_STREAM_DEST, size: 25 });
+
+    expect(queryText(0)).toContain('| INLINE STATS latest = MAX(@timestamp) BY id\n');
+  });
+
+  it('filters rows and the total by type but keeps unfiltered type counts', async () => {
     query
       .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook']]))
+      .mockResolvedValueOnce(totalsResponse(5, 1))
       .mockResolvedValueOnce(
-        countsResponse([
+        bucketsResponse([
           [4, 'faq'],
           [1, 'playbook'],
         ])
       );
 
     await expect(
-      getKis(esClient, { destValue: BACKING_INDEX, size: 10, type: 'playbook' })
+      getKis(esClient, { dest: INDEX_DEST, size: 10, type: 'playbook' })
     ).resolves.toEqual(
       expect.objectContaining({
         total: 1,
@@ -114,7 +136,13 @@ describe('ki_list', () => {
       query: expect.stringContaining('| WHERE type == ?type'),
       params: [{ type: 'playbook' }],
     });
-    expect(queryText(1)).not.toContain('?type');
+    expect(query.mock.calls[1][0]).toEqual({
+      query: expect.stringContaining(
+        '| STATS total = COUNT(*), filtered = COUNT(*) WHERE type == ?type'
+      ),
+      params: [{ type: 'playbook' }],
+    });
+    expect(queryText(2)).not.toContain('?type');
   });
 
   it('includes KIs with missing type or title so total matches the rendered row count', async () => {
@@ -126,15 +154,15 @@ describe('ki_list', () => {
           [BACKING_INDEX, 'ki-missing-title', 'policy', null],
         ])
       )
+      .mockResolvedValueOnce(totalsResponse(3))
       .mockResolvedValueOnce(
-        countsResponse([
+        bucketsResponse([
           [1, 'playbook'],
           [1, 'policy'],
-          [1, null],
         ])
       );
 
-    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 25 })).resolves.toEqual({
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).resolves.toEqual({
       total: 3,
       summary: {
         total: 3,
@@ -152,25 +180,28 @@ describe('ki_list', () => {
   });
 
   it('returns summary stats without fetching rows when size is 0', async () => {
-    query.mockResolvedValueOnce(countsResponse([[6, 'faq']]));
+    query
+      .mockResolvedValueOnce(totalsResponse(6))
+      .mockResolvedValueOnce(bucketsResponse([[6, 'faq']]));
 
-    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 0 })).resolves.toEqual({
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 0 })).resolves.toEqual({
       kis: [],
       total: 6,
       summary: { total: 6, counts_by_type: [{ type: 'faq', count: 6 }] },
     });
 
-    expect(query).toHaveBeenCalledTimes(1);
-    expect(queryText(0)).toContain('| STATS count = COUNT(*) BY type');
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(queryText(0)).toContain('| STATS total = COUNT(*)');
   });
 
   it('omits the revision collapse and lifecycle filter for indices without those fields', async () => {
     fieldCaps.mockResolvedValue(fieldCapsFor(['type', 'title']));
     query
       .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales']]))
-      .mockResolvedValueOnce(countsResponse([[1, 'dashboard']]));
+      .mockResolvedValueOnce(totalsResponse(1))
+      .mockResolvedValueOnce(bucketsResponse([[1, 'dashboard']]));
 
-    await getKis(esClient, { destValue: BACKING_INDEX, size: 25 });
+    await getKis(esClient, { dest: INDEX_DEST, size: 25 });
 
     expect(queryText(0)).toBe(
       [
@@ -187,7 +218,7 @@ describe('ki_list', () => {
     fieldCaps.mockResolvedValue({ indices: [], fields: {} });
 
     await expect(
-      getKis(esClient, { destValue: 'ai-index-idx-missing', size: 25 })
+      getKis(esClient, { dest: { type: 'index', value: 'ai-index-idx-missing' }, size: 25 })
     ).resolves.toEqual({ kis: [], total: 0, summary: { total: 0, counts_by_type: [] } });
 
     expect(fieldCaps).toHaveBeenCalledWith({

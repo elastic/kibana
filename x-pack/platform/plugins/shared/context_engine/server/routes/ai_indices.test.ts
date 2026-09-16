@@ -542,7 +542,8 @@ describe('ai indices routes', () => {
       columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
       values,
     });
-    const counts = (values: unknown[][]) => ({
+    const totals = (total: number) => ({ columns: [{ name: 'total' }], values: [[total]] });
+    const buckets = (values: unknown[][]) => ({
       columns: [{ name: 'count' }, { name: 'type' }],
       values,
     });
@@ -551,7 +552,8 @@ describe('ai indices routes', () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
         .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook']]))
-        .mockResolvedValueOnce(counts([[12, 'playbook']]));
+        .mockResolvedValueOnce(totals(12))
+        .mockResolvedValueOnce(buckets([[12, 'playbook']]));
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },
@@ -583,7 +585,13 @@ describe('ai indices routes', () => {
 
     it('passes type filter to Elasticsearch', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esEsqlQuery.mockResolvedValueOnce(rows([])).mockResolvedValueOnce(counts([]));
+      esEsqlQuery
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce({
+          columns: [{ name: 'total' }, { name: 'filtered' }],
+          values: [[0, 0]],
+        })
+        .mockResolvedValueOnce(buckets([]));
 
       await callRoute('GET', aiIndexKiListPath, {
         params: { aiIndexId: 'customer_support' },

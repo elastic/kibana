@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
+import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 /** Columns the list reads. Each is guarded by field caps since AI indices vary in shape. */
@@ -21,7 +22,7 @@ const KI_LIST_FIELDS = [
 type KiListField = (typeof KI_LIST_FIELDS)[number];
 
 export interface GetKisOptions {
-  destValue: string;
+  dest: AiIndexDest;
   size: number;
   type?: string;
 }
@@ -45,14 +46,20 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
 
 /**
  * One row per KI: the latest revision by `@timestamp` for each logical id,
- * excluding KIs whose lifecycle status is deleted.
+ * excluding KIs whose lifecycle status is deleted. On an index dest the same
+ * id may exist in several backing indices, so those are distinct KIs.
  */
-const currentKisQuery = (destValue: string, has: (field: KiListField) => boolean): string =>
+const currentKisQuery = (dest: AiIndexDest, has: (field: KiListField) => boolean): string =>
   [
-    `FROM ${JSON.stringify(destValue)} METADATA _id, _index`,
+    `FROM ${JSON.stringify(dest.value)} METADATA _id, _index`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
-      ? ['INLINE STATS latest = MAX(@timestamp) BY id', 'WHERE @timestamp == latest']
+      ? [
+          `INLINE STATS latest = MAX(@timestamp) BY ${
+            dest.type === 'data_stream' ? 'id' : '_index, id'
+          }`,
+          'WHERE @timestamp == latest',
+        ]
       : []),
     ...(has('governance.lifecycle.status')
       ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
@@ -63,10 +70,10 @@ const currentKisQuery = (destValue: string, has: (field: KiListField) => boolean
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { destValue, size, type }: GetKisOptions
+  { dest, size, type }: GetKisOptions
 ): Promise<ListKisResponse> => {
   const caps = await esClient.fieldCaps({
-    index: destValue,
+    index: dest.value,
     fields: [...KI_LIST_FIELDS],
     ignore_unavailable: true,
     allow_no_indices: true,
@@ -75,7 +82,8 @@ export const getKis = async (
     return EMPTY;
   }
   const has = (field: KiListField) => Object.keys(caps.fields[field] ?? {}).length > 0;
-  const base = currentKisQuery(destValue, has);
+  const base = currentKisQuery(dest, has);
+  const typeParams = type !== undefined ? { params: [{ type }] } : {};
 
   const rowsQuery = [
     base,
@@ -84,30 +92,35 @@ export const getKis = async (
     'KEEP _index, id, type, title',
     `LIMIT ${size}`,
   ].join('\n| ');
-  const countsQuery = `${base}\n| STATS count = COUNT(*) BY type`;
+  // Exact counts, independent of how many type buckets exist.
+  const totalsQuery = [
+    base,
+    type !== undefined
+      ? 'STATS total = COUNT(*), filtered = COUNT(*) WHERE type == ?type'
+      : 'STATS total = COUNT(*)',
+  ].join('\n| ');
+  const bucketsQuery = [
+    base,
+    'WHERE type IS NOT NULL',
+    'STATS count = COUNT(*) BY type',
+    'SORT count DESC, type ASC',
+    `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
+  ].join('\n| ');
 
-  const [rows, counts] = await Promise.all([
-    size > 0
-      ? esClient.esql.query({
-          query: rowsQuery,
-          ...(type !== undefined ? { params: [{ type }] } : {}),
-        })
-      : undefined,
-    esClient.esql.query({ query: countsQuery }),
+  const [rows, totals, buckets] = await Promise.all([
+    size > 0 ? esClient.esql.query({ query: rowsQuery, ...typeParams }) : undefined,
+    esClient.esql.query({ query: totalsQuery, ...typeParams }),
+    esClient.esql.query({ query: bucketsQuery }),
   ]);
 
-  const countRows = toRecords(counts as unknown as ESQLSearchResponse).map((row) => ({
-    type: typeof row.type === 'string' ? row.type : undefined,
-    count: Number(row.count),
-  }));
-  const totalAll = countRows.reduce((sum, { count }) => sum + count, 0);
-  const total =
-    type === undefined ? totalAll : countRows.find((row) => row.type === type)?.count ?? 0;
+  const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);
+  const totalAll = Number(totalRow?.total ?? 0);
+  const total = type === undefined ? totalAll : Number(totalRow?.filtered ?? 0);
   const countsByType = takeTopKiTypeCounts(
-    countRows
-      .filter((row): row is { type: string; count: number } => row.type !== undefined)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, MAX_KI_TYPE_FILTER_COUNT)
+    toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
+      type: String(row.type),
+      count: Number(row.count),
+    }))
   );
 
   return {

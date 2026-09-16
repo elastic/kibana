@@ -26,6 +26,20 @@ export const kiIdQuery = (kiId: string) => ({
   },
 });
 
+const isDeleted = (document: KiDocument): boolean => {
+  const governance = document.governance;
+  const lifecycle =
+    typeof governance === 'object' && governance !== null && !Array.isArray(governance)
+      ? governance.lifecycle
+      : undefined;
+  return (
+    typeof lifecycle === 'object' &&
+    lifecycle !== null &&
+    !Array.isArray(lifecycle) &&
+    lifecycle.status === 'deleted'
+  );
+};
+
 export interface GetKiOptions {
   aiIndexId: string;
   dest: AiIndexDest;
@@ -54,7 +68,7 @@ export const getKi = async (
   });
 
   const { _id, _source: document } = response.hits.hits[0] ?? {};
-  if (_id === undefined || document === undefined) {
+  if (_id === undefined || document === undefined || isDeleted(document)) {
     throw new KiNotFoundError(aiIndexId, kiId);
   }
 

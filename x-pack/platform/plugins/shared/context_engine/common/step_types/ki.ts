@@ -111,7 +111,7 @@ export const kiFieldsSchema = z.object({
     .optional()
     .describe('URIs this KI relates to'),
   expires_at: z.iso
-    .datetime()
+    .datetime({ offset: true })
     .optional()
     .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
 });

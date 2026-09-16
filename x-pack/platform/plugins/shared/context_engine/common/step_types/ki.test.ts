@@ -142,6 +142,16 @@ describe('kiFieldsSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts an expires_at with a numeric timezone offset', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: '2027-01-01T01:00:00+01:00',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it('rejects a non-ISO expires_at', () => {
     const result = kiFieldsSchema.safeParse({
       type: 'index_metadata',

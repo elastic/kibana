@@ -89,6 +89,33 @@ describe('ki_get', () => {
     });
   });
 
+  it('throws KiNotFoundError when the current revision is deleted', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'generated-es-id',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: {
+              id: 'ki-1',
+              type: 'playbook',
+              governance: { lifecycle: { status: 'deleted' } },
+            },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'data_stream', value: 'ai-index-ds-sample' },
+        index: '.ds-ai-index-ds-sample-000001',
+        kiId: 'ki-1',
+      })
+    ).rejects.toThrow(new KiNotFoundError('sample', 'ki-1'));
+  });
+
   it('resolves a data stream KI by its id field and returns that id', async () => {
     search.mockResolvedValue({
       hits: {
