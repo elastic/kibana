@@ -60,6 +60,7 @@ import {
 import { saveEditedRule, visitRuleEditPage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { getDetails } from '../../../../tasks/rule_details';
+import { shouldHaveTagsText } from '../../../../helpers/tags';
 
 describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEditedRule();
@@ -92,7 +93,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       // expect about step to populate
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
       cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
-      cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
+      shouldHaveTagsText(cy.get(TAGS_FIELD), existingRule.tags?.join(''));
       cy.get(SEVERITY_DROPDOWN).should('contain.text', 'High');
       cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
 
@@ -135,7 +136,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
         getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-        getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
+        shouldHaveTagsText(getDetails(TAGS_DETAILS), expectedEditedtags);
       });
       cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);

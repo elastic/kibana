@@ -36,5 +36,7 @@ export const queryKeys = {
     detail: (id: string | undefined) => [...queryKeys.proposals.all, 'detail', id] as const,
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...queryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
+    /** Proposals grouped by category — drives the main queue page. */
+    grouped: (windowHours: number) => [...queryKeys.proposals.all, 'grouped', windowHours] as const,
   },
 };
