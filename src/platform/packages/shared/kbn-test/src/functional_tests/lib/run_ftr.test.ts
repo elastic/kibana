@@ -17,9 +17,10 @@ import { FTR_TEST_FAILURES_EXIT_CODE, runFtr } from './run_ftr';
 type FailError = ReturnType<typeof createFailError>;
 
 const mockRun = jest.fn<Promise<number>, [AbortSignal | undefined, number | undefined]>();
+const mockRunner = { run: mockRun, aborted: false };
 
 jest.mock('../../functional_test_runner', () => ({
-  FunctionalTestRunner: jest.fn(() => ({ run: mockRun })),
+  FunctionalTestRunner: jest.fn(() => mockRunner),
 }));
 
 const log = new ToolingLog();
@@ -28,12 +29,9 @@ const configWith = (bail: boolean): Config =>
   ({ get: (key: string) => (key === 'mochaOpts.bail' ? bail : undefined) } as unknown as Config);
 const config = configWith(false);
 
-const runAndCatch = async ({
-  signal,
-  config: cfg = config,
-}: { signal?: AbortSignal; config?: Config } = {}): Promise<FailError> => {
+const runAndCatch = async (cfg: Config = config): Promise<FailError> => {
   try {
-    await runFtr({ log, config: cfg, esVersion, signal });
+    await runFtr({ log, config: cfg, esVersion });
   } catch (error) {
     if (!isFailError(error)) {
       throw error;
@@ -46,6 +44,7 @@ const runAndCatch = async ({
 describe('runFtr', () => {
   beforeEach(() => {
     mockRun.mockReset();
+    mockRunner.aborted = false;
   });
 
   it('resolves when no test failed', async () => {
@@ -60,19 +59,18 @@ describe('runFtr', () => {
     expect(error.message).toBe('2 functional test failures');
   });
 
-  it('exits with 1 when the run was aborted, since not every test ran', async () => {
-    const ctrl = new AbortController();
+  it('exits with 1 when the run was aborted (external signal or internal abort such as a Mocha timeout), since not every test ran', async () => {
     mockRun.mockImplementation(async () => {
-      ctrl.abort();
+      mockRunner.aborted = true;
       return 1;
     });
-    const error = await runAndCatch({ signal: ctrl.signal });
+    const error = await runAndCatch();
     expect(error.exitCode).toBe(1);
   });
 
   it('exits with 1 when bail is on (CLI flag, FTR_EXTRA_ARGS or mochaOpts), since the run stopped at the first failure', async () => {
     mockRun.mockResolvedValue(1);
-    const error = await runAndCatch({ config: configWith(true) });
+    const error = await runAndCatch(configWith(true));
     expect(error.exitCode).toBe(1);
   });
 });

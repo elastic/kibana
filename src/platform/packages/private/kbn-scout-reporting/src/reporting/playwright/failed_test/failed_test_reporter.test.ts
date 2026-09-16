@@ -218,6 +218,30 @@ describe('ScoutFailedTestReporter', () => {
     expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({ status: 'failed', errors: [] });
   });
 
+  it('records a test.fail() test that passed as a runner error, since it never reaches the failure report', () => {
+    const saveRunnerErrorsSpy = jest
+      .spyOn(ScoutFailureTracker.prototype, 'saveRunnerErrors')
+      .mockImplementation(() => {});
+    const unexpectedPass = createMockTestCase({
+      outcome: 'unexpected',
+      title: 'expected to fail',
+      expectedStatus: 'failed',
+      results: [{ status: 'passed' }],
+    });
+    const failed = createMockTestCase({ outcome: 'unexpected', title: 'failed' });
+    reporter.onBegin(createMockConfig(), createMockSuite([unexpectedPass, failed]));
+
+    reporter.onTestEnd(unexpectedPass, createMockResult({ status: 'passed' }));
+    reporter.onTestEnd(failed, createMockResult({ status: 'failed' }));
+    reporter.onEnd(createMockFullResult('failed'));
+
+    expect(reportLogEventSpy).toHaveBeenCalledTimes(1);
+    expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({
+      status: 'failed',
+      errors: ['1 test(s) passed but were expected to fail'],
+    });
+  });
+
   it('stamps distinct attempt numbers on each attempt of a repeatedly-failing test', () => {
     const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
     reporter.onBegin(createMockConfig(), createMockSuite([hardFailure]));

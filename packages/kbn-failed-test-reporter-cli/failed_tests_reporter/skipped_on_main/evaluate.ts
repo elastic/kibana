@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getLocationFromClassname } from '../get_failures';
 import { makeFailedTestCaseIter, readTestReport } from '../test_report';
-import type { SuiteNode } from './skip_tree';
+import type { SkipLookup, SuiteNode } from './skip_tree';
 import { findSkipForFullTitle, findSkipForScoutFailure, parseSuiteTree } from './skip_tree';
 
 export type EvaluableFailure =
@@ -115,7 +115,11 @@ export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] 
  * present at the merge base are not new to the PR, so removing them in the PR keeps the failure.
  * A file absent at the merge base was added by the PR itself, so a skip on `mainRef` comes from an
  * independent add of the same path; rebasing would conflict rather than apply it, so the failure
- * stays real.
+ * stays real. Likewise a test absent from the merge base was added (or renamed) by the PR, so a
+ * same-titled skip on `mainRef` is an independent addition that a rebase cannot be assumed to
+ * apply to the PR's test. When the title occurs more than once, every occurrence at the merge
+ * base must be runnable: a mix of skipped and unskipped occurrences means the PR may have
+ * un-skipped one of them, which a rebase would keep runnable.
  */
 export function evaluateFailures(
   failures: EvaluableFailure[],
@@ -131,12 +135,12 @@ export function evaluateFailures(
     return trees.get(key);
   };
 
-  const findSkip = (tree: SuiteNode[], failure: EvaluableFailure): SuiteNode | undefined =>
+  const findSkip = (tree: SuiteNode[], failure: EvaluableFailure): SkipLookup =>
     failure.kind === 'ftr'
       ? findSkipForFullTitle(tree, failure.fullTitle)
       : findSkipForScoutFailure(tree, failure.suite, failure.title, failure.file);
 
-  /** The skip on `mainRef` that explains `failure`, if it is absent at `baseRef`. */
+  /** The skip on `mainRef` that explains `failure`, if the test was runnable at `baseRef`. */
   const findNewSkipOnMain = (failure: EvaluableFailure): SuiteNode | undefined => {
     if (!failure.file) {
       return undefined;
@@ -146,8 +150,11 @@ export function evaluateFailures(
     if (!mainTree || !baseTree) {
       return undefined;
     }
-    const skipOnMain = findSkip(mainTree, failure);
-    if (!skipOnMain || findSkip(baseTree, failure)) {
+    const { skip: skipOnMain } = findSkip(mainTree, failure);
+    if (!skipOnMain) {
+      return undefined;
+    }
+    if (!findSkip(baseTree, failure).allUnskipped) {
       return undefined;
     }
     return skipOnMain;

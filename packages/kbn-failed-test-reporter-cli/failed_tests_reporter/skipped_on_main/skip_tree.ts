@@ -131,90 +131,131 @@ export function parseSuiteTree(source: string, fileName = 'spec.ts'): SuiteNode[
 
 const HOOK_SUFFIX_RE = / "(?:before|after) (?:all|each)" hook\b.*$/;
 
+/** Result of resolving one failure against a parsed spec file. */
+export interface SkipLookup {
+  /**
+   * The skipped node covering the failure. Set only when every occurrence that can be the failed
+   * test is covered by a skip and none of them sits under an unresolvable dynamic title.
+   */
+  skip: SuiteNode | undefined;
+  /**
+   * The failed test resolves to at least one node and every such node is runnable: none is
+   * covered by a skip and none sits under an unresolvable dynamic title. Used to prove that a
+   * skip found on another ref is new relative to this one.
+   */
+  allUnskipped: boolean;
+}
+
+/** One node that may be the failed test: covered by `skip`, or `null` when unresolvable. */
+type Occurrence = SuiteNode | undefined | null;
+
 /**
- * Collects the nearest skipped ancestor (or undefined) for every node matching `isMatch`. A title
- * may occur more than once in a file; the caller forgives only when every occurrence is skipped,
- * since the failure cannot be attributed to one of them. Subtrees under a dynamic title are pruned
- * unless `throughDynamic` is set, because the chain cannot be reconstructed.
+ * Collects, for every node matching `isMatch`, the nearest skipped ancestor (or `undefined`). A
+ * title may occur more than once in a file; the caller forgives only when every occurrence is
+ * skipped, since the failure cannot be attributed to one of them.
+ *
+ * A node with a dynamic title cannot match itself but its subtree is still walked, since the
+ * runtime title may equal any reported one. With `chainThroughDynamic` the chain restarts below
+ * such a node and every match under it is recorded as unresolvable (`null`): the reconstructed
+ * chain cannot prove which node the failure came from, so it must stay real.
  */
 const collectMatches = (
   nodes: SuiteNode[],
-  throughDynamic: boolean,
-  isMatch: (node: SuiteNode, parent: SuiteNode | undefined, chain: string) => boolean
-): Array<SuiteNode | undefined> => {
-  const matches: Array<SuiteNode | undefined> = [];
+  chainThroughDynamic: boolean,
+  isMatch: (
+    node: SuiteNode,
+    parent: SuiteNode | undefined,
+    chain: string
+  ) => boolean | 'unresolvable'
+): Occurrence[] => {
+  const matches: Occurrence[] = [];
   const walk = (
     children: SuiteNode[],
     parent: SuiteNode | undefined,
     parentChain: string | undefined,
-    skippedAncestor: SuiteNode | undefined
+    skippedAncestor: SuiteNode | undefined,
+    unresolvable: boolean
   ) => {
     for (const node of children) {
       const skipped = skippedAncestor ?? (node.skipped ? node : undefined);
       if (node.title === null) {
-        if (throughDynamic) {
-          walk(node.children, node, parentChain, skipped);
-        }
+        walk(
+          node.children,
+          node,
+          chainThroughDynamic ? undefined : parentChain,
+          skipped,
+          unresolvable || chainThroughDynamic
+        );
         continue;
       }
       const chain = parentChain === undefined ? node.title : `${parentChain} ${node.title}`;
-      if (isMatch(node, parent, chain)) {
-        matches.push(skipped);
+      const match = isMatch(node, parent, chain);
+      if (match) {
+        matches.push(unresolvable || match === 'unresolvable' ? null : skipped);
       }
-      walk(node.children, node, chain, skipped);
+      walk(node.children, node, chain, skipped, unresolvable);
     }
   };
-  walk(nodes, undefined, undefined, undefined);
+  walk(nodes, undefined, undefined, undefined, false);
   return matches;
 };
 
-const skipIfUnanimous = (matches: Array<SuiteNode | undefined>): SuiteNode | undefined =>
-  matches.length > 0 && matches.every(Boolean) ? matches[0] : undefined;
+const toLookup = (matches: Occurrence[]): SkipLookup => {
+  const [first] = matches;
+  return {
+    skip: first && matches.every(Boolean) ? first : undefined,
+    allUnskipped: matches.length > 0 && matches.every((match) => match === undefined),
+  };
+};
 
 /**
- * Whether a mocha full title (space-joined suite titles + test title, as written to JUnit `name`)
- * resolves through a skipped node. Matches any suffix of the tree chain, since JUnit names may be
- * prefixed with titles from wrapping configs. Hook failures ("before all" hook for "x") are
- * attributed to the enclosing suite.
+ * Resolves a mocha full title (space-joined suite titles + test title, as written to JUnit `name`)
+ * against the tree. Matches any suffix of the tree chain, since JUnit names may be prefixed with
+ * titles from wrapping configs. Hook failures ("before all" hook for "x") are attributed to the
+ * enclosing suite.
  *
- * Returns the skipped node only when every chain that is a suffix of the title is skipped: the
- * wrapping-config prefix is unknown, so no alignment can be preferred over another.
+ * `skip` is set only when every chain that is a suffix of the title is skipped: the
+ * wrapping-config prefix is unknown, so no alignment can be preferred over another. A matching
+ * chain below a dynamic title counts as an occurrence but is never skipped.
  */
-export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): SuiteNode | undefined {
+export function findSkipForFullTitle(nodes: SuiteNode[], fullTitle: string): SkipLookup {
   const target = fullTitle.replace(HOOK_SUFFIX_RE, '');
-  return skipIfUnanimous(
+  return toLookup(
     collectMatches(
       nodes,
-      false,
+      true,
       (_node, _parent, chain) => target === chain || target.endsWith(` ${chain}`)
     )
   );
 }
 
 /**
- * Whether a Scout failure (immediate parent `suite` title + test `title`) resolves through a
- * skipped node. Playwright reports the nearest describe only, so match on that pair anywhere
- * in the tree and check the ancestors. A test outside any describe has Playwright's synthetic
- * file suite as its parent, titled with the spec path relative to the config's `testDir`; such a
- * `suite` is matched against `file` (the repo-relative spec path) instead of a describe.
+ * Resolves a Scout failure (immediate parent `suite` title + test `title`) against the tree.
+ * Playwright reports the nearest describe only, so match on that pair anywhere in the tree and
+ * check the ancestors. A test outside any describe has Playwright's synthetic file suite as its
+ * parent, titled with the spec path relative to the config's `testDir`; such a `suite` is matched
+ * against `file` (the repo-relative spec path) instead of a describe.
  *
- * Returns the skipped node only when every matching occurrence in the file is skipped.
+ * `skip` is set only when every matching occurrence in the file is skipped. A test whose
+ * describe has a dynamic title may be the failed one, so it counts as an occurrence that is
+ * never skipped.
  */
 export function findSkipForScoutFailure(
   nodes: SuiteNode[],
   suite: string,
   title: string,
   file: string
-): SuiteNode | undefined {
+): SkipLookup {
   const isFileSuite = file === suite || file.endsWith(`/${suite}`);
-  return skipIfUnanimous(
-    collectMatches(
-      nodes,
-      true,
-      (node, parent) =>
-        node.kind === 'test' &&
-        node.title === title &&
-        (parent === undefined ? isFileSuite : parent.title === suite)
-    )
+  return toLookup(
+    collectMatches(nodes, false, (node, parent) => {
+      if (node.kind !== 'test' || node.title !== title) {
+        return false;
+      }
+      if (parent === undefined) {
+        return isFileSuite;
+      }
+      return parent.title === null ? 'unresolvable' : parent.title === suite;
+    })
   );
 }

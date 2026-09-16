@@ -103,6 +103,18 @@ describe('evaluateFailures', () => {
     expect(result.real).toEqual([scoutFailure]);
   });
 
+  it('keeps the failure when the test is absent from the file at the merge base (PR added or renamed it)', () => {
+    const readFile = readerFor({
+      [`main:${SCOUT_FILE}`]: fixture('scout_ai_indices.after'),
+      [`base:${SCOUT_FILE}`]: 'apiTest.describe("context engine AI indices API", () => {});',
+    });
+
+    const result = evaluateFailures([scoutFailure], { mainRef: 'main', baseRef: 'base', readFile });
+
+    expect(result.knownSkipped).toHaveLength(0);
+    expect(result.real).toEqual([scoutFailure]);
+  });
+
   it('keeps failures without a file location', () => {
     const failure: EvaluableFailure = { kind: 'ftr', file: '', fullTitle: 'something' };
     const result = evaluateFailures([failure], {

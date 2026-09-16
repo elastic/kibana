@@ -212,6 +212,23 @@ export class ScoutFailedTestReporter implements Reporter {
       this.runnerErrors.push(`${didNotRun} test(s) did not run`);
     }
 
+    // A test expected to fail (`test.fail()`) that passes is an unexpected outcome Playwright
+    // fails the run for, but its attempts never reach the failure NDJSON above (they passed), so
+    // it has to be recorded here or the failure report would explain less than the exit code.
+    const passedUnexpectedly = allTests.filter(
+      (test) =>
+        test.outcome() === 'unexpected' &&
+        !test.results.some(
+          (attempt) =>
+            attempt.status === 'failed' ||
+            attempt.status === 'timedOut' ||
+            attempt.status === 'interrupted'
+        )
+    ).length;
+    if (passedUnexpectedly > 0) {
+      this.runnerErrors.push(`${passedUnexpectedly} test(s) passed but were expected to fail`);
+    }
+
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);

@@ -103,7 +103,7 @@ describe('parseSuiteTree', () => {
       'describe.skip(`dynamic ${x}`, () => {}); describe(title, () => {});'
     );
     expect(tree.map(({ title }) => title)).toEqual([null, null]);
-    expect(findSkipForFullTitle(tree, 'dynamic 1 test')).toBeUndefined();
+    expect(findSkipForFullTitle(tree, 'dynamic 1 test').skip).toBeUndefined();
   });
 });
 
@@ -111,24 +111,26 @@ describe('findSkipForFullTitle', () => {
   const tree = parseSuiteTree(fixture('ftr_cases_configure_legacy.after'));
 
   it('matches a test under a skipped describe, after parent-file suite titles', () => {
-    const match = findSkipForFullTitle(
+    const { skip } = findSkipForFullTitle(
       tree,
       'Cases Configure - legacy custom fields and templates Custom fields adds a custom field'
     );
-    expect(match?.title).toBe('Configure - legacy custom fields and templates');
-    expect(match?.issue).toBe('https://github.com/elastic/kibana/issues/280016');
+    expect(skip?.title).toBe('Configure - legacy custom fields and templates');
+    expect(skip?.issue).toBe('https://github.com/elastic/kibana/issues/280016');
   });
 
   it('matches before/after hook failures of a skipped describe', () => {
     const suite = 'Cases Configure - legacy custom fields and templates';
-    expect(findSkipForFullTitle(tree, `${suite} "before all" hook in "${suite}"`)).toBeDefined();
+    expect(
+      findSkipForFullTitle(tree, `${suite} "before all" hook in "${suite}"`).skip
+    ).toBeDefined();
     expect(
       findSkipForFullTitle(
         tree,
         `${suite} Custom fields "before each" hook for "adds a custom field"`
-      )
+      ).skip
     ).toBeDefined();
-    expect(findSkipForFullTitle(tree, `${suite} "after all" hook`)).toBeDefined();
+    expect(findSkipForFullTitle(tree, `${suite} "after all" hook`).skip).toBeDefined();
   });
 
   it('does not match when the file has no skip covering the test', () => {
@@ -138,16 +140,16 @@ describe('findSkipForFullTitle', () => {
         before,
         'Cases Configure - legacy custom fields and templates Custom fields adds a custom field'
       )
-    ).toBeUndefined();
+    ).toEqual({ skip: undefined, allUnskipped: true });
   });
 
   it('anchors the chain at the end of the full title, after unknown parent suites', () => {
     const t = parseSuiteTree(`describe.skip('alert', () => { it('runs', () => {}); });`);
-    expect(findSkipForFullTitle(t, 'alerting rules alert runs')?.title).toBe('alert');
-    expect(findSkipForFullTitle(t, 'alert runs')?.title).toBe('alert');
-    expect(findSkipForFullTitle(t, 'alerting rules alerts runs')).toBeUndefined();
-    expect(findSkipForFullTitle(t, 'alerting rules alert runs twice')).toBeUndefined();
-    expect(findSkipForFullTitle(t, 'alerting runs')).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'alerting rules alert runs').skip?.title).toBe('alert');
+    expect(findSkipForFullTitle(t, 'alert runs').skip?.title).toBe('alert');
+    expect(findSkipForFullTitle(t, 'alerting rules alerts runs').skip).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'alerting rules alert runs twice').skip).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'alerting runs').skip).toBeUndefined();
   });
 
   it('does not forgive an unrelated test that merely mentions a skipped root title', () => {
@@ -155,8 +157,10 @@ describe('findSkipForFullTitle', () => {
       describe.skip('Templates', () => { it('renders', () => {}); });
       describe('Custom fields', () => { it('Templates section works', () => {}); });
     `);
-    expect(findSkipForFullTitle(t, 'Cases Custom fields Templates section works')).toBeUndefined();
-    expect(findSkipForFullTitle(t, 'Cases Templates renders')?.title).toBe('Templates');
+    expect(
+      findSkipForFullTitle(t, 'Cases Custom fields Templates section works').skip
+    ).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'Cases Templates renders').skip?.title).toBe('Templates');
   });
 
   it('does not match a nested skipped suite out of its chain', () => {
@@ -166,15 +170,29 @@ describe('findSkipForFullTitle', () => {
         describe('other', () => { it('inner t', () => {}); });
       });
     `);
-    expect(findSkipForFullTitle(t, 'root outer inner t')?.title).toBe('inner');
-    expect(findSkipForFullTitle(t, 'root outer other inner t')).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'root outer inner t').skip?.title).toBe('inner');
+    expect(findSkipForFullTitle(t, 'root outer other inner t').skip).toBeUndefined();
   });
 
   it('does not match through a dynamic title', () => {
     const t = parseSuiteTree(
       'describe.skip(`dyn ${x}`, () => { describe("inner", () => { it("t", () => {}); }); });'
     );
-    expect(findSkipForFullTitle(t, 'root dyn 1 inner t')).toBeUndefined();
+    // The test may be under the dynamic describe (its runtime title may be anything), but the
+    // chain cannot be proven either way, so it is neither skipped nor provably unskipped.
+    expect(findSkipForFullTitle(t, 'root dyn 1 inner t')).toEqual({
+      skip: undefined,
+      allUnskipped: false,
+    });
+    expect(findSkipForFullTitle(t, 'root other inner t').skip).toBeUndefined();
+  });
+
+  it('does not forgive when the title may also come from an unskipped dynamic describe', () => {
+    const t = parseSuiteTree(`
+      describe.skip('same', () => { it('case', () => {}); });
+      describe(runtimeTitle, () => { it('case', () => {}); });
+    `);
+    expect(findSkipForFullTitle(t, 'root same case').skip).toBeUndefined();
   });
 
   it('does not forgive when a shorter suffix of the title also occurs unskipped', () => {
@@ -183,8 +201,8 @@ describe('findSkipForFullTitle', () => {
       describe('x', () => { describe.skip('b', () => { it('c', () => {}); }); });
     `);
     // 'x' may be a describe in this file or a wrapping config title; both alignments are valid.
-    expect(findSkipForFullTitle(t, 'root x b c')).toBeUndefined();
-    expect(findSkipForFullTitle(t, 'root b c')).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'root x b c').skip).toBeUndefined();
+    expect(findSkipForFullTitle(t, 'root b c').skip).toBeUndefined();
   });
 });
 
@@ -193,13 +211,13 @@ describe('findSkipForScoutFailure', () => {
 
   it('matches a test whose nearest describe is skipped', () => {
     const tree = parseSuiteTree(fixture('scout_ai_indices.after'));
-    const match = findSkipForScoutFailure(
+    const { skip } = findSkipForScoutFailure(
       tree,
       'context engine AI indices API',
       'manages an AI index through its full lifecycle',
       FILE
     );
-    expect(match?.issue).toBe('https://github.com/elastic/kibana/issues/280639');
+    expect(skip?.issue).toBe('https://github.com/elastic/kibana/issues/280639');
     expect(
       findSkipForScoutFailure(
         parseSuiteTree(fixture('scout_ai_indices.before')),
@@ -207,7 +225,7 @@ describe('findSkipForScoutFailure', () => {
         'manages an AI index through its full lifecycle',
         FILE
       )
-    ).toBeUndefined();
+    ).toEqual({ skip: undefined, allUnskipped: true });
   });
 
   it('matches a root-level test through the Playwright file suite title', () => {
@@ -217,14 +235,16 @@ describe('findSkipForScoutFailure', () => {
       test.describe('d', () => { test('flaky', async () => {}); });
     `);
     // Playwright titles the file suite with the spec path relative to testDir.
-    expect(findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'flaky', FILE)?.title).toBe(
-      'flaky'
-    );
-    expect(findSkipForScoutFailure(tree, FILE, 'flaky', FILE)?.title).toBe('flaky');
-    expect(findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'ok', FILE)).toBeUndefined();
-    expect(findSkipForScoutFailure(tree, 'other.spec.ts', 'flaky', FILE)).toBeUndefined();
-    expect(findSkipForScoutFailure(tree, 'indices.spec.ts', 'flaky', FILE)).toBeUndefined();
-    expect(findSkipForScoutFailure(tree, 'd', 'flaky', FILE)).toBeUndefined();
+    expect(
+      findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'flaky', FILE).skip?.title
+    ).toBe('flaky');
+    expect(findSkipForScoutFailure(tree, FILE, 'flaky', FILE).skip?.title).toBe('flaky');
+    expect(
+      findSkipForScoutFailure(tree, 'tests/ai_indices.spec.ts', 'ok', FILE).skip
+    ).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'other.spec.ts', 'flaky', FILE).skip).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'indices.spec.ts', 'flaky', FILE).skip).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'd', 'flaky', FILE).skip).toBeUndefined();
   });
 
   it('matches through a skipped grandparent and a skipped test itself', () => {
@@ -237,10 +257,10 @@ describe('findSkipForScoutFailure', () => {
         test('ok', async () => {});
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'inner', 't', FILE)?.title).toBe('outer');
-    expect(findSkipForScoutFailure(tree, 'plain', 'flaky', FILE)?.title).toBe('flaky');
-    expect(findSkipForScoutFailure(tree, 'plain', 'ok', FILE)).toBeUndefined();
-    expect(findSkipForScoutFailure(tree, 'outer', 't', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'inner', 't', FILE).skip?.title).toBe('outer');
+    expect(findSkipForScoutFailure(tree, 'plain', 'flaky', FILE).skip?.title).toBe('flaky');
+    expect(findSkipForScoutFailure(tree, 'plain', 'ok', FILE).skip).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'outer', 't', FILE).skip).toBeUndefined();
   });
 
   it('does not forgive when the same suite/title pair also occurs unskipped', () => {
@@ -252,7 +272,7 @@ describe('findSkipForScoutFailure', () => {
         test.describe('b', () => { test('c', async () => {}); });
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE)).toBeUndefined();
+    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE).skip).toBeUndefined();
   });
 
   it('forgives when every occurrence of the suite/title pair is skipped', () => {
@@ -264,6 +284,18 @@ describe('findSkipForScoutFailure', () => {
         test.describe.skip('b', () => { test('c', async () => {}); });
       });
     `);
-    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE)?.title).toBe('a');
+    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE).skip?.title).toBe('a');
+  });
+
+  it('does not forgive when the title may also come from a describe with a dynamic title', () => {
+    const tree = parseSuiteTree(`
+      test.describe.skip('b', () => { test('c', async () => {}); });
+      test.describe(runtimeTitle, () => { test('c', async () => {}); });
+    `);
+    expect(findSkipForScoutFailure(tree, 'b', 'c', FILE)).toEqual({
+      skip: undefined,
+      allUnskipped: false,
+    });
+    expect(findSkipForScoutFailure(tree, 'b', 'd', FILE).allUnskipped).toBe(false);
   });
 });

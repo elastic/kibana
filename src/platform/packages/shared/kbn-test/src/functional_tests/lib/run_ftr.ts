@@ -35,10 +35,11 @@ export async function runFtr(options: {
 
   const failureCount = await ftr.run(options.signal, options.retry);
   if (failureCount > 0) {
-    // Bail stops at the first failure and an abort (ES/Kibana exited early) stops wherever it
-    // was, so in both cases the JUnit report is incomplete and does not explain the exit alone.
+    // Bail stops at the first failure and an abort (ES/Kibana exited early, or the first Mocha
+    // timeout under `mochaOpts.abortOnTimeout`) stops wherever it was, so in both cases the JUnit
+    // report is incomplete and does not explain the exit alone.
     // `mochaOpts.bail` is the effective value: the CLI flag is applied onto the config.
-    const stoppedEarly = options.signal?.aborted || options.config.get('mochaOpts.bail') === true;
+    const stoppedEarly = ftr.aborted || options.config.get('mochaOpts.bail') === true;
     throw createFailError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`,
       { exitCode: stoppedEarly ? 1 : FTR_TEST_FAILURES_EXIT_CODE }
