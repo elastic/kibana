@@ -43,7 +43,7 @@ export class AccessControlClient implements AccessControlClientPublic {
         `/internal/access_control/global_access/${contentTypeId}`
       );
       return {
-        isGloballyAuthorized: response?.isGloballyAuthorized,
+        isGloballyAuthorized: response?.isGloballyAuthorized ?? false,
       };
     } catch {
       return { isGloballyAuthorized: false };
