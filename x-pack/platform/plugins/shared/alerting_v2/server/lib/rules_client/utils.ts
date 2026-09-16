@@ -403,6 +403,51 @@ export function assertManagedRuleWrite(params: ManagedWriteCheckParams): void {
 }
 
 /**
+ * Asserts that a write's `kind` is compatible with the kind pin declared by
+ * the builder type's registration.  When the builder type pins a `kind`, any
+ * rule whose kind differs is rejected with RULE_KIND_MISMATCH (400).
+ *
+ * - Passes when `builderType` is absent (no-builder rule — kind unconstrained).
+ * - Passes when the builder type is not in the registry (unregistered; handled
+ *   elsewhere) or its registration carries no `kind` pin.
+ * - Throws when the write's `kind` differs from the pin.
+ *
+ * Call sites:
+ *   - createRule: pass `parsed.kind` and `parsed.metadata?.builder_type`.
+ *   - updateRule: pass `existingAttrs.kind` (kind is immutable) and the
+ *     effective builder type after the update resolves.
+ *   - upsertRule replace branch: pass `parsed.kind` and the effective builder
+ *     type from the PUT body (kind is immutable — assertImmutableUnchanged runs
+ *     first and guarantees it matches the stored kind).
+ *
+ * Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+ * Ref: rule-types.md "Which kind detection rules use"
+ */
+export function assertKindPinMatch(
+  registry: BuilderTypeRegistry,
+  writeKind: string,
+  builderType: string | null | undefined
+): void {
+  if (!builderType) return;
+  const definition = registry.get(builderType);
+  if (!definition || definition.kind === undefined) return;
+  if (writeKind !== definition.kind) {
+    throw Boom.badRequest(
+      `Rule kind '${writeKind}' does not match the kind pin '${definition.kind}' ` +
+        `declared by builder type '${builderType}'`,
+      {
+        code: ALERTING_ERROR_CODES.RULE_KIND_MISMATCH,
+        details: {
+          write_kind: writeKind,
+          required_kind: definition.kind,
+          builder_type: builderType,
+        },
+      }
+    );
+  }
+}
+
+/**
  * Returns just the immutable fields from `attrs`, suitable for spreading at
  * the end of an attribute builder so subsequent code cannot accidentally
  * overwrite them.
@@ -895,11 +940,10 @@ export function transformRuleSoAttributesToRuleApiResponse(
       name: attrs.metadata.name,
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
-      // signature_id is always set at create time (generated or caller-supplied).
-      // The non-null assertion is safe for all rules created since step 4.1;
-      // step 4.5's model-version migration backfills any pre-existing rules.
-
-      signature_id: attrs.metadata.signature_id!,
+      // Falls back to the object id for rules created before this field was
+      // introduced (pending the model-version migration in step 4.5 which
+      // backfills `signature_id ?? doc.id`), matching the migration's own logic.
+      signature_id: attrs.metadata.signature_id ?? id,
       builder_type: attrs.metadata.builder_type,
       builder_fields: attrs.metadata.builder_fields,
       // Falls back to the default for rules created before this field was
