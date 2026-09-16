@@ -166,6 +166,7 @@ const createStartContractMock = () => {
     }),
     recentlyAccessed: lazyObject({
       add: jest.fn(),
+      remove: jest.fn(),
       get: jest.fn(),
       get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
@@ -227,6 +228,8 @@ const createStartContractMock = () => {
       setNavigationCustomization: jest.fn(),
       getCustomizeNavigationHandler$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
       registerCustomizeNavigationHandler: jest.fn(),
+      registerNavigationLinks: jest.fn(),
+      getRegisteredNavigationLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     controls,
     help,

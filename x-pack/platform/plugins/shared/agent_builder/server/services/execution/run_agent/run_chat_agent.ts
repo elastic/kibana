@@ -19,6 +19,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -64,7 +65,12 @@ import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
+import {
+  eventsForContext,
+  groupTimelineEntries,
+  isTimelineRound,
+  roundResponse,
+} from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -217,10 +223,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           context: {
             userMessage: processedConversation.nextInput.message,
             recentContext: buildRecentContext(
-              groupTimelineRounds(processedConversation.timeline).map((round) => ({
-                input: round.userMessage.data,
-                response: roundResponse(round),
-              }))
+              groupTimelineEntries(processedConversation.timeline).map((entry) =>
+                isTimelineRound(entry)
+                  ? { input: entry.userMessage.data, response: roundResponse(entry) }
+                  : { input: entry.userMessage.data }
+              )
             ),
           },
           modelProvider,
@@ -279,6 +286,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    agentConfiguration,
   });
 
   // Then add dynamic tools
@@ -495,6 +503,22 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } catch (err) {
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
+
+  // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+  // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
+  try {
+    await context.hooks.run(HookLifecycle.afterExecution, {
+      request,
+      abortSignal,
+      agentId,
+      round,
+      conversationId: conversation?.id,
+      agentConfiguration,
+    });
+  } catch (err) {
+    logger.error(`After-round hooks failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
   return {
     round,
   };
@@ -513,7 +537,7 @@ const getConversationState = ({
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
