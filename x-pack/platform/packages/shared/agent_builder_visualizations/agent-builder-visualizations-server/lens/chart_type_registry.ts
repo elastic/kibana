@@ -74,9 +74,6 @@ const panelTitleRule =
 const noPanelTitleRule = (reason: string): string =>
   `Omit the top-level \`title\`, because ${reason}.`;
 
-const defaultPaletteRule =
-  'Omit explicit `color` properties so Lens applies its default palette. Add colors only when the user explicitly asks.';
-
 /**
  * Central registry for all supported chart types: schema, selection text, and
  * presentation rules. `chart_type_guidance.ts` compiles the rules into the
@@ -192,7 +189,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
       rules: [
         panelTitleRule,
-        defaultPaletteRule,
+        'Omit explicit `color` properties so Lens applies its default palette. Add colors only when the user explicitly asks.',
         'Omit `legend` entirely so Lens applies its defaults, including during enhancement. Drop any existing `legend` block rather than carrying it over. Set `legend` only when the user explicitly asks for a legend change, and then set only the requested property.',
       ],
     },
