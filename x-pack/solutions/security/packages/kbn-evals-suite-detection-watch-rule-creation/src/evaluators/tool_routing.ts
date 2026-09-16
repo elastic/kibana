@@ -12,14 +12,8 @@ import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
 const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
-/**
- * Only calls the LLM actually issued carry a tool.call.id; a tool's internal helper spans
- * (e.g. the inner search tools in agent-builder-genai-utils, which call withExecuteToolSpan
- * without a toolCallId) are TOOL-kind but carry none. The trace-based evaluators filter on
- * this, so the setup reachability probe MUST filter on it too — asserting only the weaker
- * TOOL-kind property lets a stack that exports nothing but inner-tool spans pass setup and
- * then score N/A on every example, which is the exact false pass the probe exists to stop.
- */
+/** TOOL spans for calls the LLM issued; a tool's internal helper spans carry no tool.call.id.
+ *  Shared by the probe and the evaluators so the two cannot drift apart. */
 export const LLM_ISSUED_TOOL_SPAN = `${TOOL_KIND} AND attributes.gen_ai.tool.call.id IS NOT NULL`;
 
 interface EsqlResponse {

@@ -182,10 +182,8 @@ describe('assertToolSpansReachable', () => {
   });
 
   it('demands the SAME span predicate the evaluators score on, not just TOOL kind', async () => {
-    // The evaluators count only spans carrying a tool.call.id (calls the LLM issued).
-    // Inner-tool spans are TOOL-kind with no call id, so a probe that asks only for
-    // TOOL kind passes on a stack where every trace-based evaluator then scores N/A —
-    // and N/A is not a failure, so the suite reports a pass having measured nothing.
+    // Inner-tool spans are TOOL-kind with no call id; accepting them would arm evaluators
+    // that then score N/A on every example.
     const queries: string[] = [];
     const client = esWith((q) => {
       queries.push(q);
