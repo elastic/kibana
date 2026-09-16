@@ -53,17 +53,33 @@ export const createDatasetFlyoutStrings = {
 
   nameLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.nameLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Dataset name',
     }),
 
   nameHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.nameHelp', {
-      defaultMessage: 'Unique name for use in queries',
+      defaultMessage:
+        'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+    }),
+
+  namePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.namePlaceholder', {
+      defaultMessage: 'e.g. my-dataset',
     }),
 
   descriptionLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.descriptionLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
+    }),
+
+  descriptionHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.descriptionHelp', {
+      defaultMessage: 'A brief description to identify this dataset',
+    }),
+
+  descriptionPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.descriptionPlaceholder', {
+      defaultMessage: 'Type text',
     }),
 
   dataSourceLabel: () =>

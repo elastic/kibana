@@ -142,6 +142,7 @@ export function CreateDatasetDetailsFields({
           data-test-subj="createDatasetFlyoutName"
           autoFocus={autoFocusName}
           fullWidth
+          placeholder={createDatasetFlyoutStrings.namePlaceholder()}
           isInvalid={Boolean(nameFieldState.error)}
           value={nameField.value}
           onChange={(e) => nameField.onChange(e.target.value)}
@@ -149,11 +150,16 @@ export function CreateDatasetDetailsFields({
           inputRef={nameField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.descriptionLabel()} fullWidth>
+      <EuiFormRow
+        label={createDatasetFlyoutStrings.descriptionLabel()}
+        helpText={createDatasetFlyoutStrings.descriptionHelp()}
+        fullWidth
+      >
         <EuiTextArea
           data-test-subj="createDatasetFlyoutDescription"
           fullWidth
           rows={1}
+          placeholder={createDatasetFlyoutStrings.descriptionPlaceholder()}
           value={descriptionField.value}
           onChange={(e) => descriptionField.onChange(e.target.value)}
           name={descriptionField.name}

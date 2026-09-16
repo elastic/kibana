@@ -67,6 +67,22 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetFlyoutResource')).toBeInTheDocument();
     expect(getByText('Select an existing data source or connect a new one')).toBeInTheDocument();
     expect(queryByText('Select the external data source this dataset belongs to.')).toBeNull();
+    expect(getByText('Dataset name')).toBeInTheDocument();
+    expect(
+      getByText(
+        'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported'
+      )
+    ).toBeInTheDocument();
+    expect(getByTestId('createDatasetFlyoutName')).toHaveAttribute(
+      'placeholder',
+      'e.g. my-dataset'
+    );
+    expect(getByText('Description (optional)')).toBeInTheDocument();
+    expect(getByText('A brief description to identify this dataset')).toBeInTheDocument();
+    expect(getByTestId('createDatasetFlyoutDescription')).toHaveAttribute(
+      'placeholder',
+      'Type text'
+    );
     expect(
       getByText('URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)')
     ).toBeInTheDocument();
