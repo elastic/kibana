@@ -24,6 +24,8 @@ import {
   assertSignatureIdUnchanged,
   assertRuleSourceUnchanged,
   deriveOwnership,
+  getManagedWriteOwner,
+  managedRuleWriteError,
   validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
@@ -2033,5 +2035,120 @@ describe('isTaskMidRun', () => {
     expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
     expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
     expect(isTaskMidRun(undefined)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Step 5.3: getManagedWriteOwner and managedRuleWriteError
+// ---------------------------------------------------------------------------
+
+describe('getManagedWriteOwner (step 5.3)', () => {
+  const registry = new BuilderTypeRegistry();
+  const managedType = {
+    type: 'security.detection.query',
+    name: 'Detection query',
+    ownership: { solution: 'security', domain: 'detection' },
+    builderFieldsSchema: {} as never,
+    generateQuery: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.spyOn(registry, 'get').mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('returns undefined for an unmanaged stored rule', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: undefined,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns the owner when stored ownership says managed and caller has no identity', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('returns undefined when stored ownership says managed and caller solution matches', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: { solution: 'security' },
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns the owner when stored ownership says managed and caller solution mismatches', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: { solution: 'other' },
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('uses the registration when stored ownership is not managed', () => {
+    jest.spyOn(registry, 'get').mockReturnValue(managedType as never);
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: 'security.detection.query',
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('returns undefined when neither stored ownership nor registration says managed', () => {
+    jest.spyOn(registry, 'get').mockReturnValue(undefined);
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: 'security.detection.query',
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe('managedRuleWriteError (step 5.3)', () => {
+  it('builds a RULE_IS_MANAGED bulk error with solution/domain in the message', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection');
+    expect(err).toMatchObject({
+      id: 'rule-1',
+      error: {
+        code: 'RULE_IS_MANAGED',
+        message: expect.stringContaining('security'),
+      },
+    });
+    expect(err.error.message).toContain('detection');
+  });
+
+  it('includes the rule name in error.details when provided', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection', 'My detection rule');
+    expect(err.error.details).toEqual({ name: 'My detection rule' });
+  });
+
+  it('omits error.details when no name is provided', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection');
+    expect(err.error.details).toBeUndefined();
   });
 });
