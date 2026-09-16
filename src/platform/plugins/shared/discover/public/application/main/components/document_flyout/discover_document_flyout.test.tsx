@@ -407,6 +407,12 @@ describe('DiscoverDocumentFlyout', () => {
       skipWaitForDataFetching: true,
     });
 
+    const documents$ = toolkit.getCurrentTabDataStateContainer().data$.documents$;
+    const emitDocuments = documents$.next.bind(documents$);
+    // Freeze before seeding: the main fetch uses searchSource.fetch$ (not the hanging search mock),
+    // and useDataState ignores later COMPLETE payloads once fetchStatus is already COMPLETE.
+    documents$.next = jest.fn();
+
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: toolkit.getCurrentTab().id,
@@ -414,9 +420,7 @@ describe('DiscoverDocumentFlyout', () => {
       })
     );
 
-    const documents$ = toolkit.getCurrentTabDataStateContainer().data$.documents$;
-
-    documents$.next({
+    emitDocuments({
       fetchStatus: FetchStatus.LOADING,
       result: [buildDataTableRecord(inResultsHit, dataViewMock)],
     });
@@ -433,22 +437,21 @@ describe('DiscoverDocumentFlyout', () => {
       </DiscoverToolkitTestProvider>
     );
 
+    expect(await screen.findByTestId('docViewerFlyoutLoading')).toBeVisible();
     await waitFor(() => {
       expect(services.data.search.search).toHaveBeenCalled();
     });
 
+    const completeRecords = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
     act(() => {
-      documents$.next({
+      emitDocuments({
         fetchStatus: FetchStatus.COMPLETE,
-        result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+        result: completeRecords,
       });
     });
-    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    documents$.next = jest.fn();
 
-    const rowFromResults = documents$
-      .getValue()
-      .result?.find((row) => row.raw._id === outOfResultsHit._id);
+    const rowFromResults = completeRecords.find((row) => row.raw._id === outOfResultsHit._id);
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
