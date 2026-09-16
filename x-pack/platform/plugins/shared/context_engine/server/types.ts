@@ -33,10 +33,13 @@ export interface ContextEnginePluginStart {
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
   /**
-   * The improvements store, bound to the caller's Elasticsearch client. Pass a request-scoped one:
-   * the store is a user-owned index, so Elasticsearch authorizes each read and write.
+   * The improvements store for one space, bound to the caller's Elasticsearch client.
+   * Pass a request-scoped client: the store is a user-owned index, so Elasticsearch authorizes each read and write.
    */
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */

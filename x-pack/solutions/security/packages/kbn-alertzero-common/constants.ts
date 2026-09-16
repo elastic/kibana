@@ -6,7 +6,6 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { RecommendedAction } from './impl/schemas';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -225,13 +224,3 @@ export const API_VERSIONS = {
 } as const;
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
-
-export const CONVERSATION_CATEGORY_COLORS: Record<
-  RecommendedAction,
-  'danger' | 'warning' | 'accentSecondary' | 'accent'
-> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'accentSecondary',
-  tune: 'accent',
-};
