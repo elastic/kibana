@@ -14,9 +14,7 @@ import {
 } from '@kbn/core-security-server';
 
 /**
- * The workload types plugins have registered, keyed by plugin. Lives in Core because Core is the
- * only party that knows which plugin is calling; the security plugin only ever sees the plugin id
- * Core hands it.
+ * The workload types plugins have registered, keyed by plugin.
  */
 export class WorkloadTypeRegistry {
   private readonly byPlugin = new Map<

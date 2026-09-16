@@ -44,7 +44,7 @@ export interface CoreServiceAccountsService {
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is
-   * unbound. Requires an authenticated request holding the `manage_security` cluster privilege.
+   * unbound.
    * The binding is created in the space of the request, which the returned binding reports for a
    * caller that has to name it again at execution time. Re-binding is the same call: it replaces
    * the existing binding for the workload.
@@ -57,8 +57,7 @@ export interface CoreServiceAccountsService {
   ): Promise<ServiceAccountWorkloadBinding>;
 
   /**
-   * Removes the binding of a workload in the space of the request. Requires the same privilege as
-   * {@link CoreServiceAccountsService.bindWorkload}. Succeeds whether or not a binding existed, and
+   * Removes the binding of a workload in the space of the request. Succeeds whether or not a binding existed, and
    * takes effect on a running execution at its next credential mint.
    *
    * Plugins must call this from their own workload-delete path; nothing else removes a binding.

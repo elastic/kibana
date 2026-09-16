@@ -37,11 +37,11 @@ export interface ServiceAccountWorkloadTypeRegistration {
    */
   type: string;
   /**
-   * Human-readable label for the service account management UI, e.g. `Alerting rule`.
+   * Human-readable label, e.g. `Alerting rule`.
    */
   name: string;
   /**
-   * Optional longer description of what the workload does, for the same UI.
+   * Optional longer description of what the workload does.
    */
   description?: string;
 }
