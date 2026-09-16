@@ -10,7 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useRef } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
@@ -38,7 +38,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
         try {
           // First, configure the JSON language service with schema validation
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,

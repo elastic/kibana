@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { isPlainObject } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -195,7 +195,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
 
         try {
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,

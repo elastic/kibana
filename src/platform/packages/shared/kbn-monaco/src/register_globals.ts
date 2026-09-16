@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { createWebWorker } from 'monaco-editor/internal/common/workers.js';
 import { monaco } from './monaco_imports';
 import type { CustomLangModuleType } from './types';
 import { getWorker } from './languages/worker_factory';
 
-declare module 'monaco-editor/esm/vs/editor/editor.api' {
+declare module 'monaco-editor/editor/editor.api' {
   export interface Environment {
     // add typing for exposing monaco on the MonacoEnvironment property
+    // passed for use in functional and unit tests so that we can verify values from 'editor'
     monaco: typeof monaco;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
   export namespace editor {
-    // Define overloads for the getContribution method to allow for better typing of the editor contributions
+    // Define overloads for the getContribution method to allow for
+    // better typing of the editor contributions of concerns to us
     interface ICodeEditor {
       getContribution(id: 'editor.contrib.suggestController'):
         | (editor.IEditorContribution & {
@@ -27,7 +31,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
             widget?: {
               value?: {
                 // these methods are not documented in monaco but are available on the vscode upstream,
-                // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts#L146-L147
+                // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts#L149-L150
                 onDidHide?: (cb: () => void) => void;
                 onDidShow?: (cb: () => void) => void;
               };
@@ -62,12 +66,11 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
 }
 
 window.MonacoEnvironment = {
-  // passed for use in functional and unit tests so that we can verify values from 'editor'
   monaco,
   getWorker: (_moduleId, languageId) => {
     return getWorker(languageId);
   },
-};
+} satisfies typeof MonacoEnvironment;
 
 const languageThemeResolverDefinitions = new Map<
   string,
@@ -101,3 +104,40 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
 });
+
+// In Monaco version >= 0.54, the createWebWorker function signature changed to accept `{ worker: Worker|Promise<Worker> }`
+// instead of the previous `{ moduleId, label, createData }`, monaco-yaml (via monaco-worker-manager@2) still
+// uses the old signature.
+// This shim intercepts old-style calls, manually creates the Worker, sends
+// the two initialization messages monaco-worker-manager requires before Monaco's own INITIALIZE handshake,
+// then forwards to the real createWebWorker with the new API.
+//
+// This is not a novel implementation a variant of it is present in monaco 0.54,
+// see https://github.com/microsoft/monaco-editor/blob/v0.54.0/src/editor/editor.main.ts#L10-L16.
+{
+  // Monaco version >= 0.54 dropped exposing IWebWorkerOptions from its public types.
+  interface LegacyWebWorkerOptions {
+    moduleId: string;
+    label?: string;
+    createData?: object;
+    host?: monaco.editor.IInternalWebWorkerOptions['host'];
+    keepIdleModels?: boolean;
+  }
+
+  type CreateWebWorkerOptions = monaco.editor.IInternalWebWorkerOptions | LegacyWebWorkerOptions;
+
+  const isLegacyWebWorkerOptions = (opts: CreateWebWorkerOptions): opts is LegacyWebWorkerOptions =>
+    'moduleId' in opts && !('worker' in opts);
+
+  const originalCreateWebWorker = monaco.editor.createWebWorker;
+
+  monaco.editor.createWebWorker = function <T extends object>(
+    opts: CreateWebWorkerOptions
+  ): monaco.editor.MonacoWebWorker<T> {
+    if (isLegacyWebWorkerOptions(opts)) {
+      return createWebWorker(opts);
+    }
+
+    return originalCreateWebWorker(opts);
+  };
+}
