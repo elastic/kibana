@@ -68,7 +68,7 @@ const baseRule: RuleApiResponse = {
   kind: 'alert',
   enabled: true,
   version: 1,
-  metadata: { name: 'Test Rule', tags: ['prod'], routing_tags: ['sre'] },
+  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', tags: ['prod'], routing_tags: ['sre'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-*' },

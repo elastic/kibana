@@ -43,6 +43,7 @@ import {
   FIND_MAX_RESULT_WINDOW,
   MAX_BUILDER_FIELDS_KEYS,
   MAX_BUILDER_TYPE_LENGTH,
+  MAX_SIGNATURE_ID_LENGTH,
 } from './constants';
 import { bulkErrorSchema } from './bulk_operation_schema';
 
@@ -96,6 +97,8 @@ const METADATA_ROUTING_TAGS_DESCRIPTION =
   'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".';
 const METADATA_BUILDER_DESCRIPTION =
   'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.';
+const METADATA_SIGNATURE_ID_DESCRIPTION =
+  'Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.';
 const METADATA_BUILDER_FIELDS_DESCRIPTION =
   'Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.';
 
@@ -105,6 +108,15 @@ const metadataDescriptionSchema = lazySchema(() =>
 );
 const metadataTagsSchema = lazySchema(() => tagsSchema.min(1));
 const metadataRoutingTagsSchema = lazySchema(() => tagsSchema.min(1));
+/**
+ * Stable logical-rule identifier. Callers may supply an opaque string (1–256
+ * chars) at creation; when absent the framework generates a UUID v4. The value
+ * is immutable after creation: an update or PUT-replace omitting the field
+ * keeps the stored value, and sending a differing value is rejected with 409.
+ * Unique within a space (same value in two spaces represents the same logical
+ * rule installed twice, which is the expected cross-space use case).
+ */
+const metadataSignatureIdSchema = lazySchema(() => z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH));
 const metadataBuilderSchema = lazySchema(() =>
   z
     .object({
@@ -133,6 +145,9 @@ export const metadataSchema = lazySchema(() =>
       routing_tags: metadataRoutingTagsSchema
         .optional()
         .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+      signature_id: metadataSignatureIdSchema
+        .optional()
+        .describe(METADATA_SIGNATURE_ID_DESCRIPTION),
       builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
       builder_fields: metadataBuilderFieldsSchema
         .optional()
@@ -157,6 +172,10 @@ const metadataPatchSchema = lazySchema(() =>
         .nullable()
         .optional()
         .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+      // Immutable: the rules client rejects a value that differs from the stored one.
+      signature_id: metadataSignatureIdSchema
+        .optional()
+        .describe(METADATA_SIGNATURE_ID_DESCRIPTION),
       builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
       // Replaced whole rather than merged key by key: the builder's own schema validates the record.
       builder_fields: metadataBuilderFieldsSchema
@@ -1085,6 +1104,25 @@ export const updateRuleDataSchema = lazySchema(() =>
 );
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/** Rule response metadata — write-path fields plus server-managed fields. */
+export const ruleResponseMetadataSchema = lazySchema(() =>
+  metadataSchema
+    .extend({
+      /**
+       * `signature_id` is optional on write (generated when absent) but the
+       * framework always sets it at create time, so responses always carry it.
+       */
+      signature_id: z
+        .string()
+        .min(1)
+        .max(MAX_SIGNATURE_ID_LENGTH)
+        .describe(
+          'Stable logical-rule identifier. Set at creation (caller-supplied or UUID v4). Immutable.'
+        ),
+    })
+    .meta({ id: 'alerting_rule_response_metadata' })
+);
 
 /**
  * Schema for rule response data returned from the API.
