@@ -13,6 +13,7 @@ import apm from 'elastic-apm-node';
 
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
 import type {
+  IacBlueprintCoverage,
   IacPolicyTemplateSelection,
   IAC_FEDERATED_IDENTITY_WORKFLOW,
 } from '../../common/types/rest_spec/iac_provisioner';
@@ -28,6 +29,7 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
+const RESOLVE_ENDPOINT = '/api/v1/resolve';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
@@ -70,6 +72,15 @@ export interface IacProvisionerRenderResponse {
   blueprint: { id: string; version: string };
 }
 
+export interface IacProvisionerResolveRequest {
+  provider: typeof AWS_CLOUD_PROVIDER;
+  integrations: IacProvisionerRenderIntegration[];
+}
+
+export interface IacProvisionerResolveResponse {
+  blueprints: IacBlueprintCoverage[];
+}
+
 interface IacProvisionerErrorBody {
   code?: string;
   message?: string;
@@ -78,6 +89,7 @@ interface IacProvisionerErrorBody {
 
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  resolveBlueprints(request: IacProvisionerResolveRequest): Promise<IacProvisionerResolveResponse>;
 }
 
 const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
@@ -94,6 +106,29 @@ const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisioner
     typeof (blueprint as { id?: unknown }).id === 'string' &&
     typeof (blueprint as { version?: unknown }).version === 'string'
   );
+};
+
+const isIacBlueprintCoverage = (value: unknown): value is IacBlueprintCoverage => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { workflow, resolvedVersion, deployable, notCovered } = value as Record<string, unknown>;
+  return (
+    typeof workflow === 'string' &&
+    (resolvedVersion === null || typeof resolvedVersion === 'string') &&
+    typeof deployable === 'boolean' &&
+    Array.isArray(notCovered)
+  );
+};
+
+const isIacProvisionerResolveResponse = (
+  value: unknown
+): value is IacProvisionerResolveResponse => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const { blueprints } = value as Record<string, unknown>;
+  return Array.isArray(blueprints) && blueprints.every(isIacBlueprintCoverage);
 };
 
 /**
@@ -145,6 +180,29 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       `[IaC Provisioner] Render response: blueprint ${rendered.blueprint.id}@${rendered.blueprint.version}${expiry}`
     );
     return rendered;
+  }
+
+  public async resolveBlueprints(
+    request: IacProvisionerResolveRequest
+  ): Promise<IacProvisionerResolveResponse> {
+    const logger = appContextService.getLogger().get('IacProvisionerService');
+    logger.info(
+      `[IaC Provisioner] Resolving blueprints for provider ${
+        request.provider
+      }, integrations: ${JSON.stringify(request.integrations)}`
+    );
+
+    const resolved = await this.request<IacProvisionerResolveResponse>(
+      RESOLVE_ENDPOINT,
+      request,
+      logger
+    );
+    if (!isIacProvisionerResolveResponse(resolved)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid resolve body');
+    }
+    // Unlike render, every field of the resolve response is safe to log.
+    logger.debug(`[IaC Provisioner] Resolve response: ${JSON.stringify(resolved)}`);
+    return resolved;
   }
 
   /**

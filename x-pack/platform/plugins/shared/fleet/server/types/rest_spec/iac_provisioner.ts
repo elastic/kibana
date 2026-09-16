@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import type { IacNotCoveredReasonCode } from '../../../common/types/rest_spec/iac_provisioner';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  IAC_NOT_COVERED_REASONS,
+} from '../../../common/types/rest_spec/iac_provisioner';
+import {
+  CLOUD_CONNECTOR_RENDER_FLOW,
+  UNIFIED_ONBOARDING_RENDER_FLOW,
+} from '../../../common/telemetry/iac_provisioner_events';
 
-const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
-  meta: {
-    description: 'The Kibana flow requesting the render; reported in telemetry.',
-  },
-});
+const IacProvisionerFlowSchema = schema.oneOf(
+  [schema.literal(CLOUD_CONNECTOR_RENDER_FLOW), schema.literal(UNIFIED_ONBOARDING_RENDER_FLOW)],
+  {
+    meta: {
+      description: 'The Kibana flow requesting the call; reported in telemetry.',
+    },
+  }
+);
 
 const IacPolicyTemplateSelectionSchema = schema.object({
   name: schema.string({
@@ -117,4 +128,93 @@ export const RenderIacTemplateResponseSchema = schema.object({
       meta: { description: 'Blueprint version that was rendered.' },
     }),
   }),
+});
+
+export const ResolveIacBlueprintsRequestSchema = {
+  body: schema.object({
+    provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
+      meta: {
+        description: 'The cloud provider the integrations run against. Only AWS is supported.',
+      },
+    }),
+    flow: IacProvisionerFlowSchema,
+    integrations: IacIntegrationsSchema,
+  }),
+};
+
+const IacNotCoveredReasonSchema = schema.object({
+  integration: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'EPR package name of the integration that is not covered.' },
+  }),
+  // Derived from the shared const so a new reason code cannot be added in
+  // one place only; the tuple cast bridges oneOf's fixed-arity overloads.
+  reason: schema.oneOf(
+    IAC_NOT_COVERED_REASONS.map((reason) => schema.literal(reason)) as [
+      Type<IacNotCoveredReasonCode>
+    ],
+    { meta: { description: 'Machine-readable reason code.' } }
+  ),
+  policyTemplate: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 255,
+      meta: { description: 'Policy template name, when the reason is template- or input-scoped.' },
+    })
+  ),
+  input: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 255,
+      meta: { description: 'Input name, when the reason is no_patch_for_input.' },
+    })
+  ),
+  supportFloor: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 64,
+      meta: { description: 'Minimum version required, when the reason is below_support_floor.' },
+    })
+  ),
+  installedVersion: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 64,
+      meta: { description: 'Installed package version, when the reason is below_support_floor.' },
+    })
+  ),
+});
+
+export const ResolveIacBlueprintsResponseSchema = schema.object({
+  blueprints: schema.arrayOf(
+    schema.object({
+      workflow: schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: { description: 'Identity mechanism name, e.g. federated_identity.' },
+      }),
+      resolvedVersion: schema.nullable(
+        schema.string({
+          minLength: 1,
+          maxLength: 64,
+          meta: {
+            description:
+              'Blueprint version that satisfies the request, or null when not deployable.',
+          },
+        })
+      ),
+      deployable: schema.boolean({
+        meta: { description: 'True when every requested integration is covered.' },
+      }),
+      notCovered: schema.arrayOf(IacNotCoveredReasonSchema, {
+        maxSize: 100,
+        meta: { description: 'Reasons why one or more integrations are not covered.' },
+      }),
+    }),
+    {
+      maxSize: 50,
+      meta: { description: 'Coverage result for every known blueprint.' },
+    }
+  ),
 });

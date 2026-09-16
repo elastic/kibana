@@ -450,6 +450,66 @@ describe('IacProvisionerService', () => {
       /invalid render body/
     );
   });
+
+  it('POSTs the resolve request and returns blueprint coverage', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    const resolveResponse = {
+      blueprints: [
+        {
+          workflow: 'federated_identity',
+          resolvedVersion: 'v1',
+          deployable: true,
+          notCovered: [],
+        },
+      ],
+    };
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, resolveResponse));
+
+    const result = await iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+
+    expect(result).toEqual(resolveResponse);
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://iac-provisioner.example/api/v1/resolve',
+      expect.objectContaining({ method: 'POST' })
+    );
+    const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
+    expect(debugLogged).toContain('federated_identity');
+    expect(debugLogged).not.toContain('X-Amz-Signature');
+  });
+
+  it('maps a 501 resolve response to IacProvisionerUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(jsonResponse(501, { code: 'resolve.not_implemented' }));
+
+    const promise = iacProvisionerService.resolveBlueprints({
+      provider: 'aws',
+      integrations: RENDER_REQUEST.integrations,
+    });
+    await expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
+    await promise.catch((error: IacProvisionerUnavailableError) => {
+      expect(error.statusCode).toBe(501);
+    });
+  });
+
+  it('rejects a 200 resolve body whose blueprints are malformed', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { blueprints: [{ deployable: true, notCovered: [] }] })
+    );
+
+    await expect(
+      iacProvisionerService.resolveBlueprints({
+        provider: 'aws',
+        integrations: RENDER_REQUEST.integrations,
+      })
+    ).rejects.toThrow(/invalid resolve body/);
+  });
 });
 
 describe('parseIacProvisionerErrors', () => {

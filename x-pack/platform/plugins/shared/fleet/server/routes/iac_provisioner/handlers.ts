@@ -17,6 +17,8 @@ import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
+  reportIacProvisionerResolveCompleted,
+  reportIacProvisionerResolveRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 import {
   IacProvisionerRequestError,
@@ -25,7 +27,10 @@ import {
 } from '../../errors';
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
-import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
+import type {
+  RenderIacTemplateRequestSchema,
+  ResolveIacBlueprintsRequestSchema,
+} from '../../types/rest_spec/iac_provisioner';
 import type { IacPolicyTemplateSelection } from '../../../common/types/rest_spec/iac_provisioner';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
@@ -180,9 +185,84 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       logger,
       response,
       unexpectedMessage: 'An unexpected error occurred while rendering the IaC template',
+      reportCompleted: reportIacProvisionerRenderCompleted,
     });
   }
 };
+
+export const resolveIacBlueprintsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof ResolveIacBlueprintsRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+  const logger = appContextService.getLogger().get('IacProvisioner resolveIacBlueprintsHandler');
+  const { provider, flow, integrations: requestedIntegrations } = request.body;
+
+  const iacProvisionerEnabled = await isIacProvisionerEnabled();
+  if (!iacProvisionerEnabled) {
+    return response.notFound({
+      body: { message: 'IaC Provisioner is not enabled' },
+    });
+  }
+
+  const startTime = Date.now();
+  try {
+    const integrations = await buildIacProvisionerIntegrations({
+      savedObjectsClient: internalSoClient,
+      requestedIntegrations,
+    });
+    if (!Array.isArray(integrations)) {
+      return response.badRequest({ body: { message: integrations.errorMessage } });
+    }
+
+    reportIacProvisionerResolveRequested({
+      flow,
+      integrationCount: integrations.length,
+    });
+
+    const resolved = await iacProvisionerService.resolveBlueprints({ provider, integrations });
+
+    reportIacProvisionerResolveCompleted({
+      flow,
+      success: true,
+      httpStatus: 200,
+      errorCodes: [],
+      blueprintCount: resolved.blueprints.length,
+      deployableCount: resolved.blueprints.filter(({ deployable }) => deployable).length,
+      notCoveredReasons: uniqueNotCoveredReasons(resolved.blueprints),
+      latencyMs: Date.now() - startTime,
+    });
+    return response.ok({ body: resolved });
+  } catch (error) {
+    return mapIacProvisionerRouteError({
+      error,
+      flow,
+      startTime,
+      logger,
+      response,
+      unexpectedMessage: 'An unexpected error occurred while resolving IaC blueprints',
+      reportCompleted: ({ flow: completedFlow, success, httpStatus, errorCodes, latencyMs }) =>
+        reportIacProvisionerResolveCompleted({
+          flow: completedFlow,
+          success,
+          httpStatus,
+          errorCodes,
+          latencyMs,
+          blueprintCount: 0,
+          deployableCount: 0,
+          notCoveredReasons: [],
+        }),
+    });
+  }
+};
+
+const uniqueNotCoveredReasons = (
+  blueprints: Array<{ notCovered: Array<{ reason: string }> }>
+): string[] => [
+  ...new Set(blueprints.flatMap(({ notCovered }) => notCovered.map(({ reason }) => reason))),
+];
 
 const mapIacProvisionerRouteError = ({
   error,
@@ -191,6 +271,7 @@ const mapIacProvisionerRouteError = ({
   logger,
   response,
   unexpectedMessage,
+  reportCompleted,
 }: {
   error: unknown;
   flow: IacProvisionerRenderFlow;
@@ -198,11 +279,18 @@ const mapIacProvisionerRouteError = ({
   logger: Logger;
   response: KibanaResponseFactory;
   unexpectedMessage: string;
+  reportCompleted: (fields: {
+    flow: IacProvisionerRenderFlow;
+    success: false;
+    httpStatus: number;
+    errorCodes: string[];
+    latencyMs: number;
+  }) => void;
 }) => {
   const latencyMs = Date.now() - startTime;
 
   if (error instanceof IacProvisionerRequestError) {
-    reportIacProvisionerRenderCompleted({
+    reportCompleted({
       flow,
       success: false,
       httpStatus: error.statusCode,
@@ -220,7 +308,7 @@ const mapIacProvisionerRouteError = ({
   }
 
   if (error instanceof IacProvisionerUnavailableError) {
-    reportIacProvisionerRenderCompleted({
+    reportCompleted({
       flow,
       success: false,
       httpStatus: error.statusCode ?? 0,
@@ -237,7 +325,7 @@ const mapIacProvisionerRouteError = ({
   // PackageNotFoundError) — a caller mistake, not a server failure, so no
   // error-level log.
   if (error instanceof PackageNotFoundError) {
-    reportIacProvisionerRenderCompleted({
+    reportCompleted({
       flow,
       success: false,
       httpStatus: 404,
@@ -250,7 +338,7 @@ const mapIacProvisionerRouteError = ({
   }
 
   logger.error(`Failed IaC Provisioner request: ${getErrorMessage(error)}`);
-  reportIacProvisionerRenderCompleted({
+  reportCompleted({
     flow,
     success: false,
     httpStatus: 500,
