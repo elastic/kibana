@@ -18,13 +18,13 @@ import type { Investigation } from '../schemas/components/investigation.gen';
  * produces NO investigation row — the watch execution completes without materializing
  * a conversation. Only inconclusive or true_positive classifications spawn investigations.
  *
- * Brief fixtures below track Throughline decision groups (Contain / Escalate /
- * Investigate / Tune) while staying on the Investigation → Proposal object model.
+ * Brief fixtures below track proposal queue groups (Respond / Investigate /
+ * Configure) while staying on the Investigation → Proposal object model.
  */
 export const MOCK_CLEAN_RUN_NOTE =
   'Clean Floor runs (false_positive, confidence >= 0.9) do not create investigation rows.';
 
-const containInvestigations: Investigation[] = [
+const respondInvestigations: Investigation[] = [
   {
     id: 'inv-officer-impossible-travel-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
@@ -38,7 +38,7 @@ const containInvestigations: Investigation[] = [
     assignee: null,
     status: 'open',
     pendingProposalCount: 2,
-    recommendedAction: 'contain',
+    recommendedAction: 'respond',
     affectedSurface: 'cfo@corp',
     summary:
       'MFA was satisfied from two countries in 40 minutes — that reads as a stolen session token, not a guessed password. The CFO’s live sessions are the blast radius.',
@@ -75,7 +75,7 @@ const containInvestigations: Investigation[] = [
     assignee: 'analyst.mrodriguez',
     status: 'open',
     pendingProposalCount: 1,
-    recommendedAction: 'contain',
+    recommendedAction: 'respond',
     affectedSurface: 'Sales-NAS',
     summary:
       'Overnight encryption on the Sales NAS — 1,431 files renamed in four minutes before the writing process died. Spread stayed local to one share.',
@@ -105,7 +105,7 @@ const containInvestigations: Investigation[] = [
     assignee: null,
     status: 'open',
     pendingProposalCount: 1,
-    recommendedAction: 'contain',
+    recommendedAction: 'respond',
     affectedSurface: 'svc-helpdesk',
     summary:
       'svc-helpdesk was added to Domain Admins at 02:43, inside the FIN-WS-04 attack window — no change ticket. Morning sweep surfaced it 11 minutes ago.',
@@ -135,7 +135,7 @@ const containInvestigations: Investigation[] = [
     assignee: 'oncall.sec-team',
     status: 'in-progress',
     pendingProposalCount: 0,
-    recommendedAction: 'contain',
+    recommendedAction: 'respond',
     affectedSurface: 'Sales-NAS',
     summary:
       'Network isolation is executing — share offline for users while SNAP-7740 restore prepares. No decision needed until the run finishes.',
@@ -154,7 +154,7 @@ const containInvestigations: Investigation[] = [
   },
 ];
 
-const escalateInvestigations: Investigation[] = [
+const respondMoreInvestigations: Investigation[] = [
   {
     id: 'inv-floor-findb-staged-005',
     template_id: TEMPLATE_ID_INVESTIGATION,
@@ -168,7 +168,7 @@ const escalateInvestigations: Investigation[] = [
     assignee: null,
     status: 'open',
     pendingProposalCount: 1,
-    recommendedAction: 'escalate',
+    recommendedAction: 'respond',
     affectedSurface: 'FIN-DB-02',
     summary:
       'A 4.2 GB archive was assembled in C:\\temp on FIN-DB-02 from finance exports. Nothing has left the host yet — staged, not exfiltrated.',
@@ -198,7 +198,7 @@ const escalateInvestigations: Investigation[] = [
     assignee: 'analyst.jchen',
     status: 'open',
     pendingProposalCount: 1,
-    recommendedAction: 'escalate',
+    recommendedAction: 'respond',
     affectedSurface: 'okta-sso',
     summary:
       'Four Finance users clicked an invoice lure; one credential submission confirmed. URL still reachable — fleet block recommended before broader spread.',
@@ -257,7 +257,7 @@ const investigateInvestigations: Investigation[] = [
   },
 ];
 
-const tuneInvestigations: Investigation[] = [
+const configureInvestigations: Investigation[] = [
   {
     id: 'inv-floor-oauth-tune-007',
     template_id: TEMPLATE_ID_INVESTIGATION,
@@ -270,7 +270,7 @@ const tuneInvestigations: Investigation[] = [
     severity: 'low',
     status: 'open',
     pendingProposalCount: 1,
-    recommendedAction: 'tune',
+    recommendedAction: 'configure',
     affectedSurface: 'app-salesforce-sync',
     summary:
       'Volume spike within the expected batch window. Rule threshold looks too sensitive for this SaaS sync pattern — review the tuning proposal.',
@@ -295,7 +295,7 @@ const resolvedInvestigations: Investigation[] = [
     severity: 'medium',
     status: 'auto-resolved',
     pendingProposalCount: 0,
-    recommendedAction: 'contain',
+    recommendedAction: 'respond',
     affectedSurface: 'j.reyes@corp',
     summary:
       'Dark Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
@@ -315,17 +315,17 @@ const resolvedInvestigations: Investigation[] = [
 ];
 
 export const MOCK_INVESTIGATIONS: Investigation[] = [
-  ...containInvestigations,
-  ...escalateInvestigations,
+  ...respondInvestigations,
+  ...respondMoreInvestigations,
   ...investigateInvestigations,
-  ...tuneInvestigations,
+  ...configureInvestigations,
   ...resolvedInvestigations,
 ];
 
 export const createMockInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
-  ...containInvestigations[0],
+  ...respondInvestigations[0],
   ...overrides,
-  events: overrides.events ?? containInvestigations[0].events,
+  events: overrides.events ?? respondInvestigations[0].events,
 });
 
 export const getMockInvestigationsByWatchId = (watchId: string): Investigation[] =>

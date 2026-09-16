@@ -15,7 +15,6 @@
 
 export {
   API_VERSIONS,
-  CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -73,7 +72,6 @@ export type {
   ActionImpact,
   ListActionsResponse,
 } from './action_catalog_types';
-export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {
   ApprovalRequirement,
