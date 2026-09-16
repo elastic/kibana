@@ -47,7 +47,7 @@ export const WORKFLOW_READ_ONLY_MONACO_OPTIONS: monaco.editor.IStandaloneEditorC
     lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,
-    hover: { enabled: false },
+    hover: { enabled: 'off' },
     parameterHints: { enabled: false },
   };
 
@@ -69,7 +69,7 @@ export const getWorkflowValidationDisplayOptions = (
   highlightValidationErrors: boolean
 ): monaco.editor.IEditorOptions => ({
   renderValidationDecorations: highlightValidationErrors ? 'on' : 'off',
-  hover: { enabled: highlightValidationErrors },
+  hover: { enabled: highlightValidationErrors ? 'on' : 'off' },
 });
 
 /** Global editor options applied to diff child editors via `updateOptions`. */
@@ -110,7 +110,7 @@ export const WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS: monaco.editor.ISt
     lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,
-    hover: { enabled: false },
+    hover: { enabled: 'off' },
     parameterHints: { enabled: false },
     renderOverviewRuler: false,
     overviewRulerLanes: 0,

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -136,7 +136,7 @@ export const WorkflowExecuteManualForm = ({
 
       try {
         const currentModel = editor.getModel();
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           enableSchemaRequest: false,

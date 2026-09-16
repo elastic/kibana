@@ -9,10 +9,10 @@
 
 import './src/register_globals';
 
-export { monaco } from './src/monaco_imports';
+export { monaco, cssDefaults, jsonDefaults } from './src/monaco_imports';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';
 
 export * from './src/languages/definitions';
 export { getWorker } from './src/languages/worker_factory';

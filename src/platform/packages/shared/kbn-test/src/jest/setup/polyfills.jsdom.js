@@ -113,9 +113,36 @@ if (!Object.hasOwn(global, 'MessagePort')) {
 // Required from ts decorators support in tests
 import 'reflect-metadata/lite';
 
-// Monaco's Safari workaround (added in 0.45.0) uses ClipboardItem, which doesn't exist in JSDOM.
-// JSDOM's user agent contains "AppleWebKit" without "Chrome" or "Safari", so Monaco treats the
-// test environment as a WebKit web view and installs the workaround in every test.
+/**
+ * Monaco's WebKit clipboard workaround
+ * (installWebKitWriteTextWorkaround in clipboardService.ts, added in 0.45.0) installs a click/keydown listener that does:
+ *
+ * ```typescript
+ *  getActiveWindow().navigator.clipboard.write([new ClipboardItem({ 'text/plain': promise.promise })]);
+ * ```
+ * JSDOM has neither navigator.clipboard nor ClipboardItem, and JSDOM's user agent contains
+ * "AppleWebKit" without "Chrome" or "Safari", so Monaco treats the test environment as a WebKit
+ * web view and installs this workaround in every test that mounts a Monaco editor.
+ *
+ * Without a navigator.clipboard stub, `.clipboard.write` throws before `new ClipboardItem(...)`
+ * is ever evaluated, so the pending DeferredPromise the listener tracks is never wrapped by the
+ * ClipboardItem polyfill below and never gets a rejection handler. The listener then cancels that
+ * same bare promise on the *next* click/keydown (to supersede the previous one), which rejects it
+ * with a CancellationError that nothing has subscribed to, surfacing as an unhandled rejection and
+ * failing whichever test happens to be running at the time.
+ */
+if (!Object.hasOwn(global.navigator, 'clipboard')) {
+  Object.defineProperty(global.navigator, 'clipboard', {
+    value: {
+      writeText: () => Promise.resolve(),
+      readText: () => Promise.resolve(''),
+      write: () => Promise.resolve(),
+      read: () => Promise.resolve([]),
+    },
+    configurable: true,
+  });
+}
+
 if (!Object.hasOwn(global, 'ClipboardItem')) {
   global.ClipboardItem = class ClipboardItem {
     constructor(data) {
