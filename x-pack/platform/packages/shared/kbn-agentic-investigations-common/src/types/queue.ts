@@ -9,17 +9,17 @@ import { i18n } from '@kbn/i18n';
 import type { RecommendedAction } from './investigation';
 
 export const CONVERSATION_QUEUE_LABELS: Record<RecommendedAction, string> = Object.freeze({
-  contain: i18n.translate('xpack.alertzero.conversationQueue.bucket.contain', {
-    defaultMessage: 'Contain',
-  }),
-  escalate: i18n.translate('xpack.alertzero.conversationQueue.bucket.escalate', {
-    defaultMessage: 'Escalate',
+  respond: i18n.translate('xpack.alertzero.conversationQueue.bucket.respond', {
+    defaultMessage: 'Respond',
   }),
   investigate: i18n.translate('xpack.alertzero.conversationQueue.bucket.investigate', {
     defaultMessage: 'Investigate',
   }),
-  tune: i18n.translate('xpack.alertzero.conversationQueue.bucket.tune', {
-    defaultMessage: 'Tune',
+  configure: i18n.translate('xpack.alertzero.conversationQueue.bucket.configure', {
+    defaultMessage: 'Configure',
+  }),
+  closed: i18n.translate('xpack.alertzero.conversationQueue.bucket.closed', {
+    defaultMessage: 'Closed',
   }),
 });
 
@@ -27,18 +27,18 @@ export const CONVERSATION_QUEUE_CATEGORIES: ReadonlyArray<{
   id: RecommendedAction;
   label: string;
 }> = Object.freeze([
-  { id: 'contain', label: CONVERSATION_QUEUE_LABELS.contain },
-  { id: 'escalate', label: CONVERSATION_QUEUE_LABELS.escalate },
+  { id: 'respond', label: CONVERSATION_QUEUE_LABELS.respond },
   { id: 'investigate', label: CONVERSATION_QUEUE_LABELS.investigate },
-  { id: 'tune', label: CONVERSATION_QUEUE_LABELS.tune },
+  { id: 'configure', label: CONVERSATION_QUEUE_LABELS.configure },
+  { id: 'closed', label: CONVERSATION_QUEUE_LABELS.closed },
 ]);
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
   'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'accentSecondary',
-  tune: 'accent',
+  respond: 'danger',
+  investigate: 'warning',
+  configure: 'accentSecondary',
+  closed: 'accent',
 };
