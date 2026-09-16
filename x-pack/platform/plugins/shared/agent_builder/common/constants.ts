@@ -17,6 +17,9 @@ export const PREFERRED_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';
 /** Maximum number of conversations returned per page. Also the default. */
 export const MAX_CONVERSATIONS_PER_PAGE = 1000;
 
+/** Maximum number of conversation ids a single bulk get may look up. */
+export const CONVERSATION_BULK_GET_MAX_IDS = 1000;
+
 /**
  * Maximum number of conversations returned per page of a search query.
  */
