@@ -11,15 +11,18 @@
 
 const WATCHED_METHODS = new Set(['locator', '$', '$$', 'waitForSelector']);
 
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Matches a raw EUI class selector against a restricted entry's `selector`.
- * Entries with `exact: true` require an exact string match; otherwise the
- * selector is treated as "contains this class name" so callers don't have to
- * enumerate every combined selector string (e.g. `[data-test-subj="x"] .euiFoo`).
+ * Entries with `exact: true` require an exact string match. Otherwise the
+ * class may appear anywhere in a combined selector (e.g.
+ * `[data-test-subj="x"] .euiFoo`) but must end at a class-token boundary, so
+ * `.euiFoo` does not flag `.euiFoo__child` or `.euiFooBar`.
  */
 function selectorMatches(value, entry) {
   if (entry.exact) return value === entry.selector;
-  return value.includes(entry.selector);
+  return new RegExp(`${escapeRegExp(entry.selector)}(?![\\w-])`).test(value);
 }
 
 /** @type {Rule} */
@@ -93,8 +96,11 @@ module.exports = {
 
         if (firstArg.type === 'Literal' && typeof firstArg.value === 'string') {
           checkStringValue(firstArg.value, node);
-        } else if (firstArg.type === 'TemplateLiteral' && firstArg.expressions.length === 0) {
-          checkStringValue(firstArg.quasis.map((q) => q.value.cooked).join(''), node);
+        } else if (firstArg.type === 'TemplateLiteral') {
+          // Check each static chunk so `${scope} .euiFoo` is still caught.
+          for (const quasi of firstArg.quasis) {
+            checkStringValue(quasi.value.cooked ?? '', node);
+          }
         }
       },
     };
