@@ -18,7 +18,10 @@ import {
 } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
+import {
+  bumpAgentPolicyRevisions,
+  cleanUpDuplicatedPackagePolicies,
+} from './clean_up_duplicate_policies';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
   LEFTOVER_CLEANUP_SCAN_VERSION,
@@ -35,6 +38,7 @@ import {
 
 jest.mock('./clean_up_duplicate_policies', () => ({
   cleanUpDuplicatedPackagePolicies: jest.fn(),
+  bumpAgentPolicyRevisions: jest.fn(),
 }));
 
 jest.mock('../synthetics_service/get_private_locations', () => ({
@@ -51,6 +55,9 @@ jest.mock('./sync_private_locations_monitors_task', () => {
 
 const cleanUpDuplicatedPackagePoliciesMock =
   cleanUpDuplicatedPackagePolicies as jest.MockedFunction<typeof cleanUpDuplicatedPackagePolicies>;
+const bumpAgentPolicyRevisionsMock = bumpAgentPolicyRevisions as jest.MockedFunction<
+  typeof bumpAgentPolicyRevisions
+>;
 const getPrivateLocationsMock = getPrivateLocations as jest.MockedFunction<
   typeof getPrivateLocations
 >;
@@ -102,7 +109,12 @@ describe('clean_up_package_policies_task', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFleet.packagePolicyService.list.mockResolvedValue({ items: [], total: 0 } as any);
-    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({ performCleanupSync: false });
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: false,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+    });
+    bumpAgentPolicyRevisionsMock.mockResolvedValue([]);
     getPrivateLocationsMock.mockResolvedValue([]);
     runTaskPerPrivateLocationMock.mockResolvedValue(undefined);
     mockTaskManagerStart.ensureScheduled.mockResolvedValue({
@@ -138,6 +150,25 @@ describe('clean_up_package_policies_task', () => {
       })
     );
     expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('scans leftovers with a fresh unlatched state even if task state looks latched', async () => {
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { hasAlreadyDoneCleanup: true, cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION },
+    };
+
+    await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(cleanUpDuplicatedPackagePoliciesMock).toHaveBeenCalledWith(
+      mockServerSetup,
+      mockSoClient,
+      expect.objectContaining({
+        hasAlreadyDoneCleanup: false,
+        maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+        cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
+      })
+    );
   });
 
   it('schedules 20m when Test Now policies are still within TTL', async () => {
@@ -216,6 +247,201 @@ describe('clean_up_package_policies_task', () => {
 
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('persists failed leftover bumps and comes back in 20m', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: true,
+      failedAgentPolicyIds: ['agent-a'],
+      attemptedAgentPolicyIds: ['agent-a'],
+    });
+    getPrivateLocationsMock.mockResolvedValue([{ id: 'pl-1' }] as any);
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, getTaskInstance() as any);
+
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a']);
+    expect(result.schedule).toEqual({ interval: '20m' });
+    expect(bumpAgentPolicyRevisionsMock).not.toHaveBeenCalled();
+  });
+
+  it('retries previously failed bumps on the next run', async () => {
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(bumpAgentPolicyRevisionsMock).toHaveBeenCalledWith(
+      ['agent-a'],
+      mockSoClient,
+      {},
+      mockServerSetup
+    );
+    expect(result.state.failedAgentPolicyBumps).toEqual([]);
+    expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('does not re-bump a policy the leftover scan already attempted', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: false,
+      failedAgentPolicyIds: ['agent-a'],
+      attemptedAgentPolicyIds: ['agent-a'],
+    });
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(bumpAgentPolicyRevisionsMock).not.toHaveBeenCalled();
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a']);
+    expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('keeps a failed bump in state when the next-run retry still fails', async () => {
+    bumpAgentPolicyRevisionsMock.mockResolvedValue(['agent-a']);
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a']);
+    expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('retries previously failed bumps even when the leftover scan throws', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockRejectedValue(new Error('scan failed'));
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(bumpAgentPolicyRevisionsMock).toHaveBeenCalledWith(
+      ['agent-a'],
+      mockSoClient,
+      {},
+      mockServerSetup
+    );
+    expect(result.state.failedAgentPolicyBumps).toEqual([]);
+    expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('ignores invalid persisted failed bump state', async () => {
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: 'agent-a' },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(bumpAgentPolicyRevisionsMock).not.toHaveBeenCalled();
+    expect(result.state.failedAgentPolicyBumps).toEqual([]);
+    expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('retries only the previous failures the leftover scan did not already attempt', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: false,
+      failedAgentPolicyIds: ['agent-a'],
+      attemptedAgentPolicyIds: ['agent-a'],
+    });
+    bumpAgentPolicyRevisionsMock.mockResolvedValue([]);
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a', 'agent-b', ''] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(bumpAgentPolicyRevisionsMock).toHaveBeenCalledWith(
+      ['agent-b'],
+      mockSoClient,
+      {},
+      mockServerSetup
+    );
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a']);
+    expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('keeps leftover and retry failures from different agent policies', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: true,
+      failedAgentPolicyIds: ['agent-a'],
+      attemptedAgentPolicyIds: ['agent-a'],
+    });
+    bumpAgentPolicyRevisionsMock.mockResolvedValue(['agent-b']);
+    getPrivateLocationsMock.mockResolvedValue([{ id: 'pl-1' }] as any);
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-b'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(runTaskPerPrivateLocationMock).toHaveBeenCalledWith({
+      server: mockServerSetup,
+      privateLocationId: 'pl-1',
+    });
+    expect(bumpAgentPolicyRevisionsMock).toHaveBeenCalledWith(
+      ['agent-b'],
+      mockSoClient,
+      {},
+      mockServerSetup
+    );
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a', 'agent-b']);
+    expect(result.schedule).toEqual({ interval: '20m' });
+  });
+
+  it('retries previously failed bumps when per-location sync throws', async () => {
+    cleanUpDuplicatedPackagePoliciesMock.mockResolvedValue({
+      performCleanupSync: true,
+      failedAgentPolicyIds: [],
+      attemptedAgentPolicyIds: [],
+    });
+    getPrivateLocationsMock.mockResolvedValue([{ id: 'pl-1' }] as any);
+    runTaskPerPrivateLocationMock.mockRejectedValue(new Error('sync failed'));
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-z'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(mockServerSetup, taskInstance as any);
+
+    expect(mockLogger.error).toHaveBeenCalled();
+    expect(bumpAgentPolicyRevisionsMock).toHaveBeenCalledWith(
+      ['agent-z'],
+      mockSoClient,
+      {},
+      mockServerSetup
+    );
+    expect(result.state.failedAgentPolicyBumps).toEqual([]);
+    expect(result.schedule).toEqual({ interval: '24h' });
+  });
+
+  it('skips leftover work when elasticsearch is unavailable', async () => {
+    const server = {
+      ...mockServerSetup,
+      coreStart: {
+        ...mockServerSetup.coreStart,
+        elasticsearch: { client: { asInternalUser: undefined } },
+      },
+    };
+    const taskInstance = {
+      ...getTaskInstance(),
+      state: { failedAgentPolicyBumps: ['agent-a'] },
+    };
+
+    const result = await runCleanUpPackagePoliciesTask(server as any, taskInstance as any);
+
+    expect(cleanUpDuplicatedPackagePoliciesMock).not.toHaveBeenCalled();
+    expect(result.state.failedAgentPolicyBumps).toEqual(['agent-a']);
+    expect(result.schedule).toEqual({ interval: '60m' });
   });
 
   it('triggerCleanUpPackagePoliciesTask ensures the task then runSoons it', async () => {

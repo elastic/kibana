@@ -21,11 +21,11 @@ const triggerCleanUpPackagePoliciesTaskMock =
 describe('cleanupPrivateLocationRoute', () => {
   const server = { logger: { debug: jest.fn(), error: jest.fn() } };
 
-  const callRoute = async () => {
+  const callRoute = async (query: Record<string, unknown> = {}) => {
     const response = httpServerMock.createResponseFactory();
     const result = await cleanupPrivateLocationRoute().handler({
       server,
-      request: { query: {} },
+      request: { query },
       response,
     } as any);
     return { response, result };
@@ -39,6 +39,15 @@ describe('cleanupPrivateLocationRoute', () => {
     triggerCleanUpPackagePoliciesTaskMock.mockResolvedValue(undefined);
 
     const { result } = await callRoute();
+
+    expect(result).toEqual(expect.objectContaining({ success: true }));
+    expect(triggerCleanUpPackagePoliciesTaskMock).toHaveBeenCalledWith(server);
+  });
+
+  it('still schedules leftover cleanup when hasAlreadyDoneCleanup is true in the query', async () => {
+    triggerCleanUpPackagePoliciesTaskMock.mockResolvedValue(undefined);
+
+    const { result } = await callRoute({ hasAlreadyDoneCleanup: true });
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
     expect(triggerCleanUpPackagePoliciesTaskMock).toHaveBeenCalledWith(server);

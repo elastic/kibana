@@ -16,7 +16,10 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BROWSER_TEST_NOW_RUN } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 import { getFilterForTestNowRun } from './test_now_run_filter';
-import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
+import {
+  bumpAgentPolicyRevisions,
+  cleanUpDuplicatedPackagePolicies,
+} from './clean_up_duplicate_policies';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
   LEFTOVER_CLEANUP_SCAN_VERSION,
@@ -33,6 +36,18 @@ const DELETE_BROWSER_MINUTES = 15;
 const DELETE_LIGHTWEIGHT_MINUTES = 2;
 
 export { getFilterForTestNowRun };
+
+export interface CleanUpPackagePoliciesTaskState {
+  failedAgentPolicyBumps?: string[];
+}
+
+const getFailedAgentPolicyBumps = (state: ConcreteTaskInstance['state']): string[] => {
+  const value = state.failedAgentPolicyBumps;
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((id): id is string => typeof id === 'string' && id.length > 0);
+};
 
 export const registerCleanUpTask = (
   taskManager: TaskManagerSetupContract,
@@ -85,16 +100,23 @@ export async function runCleanUpPackagePoliciesTask(
       esClient,
     });
 
+    let failedAgentPolicyBumps = getFailedAgentPolicyBumps(state);
     try {
-      await cleanUpLeftoverPrivateLocationPolicies(serverSetup, soClient);
+      failedAgentPolicyBumps = await cleanUpLeftoverPrivateLocationPolicies(
+        serverSetup,
+        soClient,
+        esClient,
+        failedAgentPolicyBumps
+      );
     } catch (e) {
       logger.error(e);
     }
 
-    if (remainingTestNow === 0) {
-      return { state, schedule: { interval: '24h' } };
+    const nextState = { ...state, failedAgentPolicyBumps };
+    if (remainingTestNow === 0 && failedAgentPolicyBumps.length === 0) {
+      return { state: nextState, schedule: { interval: '24h' } };
     }
-    return { state, schedule: { interval: '20m' } };
+    return { state: nextState, schedule: { interval: '20m' } };
   } catch (e) {
     logger.error(e);
   }
@@ -142,32 +164,47 @@ async function deleteExpiredTestNowPolicies({
 
 async function cleanUpLeftoverPrivateLocationPolicies(
   serverSetup: SyntheticsServerSetup,
-  soClient: SavedObjectsClientContract
-) {
-  // Fresh state each run: leftovers are not created on the happy path, so a
-  // daily scan is enough and a persisted latch would hide them again.
-  const leftoverState: SyncTaskState = {
-    lastStartedAt: new Date().toISOString(),
-    hasAlreadyDoneCleanup: false,
-    maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
-    cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
-  };
-  const { performCleanupSync } = await cleanUpDuplicatedPackagePolicies(
-    serverSetup,
-    soClient,
-    leftoverState
-  );
-  if (!performCleanupSync) {
-    return;
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  previousFailedBumps: string[]
+): Promise<string[]> {
+  let failedAgentPolicyIds: string[] = [];
+  let attemptedAgentPolicyIds: string[] = [];
+
+  try {
+    // Fresh leftover-scan latch each run: leftovers are not created on the
+    // happy path, so a daily scan is enough and a persisted latch would hide them.
+    const leftoverState: SyncTaskState = {
+      lastStartedAt: new Date().toISOString(),
+      hasAlreadyDoneCleanup: false,
+      maxCleanUpRetries: DEFAULT_MAX_CLEANUP_RETRIES,
+      cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
+    };
+    const leftover = await cleanUpDuplicatedPackagePolicies(serverSetup, soClient, leftoverState);
+    failedAgentPolicyIds = leftover.failedAgentPolicyIds ?? [];
+    attemptedAgentPolicyIds = leftover.attemptedAgentPolicyIds ?? [];
+
+    if (leftover.performCleanupSync) {
+      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+      for (const location of allPrivateLocations) {
+        await runTaskPerPrivateLocation({
+          server: serverSetup,
+          privateLocationId: location.id,
+        });
+      }
+    }
+  } catch (e) {
+    serverSetup.logger.error(e);
   }
 
-  const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-  for (const location of allPrivateLocations) {
-    await runTaskPerPrivateLocation({
-      server: serverSetup,
-      privateLocationId: location.id,
-    });
-  }
+  const attempted = new Set(attemptedAgentPolicyIds);
+  const pendingRetry = previousFailedBumps.filter((id) => !attempted.has(id));
+  const retriedFailed =
+    pendingRetry.length > 0
+      ? await bumpAgentPolicyRevisions(pendingRetry, soClient, esClient, serverSetup)
+      : [];
+
+  return [...new Set([...failedAgentPolicyIds, ...retriedFailed])];
 }
 
 export async function triggerCleanUpPackagePoliciesTask(server: SyntheticsServerSetup) {

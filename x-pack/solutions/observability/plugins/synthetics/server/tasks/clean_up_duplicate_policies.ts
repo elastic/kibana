@@ -20,12 +20,26 @@ import type { SyntheticsServerSetup } from '../types';
 /** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
 export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
 
+export interface DeleteDuplicatePackagePoliciesResult {
+  deletedCount: number;
+  failedAgentPolicyIds: string[];
+  attemptedAgentPolicyIds: string[];
+}
+
+export interface CleanUpDuplicatedPackagePoliciesResult {
+  performCleanupSync: boolean;
+  failedAgentPolicyIds: string[];
+  attemptedAgentPolicyIds: string[];
+}
+
 export async function cleanUpDuplicatedPackagePolicies(
   serverSetup: SyntheticsServerSetup,
   soClient: SavedObjectsClientContract,
   taskState: SyncTaskState
-) {
+): Promise<CleanUpDuplicatedPackagePoliciesResult> {
   let performCleanupSync = false;
+  let failedAgentPolicyIds: string[] = [];
+  let attemptedAgentPolicyIds: string[] = [];
   const { fleet } = serverSetup.pluginsStart;
   const { logger } = serverSetup;
 
@@ -43,7 +57,7 @@ export async function cleanUpDuplicatedPackagePolicies(
 
   if (taskState.hasAlreadyDoneCleanup) {
     debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
-    return { performCleanupSync };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   }
 
   // Same budget for leftover deletes and recreate. Clearing it on every
@@ -56,7 +70,7 @@ export async function cleanUpDuplicatedPackagePolicies(
         `Request cleanup again to retry.`
     );
     taskState.hasAlreadyDoneCleanup = true;
-    return { performCleanupSync };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   }
   debugLog('Starting cleanup of duplicated package policies');
 
@@ -126,12 +140,15 @@ export async function cleanUpDuplicatedPackagePolicies(
     }
 
     if (hasExtras) {
-      const deletedCount = await deleteDuplicatePackagePolicies(
+      const deleted = await deleteDuplicatePackagePolicies(
         packagePoliciesToDelete,
         soClient,
         esClient,
         serverSetup
       );
+      failedAgentPolicyIds = deleted.failedAgentPolicyIds;
+      attemptedAgentPolicyIds = deleted.attemptedAgentPolicyIds;
+      const { deletedCount } = deleted;
       if (deletedCount > 0) {
         taskState.hasAlreadyDoneCleanup = false;
         taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
@@ -152,7 +169,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       // Latch means we already gave up on recreate. Do not reopen that loop
       // when the only problem is still-missing expected policies.
       if (wasLatched && !hasExtras) {
-        return { performCleanupSync };
+        return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
       }
       performCleanupSync = true;
       if (!hasExtras) {
@@ -162,7 +179,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       taskState.hasAlreadyDoneCleanup = true;
       taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
     }
-    return { performCleanupSync };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   } catch (e) {
     taskState.maxCleanUpRetries -= 1;
     if (taskState.maxCleanUpRetries <= 0) {
@@ -176,7 +193,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
       { error: e }
     );
-    return { performCleanupSync };
+    return { performCleanupSync, failedAgentPolicyIds, attemptedAgentPolicyIds };
   }
 }
 
@@ -185,7 +202,7 @@ export async function deleteDuplicatePackagePolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   serverSetup: SyntheticsServerSetup
-): Promise<number> {
+): Promise<DeleteDuplicatePackagePoliciesResult> {
   const { logger } = serverSetup;
   const { fleet } = serverSetup.pluginsStart;
 
@@ -227,19 +244,45 @@ export async function deleteDuplicatePackagePolicies(
     }
   }
 
-  if (agentPolicyIds.size === 0) {
-    return deletedCount;
+  const attemptedAgentPolicyIds = [...agentPolicyIds];
+  const failedAgentPolicyIds = await bumpAgentPolicyRevisions(
+    attemptedAgentPolicyIds,
+    soClient,
+    esClient,
+    serverSetup
+  );
+  return { deletedCount, failedAgentPolicyIds, attemptedAgentPolicyIds };
+}
+
+export const bumpAgentPolicyRevisions = async (
+  agentPolicyIds: string[],
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  serverSetup: SyntheticsServerSetup
+): Promise<string[]> => {
+  const uniqueIds = [...new Set(agentPolicyIds)];
+  if (uniqueIds.length === 0) {
+    return [];
   }
 
+  const { logger } = serverSetup;
+  const { fleet } = serverSetup.pluginsStart;
   logger.info(
-    `[PrivateLocationCleanUpTask] Bumping agent policy revision once for [${[
-      ...agentPolicyIds,
-    ].join(', ')}] after leftover package-policy deletes`
+    `[PrivateLocationCleanUpTask] Bumping agent policy revision for [${uniqueIds.join(', ')}]`
   );
-  for (const policyId of agentPolicyIds) {
-    await fleet.agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-      asyncDeploy: true,
-    });
+  const failedAgentPolicyIds: string[] = [];
+  for (const policyId of uniqueIds) {
+    try {
+      await fleet.agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+        asyncDeploy: true,
+      });
+    } catch (error) {
+      logger.error(
+        `[PrivateLocationCleanUpTask] Failed to bump agent policy [${policyId}]; will retry on the next run`,
+        { error }
+      );
+      failedAgentPolicyIds.push(policyId);
+    }
   }
-  return deletedCount;
-}
+  return failedAgentPolicyIds;
+};

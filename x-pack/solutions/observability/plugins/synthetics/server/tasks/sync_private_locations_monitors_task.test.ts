@@ -17,6 +17,8 @@ import {
   DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
   cleanUpDuplicatedPackagePolicies,
 } from './clean_up_duplicate_policies';
+import { getFilterForTestNowRun } from './test_now_run_filter';
+import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
@@ -725,6 +727,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         async (_so: unknown, _es: unknown, ids: string[]) =>
           ids.map((id) => ({ id, success: true, policy_ids: ['agent-a'] }))
       );
+      mockFleet.agentPolicyService.bumpRevision.mockResolvedValue(undefined as any);
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -754,15 +757,24 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         mockSoClient as any,
         state as any
       );
+      expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: syntheticsMonitorSOTypes,
+          namespaces: ['*'],
+        })
+      );
       expect(mockFleet.packagePolicyService.fetchAllItemIds).toHaveBeenCalledWith(
         mockSoClient,
         expect.objectContaining({
+          kuery: getFilterForTestNowRun(true),
           spaceIds: ['*'],
           perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
         })
       );
       expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
       expect(result.performCleanupSync).toBe(false);
+      expect(result.failedAgentPolicyIds).toEqual([]);
+      expect(result.attemptedAgentPolicyIds).toEqual([]);
       expect(state.hasAlreadyDoneCleanup).toBe(true);
     });
 
@@ -784,6 +796,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
       expect(result.performCleanupSync).toBe(true);
+      expect(result.failedAgentPolicyIds).toEqual([]);
+      expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
     });
 
     it('should not charge the retry budget for a pass that deleted policies', async () => {
@@ -1186,6 +1200,298 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('max retries have been reached')
       );
+    });
+
+    it('deletes legacy space-suffixed leftover ids when the new-format policy exists', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'monitor1-loc1-stores'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 } as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['monitor1-loc1-stores'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('deletes extras and still requests recreate when expected policies are missing', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['orphan-policy'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['orphan-policy'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+      expect(state.maxCleanUpRetries).toBe(3);
+      expect(state.hasAlreadyDoneCleanup).toBe(false);
+    });
+
+    it('still requests follow-up sync when leftover deletes succeed but revision bump fails', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'unexpected-policy'];
+        })()
+      );
+      mockFleet.agentPolicyService.bumpRevision.mockRejectedValue(new Error('deployment failed'));
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(result.performCleanupSync).toBe(true);
+      expect(result.failedAgentPolicyIds).toEqual(['agent-a']);
+      expect(result.attemptedAgentPolicyIds).toEqual(['agent-a']);
+      expect(state.maxCleanUpRetries).toBe(3);
+      expect(state.hasAlreadyDoneCleanup).toBe(false);
+    });
+
+    it('deletes a leftover space-suffixed policy when it is the only live policy for the monitor', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1-stores'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['monitor1-loc1-stores'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+      expect(state.hasAlreadyDoneCleanup).toBe(false);
+    });
+
+    it('deletes per-space extras left by all-spaces monitor sharing', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield [
+            'monitor1-loc1',
+            'monitor1-loc1-default',
+            'monitor1-loc1-stores',
+            'monitor1-loc1-other',
+          ];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['monitor1-loc1-default', 'monitor1-loc1-stores', 'monitor1-loc1-other'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('expects one config-location policy for a multi-space monitor', async () => {
+      mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'monitor1',
+                type: 'synthetics-monitor-multi-space',
+                attributes: {
+                  origin: 'ui',
+                  locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
+                },
+                namespaces: ['stores', 'default'],
+              },
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      });
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'monitor1-loc1-stores', 'monitor1-loc1-default'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['monitor1-loc1-stores', 'monitor1-loc1-default'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('deletes orphan new-format ids that match no monitor', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'deadbeef-loc1', 'orphan-loc1'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['deadbeef-loc1', 'orphan-loc1'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('builds expected policy ids across monitor finder pages', async () => {
+      mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'monitor1',
+                attributes: {
+                  origin: 'ui',
+                  locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
+                },
+                namespaces: ['default'],
+              },
+            ],
+          };
+          yield {
+            saved_objects: [
+              {
+                id: 'monitor2',
+                attributes: {
+                  origin: 'ui',
+                  locations: [{ id: 'loc2', isServiceManaged: false }],
+                  id: 'monitor2',
+                },
+                namespaces: ['stores'],
+              },
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      });
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'monitor2-loc2', 'orphan-loc1'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['orphan-loc1'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('uses config id and location id for project monitors', async () => {
+      mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'proj-monitor',
+                attributes: {
+                  origin: 'project',
+                  locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'proj-monitor',
+                },
+                namespaces: ['default'],
+              },
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      });
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['proj-monitor-loc1', 'proj-monitor-loc1-default'];
+        })()
+      );
+
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        {} as any
+      );
+
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['proj-monitor-loc1-default'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+    });
+
+    it('returns empty bump lists when leftover cleanup is skipped', async () => {
+      const state = {
+        hasAlreadyDoneCleanup: true,
+        maxCleanUpRetries: 3,
+        cleanupScanVersion: LEFTOVER_CLEANUP_SCAN_VERSION,
+      };
+      const result = await cleanUpDuplicatedPackagePolicies(
+        mockServerSetup as any,
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(result).toEqual({
+        performCleanupSync: false,
+        failedAgentPolicyIds: [],
+        attemptedAgentPolicyIds: [],
+      });
     });
   });
 
