@@ -12,6 +12,16 @@ import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common'
 
 export { ConversationMetadataUpdatedTriggerId };
 
+export {
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
+  conversationAttachmentAddedTriggerCommonDefinition,
+  conversationAttachmentUpdatedTriggerCommonDefinition,
+  conversationAttachmentDeletedTriggerCommonDefinition,
+} from './attachments';
+export type { ConversationAttachmentEvent } from './attachments';
+
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({
     description: i18n.translate(

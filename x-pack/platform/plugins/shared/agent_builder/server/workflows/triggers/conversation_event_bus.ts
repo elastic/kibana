@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ConversationAttachmentChange } from '../../services/conversation/client/attachment_diff';
 
 export interface ConversationMetadataPatchedPayload {
   conversationId: string;
@@ -14,18 +15,33 @@ export interface ConversationMetadataPatchedPayload {
   changedFields: string[];
 }
 
+export interface ConversationAttachmentsChangedPayload {
+  conversationId: string;
+  changes: ConversationAttachmentChange[];
+}
+
 type MetadataPatchedListener = (
   request: KibanaRequest,
   payload: ConversationMetadataPatchedPayload
 ) => void;
 
+type AttachmentsChangedListener = (
+  request: KibanaRequest,
+  payload: ConversationAttachmentsChangedPayload
+) => void;
+
 /**
  * Lightweight event bus for conversation lifecycle events.
- * Listeners registered here are called after a successful metadata write.
+ * Listeners registered here are called after a successful write.
  */
 export interface ConversationEventBus {
   onMetadataPatched(listener: MetadataPatchedListener): void;
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
+  onAttachmentsChanged(listener: AttachmentsChangedListener): void;
+  emitAttachmentsChanged(
+    request: KibanaRequest,
+    payload: ConversationAttachmentsChangedPayload
+  ): void;
 }
 
 export const createConversationEventBus = (): ConversationEventBus =>
@@ -33,6 +49,7 @@ export const createConversationEventBus = (): ConversationEventBus =>
 
 class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
+  private readonly attachmentsChangedListeners: AttachmentsChangedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -40,6 +57,19 @@ class ConversationEventBusImpl implements ConversationEventBus {
 
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void {
     for (const listener of this.metadataPatchedListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onAttachmentsChanged(listener: AttachmentsChangedListener): void {
+    this.attachmentsChangedListeners.push(listener);
+  }
+
+  emitAttachmentsChanged(
+    request: KibanaRequest,
+    payload: ConversationAttachmentsChangedPayload
+  ): void {
+    for (const listener of this.attachmentsChangedListeners) {
       listener(request, payload);
     }
   }
