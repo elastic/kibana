@@ -5,7 +5,7 @@ metadata:
   name: bk-kibana-esql-grammar-sync
   description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
   links:
-    - url: 'https://buildkite.com/elastic/kibana-esql-grammar-sync'
+    - url: 'https://buildkite.com/elastic/kibana-es-ql-grammar-sync'
       title: Pipeline link
 spec:
   type: buildkite-pipeline

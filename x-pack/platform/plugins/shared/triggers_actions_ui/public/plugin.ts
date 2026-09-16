@@ -34,7 +34,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { triggersActionsRoute, TRIGGERS_ACTIONS_RULES_CAPABILITY_ID } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -78,12 +78,7 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import {
-  ALERTS_PAGE_ID,
-  CONNECTORS_PLUGIN_ID,
-  PLUGIN_ID,
-  RULES_CAPABILITY_ID,
-} from './common/constants';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
@@ -116,6 +111,14 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { getClassicRulesPageLazy } from './common/get_classic_rules_page';
+import type {
+  ClassicRulesPageInternalDeps,
+  ClassicRulesPagePluginsStart,
+  ClassicRulesPageProps,
+} from './application/classic_rules_page';
+
+export type { ClassicRulesPageProps } from './application/classic_rules_page';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -176,6 +179,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Classic (v1) Rules page, for hosts that mount it outside Stack Management.
+   */
+  getClassicRulesPage: (props: ClassicRulesPageProps) => ReactElement<ClassicRulesPageProps>;
 }
 
 interface PluginsSetup {
@@ -227,6 +234,8 @@ export class Plugin
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
   private readonly isServerless: boolean;
+  private cloud?: CloudSetup;
+  private actionsSetup?: ActionsPublicPluginSetup;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -240,6 +249,8 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    this.cloud = plugins.cloud;
+    this.actionsSetup = plugins.actions;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -337,7 +348,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
-        capabilitiesId: RULES_CAPABILITY_ID,
+        capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -516,6 +527,21 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const internalDeps: ClassicRulesPageInternalDeps = {
+      actions:
+        this.actionsSetup ??
+        ({
+          validateEmailAddresses: this.connectorServices?.validateEmailAddresses ?? (() => []),
+          enabledEmailServices: this.connectorServices?.enabledEmailServices ?? [],
+        } as ActionsPublicPluginSetup),
+      security: plugins.security,
+      cloud: this.cloud,
+      actionTypeRegistry: this.actionTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      isServerless: this.isServerless,
+      pluginsStart: plugins as ClassicRulesPagePluginsStart,
+    };
+
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
         coreStart: core,
@@ -652,6 +678,8 @@ export class Plugin
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
+      getClassicRulesPage: (props: ClassicRulesPageProps) =>
+        getClassicRulesPageLazy({ ...props, internalDeps }),
     };
   }
 
