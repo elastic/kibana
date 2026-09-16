@@ -9,7 +9,8 @@ import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow, EuiText } from '
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import React, { useMemo, useState } from 'react';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
 import { optionalLabel } from '../optional_label';
 
@@ -19,7 +20,14 @@ interface RuleTagsSelectorProps {
 }
 
 export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) => {
-  const { data: apiTags = [], isLoading } = useFetchRuleTags({ kind: 'alert', enabled: true });
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  const { data: apiTags = [], isLoading } = useFetchRuleTags({
+    kind: 'alert',
+    enabled: true,
+    search: debouncedSearch || undefined,
+  });
 
   const selectedTags = matcher?.tags ?? [];
 
@@ -52,7 +60,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
     return groups;
   }, [apiTags, matcher]);
 
-  const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
+  const showCapGuidance = !search && apiTags.length >= TAGS_RESPONSE_LIMIT;
 
   return (
     <EuiFormRow
@@ -72,6 +80,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
             const tags = selected.map((o) => o.value ?? o.label);
             onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
           }}
+          onSearchChange={setSearch}
           onCreateOption={(newTag) => {
             const trimmed = newTag.trim();
             if (!trimmed) return;
@@ -80,7 +89,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
           isClearable
           data-test-subj="ruleTagsSelector"
         />
-        {!isLoading && apiTags.length === 0 && selectedTags.length === 0 && (
+        {!isLoading && !search && apiTags.length === 0 && selectedTags.length === 0 && (
           <EuiText size="xs" color="subdued" data-test-subj="ruleTagsSelectorEmptyState">
             {i18n.translate('xpack.alertingV2.actionPolicy.form.policyScope.ruleTags.emptyState', {
               defaultMessage: 'No rule tags in this space yet. Add a tag to scope this policy.',

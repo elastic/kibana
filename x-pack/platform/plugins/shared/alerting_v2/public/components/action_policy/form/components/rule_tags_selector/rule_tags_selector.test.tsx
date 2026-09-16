@@ -17,6 +17,10 @@ jest.mock('../../../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
 }));
 
+jest.mock('@kbn/react-hooks', () => ({
+  useDebouncedValue: (value: unknown) => value,
+}));
+
 const MOCK_TAGS = ['production', 'staging', 'critical'];
 
 const USER_EVENT_OPTIONS = {
@@ -133,5 +137,31 @@ describe('RuleTagsSelector', () => {
         `Showing first ${TAGS_RESPONSE_LIMIT} most-used tags. Type to search for more.`
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('passes search text to useFetchRuleTags when user types in the combobox', async () => {
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    await user.type(getComboBoxInput(), 'prod');
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'prod' })
+    );
+  });
+
+  it('can discover a tag beyond the initial cap by searching', async () => {
+    const cappedTags = Array.from({ length: TAGS_RESPONSE_LIMIT }, (_, i) => `tag-${i}`);
+    mockUseFetchRuleTags.mockImplementation(({ search }: { search?: string }) => ({
+      data: search ? ['beyond-cap-tag'] : cappedTags,
+      isLoading: false,
+    }));
+
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+
+    await user.type(getComboBoxInput(), 'beyond');
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'beyond' })
+    );
   });
 });
