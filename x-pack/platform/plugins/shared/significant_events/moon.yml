@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/workflows'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-security-server'
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-plugin'
   - '@kbn/nightshift-ai'
