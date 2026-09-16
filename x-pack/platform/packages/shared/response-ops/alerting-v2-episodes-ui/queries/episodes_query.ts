@@ -42,7 +42,8 @@ export interface AlertEpisode extends BaseAlertEpisode {
   'rule.name'?: string;
   /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
-   * from the v2 pipeline. Stamped automatically by `fetchEpisodesFromSource`.
+   * from the v2 pipeline. Stamped on classic rows by the list fetch (and by
+   * `fetchEpisodesFromSource`).
    */
   source_id?: string;
   /**
