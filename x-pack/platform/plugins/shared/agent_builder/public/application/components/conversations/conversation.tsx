@@ -16,11 +16,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isString } from 'lodash';
-import {
-  useConversationError,
-  useConversationRounds,
-  useHasActiveConversation,
-} from '../../hooks/use_conversation';
+import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { TimelineConnector } from './timeline/timeline_connector';
 import { NewConversationPrompt } from './new_conversation_prompt';
@@ -44,7 +40,6 @@ import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
 import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
-import { RoundsScreenReaderStatus } from './conversation_rounds/rounds_screen_reader_status';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
@@ -56,8 +51,6 @@ export const Conversation: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
   const isAnyStreaming = useIsAnyConversationStreaming();
   const { cancelAllStreams } = useStreamingContext();
-  const conversationRounds = useConversationRounds();
-  const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
   const onAppLeave = useAppLeave();
@@ -183,7 +176,6 @@ export const Conversation: React.FC<{}> = () => {
 
   return (
     <CanvasProvider>
-      <RoundsScreenReaderStatus lastRound={lastRound} />
       <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
         <EuiFlexItem grow={true} css={scrollWrapperStyles}>
           <EuiFlexGroup

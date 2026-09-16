@@ -8,8 +8,10 @@
 import React from 'react';
 import { useConversation, useAgentId } from '../../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { RoundsScreenReaderStatus } from '../conversation_rounds/rounds_screen_reader_status';
 import { useTimelineItems } from './use_timeline_items';
 import { Timeline } from './timeline';
+import type { AgentTurnItem } from './to_timeline_items';
 
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here
@@ -19,8 +21,12 @@ export const TimelineConnector: React.FC = () => {
   const agentId = useAgentId();
   const { agent } = useAgentBuilderAgentById(agentId);
   const items = useTimelineItems();
+  const lastTurn = items.filter((item): item is AgentTurnItem => item.kind === 'agentTurn').at(-1);
 
   return (
-    <Timeline items={items} agent={agent} conversationAttachments={conversation?.attachments} />
+    <>
+      <RoundsScreenReaderStatus responseMessage={lastTurn?.response?.message} />
+      <Timeline items={items} agent={agent} conversationAttachments={conversation?.attachments} />
+    </>
   );
 };

@@ -35,6 +35,9 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamRecord: jest.fn(),
   useConversationStreamService: () => mockStreamService,
 }));
+jest.mock('../conversation_rounds/rounds_screen_reader_status', () => ({
+  RoundsScreenReaderStatus: () => null,
+}));
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>
