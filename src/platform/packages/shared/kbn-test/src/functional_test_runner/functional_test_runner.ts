@@ -43,9 +43,10 @@ interface FunctionalTestRunnerRunResult {
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
   /**
-   * Whether the most recent `run()` (its last retry, when retried) stopped before every test
-   * ran, either through the caller's `AbortSignal` or an internal `lifecycle.abort()` such as
-   * the first Mocha timeout under `mochaOpts.abortOnTimeout`.
+   * Whether any attempt of the most recent `run()` stopped before every test ran, either through
+   * the caller's `AbortSignal` or an internal `lifecycle.abort()` such as the first Mocha timeout
+   * under `mochaOpts.abortOnTimeout`. Sticky across retries: a retry only re-runs the files that
+   * failed, so tests an aborted attempt never reached stay unrun even when the retry completes.
    */
   public aborted = false;
   constructor(
@@ -62,7 +63,9 @@ export class FunctionalTestRunner {
   }
 
   async run(abortSignal?: AbortSignal, retry = 0) {
+    this.aborted = false;
     let result = await this.runWithResult(abortSignal);
+    this.aborted = result.aborted;
 
     if (result.customTestRunnerResult !== undefined) {
       return result.customTestRunnerResult;
@@ -93,6 +96,7 @@ export class FunctionalTestRunner {
       const retryConfig = this.createRetryConfig(result.failedTestFiles);
       const retryRunner = new FunctionalTestRunner(this.log, retryConfig, this.esVersion);
       result = await retryRunner.runWithResult(abortSignal);
+      this.aborted = this.aborted || result.aborted;
       didRetry = true;
     }
 
@@ -106,7 +110,6 @@ export class FunctionalTestRunner {
       });
     }
 
-    this.aborted = result.aborted;
     return result.failureCount;
   }
 
