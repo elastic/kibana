@@ -379,7 +379,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
+        context: { resumedBy: 'jane.doe', otherKey: 'preserved', resumeInput: null },
       });
     });
 

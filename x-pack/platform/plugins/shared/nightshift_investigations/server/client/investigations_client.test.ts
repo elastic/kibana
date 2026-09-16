@@ -25,6 +25,7 @@ import {
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationMetadataMissingError,
+  InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
 } from './errors';
 import { NightshiftInvestigationsClient } from './investigations_client';
@@ -59,6 +60,7 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockRequest = {} as KibanaRequest;
+const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
 
 let repository: jest.Mocked<InvestigationRepository>;
 
@@ -71,6 +73,7 @@ const makeClient = (
     logger: mockLogger,
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
+    investigationQuotaCallback,
     investigationRepository: repository,
     isAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
@@ -125,6 +128,7 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
+  investigationQuotaCallback.mockResolvedValue({ allowed: true });
   repository = createMockRepository();
 });
 
@@ -402,6 +406,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     const result = await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -419,6 +424,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {
@@ -441,6 +447,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(mockManagement.getWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationQuotaCallback.mock.invocationCallOrder[0]
+    );
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
+      installInvestigationAgentMock.mock.invocationCallOrder[0]
+    );
   });
 
   it('passes the title as a workflow input and persists it on the pending record', async () => {
@@ -450,6 +463,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Checkout latency breach',
       subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -462,6 +476,31 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
   });
 
+  it.each([
+    ['alert', { type: 'alert' as const, id: 'alert-1' }, alertContext],
+    ['significant event', { type: 'significant_event' as const, id: 'event-1' }, undefined],
+  ])(
+    'denies an automatic %s investigation before installation, launch, or persistence',
+    async (_label, subject, context) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+      await expect(
+        makeClient().start({
+          title: 'Latency is too high',
+          subject,
+          trigger_type: 'automatic',
+          context,
+        })
+      ).rejects.toThrow(InvestigationQuotaDeniedError);
+
+      expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+      expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
+    }
+  );
+
   it('persists the subject summary into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
@@ -469,6 +508,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -483,6 +523,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -497,6 +538,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-99' },
+      trigger_type: 'manual',
       concurrency_key: 'key-abc',
     });
 
@@ -516,6 +558,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'manual',
       message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
       stream_names: ['logs.checkout'],
     });
@@ -534,6 +577,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'manual',
     });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
@@ -548,6 +592,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'manual',
       context: alertContext,
     });
 
@@ -560,6 +605,53 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
+  it('consumes quota for every automatic start attempt', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValueOnce('exec-123').mockResolvedValueOnce('exec-124');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'automatic',
+    });
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-2' },
+      trigger_type: 'automatic',
+    });
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not consume again when workflow launch fails after admission', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockRejectedValueOnce(new Error('Workflow launch failed'));
+
+    await expect(
+      makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
+      })
+    ).rejects.toThrow('Workflow launch failed');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('does not consume again when agent installation fails after admission', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    installInvestigationAgentMock.mockRejectedValueOnce(new Error('Agent installation failed'));
+
+    await expect(
+      makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
+      })
+    ).rejects.toThrow('Agent installation failed');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
@@ -567,8 +659,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
       makeClient().start({
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
       })
     ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(installInvestigationAgentMock).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
@@ -582,8 +677,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     await expect(
-      client.start({ title: 'Latency is too high', subject: { type: 'alert', id: 'alert-1' } })
+      client.start({
+        title: 'Latency is too high',
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+      })
     ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
@@ -591,8 +691,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
       makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'automatic',
       })
     ).rejects.toThrow(InvestigationUnavailableError);
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -612,9 +714,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
           context,
         })
       ).rejects.toThrow(InvalidInvestigationContextError);
+      expect(investigationQuotaCallback).not.toHaveBeenCalled();
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
@@ -629,6 +733,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
           makeClient().start({
             title: 'Latency is too high',
             subject: { type: 'alert', id: 'alert-1' },
+            trigger_type: 'manual',
             context: { ...alertContext, [key]: 'whatever' },
           })
         ).rejects.toThrow(InvalidInvestigationContextError);
@@ -643,6 +748,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
           context: { ...alertContext, event_uuid: 'se-1', severity: 'high' },
         })
       ).rejects.toThrow(/event_uuid[\s\S]*severity/);
@@ -655,6 +761,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'manual',
           context: { alerts: [{ ...alertContext.alerts[0], flapping: 'nope' }] },
         })
       ).rejects.toThrow(/flapping/);
@@ -676,6 +783,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: uuid },
         })
       ).rejects.toThrow(InvalidInvestigationContextError);
@@ -697,6 +805,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
         })
       ).resolves.toEqual({ investigation_id: 'exec-791' });
@@ -710,6 +819,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
           context: { event_uuid: 'se-1', severity: 'high' },
         })
       ).resolves.toEqual({ investigation_id: 'exec-790' });
@@ -723,6 +833,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         makeClient().start({
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'manual',
         })
       ).resolves.toEqual({ investigation_id: 'exec-789' });
     });
@@ -734,6 +845,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await makeClient().start({
         title: 'Latency is too high',
         subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'manual',
         context: alertContext,
       });
 
@@ -751,6 +863,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       await makeClient().start({
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'manual',
         message: 'Checkout latency breach',
         context: { alerts: [alertContext.alerts[0]] },
       });

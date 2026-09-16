@@ -65,10 +65,8 @@ export interface StartInvestigationRequest {
    * chat-supplied headline) and refined by the agent's structured output on completion.
    */
   title: string;
-  /**
-   * What initiated the investigation. Defaults to "manual" when omitted.
-   */
-  trigger_type?: InvestigationTriggerType;
+  /** What initiated the investigation. */
+  trigger_type: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
