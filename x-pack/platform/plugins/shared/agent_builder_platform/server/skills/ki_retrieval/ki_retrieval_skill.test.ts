@@ -60,6 +60,18 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.indexOf('| WHERE @timestamp == latest_at')).toBeLessThan(
       kiRetrievalSkill.content.indexOf('expires_at IS NULL OR expires_at > NOW()')
     );
+    // Session recall: DESC selects newest memories, ASC presents them chronologically.
+    // updated_at (not @timestamp) is used because it reflects the last-write time on both
+    // index-backed and data-stream destinations; @timestamp stays at creation time for indexes.
+    const sessionSection = kiRetrievalSkill.content.slice(
+      kiRetrievalSkill.content.indexOf('FIELD_EXTRACT(attributes, "memory.session_id")')
+    );
+    expect(sessionSection.indexOf('| SORT updated_at DESC')).toBeLessThan(
+      sessionSection.indexOf('| LIMIT')
+    );
+    expect(sessionSection.indexOf('| LIMIT')).toBeLessThan(
+      sessionSection.indexOf('| SORT @timestamp ASC')
+    );
   });
 
   it('has no referencedContent', () => {
