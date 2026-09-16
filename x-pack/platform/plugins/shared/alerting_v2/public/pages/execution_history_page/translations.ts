@@ -77,6 +77,16 @@ export const RULES_COLUMN_MESSAGE = i18n.translate(
   }
 );
 
+export const RULES_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.alertingV2.executionHistory.rulesTab.successMessage',
+  {
+    defaultMessage: 'Rule executed successfully',
+  }
+);
+
+/** Placeholder shown (and copied) for a rule execution message column with no message. */
+export const RULES_MESSAGE_PLACEHOLDER = '—';
+
 /** --- Outcome badge labels --- */
 export const OUTCOME_DISPATCHED = i18n.translate(
   'xpack.alertingV2.executionHistory.table.outcome.dispatched',

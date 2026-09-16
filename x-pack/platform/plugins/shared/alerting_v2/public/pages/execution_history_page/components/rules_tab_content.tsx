@@ -148,10 +148,6 @@ const OUTCOME_OPTIONS: Array<{ value: RuleOutcomeFilter; text: string }> = [
   },
 ];
 
-const RULE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.alertingV2.executionHistory.rulesTab.successMessage',
-  { defaultMessage: 'Rule executed successfully' }
-);
 
 type RulesCache = Record<string, { metadata: { name: string } }>;
 
@@ -200,12 +196,6 @@ const RuleResponseCell = ({ row }: DataGridCellValueElementProps) => {
       {outcome}
     </EuiBadge>
   );
-};
-
-const RuleMessageCell = ({ row }: DataGridCellValueElementProps) => {
-  const message = row.flattened[RULE_EXECUTION_FIELDS.message] as string | null;
-  const outcome = row.flattened[RULE_EXECUTION_FIELDS.outcome] as RuleExecutionOutcome;
-  return <>{message ?? (outcome === 'success' ? RULE_SUCCESS_MESSAGE : '—')}</>;
 };
 
 interface Props {
@@ -267,7 +257,6 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
       ),
       [RULE_EXECUTION_FIELDS.duration]: RuleDurationCell,
       [RULE_EXECUTION_FIELDS.outcome]: RuleResponseCell,
-      [RULE_EXECUTION_FIELDS.message]: RuleMessageCell,
     }),
     [dateTimeFormat, rulesCache, onRuleClick]
   );

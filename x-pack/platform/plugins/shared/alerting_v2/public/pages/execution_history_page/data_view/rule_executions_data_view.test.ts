@@ -6,6 +6,7 @@
  */
 
 import type { RuleExecutionView } from '@kbn/alerting-v2-schemas';
+import { RULES_SUCCESS_MESSAGE, RULES_MESSAGE_PLACEHOLDER } from '../translations';
 import { RULE_EXECUTION_FIELDS, ruleExecutionToDataTableRecord } from './rule_executions_data_view';
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
@@ -58,11 +59,20 @@ describe('ruleExecutionToDataTableRecord', () => {
     expect(record.flattened[RULE_EXECUTION_FIELDS.message]).toBe('Index not found');
   });
 
-  it('falls back to null for the flattened message when neither error nor reason is present', () => {
+  it('resolves the flattened message to the generic success text for a success with no error/reason', () => {
+    const record = ruleExecutionToDataTableRecord(
+      buildItem({ outcome: 'success', reason: null, error: null })
+    );
+
+    // The message column carries the final displayed text so it is what gets copied.
+    expect(record.flattened[RULE_EXECUTION_FIELDS.message]).toBe(RULES_SUCCESS_MESSAGE);
+  });
+
+  it('resolves the flattened message to the placeholder for a non-success with no error/reason', () => {
     const record = ruleExecutionToDataTableRecord(
       buildItem({ outcome: 'failure', reason: null, error: null })
     );
 
-    expect(record.flattened[RULE_EXECUTION_FIELDS.message]).toBeNull();
+    expect(record.flattened[RULE_EXECUTION_FIELDS.message]).toBe(RULES_MESSAGE_PLACEHOLDER);
   });
 });
