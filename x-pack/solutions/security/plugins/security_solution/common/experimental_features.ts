@@ -358,7 +358,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the reworked Elastic Defend policy settings form with
    * per-operating-system protection configuration.
-   * Release: 9.5
+   * Release: 9.6
    */
   perOsPolicySettings: false,
 
