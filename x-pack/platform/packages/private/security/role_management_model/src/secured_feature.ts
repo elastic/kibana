@@ -7,7 +7,10 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
-import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
+import {
+  getAllMinimalPrivilegeIds,
+  type MinimalPrivilegeBase,
+} from '@kbn/security-authorization-core-common';
 
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
@@ -31,15 +34,22 @@ export class SecuredFeature extends KibanaFeature {
       ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege, actionMapping[id])
     );
 
-    this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
-      ([id, privilege]) => {
-        const minimalPrivilegeId = getMinimalPrivilegeId(id);
-        return new PrimaryFeaturePrivilege(
-          minimalPrivilegeId,
-          privilege,
-          actionMapping[minimalPrivilegeId]
-        );
-      }
+    // One `PrimaryFeaturePrivilege` per minimal privilege id ever minted for this base privilege
+    // (see `privilegeVersions`) — just the single current id when there's no version history,
+    // matching today's behavior exactly. This lets a role holding a legacy minimal id (one that
+    // predates the feature's current customization contract) still resolve correctly, e.g. via
+    // `KibanaPrivileges.createCollectionFromRoleKibanaPrivileges`, rather than being silently
+    // dropped for not matching the current id.
+    this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).flatMap(
+      ([id, privilege]) =>
+        getAllMinimalPrivilegeIds(id as MinimalPrivilegeBase, privilege.privilegeVersions).map(
+          (minimalPrivilegeId) =>
+            new PrimaryFeaturePrivilege(
+              minimalPrivilegeId,
+              privilege,
+              actionMapping[minimalPrivilegeId]
+            )
+        )
     );
 
     this.securedSubFeatures =

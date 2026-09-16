@@ -322,19 +322,25 @@ export class PrivilegeFormCalculator {
     const displayedPrivilege = feature.getPrimaryFeaturePrivileges().find((fp) => {
       const correspondingMinimalPrivilegeId = fp.getMinimalPrivilegeId();
 
-      const correspondingMinimalPrivilege = feature
+      // Every minimal id ever minted for `fp`'s own base (bare + every legacy version + current
+      // — just one entry when the privilege has no version history) shares the same *current*
+      // minimal id, so this correctly scopes to "fp's own base" without also matching the other
+      // top-level privilege's minimal variants.
+      const correspondingMinimalPrivileges = feature
         .getMinimalFeaturePrivileges()
-        .find((mp) => mp.id === correspondingMinimalPrivilegeId)!;
+        .filter((mp) => mp.getMinimalPrivilegeId() === correspondingMinimalPrivilegeId);
 
       // There is only one case where the minimal privileges aren't available:
       // 1. Sub-feature privileges cannot be customized. When this is the case, the minimal privileges aren't registered with ES,
       // so they end up represented in the UI as an empty privilege. Empty privileges cannot be granted other privileges, so if we
       // encounter a minimal privilege that isn't granted by it's corresponding primary, then we know we've encountered this scenario.
-      const hasMinimalPrivileges = fp.grantsPrivilege(correspondingMinimalPrivilege);
+      const hasMinimalPrivileges = correspondingMinimalPrivileges.some((mp) =>
+        fp.grantsPrivilege(mp)
+      );
       return (
         selectedFeaturePrivileges.includes(fp.id) ||
         (hasMinimalPrivileges &&
-          selectedFeaturePrivileges.includes(correspondingMinimalPrivilegeId)) ||
+          correspondingMinimalPrivileges.some((mp) => selectedFeaturePrivileges.includes(mp.id))) ||
         basePrivilege?.grantsPrivilege(fp)
       );
     });

@@ -410,4 +410,68 @@ export interface FeatureKibanaPrivileges {
         default: readonly FeatureKibanaPrivilegesReference[];
         minimal: readonly FeatureKibanaPrivilegesReference[];
       };
+
+  /**
+   * Records grants that used to be part of this privilege's own "minimal" baseline (i.e. its own
+   * `api`/`app`/`catalogue`/`management`/`savedObject`/`ui`/`alerting`/`cases` fields, excluding
+   * anything contributed by sub-features) and have since been extracted into a sub-feature of
+   * this same feature, without deprecating the feature. This lets `minimal_all`/`minimal_read`
+   * shrink for new role customizations while every privilege name a role could already be
+   * storing keeps granting exactly what it always granted, with no role save required.
+   *
+   * Entries are ordered chronologically and must only ever be appended to — never edit or remove
+   * a shipped entry, since that would change the meaning of a name that may already be persisted
+   * in stored roles. Each entry's `version` must be sequential: the first entry appended is
+   * `'v2'`, the next `'v3'`, and so on (the original, unversioned `minimal_all`/`minimal_read`
+   * name is implicitly "v1" and is never spelled out here). Only valid on the top-level `all`/
+   * `read` privileges of a feature that is not `deprecated`; a deprecated feature's backward
+   * compatibility is handled entirely by `replacedBy` instead.
+   *
+   * @example
+   * ```ts
+   * // "Can manage settings" used to be an inseparable part of `all`. This extracts it into its
+   * // own sub-feature privilege while keeping every existing role working unchanged:
+   * privileges: {
+   *   all: {
+   *     // ...own fields no longer include the settings grant...
+   *     privilegeVersions: [
+   *       { version: 'v2', extractedInto: [{ feature: 'my_feature', privileges: ['can_manage_settings'] }] },
+   *     ],
+   *   },
+   * },
+   * subFeatures: [
+   *   {
+   *     name: 'Settings',
+   *     privilegeGroups: [
+   *       {
+   *         groupType: 'independent',
+   *         privileges: [
+   *           { id: 'can_manage_settings', name: 'Can manage settings', includeIn: 'all', ... },
+   *         ],
+   *       },
+   *     ],
+   *   },
+   * ],
+   * ```
+   */
+  privilegeVersions?: readonly PrivilegeVersion[];
+}
+
+/**
+ * One entry in a top-level privilege's `privilegeVersions` history. See
+ * {@link FeatureKibanaPrivileges.privilegeVersions}.
+ */
+export interface PrivilegeVersion {
+  /**
+   * Sequential version suffix (`'v2'`, `'v3'`, ...) identifying this frozen privilege. Forms the
+   * Elasticsearch privilege name `minimal_<privilegeId>_<version>`.
+   */
+  version: string;
+
+  /**
+   * The sub-feature privilege(s), on this same feature, that were folded out of the base minimal
+   * grant as of this version. Every referenced privilege's `includeIn` must exactly match the
+   * top-level privilege being versioned (`'all'` for `all`'s versions, `'read'` for `read`'s).
+   */
+  extractedInto: readonly FeatureKibanaPrivilegesReference[];
 }

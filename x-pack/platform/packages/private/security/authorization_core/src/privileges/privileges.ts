@@ -14,8 +14,10 @@ import type {
 } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, KibanaFeature } from '@kbn/features-plugin/server';
 import {
-  getMinimalPrivilegeId,
+  getAllMinimalPrivilegeIds,
+  getReferencesExtractedAfter,
   isMinimalPrivilegeId,
+  type MinimalPrivilegeBase,
 } from '@kbn/security-authorization-core-common';
 import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
 
@@ -81,7 +83,8 @@ export function privilegesFactory(
       const tryStoreComposablePrivilege = (
         feature: KibanaFeature,
         privilegeId: string,
-        privilege: FeatureKibanaPrivileges
+        privilege: FeatureKibanaPrivileges,
+        extractedIntoReferences?: readonly FeatureKibanaPrivilegesReference[]
       ) => {
         // If privilege is configured with `composedOf` it should be complemented with **all**
         // actions from referenced privileges.
@@ -101,6 +104,14 @@ export function privilegesFactory(
             references: replacedBy,
             actionsFilter: (action) => actions.ui.isValid(action),
           });
+        }
+
+        // A legacy minimal privilege (minted from `privilegeVersions`) must be complemented with
+        // **all** actions of the sub-feature privilege(s) that were extracted out of it after it
+        // was minted, so that roles still holding this name keep the exact access they always had
+        // — unlike `replacedBy` above, this isn't UI-capability-only, it's a real, permanent grant.
+        if (extractedIntoReferences && extractedIntoReferences.length > 0) {
+          referenceGroups.push({ references: extractedIntoReferences });
         }
 
         if (referenceGroups.length > 0) {
@@ -135,13 +146,29 @@ export function privilegesFactory(
           augmentWithSubFeaturePrivileges: false,
           licenseHasAtLeast,
         })) {
-          const minimalPrivilegeId = getMinimalPrivilegeId(featurePrivilege.privilegeId);
-          featurePrivileges[feature.id][minimalPrivilegeId] = [
+          const baseMinimalActions = [
             actions.login,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
 
-          tryStoreComposablePrivilege(feature, minimalPrivilegeId, featurePrivilege.privilege);
+          // A privilege without `privilegeVersions` mints exactly one minimal id, identical to
+          // today's behavior. One with a version history mints one id per historical version
+          // plus the current one, each frozen at the actions it granted when it was current.
+          const basePrivilegeId = featurePrivilege.privilegeId as MinimalPrivilegeBase;
+          const privilegeVersions = featurePrivilege.privilege.privilegeVersions;
+          for (const minimalPrivilegeId of getAllMinimalPrivilegeIds(
+            basePrivilegeId,
+            privilegeVersions
+          )) {
+            featurePrivileges[feature.id][minimalPrivilegeId] = baseMinimalActions;
+
+            tryStoreComposablePrivilege(
+              feature,
+              minimalPrivilegeId,
+              featurePrivilege.privilege,
+              getReferencesExtractedAfter(minimalPrivilegeId, basePrivilegeId, privilegeVersions)
+            );
+          }
         }
 
         if (

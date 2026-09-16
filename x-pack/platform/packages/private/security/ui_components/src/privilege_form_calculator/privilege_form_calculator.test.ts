@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
@@ -173,6 +174,65 @@ describe('PrivilegeFormCalculator', () => {
           /** allSpacesSelected **/ false
         )
       ).toEqual('read');
+    });
+
+    it('returns the primary version when a LEGACY (non-current) minimal privilege id is assigned', () => {
+      // A feature whose `all` privilege has a version history: `minimal_all` is frozen with the
+      // extracted grant still folded in, `minimal_all_v2` is current without it. A role holding
+      // the legacy id must still resolve to the full, non-minimal `all` — exactly as it would if
+      // the feature had never been versioned at all.
+      const versionedFeature = new KibanaFeature({
+        id: 'versioned_feature',
+        name: 'Versioned Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: { all: ['one'], read: [] },
+            ui: [],
+            privilegeVersions: [
+              {
+                version: 'v2',
+                extractedInto: [{ feature: 'versioned_feature', privileges: ['so_two_all'] }],
+              },
+            ],
+          },
+          read: { savedObject: { all: [], read: ['one'] }, ui: [] },
+        },
+        subFeatures: [
+          {
+            name: 'Access to `two`',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'so_two_all',
+                    name: 'Can manage `two`',
+                    includeIn: 'all',
+                    savedObject: { all: ['two'], read: [] },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const kibanaPrivileges = createKibanaPrivileges([versionedFeature]);
+      const role = createRole([
+        { base: [], feature: { versioned_feature: ['minimal_all'] }, spaces: ['foo'] },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(
+        calculator.getDisplayedPrimaryFeaturePrivilegeId(
+          'versioned_feature',
+          0,
+          /** allSpacesSelected **/ false
+        )
+      ).toEqual('all');
     });
   });
 

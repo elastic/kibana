@@ -798,4 +798,142 @@ describe('#transformElasticsearchRoleToRole', () => {
       `);
     }
   });
+
+  it('properly handles privileges from a LIVE feature with a versioned minimal privilege', () => {
+    const applicationName = 'kibana-.kibana';
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'delta',
+        name: 'Feature Delta',
+        app: [],
+        category: { id: 'delta', label: 'delta' },
+        privileges: {
+          all: {
+            savedObject: { all: ['delta-one'], read: [] },
+            ui: [],
+            privilegeVersions: [
+              {
+                version: 'v2',
+                extractedInto: [{ feature: 'delta', privileges: ['delta_two_all'] }],
+              },
+              {
+                version: 'v3',
+                extractedInto: [{ feature: 'delta', privileges: ['delta_three_all'] }],
+              },
+            ],
+          },
+          read: { savedObject: { all: [], read: ['delta-one'] }, ui: [] },
+        },
+        subFeatures: [
+          {
+            name: 'sub-feature-delta',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'delta_two_all',
+                    name: 'Can manage two',
+                    includeIn: 'all',
+                    savedObject: { all: ['delta-two'], read: [] },
+                    ui: [],
+                  },
+                  {
+                    id: 'delta_three_all',
+                    name: 'Can manage three',
+                    includeIn: 'all',
+                    savedObject: { all: ['delta-three'], read: [] },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ];
+    const getTransformRoleParams = (
+      params: Pick<TransformRoleOptions, 'elasticsearchRole' | 'replaceDeprecatedKibanaPrivileges'>
+    ) => ({
+      features,
+      name: 'old-role',
+      elasticsearchRole: params.elasticsearchRole,
+      application: applicationName,
+      logger: loggerMock.create(),
+      subFeaturePrivilegeIterator: featuresPluginMock.createSetup().subFeaturePrivilegeIterator,
+      replaceDeprecatedKibanaPrivileges: params.replaceDeprecatedKibanaPrivileges,
+    });
+    const getRole = (appPrivileges: string[]) => ({
+      name: 'old-role',
+      cluster: [],
+      remote_cluster: [],
+      indices: [],
+      applications: [{ application: applicationName, privileges: appPrivileges, resources: ['*'] }],
+      run_as: [],
+      metadata: {},
+      transient_metadata: { enabled: true },
+    });
+
+    // With the flag off, legacy names pass through untouched, exactly as before.
+    {
+      const kibanaRole = transformElasticsearchRoleToRole(
+        getTransformRoleParams({
+          elasticsearchRole: getRole(['feature_delta.minimal_all']),
+          replaceDeprecatedKibanaPrivileges: false,
+        })
+      );
+      expect(kibanaRole.kibana[0].feature).toEqual({ delta: ['minimal_all'] });
+    }
+
+    // The oldest, unversioned name predates BOTH extractions, so it normalizes to the current
+    // id plus BOTH extracted sub-feature privileges.
+    {
+      const kibanaRole = transformElasticsearchRoleToRole(
+        getTransformRoleParams({
+          elasticsearchRole: getRole(['feature_delta.minimal_all']),
+          replaceDeprecatedKibanaPrivileges: true,
+        })
+      );
+      expect(kibanaRole.kibana[0].feature).toEqual({
+        delta: ['minimal_all_v3', 'delta_two_all', 'delta_three_all'],
+      });
+    }
+
+    // The in-between version (`minimal_all_v2`) already lost `delta_two_all` via its own save,
+    // but must NOT gain it back — only `delta_three_all` (extracted after it) is implied. This is
+    // the "second extraction doesn't break a role customized after the first" guarantee.
+    {
+      const kibanaRole = transformElasticsearchRoleToRole(
+        getTransformRoleParams({
+          elasticsearchRole: getRole(['feature_delta.minimal_all_v2']),
+          replaceDeprecatedKibanaPrivileges: true,
+        })
+      );
+      expect(kibanaRole.kibana[0].feature).toEqual({
+        delta: ['minimal_all_v3', 'delta_three_all'],
+      });
+    }
+
+    // The current id is already normalized — passes through unchanged.
+    {
+      const kibanaRole = transformElasticsearchRoleToRole(
+        getTransformRoleParams({
+          elasticsearchRole: getRole(['feature_delta.minimal_all_v3']),
+          replaceDeprecatedKibanaPrivileges: true,
+        })
+      );
+      expect(kibanaRole.kibana[0].feature).toEqual({ delta: ['minimal_all_v3'] });
+    }
+
+    // The full `all` privilege was never affected by any of this — `all` isn't a minimal id.
+    {
+      const kibanaRole = transformElasticsearchRoleToRole(
+        getTransformRoleParams({
+          elasticsearchRole: getRole(['feature_delta.all']),
+          replaceDeprecatedKibanaPrivileges: true,
+        })
+      );
+      expect(kibanaRole.kibana[0].feature).toEqual({ delta: ['all'] });
+    }
+  });
 });

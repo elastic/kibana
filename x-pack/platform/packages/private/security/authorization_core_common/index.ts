@@ -6,3 +6,14 @@
  */
 
 export { isMinimalPrivilegeId, getMinimalPrivilegeId } from './src/privileges';
+export {
+  getAllMinimalPrivilegeIds,
+  getCurrentMinimalPrivilegeId,
+  isAnyMinimalPrivilegeId,
+  getReferencesExtractedAfter,
+} from './src/privileges';
+export type {
+  MinimalPrivilegeBase,
+  MinimalPrivilegeVersion,
+  MinimalPrivilegeVersionReference,
+} from './src/privileges';
