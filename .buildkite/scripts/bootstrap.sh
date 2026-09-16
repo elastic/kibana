@@ -50,7 +50,7 @@ else
       echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
       mv ~/.cache/kibana/pnpm/.pnpm-store ./.pnpm-store
     fi
-    # Check if there's a cache artifact uploaded from a previous step
+    # Check whether a cache artifact was uploaded by a previous step
     if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
       if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
         echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
