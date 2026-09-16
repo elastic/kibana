@@ -9,10 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   extractApiKeyIdFromAuthzHeader,
+  HTTPAuthorizationHeader,
+  isUiamCredential,
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
-import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -68,12 +69,20 @@ export const toStableUserId = async ({
 };
 
 /**
- * Resolves the API key creator's profile uid via Elasticsearch, when available.
+ * Resolves the API key creator's profile uid, when available.
  *
- * `getCurrentUser` for API-key auth often omits `profile_uid`. Looking up the key with
- * `with_profile_uid` recovers the creator's profile so ownership can match interactive
- * sessions for the same user. Older keys or creators without an activated profile return
- * undefined and callers fall back to username matching.
+ * `getCurrentUser` for API-key auth often omits `profile_uid`. For native Elasticsearch
+ * API keys, looking up the key with `with_profile_uid` recovers the creator's profile so
+ * ownership can match interactive sessions for the same user.
+ *
+ * Serverless UIAM credentials (`essu_…`) are not stored in Elasticsearch, so
+ * `GET _security/api_key` returns an empty `api_keys` list (a non-403 miss). Those
+ * keys must not go through getApiKey. The already-scoped client can still call
+ * `authenticate()`; org/workflow UIAM keys often have no profile, in which case we
+ * return undefined and callers fall back to username matching.
+ *
+ * Empty results, 404s, and any other getApiKey/authenticate miss return undefined
+ * rather than throwing — matching Security `getCurrentUserProfileIdViaApiKey`.
  */
 const resolveApiKeyOwnerProfileUid = async ({
   request,
@@ -82,6 +91,16 @@ const resolveApiKeyOwnerProfileUid = async ({
   request: KibanaRequest;
   esClient: ElasticsearchClient;
 }): Promise<string | undefined> => {
+  const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+  if (authorization && isUiamCredential(authorization)) {
+    try {
+      const authResponse = await esClient.security.authenticate();
+      return authResponse.profile_uid;
+    } catch {
+      return undefined;
+    }
+  }
+
   const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
   if (!id) {
     return undefined;
@@ -94,14 +113,8 @@ const resolveApiKeyOwnerProfileUid = async ({
     });
 
     return response.api_keys?.[0]?.profile_uid;
-  } catch (error) {
-    if (
-      error instanceof errors.ResponseError &&
-      (error.statusCode === 403 || error.statusCode === 404)
-    ) {
-      return undefined;
-    }
-    throw error;
+  } catch {
+    return undefined;
   }
 };
 

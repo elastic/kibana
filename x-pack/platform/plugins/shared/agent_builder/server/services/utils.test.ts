@@ -259,7 +259,7 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('treats a 404 from API key profile lookup as profile not resolvable (e.g. UIAM keys)', async () => {
+  it('treats empty api_keys from getApiKey as profile not resolvable', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {
@@ -272,17 +272,9 @@ describe('getUserFromRequest', () => {
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
-    // UIAM `essu_` keys cannot be looked up via the native `_security/api_key`
-    // endpoint: Elasticsearch responds 404 with an empty `api_keys` array.
-    esClient.security.getApiKey.mockRejectedValue(
-      new errors.ResponseError({
-        statusCode: 404,
-        body: { api_keys: [] },
-        headers: {},
-        warnings: [],
-        meta: {} as never,
-      })
-    );
+    esClient.security.getApiKey.mockResolvedValue({
+      api_keys: [],
+    } as any);
 
     const result = await getUserFromRequest({ request, security, esClient });
 
@@ -293,7 +285,7 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('propagates unexpected API key profile lookup failures', async () => {
+  it('does not reject when getApiKey throws a non-403 miss, including empty api_keys', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {
@@ -306,17 +298,111 @@ describe('getUserFromRequest', () => {
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
-    esClient.security.getApiKey.mockRejectedValue(
+
+    for (const rejection of [
+      { api_keys: [] },
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'not_found' }, status: 404 },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      }),
       new errors.ResponseError({
         statusCode: 500,
         body: { error: { type: 'server_error' }, status: 500 },
         headers: {},
         warnings: [],
         meta: {} as never,
-      })
-    );
+      }),
+    ]) {
+      esClient.security.getApiKey.mockRejectedValue(rejection);
 
-    await expect(getUserFromRequest({ request, security, esClient })).rejects.toThrow();
+      await expect(getUserFromRequest({ request, security, esClient })).resolves.toEqual({
+        id: undefined,
+        username: 'shareduser',
+        isAdmin: false,
+      });
+    }
+  });
+
+  it('does not call getApiKey for a UIAM ApiKey essu_ header', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'ApiKey essu_credential_123',
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.authenticate.mockResolvedValue({
+      username: 'shareduser',
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: undefined,
+      username: 'shareduser',
+      isAdmin: false,
+    });
+    expect(esClient.security.getApiKey).not.toHaveBeenCalled();
+    expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses authenticate profile_uid for UIAM credentials when present', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'ApiKey essu_credential_123',
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.authenticate.mockResolvedValue({
+      username: 'shareduser',
+      profile_uid: 'profile-from-uiam',
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'profile-from-uiam',
+      username: 'shareduser',
+      isAdmin: false,
+    });
+    expect(esClient.security.getApiKey).not.toHaveBeenCalled();
+    expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns undefined when UIAM authenticate fails', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'ApiKey essu_credential_123',
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.authenticate.mockRejectedValue(new Error('authenticate failed'));
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: undefined,
+      username: 'shareduser',
+      isAdmin: false,
+    });
+    expect(esClient.security.getApiKey).not.toHaveBeenCalled();
   });
 
   it('prefers profile uid on the authenticated user for api_key auth without looking up the key', async () => {
