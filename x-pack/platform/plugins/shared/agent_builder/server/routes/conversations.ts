@@ -535,7 +535,7 @@ export function registerConversationRoutes({
       access: 'public',
       summary: 'Add events to a conversation',
       description:
-        'Append custom events to a conversation timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        "Append custom events to a conversation's timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).",
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
@@ -562,8 +562,6 @@ export function registerConversationRoutes({
                     maxLength: CONVERSATION_EVENT_TYPE_MAX_LENGTH,
                     meta: { description: 'The registered custom event type.' },
                   }),
-                  // data is opaque here; the registered Zod schema is the real validator.
-                  // Per-request size is bounded by the HTTP payload limit × MAX_EVENTS_PER_REQUEST.
                   data: schema.object({}, { unknowns: 'allow' }),
                 }),
                 {
