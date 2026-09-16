@@ -21,6 +21,7 @@ import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
   FieldValueSchema,
+  GatedEntityDefinition,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
@@ -65,7 +66,7 @@ export interface LogPageProbeSourceClauseParams {
   indexPatterns: string[];
   /** Resolved extraction variant: the probe and the extraction query must share one definition,
    * so both scan the same document population. */
-  entityDefinition: EntityDefinition;
+  entityDefinition: GatedEntityDefinition;
   fromDateISO: string;
   toDateISO: string;
   /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
