@@ -45,9 +45,12 @@ import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
   markExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
+import { createCoreUiamService } from '@kbn/core-security-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { CriticalError } from '@kbn/core-base-server-internal';
 
@@ -544,5 +547,46 @@ describe('self client UIAM auth header augmenter', () => {
 
     expect(augmenter(request, outboundHeaders)).toBeUndefined();
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('attests a cookie-authenticated UIAM session from the outbound credential', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION);
+    const augmenter = await startServerAndGetAugmenter();
+
+    const request = httpServerMock.createFakeKibanaRequest({ headers: {} });
+    const outboundHeaders = new Headers({ authorization: 'Bearer essu_session_token' });
+
+    expect(request.headers.authorization).toBeUndefined();
+    expect(augmenter(request, outboundHeaders)).toEqual(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_session_token' })
+    );
+  });
+
+  it('mints an attestation the receiving UIAM service accepts', async () => {
+    const sharedSecret = 'shared-secret';
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockImplementation((credential) => ({
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+        sharedSecret,
+        credential
+      ),
+    }));
+    const augmenter = await startServerAndGetAugmenter();
+
+    const minted = augmenter(
+      httpServerMock.createFakeKibanaRequest({ headers: {} }),
+      new Headers({ authorization: 'Bearer essu_outbound' })
+    );
+
+    expect(minted?.[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]).toEqual(expect.any(String));
+    expect(
+      createCoreUiamService(sharedSecret).getElasticsearchClientAuthentication({
+        credentialSource: 'inbound',
+        credential: new HTTPAuthorizationHeader('Bearer', 'essu_outbound'),
+        requestHeaders: minted ?? {},
+      })
+    ).toBe(sharedSecret);
   });
 });
