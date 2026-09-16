@@ -117,6 +117,23 @@ export const concatJsonObjectPropertyEsqlExprAsString = (
   return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
 };
 
+/**
+ * Builds a JSON *array of strings* property from a multi-value ES|QL expression, e.g.
+ * `"sources":["okta","endpoint"]`.
+ *
+ * Each value is escaped before being joined: these values come from event module/dataset
+ * data, so a quote or backslash would otherwise produce malformed JSON and make
+ * `parseDocumentsData` throw, failing the whole graph request. Collapses to "" when the
+ * expression is null.
+ */
+export const concatJsonObjectPropertyEsqlExprAsStringArray = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  const escaped = escapeJsonStringValueEsql(`TO_STRING(${esqlExpr})`);
+  return `COALESCE(CONCAT("\\"${propertyName}\\":[\\"", MV_CONCAT(${escaped}, "\\",\\""), "\\"]"), "")`;
+};
+
 export const JSON_OBJECT_SEPARATOR = '","';
 export const JSON_OBJECT_START = '"{"';
 export const JSON_OBJECT_END = '"}"';

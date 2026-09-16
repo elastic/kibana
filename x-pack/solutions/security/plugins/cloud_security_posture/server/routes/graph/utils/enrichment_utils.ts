@@ -270,7 +270,14 @@ export const rebuildDocData = (
     // Omitted entirely when absent: an unscored / uncategorized entity carries no key,
     // rather than a null the client would have to distinguish from a real value.
     if (enrichment?.riskScore != null) entityData.riskScore = enrichment.riskScore;
-    if (enrichment?.assetCriticality != null) {
+    // Levels the graph does not model are dropped rather than passed through, so a future or
+    // invalid value can never reach a consumer whose label map has no entry for it. Enforced
+    // here as well as at the enrichment source, since this is the single point every entity
+    // document flows through.
+    if (
+      enrichment?.assetCriticality != null &&
+      isKnownAssetCriticalityLevel(enrichment.assetCriticality)
+    ) {
       entityData.assetCriticality = enrichment.assetCriticality;
     }
     if (enrichment?.sources?.length) entityData.sources = enrichment.sources;

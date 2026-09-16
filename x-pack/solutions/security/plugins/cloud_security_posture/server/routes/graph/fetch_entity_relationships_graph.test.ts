@@ -963,121 +963,79 @@ describe('enrichEntityRecords', () => {
   // The entities query builds docData inline in ES|QL and never passes through
   // rebuildDocData, so risk/criticality have to be injected onto these records explicitly —
   // otherwise an entity-only graph request (entityIds, no originEventIds) returns neither.
-  it('applies risk score and asset criticality, including into docData', () => {
+  // The entities ES|QL query now serializes riskScore / assetCriticality / sources into
+  // docData itself, so enrichEntityRecords no longer injects them — it only normalizes the
+  // document through the shared rebuildDocData path.
+  it('preserves query-serialized risk score, criticality and sources in docData', () => {
     const record: EntityRecord = {
-      id: 'user:alice@example.com@okta',
-      name: 'alice@example.com',
-      type: 'Identity',
-      sub_type: 'Okta User',
+      id: 'host:ea-endpoint-1',
+      name: 'ea-endpoint-1',
+      type: 'Host',
+      sub_type: 'AWS EC2 Instance',
       docData: JSON.stringify({
-        id: 'user:alice@example.com@okta',
+        id: 'host:ea-endpoint-1',
         type: 'entity',
-        entity: { availableInEntityStore: true, name: 'alice@example.com' },
+        entity: {
+          availableInEntityStore: true,
+          riskScore: 82,
+          assetCriticality: 'high_impact',
+          sources: ['endpoint', 'system'],
+        },
       }),
+      riskScore: 82,
+      assetCriticality: 'high_impact',
     };
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
-        'user:alice@example.com@okta',
-        { name: 'alice@example.com', riskScore: 91, assetCriticality: 'extreme_impact' },
+        'host:ea-endpoint-1',
+        { riskScore: 82, assetCriticality: 'high_impact', sources: ['endpoint', 'system'] },
       ],
     ]);
 
     const [result] = enrichEntityRecords([record], enrichmentMap);
+    const entity = JSON.parse(result.docData).entity;
 
-    expect(result.riskScore).toBe(91);
-    expect(result.assetCriticality).toBe('extreme_impact');
-
-    const doc = JSON.parse(result.docData);
-    expect(doc.entity.riskScore).toBe(91);
-    expect(doc.entity.assetCriticality).toBe('extreme_impact');
-    // Existing docData fields survive the injection.
-    expect(doc.entity.availableInEntityStore).toBe(true);
-    expect(doc.entity.name).toBe('alice@example.com');
+    expect(entity.riskScore).toBe(82);
+    expect(entity.assetCriticality).toBe('high_impact');
+    expect(entity.sources).toEqual(['endpoint', 'system']);
   });
 
-  it('leaves docData untouched when the entity has neither value', () => {
-    const docData = JSON.stringify({
-      id: 'user:alice',
-      type: 'entity',
-      entity: { availableInEntityStore: true },
-    });
+  it('drops an asset criticality level the graph does not model', () => {
+    // The enrichment map filters unknown levels at the source, so no consumer — node
+    // aggregation or per-entity docData — can surface a value the client cannot label.
     const record: EntityRecord = {
       id: 'user:alice',
       name: 'alice',
       type: 'user',
       sub_type: '',
-      docData,
+      docData: JSON.stringify({ id: 'user:alice', type: 'entity', entity: {} }),
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { assetCriticality: 'some_future_level' }],
+    ]);
+
+    const [result] = enrichEntityRecords([record], enrichmentMap);
+
+    expect(JSON.parse(result.docData).entity).not.toHaveProperty('assetCriticality');
+  });
+
+  it('omits the fields entirely when the entity has none of them', () => {
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData: JSON.stringify({ id: 'user:alice', type: 'entity', entity: {} }),
     };
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       ['user:alice', { name: 'alice', riskScore: null, assetCriticality: null }],
     ]);
 
     const [result] = enrichEntityRecords([record], enrichmentMap);
+    const entity = JSON.parse(result.docData).entity;
 
-    expect(result.docData).toBe(docData);
-    const doc = JSON.parse(result.docData);
-    expect(doc.entity).not.toHaveProperty('riskScore');
-    expect(doc.entity).not.toHaveProperty('assetCriticality');
-  });
-
-  it('fills in sources when the entities query did not already serialize them', () => {
-    const record: EntityRecord = {
-      id: 'user:alice@example.com@okta',
-      name: 'alice@example.com',
-      type: 'Identity',
-      sub_type: 'Okta User',
-      docData: JSON.stringify({
-        id: 'user:alice@example.com@okta',
-        type: 'entity',
-        entity: { availableInEntityStore: true },
-      }),
-    };
-    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
-      ['user:alice@example.com@okta', { sources: ['okta'] }],
-    ]);
-
-    const [result] = enrichEntityRecords([record], enrichmentMap);
-
-    expect(JSON.parse(result.docData).entity.sources).toEqual(['okta']);
-  });
-
-  it('does not overwrite sources already serialized by the entities query', () => {
-    const record: EntityRecord = {
-      id: 'host:ea-endpoint-1',
-      name: 'ea-endpoint-1',
-      type: 'Host',
-      sub_type: '',
-      // The entities ES|QL query emits `sources` inline; enrichment must leave it alone.
-      docData: JSON.stringify({
-        id: 'host:ea-endpoint-1',
-        type: 'entity',
-        entity: { availableInEntityStore: true, sources: ['endpoint', 'system'] },
-      }),
-    };
-    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
-      ['host:ea-endpoint-1', { sources: ['should-not-win'] }],
-    ]);
-
-    const [result] = enrichEntityRecords([record], enrichmentMap);
-
-    expect(JSON.parse(result.docData).entity.sources).toEqual(['endpoint', 'system']);
-  });
-
-  it('returns unparseable docData unchanged rather than throwing', () => {
-    const record: EntityRecord = {
-      id: 'user:alice',
-      name: 'alice',
-      type: 'user',
-      sub_type: '',
-      docData: 'not-valid-json',
-    };
-    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
-      ['user:alice', { riskScore: 50 }],
-    ]);
-
-    const [result] = enrichEntityRecords([record], enrichmentMap);
-
-    expect(result.docData).toBe('not-valid-json');
-    expect(result.riskScore).toBe(50);
+    expect(entity).not.toHaveProperty('riskScore');
+    expect(entity).not.toHaveProperty('assetCriticality');
+    expect(entity).not.toHaveProperty('sources');
   });
 });

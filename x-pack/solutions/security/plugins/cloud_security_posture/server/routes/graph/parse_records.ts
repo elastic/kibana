@@ -1401,10 +1401,14 @@ export const regroupRelationships = (
 };
 
 /**
- * Rebuilds targetsDocData for each relationship using entity store enrichment.
- * actorsDocData is intentionally left unchanged: relationship actor docData is already
- * built inline in the ES|QL query with full entity metadata (the actor IS the
- * entity-store source row). Only target entities need TypeScript-side enrichment.
+ * Rebuilds actorsDocData and targetsDocData for each relationship using entity store
+ * enrichment.
+ *
+ * The relationship query builds actor docData inline (the actor IS the entity-store source
+ * row), but it is still rebuilt here so the actor side gets the same per-entity treatment as
+ * every other path — notably `sourceFields` unioning and the unknown-criticality filtering
+ * applied in `rebuildDocData`. Without this, relationship actors were the only entities in
+ * the API missing risk score / criticality under `documentsData`.
  */
 export const enrichRelationshipDocData = (
   relationships: RelationshipEdge[],
@@ -1412,57 +1416,14 @@ export const enrichRelationshipDocData = (
 ): RelationshipEdge[] => {
   return relationships.map((rel) => ({
     ...rel,
+    actorsDocData: rebuildDocData(rel.actorsDocData, enrichmentMap),
     targetsDocData: rebuildDocData(rel.targetsDocData, enrichmentMap),
   }));
 };
 
-/**
- * Injects risk score / asset criticality into an entities-query `docData` JSON string.
- *
- * The entities query builds `docData` inline in ES|QL (it does not pass through
- * `rebuildDocData`), so these two fields have to be merged into the already-serialized
- * `entity` object here. Absent values add no key at all. A `docData` that fails to parse is
- * returned unchanged — it must already be schema-valid, same contract as `rebuildDocData`.
- */
-const injectEntityDocDataEnrichment = (
-  docData: string,
-  enrichment: EntityEnrichmentFields,
-  logger?: Logger
-): string => {
-  if (
-    enrichment.riskScore == null &&
-    enrichment.assetCriticality == null &&
-    !enrichment.sources?.length
-  ) {
-    return docData;
-  }
-
-  let doc: Record<string, unknown>;
-  try {
-    doc = JSON.parse(docData);
-  } catch (e) {
-    logger?.warn(`Failed to parse entity docData for enrichment injection: ${e}`);
-    return docData;
-  }
-
-  const entity = (doc.entity ?? {}) as Record<string, unknown>;
-  if (enrichment.riskScore != null) entity.riskScore = enrichment.riskScore;
-  if (enrichment.assetCriticality != null) entity.assetCriticality = enrichment.assetCriticality;
-  // The entities query already serializes `sources` into docData, so only fill it in when
-  // that query did not (e.g. an entity reached here from another path).
-  if (enrichment.sources?.length && entity.sources == null) entity.sources = enrichment.sources;
-  doc.entity = entity;
-
-  return JSON.stringify(doc);
-};
-
-/**
- * Applies enrichment to entity records from the entity store.
- */
 export const enrichEntityRecords = (
   records: EntityRecord[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>,
-  logger?: Logger
+  enrichmentMap: Map<string, EntityEnrichmentFields>
 ): EntityRecord[] => {
   return records.map((record) => {
     const enrichment = enrichmentMap.get(record.id);
@@ -1472,11 +1433,11 @@ export const enrichEntityRecords = (
       name: enrichment.name ?? record.name,
       type: enrichment.type ?? record.type,
       sub_type: enrichment.subType ?? record.sub_type,
-      riskScore: enrichment.riskScore,
-      assetCriticality: enrichment.assetCriticality,
-      docData: record.docData
-        ? injectEntityDocDataEnrichment(record.docData, enrichment, logger)
-        : record.docData,
+      // Rebuilt through the shared path so this docData gets the same treatment as every
+      // other entity document — in particular the unknown-criticality filtering applied via
+      // the enrichment map. The entities query serializes these fields itself, so this is a
+      // normalization pass rather than the only source of them.
+      docData: record.docData ? rebuildDocData(record.docData, enrichmentMap)[0] : record.docData,
     };
   });
 };

@@ -23,6 +23,7 @@ import {
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyEsqlExprAsStringArray,
   buildPinnedEsql,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEsqlRow } from './types';
@@ -111,19 +112,11 @@ ${forkBranches}
           'engine_type',
           'entity.EngineMetadata.Type'
         )}), ""),
-      CASE(
-        host.ip IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
-          ${JSON_OBJECT_END}),
-        ""
-      ),
-      CASE(
-        entity.source IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"sources\\":[\\"",
-          MV_CONCAT(TO_STRING(entity.source), "\\",\\""), "\\"]"),
-        ""
-      ),
+      CASE(host.ip IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+        ${concatJsonObjectPropertyEsqlExprAsStringArray('ip', 'host.ip')},
+        ${JSON_OBJECT_END}), ""),
+      CASE(entity.source IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')}), ""),
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
@@ -311,13 +304,14 @@ export const fetchEntities = async ({
   const esqlQuery = `SET unmapped_fields="nullify";
     FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
-    // host.ip and entity.source are both multi-value; cast to string so MV_CONCAT can
-    // serialize them into the docData JSON below.
-    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)), __entity_source = VALUES(TO_STRING(entity.source))
     | EVAL id = entity.id
     | EVAL name = entity.name
     | EVAL type = entity.type
     | EVAL sub_type = entity.sub_type
+    // Kept as columns (not only inside docData) because the node-level riskScore range and
+    // assetCriticality distribution are computed in TypeScript from EntityRecord.
+    | EVAL riskScore = \`entity.risk.calculated_score_norm\`
+    | EVAL assetCriticality = asset.criticality
     | EVAL docData = CONCAT(${JSON_OBJECT_START},
       ${concatJsonObjectPropertyEsqlExprAsString('id', 'entity.id')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
@@ -334,23 +328,15 @@ export const fetchEntities = async ({
             'engine_type',
             'entity.EngineMetadata.Type'
           )}), ""),
-        CASE(
-          host.ip IS NOT NULL,
-          CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-            "\\"ip\\":[\\"", MV_CONCAT(__host_ip, "\\",\\""), "\\"]",
-            ${JSON_OBJECT_END}),
-          ""
-        ),
-        CASE(
-          entity.source IS NOT NULL,
-          CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"sources\\":[\\"",
-            MV_CONCAT(__entity_source, "\\",\\""), "\\"]"),
-          ""
-        ),
+        CASE(host.ip IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          ${concatJsonObjectPropertyEsqlExprAsStringArray('ip', 'host.ip')},
+          ${JSON_OBJECT_END}), ""),
+        CASE(entity.source IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source')}), ""),
         ${JSON_OBJECT_SEPARATOR}, ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
-    | KEEP id, name, type, sub_type, docData`;
+    | KEEP id, name, type, sub_type, docData, riskScore, assetCriticality`;
   logger.trace(`Entities ES|QL query: ${esqlQuery}`);
 
   const response = await esClient.asCurrentUser.helpers

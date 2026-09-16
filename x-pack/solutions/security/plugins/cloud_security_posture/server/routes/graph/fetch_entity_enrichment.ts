@@ -11,6 +11,7 @@ import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 export interface EntityEnrichmentFields {
   name?: string | null;
@@ -67,6 +68,10 @@ const firstValue = <T>(value: T | T[] | null | undefined): T | null => {
   if (value == null) return null;
   return Array.isArray(value) ? value[0] ?? null : value;
 };
+
+/** Drops asset criticality levels the graph does not model, so they never reach the DTO. */
+const knownCriticality = (level: string | null): string | null =>
+  level != null && isKnownAssetCriticalityLevel(level) ? level : null;
 
 /**
  * Builds a sourceFields object for an entity from its entity-store record columns.
@@ -221,7 +226,10 @@ FROM ${indexName}
           // `null` is preserved rather than defaulted: an entity with no risk score is
           // unscored, which is not the same as scoring zero.
           riskScore: firstValue(record['entity.risk.calculated_score_norm']),
-          assetCriticality: firstValue(record['asset.criticality']),
+          // Levels the graph does not model are dropped here rather than at each consumer, so
+          // no path (node aggregation *or* per-entity documentsData) can surface a value the
+          // client's four-level label map has no entry for.
+          assetCriticality: knownCriticality(firstValue(record['asset.criticality'])),
           // entity.source is genuinely multi-value (collectValues in the entity store), so
           // unlike the scalars above it is normalized to an array rather than a first value.
           ...(sources.length > 0 ? { sources } : {}),

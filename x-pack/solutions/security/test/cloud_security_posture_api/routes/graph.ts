@@ -2999,9 +2999,19 @@ export default function (providerContext: FtrProviderContext) {
                       name: 'Relationships Test User',
                       type: 'Identity',
                       sub_type: 'AWS IAM User',
+                      // Relationship ACTOR documents must carry the per-entity fields too —
+                      // this side was previously missing them because the relationship query
+                      // built actor docData inline and it was never rebuilt.
+                      riskScore: 74.5,
+                      assetCriticality: 'extreme_impact',
+                      sources: ['cloud_asset_inventory', 'okta'],
                     }),
                   })
                 );
+                expect(userActorNode.riskScore).to.eql({ min: 74.5, max: 74.5 });
+                expect(userActorNode.assetCriticality).to.eql([
+                  { level: 'extreme_impact', count: 1 },
+                ]);
 
                 const relationshipGroupedNodeTarget = response.body.nodes.find(
                   (node: NodeDataModel) =>

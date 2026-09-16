@@ -181,10 +181,9 @@ export interface EntityRecord {
   sub_type: string;
   docData: string;
   /**
-   * Risk score / asset criticality resolved from the entity store by `enrichEntityRecords`.
-   * Unlike name/type/sub_type these are not columns of the entities ES|QL query — that query
-   * builds `docData` itself rather than going through `rebuildDocData`, so enrichment has to
-   * be applied to these records explicitly.
+   * Risk score / asset criticality, KEEP-ed as columns by the entities ES|QL query (which
+   * also serializes them into `docData`). Kept separately because the node-level riskScore
+   * range and assetCriticality distribution are computed here in TypeScript.
    */
   riskScore?: number | null;
   assetCriticality?: string | null;
