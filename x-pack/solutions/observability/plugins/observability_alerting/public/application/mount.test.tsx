@@ -11,11 +11,11 @@ import { mountObservabilityAlertingApp } from './mount';
 
 const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
   (appId: string, paths: Record<string, string>) => ({
-    rules: { app: appId, basePath: paths.rules },
-    ruleLibrary: { app: appId, basePath: paths.ruleLibrary },
-    episodes: { app: appId, basePath: paths.episodes },
-    actionPolicies: { app: appId, basePath: paths.actionPolicies },
-    executionHistory: { app: appId, basePath: paths.executionHistory },
+    rules: { app: appId, pathPrefix: paths.rules },
+    ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
+    episodes: { app: appId, pathPrefix: paths.episodes },
+    actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
+    executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })
 );
 
