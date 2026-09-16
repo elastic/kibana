@@ -74,10 +74,7 @@ const createStateManager = (
   };
 };
 
-const createFetcher = (
-  initialColumnsMeta?: DataTableColumnsMeta,
-  currentSource?: DataSource
-) => {
+const createFetcher = (initialColumnsMeta?: DataTableColumnsMeta, currentSource?: DataSource) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),

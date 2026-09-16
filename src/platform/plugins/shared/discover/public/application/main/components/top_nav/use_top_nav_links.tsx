@@ -205,10 +205,9 @@ export const useTopNavLinks = ({
     }
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
-      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-        isEsqlMode
-          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-          : undefined;
+      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined = isEsqlMode
+        ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+        : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
         : currentDataView.isPersisted()

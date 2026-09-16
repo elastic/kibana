@@ -22,8 +22,7 @@ const defaultDataSource = new DataViewSource(dataViewWithTimefieldMock);
 export const getFetchParamsMock = (
   partialParams?: Partial<UnifiedHistogramFetchParamsExternal>
 ): UnifiedHistogramFetchParams => {
-  const dataSource =
-    (partialParams?.dataSource as DataViewSource | undefined) ?? defaultDataSource;
+  const dataSource = (partialParams?.dataSource as DataViewSource | undefined) ?? defaultDataSource;
 
   return {
     dataSource,
@@ -38,7 +37,8 @@ export const getFetchParamsMock = (
     isESQLQuery: false,
     isTimeBased: dataSource.isTimeBased() && !dataSource.isRollup(),
     columnsMap: undefined,
-    breakdown: dataSource.isTimeBased() && !dataSource.isRollup() ? { field: undefined } : undefined,
+    breakdown:
+      dataSource.isTimeBased() && !dataSource.isRollup() ? { field: undefined } : undefined,
     timeInterval: 'auto',
     ...partialParams,
   };
