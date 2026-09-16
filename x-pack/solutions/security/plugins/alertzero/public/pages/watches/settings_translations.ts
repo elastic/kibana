@@ -207,6 +207,24 @@ const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
     values: { intervalValue },
   });
 
+export const CANDIDATE_LIMIT_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.label',
+  { defaultMessage: 'Candidate limit' }
+);
+
+export const CANDIDATE_LIMIT_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.helpText',
+  {
+    defaultMessage:
+      'Attack Discovery only. Maximum candidates considered per run. Other Workers do not have this setting.',
+  }
+);
+
+export const CANDIDATE_LIMIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.candidateLimit.ariaLabel',
+  { defaultMessage: 'Candidate limit' }
+);
+
 /** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
 export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
   const value = String(intervalValue);

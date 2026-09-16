@@ -41,6 +41,8 @@ export {
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
+  WorkerTriggerType,
 } from './components/watch_settings.gen';
 
 export {

@@ -20,6 +20,7 @@ import {
   WatchAutonomyLevel,
   WorkerScheduleInterval,
   Worker,
+  WorkerSettingsExtras,
 } from '../components/watch_settings.gen';
 
 export const UpdateWorkerRequestParams = lazySchema(() =>
@@ -62,6 +63,12 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
      */
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       "New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule."
+    ),
+    /**
+     * Partial unique-settings bag. Rejected with a 400 for a Worker that owns no extras. The Worker module rejects keys it does not own.
+     */
+    extras: WorkerSettingsExtras.optional().describe(
+      'Partial unique-settings bag. Rejected with a 400 for a Worker that owns no extras. The Worker module rejects keys it does not own.'
     ),
   })
 );

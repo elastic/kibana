@@ -12,6 +12,8 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Worker-specific settings bag. Present only when that Worker owns unique settings. */
+  extras?: Record<string, unknown>;
 }
 
 export const renderCommonWorkerYaml = (
