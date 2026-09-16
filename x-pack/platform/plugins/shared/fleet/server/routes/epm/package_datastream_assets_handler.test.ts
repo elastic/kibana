@@ -35,6 +35,7 @@ jest.mock('../../services/epm/packages/input_type_packages');
 jest.mock('../../services/package_policy', () => {
   return {
     packagePolicyService: {
+      get: jest.fn(),
       list: jest.fn(),
     },
   };
@@ -113,13 +114,14 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [packagePolicy1, testPackagePolicy],
     } as any);
@@ -198,13 +200,14 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [packagePolicy1, testPackagePolicy],
     } as any);
@@ -237,7 +240,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     });
   });
 
-  it('should throw not found error if package policy id does not exist', async () => {
+  it('should throw not found error if package policy id does not exist in request space', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
@@ -253,13 +256,93 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         packagePolicyId: 'idontexist',
       },
     });
-    packagePolicyServiceMock.list.mockRejectedValueOnce(
-      new Error('Saved object [ingest-package-policies/idontexist] not found')
+    packagePolicyServiceMock.get.mockResolvedValue(null);
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id idontexist not found')
     );
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError('Saved object [ingest-package-policies/idontexist] not found');
+    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different package name', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy-other-pkg',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue({
+      ...packagePolicy1,
+      id: 'policy-other-pkg',
+      package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+    });
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id policy-other-pkg not found')
+    );
+    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different package version', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy-other-version',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue({
+      ...packagePolicy1,
+      id: 'policy-other-version',
+      package: { name: 'logs', title: 'Test', version: '2.0.0' },
+    });
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id policy-other-version not found')
+    );
+    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different space', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'other-space-policy-id',
+      },
+    });
+    // Space-scoped get returns null — policy not visible in request space
+    packagePolicyServiceMock.get.mockResolvedValue(null);
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id other-space-policy-id not found')
+    );
+    expect(packagePolicyServiceMock.list).not.toHaveBeenCalled();
+    expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
   it('should throw error if the datastreams also exist on different packages', async () => {
@@ -271,13 +354,14 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [testPackagePolicy, packagePolicy1],
     } as any);
@@ -310,13 +394,14 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [
         packagePolicy1,
