@@ -24,29 +24,19 @@ export const taskHasRun = async (taskId: string, kbn: KbnClient, after: Date): P
 export const launchTask = async (
   taskId: string,
   kbn: KbnClient,
-  logger: ToolingLog,
-  delayMillis: number = 1_000
+  logger: ToolingLog
 ): Promise<Date> => {
   logger.info(`Launching task ${taskId}`);
-  const task = await kbn.savedObjects.get({
-    type: 'task',
-    id: taskId,
+
+  await kbn.request({
+    method: 'POST',
+    path: `/internal/ftr/task_manager/${taskId}/run_soon`,
   });
 
-  const runAt = new Date(Date.now() + delayMillis).toISOString();
-
-  await kbn.savedObjects.update({
-    type: 'task',
-    id: taskId,
-    attributes: {
-      ...task.attributes,
-      runAt,
-      scheduledAt: runAt,
-      status: TaskStatus.Idle,
-    },
-  });
+  // runSoon sets runAt to now, so capture the threshold after it returns: taskHasRun then stays false until the post-run reschedule.
+  const after = new Date();
 
   logger.info(`Task ${taskId} launched`);
 
-  return new Date(runAt);
+  return after;
 };
