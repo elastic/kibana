@@ -19,6 +19,7 @@ import { treeifyError } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataBaseSchema,
+  querySchema,
   IMMUTABLE_RULE_FIELDS,
   isAbsenceDistinguishableFromBreach,
   isLifecycleConfigAllowedForKind,
@@ -48,7 +49,12 @@ import { getInvalidRuleDataMessage } from '../errors/rule_error_messages';
 import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BuilderTypeRegistry } from '../builder_types';
 import type { CallerIdentity } from './caller_identity';
-import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
+import type {
+  BulkOperationError,
+  ResolvedCreateRuleData,
+  ResolvedUpdateRuleData,
+  RotationCandidate,
+} from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -629,7 +635,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: data.query,
+    // Absent for execution-time builder rules, which compile a query on every
+    // run and persist nothing in `query`.
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    ...(data.query !== undefined ? { query: data.query } : {}),
     ...toStoredLifecycle(data),
     state_transition: data.state_transition,
     grouping: data.grouping,
@@ -654,13 +663,21 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
   },
   time_field: attrs.time_field,
   schedule: { every: attrs.schedule.every, lookback: attrs.schedule.lookback },
-  query: toApiQuery(attrs.query),
+  query: attrs.query ? toApiQuery(attrs.query) : undefined,
   recovery: attrs.recovery,
   no_data: attrs.no_data,
   state_transition: toApiStateTransition(attrs.state_transition),
   grouping: toApiGrouping(attrs.grouping),
   artifacts: toApiArtifacts(attrs.artifacts),
 });
+
+/**
+ * The schema a merged update is parsed with. `query` is optional because an execution-time builder
+ * rule persists none, and the resolved update data clears a stored one with `query: null`.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
+ */
+const mergedRuleDataSchema = createRuleDataBaseSchema.extend({ query: querySchema.optional() });
 
 /**
  * Builds the complete next saved-object attributes for a rule update.
@@ -675,7 +692,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
-  updateData: UpdateRuleData,
+  updateData: ResolvedUpdateRuleData,
   serverFields: {
     updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
@@ -690,9 +707,9 @@ export function buildUpdateRuleAttributes(
     delete existing.query;
   }
 
-  const merged = applyPatch(createRuleDataBaseSchema, existing, updateData);
+  const merged = applyPatch(mergedRuleDataSchema, existing, updateData);
 
-  const parsed = createRuleDataBaseSchema.safeParse(merged);
+  const parsed = mergedRuleDataSchema.safeParse(merged);
   if (!parsed.success) {
     throw Boom.badRequest(getInvalidRuleDataMessage('update', stringifyZodError(parsed.error)), {
       code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
@@ -850,6 +867,9 @@ function isMergedRecoverySegmentComposable(attrs: RuleSavedObjectAttributes): bo
   if (attrs.recovery?.strategy !== recoveryStrategy.condition) {
     return true;
   }
+  if (attrs.query == null) {
+    return true;
+  }
   return validateComposedEsqlQuery(attrs.query.base, attrs.recovery.segment) == null;
 }
 
@@ -892,7 +912,8 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    query: toApiQuery(attrs.query),
+    // Execution-compiled rules persist no query and must not emit one.
+    query: attrs.query ? toApiQuery(attrs.query) : undefined,
     recovery: attrs.recovery,
     no_data: attrs.no_data,
     state_transition: toApiStateTransition(attrs.state_transition),
