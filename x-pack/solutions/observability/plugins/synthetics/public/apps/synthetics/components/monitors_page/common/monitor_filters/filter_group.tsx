@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 
 import type {
   SyntheticsMonitorFilterItem,
@@ -20,6 +21,7 @@ import type {
 import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
+import { getRemoteOriginFieldLabel } from '../../../../utils/remote/remote_origin_copy';
 
 const mixUrlValues = (
   values?: LabelWithCountValue[],
@@ -47,6 +49,7 @@ const mixUrlValues = (
 export const FilterGroup = ({
   handleFilterChange,
   excludeFields,
+  showRemoteClusterFilter = false,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
   /**
@@ -55,12 +58,35 @@ export const FilterGroup = ({
    * apply because the data being filtered isn't backed by monitor configs.
    */
   excludeFields?: ReadonlyArray<SyntheticsMonitorFilterItem['field']>;
+  /**
+   * Whether to render the "Remote cluster" filter. Only meaningful on the
+   * overview page (`MonitorListContainer` renders `FilterGroup` too via
+   * `ListFilters`, but management cannot filter on `_index`). Hidden by
+   * default and additionally gated on the presence of remote monitors.
+   */
+  showRemoteClusterFilter?: boolean;
 }) => {
   const data = useFilters();
 
   const { locations } = useSelector(selectServiceLocationsState);
+  const { allConfigs } = useSelector(selectOverviewStatus);
 
   const urlParams = useGetUrlParams();
+
+  // Derive remote-cluster filter values from the overview status payload
+  // (same source the grouping toggle uses). The filters endpoint only knows
+  // about local saved objects, so it cannot enumerate remote clusters.
+  const remoteClusterValues = useMemo<LabelWithCountValue[]>(() => {
+    const counts = new Map<string, number>();
+    for (const config of allConfigs ?? []) {
+      const remoteName = config.remote?.remoteName;
+      if (!remoteName) continue;
+      counts.set(remoteName, (counts.get(remoteName) ?? 0) + 1);
+    }
+    return Array.from(counts, ([label, count]) => ({ label, count }));
+  }, [allConfigs]);
+
+  const hasRemoteMonitors = remoteClusterValues.length > 0;
 
   const allFilters: SyntheticsMonitorFilterItem[] = [
     {
@@ -119,6 +145,18 @@ export const FilterGroup = ({
       values: getSyntheticsFilterDisplayValues(
         mixUrlValues(data?.projects, urlParams.projects),
         'projects',
+        locations
+      ),
+    });
+  }
+
+  if (showRemoteClusterFilter && hasRemoteMonitors) {
+    allFilters.push({
+      label: getRemoteOriginFieldLabel(),
+      field: 'remoteNames',
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(remoteClusterValues, urlParams.remoteNames),
+        'remoteNames',
         locations
       ),
     });

@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import type { StepExecutionsDataClient } from './data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
-export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+/**
+ * Step documents share the workflow-execution document's concurrent-writer problem: the run's own
+ * periodic flush and `markNonTerminalStepsFailed` (cancel / task-recovery paths) can update the
+ * same step doc at once. See the matching note in `workflow_execution_repository.ts`.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
 
-  constructor(private esClient: ElasticsearchClient) {}
+export class StepExecutionRepository {
+  constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -29,8 +33,7 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
-      index: this.indexName,
+    const response = await this.stepExecutionsDataClient.search({
       query: {
         match: { workflowRunId: executionId },
       },
@@ -51,8 +54,7 @@ export class StepExecutionRepository {
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
-      esClient: this.esClient,
-      stepsExecutionIndex: this.indexName,
+      stepExecutionsDataClient: this.stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds,
     });
@@ -78,26 +80,17 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.mget<EsWorkflowStepExecution>({
-      index: this.indexName,
-      ids: stepExecutionIds,
-      ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
-      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
+    const { items } = await this.stepExecutionsDataClient.getByIds(stepExecutionIds, {
+      sourceIncludes,
+      sourceExcludes,
     });
-
-    const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
-
-    const stepExecutions: EsWorkflowStepExecution[] = [];
-    for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        const source = doc._source as EsWorkflowStepExecution;
-        if (outputExplicitlyRequested && source.output === undefined) {
-          source.output = null;
-        }
-        stepExecutions.push(source);
+    const shouldNormalizeOutput = sourceIncludes?.includes('output');
+    return items.map(({ document }) => {
+      if (shouldNormalizeOutput && document.output === undefined) {
+        return { ...document, output: null };
       }
-    }
-    return stepExecutions;
+      return document;
+    });
   }
 
   /**
@@ -136,28 +129,22 @@ export class StepExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
+    const bulkResponse = await this.stepExecutionsDataClient.bulk({
+      items: stepExecutions.map((stepExecution) => ({
+        operation: 'upsert',
+        document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+      })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
-      index: this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
-      ]),
     });
 
     if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
+      const failed = bulkResponse.items
+        .filter((item) => item.error)
+        .map((item) => ({ id: item.id, error: item.error }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Failed to upsert ${failed.length} step executions: ${JSON.stringify(failed)}`
       );
     }
   }

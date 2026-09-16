@@ -30,6 +30,7 @@ export const episodeDeactivatedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeDeactivatedPayloadSchema
 > = {
   id: EPISODE_DEACTIVATED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeDeactivatedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeDeactivated.title', {
     defaultMessage: 'Alerting - Episode deactivated',

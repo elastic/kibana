@@ -10,7 +10,7 @@ import type { CompositeSLODefinitionResponse, UpdateCompositeSLOInput } from '@k
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import { persistCompositeSummaryDoc } from './composite_summary_writer';
+import { computeAndPersistCompositeSummaryDoc } from './composite_summary_writer';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -34,7 +34,7 @@ export async function updateCompositeSlo(
     updatedBy: userId,
   });
 
-  await persistCompositeSummaryDoc(updated, {
+  await computeAndPersistCompositeSummaryDoc(updated, {
     esClient,
     summaryClient,
     repository,

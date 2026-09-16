@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiFilePickerProps } from '@elastic/eui';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -20,21 +20,22 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
-import type { MigrationStepProps } from '../../../../../common/types';
+import type { MigrationSource, MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
+import { FILE_UPLOAD_ERROR } from '../../../../../common/translations/file_upload_error';
 import { useParseFileInput } from '../../../../../common/hooks/use_parse_file_input';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import * as i18n from './translations';
-import { EnhancementType, QRADAR_ENHANCEMENT_OPTS, type AddedEnhancement } from './types';
+import { EnhancementType, type AddedEnhancement } from './types';
 import { QradarDataInputStep } from '../../types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 export const EnhancementsDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationStats }) => {
+  ({ dataInputStep, migrationStats, migrationSource }) => {
     const dataInputStatus = useMemo(
       () => getEuiStepStatus(QradarDataInputStep.Enhancements, dataInputStep),
       [dataInputStep]
@@ -62,7 +63,10 @@ export const EnhancementsDataInput = React.memo<MigrationStepProps>(
           </EuiFlexItem>
           {dataInputStatus === 'current' && migrationStats && (
             <EuiFlexItem>
-              <EnhancementsDataInputContent migrationStats={migrationStats} />
+              <EnhancementsDataInputContent
+                migrationStats={migrationStats}
+                migrationSource={migrationSource}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -74,30 +78,30 @@ EnhancementsDataInput.displayName = 'EnhancementsDataInput';
 
 interface EnhancementsDataInputContentProps {
   migrationStats: RuleMigrationTaskStats;
+  migrationSource: MigrationSource;
 }
 
 const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProps>(
-  ({ migrationStats }) => {
+  ({ migrationStats, migrationSource }) => {
+    const { enhancements } = useRuleMigrationVendorCopy(migrationSource);
+
     const [selectedType, setSelectedType] = useState<EnhancementType>(EnhancementType.MITRE);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<QRadarMitreMappingsData | null>(null);
     const [addedEnhancements, setAddedEnhancements] = useState<AddedEnhancement[]>([]);
-    const filePickerRef = React.useRef<EuiFilePickerClass>(null);
+    const filePickerRef = React.useRef<EuiFilePickerRef>(null);
+    const { euiTheme } = useEuiTheme();
 
     const { enhanceRules, isLoading } = useEnhanceRules();
-    const { addError } = useAppToasts();
 
-    const onFileParsed = useCallback(
-      (content: string) => {
-        try {
-          const parsed: QRadarMitreMappingsData = JSON.parse(content);
-          setParsedData(parsed);
-        } catch (err) {
-          addError(err, { title: i18n.INVALID_JSON_ERROR });
-        }
-      },
-      [addError]
-    );
+    const onFileParsed = useCallback((content: string) => {
+      try {
+        const parsed: QRadarMitreMappingsData = JSON.parse(content);
+        setParsedData(parsed);
+      } catch (err) {
+        throw new Error(FILE_UPLOAD_ERROR.INVALID_JSON);
+      }
+    }, []);
 
     const { parseFile, isParsing, error: parseError } = useParseFileInput(onFileParsed);
 
@@ -108,6 +112,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const onFileChange = useCallback(
       (files: FileList | null) => {
         setParsedData(null);
+        parseFile(files);
 
         if (!files || files.length === 0) {
           setSelectedFile(null);
@@ -115,7 +120,6 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
         }
 
         setSelectedFile(files[0]);
-        parseFile(files);
       },
       [parseFile]
     );
@@ -152,11 +156,11 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
 
     const typeOptions = useMemo(
       () =>
-        Array.from(QRADAR_ENHANCEMENT_OPTS.keys()).map((enhancementType) => ({
+        Object.values(EnhancementType).map((enhancementType) => ({
           value: enhancementType,
-          inputDisplay: QRADAR_ENHANCEMENT_OPTS.get(enhancementType),
+          inputDisplay: enhancements?.typeOptions[enhancementType] ?? enhancementType,
         })),
-      []
+      [enhancements?.typeOptions]
     );
 
     return (
@@ -172,7 +176,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexStart">
             <EuiFlexItem grow={2}>
               <EuiFormRow label={i18n.ENHANCEMENT_TYPE_LABEL} fullWidth>
                 <EuiSuperSelect
@@ -186,10 +190,15 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={3}>
-              <EuiFormRow label={i18n.FILE_LABEL} isInvalid={!!parseError} fullWidth>
+              <EuiFormRow
+                label={i18n.FILE_LABEL}
+                isInvalid={!!parseError}
+                error={parseError}
+                fullWidth
+              >
                 <EuiFilePicker
                   id="enhancementFilePicker"
-                  ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+                  ref={filePickerRef}
                   initialPromptText={i18n.FILE_PICKER_PROMPT}
                   onChange={onFileChange}
                   accept=".json"
@@ -203,6 +212,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                css={{ marginTop: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` }}
                 onClick={onAddEnhancement}
                 disabled={isAddDisabled}
                 isLoading={isLoading}
@@ -228,7 +238,9 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               {addedEnhancements.map((enhancement, index) => (
                 <EuiFlexItem key={index}>
                   <EuiText size="s">
-                    {`${QRADAR_ENHANCEMENT_OPTS.get(enhancement.type)} - ${enhancement.fileName}`}
+                    {`${enhancements?.typeOptions[enhancement.type] ?? enhancement.type} - ${
+                      enhancement.fileName
+                    }`}
                   </EuiText>
                 </EuiFlexItem>
               ))}

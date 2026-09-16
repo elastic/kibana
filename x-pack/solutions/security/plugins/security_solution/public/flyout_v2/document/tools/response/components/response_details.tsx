@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { useResponseActionsView } from '../hooks/use_response_actions_view';
+import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
 
 export interface ResponseDetailsContentProps {
   /**
    * Alert document used to fetch and display response actions.
    */
   hit: DataTableRecord;
-  /**
-   * Whether the flyout is opened in rule preview mode.
-   */
-  isRulePreview?: boolean;
 }
 
 /**
  * Automated response actions results.
  */
-export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({
-  hit,
-  isRulePreview = false,
-}) => {
+export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({ hit }) => {
+  const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
   const responseActionsView = useResponseActionsView({
     hit,
   });

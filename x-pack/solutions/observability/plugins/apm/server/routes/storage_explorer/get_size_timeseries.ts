@@ -7,6 +7,7 @@
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { SizeTimeseriesResponse } from '@kbn/apm-api-shared';
 import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
@@ -18,11 +19,6 @@ import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
-export type SizeTimeseriesResponse = Array<{
-  serviceName: string;
-  timeseries: Array<{ x: number; y: number }>;
-}>;
 
 export async function getSizeTimeseries({
   environment,

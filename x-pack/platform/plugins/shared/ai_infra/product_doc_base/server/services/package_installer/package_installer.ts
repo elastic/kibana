@@ -19,14 +19,11 @@ import {
   type ProductName,
   ResourceTypes,
 } from '@kbn/product-doc-common';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { defaultInferenceEndpoints, InferenceEndpointProvider } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import {
-  isDefaultLinuxElserInferenceId,
-  isImpliedDefaultElserInferenceId,
-} from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
@@ -42,6 +39,7 @@ import {
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
+  validateOpenApiArtifactArchive,
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
   createIndex,
@@ -109,6 +107,16 @@ export class PackageInstaller {
     this.isServerless = isServerless ?? false;
   }
 
+  private getArtifactRepositoryOptions(): {
+    artifactRepositoryUrl: string;
+    artifactRepositoryProxyUrl?: string;
+  } {
+    return {
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
+    };
+  }
+
   private async getInferenceInfo(inferenceId?: string) {
     if (!inferenceId) {
       return;
@@ -120,17 +128,56 @@ export class PackageInstaller {
       ? inferenceEndpoints.endpoints[0]
       : undefined;
   }
+
   /**
-   * Make sure that the currently installed doc packages are up to date.
+   * Makes sure the inference endpoint backing an installation is ready. On serverless only
+   * Elastic Inference Service endpoints are allowed; they are hosted, so nothing is deployed.
+   */
+  private async ensureInferenceEndpointReady({
+    inferenceId,
+    endpoint,
+  }: {
+    inferenceId: string;
+    endpoint?: InferenceInferenceEndpointInfo;
+  }): Promise<void> {
+    if (this.isServerless) {
+      const resolvedEndpoint = endpoint ?? (await this.getInferenceInfo(inferenceId));
+      if (resolvedEndpoint?.service !== InferenceEndpointProvider.Elastic) {
+        throw new Error(
+          `Inference ID [${inferenceId}] is not an Elastic Inference Service endpoint. Only EIS endpoints are supported on serverless; ML node models cannot be used.`
+        );
+      }
+      return;
+    }
+
+    if (inferenceId === defaultInferenceEndpoints.ELSER) {
+      await ensureDefaultElserDeployed({ client: this.esClient });
+      return;
+    }
+    await ensureInferenceDeployed({ client: this.esClient, inferenceId });
+  }
+
+  private assertValidArtifactArchive(
+    zipArchive: ZipArchive,
+    archivePath: string,
+    { openApi = false }: { openApi?: boolean } = {}
+  ): void {
+    const validationResult = openApi
+      ? validateOpenApiArtifactArchive(zipArchive, { archivePath })
+      : validateArtifactArchive(zipArchive, { archivePath });
+    if (!validationResult.valid) {
+      throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
+    }
+  }
+
+  /**
    * Will not upgrade products that are not already installed
    */
   async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
     const { inferenceId, forceUpdate } = params;
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
     const [repositoryVersions, installStatuses, openapiSpecInstallStatus] = await Promise.all([
-      fetchArtifactVersions({
-        artifactRepositoryUrl: this.artifactRepositoryUrl,
-      }),
+      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
       this.productDocClient.getInstallationStatus({ inferenceId }),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
@@ -195,10 +242,7 @@ export class PackageInstaller {
 
   async installAll(params: { inferenceId?: string } = {}) {
     const { inferenceId } = params;
-    const repositoryVersions = await fetchArtifactVersions({
-      artifactRepositoryUrl: this.artifactRepositoryUrl,
-      artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
-    });
+    const repositoryVersions = await fetchArtifactVersions(this.getArtifactRepositoryOptions());
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
 
@@ -286,23 +330,16 @@ export class PackageInstaller {
         inferenceId,
       });
 
-      if (customInference && !isDefaultLinuxElserInferenceId(customInference?.inference_id)) {
-        if (customInference?.task_type !== 'text_embedding') {
-          throw new Error(
-            `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
-          );
-        }
-        await ensureInferenceDeployed({
-          client: this.esClient,
-          inferenceId,
-        });
+      if (
+        customInference &&
+        !isImpliedDefaultElserInferenceId(customInference.inference_id) &&
+        customInference.task_type !== 'text_embedding'
+      ) {
+        throw new Error(
+          `Inference [${inferenceId}]'s task type ${customInference.task_type} is not supported. Please use a model with task type 'text_embedding'.`
+        );
       }
-
-      if (!customInference || isDefaultLinuxElserInferenceId(customInference?.inference_id)) {
-        await ensureDefaultElserDeployed({
-          client: this.esClient,
-        });
-      }
+      await this.ensureInferenceEndpointReady({ inferenceId, endpoint: customInference });
 
       const artifactFileName = getArtifactName({
         productName,
@@ -319,7 +356,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(artifactFullPath);
-      validateArtifactArchive(zipArchive);
+      this.assertValidArtifactArchive(zipArchive, artifactFullPath);
 
       const [manifest, mappings] = await Promise.all([
         loadManifestFile(zipArchive),
@@ -433,28 +470,19 @@ export class PackageInstaller {
     let zipArchive: ZipArchive | undefined;
     let selectedVersion: string | undefined;
     try {
-      // ELSER can come in default linux variant
-      if (isDefaultLinuxElserInferenceId(inferenceId)) {
-        // Ensure ELSER is deployed
-        await ensureDefaultElserDeployed({
-          client: this.esClient,
-        });
-      } else {
-        // or ARM which can be a different Inference id
-        await ensureInferenceDeployed({ client: this.esClient, inferenceId: effectiveInferenceId });
-      }
+      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
 
       // Determine version to install
       selectedVersion = version;
       if (!selectedVersion) {
         const availableVersions = await fetchSecurityLabsVersions({
-          artifactRepositoryUrl: this.artifactRepositoryUrl,
-          artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
+          ...this.getArtifactRepositoryOptions(),
+          inferenceId: effectiveInferenceId,
         });
         if (availableVersions.length === 0) {
           throw new Error('No Security Labs versions available');
         }
-        // Select the latest version
+        // Select the latest version for this inference ID
         selectedVersion = availableVersions.sort().reverse()[0];
       }
 
@@ -478,7 +506,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(downloadedFullPath);
-      validateArtifactArchive(zipArchive);
+      this.assertValidArtifactArchive(zipArchive, downloadedFullPath);
 
       const [manifest, mappings] = await Promise.all([
         loadManifestFile(zipArchive),
@@ -574,7 +602,8 @@ export class PackageInstaller {
       let repoLatestVersion: string | undefined;
       try {
         const versions = await fetchSecurityLabsVersions({
-          artifactRepositoryUrl: this.artifactRepositoryUrl,
+          ...this.getArtifactRepositoryOptions(),
+          inferenceId: effectiveInferenceId,
         });
         if (versions.length > 0) {
           repoLatestVersion = versions.slice().sort().reverse()[0];
@@ -625,7 +654,8 @@ export class PackageInstaller {
     }
 
     const availableVersions = await fetchSecurityLabsVersions({
-      artifactRepositoryUrl: this.artifactRepositoryUrl,
+      ...this.getArtifactRepositoryOptions(),
+      inferenceId,
     });
     if (availableVersions.length === 0) {
       return;
@@ -668,15 +698,7 @@ export class PackageInstaller {
     try {
       await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
 
-      if (isDefaultLinuxElserInferenceId(effectiveInferenceId)) {
-        // Ensure ELSER is deployed
-        await ensureDefaultElserDeployed({
-          client: this.esClient,
-        });
-      } else {
-        // or ARM which can be a different Inference id
-        await ensureInferenceDeployed({ client: this.esClient, inferenceId: effectiveInferenceId });
-      }
+      await this.ensureInferenceEndpointReady({ inferenceId: effectiveInferenceId });
       const artifactFileName = this.getOpenApiArtifactFileName({
         stackVersion,
         inferenceId: effectiveInferenceId,
@@ -692,7 +714,7 @@ export class PackageInstaller {
       );
 
       zipArchive = await openZipArchive(downloadedFullPath);
-      validateArtifactArchive(zipArchive);
+      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi: true });
 
       for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
@@ -869,7 +891,7 @@ export class PackageInstaller {
         inferenceId,
       });
       try {
-        await this.ensureArtifactArchiveAvailable(artifactFileName);
+        await this.ensureArtifactArchiveAvailable(artifactFileName, { openApi: true });
         return stackVersion;
       } catch (error) {
         if (isArtifactMissingError(error) && explicitVersionProvided && !fallbackVersionsLoaded) {
@@ -917,7 +939,10 @@ export class PackageInstaller {
     return `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
   }
 
-  private async ensureArtifactArchiveAvailable(artifactFileName: string): Promise<void> {
+  private async ensureArtifactArchiveAvailable(
+    artifactFileName: string,
+    { openApi = false }: { openApi?: boolean } = {}
+  ): Promise<void> {
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const precheckArtifactPath = `${
       this.artifactsFolder
@@ -930,10 +955,7 @@ export class PackageInstaller {
         this.artifactRepositoryProxyUrl
       );
       zipArchive = await openZipArchive(downloadedFullPath);
-      const validationResult = validateArtifactArchive(zipArchive);
-      if (!validationResult.valid) {
-        throw new Error(`Artifact archive validation failed: ${validationResult.error}`);
-      }
+      this.assertValidArtifactArchive(zipArchive, downloadedFullPath, { openApi });
     } finally {
       zipArchive?.close();
       await Fs.unlink(precheckArtifactPath).catch(() => {});
@@ -944,10 +966,7 @@ export class PackageInstaller {
     let lastError: Error | undefined;
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await fetchArtifactVersions({
-          artifactRepositoryUrl: this.artifactRepositoryUrl,
-          artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
-        });
+        return await fetchArtifactVersions(this.getArtifactRepositoryOptions());
       } catch (error) {
         lastError = error as Error;
         if (attempt < retries) {

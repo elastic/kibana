@@ -35,13 +35,13 @@ regenerate_gh_aw_locks() {
   gh aw lint
 }
 
-echo --- Deduplicate yarn.lock
-cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn_deduplicate.js"
+echo --- Deduplicate pnpm-lock.yaml
+cmd="node scripts/deduplicate_dependencies.js && yarn kbn bootstrap && node scripts/deduplicate_dependencies.js"
 eval "$cmd"
 
 commit_message_parts=()
 if [[ -n "$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')" ]]; then
-  commit_message_parts+=("yarn dedupe")
+  commit_message_parts+=("pnpm dedupe")
 fi
 
 if has_gh_aw_version_change; then
@@ -55,7 +55,7 @@ if [[ ${#commit_message_parts[@]} -gt 0 ]]; then
   commit_message="$commit_message ${joined%, }"
 fi
 
-check_for_changed_files "Renovate helper auto-fixes" true "$commit_message"
+check_for_changed_files "Renovate helper auto-fixes" true "$commit_message" true
 
 echo --- Additional helpers
 # We only want the deploy label on the main branch instead of all branches in the Renovate group

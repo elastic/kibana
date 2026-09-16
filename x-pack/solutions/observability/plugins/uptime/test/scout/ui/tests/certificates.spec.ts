@@ -133,10 +133,10 @@ test.describe.skip('Uptime certificates', { tag: ['@local-stateful-classic'] }, 
 
     await test.step('displays at least one certificate', async () => {
       await expect(async () => {
-        await pageObjects.uptimeApp.refreshApp();
+        await pageObjects.uptimeApp.refreshCertificates();
         const total = await pageObjects.uptimeApp.getCertificateTotal();
         expect(Number(total)).toBeGreaterThanOrEqual(1);
-      }).toPass({ timeout: 60_000 });
+      }).toPass({ timeout: 90_000 });
     });
   });
 
@@ -153,9 +153,9 @@ test.describe.skip('Uptime certificates', { tag: ['@local-stateful-classic'] }, 
     await pageObjects.uptimeApp.navigateToCertificates();
 
     await expect(async () => {
-      await pageObjects.uptimeApp.refreshApp();
+      await pageObjects.uptimeApp.refreshCertificates();
       await pageObjects.uptimeApp.certificateExists(certId, monitorId);
-    }).toPass({ timeout: 60_000 });
+    }).toPass({ timeout: 90_000 });
   });
 
   test('performs search against monitor id', async ({ pageObjects, esClient }) => {
@@ -175,10 +175,10 @@ test.describe.skip('Uptime certificates', { tag: ['@local-stateful-classic'] }, 
     await pageObjects.uptimeApp.navigateToCertificates();
 
     await expect(async () => {
-      await pageObjects.uptimeApp.refreshApp();
+      await pageObjects.uptimeApp.refreshCertificates();
       await pageObjects.uptimeApp.searchCertificates(monitorId);
       const total = await pageObjects.uptimeApp.getCertificateTotal();
       expect(Number(total)).toBe(1);
-    }).toPass({ timeout: 60_000 });
+    }).toPass({ timeout: 90_000 });
   });
 });

@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
@@ -15,6 +16,7 @@ import {
   ToolResultType,
   type ToolSelection,
   type ToolType,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import type {
   ReportAgentCreatedParams,
@@ -122,12 +124,17 @@ export class AnalyticsService {
     skillId,
     origin,
     pluginId,
+    toolIds,
   }: {
     skillId: string;
     origin?: SkillCreationOrigin;
     pluginId?: string;
+    toolIds: string[];
   }): void {
     try {
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
       this.analytics.reportEvent<ReportSkillCreatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillCreated, {
         skill_id: normalizeSkillIdForTelemetry({
           id: skillId,
@@ -135,6 +142,7 @@ export class AnalyticsService {
           plugin_id: pluginId,
         }),
         origin,
+        tool_ids: toolsIncluded,
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillCreated telemetry event', { error });
@@ -145,12 +153,17 @@ export class AnalyticsService {
     skillId,
     origin,
     pluginId,
+    toolIds,
   }: {
     skillId: string;
     origin?: SkillCreationOrigin;
     pluginId?: string;
+    toolIds: string[];
   }): void {
     try {
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
       this.analytics.reportEvent<ReportSkillUpdatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillUpdated, {
         skill_id: normalizeSkillIdForTelemetry({
           id: skillId,
@@ -158,6 +171,7 @@ export class AnalyticsService {
           plugin_id: pluginId,
         }),
         origin,
+        tool_ids: toolsIncluded,
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillUpdated telemetry event', { error });
@@ -257,6 +271,7 @@ export class AnalyticsService {
     modelProvider,
     round,
     roundCount,
+    conversationAttachments,
   }: {
     agentId: string;
     conversationId?: string;
@@ -264,6 +279,7 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     round: ConversationRound;
     roundCount: number;
+    conversationAttachments: VersionedAttachment[];
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -282,9 +298,23 @@ export class AnalyticsService {
         return results.length > 0 && results.every((r) => r.type === ToolResultType.error);
       });
 
-      const attachments = round.input.attachments?.length
-        ? round.input.attachments.map((a) => a.type || 'unknown')
-        : undefined;
+      const conversationAttachmentTypes = new Map(
+        conversationAttachments.map(({ id, type }) => [id, type])
+      );
+      const imageAttachmentIds = new Set(
+        round.input.attachment_refs
+          ?.filter(({ actor }) => actor === ATTACHMENT_REF_ACTOR.user)
+          .filter(
+            ({ attachment_id: attachmentId }) =>
+              conversationAttachmentTypes.get(attachmentId) === AttachmentType.image
+          )
+          .map(({ attachment_id: attachmentId }) => attachmentId) ?? []
+      );
+      const attachmentTypes = [
+        ...(round.input.attachments?.map(({ type }) => type || 'unknown') ?? []),
+        ...Array.from(imageAttachmentIds, () => AttachmentType.image),
+      ];
+      const attachments = attachmentTypes.length > 0 ? attachmentTypes : undefined;
       this.analytics.reportEvent<ReportRoundCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         {
@@ -293,6 +323,7 @@ export class AnalyticsService {
           conversation_id: conversationId,
           execution_id: executionId,
           input_tokens: round.model_usage.input_tokens,
+          cached_input_tokens: round.model_usage.cached_input_tokens,
           llm_calls: round.model_usage.llm_calls,
           message_length: round.input.message.length,
           model: round.model_usage.model,

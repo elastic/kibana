@@ -8,14 +8,17 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
   ConversationRoundStatus,
   ConversationRoundStepType,
   agentBuilderDefaultAgentId,
+  attachmentTools,
   ToolType,
   type ConversationRound,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import { ModelProvider } from '@kbn/inference-common';
 import { AnalyticsService } from './analytics_service';
@@ -52,6 +55,20 @@ describe('AnalyticsService', () => {
 
   describe('reportRoundComplete', () => {
     const modelProvider = ModelProvider.OpenAI;
+    const imageAttachments: VersionedAttachment[] = [
+      {
+        id: 'image-1',
+        type: AttachmentType.image,
+        versions: [],
+        current_version: 1,
+      },
+      {
+        id: 'image-2',
+        type: AttachmentType.image,
+        versions: [],
+        current_version: 1,
+      },
+    ];
     const round: ConversationRound = {
       id: 'round-1',
       input: { message: 'hi' },
@@ -86,6 +103,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -112,14 +130,14 @@ describe('AnalyticsService', () => {
       });
     });
 
-    it('keeps the real tool id in tools_invoked for built-in tools (by tool_type)', () => {
+    it('reports attachments.read in tools_invoked', () => {
       const roundWithBuiltinTool: ConversationRound = {
         ...round,
         steps: [
           {
             type: ConversationRoundStepType.toolCall,
             tool_call_id: 'tool-call-1',
-            tool_id: 'platform.dashboard.manage_dashboard',
+            tool_id: attachmentTools.read,
             tool_type: ToolType.builtin,
             params: {},
             results: [],
@@ -133,13 +151,81 @@ describe('AnalyticsService', () => {
         round: roundWithBuiltinTool,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         expect.objectContaining({
-          tools_invoked: ['platform.dashboard.manage_dashboard'],
+          tools_invoked: [attachmentTools.read],
         })
+      );
+    });
+
+    it('reports image attachments referenced by the user', () => {
+      const roundWithImageAttachments: ConversationRound = {
+        ...round,
+        input: {
+          message: 'What is in these images?',
+          attachment_refs: [
+            {
+              attachment_id: 'image-1',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.user,
+            },
+            {
+              attachment_id: 'image-2',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.user,
+            },
+          ],
+        },
+      };
+
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: roundWithImageAttachments,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: imageAttachments,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          attachments: [AttachmentType.image, AttachmentType.image],
+        })
+      );
+    });
+
+    it('does not report image attachments referenced by the agent', () => {
+      const roundWithAgentImageReference: ConversationRound = {
+        ...round,
+        input: {
+          message: 'Continue',
+          attachment_refs: [
+            {
+              attachment_id: 'image-1',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.agent,
+            },
+          ],
+        },
+      };
+
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: roundWithAgentImageReference,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: imageAttachments,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ attachments: undefined })
       );
     });
 
@@ -150,6 +236,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -188,6 +275,7 @@ describe('AnalyticsService', () => {
           round,
           roundCount: 2,
           modelProvider,
+          conversationAttachments: [],
         })
       ).not.toThrow();
     });
@@ -203,6 +291,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(logger.debug).toHaveBeenCalled();
@@ -273,8 +362,69 @@ describe('AnalyticsService', () => {
   });
 
   describe.each([
-    { method: 'reportSkillCreated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated },
-    { method: 'reportSkillUpdated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated },
+    {
+      method: 'reportSkillCreated' as const,
+      eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
+      report: (args: { skillId: string; origin?: 'custom'; toolIds: string[] }) =>
+        service.reportSkillCreated(args),
+    },
+    {
+      method: 'reportSkillUpdated' as const,
+      eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated,
+      report: (args: { skillId: string; origin?: 'custom'; toolIds: string[] }) =>
+        service.reportSkillUpdated(args),
+    },
+  ])('$method', ({ method, eventType, report }) => {
+    it('reports the event with normalized skill_id and deduplicated tool_ids', () => {
+      report({
+        skillId: 'custom-skill-1',
+        origin: 'custom',
+        toolIds: ['my_custom_tool', 'my_custom_tool'],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+        tool_ids: ['custom-3c9388baa67aef90'],
+      });
+    });
+
+    it('reports empty tool_ids when no tools are attached', () => {
+      report({ skillId: 'custom-skill-1', origin: 'custom', toolIds: [] });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'custom-a1c01b755b74d7bd',
+        origin: 'custom',
+        tool_ids: [],
+      });
+    });
+
+    it('uses a composite `plugin-<hash>-<hash>` id when a pluginId is provided', () => {
+      service[method]({
+        skillId: 'plugin-skill',
+        origin: 'plugin',
+        pluginId: 'plugin-uuid-1',
+        toolIds: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(eventType, {
+        skill_id: 'plugin-f3a4ba6782682a47-eabadf06389e747c',
+        origin: 'plugin',
+        tool_ids: [],
+      });
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() => report({ skillId: 'custom-skill-1', toolIds: [] })).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe.each([
     { method: 'reportSkillDeleted' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted },
   ])('$method', ({ method, eventType }) => {
     it('normalizes the skill_id and passes origin for custom skills', () => {

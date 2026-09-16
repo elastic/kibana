@@ -110,7 +110,7 @@ export class InterceptsTriggerOrchestrator {
         path: TRIGGER_INFO_API_ROUTE,
         validate: {
           body: schema.object({
-            triggerId: schema.string(),
+            triggerId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
         },
         security: {

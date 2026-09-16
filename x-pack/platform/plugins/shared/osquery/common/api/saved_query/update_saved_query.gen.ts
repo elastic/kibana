@@ -70,7 +70,7 @@ export const UpdateSavedQueryResponse = lazySchema(() =>
       /**
        * The saved query version.
        */
-      version: z.string().optional(),
+      version: z.string().optional().describe('The saved query version.'),
     }),
   })
 );

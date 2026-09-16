@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -21,15 +21,12 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
-import { StepItem } from '../round_events/step_item';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
-  isLastRound: boolean;
-  latestStep?: ConversationRoundStep;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -41,8 +38,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response,
   steps,
   isLoading,
-  isLastRound,
-  latestStep,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -51,13 +46,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   const hasMessage = Boolean(response.message);
 
   const showStreamingText = isLoading && hasMessage;
-  const liveStep = isLoading ? latestStep : undefined;
   const showCompletedAnswer = !isLoading;
 
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="s"
       aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
@@ -75,8 +69,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             attachmentRefs={attachmentRefs}
             conversationId={conversationId}
           />
-        ) : liveStep ? (
-          <StepItem step={liveStep} />
         ) : showCompletedAnswer ? (
           <ChatMessageText
             content={response.message}
@@ -87,19 +79,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           />
         ) : null}
       </EuiFlexItem>
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingElastic size="l" aria-label="Streaming response" />
-        </EuiFlexItem>
-      )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions
-            content={response.message}
-            isVisible
-            isLastRound={isLastRound}
-            rawRound={rawRound}
-          />
+          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

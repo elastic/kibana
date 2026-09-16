@@ -12,10 +12,8 @@ import type {
   PingsResponse,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import {
-  EncryptedSyntheticsMonitorCodec,
-  PingsResponseType,
-} from '../../../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorCodec } from '../../../../../common/runtime_types/zod/monitor_types';
+import { PingsResponseType } from '../../../../../common/runtime_types/zod/ping';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface MostRecentPingsRequest {
@@ -46,7 +44,12 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? moment().subtract(30, 'days').toISOString(),
+      // Callers normally pass an explicit UI date range; this fallback is only
+      // used when none is provided. Default to the last 7 days (instead of 30)
+      // so the query stays within typical hot+warm retention and doesn't fan
+      // out to long-retention frozen-tier indices, while still being wide
+      // enough not to hide infrequently-run monitors.
+      from: from ?? moment().subtract(7, 'days').toISOString(),
       to: to ?? moment().toISOString(),
       locations,
       sort,
@@ -59,16 +62,21 @@ export const fetchMonitorRecentPings = async ({
   );
 };
 
+export interface LatestTestRunRequest {
+  monitorId: string;
+  locationLabel?: string;
+  remoteName?: string;
+}
+
 export const fetchLatestTestRun = async ({
   monitorId,
   locationLabel,
-}: {
-  monitorId: string;
-  locationLabel?: string;
-}): Promise<{ ping?: Ping }> => {
+  remoteName,
+}: LatestTestRunRequest): Promise<{ ping?: Ping }> => {
   return apiService.get<{ ping?: Ping }>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
     monitorId,
     locationLabel,
+    ...(remoteName ? { remoteName } : {}),
     version: INITIAL_REST_VERSION,
   });
 };

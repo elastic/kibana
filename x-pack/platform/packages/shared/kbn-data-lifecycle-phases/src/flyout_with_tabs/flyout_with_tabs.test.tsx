@@ -8,7 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { FlyoutWithTabs, type NonEmptyFlyoutTabs } from './flyout_with_tabs';
 
 type TestTabId = 'summary' | 'json';
@@ -23,15 +23,18 @@ const renderFlyout = ({
   onBack,
   onClose = jest.fn(),
   showBackButton,
+  titleAppend,
 }: {
   initialTabId?: TestTabId;
   onBack?: () => void;
   onClose?: () => void;
   showBackButton?: boolean;
+  titleAppend?: React.ReactNode;
 } = {}) =>
   render(
     <FlyoutWithTabs
       title="Lifecycle policy"
+      titleAppend={titleAppend}
       tabsAriaLabel="Lifecycle policy tabs"
       tabs={tabs}
       initialTabId={initialTabId}
@@ -81,5 +84,25 @@ describe('FlyoutWithTabs', () => {
     fireEvent.click(screen.getByTestId('flyoutWithTabsBackButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders titleAppend content next to the title when provided', () => {
+    renderFlyout({
+      titleAppend: <span data-test-subj="titleAppendContent">badge</span>,
+    });
+
+    expect(screen.getByTestId('titleAppendContent')).toBeInTheDocument();
+  });
+
+  it('does not render titleAppend wrapper when not provided', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('titleAppendContent')).not.toBeInTheDocument();
+  });
+
+  it('moves focus into the push flyout when it opens (push flyouts get no EUI focus trap)', async () => {
+    renderFlyout();
+
+    await waitFor(() => expect(screen.getByTestId('flyoutWithTabs')).toHaveFocus());
   });
 });

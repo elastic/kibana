@@ -64,8 +64,9 @@ import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { getEcsResponseLog } from './logging';
+import { getEcsResponseLog, getSlimInfoResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
+import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -192,13 +193,14 @@ export interface HttpServerSetup {
 }
 
 /** @internal */
-export type LifecycleRegistrar = Pick<
+export type CoreHandlerDependencies = Pick<
   HttpServerSetup,
   | 'registerOnPreRouting'
   | 'registerOnPreAuth'
   | 'registerAuth'
   | 'registerOnPostAuth'
   | 'registerOnPreResponse'
+  | 'auth'
 >;
 
 export interface HttpServerSetupOptions {
@@ -323,6 +325,8 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
+    this.server.ext('onPreHandler', createSelfCallPreHandler());
+    this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -544,9 +548,19 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
+      const logAtInfo =
+        (request.route?.settings as { app?: KibanaRouteOptions } | undefined)?.app
+          ?.httpResponseLogLevel === 'info';
+
       if (log.isLevelEnabled('debug')) {
         const { message, meta } = getEcsResponseLog(request, this.log);
         log.debug(message!, meta);
+        return;
+      }
+
+      if (logAtInfo && log.isLevelEnabled('info')) {
+        const { message, meta } = getSlimInfoResponseLog(request);
+        log.info(message, meta);
       }
     };
 
@@ -586,7 +600,9 @@ export class HttpServer {
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
-      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      if (app.httpSpan?.isRecording()) {
+        app.httpSpan.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      }
 
       const stop = app.measureElu;
 
@@ -1068,7 +1084,13 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
-      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: route.options.excludeFromRateLimiter,
+          httpResponseLogLevel: route.options.httpResponseLogLevel,
+        },
+        isNil
+      ),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

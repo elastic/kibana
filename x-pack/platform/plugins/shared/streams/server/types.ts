@@ -6,14 +6,16 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -27,10 +29,6 @@ import type {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -60,12 +58,22 @@ export interface StreamsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /**
+   * The running Kibana's version, e.g. `9.2.0`. Populated by the
+   * significantEvents plugin, which needs it to identify the connecting
+   * deployment to the Relay service.
+   */
+  kibanaVersion: string;
+  /**
+   * Singleton client for the Relay service, owned by the Actions plugin.
+   */
+  relayClient?: RelayClientContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -74,9 +82,8 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
@@ -94,15 +101,13 @@ export interface StreamsPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
-  taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
-  alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
-  agentContextLayer?: AgentContextLayerPluginStart;
+  agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

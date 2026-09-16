@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { mergeWith } from 'lodash';
+import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
 
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
+import type { BeatsOutput } from '../../../common/types';
 import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
@@ -21,6 +23,7 @@ import type {
 } from '../../../common/types';
 import {
   dataTypes,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   USE_APM_VAR_NAME,
@@ -29,6 +32,8 @@ import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../../../common/services';
+
+import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
 
 /**
  * Builds OpenTelemetry Collector fragments merged into the full agent policy.
@@ -159,7 +164,11 @@ export function generateOtelcolConfig({
         };
 
         let otelConfig: OTelCollectorConfig = {
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+          ...addSuffixToOtelcolComponentsConfig(
+            'extensions',
+            suffix,
+            rewriteExtRefs(stream?.extensions)
+          ),
           ...addSuffixToOtelcolComponentsConfig(
             'receivers',
             suffix,
@@ -209,8 +218,12 @@ export function generateOtelcolConfig({
         };
 
         // Must run before the APM block below so the aggregated metrics pipeline
-        // does not receive the per-stream routing transform.
-        otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        // does not receive the per-stream routing transform. `attributesTransform` is
+        // undefined when the stream only carries Fleet-unmanaged signals (e.g. profiles),
+        // in which case no routing transform is injected.
+        if (attributesTransform) {
+          otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        }
 
         if (resolvedOutputId) {
           for (const pipelineId of Object.keys(otelConfig.service?.pipelines ?? {})) {
@@ -310,8 +323,12 @@ function resolveOutputsById({
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
   return [
     `set(attributes["data_stream.type"], "${type}")`,
-    `set(attributes["data_stream.dataset"], "${dataset}")`,
-    `set(attributes["data_stream.namespace"], "${namespace}")`,
+    // Only set dataset/namespace when not already provided upstream (e.g. by an OTel receiver
+    // in a Gateway collector feeding this Fleet-managed agent). This preserves upstream routing
+    // so content-pack dashboards resolve to the correct data stream.
+    // See: https://github.com/elastic/ingest-dev/issues/7716
+    `set(attributes["data_stream.dataset"], "${dataset}") where attributes["data_stream.dataset"] == nil`,
+    `set(attributes["data_stream.namespace"], "${namespace}") where attributes["data_stream.namespace"] == nil`,
   ];
 }
 
@@ -363,16 +380,10 @@ function generateOtelTypeTransforms(
           },
         ],
       };
-    case 'profiles':
-      return {
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: buildDataStreamStatements('profiles', dataset, namespace),
-          },
-        ],
-      };
     default:
+      // `profiles` is intentionally absent: it is filtered out before this function is
+      // called (see FLEET_UNMANAGED_DATA_STREAM_TYPES) because the Elasticsearch
+      // exporter — not Fleet — routes it. Any other type here is unexpected.
       throw new FleetError(`unexpected data stream type ${type}`);
   }
 }
@@ -397,18 +408,29 @@ function generateOTelAttributesTransform(
   suffix: string,
   dynamicSignalTypes: boolean,
   signalTypes?: string[]
-): Record<OTelCollectorComponentID, any> {
+): Record<OTelCollectorComponentID, any> | undefined {
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
-    signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
-      Object.assign(transformStatements, typeTransforms);
-    });
-  } else {
+    signalTypes
+      // Fleet-unmanaged signals (e.g. profiles) are routed by the Elasticsearch exporter,
+      // not by Fleet, so they must not get a data_stream.* routing transform.
+      .filter((signalType) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(signalType))
+      .forEach((signalType) => {
+        const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
+        Object.assign(transformStatements, typeTransforms);
+      });
+  } else if (!FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type)) {
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
+
+  // When every signal type is Fleet-unmanaged (e.g. a profiles-only stream) there is
+  // nothing to route, so do not emit an empty routing transform.
+  if (Object.keys(transformStatements).length === 0) {
+    return undefined;
+  }
+
   return {
     [`transform/${suffix}-routing`]: transformStatements,
   };
@@ -499,38 +521,34 @@ function alignPipelineSignalType(
   return { [newKey]: pipeline };
 }
 
-// Recursively walks a component config body and rewrites auth.authenticator
-// references whose bare ID appears in originalToSuffixedExtensionIds.
-// This covers the OTel configauth convention where receivers/exporters/etc.
-// reference extensions via `auth: { authenticator: <extension-id> }`.
+// Recursively walks a component config body and rewrites any string value that
+// exactly matches a declared extension ID to its suffixed form. This is
+// intentionally value-based rather than field-name-based: OTel contrib uses
+// many different field names to reference extensions (auth.authenticator,
+// credentials_provider, storage, sending_queue.storage, …) with no uniform
+// convention, so a field-name allow-list would need constant maintenance.
+// Exact whole-string matching keeps false-positive risk negligible — the
+// package author controls both the extension IDs and the component configs
+// within a stream, so an accidental collision is very rare.
 function rewriteOtelcolExtensionReferences(
   value: unknown,
   originalToSuffixedExtensionIds: Record<string, string>
 ): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return value;
+  if (typeof value === 'string') {
+    return originalToSuffixedExtensionIds[value] ?? value;
   }
-  const obj = value as Record<string, unknown>;
-  const result: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(obj)) {
-    if (
-      key === 'auth' &&
-      val !== null &&
-      typeof val === 'object' &&
-      !Array.isArray(val) &&
-      typeof (val as Record<string, unknown>).authenticator === 'string'
-    ) {
-      const authObj = val as Record<string, unknown>;
-      const authenticator = authObj.authenticator as string;
-      result[key] = {
-        ...authObj,
-        authenticator: originalToSuffixedExtensionIds[authenticator] ?? authenticator,
-      };
-    } else {
-      result[key] = rewriteOtelcolExtensionReferences(val, originalToSuffixedExtensionIds);
-    }
+  if (Array.isArray(value)) {
+    return value.map((v) => rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds));
   }
-  return result;
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds),
+      ])
+    );
+  }
+  return value;
 }
 
 function addSuffixToOtelcolPipelinesComponents(
@@ -600,7 +618,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
 }
 
 function buildBeatsauthConfig(
-  output: Output,
+  output: BeatsOutput,
   proxy?: FleetProxy,
   logger?: Logger
 ): Record<string, unknown> {
@@ -657,7 +675,7 @@ function buildBeatsauthConfig(
 function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
@@ -725,29 +743,19 @@ function attachOtelcolExporter(
   return config;
 }
 
-function parseOtelExporterConfigYaml(
+const parseOtelExporterConfigYaml = (
   yaml: string | null | undefined,
   logger?: Logger
-): Record<string, unknown> {
-  if (!yaml) return {};
-  try {
-    const parsed = load(yaml);
-    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-    logger?.warn(
-      'otel_exporter_config_yaml did not parse to an object, skipping extra exporter config'
-    );
-    return {};
-  } catch (e) {
+): Record<string, unknown> =>
+  parseYamlRecord(yaml, (e) =>
     // Malformed YAML — skip extra config rather than crashing policy generation.
     // The UI validates YAML before saving; this path is only reachable via direct API writes.
     logger?.warn(
-      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${e.message}`
-    );
-    return {};
-  }
-}
+      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    )
+  );
 
 function generateOtelcolExporter(
   dataOutput: Output,
@@ -765,15 +773,31 @@ function generateOtelcolExporter(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+      // Batching, queueing, retry and compression settings translated from the Fleet output,
+      // so this exporter behaves like the one the agent generates for Beats-based inputs.
+      // User-supplied exporter YAML wins over the translated values at the individual field
+      // level (deep merge). Arrays in the user YAML are replaced wholesale rather than merged
+      // position-by-position (e.g. retry_on_status is replaced, not extended).
+      const outputExporterConfig = buildOtelEsExporterConfig(dataOutput);
+      // Deep-merge: translated settings are the base; user YAML overrides individual fields;
+      // arrays from user YAML replace rather than position-merge. endpoints/auth are forced
+      // last so they always take precedence regardless of what the user YAML contains.
+      const mergedExporterConfig = mergeWith(
+        {},
+        outputExporterConfig,
+        extraExporterConfig,
+        (_dst: unknown, src: unknown) => (Array.isArray(src) ? src : undefined)
+      ) as Record<string, unknown>;
 
-      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
-      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely. The
+      // output's own exporter settings still apply — beatsauth only carries transport
+      // (ssl/proxy/timeout) configuration.
       if (dataOutput.otel_disable_beatsauth) {
         return {
           extensions: {},
           exporters: {
             [`elasticsearch/${outputID}`]: {
-              ...extraExporterConfig,
+              ...mergedExporterConfig,
               endpoints: dataOutput.hosts,
             },
           },
@@ -787,7 +811,7 @@ function generateOtelcolExporter(
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
-            ...extraExporterConfig,
+            ...mergedExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
             ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),

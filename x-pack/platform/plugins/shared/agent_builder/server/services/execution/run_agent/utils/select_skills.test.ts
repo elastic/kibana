@@ -143,6 +143,47 @@ describe('selectSkills', () => {
     expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'builtin-2', 'custom-1']);
   });
 
+  it('excludes built-in skills marked excludeFromElasticCapabilities', async () => {
+    const builtinSkill = createSkill('builtin-1', true);
+    const excludedSkill = {
+      ...createSkill('streams-management', true),
+      excludeFromElasticCapabilities: true,
+    };
+    const skills = createSkillsServiceMock();
+    skills.list.mockResolvedValue([builtinSkill, excludedSkill]);
+    const skillsStore = createSkillsStoreMock();
+
+    const result = await selectSkills({
+      skills,
+      skillsStore,
+      agentConfiguration: createConfig({ enable_elastic_capabilities: true }),
+    });
+
+    expect(result).toEqual([builtinSkill]);
+  });
+
+  it('still includes a skill marked excludeFromElasticCapabilities when requested via skill_ids', async () => {
+    const excludedSkill = {
+      ...createSkill('streams-management', true),
+      excludeFromElasticCapabilities: true,
+    };
+    const skills = createSkillsServiceMock();
+    skills.bulkGet.mockResolvedValue(new Map([['streams-management', excludedSkill]]));
+    skills.list.mockResolvedValue([]);
+    const skillsStore = createSkillsStoreMock();
+
+    const result = await selectSkills({
+      skills,
+      skillsStore,
+      agentConfiguration: createConfig({
+        skill_ids: ['streams-management'],
+        enable_elastic_capabilities: true,
+      }),
+    });
+
+    expect(result).toEqual([excludedSkill]);
+  });
+
   describe('additionalSkillIds (plugin skills)', () => {
     it('returns empty when only additionalSkillIds are provided but list is empty', async () => {
       const skills = createSkillsServiceMock();

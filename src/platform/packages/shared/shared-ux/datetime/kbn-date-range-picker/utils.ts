@@ -14,13 +14,14 @@ import moment from 'moment';
 import type {
   TimePrecision,
   TimeRange,
+  TimeRangeBounds,
   TimeRangeBoundsOption,
   TimeRangeTransformOptions,
   InitialFocus,
   AutoRefreshIntervalUnit,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT, UNIT_DISPLAY_ABBREV } from './constants';
-import { textToTimeRange, getNamedRangeAlias } from './parse';
+import { textToTimeRange, getNamedRangeAlias, getPresetLabel } from './parse';
 import type { RangePart } from './parse/parse_range_parts';
 import { dateMathToRelativeParts, timeRangeToDisplayText, applyTimePrecision } from './format';
 import { MS_PER } from './format/format_duration';
@@ -190,6 +191,43 @@ export function isRelativeToNow(range: TimeRange): boolean {
   );
 }
 
+/** Matches `now/d` and `now-1d/d`, capturing the offset unit (if any) and the rounding unit. */
+const ROUNDED_BOUND_RE = /^now(?:[+-]\d+(ms|[smhdwMy]))?\/(ms|[smhdwMy])$/;
+
+/**
+ * Returns `true` when the range covers exactly one calendar bucket, i.e. both
+ * bounds are the same expression and that expression rounds to its own offset
+ * unit (`now/d`, `now-1d/d`, `now-1w/w`).
+ *
+ * Such a range is a whole day, week, month or year: `start` resolves to the
+ * first instant of the bucket and `end` — parsed with `roundUp` — to its last,
+ * so nothing the user asked for is truncated. The `roundRelativeTime` setting
+ * never produces this shape, because it rounds to a finer unit than the offset
+ * (see `ROUND_UNIT_MAP`: a `d` offset rounds to `/h`).
+ */
+function isWholeCalendarBucket({ start, end }: TimeRangeBounds): boolean {
+  if (start !== end) return false;
+
+  const match = start.match(ROUNDED_BOUND_RE);
+  if (!match) return false;
+
+  const [, offsetUnit, roundUnit] = match;
+  return !offsetUnit || offsetUnit === roundUnit;
+}
+
+/**
+ * Returns `true` when a relative offset bound carries a rounding suffix
+ * (e.g. `now-1y/y`), whether typed by the user or added by the
+ * `roundRelativeTime` setting. Rounding-only bounds such as the `now/d` of
+ * "Today" are not offsets and don't count, and neither does a whole calendar
+ * bucket such as the `now-1d/d to now-1d/d` of "Yesterday" — its label already
+ * says it spans the full day (see {@link isWholeCalendarBucket}).
+ */
+export function hasRoundedOffset(range: TimeRangeBounds): boolean {
+  if (isWholeCalendarBucket(range)) return false;
+  return [range.start, range.end].some((bound) => Boolean(dateMathToRelativeParts(bound)?.round));
+}
+
 /**
  * Resolve the `initialFocus` target within the panel.
  * A string is treated as a CSS selector; a ref as a direct element handle.
@@ -209,18 +247,42 @@ export function resolveInitialFocus(
 }
 
 /**
+ * Returns the option's own usable label, or that of a preset with the same
+ * bounds. Recent ranges carry no label, so this is how a recently used
+ * "Financial Year to Date" shows its name instead of its raw bounds.
+ */
+function resolveOptionLabel(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'presets' | 'locale'>
+): string | null {
+  const own = getPresetLabel(option, options);
+  if (own) return own;
+
+  const preset = options?.presets?.find(
+    ({ start, end }) => start === option.start && end === option.end
+  );
+  return preset ? getPresetLabel(preset, options) : null;
+}
+
+/**
  * Returns a human-readable display label for a time range option.
- * Uses the existing label when present, otherwise generates one using the same
- * pipeline as the control button: build text → parse → format.
+ *
+ * Real names (see {@link getPresetLabel}) are kept verbatim — they carry
+ * semantics the bounds alone can't reconstruct (e.g. "now/d to now/d" is
+ * "Today"). Every other label is regenerated from the bounds using the same
+ * pipeline as the control button (build text → parse → format), so the list always
+ * uses the `→` delimiter and honours the current `timePrecision`, rather than
+ * echoing a frozen display string or a raw input-form label saved earlier.
  */
 export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'locale'>
 ): string {
-  if (option.label) return option.label;
+  const label = resolveOptionLabel(option, options);
+  if (label) return label;
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
-  const timeRange = textToTimeRange(text);
+  const timeRange = textToTimeRange(text, options);
   return timeRangeToDisplayText(timeRange, options);
 }
 
@@ -259,16 +321,22 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
 /**
  * Determines the text to populate the input with when an option is selected.
  *
- * 1. If the option has a label that parses to a valid time range, returns it
- *    so natural-language input round-trips (e.g. "Last 15 minutes").
- * 2. Otherwise generates a user-friendly shorthand from the bounds, stripping
- *    the `now` prefix where possible (e.g. "-15m" instead of "now-15m").
+ * 1. If the option has a real name (see {@link getPresetLabel}), returns it: the
+ *    parser matches preset labels first, so the text round-trips to the option's
+ *    bounds. Frozen display text (e.g. "Feb 3 → Feb 10") never reaches the input.
+ * 2. Otherwise derives re-parseable input text from the bounds: relative offsets
+ *    are stripped of the `now` prefix (e.g. "-15m"), and absolute bounds are
+ *    formatted as readable dates rather than raw ISO. Absolute bounds use full
+ *    millisecond precision (not the display `timePrecision`), reproducing the
+ *    bounds verbatim (rounding included) so that re-applying the text yields
+ *    exactly the stored range — no unintended precision or rounding change.
  */
-export function getOptionInputText(option: TimeRangeBoundsOption): string {
-  if (option.label) {
-    const parsed = textToTimeRange(option.label);
-    if (!parsed.isInvalid) return option.label;
-  }
+export function getOptionInputText(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'presets' | 'locale'>
+): string {
+  const label = resolveOptionLabel(option, options);
+  if (label) return label;
 
   const startFragment = boundToInputFragment(option.start);
   const endFragment = boundToInputFragment(option.end);
@@ -328,13 +396,23 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
 
 /**
  * Converts a date math bound into a user-friendly input fragment.
- * Uses `boundToRelativeShorthand` to strip the `now` prefix when possible,
- * falling back to the original string for absolute dates and rounding-only expressions.
+ * - Relative offsets are stripped of the `now` prefix via `boundToRelativeShorthand`,
+ *   keeping any rounding suffix so the range round-trips unchanged.
+ * - Absolute ISO bounds are formatted as readable dates at full millisecond
+ *   precision (not the display `timePrecision`), so the range round-trips
+ *   unchanged instead of leaking the raw ISO string into the input.
+ * - Rounding-only datemath (e.g. `now/d`) and anything unrecognised pass through as-is.
  */
 function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
   const shorthand = boundToRelativeShorthand(bound);
   if (shorthand === 'now') return { text: '', isNow: true };
   if (shorthand !== null) return { text: shorthand, isNow: false };
+
+  const parsed = moment(bound, moment.ISO_8601, true);
+  if (parsed.isValid()) {
+    return { text: formatAbsoluteDate(parsed.toDate(), 'ms'), isNow: false };
+  }
+
   return { text: bound, isNow: false };
 }
 

@@ -21,6 +21,9 @@ jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
 
 const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
 
+// Security plugin disabled by default in these tests -> privilege checks allow.
+const getSecurity = () => undefined;
+
 const invokeHandler = async (
   tool: ReturnType<typeof executeWorkflowTool>,
   input: unknown,
@@ -56,7 +59,7 @@ describe('executeWorkflowTool', () => {
 
   it('executes a saved workflow when only `workflowId` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     const result = await invokeHandler(
       tool,
@@ -79,9 +82,26 @@ describe('executeWorkflowTool', () => {
     });
   });
 
+  it('does not execute a saved workflow when the caller lacks execute privilege', async () => {
+    const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+    const denyingSecurity = () =>
+      ({
+        authz: {
+          actions: { api: { get: (a: string) => `api:${a}` } },
+          checkPrivilegesWithRequest: () => ({ atSpace }),
+        },
+      } as any);
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
+
+    const result = await invokeHandler(tool, { workflowId: 'wf-1', inputs: {} }, buildContext());
+
+    expect(executeWorkflowMock).not.toHaveBeenCalled();
+    expect(result.results[0]).toEqual(expect.objectContaining({ type: 'error' }));
+  });
+
   it('executes an inline yaml workflow when only `yaml` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(
       tool,
@@ -114,7 +134,7 @@ describe('executeWorkflowTool', () => {
         },
       },
     });
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(tool, { attachmentId: 'att-1', inputs: { b: 2 } }, buildContext({ get }));
 
@@ -131,7 +151,7 @@ describe('executeWorkflowTool', () => {
 
   it('forwards `waitForCompletion: false`', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(tool, { workflowId: 'wf-1', waitForCompletion: false }, buildContext());
 
@@ -141,7 +161,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when zero modes are provided', async () => {
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(tool, {}, buildContext());
     expect(executeWorkflowMock).not.toHaveBeenCalled();
     expect(result.results[0].type).toBe('error');
@@ -149,7 +169,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when two modes are provided', async () => {
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       {
@@ -163,7 +183,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when all three modes are provided', async () => {
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       {
@@ -178,7 +198,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when the attachment is missing', async () => {
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       { attachmentId: 'missing' },
@@ -190,7 +210,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when the attachment is not a workflow yaml attachment', async () => {
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       { attachmentId: 'att-wrong' },
@@ -210,7 +230,7 @@ describe('executeWorkflowTool', () => {
 
   it('returns an error result when the helper reports failure', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: false, error: 'boom' });
-    const tool = executeWorkflowTool({ workflowsManagement });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(tool, { workflowId: 'wf-1' }, buildContext());
     expect(result.results[0].type).toBe('error');
     expect(JSON.stringify(result.results[0])).toContain('boom');

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, parseDurationToMs } from '@kbn/alerting-v2-schemas';
 import { DurationInput } from './duration_input';
 
 const SCHEDULE_TITLE_PREFIX = i18n.translate('xpack.alertingV2.ruleForm.schedule.titlePrefix', {
@@ -25,15 +26,19 @@ interface Props {
   onChange: (value: string) => void;
   errors?: string;
   compressed?: boolean;
+  minimumInterval?: string;
 }
 
-export const RuleSchedule = React.forwardRef<HTMLInputElement, Props>((props, ref) => (
-  <DurationInput
-    {...props}
-    ref={ref}
-    numberLabel={SCHEDULE_TITLE_PREFIX}
-    unitAriaLabel={SCHEDULE_UNIT_ARIA_LABEL}
-    dataTestSubj="ruleSchedule"
-    idPrefix="ruleSchedule"
-  />
-));
+export const RuleSchedule = React.forwardRef<HTMLInputElement, Props>(
+  ({ minimumInterval, ...props }, ref) => (
+    <DurationInput
+      {...props}
+      ref={ref}
+      numberLabel={SCHEDULE_TITLE_PREFIX}
+      unitAriaLabel={SCHEDULE_UNIT_ARIA_LABEL}
+      dataTestSubj="ruleSchedule"
+      idPrefix="ruleSchedule"
+      minDurationMs={parseDurationToMs(minimumInterval ?? DEFAULT_MINIMUM_SCHEDULE_INTERVAL)}
+    />
+  )
+);

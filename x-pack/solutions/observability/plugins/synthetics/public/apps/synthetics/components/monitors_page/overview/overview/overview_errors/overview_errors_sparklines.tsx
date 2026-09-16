@@ -12,6 +12,7 @@ import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monito
 import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../../hooks/use_monitor_query_filters';
+import { useOverviewDataViewIndexPatterns } from '../../../hooks/use_overview_data_view_index_patterns';
 
 interface Props {
   from: string;
@@ -26,6 +27,14 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
+  const queryFilters = useMonitorQueryFilters();
+  const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();
+
+  // Wait for the CCS index pattern to resolve before mounting the embeddable;
+  // it latches its first data view title (see useOverviewDataViewIndexPatterns).
+  if (loading) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -35,13 +44,14 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      dslFilters={useMonitorQueryFilters()}
+      dslFilters={queryFilters}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,
           seriesType: 'area',
           reportDefinitions: {
-            'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
+            'monitor.type': ['http', 'tcp', 'browser', 'icmp', 'api'],
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

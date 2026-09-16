@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 const useSelectorMock = useSelector as jest.Mock;
 const mockAppState = {
   app: {
@@ -32,7 +32,7 @@ describe('useExperimentalFeatures', () => {
   it('throws an error when unexisting feature', async () => {
     expect(() =>
       useIsExperimentalFeatureEnabled('unexistingFeature' as keyof ExperimentalFeatures)
-    ).toThrowError();
+    ).toThrow();
   });
   it('returns true when existing feature and is enabled', async () => {
     const result = useIsExperimentalFeatureEnabled('featureA' as keyof ExperimentalFeatures);

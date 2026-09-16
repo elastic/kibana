@@ -14,6 +14,7 @@ import { createCsvFormatter } from './format_results';
 import type { ResultFormatter, ExportMetadata } from './format_results';
 import type { BaseExportRequest } from './export_results_to_stream';
 import { OsqueryQueries } from '../../common/search_strategy/osquery';
+import { OSQUERY_SEARCH_STRATEGY } from '../search_strategy/constants';
 
 /**
  * Collects all data from a stream until it ends.
@@ -410,7 +411,7 @@ describe('exportResultsToStream', () => {
           factoryQueryType: 'osquery.exportResults',
           pit: { id: 'test-pit-id', keep_alive: '5m' },
         }),
-        expect.objectContaining({ strategy: 'osquerySearchStrategy' })
+        expect.objectContaining({ strategy: OSQUERY_SEARCH_STRATEGY })
       );
     });
 

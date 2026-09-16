@@ -12,7 +12,7 @@ import Path from 'path';
 
 import inquirer from 'inquirer';
 import normalizePath from 'normalize-path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';

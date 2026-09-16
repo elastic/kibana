@@ -218,6 +218,75 @@ describe('Rules Endpoint response actions validators', () => {
       });
     });
 
+    describe('and response action has `kill_descendants`', () => {
+      // Builds a kill/suspend process action while allowing an arbitrary (possibly invalid)
+      // `kill_descendants` value so that the validator's runtime type check can be exercised.
+      const createProcessActionWithKillDescendants = (
+        command: 'kill-process' | 'suspend-process',
+        killDescendants: unknown
+      ): ResponseAction =>
+        createRulePayloadResponseActionMock({
+          params: {
+            command,
+            config: { overwrite: true, kill_descendants: killDescendants as boolean },
+          },
+        } as ResponseAction);
+
+      beforeEach(() => {
+        // @ts-expect-error assignment to readonly is ok here
+        endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
+      });
+
+      it.each([true, false])(
+        'should succeed when `kill_descendants` is `%s`',
+        async (killDescendants) => {
+          rulePayload.response_actions = [
+            createProcessActionWithKillDescendants('kill-process', killDescendants),
+          ];
+
+          await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+        }
+      );
+
+      it('should succeed when `kill_descendants` is not defined', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: { command: 'kill-process', config: { overwrite: true } },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should error when `kill_descendants` is not a boolean', async () => {
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('kill-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          "Invalid [kill-process] response action configuration: 'kill_descendants' must be a boolean"
+        );
+      });
+
+      it('should NOT validate `kill_descendants` when the feature flag is disabled', async () => {
+        // @ts-expect-error assignment to readonly is ok here
+        endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('kill-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should NOT validate `kill_descendants` for the suspend-process command', async () => {
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('suspend-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+    });
+
     describe('and response action is runscript', () => {
       let scriptsClientMock: jest.Mocked<ScriptsLibraryClientInterface>;
 

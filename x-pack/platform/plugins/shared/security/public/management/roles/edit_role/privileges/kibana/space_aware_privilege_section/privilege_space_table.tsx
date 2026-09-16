@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './privilege_space_table.scss';
-
 import type { EuiBadgeProps, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -18,7 +16,9 @@ import {
   EuiIconTip,
   EuiInMemoryTable,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -26,11 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
 import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
 import { constants, type PrivilegeFormCalculator } from '@kbn/security-ui-components';
-import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { copyRole } from '../../../../../../../common/model';
+import { createUnresolvedSpaceEntry, type DisplaySpace } from '../display_space';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -39,7 +39,7 @@ interface Props {
   privilegeCalculator: PrivilegeFormCalculator;
   onChange: (role: Role) => void;
   onEdit: (privilegeIndex: number) => void;
-  displaySpaces: Space[];
+  displaySpaces: DisplaySpace[];
   disabled?: boolean;
 }
 
@@ -47,7 +47,7 @@ interface State {
   expandedSpacesGroups: number[];
 }
 
-type TableSpace = Space &
+type TableSpace = DisplaySpace &
   Partial<{
     deleted: boolean;
   }>;
@@ -63,6 +63,36 @@ interface TableRow {
     reserved: string[];
   };
 }
+
+const SpacePrivilegeTable = ({
+  columns,
+  items,
+}: {
+  columns: Array<EuiBasicTableColumn<TableRow>>;
+  items: TableRow[];
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const globalSpaceRowStyles = css`
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  `;
+
+  return (
+    <EuiInMemoryTable
+      tableCaption={i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeTable.caption',
+        {
+          defaultMessage: 'Space privilege assignments',
+        }
+      )}
+      columns={columns}
+      items={items}
+      rowProps={(item: TableRow) =>
+        isGlobalPrivilegeDefinition(item.privileges) ? { css: globalSpaceRowStyles } : {}
+      }
+    />
+  );
+};
 
 export class PrivilegeSpaceTable extends Component<Props, State> {
   public state = {
@@ -80,14 +110,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
-        (spaceId) =>
-          displaySpaces.find((space) => space.id === spaceId) || {
-            id: spaceId,
-            name: spaceId,
-            disabledFeatures: [],
-            deleted: true,
-          }
-      ) as Space[];
+        (spaceId): TableSpace =>
+          displaySpaces.find((space) => space.id === spaceId) ||
+          createUnresolvedSpaceEntry(spaceId, { deleted: true })
+      );
 
       return {
         spaces,
@@ -286,25 +312,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       });
     }
 
-    return (
-      <EuiInMemoryTable
-        tableCaption={i18n.translate(
-          'xpack.security.management.editRole.spacePrivilegeTable.caption',
-          {
-            defaultMessage: 'Space privilege assignments',
-          }
-        )}
-        columns={columns}
-        items={rows}
-        rowProps={(item: TableRow) => {
-          return {
-            className: isGlobalPrivilegeDefinition(item.privileges)
-              ? 'secPrivilegeTable__row--isGlobalSpace'
-              : '',
-          };
-        }}
-      />
-    );
+    return <SpacePrivilegeTable columns={columns} items={rows} />;
   };
 
   private getSortedPrivileges = () => {

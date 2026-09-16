@@ -9,6 +9,10 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';

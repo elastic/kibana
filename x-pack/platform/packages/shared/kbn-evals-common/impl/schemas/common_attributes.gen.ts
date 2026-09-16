@@ -16,6 +16,69 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+/**
+ * Free-form labels used to organize datasets. Tags are lowercased and deduplicated on write, so `Golden` and `golden` are the same tag. Commas are not allowed because tag filters are comma-separated. Tags describe what a dataset is about; they never affect who can see it.
+ */
+export const DatasetTags = lazySchema(() =>
+  z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
+    )
+    .max(20)
+);
+export type DatasetTags = z.infer<typeof DatasetTags>;
+
+/**
+ * Metric polarity. `maximize` means a higher score is better (e.g. faithfulness, accuracy). `minimize` means a lower score is better (e.g. latency, token count). `neutral` means the metric is informational only and has no improvement direction.
+ */
+export const Direction = lazySchema(() => z.enum(['maximize', 'minimize', 'neutral']));
+export type Direction = z.infer<typeof Direction>;
+export type DirectionEnum = typeof Direction.enum;
+export const DirectionEnum = Direction.enum;
+
+/**
+ * How curated the dataset is, from raw captures through cleaned data to "golden" reference datasets. Absent when a dataset has no maturity set.
+ */
+export const DatasetMaturity = lazySchema(() => z.enum(['raw', 'cleaned', 'golden']));
+export type DatasetMaturity = z.infer<typeof DatasetMaturity>;
+export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
+export const DatasetMaturityEnum = DatasetMaturity.enum;
+
+/**
+ * Spaces the dataset is assigned to. Each id must name an existing space the caller can manage evaluations in; wildcards are not accepted, so every space is listed. Defaults to the space the request was made in, taken from the URL's `/s/` prefix and the default space without one. Absent in a response means the default space.
+ */
+export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
+export type SpaceIds = z.infer<typeof SpaceIds>;
+
+/**
+ * Spaces the dataset is assigned to, with each id the caller cannot access replaced by `?`, so the entries still count the spaces.
+ */
+export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
+export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;
+
+export const DatasetFacetBucket = lazySchema(() =>
+  z.object({
+    value: z.string().max(64),
+    count: z.number().int(),
+  })
+);
+export type DatasetFacetBucket = z.infer<typeof DatasetFacetBucket>;
+
+/**
+ * Values available to filter on, with the number of datasets carrying each. Counts reflect the current search term but ignore the tag and maturity filters, so they stay stable while filters are toggled.
+ */
+export const DatasetFacets = lazySchema(() =>
+  z.object({
+    tags: z.array(DatasetFacetBucket),
+    maturity: z.array(DatasetFacetBucket),
+  })
+);
+export type DatasetFacets = z.infer<typeof DatasetFacets>;
+
 export const Model = lazySchema(() =>
   z.object({
     id: z.string().max(256),
@@ -30,6 +93,7 @@ export const ExampleInfo = lazySchema(() =>
     id: z.string().max(1024),
     index: z.number().int(),
     input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     dataset: z.object({
       id: z.string().max(1024),
       name: z.string().max(256),
@@ -51,12 +115,21 @@ export type TaskInfo = z.infer<typeof TaskInfo>;
 export const EvaluatorInfo = lazySchema(() =>
   z.object({
     name: z.string().max(256),
+    /**
+     * The evaluator version that produced the score, so a run stays reproducible after the definition moves on. Absent on documents written before the version was recorded.
+     */
+    version: z.string().max(64).optional(),
     score: z.number().nullable().optional(),
     label: z.string().max(256).nullable().optional(),
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
-    model: Model,
+    direction: Direction.optional(),
+    model: Model.optional(),
+    /**
+     * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
+     */
+    kind: z.enum(['llm', 'code']).optional(),
   })
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
@@ -96,6 +169,10 @@ export const EvaluationScoreDocument = lazySchema(() =>
     '@timestamp': z.string().max(64),
     experiment_id: z.string().max(1024),
     experiment_name: z.string().max(256).optional(),
+    /**
+     * Spaces this score belongs to. Absent on documents created before space-awareness was introduced (those are treated as the default space).
+     */
+    space_ids: z.array(z.string().max(256)).max(100).nullable().optional(),
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,
@@ -109,7 +186,14 @@ export const EvaluatorStats = lazySchema(() =>
     dataset_id: z.string().max(1024),
     dataset_name: z.string().max(256),
     evaluator_name: z.string().max(256),
-    example_count: z.number().int().nonnegative().optional().default(0),
+    /**
+     * Number of unique examples evaluated in this dataset
+     */
+    example_count: z.number().int().min(0).optional().default(0),
+    /**
+     * Model this evaluator judged with. Absent for code evaluators, which invoke no model.
+     */
+    evaluator_model: Model.optional(),
     stats: z.object({
       mean: z.number(),
       median: z.number(),
@@ -121,6 +205,117 @@ export const EvaluatorStats = lazySchema(() =>
   })
 );
 export type EvaluatorStats = z.infer<typeof EvaluatorStats>;
+
+/**
+ * Identifies the evaluator. Lowercase so a lookup cannot miss on case, and never opening with an underscore so a name cannot be read as an action path. Cannot be the name of a built-in evaluator.
+ */
+export const EvaluatorName = lazySchema(() =>
+  z
+    .string()
+    .min(2)
+    .max(128)
+    .regex(/^[a-z0-9][a-z0-9_-]*[a-z0-9]$/)
+);
+export type EvaluatorName = z.infer<typeof EvaluatorName>;
+
+/**
+ * Whether the evaluator ships with Kibana or was defined by a user. Built-in evaluators are read-only.
+ */
+export const EvaluatorOrigin = lazySchema(() => z.enum(['built_in', 'user_defined']));
+export type EvaluatorOrigin = z.infer<typeof EvaluatorOrigin>;
+export type EvaluatorOriginEnum = typeof EvaluatorOrigin.enum;
+export const EvaluatorOriginEnum = EvaluatorOrigin.enum;
+
+/**
+ * Which parts of the normalized trace the judge is shown, and therefore requires: the user query (`input`), the agent response (`response`), and the tool calls (`steps`). Rendered into the prompt as `user_query`, `agent_response`, and `tool_calls`. A trace missing any of them is reported as unmet rather than judged.
+ */
+export const JudgeEvidence = lazySchema(() =>
+  z
+    .array(z.enum(['input', 'response', 'steps']))
+    .min(1)
+    .max(3)
+);
+export type JudgeEvidence = z.infer<typeof JudgeEvidence>;
+
+export const JudgeScore = lazySchema(() =>
+  z.object({
+    /**
+     * Score name. Limited so `evaluator.score` fits the score document's evaluator-name field even when the evaluator name is at its limit.
+     */
+    name: z.string().min(1).max(127),
+    /**
+     * `number` asks the judge for a value between 0 and 1. `categorical` asks it to pick one of `labels`, which carry the numeric value each label is worth.
+     */
+    type: z.enum(['number', 'categorical']),
+    labels: z
+      .array(
+        z.object({
+          value: z.string().min(1).max(256),
+          score: z.number().min(0).max(1),
+        })
+      )
+      .min(1)
+      .max(20)
+      .optional(),
+    description: z.string().max(2048).optional(),
+  })
+);
+export type JudgeScore = z.infer<typeof JudgeScore>;
+
+/**
+ * What a user-defined judge is given and what it must report back. The prompt is a Mustache template and may only reference the evidence and reference data keys the config declares.
+ */
+export const LlmJudgeConfig = lazySchema(() =>
+  z.object({
+    /**
+     * Mustache template for the evaluation request. Use unescaped interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence and reference data so their contents are not HTML-escaped.
+     */
+    prompt: z.string().min(1).max(32768),
+    /**
+     * System instructions for the judge. Required so every immutable evaluator version contains its complete prompt configuration. Use unescaped Mustache interpolation (`{{{variable}}}` or `{{& variable}}`) when inserting evidence or reference data.
+     */
+    system_prompt: z.string().min(1).max(32768),
+    evidence: JudgeEvidence,
+    /**
+     * Keys the example's reference data must supply, each exposed to the prompt under its own name. An example missing one is refused before a model is called.
+     */
+    reference_data_keys: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(256)
+          .regex(/^[a-zA-Z_][a-zA-Z0-9_-]*$/)
+      )
+      .max(20)
+      .optional(),
+    output: z.object({
+      scores: z.array(JudgeScore).min(1).max(10),
+    }),
+  })
+);
+export type LlmJudgeConfig = z.infer<typeof LlmJudgeConfig>;
+
+/**
+ * A persisted evaluator definition.
+ */
+export const PersistedEvaluator = lazySchema(() =>
+  z.object({
+    name: EvaluatorName,
+    version: z.string().max(64),
+    kind: z.literal('llm'),
+    origin: EvaluatorOrigin,
+    description: z.string().max(2048),
+    judge: LlmJudgeConfig,
+    created_at: z.string().max(64),
+    updated_at: z.string().max(64),
+    /**
+     * User who created this immutable version.
+     */
+    created_by: z.string().max(256).optional(),
+  })
+);
+export type PersistedEvaluator = z.infer<typeof PersistedEvaluator>;
 
 export const TraceSpan = lazySchema(() =>
   z.object({

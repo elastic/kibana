@@ -11,7 +11,8 @@ import { GLOBAL_KQL_WRAPPER } from './search_bar';
 // main links
 export const DASHBOARDS = '[data-test-subj="solutionSideNavItemLink-dashboards"]';
 
-export const ALERTS = '[data-test-subj="solutionSideNavItemLink-alerts"]';
+export const ALERTS = '[data-test-subj="solutionSideNavPanelLink-alerts"]';
+export const DETECTIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-alert_detections"]';
 
 export const CSP_FINDINGS =
   '[data-test-subj="solutionSideNavItemLink-cloud_security_posture-findings"]';
@@ -21,15 +22,15 @@ export const CASES = '[data-test-subj="solutionSideNavItemLink-cases"]';
 export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
-export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
+export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-explore"]';
 
 export const RULES_NAV_LINK = '[data-test-subj="solutionSideNavItemLink-rules-landing"]';
 
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
-export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
+export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-administration"]';
 
 export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem_migrations"]';
-export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
+export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemLink-siem_migrations"]';
 
 // nested links
 export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
@@ -108,6 +109,10 @@ export const SOLUTION_SIDE_NAV_PANEL = getDataTestSubjectSelector('solutionSideN
 export const openNavigationPanelFor = (page: string) => {
   let panel;
   switch (page) {
+    case ALERTS: {
+      panel = DETECTIONS_PANEL_BTN;
+      break;
+    }
     case HOSTS:
     case NETWORK:
     case USERS: {

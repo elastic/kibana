@@ -23,6 +23,7 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import {
   comparisonFunctions,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -117,6 +118,8 @@ const statsExpectSuggestions = (
   );
 };
 
+const timeseriesContext = { ...mockContext, isTimeseriesSource: true };
+
 describe('STATS Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
@@ -127,13 +130,13 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  const suggest = async (query: string) => {
+  const suggest = async (query: string, context = mockContext) => {
     const cursorPosition = query.length;
-    const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
+    const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
-    const contextWithRoot = { ...mockContext, rootAst: root };
+    const contextWithRoot = { ...context, rootAst: root };
     const suggestions = await autocomplete(
       query,
       command,
@@ -141,7 +144,10 @@ describe('STATS Autocomplete', () => {
       contextWithRoot,
       cursorPosition
     );
-    return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
+    return attachReplacementRanges(innerText, suggestions, {
+      commandContext: contextWithRoot,
+      tokens,
+    });
   };
   describe('STATS ...', () => {
     afterEach(() => setTestFunctions([]));
@@ -167,6 +173,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after aggregate field', async () => {
         await statsExpectSuggestions('from a | stats a=min(integerField) ', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -180,6 +187,7 @@ describe('STATS Autocomplete', () => {
         ]);
 
         await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) WHE', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -193,6 +201,7 @@ describe('STATS Autocomplete', () => {
         ]);
 
         await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) B', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -265,7 +274,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -354,7 +369,8 @@ describe('STATS Autocomplete', () => {
             ),
             'FUNC($0)',
           ],
-          mockCallbacks
+          mockCallbacks,
+          timeseriesContext
         );
         await statsExpectSuggestions(
           'from a | stats round(avg(',
@@ -466,6 +482,7 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions(
           'from a | stats a = min(integerField) | sort b',
           [
+            '\n',
             'WHERE ',
             'BY ',
             ', ',
@@ -496,6 +513,7 @@ describe('STATS Autocomplete', () => {
 
       test('expressions with aggregates', async () => {
         await statsExpectSuggestions('from a | stats col0 = min(integerField) ', [
+          '\n',
           'BY ',
           'WHERE ',
           '| ',
@@ -532,6 +550,7 @@ describe('STATS Autocomplete', () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
             ...getOperatorSuggestions([
               ...comparisonFunctions,
+              ...matchOperators,
               ...patternMatchOperators,
               ...inOperators,
               ...nullCheckOperators,
@@ -556,8 +575,24 @@ describe('STATS Autocomplete', () => {
           );
         });
 
-        it('suggests opening a list after IN in WHERE', async () => {
-          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', ['($0)']);
+        it('suggests opening a list or subquery after IN in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', [
+            '($0)',
+            '(FROM $0)',
+            '(ROW $0)',
+            '(TS $0)',
+          ]);
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField NOT IN ', [
+            '($0)',
+            '(FROM $0)',
+            '(ROW $0)',
+            '(TS $0)',
+          ]);
+        });
+
+        it('does not suggest subqueries after IN outside WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) BY keywordField IN ', ['($0)']);
+          await statsExpectSuggestions('FROM a | STATS MIN(b) BY keywordField NOT IN ', ['($0)']);
         });
 
         it('suggests LIKE pattern values after LIKE in WHERE', async () => {
@@ -641,23 +676,26 @@ describe('STATS Autocomplete', () => {
 
       test('on complete column name', async () => {
         await statsExpectSuggestions('from a | stats a=max(b) by integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) by col0 = integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) by keywordField, integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions(
           'from a | stats a=max(b) by keywordField, col0 = integerField',
-          ['integerField | ', 'integerField, ']
+          ['\n', 'integerField | ', 'integerField, ']
         );
       });
 
@@ -672,6 +710,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after grouping field', async () => {
         await statsExpectSuggestions('from a | stats a=c by keywordField ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -688,6 +727,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after grouping function', async () => {
         await statsExpectSuggestions('from a | stats a=c by CATEGORIZE(keywordField) ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -742,7 +782,10 @@ describe('STATS Autocomplete', () => {
             }),
             // Filter out functions that are not compatible with this context
             ...allGroupingFunctions.filter(
-              (f) => !['CATEGORIZE', 'TBUCKET'].some((incompatible) => f.includes(incompatible))
+              (f) =>
+                !['CATEGORIZE', 'TBUCKET', 'WITHOUT'].some((incompatible) =>
+                  f.includes(incompatible)
+                )
             ),
           ],
           mockCallbacks
@@ -775,6 +818,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after expression right hand side operand', async () => {
         await statsExpectSuggestions('from a | stats avg(b) by doubleField % 2 ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -788,9 +832,25 @@ describe('STATS Autocomplete', () => {
           ),
         ]);
 
+        await statsExpectSuggestions('from a | stats avg(doubleField) by (integerField) ', [
+          '\n',
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS_BY,
+            'any',
+            {
+              operators: true,
+              skipAssign: true,
+            },
+            ['integer']
+          ),
+        ]);
+
         await statsExpectSuggestions(
           'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) ',
           [
+            '\n',
             ', ',
             '| ',
             ...getFunctionSignaturesByReturnType(
@@ -831,7 +891,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -848,7 +914,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -892,7 +964,7 @@ describe('STATS Autocomplete', () => {
         test('suggests TBUCKET for TS source command', async () => {
           const expectedCompletionItem = getTimeseriesDateHistogramCompletionItem(50);
 
-          const suggestions = await suggest('TS a | STATS BY ');
+          const suggestions = await suggest('TS a | STATS BY ', timeseriesContext);
 
           expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
           expect(suggestions).not.toContainEqual(

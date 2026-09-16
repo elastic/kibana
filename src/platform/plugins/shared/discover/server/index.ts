@@ -51,6 +51,17 @@ export type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
+export { discoverSessionApiResponseSchema } from './api/schema';
+export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
+export type {
+  DiscoverSessionApiResponse,
+  DiscoverSessionApiData,
+  DiscoverSessionApiDataInput,
+  DiscoverSessionSanitizeResponse,
+  DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
+} from './api/schema';
+export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 
 import type { Filter, Query } from '@kbn/es-query';
 import type { InputsState } from './reducer';

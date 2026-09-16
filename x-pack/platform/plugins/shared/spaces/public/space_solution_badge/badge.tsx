@@ -8,60 +8,58 @@ import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import type { Space } from '../../common';
 
 const SolutionOptions: Record<
   NonNullable<Space['solution']>,
-  { iconType: string; label: JSX.Element }
+  { iconType: string; label: string }
 > = {
   es: {
     iconType: 'logoElasticsearch',
-    label: (
-      <FormattedMessage
-        id="xpack.spaces.spaceSolutionBadge.elasticsearch"
-        defaultMessage="Elasticsearch"
-      />
-    ),
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.elasticsearch', {
+      defaultMessage: 'Elasticsearch',
+    }),
   },
   workplaceai: {
     iconType: 'logoElasticsearch',
-    label: (
-      <FormattedMessage
-        id="xpack.spaces.spaceSolutionBadge.workplaceai"
-        defaultMessage="Workplace AI"
-      />
-    ),
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.workplaceai', {
+      defaultMessage: 'Workplace AI',
+    }),
   },
   vectordb: {
-    iconType: 'logoElasticsearch',
-    label: (
-      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.vectordb" defaultMessage="VectorDB" />
-    ),
+    iconType: 'logoVectorDB',
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.vectordb', {
+      defaultMessage: 'VectorDB',
+    }),
   },
   security: {
     iconType: 'logoSecurity',
-    label: (
-      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.security" defaultMessage="Security" />
-    ),
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.security', {
+      defaultMessage: 'Security',
+    }),
   },
   oblt: {
     iconType: 'logoObservability',
-    label: (
-      <FormattedMessage
-        id="xpack.spaces.spaceSolutionBadge.observability"
-        defaultMessage="Observability"
-      />
-    ),
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.observability', {
+      defaultMessage: 'Observability',
+    }),
   },
   classic: {
     iconType: 'logoElasticStack',
-    label: (
-      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.classic" defaultMessage="Classic" />
-    ),
+    label: i18n.translate('xpack.spaces.spaceSolutionBadge.classic', {
+      defaultMessage: 'Classic',
+    }),
   },
 };
+
+export function getSpaceSolutionBadgeLabel(solution?: Space['solution']): string {
+  if (!solution || !SolutionOptions[solution]) {
+    return SolutionOptions.classic.label;
+  }
+  return SolutionOptions[solution].label;
+}
 
 export type SpaceSolutionBadgeProps = Omit<EuiBadgeProps, 'iconType'> & {
   solution?: Space['solution'];

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { AgentAcl, AgentDefinition } from '@kbn/agent-builder-common';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
+import type { AgentAccessControl } from '@kbn/agent-builder-common';
 import type {
-  AgentAclUpdateRequest,
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentUpdateRequest,
@@ -16,13 +16,20 @@ import type {
 import type {
   CreateAgentResponse,
   DeleteAgentResponse,
-  GetAgentAclResponse,
+  GetAgentAccessControlResponse,
+  GetAgentAiIndicesResponse,
   GetAgentResponse,
+  ListAgentAiIndicesResponse,
   ListAgentResponse,
-  UpdateAgentAclResponse,
+  ListAgentResponseItem,
+  UpdateAgentAccessControlResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
-import { publicApiPath } from '../../../common/constants';
+import { internalApiPath, publicApiPath } from '../../../common/constants';
+
+/** Static, so it does not read as a dynamic http path. */
+const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
+const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -34,7 +41,7 @@ export class AgentService {
   /**
    * List all agents
    */
-  async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
+  async list(options?: AgentListOptions): Promise<ListAgentResponseItem[]> {
     const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
     return res.results;
   }
@@ -42,14 +49,30 @@ export class AgentService {
   /**
    * Get a single agent by id
    */
-  async get(id: string): Promise<AgentDefinition> {
+  async get(id: string): Promise<GetAgentResponse> {
     return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+  }
+
+  /**
+   * Lists the effective AI indices for each listed agent, with type-contributed ones flagged.
+   */
+  async listAgentAiIndices(): Promise<ListAgentAiIndicesResponse> {
+    return await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);
+  }
+
+  /**
+   * Returns the effective AI indices for one agent, with type-contributed ones flagged.
+   */
+  async getAgentAiIndices(id: string): Promise<GetAgentAiIndicesResponse> {
+    return await this.http.get<GetAgentAiIndicesResponse>(
+      buildPath(AGENT_AI_INDICES_BY_ID_PATH, { id })
+    );
   }
 
   /**
    * Create a new agent
    */
-  async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
+  async create(profile: AgentCreateRequest): Promise<CreateAgentResponse> {
     return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
       body: JSON.stringify(profile),
     });
@@ -58,7 +81,7 @@ export class AgentService {
   /**
    * Update an existing agent
    */
-  async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
+  async update(id: string, update: AgentUpdateRequest): Promise<UpdateAgentResponse> {
     return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
       body: JSON.stringify(update),
     });
@@ -72,18 +95,26 @@ export class AgentService {
   }
 
   /**
-   * Get the ACL for an agent. Callers without manage rights receive a redacted entries list.
+   * Get access control for an agent. Callers without manage rights receive redacted entries.
    */
-  async getAcl(id: string): Promise<GetAgentAclResponse> {
-    return await this.http.get<GetAgentAclResponse>(`${publicApiPath}/agents/${id}/acl`);
+  async getAccessControl(id: string): Promise<GetAgentAccessControlResponse> {
+    return await this.http.get<GetAgentAccessControlResponse>(
+      `${publicApiPath}/agents/${id}/access_control`
+    );
   }
 
   /**
-   * Replace the ACL for an agent. Returns the new ACL with the bumped version.
+   * Replace access-control entries for an agent.
    */
-  async updateAcl(id: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
-    return await this.http.put<UpdateAgentAclResponse>(`${publicApiPath}/agents/${id}/acl`, {
-      body: JSON.stringify(update),
-    });
+  async updateAccessControl(
+    id: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl> {
+    return await this.http.put<UpdateAgentAccessControlResponse>(
+      `${publicApiPath}/agents/${id}/access_control`,
+      {
+        body: JSON.stringify(update),
+      }
+    );
   }
 }

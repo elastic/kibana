@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { inheritLifecycleSectionStrings as strings } from './strings';
 import type { InheritLifecycleSectionProps } from './types';
 
@@ -17,11 +25,11 @@ export const InheritLifecycleSection = ({
   link,
   checkboxId,
   checkboxIdPrefix = 'inheritLifecycle',
-  checkboxDataTestSubj,
   linkDataTestSubj,
 }: InheritLifecycleSectionProps) => {
   const generatedCheckboxId = useGeneratedHtmlId({ prefix: checkboxIdPrefix });
   const id = checkboxId ?? generatedCheckboxId;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -31,20 +39,28 @@ export const InheritLifecycleSection = ({
           checked={value}
           label={label}
           onChange={(e) => onChange(e.target.checked)}
-          data-test-subj={checkboxDataTestSubj}
+          data-test-subj="dataLifecycleInheritCheckbox"
         />
       </EuiFlexItem>
 
       {link && (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj={linkDataTestSubj}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {link.label ?? strings.viewSourceLink}
-          </EuiLink>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            paddingLeft: euiTheme.size.l,
+          }}
+        >
+          <EuiText size="xs">
+            <EuiLink
+              data-test-subj={linkDataTestSubj}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              external={false}
+            >
+              {link.label ?? strings.viewSourceLink}
+            </EuiLink>
+          </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

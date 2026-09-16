@@ -7,10 +7,14 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  type AlertEpisode,
+  type BulkDeactivateEpisodeActionItem,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { bulkDeactivateEpisodeActions } from './bulk_create_alert_actions';
+import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 
 export interface ResolveActionDeps {
@@ -18,31 +22,27 @@ export interface ResolveActionDeps {
   notifications: NotificationsStart;
 }
 
+const isResolvable = (episode: AlertEpisode) =>
+  episode['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE;
+
 export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_RESOLVE_EPISODE',
   order: 30,
   displayName: i18n.RESOLVE,
   iconType: 'check',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some(
-      (ep) =>
-        ep.last_deactivate_action !== 'deactivate' &&
-        // last_deactivate_action is authoritative; episode.status may be stale after an unresolve
-        (ep.last_deactivate_action === 'activate' ||
-          ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE)
-    ),
+    episodes.length > 0 && episodes.some(isResolvable),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    // On a mixed selection, only resolve the episodes that are not already inactive.
+    const items: BulkDeactivateEpisodeActionItem[] = episodes.filter(isResolvable).map((ep) => ({
+      episode_id: ep['episode.id'],
       reason: i18n.RESOLVE_ACTION_REASON,
     }));
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkDeactivateEpisodeActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

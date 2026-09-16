@@ -9,11 +9,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
-import { buildIndexNameWithNamespace } from '../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../utils/build_index_name_with_namespace';
+import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
 
+// The `*Agents` fields hold DOCUMENT counts. Correct only on live-query paths,
+// where an agent emits one response doc per `action_id`. Names kept: they are
+// part of the live-query response schema.
 export interface ResultCountsEntry {
   totalRows: number;
   respondedAgents: number;
@@ -42,7 +46,12 @@ interface ActionResponseAggregation {
 export const getResultCountsForActions = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  integrationNamespaces: readonly string[] = ['default'],
+  spaceId: string,
+  // When Fleet cannot resolve integration namespaces the caller passes
+  // `undefined`; buildIndexNamesWithNamespaces then falls back to the base
+  // pattern, mirroring the other result read paths. Results stay scoped to the
+  // active space via the `space_id` filter.
+  integrationNamespaces?: readonly string[],
   ccsEnabled = false
 ): Promise<ResultCountsMap> => {
   if (actionIds.length === 0) {
@@ -53,7 +62,7 @@ export const getResultCountsForActions = async (
 
   const batchResults = await Promise.all(
     batches.map((batchIds) =>
-      fetchResultCountsBatch(esClient, batchIds, integrationNamespaces, ccsEnabled)
+      fetchResultCountsBatch(esClient, batchIds, spaceId, integrationNamespaces, ccsEnabled)
     )
   );
 
@@ -70,17 +79,15 @@ export const getResultCountsForActions = async (
 const fetchResultCountsBatch = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  integrationNamespaces: readonly string[],
+  spaceId: string,
+  integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean
 ): Promise<ResultCountsMap> => {
   const baseIndex = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
-  const indexPattern =
-    integrationNamespaces.length > 0
-      ? integrationNamespaces
-          .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-          .join(',')
-      : baseIndex;
-  const index = prefixIndexPatternsWithCcs(indexPattern, ccsEnabled);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled
+  );
 
   const response = await esClient.search<unknown, ActionResponseAggregation>({
     allow_no_indices: true,
@@ -88,8 +95,8 @@ const fetchResultCountsBatch = async (
     ignore_unavailable: true,
     size: 0,
     query: {
-      terms: {
-        action_id: actionIds,
+      bool: {
+        filter: [{ terms: { action_id: actionIds } }, buildSpaceIdFilter(spaceId)],
       },
     },
     aggs: {

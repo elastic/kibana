@@ -248,10 +248,14 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    const breadcrumbLink = this.config.get('serverless')
-      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
-      : 'breadcrumb dashboardListingBreadcrumb first';
-    await this.testSubjects.click(breadcrumbLink);
+    if (await this.globalNav.isNextProjectChrome()) {
+      await this.testSubjects.click('appHeaderBack');
+    } else {
+      const breadcrumbLink = this.config.get('serverless')
+        ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+        : 'breadcrumb dashboardListingBreadcrumb first';
+      await this.testSubjects.click(breadcrumbLink);
+    }
     await this.expectExistsDashboardLandingPage();
   }
 
@@ -694,6 +698,9 @@ export class DashboardPageObject extends FtrService {
       await this.selectDashboardTags(saveOptions.tags);
     }
 
+    // Let the async "Permissions" (access control) section render and reflow the footer before clicking Save, so the button isn't hit mid-reflow.
+    await this.testSubjects.exists('accessModeContainer');
+
     await this.clickSave();
     if (saveOptions.waitDialogIsClosed) {
       await this.testSubjects.waitForDeleted(modalDialog);
@@ -903,6 +910,11 @@ export class DashboardPageObject extends FtrService {
 
   public async waitForRenderComplete() {
     this.log.debug('waitForRenderComplete');
+    await this.find.waitForAttributeToChange(
+      '[data-dashboard-controls-ready]',
+      'data-dashboard-controls-ready',
+      'true'
+    );
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
@@ -993,16 +1005,5 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
-  }
-
-  public async isNotificationExists(panelIndex = 0) {
-    const panel = (await this.getDashboardPanels())[panelIndex];
-    try {
-      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
-      return Boolean(notification);
-    } catch (e) {
-      // if not found then this is false
-      return false;
-    }
   }
 }

@@ -52,6 +52,8 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
+  conversationAccess: (conversationId: string) =>
+    [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [
@@ -87,7 +89,6 @@ export const casesMutationsKeys = {
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
-  bulkPostObservables: ['bulk-post-observables'] as const,
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,

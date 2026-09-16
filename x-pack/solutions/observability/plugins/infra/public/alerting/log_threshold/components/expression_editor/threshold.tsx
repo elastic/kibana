@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
@@ -54,12 +55,14 @@ interface Props {
 
 export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold, errors }) => {
   const [isThresholdPopoverOpen, setThresholdPopoverOpenState] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiPopover
           id="threshold"
+          aria-labelledby={popoverTitleId}
           button={
             <EuiExpression
               description={thresholdPrefix}
@@ -78,10 +81,15 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
           anchorPosition="downLeft"
         >
           <>
-            <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>{popoverTitle}</EuiPopoverTitle>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiFormRow>
+                <EuiFormRow
+                  aria-label={i18n.translate(
+                    'xpack.infra.logs.alertFlyout.threshold.comparatorAriaLabel',
+                    { defaultMessage: 'Threshold comparator' }
+                  )}
+                >
                   <EuiSelect
                     data-test-subj="infraThresholdSelect"
                     compressed

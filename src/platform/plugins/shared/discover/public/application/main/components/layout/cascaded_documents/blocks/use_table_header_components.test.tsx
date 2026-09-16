@@ -13,7 +13,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useGetGroupBySelectorRenderer } from './use_table_header_components';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
+import type { RenderViewModeToggleOptions } from '../../../../../../components/view_mode_toggle';
+import {
+  useGetGroupBySelectorRenderer,
+  useEsqlDataCascadeHeaderComponent,
+} from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
   const mockCascadeGroupingChangeHandler = jest.fn();
@@ -127,5 +132,56 @@ describe('useTableHeaderComponents', () => {
 
     expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
     expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
+  });
+});
+
+describe('useEsqlDataCascadeHeaderComponent', () => {
+  const mockCascadeGroupingChangeHandler = jest.fn();
+
+  // Renders the hits-counter-variant option it's called with, so the test can assert
+  // on it, in place of the real hit-count toggle (which owns its own total-hits number).
+  const renderToggleProbe = jest.fn((options?: RenderViewModeToggleOptions) => (
+    <div data-test-subj="toggle-probe">{options?.hitsCounterVariant}</div>
+  ));
+
+  const renderCustomHeader = (
+    renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle']
+  ) => {
+    const { result } = renderHook(() =>
+      useEsqlDataCascadeHeaderComponent({
+        renderViewModeToggle,
+        cascadeGroupingChangeHandler: mockCascadeGroupingChangeHandler,
+      })
+    );
+
+    const CustomHeader = () =>
+      result.current({
+        currentSelectedColumns: ['category'],
+        availableColumns: ['category'],
+        onGroupSelection: jest.fn(),
+        selectedRows: [],
+      });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <CustomHeader />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+  };
+
+  it('calls renderViewModeToggle with the "groups" hits counter variant, instead of the generic variant', () => {
+    renderCustomHeader(renderToggleProbe);
+
+    expect(renderToggleProbe).toHaveBeenCalledWith({ hitsCounterVariant: 'groups' });
+    expect(screen.getByTestId('toggle-probe')).toHaveTextContent('groups');
+  });
+
+  it('still renders the group-by selector when no renderViewModeToggle is provided', () => {
+    renderCustomHeader(undefined);
+
+    expect(screen.queryByTestId('toggle-probe')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverEnableCascadeLayoutSwitch')).toBeInTheDocument();
   });
 });

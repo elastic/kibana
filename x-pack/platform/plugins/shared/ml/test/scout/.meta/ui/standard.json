@@ -1,6 +1,100 @@
 {
-  "sha1": "4a7595c5b7c64dabaefea06c56772b0e5f7824ec",
+  "sha1": "78e9dc4f5d8734b11bd51e181c433cde6f2f2b5b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "bc6aa97a6c2d787-a0104f7a4f9a2c2",
+      "title": "classification creation bank marketing classification: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/classification_creation.spec.ts",
+        "line": 100,
+        "column": 17
+      }
+    },
+    {
+      "id": "c2069b7f4d5a046-cd4a96bb0fb02b8",
+      "title": "DFA job cloning clones a classification job through the wizard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
+        "line": 246,
+        "column": 8
+      }
+    },
+    {
+      "id": "c2069b7f4d5a046-edaf31c7cf7b1ca",
+      "title": "DFA job cloning clones an outlier detection job through the wizard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
+        "line": 353,
+        "column": 17
+      }
+    },
+    {
+      "id": "c2069b7f4d5a046-c33e3ae354f5796",
+      "title": "DFA job cloning clones a regression job through the wizard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
+        "line": 437,
+        "column": 26
+      }
+    },
+    {
+      "id": "8a2d8b926e59b47-a66309361556b19",
+      "title": "DFA results view content binary classification results view: feature importance, histograms, columns, custom viz",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_results_view_content.spec.ts",
+        "line": 392,
+        "column": 7
+      }
+    },
+    {
+      "id": "8a2d8b926e59b47-7ec24cb5522e3c4",
+      "title": "DFA results view content multi-class classification results view: feature importance, histograms, columns, custom viz",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_results_view_content.spec.ts",
+        "line": 463,
+        "column": 15
+      }
+    },
+    {
+      "id": "8a2d8b926e59b47-24f056f715381d0",
+      "title": "DFA results view content regression results view: feature importance, histograms, columns, custom viz",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_results_view_content.spec.ts",
+        "line": 528,
+        "column": 7
+      }
+    },
     {
       "id": "c8ef714ccee931c-76874840f05b4c6",
       "title": "Machine Learning feature controls mlAppPageOverview renders in a space where ML is enabled",
@@ -11,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 30,
+        "column": 8
       }
     },
     {
@@ -25,8 +119,62 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 36,
+        "column": 16
+      }
+    },
+    {
+      "id": "0e907d752fc9d32-c1a30a350e5bcce",
+      "title": "index based actions panel on trial license create advanced job action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/index_data_visualizer_actions_panel_trial.spec.ts",
+        "line": 28,
+        "column": 28
+      }
+    },
+    {
+      "id": "0e907d752fc9d32-4dc45a678b432b5",
+      "title": "index based actions panel on trial license view in discover page action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/index_data_visualizer_actions_panel_trial.spec.ts",
+        "line": 37,
+        "column": 13
+      }
+    },
+    {
+      "id": "5d272fc26d0cce3-2fecdf3a8ab97ec",
+      "title": "outlier detection creation iowa house prices outlier detection: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/outlier_detection_creation.spec.ts",
+        "line": 111,
+        "column": 9
+      }
+    },
+    {
+      "id": "d1a8fc29133f341-10d12d26491ebb3",
+      "title": "regression creation electrical grid stability regression: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/regression_creation.spec.ts",
+        "line": 99,
+        "column": 17
       }
     }
   ]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { apmSchema } from '../server/lib/apm_telemetry/schema';
 

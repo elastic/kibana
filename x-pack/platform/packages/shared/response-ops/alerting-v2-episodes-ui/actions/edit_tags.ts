@@ -6,7 +6,7 @@
  */
 
 // For a single episode, seed the flyout from `last_tags`. For multiple selections, start empty
-// (no single "current" set when replacing tags across groups).
+// (no single "current" set when replacing tags across episodes).
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -15,10 +15,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { BulkTagEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { bulkTagEpisodeActions } from './bulk_create_alert_actions';
+import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openTagsFlyout } from '../components/tags_flyout';
 
@@ -47,16 +47,15 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
     });
     if (tags == null) return;
 
-    const items = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+    const items: BulkTagEpisodeActionItem[] = episodes.map((ep) => ({
+      episode_id: ep['episode.id'],
       tags,
     }));
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkTagEpisodeActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

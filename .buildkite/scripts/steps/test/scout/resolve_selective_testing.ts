@@ -17,7 +17,7 @@
  * (critical-files check, tests-only fast path, dependency-tree fallback).
  *
  * Usage:
- *   ts-node resolve_selective_testing.ts <mergeBase> <outPath>
+ *   node resolve_selective_testing.ts <mergeBase> <outPath>
  *
  * Args:
  *   mergeBase  — git ref to diff against (required)
@@ -29,15 +29,25 @@
  *     "changedFiles": ["src/...", ...],
  *     "affectedModules": ["@kbn/foo", ...]
  *   }
+ *
+ * Shadow mode: also computes the same result via Moon and writes it to
+ * `<outPath>.moon_shadow.json` for comparison only — never affects the
+ * actual decision. See affected-packages/README.md.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import type { ScoutLog } from './scout_log.ts';
+import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
+import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
-const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
+const writeLog = (message: string) => process.stderr.write(`${message}\n`);
+const log: ScoutLog = {
+  info: writeLog,
+  warning: (message) => writeLog(`WARN ${message}`),
+};
 
 const [mergeBase, outPath] = process.argv.slice(2);
 
@@ -49,6 +59,30 @@ if (!mergeBase || !outPath) {
 (async () => {
   // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
+
+  // Skip Scout when all affected modules are not related.
+  const directlyAffected = await getAffectedPackages(mergeBase, {
+    strategy: 'git',
+    includeDownstream: false,
+    ignoreUncategorizedChanges: true,
+  });
+
+  if (shouldSkipScoutTests(directlyAffected)) {
+    log.info(
+      `Skipping Scout tests — all ${directlyAffected.size} affected module(s) are excluded: ${[
+        ...directlyAffected,
+      ].join(', ')}`
+    );
+    const codeChanges = {
+      mergeBase,
+      changedFiles: [...changedFiles].sort(),
+      affectedModules: [] as string[],
+    };
+    const resolvedOutPath = path.resolve(outPath);
+    fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
+    fs.writeFileSync(resolvedOutPath, JSON.stringify(codeChanges, null, 2));
+    return;
+  }
 
   // Compute affected @kbn/ modules (replaces the legacy `list_affected` binary).
   // Overlay implicit runtime-registry consumers — see scout_implicit_consumers.ts.
@@ -72,4 +106,18 @@ if (!mergeBase || !outPath) {
   const resolvedOutPath = path.resolve(outPath);
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(codeChanges, null, 2));
+
+  const moonShadow = computeMoonShadow({
+    mergeBase,
+    gitChangedFiles: changedFiles,
+    gitAffectedModules: affectedPackages,
+    log,
+  });
+  if (moonShadow) {
+    const shadowOutPath = path.join(
+      path.dirname(resolvedOutPath),
+      `${path.basename(resolvedOutPath, path.extname(resolvedOutPath))}.moon_shadow.json`
+    );
+    fs.writeFileSync(shadowOutPath, JSON.stringify(moonShadow, null, 2));
+  }
 })();

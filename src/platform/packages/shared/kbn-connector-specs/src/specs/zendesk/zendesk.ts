@@ -22,7 +22,7 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -80,6 +80,7 @@ export const ZendeskConnector: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search across Zendesk data (tickets, users, organizations, articles). Use when you need to find items by keyword or criteria.',
       input: lazySchema(() =>
@@ -131,6 +132,7 @@ export const ZendeskConnector: ConnectorSpec = {
 
     listTickets: {
       isTool: true,
+      scope: 'read',
       description:
         'List Zendesk tickets. Use when you need to browse or filter tickets by page. For keyword or criteria-based lookups, prefer the search action instead.',
       input: lazySchema(() =>
@@ -162,6 +164,7 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicket: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full details of a single Zendesk ticket by ID, including metadata and comment count. Use when you already have a ticket ID and need the complete record.',
       input: lazySchema(() =>
@@ -180,6 +183,7 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicketComments: {
       isTool: true,
+      scope: 'read',
       description:
         'List comments on a Zendesk ticket (the conversation thread, including both public and private comments). Use when you have a ticket ID and need to read the full discussion.',
       input: lazySchema(() =>
@@ -223,6 +227,7 @@ export const ZendeskConnector: ConnectorSpec = {
 
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the currently authenticated Zendesk user. Returns the user record for the API credentials in use. Useful for verifying which account is connected or resolving your own agent/user ID.',
       input: lazySchema(() => z.object({})),
@@ -257,22 +262,9 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const baseUrl = buildBaseUrl(ctx);
-      try {
-        const response = await ctx.client.get(`${baseUrl}/users/me.json`);
-        const user = response.data?.user;
-        return {
-          ok: true,
-          message: user
-            ? `Successfully connected to Zendesk as ${user.email ?? user.name ?? 'user'}`
-            : 'Successfully connected to Zendesk API',
-        };
-      } catch (error: unknown) {
-        const message =
-          error && typeof error === 'object' && 'message' in error
-            ? String((error as { message: unknown }).message)
-            : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${baseUrl}/users/me.json`);
+      return {};
     },
+    enabled: true,
   },
 };

@@ -11,6 +11,7 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-p
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
 import type { ActiveMaintenanceWindow } from './types';
@@ -54,6 +55,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
             this.logger.warn({
               message: () =>
                 `Skipping maintenance window "${doc.id}": missing or invalid events array`,
+              code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID,
             });
             continue;
           }
@@ -72,7 +74,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
     } catch (error) {
       this.logger.error({
         error,
-        type: 'MaintenanceWindowFetchError',
+        code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED,
       });
       return [];
     } finally {
@@ -81,6 +83,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
       } catch (closeError) {
         this.logger.warn({
           message: () => `Failed to close maintenance window PIT finder: ${closeError.message}`,
+          code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED,
         });
       }
     }

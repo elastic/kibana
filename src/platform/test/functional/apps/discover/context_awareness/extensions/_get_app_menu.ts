@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_app_menu.ts
+
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. Browser-only — top-nav menu registration, submenu clicks,
+ * and flyout rendering. No overlapping Jest coverage.
+ */
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

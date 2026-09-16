@@ -33,6 +33,9 @@ const RULE_DEFAULT_OPTIONS = ['add_to_rule', 'add_to_rules', 'select_rules_to_ad
  * @param selectedRulesToAddTo List of rules item/s should be added to
  * @param listType list type of the item being added
  * @param exceptionListsToAddTo User selected exception lists to add item to
+ * @param bulkCloseAlerts User opted in to bulk-closing alerts that match the exception
+ * @param isRuntimeFieldsResolving The runtime-field map bulk close sends with the
+ * close-by-query request is still being derived from in-flight index-field fetches
  */
 export const isSubmitDisabled = ({
   isSubmitting,
@@ -47,6 +50,8 @@ export const isSubmitDisabled = ({
   selectedRulesToAddTo,
   listType,
   exceptionListsToAddTo,
+  bulkCloseAlerts,
+  isRuntimeFieldsResolving,
 }: {
   isSubmitting: boolean;
   isClosingAlerts: boolean;
@@ -60,6 +65,8 @@ export const isSubmitDisabled = ({
   selectedRulesToAddTo: Rule[];
   listType: ExceptionListTypeEnum;
   exceptionListsToAddTo: ExceptionListSchema[];
+  bulkCloseAlerts: boolean;
+  isRuntimeFieldsResolving: boolean;
 }): boolean => {
   return (
     isSubmitting ||
@@ -73,7 +80,9 @@ export const isSubmitDisabled = ({
     (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
     (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
       isEmpty(selectedRulesToAddTo) &&
-      listType === ExceptionListTypeEnum.RULE_DEFAULT)
+      listType === ExceptionListTypeEnum.RULE_DEFAULT) ||
+    // Closing with an unresolved map would silently skip alerts on runtime fields.
+    (bulkCloseAlerts && isRuntimeFieldsResolving)
   );
 };
 

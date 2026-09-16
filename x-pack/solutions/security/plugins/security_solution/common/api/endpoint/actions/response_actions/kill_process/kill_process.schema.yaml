@@ -91,6 +91,7 @@ components:
                       description: "The entity ID of the process to terminate."
                       example: "abc123"
                       minLength: 1
+                      maxLength: 256
                 - type: object
                   properties:
                     process_name:
@@ -98,3 +99,4 @@ components:
                       description: "The name of the process to terminate. Valid for SentinelOne agent type only."
                       example: "Elastic"
                       minLength: 1
+                      maxLength: 1024

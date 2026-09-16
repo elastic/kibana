@@ -11,7 +11,10 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
-import icon from './alienvault.jpg';
+// Transparent PNG of the same artwork the JPEG carried: the JPEG's white matte
+// showed as a light tile on dark surfaces. Green reads on both themes, and the
+// eyes stay knocked out in white as the mark intends.
+import icon from './alienvault.png';
 
 export default (props: ConnectorIconProps) => {
   return <EuiIcon type={icon} {...props} />;

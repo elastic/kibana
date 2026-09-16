@@ -70,13 +70,33 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
+/**
+ * Wraps a string-valued ES|QL expression so its result can be safely embedded as a JSON
+ * string value. Escapes the two JSON-significant characters at query time:
+ *   - backslash  \  ->  \\
+ *   - double quote "  ->  \"
+ * Backslash is escaped first so the backslashes added when escaping quotes are not doubled again.
+ *
+ * Without this, identity values containing a backslash (e.g. Windows/AD `DOMAIN\user` EUIDs such
+ * as `user:AzureAD\FelixRoessel@...`) or a double quote produce invalid JSON that fails
+ * `JSON.parse` downstream in parse_records, 500-ing the whole graph request.
+ *
+ * REPLACE uses Java regex for the pattern and Java replacement semantics for the third argument,
+ * which is why the escape/replacement strings carry doubled backslashes. Returns null when the
+ * input expression is null, preserving the COALESCE null-handling of the callers.
+ */
+export const escapeJsonStringValueEsql = (esqlExpr: string): string =>
+  String.raw`REPLACE(REPLACE(${esqlExpr}, "\\\\", "\\\\\\\\"), "\"", "\\\\\"")`;
+
 export const concatJsonObjectPropertyEsqlExprSafe = (
   propertyName: string,
   esqlVariable: string
 ): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${esqlVariable}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(
+    esqlVariable
+  )}, "\\""), "")`;
 };
 
 export const concatJsonObjectPropertyString = (
@@ -94,7 +114,7 @@ export const concatJsonObjectPropertyEsqlExprAsString = (
   propertyName: string,
   esqlExpr: string
 ): string => {
-  return `CONCAT("\\"${propertyName}\\":\\"", ${esqlExpr}, "\\"")`;
+  return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
 };
 
 export const JSON_OBJECT_SEPARATOR = '","';
@@ -229,4 +249,29 @@ ${targetCases},
 export const buildSourceMetadataEvals = (): string => {
   return `| EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code`;
+};
+
+/**
+ * Generates the `| EVAL pinned = ...` statement used by both the events and relationships
+ * queries. A pinned entity is isolated into its own graph node (never merged into a same-type
+ * group) whether it appears as an actor or a target. The `pinned` column is set to the first
+ * candidate column whose value is one of the pinned IDs, or null when none match — so pinned
+ * entities get a distinct group key downstream.
+ *
+ * `candidateColumns` is the ordered list of ES|QL columns to test against the pinned IDs
+ * (e.g. `['_id', 'actorEntityId', 'targetEntityId']` for events, `['actorId', 'targetId']` for
+ * relationships). The pinned IDs are passed as `?pinned_id{idx}` query params by the caller.
+ */
+export const buildPinnedEsql = (candidateColumns: string[], pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+  const arms = candidateColumns
+    .map((col) => `COALESCE(${col}, "") IN (${pinnedParamsStr}), ${col}`)
+    .join(',\n    ');
+  return `| EVAL pinned = CASE(
+    ${arms},
+    null
+  )`;
 };

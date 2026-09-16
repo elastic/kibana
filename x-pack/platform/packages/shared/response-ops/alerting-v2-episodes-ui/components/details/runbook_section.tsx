@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiSkeletonText, EuiText } from '@elastic/eui';
+import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { isRuleError, isRuleLoaded, isRuleLoading } from '../../types/rule_state';
 import { AlertEpisodeRunbook } from './runbook';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -30,17 +32,16 @@ export const AlertEpisodeRunbookSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({
+    id: ruleId,
+    http: services.http,
+  });
 
-  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
-    return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
+  if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
+    return <EuiSkeletonText lines={4} data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
   }
 
-  if (isEpisodeError || isRuleError) {
+  if (isEpisodeError || isRuleError(ruleState)) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeRunbookSectionError">
         {i18n.RUNBOOK_SECTION_LOAD_ERROR}
@@ -48,7 +49,12 @@ export const AlertEpisodeRunbookSection = ({
     );
   }
 
-  const runbookContent = rule?.artifacts?.find((a) => a.type === 'runbook')?.value;
+  if (!isRuleLoaded(ruleState)) {
+    return null;
+  }
+
+  const runbookArtifact = ruleState.rule.artifacts?.find((a) => a.type === 'runbook');
+  const runbookContent = runbookArtifact ? getRunbookContent(runbookArtifact) : undefined;
 
   return <AlertEpisodeRunbook content={runbookContent} />;
 };

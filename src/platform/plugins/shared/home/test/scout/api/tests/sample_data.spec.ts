@@ -8,8 +8,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -32,6 +31,17 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     credentials = await requestAuth.getApiKeyForAdmin();
 
     await kbnClient.spaces.create({ id: TEST_SPACE_ID, name: 'Scout sample data test space' });
+  });
+
+  // Guarantee the default space is left clean after every test. The flights dashboard is a
+  // multiple-isolated saved object, so a canonical-ID copy leaked into the default space by a
+  // mid-test failure would force the importer to regenerate the ID when the non-default-space
+  // test installs, breaking its ID-preservation assertion. uninstall is idempotent, so this is
+  // safe to run even when nothing is installed.
+  apiTest.afterEach(async ({ apiClient }) => {
+    await apiClient.delete(`${sampleDataApiPath('default')}/${FLIGHTS_DATASET_ID}`, {
+      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+    });
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -77,6 +87,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       await apiTest.step(
         'ES index contains timestamps relative to current time (no ?now= param)',
         async () => {
+          await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const result = await esClient.search<{ timestamp: string }>({
             index: FLIGHTS_ES_INDEX,
             sort: [{ timestamp: { order: 'desc' } }],
@@ -96,6 +107,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
             { headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader } }
           );
           expect(reinstallResponse).toHaveStatusCode(200);
+          await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const result = await esClient.search<{ timestamp: string }>({
             index: FLIGHTS_ES_INDEX,
             sort: [{ timestamp: { order: 'desc' } }],
@@ -107,6 +119,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       );
 
       await apiTest.step('list returns installed status after install', async () => {
+        await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
         const response = await apiClient.get(apiPath, {
           headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
           responseType: 'json',
@@ -169,6 +182,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       await apiTest.step(
         'list shows installed status and the canonical overviewDashboard ID in non-default space',
         async () => {
+          await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const response = await apiClient.get(apiPath, {
             headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
             responseType: 'json',

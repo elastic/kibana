@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker } from '@elastic/esql';
+import { isFunctionExpression, isSubQuery, Walker } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
@@ -66,6 +66,7 @@ describe('getAutocompleteCursorContext', () => {
       const parsed = parseAutocompleteQuery(query, query.length);
 
       expect(parsed.innerText).toBe(query);
+      expect(parsed.tokens.length).toBeGreaterThan(0);
       assertNoMarker(parsed.root, query, 'root');
 
       const { root, command, node, option, containingFunction } = findAutocompleteAstPosition(
@@ -98,5 +99,26 @@ describe('getAutocompleteCursorContext', () => {
     const { astContext } = getAutocompleteCursorContext(query, query.length);
 
     expect(astContext.type).toBe('expression');
+  });
+
+  it('preserves nested expressions when recovering an incomplete subquery', () => {
+    const query = 'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM ';
+    const { root } = parseAutocompleteQuery(query, query.length);
+    const coalesce = Walker.find(
+      root,
+      (node) => isFunctionExpression(node) && node.name.toLowerCase() === 'coalesce'
+    );
+    const inExpression = coalesce
+      ? Walker.find(
+          coalesce,
+          (node) => isFunctionExpression(node) && node.name.toLowerCase() === 'in'
+        )
+      : undefined;
+    const subquery = inExpression ? Walker.find(inExpression, isSubQuery) : undefined;
+
+    expect(coalesce).toBeDefined();
+    expect(inExpression).toBeDefined();
+    expect(subquery).toBeDefined();
+    assertNoMarker(root, query, 'root');
   });
 });

@@ -8,8 +8,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorContractUnion } from '../..';
-import { generateYamlSchemaFromConnectors } from '../..';
+import {
+  CONNECTOR_ID_MAX_LENGTH,
+  type ConnectorContractUnion,
+  generateYamlSchemaFromConnectors,
+} from '../..';
 
 const BASE_WORKFLOW = {
   name: 'test',
@@ -34,9 +37,27 @@ describe('generateYamlSchemaFromConnectors', () => {
       ];
       const schema = generateYamlSchemaFromConnectors(connectors);
       expect(schema).toBeDefined();
-      // strict mode should throw if required fields are missing
+    });
+
+    it('rejects an empty steps array when the other required fields are valid', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Console',
+          description: 'Console',
+          type: 'console',
+          paramsSchema: z.object({
+            message: z.string(),
+          }),
+          outputSchema: z.object({
+            message: z.string(),
+          }),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
       expect(() =>
         schema.parse({
+          ...BASE_WORKFLOW,
           steps: [],
         })
       ).toThrow();
@@ -81,6 +102,46 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [{ name: 'step', type: 'my.step' }],
         })
       ).not.toThrow();
+    });
+
+    it('rejects a step connector-id longer than CONNECTOR_ID_MAX_LENGTH', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Slack',
+          description: null,
+          type: 'slack',
+          hasConnectorId: 'required',
+          paramsSchema: z.object({ message: z.string().optional() }),
+          outputSchema: z.unknown(),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 'notify',
+              type: 'slack',
+              'connector-id': 'x'.repeat(CONNECTOR_ID_MAX_LENGTH + 1),
+            },
+          ],
+        }).success
+      ).toBe(false);
+
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 'notify',
+              type: 'slack',
+              'connector-id': 'x'.repeat(CONNECTOR_ID_MAX_LENGTH),
+            },
+          ],
+        }).success
+      ).toBe(true);
     });
 
     it('requires `with` for a step that has required params', () => {

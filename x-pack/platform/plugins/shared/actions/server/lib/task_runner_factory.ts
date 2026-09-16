@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -18,6 +17,7 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -73,7 +73,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance, abortController }: RunContext) {
+  public create({ taskInstance, signal, executionUuid }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -86,7 +86,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
-    const actionExecutionId = uuidv4();
+    const actionExecutionId = executionUuid;
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
     return {
@@ -96,6 +96,7 @@ export class TaskRunnerFactory {
             actionId,
             params,
             apiKey,
+            uiamApiKeyExternal,
             executionId,
             consumer,
             source,
@@ -110,7 +111,7 @@ export class TaskRunnerFactory {
         );
 
         const { spaceId } = actionTaskExecutorParams;
-        const request = getFakeRequest(apiKey, spaceId);
+        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -124,7 +125,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
-            signal: abortController.signal,
+            signal,
           });
         } catch (e) {
           const errorSource =
@@ -132,6 +133,12 @@ export class TaskRunnerFactory {
               ? TaskErrorSource.USER
               : getErrorSource(e) || TaskErrorSource.FRAMEWORK;
           logger.error(`Action '${actionId}' failed: ${e.message}`, {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
             tags: ['connector-run-failed', `${errorSource}-error`],
           });
           if (e instanceof ActionTypeDisabledError) {
@@ -150,6 +157,12 @@ export class TaskRunnerFactory {
             message = `${message}: ${executorResult.serviceMessage}`;
           }
           logger.error(`Action '${actionId}' failed: ${message}`, {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
             tags: ['connector-run-failed', `${executorResult.errorSource}-error`],
           });
 
@@ -166,7 +179,15 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, executionId, consumer, source, relatedSavedObjects },
+          attributes: {
+            actionId,
+            apiKey,
+            uiamApiKeyExternal,
+            executionId,
+            consumer,
+            source,
+            relatedSavedObjects,
+          },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -175,7 +196,7 @@ export class TaskRunnerFactory {
           logger
         );
 
-        const request = getFakeRequest(apiKey, spaceId);
+        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
 
         await actionExecutor.logCancellation({
           actionId,
@@ -190,7 +211,15 @@ export class TaskRunnerFactory {
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 
         logger.debug(
-          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
+          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`,
+          {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
+          }
         );
         return { state: {} };
       },
@@ -205,7 +234,12 @@ export class TaskRunnerFactory {
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
-            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`,
+            {
+              labels: {
+                actionExecutionId,
+              },
+            }
           );
         }
       },
@@ -213,7 +247,7 @@ export class TaskRunnerFactory {
   }
 }
 
-function getFakeRequest(apiKey: string | undefined, spaceId: string) {
+function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyExternal?: boolean) {
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -221,10 +255,20 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: asSpaceId(spaceId),
+    spaceId: brandSpaceId(spaceId),
   };
 
-  return kibanaRequestFactory(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+  // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with the
+  // UIAM shared secret - UIAM rejects external keys carrying client authentication. The verdict is
+  // UIAM's own, captured when the rule was created and persisted on the action task params.
+  // Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
+  if (apiKey && uiamApiKeyExternal === true) {
+    markExternalUiamCredential(fakeRequest);
+  }
+
+  return fakeRequest;
 }
 
 async function getActionTaskParams(
@@ -264,7 +308,12 @@ async function getActionTaskParams(
       : TaskErrorSource.FRAMEWORK;
     logger.error(
       `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
-      { tags: ['connector-run-failed', `${errorSource}-error`] }
+      {
+        labels: {
+          spaceId,
+        },
+        tags: ['connector-run-failed', `${errorSource}-error`],
+      }
     );
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw createRetryableError(createTaskRunError(e, errorSource), true);

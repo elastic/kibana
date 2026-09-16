@@ -6,17 +6,31 @@
  */
 
 import type { AgentDefinition, AgentConfiguration } from './definition';
-import type { AgentVisibility } from './visibility';
+import type { AgentAccessControl } from './access_control';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentListOptions {}
+export interface AgentListOptions {
+  /**
+   * When true, agents of a managed (non-chat) type are included in the results.
+   * Defaults to false.
+   */
+  includeManaged?: boolean;
+}
 
-export type AgentCreateRequest = Omit<AgentDefinition, 'type' | 'readonly' | 'created_by'>;
+export type AgentCreateRequest = Omit<
+  AgentDefinition,
+  'type' | 'readonly' | 'created_by' | 'access_control'
+> & {
+  /**
+   * Id of a registered agent type. Defaults to the chat type (empty base).
+   */
+  type?: string;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
+};
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
-  visibility?: AgentVisibility;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfiguration>;
 };
 

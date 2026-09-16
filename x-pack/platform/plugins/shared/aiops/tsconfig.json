@@ -92,7 +92,8 @@
     "@kbn/css-utils",
     "@kbn/presentation-publishing-schemas",
     "@kbn/cps",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

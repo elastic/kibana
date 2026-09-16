@@ -8,7 +8,8 @@
  */
 
 import type { CoreAuditService } from './audit';
-import type { CoreAuthenticationService } from './authc';
+import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
  * The contract exposed by the security provider for Core to
@@ -19,11 +20,34 @@ import type { CoreAuthenticationService } from './authc';
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
   audit: AuditServiceContract;
+  serviceAccounts: ServiceAccountsServiceContract;
+  /**
+   * Binds a `profile_uid` to a fake request. The delegate owns the storage
+   * (typically a WeakMap) consulted by its own `authc.getCurrentUser`. Core
+   * re-exposes this via the one-shot
+   * {@link SecurityServiceSetup.acquireFakeRequestEnricher} accessor.
+   *
+   * @internal
+   */
+  fakeRequestEnricher: FakeRequestEnricher;
 }
 
 /**
+ * The authentication contract that the security provider must implement.
+ * Mirrors {@link CoreAuthenticationService}; the delegate's `getCurrentUser`
+ * is responsible for surfacing the synthetic user produced by
+ * {@link CoreSecurityDelegateContract.fakeRequestEnricher}.
+ *
  * @public
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
 
 export type AuditServiceContract = CoreAuditService;
+
+/**
+ * The service accounts contract that the security provider must implement.
+ * Mirrors {@link CoreServiceAccountsService}.
+ *
+ * @public
+ */
+export type ServiceAccountsServiceContract = CoreServiceAccountsService;

@@ -10,14 +10,14 @@ import type { ResolvedResourceWithSampling } from '@kbn/agent-builder-genai-util
 import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
-import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../../../common/task/util/enrich_lookup_resources';
 import type { EsqlColumn, ValidationErrors } from './types';
 
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
   description: Annotation<string>(),
   dashboard_description: Annotation<string>(),
-  resources: Annotation<MigrationResources>(), // The visualization panel object
+  resources: Annotation<EnrichedMigrationResources>(), // The visualization panel object
   elastic_panel: Annotation<object | undefined>(),
   index_pattern: Annotation<string | undefined>(),
   /** includes mapping and field stats for a given index */

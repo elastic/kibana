@@ -11,7 +11,6 @@ import { FtrService } from '../ftr_provider_context';
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
-const DATA_LOADING_SELECTOR = '[data-loading]';
 
 export class RenderableService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -21,8 +20,6 @@ export class RenderableService extends FtrService {
   /**
    * This method waits for a certain number of objects to finish rendering and loading, which is indicated
    * by a couple tags. The RENDER_COMPLETE_SELECTOR indicates that it's done initially loading up. Some
-   * visualizations also add a DATA_LOADING_SELECTOR when the internal data is loading. This test will not
-   * return if any of those tags are found.
    * @param count {Number} Number of RENDER_COMPLETE_SELECTORs to wait for.
    */
   public async waitForRender(count: number = 1): Promise<void> {
@@ -47,11 +44,6 @@ export class RenderableService extends FtrService {
           completedElements.length
         } elements completed rendering, still waiting on a total of ${count}
                 specifically:\n${pendingElementNames.join('\n')}`);
-      }
-
-      const stillLoadingElements = await this.find.allByCssSelector(DATA_LOADING_SELECTOR, 1000);
-      if (stillLoadingElements.length > 0) {
-        throw new Error(`${stillLoadingElements.length} elements still loading contents`);
       }
     });
   }

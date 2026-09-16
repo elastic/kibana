@@ -20,6 +20,7 @@ export interface CategorizeFieldContext {
   };
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
   onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void;
+  projectRouting?: string;
 }
 
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';

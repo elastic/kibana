@@ -45,8 +45,11 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const agentIdFromPath = agentIdParam;
 
   const location = useLocation<LocationState>();
-  const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
+  const locationAttachments = location.state?.attachments;
+  // Defaults to true so existing deep-link auto-send keeps working; the abort bounce-back
+  // passes false to prefill the input without sending.
+  const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
   const entryPointSource = location.state?.entryPointSource ?? 'direct';
 
   const hasFiredEntryPointRef = useRef(false);
@@ -67,13 +70,27 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
         // If deleting current conversation, navigate to root (redirects to last used agent)
-        navigateToAgentBuilderUrl(appPaths.root, undefined, { shouldStickToBottom: true });
+        navigateToAgentBuilderUrl(appPaths.root);
       }
     },
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(
+    locationAttachments
+  );
+
+  // Reset attachments when navigating to a different conversation, but not on initial mount.
+  // Skipping initial mount prevents the parent effect from racing with child effects (e.g.
+  // stale-attachments checks in conversation.tsx) that set attachments during the same render.
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    setAttachments(locationAttachments);
+  }, [conversationId, locationAttachments]);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -103,11 +120,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const contextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom,
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage,
       agentId: agentIdFromPath,
       attachments,
       upsertAttachments,
@@ -116,9 +132,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     }),
     [
       conversationId,
-      shouldStickToBottom,
       conversationActions,
       initialMessage,
+      autoSendInitialMessage,
       agentIdFromPath,
       attachments,
       upsertAttachments,

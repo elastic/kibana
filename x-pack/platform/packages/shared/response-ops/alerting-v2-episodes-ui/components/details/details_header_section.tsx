@@ -11,6 +11,7 @@ import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useEpisodeFlapping } from '../../hooks/use_episode_flapping';
 import { AlertEpisodeDetailsHeader } from './details_header';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -25,11 +26,15 @@ export const AlertEpisodeDetailsHeaderSection = ({
   services,
   titleSize,
 }: AlertEpisodeDetailsHeaderSectionProps) => {
-  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
+    episodeId,
+    services,
+  });
 
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
   const lastStatus = episode?.['episode.status'];
+  const severity = episode?.severity;
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: [episodeId],
@@ -39,20 +44,21 @@ export const AlertEpisodeDetailsHeaderSection = ({
     groupHashes: groupHash ? [groupHash] : [],
     services,
   });
-  const { data: rule } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
+  const { isFlapping } = useEpisodeFlapping({ episodeId, services });
 
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-  const tags = groupAction?.tags ?? [];
 
   return (
     <AlertEpisodeDetailsHeader
-      title={rule?.metadata.name}
-      description={rule?.metadata.description}
-      tags={tags}
+      isLoadingEpisode={isLoadingEpisode}
+      ruleState={ruleState}
       status={lastStatus}
+      severity={severity}
       episodeAction={episodeAction}
       groupAction={groupAction}
+      isFlapping={isFlapping}
       titleSize={titleSize}
     />
   );

@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -21,24 +18,6 @@ import {
   type SmlAttachHttpResultItem,
 } from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-const mergeAttachmentsById = (
-  latestAttachments: VersionedAttachment[],
-  stateManagerAttachments: VersionedAttachment[]
-) => {
-  const mergedAttachments = new Map<string, VersionedAttachment>();
-
-  for (const attachment of stateManagerAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  for (const attachment of latestAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  return Array.from(mergedAttachments.values());
-};
 
 export function registerInternalSmlRoutes({
   router,
@@ -54,7 +33,7 @@ export function registerInternalSmlRoutes({
       validate: {
         body: schema.object({
           conversation_id: schema.string(),
-          chunk_ids: schema.arrayOf(schema.string(), {
+          entry_ids: schema.arrayOf(schema.string(), {
             minSize: 1,
             maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
           }),
@@ -67,9 +46,9 @@ export function registerInternalSmlRoutes({
       async (ctx, request, response) => {
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
-        const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
+        const { conversation_id: conversationId, entry_ids: entryIds } = request.body;
         const [coreStart, startDeps] = await coreSetup.getStartServices();
-        const agentContextLayer = startDeps.agentContextLayer;
+        const agentBuilderSml = startDeps.agentBuilderSml;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
         const esClient = (await ctx.core).elasticsearch.client;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
@@ -84,8 +63,8 @@ export function registerInternalSmlRoutes({
           });
         }
 
-        const resolvedItems = await agentContextLayer.resolveSmlAttachItems({
-          chunkIds,
+        const resolvedItems = await agentBuilderSml.resolveSmlAttachItems({
+          entryIds,
           esClient,
           request,
           spaceId,
@@ -103,7 +82,7 @@ export function registerInternalSmlRoutes({
             if (!r.success) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment_type,
                 message: r.message,
               };
@@ -118,15 +97,15 @@ export function registerInternalSmlRoutes({
 
               return {
                 success: true,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 conversation_attachment_id: added.id,
                 attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
               };
             } catch (e) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment.type,
                 message: e instanceof Error ? e.message : String(e),
               };
@@ -134,26 +113,14 @@ export function registerInternalSmlRoutes({
           })
         );
 
-        // Update the conversation with the new attachments
         if (resultItems.some((r) => r.success)) {
-          const latestConversation = await conversationClient.get(conversationId);
-          const newRefs = stateManager.getAccessedRefs();
-
-          const lastRoundIndex = latestConversation.rounds.length - 1;
-          const updatedRounds = applyAttachmentRefsToRounds(
-            latestConversation.rounds,
-            new Map([[lastRoundIndex, newRefs]])
-          );
-          // Merge attachments to prevent duplication or overwriting older attachments
-          const mergedAttachments = mergeAttachmentsById(
-            latestConversation.attachments ?? [],
-            stateManager.getAll()
-          );
-
-          await conversationClient.update({
+          await conversationClient.addAttachmentsToLastRound({
             id: conversationId,
-            attachments: mergedAttachments,
-            rounds: updatedRounds,
+            refs: stateManager.getAccessedRefs(),
+            attachments: {
+              snapshot: conversationForAttach.attachments ?? [],
+              produced: stateManager.getAll(),
+            },
           });
         }
 
@@ -162,6 +129,8 @@ export function registerInternalSmlRoutes({
         return response.ok({ body });
       },
       {
+        // SML lives inside Agent Builder, so the route requires only the Agent
+        // Builder experimental flag.
         featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )

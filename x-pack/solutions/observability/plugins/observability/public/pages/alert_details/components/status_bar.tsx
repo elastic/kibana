@@ -19,6 +19,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { TopAlert } from '../../../typings/alerts';
 import { CaseLinks } from './case_links';
+import { AlertSnoozeStatus } from './alert_snooze_status';
 
 export interface StatusBarProps {
   alert: TopAlert | null;
@@ -45,12 +46,15 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       wrap
     >
       <EuiFlexItem grow={false}>
-        {alertStatus && (
-          <AlertLifecycleStatusBadge
-            alertStatus={alertStatus}
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
-        )}
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
+            />
+          )}
+          <AlertSnoozeStatus alert={alert} />
+        </EuiFlexGroup>
       </EuiFlexItem>
       <CaseLinks alert={alert} />
       {tags && tags.length > 0 && (

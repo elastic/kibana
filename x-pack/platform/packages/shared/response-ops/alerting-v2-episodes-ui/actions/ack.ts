@@ -7,9 +7,9 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { BulkAckEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
+import { bulkAckEpisodeActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 
@@ -26,16 +26,14 @@ export const createAckAction = (deps: AckActionDeps): EpisodeAction => ({
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 && episodes.some((ep) => ep.last_ack_action !== 'ack'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items = episodes.map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+    const items: BulkAckEpisodeActionItem[] = episodes.map((ep) => ({
       episode_id: ep['episode.id'],
     }));
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkAckEpisodeActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

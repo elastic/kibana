@@ -24,18 +24,6 @@ TARGET_DIR="${BUILD_OUTPUT_DIR:-$NAV_ROOT/target}"
 KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
 
 echo "==> Step 0: Dependencies"
-if [[ ! -f "$KBN_UI_ROOT/chrome-layout-constants/target/index.js" ]]; then
-  echo "    Building @kbn/ui-chrome-layout-constants (missing target)..."
-  bash "$KBN_UI_ROOT/chrome-layout-constants/packaging/scripts/build.sh"
-else
-  echo "    @kbn/ui-chrome-layout-constants target OK"
-fi
-if [[ ! -f "$KBN_UI_ROOT/chrome-layout-utils/target/index.js" ]]; then
-  echo "    Building @kbn/ui-chrome-layout-utils (missing target)..."
-  bash "$KBN_UI_ROOT/chrome-layout-utils/packaging/scripts/build.sh"
-else
-  echo "    @kbn/ui-chrome-layout-utils target OK"
-fi
 if [[ ! -f "$KBN_UI_ROOT/chrome-layout/target/index.js" ]]; then
   echo "    Building @kbn/ui-chrome-layout (missing target)..."
   bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
@@ -58,9 +46,11 @@ echo "==> Step 3: TypeScript declarations"
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \
   --rootDir "$PACKAGING_DIR/react" \
-  --moduleResolution node \
+  --module preserve \
+  --moduleResolution bundler \
   --esModuleInterop \
-  --skipLibCheck
+  --skipLibCheck \
+  --ignoreConfig
 mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
 echo "    Declarations OK"
 

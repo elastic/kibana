@@ -25,16 +25,17 @@
       "ruleRegistry",
       "security",
       "uiActions",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cps",
       "fleet",
       "home",
       "lens",
       "telemetry",
       "cases",
-      "spaces",
-      "unifiedSearch"
+      "spaces"
     ],
     "requiredBundles": [
       "esUiShared",

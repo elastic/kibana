@@ -1,5 +1,8 @@
 {
-  "sha1": "5c453d3a64669d5e1ee6bb34fa4c8c5a55765e47",
+  "sha1": "7dd4f9c81c97a11f5c7d5783502623342d136de6",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "97a24bbce8410c2-d711d2dd8bcbcae",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 43,
+        "column": 65
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 58,
+        "column": 27
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
-        "line": 149,
-        "column": 10
+        "line": 146,
+        "column": 26
       }
     }
   ]

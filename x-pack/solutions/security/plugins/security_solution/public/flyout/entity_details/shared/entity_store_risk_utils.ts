@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntitySummaryStalenessEntitySnapshot } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScore, RiskStats } from '../../../../common/search_strategy';
@@ -16,6 +17,17 @@ export function getRiskFromEntityRecord(record: EntityStoreRecord): {
   calculated_score_norm?: number;
 } | null {
   return getRiskFromRecord(record);
+}
+
+/** Current entity signals used for AI summary staleness checks. */
+export function buildEntitySummaryStalenessEntitySnapshot(
+  record?: EntityStoreRecord | null
+): EntitySummaryStalenessEntitySnapshot {
+  const risk = record ? getRiskFromEntityRecord(record) : null;
+  return {
+    // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.
+    riskScoreNorm: risk?.calculated_score_norm ?? null,
+  };
 }
 
 function getRiskFromRecord(record: EntityStoreRecord): {
@@ -32,7 +44,7 @@ function getRiskFromRecord(record: EntityStoreRecord): {
     };
   }
   if ('host' in record && record.host) {
-    const hostRisk = record.host.risk ?? record.host.entity?.risk;
+    const hostRisk = record.host.risk;
     if (hostRisk) {
       return {
         calculated_level: hostRisk.calculated_level,
@@ -42,19 +54,7 @@ function getRiskFromRecord(record: EntityStoreRecord): {
     }
   }
   if ('user' in record && record.user) {
-    const userRisk =
-      record.user.risk ??
-      (
-        record.user as {
-          entity?: {
-            risk?: {
-              calculated_level?: string;
-              calculated_score?: number;
-              calculated_score_norm?: number;
-            };
-          };
-        }
-      ).entity?.risk;
+    const userRisk = record.user.risk;
     if (userRisk) {
       return {
         calculated_level: userRisk.calculated_level,
@@ -64,7 +64,7 @@ function getRiskFromRecord(record: EntityStoreRecord): {
     }
   }
   if ('service' in record && record.service) {
-    const serviceRisk = record.service.risk ?? record.service.entity?.risk;
+    const serviceRisk = record.service.risk;
     if (serviceRisk) {
       return {
         calculated_level: serviceRisk.calculated_level,
@@ -140,7 +140,7 @@ function buildMinimalRiskStats(
 }
 
 /**
- * Build RiskScoreState for the flyout from an entity store record (when FF_ENABLE_ENTITY_STORE_V2).
+ * Build RiskScoreState for the flyout from an entity store record.
  * When inspect is provided (e.g. from entity store API response), the Risk Summary inspect button will be enabled.
  */
 export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(

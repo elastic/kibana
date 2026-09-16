@@ -6,6 +6,11 @@
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type {
+  AwsLambdaArchitecture,
+  AWSLambdaPriceFactor,
+  ServerlessSummaryResponse,
+} from '@kbn/apm-api-shared';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   FAAS_BILLED_DURATION,
@@ -22,10 +27,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { computeUsageAvgScript } from './get_compute_usage_chart';
 import { calcEstimatedCost, calcMemoryUsedRate, convertComputeUsageToGbSec } from './helper';
-
-export type AwsLambdaArchitecture = 'arm' | 'x86_64';
-
-export type AWSLambdaPriceFactor = Record<AwsLambdaArchitecture, number>;
 
 async function getServerlessTransactionThroughput({
   end,
@@ -71,14 +72,6 @@ async function getServerlessTransactionThroughput({
   const response = await apmEventClient.search('get_serverless_transaction_throughout', params);
 
   return response.hits.total.value;
-}
-
-export interface ServerlessSummaryResponse {
-  memoryUsageAvgRate: number | undefined;
-  serverlessFunctionsTotal: number | undefined;
-  serverlessDurationAvg: number | null | undefined;
-  billedDurationAvg: number | null | undefined;
-  estimatedCost: number | undefined;
 }
 
 export async function getServerlessSummary({

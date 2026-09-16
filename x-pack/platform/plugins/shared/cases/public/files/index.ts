@@ -10,14 +10,36 @@ import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
 import {
   GENERAL_CASES_OWNER,
   MAX_FILE_SIZE,
+  MAX_IMAGE_FILE_SIZE,
   OBSERVABILITY_OWNER,
   OWNERS,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
+import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 import type { Owner } from '../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../common/files';
 import type { CaseFileKinds, FilesConfig } from './types';
 import * as i18n from './translations';
+
+/**
+ * Mirrors the server-side per-file limit (see `createMaxCallback`) so oversized
+ * images are rejected client-side before uploading instead of failing mid-stream.
+ */
+const createMaxSizeBytes =
+  (config: FilesConfig) =>
+  (file: File): number => {
+    if (config.maxSize != null) {
+      return config.maxSize;
+    }
+
+    const allowedMimeTypesSet = new Set(config.allowedMimeTypes);
+
+    if (file.type && allowedMimeTypesSet.has(file.type) && IMAGE_MIME_TYPES.has(file.type)) {
+      return MAX_IMAGE_FILE_SIZE;
+    }
+
+    return MAX_FILE_SIZE;
+  };
 
 const getOwnerUIName = (owner: Owner) => {
   switch (owner) {
@@ -36,7 +58,10 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {
     id: constructFileKindIdByOwner(owner),
     allowedMimeTypes: config.allowedMimeTypes,
-    maxSizeBytes: config.maxSize ?? MAX_FILE_SIZE,
+    maxSizeBytes: createMaxSizeBytes(config),
+    // The allow-list is long; the upload modal shows the supported categories
+    // itself, so omit the raw MIME list from the shared-ux error.
+    listAllowedMimeTypesInError: false,
     managementUiActions: {
       delete: {
         enabled: false,

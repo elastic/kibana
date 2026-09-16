@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
@@ -90,7 +91,7 @@ export interface RunRulePreviewParams {
   body: RulePreviewRequestBody;
   enableLoggedRequests: boolean | undefined;
   request: KibanaRequest;
-  spaceId: string;
+  spaceId: SpaceId;
   actionsClient: ActionsClient;
   license: ILicense;
   savedObjectsClient: SavedObjectsClientContract;
@@ -255,9 +256,11 @@ export const runRulePreview = async (
 
     let invocationStartTime;
 
+    // Use the scoped (space-aware) client, not internalUserEsClient — the internal client is
+    // origin-only and cannot fan out to CPS linked projects. See https://github.com/elastic/kibana/issues/284670
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       savedObjectsClient,
-      internalUserEsClient
+      scopedClusterClientWithCps.asCurrentUser
     );
 
     while (invocationCount > 0 && !isAborted) {

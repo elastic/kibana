@@ -7,11 +7,14 @@
 
 import type { RuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
 import type { AlertsSelectionSettings } from '../../types';
+import type { WorkflowConfiguration } from '../../workflow_configuration/types';
 
 export interface AttackDiscoveryScheduleSchema {
-  name: string;
-  connectorId?: string;
-  alertsSelectionSettings: AlertsSelectionSettings;
-  interval: string;
   actions: Array<RuleAction | RuleSystemAction>;
+  alertsSelectionSettings: AlertsSelectionSettings;
+  connectorId?: string;
+  interval: string;
+  name: string;
+  type?: string;
+  workflowConfig?: WorkflowConfiguration;
 }
