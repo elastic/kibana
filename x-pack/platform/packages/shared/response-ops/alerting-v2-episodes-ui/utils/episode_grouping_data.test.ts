@@ -9,6 +9,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   formatGroupingValue,
   formatGroupingValueForDisplay,
+  getGroupingFieldsFromSource,
   getNonEmptyGroupingFields,
 } from './episode_grouping_data';
 
@@ -105,5 +106,37 @@ describe('getNonEmptyGroupingFields', () => {
     expect(
       getNonEmptyGroupingFields(['host.name', 'rule.id', 'missing', 'other', 'foobar'], data)
     ).toEqual(['other']);
+  });
+});
+
+describe('getGroupingFieldsFromSource', () => {
+  it('returns an empty array when grouping is missing or empty', () => {
+    expect(getGroupingFieldsFromSource(undefined)).toEqual([]);
+    expect(getGroupingFieldsFromSource({})).toEqual([]);
+  });
+
+  it('keeps already-flat keys as-is', () => {
+    expect(getGroupingFieldsFromSource({ 'host.name': 'web-01', 'service.name': 'api' })).toEqual([
+      'host.name',
+      'service.name',
+    ]);
+  });
+
+  it('collects dotted leaf paths from nested ECS grouping', () => {
+    expect(
+      getGroupingFieldsFromSource({
+        host: { name: 'web-01' },
+        monitor: { id: 'mon-1' },
+        location: { id: 'us-east' },
+      })
+    ).toEqual(['host.name', 'monitor.id', 'location.id']);
+  });
+
+  it('expands sibling leaves under the same parent', () => {
+    expect(
+      getGroupingFieldsFromSource({
+        host: { name: 'web-01', hostname: 'web-01.example.com' },
+      })
+    ).toEqual(['host.name', 'host.hostname']);
   });
 });

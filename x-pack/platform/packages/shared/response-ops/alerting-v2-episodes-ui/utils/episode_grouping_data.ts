@@ -76,6 +76,30 @@ export const formatGroupingValue = (
   return formatGroupingValueForDisplay(rawValue);
 };
 
+/** Recursively collect dotted leaf paths from a nested grouping object. */
+const collectLeafPaths = (value: Record<string, unknown>, prefix = ''): string[] =>
+  Object.entries(value).flatMap(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isPlainObject(child)) {
+      const nested = collectLeafPaths(child as Record<string, unknown>, path);
+      return nested.length > 0 ? nested : [path];
+    }
+    return [path];
+  });
+
+/**
+ * Derives grouping field names from a v1 `kibana.alert.grouping` object.
+ * Nested ECS objects become dotted leaf paths (`host.name`); already-flat keys are kept as-is.
+ */
+export const getGroupingFieldsFromSource = (
+  sourceGrouping: Record<string, unknown> | undefined
+): string[] => {
+  if (!isPlainObject(sourceGrouping)) {
+    return [];
+  }
+  return collectLeafPaths(sourceGrouping);
+};
+
 /** Grouping fields whose formatted value is non-empty (whitespace-only counts as empty). */
 export const getNonEmptyGroupingFields = (
   fields: readonly string[],

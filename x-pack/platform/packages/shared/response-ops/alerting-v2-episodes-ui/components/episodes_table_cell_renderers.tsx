@@ -27,6 +27,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
+import { getGroupingFieldsFromSource } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
@@ -251,7 +252,13 @@ export const EpisodeRuleCell = ({
   }
 
   const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  const groupingFields = rule.grouping?.fields ?? [];
+  const ruleGroupingFields = rule.grouping?.fields ?? [];
+  const sourceGrouping = row.flattened.source_grouping as Record<string, unknown> | undefined;
+  const groupingFields =
+    ruleGroupingFields.length > 0
+      ? ruleGroupingFields
+      : getGroupingFieldsFromSource(sourceGrouping);
+  const groupingData = ruleGroupingFields.length > 0 ? episodeData : sourceGrouping ?? {};
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
@@ -270,7 +277,7 @@ export const EpisodeRuleCell = ({
           <AlertingEpisodeGroupingTags
             inline
             fields={groupingFields}
-            data={episodeData}
+            data={groupingData}
             dataView={sourceDataViewsByRule?.get(ruleId)}
             data-test-subj="episodeRuleCellGroupingTags"
           />

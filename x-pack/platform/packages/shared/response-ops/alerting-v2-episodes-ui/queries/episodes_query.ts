@@ -55,6 +55,11 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Only set for classic alert rows; native episodes never use this.
    */
   is_muted?: boolean;
+  /**
+   * Grouping values copied from classic `kibana.alert.grouping`. Used as a display
+   * fallback when the rule has no v2 `grouping.fields`. V2 episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
