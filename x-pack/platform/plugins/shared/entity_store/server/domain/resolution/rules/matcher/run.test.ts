@@ -23,6 +23,8 @@ jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
+const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
+  .matcher!;
 
 const createInitialState = (overrides: Partial<PerRuleState> = {}): PerRuleState => ({
   lastProcessedTimestamp: null,
@@ -318,8 +320,7 @@ describe('runEsqlMatcherRule', () => {
     expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-local-a', 'user-local-b']);
   });
 
-  it('still declines a SID bucket with two unresolved Active Directory entities', async () => {
-    const logger = loggerMock.create();
+  it('links two AD entities sharing a SID because a SID names one account, not a collision', async () => {
     (mockEsClient.esql.query as jest.Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
@@ -345,17 +346,46 @@ describe('runEsqlMatcherRule', () => {
       },
     });
 
-    const result = await runEsqlMatcherRule(
+    await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
         spec: SID_SPEC,
         ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
-        logger,
       })
     );
 
-    expect(mockCascadeLink).not.toHaveBeenCalled();
-    expect(result.lastRun?.skippedAmbiguousBuckets).toBe(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ambiguous bucket'));
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad-1', ['user-ad-2', 'user-local']);
+  });
+
+  it('links two leftover CrowdStrike-namespace entities sharing a SID because a SID names one account, not a collision', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'S-1-5-21-111-222-333-1104',
+              unresolvedIds: ['user-cs-1', 'user-cs-2'],
+              namespaces: ['crowdstrike'],
+              unresolvedCount: 2,
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [entityHit('user-cs-1', 'crowdstrike'), entityHit('user-cs-2', 'crowdstrike')],
+      },
+    });
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: CROWDSTRIKE_SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-cs-1', ['user-cs-2']);
   });
 
   it('declines a bucket above the group-size ceiling without linking a subset', async () => {

@@ -73777,7 +73777,7 @@ paths:
                         id: email_exact_match
                         kind: same_field
                         managed: true
-                      - description: Links local Windows and CrowdStrike endpoint user entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Several `local` entities sharing one domain SID are treated as one account. Disable if well-known SID exclusions are not enough for your environment.
+                      - description: Links user entities that share the same SID (`user.id`) to Active Directory, including several `local` Windows or CrowdStrike endpoint users on different hosts. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
                         enabled: true
                         id: windows_sid_bridge
                         kind: same_field
@@ -73787,7 +73787,7 @@ paths:
                         id: entra_guid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links CrowdStrike-namespace user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.
+                      - description: Links leftover CrowdStrike-namespace user entities to Active Directory by SID (`user.id`). A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.
                         enabled: false
                         id: crowdstrike_sid_bridge
                         kind: same_field

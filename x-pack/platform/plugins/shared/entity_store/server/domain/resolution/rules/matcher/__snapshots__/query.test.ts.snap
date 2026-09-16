@@ -86,6 +86,7 @@ FROM \\".entities.v2.latest.default\\"
 | WHERE match_value IS NOT NULL
     AND match_value != \\"\\"
     AND match_value RLIKE \\"S-1-5-.*\\"
+    AND NOT match_value RLIKE \\"(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])\\"
 | EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
