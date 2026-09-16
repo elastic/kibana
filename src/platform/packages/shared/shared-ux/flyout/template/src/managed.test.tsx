@@ -145,7 +145,9 @@ describe('a managed FlyoutTemplate', () => {
       return null;
     };
 
-    expect(() => render(<Unmanaged />)).toThrow('only available inside a managed flyout');
+    expect(() => render(<Unmanaged />)).toThrow(
+      'Use `core.overlays.openFlyoutTemplate` to open a managed flyout'
+    );
     error.mockRestore();
   });
 });

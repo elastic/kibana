@@ -55,7 +55,7 @@ export const useFlyoutClose = (): (() => void) => {
   const managed = useContext(FlyoutTemplateManagedContext);
   if (!managed) {
     throw new Error(
-      '[FlyoutTemplate] useFlyoutClose() is only available inside a managed flyout. A <FlyoutTemplate> rendered directly owns its own close handler.'
+      '[FlyoutTemplate] useFlyoutClose() is only available inside a managed flyout. Use `core.overlays.openFlyoutTemplate` to open a managed flyout; a <FlyoutTemplate> rendered directly owns its own close handler.'
     );
   }
   return managed.close;
