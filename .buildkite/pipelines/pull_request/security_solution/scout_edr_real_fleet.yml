@@ -1,0 +1,19 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh
+    label: 'Scout EDR Real Fleet'
+    key: scout-edr-real-fleet
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
