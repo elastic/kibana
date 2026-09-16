@@ -29,12 +29,77 @@ export interface EsqlServiceOptions {
   client: ElasticsearchClient;
 }
 
+interface CommentRange {
+  start: number;
+  end: number;
+}
+
+const getTrailingCommentStart = (query: string): number => {
+  const comments: CommentRange[] = [];
+  let quote: string | undefined;
+
+  for (let index = 0; index < query.length; index++) {
+    const character = query[index];
+
+    if (quote !== undefined) {
+      if (character === '\\') {
+        index++;
+      } else if (character === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+
+    if (character === '"' || character === "'" || character === '`') {
+      quote = character;
+      continue;
+    }
+
+    if (character === '/' && query[index + 1] === '/') {
+      const end = query.indexOf('\n', index);
+      comments.push({ start: index, end: end === -1 ? query.length : end });
+      index = end === -1 ? query.length : end;
+      continue;
+    }
+
+    if (character === '/' && query[index + 1] === '*') {
+      const end = query.indexOf('*/', index + 2);
+      if (end !== -1) {
+        comments.push({ start: index, end: end + 2 });
+        index = end + 1;
+      }
+    }
+  }
+
+  let trailingCommentStart = query.length;
+  for (let index = comments.length - 1; index >= 0; index--) {
+    const comment = comments[index];
+    if (query.slice(comment.end, trailingCommentStart).trim().length > 0) {
+      break;
+    }
+    trailingCommentStart = comment.start;
+  }
+
+  while (trailingCommentStart > 0 && /\s/.test(query[trailingCommentStart - 1])) {
+    trailingCommentStart--;
+  }
+
+  return trailingCommentStart;
+};
+
 const appendColumnsProbeLimit = (esqlQuery: string): string => {
   const query = esqlQuery.trim();
   if (query.length === 0) {
     return query;
   }
-  return /\|\s*LIMIT\s+0\s*$/i.test(query) ? query : `${query} | LIMIT 0`;
+
+  const trailingCommentStart = getTrailingCommentStart(query);
+  const queryWithoutTrailingComments = query.slice(0, trailingCommentStart);
+  const trailingComments = query.slice(trailingCommentStart);
+
+  return /\|\s*LIMIT\s+0\s*$/i.test(queryWithoutTrailingComments)
+    ? query
+    : `${queryWithoutTrailingComments} | LIMIT 0${trailingComments}`;
 };
 
 export class EsqlService {

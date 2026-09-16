@@ -150,6 +150,28 @@ describe('EsqlService.getColumns', () => {
     expect(query).toHaveBeenCalledWith({ query: 'FROM logs-* | LIMIT 0', format: 'json' });
   });
 
+  it.each([
+    [
+      'a terminal line comment',
+      'FROM logs-* // retrieve schema',
+      'FROM logs-* | LIMIT 0 // retrieve schema',
+    ],
+    [
+      'a terminal block comment after LIMIT 0',
+      'FROM logs-* | LIMIT 0 /* retrieve schema */',
+      'FROM logs-* | LIMIT 0 /* retrieve schema */',
+    ],
+  ])('places the probe limit before %s', async (_, input, expected) => {
+    const query = jest.fn().mockResolvedValue({ columns: [] });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+
+    await service.getColumns(input);
+
+    expect(query).toHaveBeenCalledWith({ query: expected, format: 'json' });
+  });
+
   it('does not append a probe suffix to a blank query', async () => {
     const query = jest.fn().mockResolvedValue({ columns: [] });
     const service = new EsqlService({
