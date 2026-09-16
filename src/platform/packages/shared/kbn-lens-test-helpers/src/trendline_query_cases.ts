@@ -11,7 +11,7 @@
  * Shared trendline rewrite case matrix for ES|QL metric charts.
  *
  * Single source of truth consumed by two layers:
- * - unit tests (this package): assert the generated query and time field for
+ * - unit tests (@kbn/lens-common): assert the generated query and time field for
  *   every case — fast first line of defense, no infra required
  * - Scout API tests (Lens plugin): execute the source and generated queries
  *   against a real Elasticsearch to catch regressions in query validity,

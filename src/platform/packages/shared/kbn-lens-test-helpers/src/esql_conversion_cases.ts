@@ -28,13 +28,6 @@ export type {
   EsqlConversionDatasetId,
 } from './esql_conversion_cases/types';
 
-export const buildEsqlConversionCases = (): EsqlConversionCase[] => [
-  ...buildCoreCases(),
-  ...buildDateHistogramCases(),
-  ...buildTopNCases(),
-  ...buildStaticValueCases(),
-];
-
 export const buildEsqlConversionCasesByGroup = (): Record<
   EsqlConversionCaseGroup,
   EsqlConversionCase[]
