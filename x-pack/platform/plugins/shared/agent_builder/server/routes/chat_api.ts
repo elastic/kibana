@@ -16,6 +16,7 @@ import type {
   ChatConverseResponse,
   UserMessagePayload,
 } from '../../common/http_api/chat';
+import { ChatTriggerMode } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -43,7 +44,12 @@ const validateUserMessagePayload = ({
     throw createBadRequestError('User message requests require input or attachments');
   }
 
-  return { trigger_mode: 'never', conversation_id: conversationId, input, attachments };
+  return {
+    trigger_mode: ChatTriggerMode.Never,
+    conversation_id: conversationId,
+    input,
+    attachments,
+  };
 };
 
 /** Events-native chat API */
@@ -68,7 +74,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; execution-only options are rejected.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; the execution options are ignored.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -91,7 +97,7 @@ export function registerChatApiRoutes({
         async (ctx, request, response) => {
           const payload = request.body as ChatRequestBodyPayload;
 
-          if (payload.trigger_mode === 'never') {
+          if (payload.trigger_mode === ChatTriggerMode.Never) {
             const {
               conversation_id: conversationId,
               input,
