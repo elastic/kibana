@@ -51620,7 +51620,6 @@
     "xpack.slo.sloEdit.sliType.histogram.toTooltip": "Der „bis“-Wert ist NICHT eingeschlossen.",
     "xpack.slo.sloEdit.sliType.histogram.valueCountLabel": "Anzahl der Werte",
     "xpack.slo.sloEdit.sliType.sourceTitle": "Quelle",
-    "xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage": "Der Verfügbarkeitsindikator für Synthetics erfordert, dass die Budgetierungsmethode auf „Vorkommnisse“ eingestellt wird.",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricAriaLabel": "Metrik hinzufügen",
     "xpack.slo.sloEdit.sliType.timesliceMetric.addMetricLabel": "Metrik hinzufügen",
     "xpack.slo.sloEdit.sliType.timesliceMetric.aggregationField.placeholder": "Aggregation auswählen",
