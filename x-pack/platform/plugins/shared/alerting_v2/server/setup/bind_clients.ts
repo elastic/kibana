@@ -30,6 +30,7 @@ import {
   RuleChangesHistoryServiceToken,
 } from '../lib/rule_changes_history';
 import { RulesClient } from '../lib/rules_client';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import { RulesClientEventOriginToken, RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { RuleTemplatesClient } from '../lib/rule_templates_client';
 import { SpacesService } from '../lib/services/spaces_service/spaces_service';
@@ -63,6 +64,14 @@ export function bindClients({ bind }: ContainerModuleLoadOptions) {
       (actor, options) => ({ actor, options }),
       [EventOriginActorToken, RulesClientOptionsToken]
     )
+    .inRequestScope();
+  // Default caller identity is absent. Framework HTTP routes never override
+  // this, so the generic API surface is identity-less by construction.
+  // In-process callers that pass `options.onBehalfOf` to
+  // `getRulesClientWithRequest` override this in buildScope.
+  // Ref: rule-ownership.md "Caller identity"
+  bind(CallerIdentityToken)
+    .toDynamicValue(() => undefined)
     .inRequestScope();
 
   bind(RequestSpaceIdToken)
