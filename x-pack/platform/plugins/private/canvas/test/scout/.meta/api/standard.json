@@ -1,5 +1,8 @@
 {
   "sha1": "369b0cb8363b3ae5ec77ca518d2025f4e80412b8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a63936a2bb86807-5f465142721259b",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
-        "line": 84,
-        "column": 10
+        "line": 73,
+        "column": 55
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
-        "line": 97,
-        "column": 10
+        "line": 86,
+        "column": 49
       }
     },
     {
@@ -36,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/canvas_disabled_space.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 52,
+        "column": 7
       }
     },
     {
@@ -49,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/canvas_disabled_space.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 75,
+        "column": 9
       }
     },
     {
@@ -62,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/no_canvas_privileges.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -75,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/no_canvas_privileges.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 51,
+        "column": 16
       }
     },
     {
@@ -89,7 +92,7 @@
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
         "line": 68,
-        "column": 12
+        "column": 89
       }
     },
     {
@@ -101,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 83,
+        "column": 7
       }
     }
   ]

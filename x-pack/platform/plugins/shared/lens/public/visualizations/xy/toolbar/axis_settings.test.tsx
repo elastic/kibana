@@ -90,8 +90,8 @@ describe('Axis settings', () => {
     });
     const orientationGroup = screen.getByRole('group', { name: /orientation/i });
     fireEvent.click(within(orientationGroup).getByRole('button', { name: /angled/i }));
-    expect(defaultProps.setOrientation).toBeCalledTimes(1);
-    expect(defaultProps.setOrientation).toBeCalledWith(defaultProps.axis, -45);
+    expect(defaultProps.setOrientation).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setOrientation).toHaveBeenCalledWith(defaultProps.axis, -45);
   });
 
   it('should hide the orientation group if the tickLabels are set to not visible', async () => {
@@ -235,7 +235,7 @@ describe('Axis settings', () => {
           const scaleSelect = screen.getByTestId('lnsScaleSelect');
           fireEvent.change(scaleSelect, { target: { value: 'log' } });
 
-          expect(defaultProps.setScaleWithExtent).toBeCalledWith(
+          expect(defaultProps.setScaleWithExtent).toHaveBeenCalledWith(
             {
               mode: 'custom',
               lowerBound: 0.01,
@@ -256,7 +256,7 @@ describe('Axis settings', () => {
           const scaleSelect = screen.getByTestId('lnsScaleSelect');
           fireEvent.change(scaleSelect, { target: { value: 'linear' } });
 
-          expect(defaultProps.setScaleWithExtent).toBeCalledWith(
+          expect(defaultProps.setScaleWithExtent).toHaveBeenCalledWith(
             {
               mode: 'custom',
               lowerBound: 0,
@@ -279,7 +279,7 @@ describe('Axis settings', () => {
 
         result.bounds.select('Full');
 
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'full',
           lowerBound: undefined,
           upperBound: undefined,
@@ -287,7 +287,7 @@ describe('Axis settings', () => {
 
         (defaultProps.setExtent as jest.Mock).mockClear();
         result.bounds.select('Custom');
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',
           lowerBound: 0.01,
           upperBound: 1000,
@@ -314,7 +314,7 @@ describe('Axis settings', () => {
 
         result.bounds.select('Data');
 
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'dataBounds',
           lowerBound: undefined,
           upperBound: undefined,
@@ -322,7 +322,7 @@ describe('Axis settings', () => {
 
         (defaultProps.setExtent as jest.Mock).mockClear();
         result.bounds.select('Custom');
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',
           lowerBound: 0,
           upperBound: 1000,
@@ -338,7 +338,7 @@ describe('Axis settings', () => {
         });
 
         result.bounds.select('Data');
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'dataBounds',
           lowerBound: undefined,
           upperBound: undefined,
@@ -346,7 +346,7 @@ describe('Axis settings', () => {
 
         (defaultProps.setExtent as jest.Mock).mockClear();
         result.bounds.select('Custom');
-        expect(defaultProps.setExtent).toBeCalledWith({
+        expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',
           lowerBound: 100,
           upperBound: 1000,

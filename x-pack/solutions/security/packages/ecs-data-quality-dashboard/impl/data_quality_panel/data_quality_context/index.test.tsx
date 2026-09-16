@@ -91,7 +91,7 @@ describe('DataQualityContext', () => {
     const path = '/path/to/resource';
     httpFetch(path);
 
-    expect(mockHttpFetch).toBeCalledWith(path);
+    expect(mockHttpFetch).toHaveBeenCalledWith(path);
   });
 
   test('it should return the telemetry events', () => {

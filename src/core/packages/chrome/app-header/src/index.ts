@@ -16,7 +16,7 @@ export {
   useChromeAppHeaderRegistration,
   SuppressChromeBackButton,
 } from './app_header';
-export { APP_HEADER_TEST_SUBJECTS } from './app_header/test_subjects';
+export { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
 export {
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
@@ -36,6 +36,11 @@ export type {
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,

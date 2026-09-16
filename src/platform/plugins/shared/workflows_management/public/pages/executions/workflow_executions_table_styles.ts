@@ -9,6 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EXECUTIONS_TABLE_MIN_WIDTH_PX } from './workflow_executions_table_config';
 
 export const getWorkflowExecutionsTableGridWrapperCss = (themeContext: UseEuiTheme) => {
   const { euiTheme } = themeContext;
@@ -17,9 +18,11 @@ export const getWorkflowExecutionsTableGridWrapperCss = (themeContext: UseEuiThe
     flex: 1 1 auto;
     width: 100%;
     min-width: 0;
+    overflow-x: auto;
 
     .euiDataGrid {
       width: 100%;
+      min-width: ${EXECUTIONS_TABLE_MIN_WIDTH_PX}px;
     }
 
     .euiDataGrid__leftControls {
@@ -52,6 +55,11 @@ export const getWorkflowExecutionsTableGridWrapperCss = (themeContext: UseEuiThe
       .euiDataGridRowCell__content--defaultHeight {
       display: flex;
       align-items: center;
+    }
+
+    .euiDataGridRowCell[data-gridcell-column-id='duration']
+      .euiDataGridRowCell__content--defaultHeight {
+      justify-content: flex-end;
     }
 
     .workflowExecutionsTableRow--selected .euiDataGridRowCell {

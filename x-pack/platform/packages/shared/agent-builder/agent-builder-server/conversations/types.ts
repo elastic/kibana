@@ -6,10 +6,11 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControlInput,
   ConversationListOptions,
-  ConversationWithoutRounds,
+  ConversationWithPermissions,
+  ConversationListResult,
+  MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 
 /**
@@ -24,6 +25,14 @@ export interface ConversationCreatePublicRequest {
   title?: string;
   /** Defaults to `{ access_mode: 'private', entries: [] }`. */
   accessControl?: ConversationAccessControlInput;
+  /**
+   * Optional conversation template to apply.
+   */
+  templateId?: string;
+  /**
+   * Initial metadata values. Requires `templateId`.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
 }
 
 /**
@@ -33,13 +42,13 @@ export interface ConversationPublicClient {
   /**
    * Retrieve a single conversation by its ID, including all rounds.
    */
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */
-  create(request: ConversationCreatePublicRequest): Promise<Conversation>;
+  create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
 }

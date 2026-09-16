@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/api';
 import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { CookieHeader } from '@kbn/scout';
-import type { PutTransformsResponseSchema } from '../../../../common';
+import type { TransformApiService } from '../../../scout/api/services/transform_api_service';
 import {
   generateDestIndex,
   generateTransformConfig,
@@ -27,6 +27,24 @@ import { COMMON_HEADERS } from '../../../scout/api/constants';
  * (registered by the cps_local Scout stack).
  */
 const LINKED_PROJECT_ROUTING = `_id:${MOCK_IDP_UIAM_PROJECT_ID2}`;
+
+const createTransformWithProjectRouting = async (
+  transformService: TransformApiService,
+  transformId: string,
+  projectRouting: string
+): Promise<void> => {
+  const transformConfig = generateTransformConfig(transformId);
+
+  await transformService.createTransform({
+    transform_id: transformId,
+    defer_validation: true,
+    ...transformConfig,
+    source: {
+      ...transformConfig.source,
+      project_routing: projectRouting,
+    },
+  });
+};
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create with project routing',
@@ -55,10 +73,10 @@ apiTest.describe(
     apiTest(
       'should save and update the selected project routing value',
       async ({ apiClient, apiServices }) => {
-        const transformConfig = generateTransformConfig(transformId);
         const updatedProjectRouting = PROJECT_ROUTING.ALL;
 
         await apiTest.step('creates a transform with project routing', async () => {
+          const transformConfig = generateTransformConfig(transformId);
           const { statusCode, body } = await apiClient.put(
             `internal/transform/transforms/${transformId}?deferValidation=true`,
             {
@@ -76,15 +94,12 @@ apiTest.describe(
               responseType: 'json',
             }
           );
-          const createResponse = body as PutTransformsResponseSchema;
 
           expect(statusCode).toBe(200);
-          expect(createResponse.errors).toHaveLength(0);
-          expect(createResponse.transformsCreated).toMatchObject([
-            {
-              transform: transformId,
-            },
-          ]);
+          expect(body).toMatchObject({
+            errors: [],
+            transformsCreated: [{ transform: transformId }],
+          });
 
           const transform = await apiServices.transform.getTransform({
             transform_id: transformId,
@@ -124,33 +139,11 @@ apiTest.describe(
       async ({ apiClient, apiServices }) => {
         await apiTest.step('creates transforms with project routing', async () => {
           for (const bulkTransformId of bulkTransformIds) {
-            const transformConfig = generateTransformConfig(bulkTransformId);
-            const { statusCode, body } = await apiClient.put(
-              `internal/transform/transforms/${bulkTransformId}?deferValidation=true`,
-              {
-                headers: {
-                  ...COMMON_HEADERS,
-                  ...transformManagerCookieHeader,
-                },
-                body: {
-                  ...transformConfig,
-                  source: {
-                    ...transformConfig.source,
-                    project_routing: projectRouting,
-                  },
-                },
-                responseType: 'json',
-              }
+            await createTransformWithProjectRouting(
+              apiServices.transform,
+              bulkTransformId,
+              projectRouting
             );
-            const createResponse = body as PutTransformsResponseSchema;
-
-            expect(statusCode).toBe(200);
-            expect(createResponse.errors).toHaveLength(0);
-            expect(createResponse.transformsCreated).toMatchObject([
-              {
-                transform: bulkTransformId,
-              },
-            ]);
           }
         });
 

@@ -15,7 +15,7 @@ import { fetch$ } from './fetch';
 const searchSessionRequestCompleteCallback = jest.fn();
 const waitForSearchSession = async () => {
   await waitFor(() => {
-    expect(searchSessionRequestCompleteCallback).toBeCalled();
+    expect(searchSessionRequestCompleteCallback).toHaveBeenCalled();
     searchSessionRequestCompleteCallback.mockClear();
   });
 };

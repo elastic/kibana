@@ -32,13 +32,30 @@ import {
   getCase,
 } from '../../../../common/lib/api';
 
+const EVENTS_INDEX = 'test-events-index';
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  // Attaching an event requires the referenced document to actually exist (mget-backed
+  // existence check), so tests must seed it first.
+  const seedEvents = (ids: string[]) =>
+    Promise.all(
+      ids.map((id) =>
+        es.index({
+          index: EVENTS_INDEX,
+          id,
+          document: { '@timestamp': new Date().toISOString() },
+          refresh: true,
+        })
+      )
+    );
+
   describe('Mixed Legacy + Unified Reads', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await es.indices.delete({ index: EVENTS_INDEX, ignore_unavailable: true });
     });
 
     describe('coexistence of legacy and unified attachments', () => {
@@ -80,6 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('counts events and comments in case totals', async () => {
+        await seedEvents(['mixed-event-1']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         // Create unified comment
@@ -193,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(bulkResult.attachments.length).to.be(2);
-        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`
+        // The internal `bulkGetAttachments` route returns unified attachments.
         const byId = new Map<string, { type: string; attachmentId?: string }>(
           bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
             a.id,
@@ -243,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(bulkResult.attachments.length).to.be(2);
-        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`, so a
+        // The internal `bulkGetAttachments` route returns unified attachments, so a
         // legacy `user` SO from `cases-comments` is projected to the unified
         // `comment` shape and a unified `osquery` SO from `cases-attachments` is
         // returned in its native unified shape.
@@ -289,6 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('cross-type stats and documents over a mixed case', () => {
       it('reports correct totals and retrieves every attachment across both SOs', async () => {
+        await seedEvents(['stats-event-1']);
         const postedCase = await createCase(supertest, postCaseReq);
 
         // Track ids as they appear — each response returns the full comment list.

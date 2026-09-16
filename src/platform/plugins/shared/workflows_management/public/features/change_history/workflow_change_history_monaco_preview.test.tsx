@@ -28,6 +28,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: mockValidationResults,
     isValidationLoading: mockIsValidationLoading,
+    validationError: null,
     handleValidationErrorClick: mockHandleValidationErrorClick,
   })),
 }));
@@ -139,6 +140,7 @@ const sampleValidationError: YamlValidationResult = {
   severity: 'error',
   message: 'Invalid workflow step',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   startLineNumber: 3,
   startColumn: 5,
   endLineNumber: 3,

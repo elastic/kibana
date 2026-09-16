@@ -75,11 +75,11 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Additional format string for parsing absolute dates.
-   * Prepended to built-in formats so the parser recognises custom-formatted input.
-   * Does not affect how dates are displayed.
+   * Additional moment format strings accepted when parsing absolute dates typed
+   * by the user. Tried before the built-in formats. Display always uses the
+   * picker's own format, see {@link TimeRangeFormatOptions}.
    */
-  dateFormat?: string;
+  inputDateFormats?: string[];
   /**
    * Controls rounding of relative time range bounds (strings containing
    * `now`); bare `now` bounds are unaffected.
@@ -105,6 +105,17 @@ export interface TimeRangeTransformOptions {
    */
   locale?: string;
 }
+
+/**
+ * Options accepted by the display formatters. Deliberately excludes
+ * `inputDateFormats` and `roundRelativeTime`: those only shape parsing, and
+ * the button, presets list, and tooltip must never pick up a consumer's input
+ * format (the part-level display parser only understands the built-in one).
+ */
+export type TimeRangeFormatOptions = Omit<
+  TimeRangeTransformOptions,
+  'inputDateFormats' | 'roundRelativeTime'
+>;
 
 /** Time unit for the auto-refresh interval. */
 export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';

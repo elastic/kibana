@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { SourceDisplayMode, ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
 import { getColumnDisplayName } from '../components/data_table_columns';
 
@@ -172,7 +172,7 @@ export const copyRowsAsTextToClipboard = async ({
   toastNotifications,
   valueToStringConverter,
   format,
-  sourceDisplayMode = 'summary',
+  documentsDisplayMode = 'table',
 }: {
   columns: string[];
   dataView: DataView;
@@ -180,7 +180,7 @@ export const copyRowsAsTextToClipboard = async ({
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
   format: CopyAsTextFormat;
-  sourceDisplayMode?: SourceDisplayMode;
+  documentsDisplayMode?: DocumentsDisplayMode;
 }): Promise<string | null> => {
   const rowSeparator = '\n';
   let withFormula = false;
@@ -210,7 +210,7 @@ export const copyRowsAsTextToClipboard = async ({
         columnId,
         dataView.getFieldByName(columnId)?.displayName,
         undefined,
-        sourceDisplayMode
+        documentsDisplayMode
       );
       if (format === CopyAsTextFormat.markdown) {
         return columnDisplayName;

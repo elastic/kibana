@@ -10,10 +10,14 @@
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
-import { type FilterExpressionValue } from '../utils/filter_input_codec';
+import type { ProjectRoutingStrategy } from '../utils/project_routing_codec';
 import { PROJECT_SELECTION_DIMENSION, projectRoutingCodec } from '../utils/project_routing_codec';
-import { createFilterExpressionsMap, parseDefaultProjectRouting } from '../utils';
-import { getEnabledFiltersIdentity } from '../utils/state_utils';
+import {
+  createFilterExpressionsMap,
+  isAliasExistsFilter,
+  parseDefaultProjectRouting,
+} from '../utils';
+import { getEnabledFilterExpressions, getEnabledFiltersIdentity } from '../utils/state_utils';
 
 export const hasActiveFilterExpressions = (
   filterExpressions: Map<string, FilterEntry>
@@ -119,19 +123,41 @@ export const computeIsUsingSpaceDefaults = (
 };
 
 export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
-  const routing = projectRoutingCodec.encode({
-    filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
-      if (entry.enabled) {
-        acc.push(entry.expression);
-      }
-      return acc;
-    }, [] as FilterExpressionValue[]),
+  const enabledFilters = getEnabledFilterExpressions(state.filterExpressions);
+  const isOriginOnlySelection =
+    Boolean(state.originProjectId) &&
+    state.selectedProjectIds.length === 1 &&
+    state.selectedProjectIds[0] === state.originProjectId;
+  const isAliasExistsOnly = enabledFilters.length === 1 && isAliasExistsFilter(enabledFilters[0]);
+
+  if (isAliasExistsOnly && isOriginOnlySelection) {
+    return PROJECT_ROUTING.ORIGIN;
+  }
+
+  if (
+    isAliasExistsOnly &&
+    state.projectRoutingStrategy === 'dynamic' &&
+    state.excludedOverrides.length === 0
+  ) {
+    return PROJECT_ROUTING.ALL;
+  }
+
+  if (enabledFilters.length === 0) {
+    if (state.projectRoutingStrategy === 'dynamic' && state.excludedOverrides.length === 0) {
+      return PROJECT_ROUTING.ALL;
+    }
+
+    if (state.projectRoutingStrategy === 'snapshot' && state.selectedProjectIds.length === 0) {
+      return PROJECT_ROUTING.ALL;
+    }
+  }
+
+  return projectRoutingCodec.encode({
+    filterExpressions: enabledFilters,
     excludedProjectIds: state.excludedOverrides,
     selectedProjectIds: state.selectedProjectIds,
-    projectRoutingStrategy: state.projectRoutingStrategy,
+    projectRoutingStrategy: state.projectRoutingStrategy as ProjectRoutingStrategy,
   });
-
-  return routing || PROJECT_ROUTING.ALL;
 };
 
 /**
