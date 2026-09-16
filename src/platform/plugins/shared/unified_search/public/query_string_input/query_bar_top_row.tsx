@@ -200,10 +200,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showAddFilter?: boolean;
   showDatePicker?: ShowDatePicker;
   isDisabled?: boolean;
-  /**
-   * Disables only the submit / Search button. Pass `{ tooltip }` to show a
-   * reason on hover; pass `true` to disable silently.
-   */
   disableSubmitAction?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
