@@ -36,6 +36,16 @@ describe('chart type guidance', () => {
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
+  it('keeps metric values uncolored unless a deliberate color config is set', () => {
+    const design = getChartDesignPromptContent();
+    const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
+
+    expect(design).toContain('By default a metric is uncolored');
+    expect(metricConfig).toContain('By default omit both `color` and `apply_color_to`');
+    expect(metricConfig).toContain('Never set `apply_color_to` on its own');
+    expect(metricConfig).toContain('only in the same edit that sets a deliberate `color` config');
+  });
+
   it('always sets XY legend visibility so breakdown legends are not hidden', () => {
     const xyConfig = getChartTypeConfigPromptContent(SupportedChartType.XY);
 

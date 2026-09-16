@@ -137,9 +137,10 @@ export const chartTypeRegistry: ChartTypeRegistry = {
             'For a secondary trend or delta, hide the label with `styling.secondary.label.visible: false` and omit `label`; label a secondary metric only when it is a distinct named measure.',
         },
         {
-          design: 'Color the value, not the background, and only when it carries meaning.',
+          design:
+            'By default a metric is uncolored. Color the value, never the background, and only when the color carries meaning such as status bands with defensible thresholds.',
           config:
-            'Color the value, not the background: set `apply_color_to: "value"` only together with a `color` config, and when not coloring omit both (`apply_color_to` without a color makes Lens tint the value with a default green).',
+            'By default omit both `color` and `apply_color_to`; an uncolored metric is the correct result for most panels, including during enhancement. Never set `apply_color_to` on its own: without a `color` config Lens tints the value with a default green that carries no meaning. Add `apply_color_to: "value"` only in the same edit that sets a deliberate `color` config, and never color the background.',
         },
         {
           design:
