@@ -58,11 +58,15 @@ const DEPLOYABLE_COVERAGE = {
 };
 
 describe('useResolveIacBlueprints', () => {
-  let setIacBlueprintCoverage: jest.Mock;
+  let invalidateIacBlueprintCoverage: jest.Mock;
+  let commitIacBlueprintCoverage: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setIacBlueprintCoverage = jest.fn();
+    // Mirrors the provider: every invalidation issues a fresh token.
+    let token = 0;
+    invalidateIacBlueprintCoverage = jest.fn(() => ++token);
+    commitIacBlueprintCoverage = jest.fn();
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty', 'cloudtrail'], dataFormat: 'json' },
@@ -70,11 +74,12 @@ describe('useResolveIacBlueprints', () => {
         ['guardduty', guarddutyService],
         ['cloudtrail', ecfOnlyService],
       ]),
-      setIacBlueprintCoverage,
+      invalidateIacBlueprintCoverage,
+      commitIacBlueprintCoverage,
     });
   });
 
-  it('resolves only managed-integration services and stores the coverage', async () => {
+  it('resolves only managed-integration services and commits the coverage', async () => {
     mockSendResolve.mockResolvedValue({ data: DEPLOYABLE_COVERAGE, error: null });
 
     const { result } = renderHook(() => useResolveIacBlueprints());
@@ -92,10 +97,11 @@ describe('useResolveIacBlueprints', () => {
         },
       ],
     });
-    // Stale coverage is dropped synchronously, then replaced when the call lands.
-    expect(setIacBlueprintCoverage).toHaveBeenNthCalledWith(1, undefined);
+    // Stale coverage is invalidated synchronously, then the response commits
+    // against the token that invalidation issued.
+    expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(1);
     await waitFor(() => {
-      expect(setIacBlueprintCoverage).toHaveBeenLastCalledWith(DEPLOYABLE_COVERAGE.blueprints);
+      expect(commitIacBlueprintCoverage).toHaveBeenCalledWith(1, DEPLOYABLE_COVERAGE.blueprints);
     });
   });
 
@@ -108,14 +114,16 @@ describe('useResolveIacBlueprints', () => {
     });
 
     expect(mockSendResolve).not.toHaveBeenCalled();
-    expect(setIacBlueprintCoverage).not.toHaveBeenCalled();
+    expect(invalidateIacBlueprintCoverage).not.toHaveBeenCalled();
+    expect(commitIacBlueprintCoverage).not.toHaveBeenCalled();
   });
 
-  it('clears coverage without calling resolve when nothing is resolvable', () => {
+  it('invalidates coverage without calling resolve when nothing is resolvable', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'json' },
       awsServicesMap: new Map([['cloudtrail', ecfOnlyService]]),
-      setIacBlueprintCoverage,
+      invalidateIacBlueprintCoverage,
+      commitIacBlueprintCoverage,
     });
 
     const { result } = renderHook(() => useResolveIacBlueprints());
@@ -124,10 +132,11 @@ describe('useResolveIacBlueprints', () => {
     });
 
     expect(mockSendResolve).not.toHaveBeenCalled();
-    expect(setIacBlueprintCoverage).toHaveBeenCalledWith(undefined);
+    expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(1);
+    expect(commitIacBlueprintCoverage).not.toHaveBeenCalled();
   });
 
-  it('leaves coverage unset when the resolve call returns an error', async () => {
+  it('commits nothing when the resolve call returns an error', async () => {
     mockSendResolve.mockResolvedValue({
       data: null,
       error: { message: 'unavailable', statusCode: 502 },
@@ -141,11 +150,13 @@ describe('useResolveIacBlueprints', () => {
     await waitFor(() => {
       expect(mockSendResolve).toHaveBeenCalled();
     });
-    expect(setIacBlueprintCoverage).toHaveBeenCalledTimes(1);
-    expect(setIacBlueprintCoverage).toHaveBeenCalledWith(undefined);
+    expect(commitIacBlueprintCoverage).not.toHaveBeenCalled();
   });
 
-  it('ignores a stale in-flight response settling after a newer call', async () => {
+  it('commits each response with the token issued for its own request', async () => {
+    // A slow first response must carry its own (stale) token so the provider
+    // can discard it — even when the hook remounted in between, as Back/Next
+    // navigation does.
     let resolveFirst: (value: unknown) => void;
     const first = new Promise((resolve) => {
       resolveFirst = resolve;
@@ -164,19 +175,21 @@ describe('useResolveIacBlueprints', () => {
       .mockReturnValueOnce(first)
       .mockResolvedValueOnce({ data: DEPLOYABLE_COVERAGE, error: null });
 
-    const { result } = renderHook(() => useResolveIacBlueprints());
+    const { result, unmount } = renderHook(() => useResolveIacBlueprints());
     act(() => {
       result.current({});
     });
+    // Simulate the Back/Next remount that resets any hook-local state.
+    unmount();
+    const { result: remounted } = renderHook(() => useResolveIacBlueprints());
     act(() => {
-      result.current({});
+      remounted.current({});
     });
 
     await waitFor(() => {
-      expect(setIacBlueprintCoverage).toHaveBeenLastCalledWith(DEPLOYABLE_COVERAGE.blueprints);
+      expect(commitIacBlueprintCoverage).toHaveBeenCalledWith(2, DEPLOYABLE_COVERAGE.blueprints);
     });
 
-    // The first call settles last — its stale coverage must be discarded.
     act(() => {
       resolveFirst({ data: STALE_COVERAGE, error: null });
     });
@@ -184,8 +197,9 @@ describe('useResolveIacBlueprints', () => {
       await first;
     });
 
-    expect(setIacBlueprintCoverage).toHaveBeenLastCalledWith(DEPLOYABLE_COVERAGE.blueprints);
-    expect(setIacBlueprintCoverage).not.toHaveBeenCalledWith(STALE_COVERAGE.blueprints);
+    // The late response still presents token 1, which the provider treats as stale.
+    expect(commitIacBlueprintCoverage).toHaveBeenCalledWith(1, STALE_COVERAGE.blueprints);
+    expect(commitIacBlueprintCoverage).not.toHaveBeenCalledWith(2, STALE_COVERAGE.blueprints);
   });
 
   it('swallows a rejected resolve call', async () => {
@@ -201,7 +215,6 @@ describe('useResolveIacBlueprints', () => {
     await waitFor(() => {
       expect(mockSendResolve).toHaveBeenCalled();
     });
-    expect(setIacBlueprintCoverage).toHaveBeenCalledTimes(1);
-    expect(setIacBlueprintCoverage).toHaveBeenCalledWith(undefined);
+    expect(commitIacBlueprintCoverage).not.toHaveBeenCalled();
   });
 });

@@ -37,6 +37,7 @@ beforeEach(() => {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['guardduty'] },
     removeDeployInstance: jest.fn(),
+    invalidateIacBlueprintCoverage: jest.fn(),
     awsServicesMap: AWS_SERVICES_MAP,
   } as unknown as ReturnType<typeof useOnboardingFlow>);
   mockResolveIacBlueprints = jest.fn();
@@ -93,6 +94,7 @@ describe('useServiceSettings — incompleteInstances', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svc_a'] },
       removeDeployInstance: jest.fn(),
+      invalidateIacBlueprintCoverage: jest.fn(),
       awsServicesMap: new Map([['svc_a', svcWithRequired]]),
     } as unknown as ReturnType<typeof useOnboardingFlow>);
   });
@@ -146,6 +148,7 @@ describe('useServiceSettings — signal filter', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svc_logs', 'svc_metrics'] },
       removeDeployInstance: jest.fn(),
+      invalidateIacBlueprintCoverage: jest.fn(),
       awsServicesMap: new Map([
         ['svc_logs', svcLogs],
         ['svc_metrics', svcMetrics],
@@ -265,5 +268,28 @@ describe('useServiceSettings — handleNext', () => {
 
     expect(mockResolveIacBlueprints).toHaveBeenCalledWith({});
     expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useServiceSettings — blueprint coverage invalidation', () => {
+  it('invalidates coverage when vars change and when an instance is removed', () => {
+    const invalidateIacBlueprintCoverage = jest.fn();
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      invalidateIacBlueprintCoverage,
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    act(() => {
+      result.current.setServiceFieldsAndInputs('guardduty', {}, ['guardduty']);
+    });
+    expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.removeInstance('guardduty');
+    });
+    expect(invalidateIacBlueprintCoverage).toHaveBeenCalledTimes(2);
   });
 });

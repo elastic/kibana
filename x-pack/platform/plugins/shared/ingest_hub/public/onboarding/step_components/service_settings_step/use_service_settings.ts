@@ -125,7 +125,8 @@ function mergeVarsByDataStream(
 }
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
+  const { servicesStep, removeDeployInstance, awsServicesMap, invalidateIacBlueprintCoverage } =
+    useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -188,8 +189,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           [instanceId]: { enabledDataStreams, varsByDataStream: merged },
         },
       });
+      // Enabled inputs feed the resolve payload; coverage computed from the
+      // previous values is stale (the step indicator can bypass the next
+      // Next-click resolve).
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, getServiceVars, instances]
+    [persisted, setPersisted, getServiceVars, instances, invalidateIacBlueprintCoverage]
   );
 
   const addDuplicate = useCallback(
@@ -249,8 +254,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       // Prune deploy state so removed instances don't leave orphaned chips,
       // stale failedInstances entries, or undismissable error callouts in step 4.
       removeDeployInstance(instanceId);
+      // Removing an instance can change which inputs the resolve payload
+      // carries, so previously resolved coverage no longer applies.
+      invalidateIacBlueprintCoverage();
     },
-    [persisted, setPersisted, instances, removeDeployInstance]
+    [persisted, setPersisted, instances, removeDeployInstance, invalidateIacBlueprintCoverage]
   );
 
   const [searchQuery, setSearchQuery] = useState('');

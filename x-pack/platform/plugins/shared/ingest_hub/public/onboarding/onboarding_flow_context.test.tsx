@@ -265,4 +265,95 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.detectAndReviewStep.failedInstances).toEqual(['inst_x']);
     });
   });
+
+  describe('IaC blueprint coverage', () => {
+    const COVERAGE = [
+      {
+        workflow: 'federated_identity',
+        resolvedVersion: '1.0.0',
+        deployable: true,
+        notCovered: [],
+      },
+    ];
+
+    it('stores coverage committed with the current token', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      let token = 0;
+      act(() => {
+        token = result.current.invalidateIacBlueprintCoverage();
+      });
+      act(() => {
+        result.current.commitIacBlueprintCoverage(token, COVERAGE);
+      });
+      rerender();
+
+      expect(result.current.iacBlueprintCoverage).toEqual(COVERAGE);
+    });
+
+    it('discards a commit whose token was superseded by a newer invalidation', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      let staleToken = 0;
+      act(() => {
+        staleToken = result.current.invalidateIacBlueprintCoverage();
+      });
+      act(() => {
+        result.current.invalidateIacBlueprintCoverage();
+      });
+      act(() => {
+        result.current.commitIacBlueprintCoverage(staleToken, COVERAGE);
+      });
+      rerender();
+
+      expect(result.current.iacBlueprintCoverage).toBeUndefined();
+    });
+
+    it('invalidates stored coverage and outstanding tokens when the service selection changes', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      let token = 0;
+      act(() => {
+        token = result.current.invalidateIacBlueprintCoverage();
+      });
+      act(() => {
+        result.current.commitIacBlueprintCoverage(token, COVERAGE);
+      });
+      rerender();
+      expect(result.current.iacBlueprintCoverage).toEqual(COVERAGE);
+
+      act(() => {
+        result.current.setSelectedServiceIds(['guardduty']);
+      });
+      rerender();
+      expect(result.current.iacBlueprintCoverage).toBeUndefined();
+
+      // A resolve that was in flight when the selection changed must stay discarded.
+      act(() => {
+        result.current.commitIacBlueprintCoverage(token, COVERAGE);
+      });
+      rerender();
+      expect(result.current.iacBlueprintCoverage).toBeUndefined();
+    });
+
+    it('invalidates stored coverage when the data format changes', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      let token = 0;
+      act(() => {
+        token = result.current.invalidateIacBlueprintCoverage();
+      });
+      act(() => {
+        result.current.commitIacBlueprintCoverage(token, COVERAGE);
+      });
+      rerender();
+      expect(result.current.iacBlueprintCoverage).toEqual(COVERAGE);
+
+      act(() => {
+        result.current.setDataFormat('otel');
+      });
+      rerender();
+      expect(result.current.iacBlueprintCoverage).toBeUndefined();
+    });
+  });
 });

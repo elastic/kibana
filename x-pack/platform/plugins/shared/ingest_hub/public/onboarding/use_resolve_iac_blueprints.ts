@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   sendResolveIacBlueprints,
   useIacProvisioner,
@@ -27,11 +27,13 @@ import type { ServiceVars } from './step_components/service_settings_step/use_se
  */
 export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceVars>) => void {
   const { isIacProvisionerEnabled } = useIacProvisioner();
-  const { servicesStep, awsServicesMap, setIacBlueprintCoverage } = useOnboardingFlow();
+  const {
+    servicesStep,
+    awsServicesMap,
+    invalidateIacBlueprintCoverage,
+    commitIacBlueprintCoverage,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
-  // Each invocation invalidates every earlier in-flight call: a slow response
-  // for a previous service selection must not overwrite fresher coverage.
-  const generationRef = useRef(0);
 
   return useCallback(
     (serviceVars: Record<string, ServiceVars>) => {
@@ -51,9 +53,10 @@ export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceV
       );
 
       // Coverage from an earlier visit may describe a different selection —
-      // drop it before (and regardless of) the new call settling.
-      setIacBlueprintCoverage(undefined);
-      const generation = ++generationRef.current;
+      // drop it before (and regardless of) the new call settling. The token
+      // lives in the provider, so in-flight calls stay invalidated across
+      // Back/Next remounts of this hook.
+      const token = invalidateIacBlueprintCoverage();
       if (integrations.length === 0) {
         return;
       }
@@ -64,8 +67,8 @@ export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceV
         integrations,
       })
         .then(({ data, error }) => {
-          if (!error && data && generation === generationRef.current) {
-            setIacBlueprintCoverage(data.blueprints);
+          if (!error && data) {
+            commitIacBlueprintCoverage(token, data.blueprints);
           }
         })
         .catch(() => {
@@ -73,6 +76,12 @@ export function useResolveIacBlueprints(): (serviceVars: Record<string, ServiceV
           // or interrupt the wizard.
         });
     },
-    [isIacProvisionerEnabled, selectedServiceIds, awsServicesMap, setIacBlueprintCoverage]
+    [
+      isIacProvisionerEnabled,
+      selectedServiceIds,
+      awsServicesMap,
+      invalidateIacBlueprintCoverage,
+      commitIacBlueprintCoverage,
+    ]
   );
 }
