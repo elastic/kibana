@@ -35,6 +35,8 @@ import {
   merge,
   map,
   firstValueFrom,
+  timeout,
+  EMPTY,
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
@@ -316,7 +318,10 @@ export class FeatureFlagsService {
       return firstValueFrom(
         this.contextChanged$.pipe(
           // Re-check in case the context was "updated" without actually adding anything.
-          filter(() => !this.mustWaitForContextReady())
+          filter(() => !this.mustWaitForContextReady()),
+          // Wait for 200ms before timing out. `appendContext` is typically called with a debounce of 100ms.
+          // If context is not available in double that time, we probably will not have any context.
+          timeout({ first: 200, with: () => EMPTY })
         ),
         // Adding a default value to avoid the promise being rejected if the service stops before the context is ready.
         { defaultValue: undefined }

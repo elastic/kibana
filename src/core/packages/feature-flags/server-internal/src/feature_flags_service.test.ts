@@ -430,6 +430,25 @@ describe('FeatureFlagsService Server', () => {
         await expect(evaluation).resolves.toEqual(false);
       });
 
+      test('times out and evaluates when a provider is set but context never arrives', async () => {
+        jest.useFakeTimers();
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        // Same shape as plugin functional tests: experiments provider is configured, but
+        // there is no xpack.cloud.id so appendContext never adds targeting keys.
+        await jest.advanceTimersByTimeAsync(199);
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(1);
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
       test('observable evaluation waits for context as well', async () => {
         const observedValues: boolean[] = [];
         const flag$ = startContract.getBooleanValue$('my-flag', false);
