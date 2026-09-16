@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isBoom } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -17,19 +18,35 @@ import {
 import type { ActionsClientProvider } from '../types';
 import { getConnectorList } from './get_connector_list';
 
+type GetActionsClient = () => Promise<PublicMethodsOf<ActionsClient>>;
+
+const isForbiddenError = (e: unknown): boolean => isBoom(e) && e.output.statusCode === 403;
+
 /**
- * Lists raw stack connectors for alias resolution. Users without the Actions
- * privilege cannot list stack connectors, which must not prevent resolving
- * inference endpoints, so authorization failures degrade to an empty list.
+ * Lists raw stack connectors for alias resolution. Stack connectors being unavailable
+ * (no actions client, e.g. missing encryption key) or forbidden (no Actions privilege)
+ * must not prevent resolving inference endpoints, so both degrade to an empty list.
+ * Other listing failures are surfaced rather than reported as "not found".
  */
 const getRawStackConnectors = async (
-  actionsClient: PublicMethodsOf<ActionsClient>,
+  getActionsClient: GetActionsClient,
   logger: Logger
 ): Promise<RawConnector[]> => {
+  let actionsClient: PublicMethodsOf<ActionsClient>;
+  try {
+    actionsClient = await getActionsClient();
+  } catch (e) {
+    logger.debug(`Cannot create actions client for alias resolution: ${e.message}`);
+    return [];
+  }
+
   try {
     return await actionsClient.getAll({ includeSystemActions: false });
   } catch (e) {
-    logger.debug(`Failed to retrieve stack connectors for alias resolution: ${e.message}`);
+    if (!isForbiddenError(e)) {
+      throw e;
+    }
+    logger.debug(`Cannot list stack connectors for alias resolution: ${e.message}`);
     return [];
   }
 };
@@ -42,12 +59,12 @@ const getRawStackConnectors = async (
 const findConnectorById = async ({
   connectorId,
   connectors,
-  actionsClient,
+  getActionsClient,
   logger,
 }: {
   connectorId: string;
   connectors: InferenceConnector[];
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  getActionsClient: GetActionsClient;
   logger: Logger;
 }): Promise<InferenceConnector | undefined> => {
   const match = connectors.find((c) => c.connectorId === connectorId);
@@ -58,7 +75,7 @@ const findConnectorById = async ({
   // The requested ID may belong to a stack `.inference` connector whose underlying inference
   // endpoint was already returned in the list under `inferenceId`. Look up the raw stack
   // connector to resolve the alias.
-  const rawStackConnectors = await getRawStackConnectors(actionsClient, logger);
+  const rawStackConnectors = await getRawStackConnectors(getActionsClient, logger);
   const stackConnector = rawStackConnectors.find((c) => c.id === connectorId);
   if (stackConnector?.actionTypeId === InferenceConnectorType.Inference) {
     const inferenceId = stackConnector.config?.inferenceId as string | undefined;
@@ -91,9 +108,13 @@ export const getConnectorById = async ({
   logger: Logger;
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actions, request, esClient, logger });
-  const actionsClient = await actions.getActionsClientWithRequest(request);
 
-  const result = await findConnectorById({ connectorId, connectors, actionsClient, logger });
+  const result = await findConnectorById({
+    connectorId,
+    connectors,
+    getActionsClient: () => actions.getActionsClientWithRequest(request),
+    logger,
+  });
   if (result) {
     return result;
   }
@@ -124,7 +145,12 @@ export const getConnectorByIdWithoutClientRequest = async ({
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actionsClient, esClient, logger });
 
-  const result = await findConnectorById({ connectorId, connectors, actionsClient, logger });
+  const result = await findConnectorById({
+    connectorId,
+    connectors,
+    getActionsClient: async () => actionsClient,
+    logger,
+  });
   if (result) {
     return result;
   }
