@@ -14,7 +14,7 @@
  *   version: Bundle (no version)
  */
 
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -169,6 +169,16 @@ export interface ScoutApiRequestOptions {
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   */
+  responseType?: ApiClientOptions['responseType'];
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
@@ -198,7 +208,7 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -221,7 +231,8 @@ rules and alerts without calling this API.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -249,7 +260,7 @@ and should not remove existing data, but it can consume significant cluster reso
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -325,7 +336,7 @@ For detailed information on Kibana actions and alerting, and additional API call
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -348,7 +359,8 @@ Call `GET /api/detection_engine/index` first to confirm the index that will be r
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -371,7 +383,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     const path = `${basePath}/api/detection_engine/rules`;
 
     return apiClient.delete<DeleteRuleResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -379,7 +391,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -403,7 +416,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/detection_engine/rules/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`, {
+    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -411,7 +424,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -439,7 +452,7 @@ finishes and then call this operation once.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -454,7 +467,7 @@ finishes and then call this operation once.
     const path = `${basePath}/api/detection_engine/rules/_find`;
 
     return apiClient.get<FindRulesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -462,7 +475,8 @@ finishes and then call this operation once.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -494,7 +508,7 @@ finishes and then call this operation once.
     const path = `${basePath}/api/detection_engine/rules/_import`;
 
     return apiClient.post<ImportRulesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -502,7 +516,8 @@ finishes and then call this operation once.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -534,7 +549,8 @@ providing you with the most current and effective threat detection capabilities.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -563,7 +579,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -586,7 +602,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     const path = `${basePath}/api/detection_engine/rules/_bulk_action`;
 
     return apiClient.post<PerformRulesBulkActionResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -595,7 +611,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
           ...options.headers,
         },
         body: props.body,
-        responseType: 'json',
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -619,7 +635,8 @@ or running rules that write alerts to it.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -640,7 +657,7 @@ each of those indices.
     const path = `${basePath}/api/detection_engine/signals/migration_status`;
 
     return apiClient.get<ReadAlertsMigrationStatusResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -648,7 +665,8 @@ each of those indices.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -672,7 +690,8 @@ This endpoint provides detailed information about the number of custom rules, in
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -696,7 +715,8 @@ detection engine rules.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -719,7 +739,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     const path = `${basePath}/api/detection_engine/rules`;
 
     return apiClient.get<ReadRuleResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -727,7 +747,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -750,7 +771,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -770,7 +791,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -796,7 +818,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -818,7 +840,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -840,7 +862,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -861,7 +883,7 @@ the immediately preceding revision in `old_values`.
     )}`;
 
     return apiClient.get<RuleChangesHistoryResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -869,7 +891,8 @@ the immediately preceding revision in `old_values`.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -888,7 +911,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     const path = `${basePath}/api/detection_engine/rules/preview`;
 
     return apiClient.post<RulePreviewResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -897,7 +920,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
           ...options.headers,
         },
         body: props.body,
-        responseType: 'json',
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -920,7 +943,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -942,7 +965,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -964,7 +987,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -986,7 +1009,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1011,7 +1034,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1033,7 +1056,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1058,7 +1081,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1084,7 +1107,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1106,7 +1129,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1128,7 +1151,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1153,7 +1176,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1178,7 +1201,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1200,7 +1223,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1214,14 +1237,15 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/internal/detection_engine/users/_find`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`, {
+    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1250,7 +1274,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
 });

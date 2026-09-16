@@ -14,7 +14,7 @@
  *   version: Bundle (no version)
  */
 
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -92,6 +92,16 @@ export interface ScoutApiRequestOptions {
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   */
+  responseType?: ApiClientOptions['responseType'];
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
@@ -117,7 +127,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -140,7 +150,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -162,7 +172,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -189,7 +199,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -211,7 +221,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -225,7 +235,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}/api/timeline/_export`;
 
-    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`, {
+    return apiClient.post(`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`, {
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -233,7 +243,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -248,7 +258,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     const path = `${basePath}/api/timeline/_draft`;
 
     return apiClient.get<GetDraftTimelinesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -256,7 +266,8 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -283,7 +294,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/note`;
 
     return apiClient.get<GetNotesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -291,7 +302,8 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -307,7 +319,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/timeline`;
 
     return apiClient.get<GetTimelineResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -315,7 +327,8 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -331,7 +344,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/timelines`;
 
     return apiClient.get<GetTimelinesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -339,7 +352,8 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -362,7 +376,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -384,7 +398,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -406,7 +420,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -428,7 +442,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -457,7 +471,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -479,7 +493,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -494,7 +508,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     const path = `${basePath}/api/timeline/resolve`;
 
     return apiClient.get<ResolveTimelineResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -502,7 +516,8 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },

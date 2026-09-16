@@ -14,7 +14,7 @@
  *   version: Bundle (no version)
  */
 
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -197,6 +197,16 @@ export interface ScoutApiRequestOptions {
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   */
+  responseType?: ApiClientOptions['responseType'];
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
@@ -218,7 +228,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -248,7 +259,7 @@ is added to its existing source labels instead.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -275,7 +286,7 @@ If asset criticality records already exist for the specified entities, those rec
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -295,7 +306,8 @@ If asset criticality records already exist for the specified entities, those rec
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -317,7 +329,7 @@ If asset criticality records already exist for the specified entities, those rec
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -344,7 +356,7 @@ If a record already exists for the specified entity, that record is overwritten 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -369,7 +381,7 @@ Create a new entity source configuration.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -394,7 +406,7 @@ Create an index for Privileges Monitoring import.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -419,7 +431,7 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -441,7 +453,7 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   async createWatchlistEntitySource(
@@ -463,7 +475,7 @@ Creates a new privileged user to be monitored by the Privilege Monitoring Engine
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -481,7 +493,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.delete<DeleteAssetCriticalityRecordResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -489,7 +501,8 @@ Delete the asset criticality record for a specific entity.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -517,7 +530,8 @@ Delete an entity source configuration.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -532,7 +546,7 @@ Delete an entity source configuration.
     const path = `${basePath}/api/entity_analytics/monitoring/engine/delete`;
 
     return apiClient.delete<DeleteMonitoringEngineResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -540,7 +554,8 @@ Delete an entity source configuration.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -568,7 +583,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async deleteWatchlistEntitySource(
@@ -589,7 +605,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -611,7 +628,7 @@ Removes a privileged user from monitoring by their document ID.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -631,7 +648,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async disableRiskEngine(
@@ -648,7 +666,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async enableRiskEngine(
@@ -665,7 +684,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async entityDetailsHighlights(
@@ -684,7 +704,7 @@ Removes a privileged user from monitoring by their document ID.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -699,7 +719,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality/list`;
 
     return apiClient.get<FindAssetCriticalityRecordsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -707,7 +727,8 @@ Removes a privileged user from monitoring by their document ID.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -733,7 +754,7 @@ Removes a privileged user from monitoring by their document ID.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -758,7 +779,7 @@ Removes a privileged user from monitoring by their document ID.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -773,7 +794,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.get<GetAssetCriticalityRecordResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -781,7 +802,8 @@ Removes a privileged user from monitoring by their document ID.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -803,7 +825,8 @@ Removes a privileged user from monitoring by their document ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -830,7 +853,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -850,7 +874,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -870,7 +895,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -885,7 +911,7 @@ Get an entity source configuration by ID.
     const path = `${basePath}/api/risk_score/history`;
 
     return apiClient.get<GetRiskScoreHistoryResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -893,7 +919,8 @@ Get an entity source configuration by ID.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -918,7 +945,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async getWatchlistEntitySource(
@@ -939,7 +967,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -959,7 +988,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -979,7 +1009,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -999,7 +1030,8 @@ Get an entity source configuration by ID.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1024,7 +1056,8 @@ Each row will match up to 10,000 entities.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1042,7 +1075,7 @@ List all entity source configurations.
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source/list`;
 
     return apiClient.get<ListEntitySourcesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1050,7 +1083,8 @@ List all entity source configurations.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -1069,7 +1103,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     const path = `${basePath}/api/entity_analytics/monitoring/users/list`;
 
     return apiClient.get<ListPrivMonUsersResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1077,7 +1111,8 @@ Returns a list of all privileged users currently being monitored. Supports optio
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -1093,7 +1128,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     )}`;
 
     return apiClient.get<ListWatchlistEntitySourcesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1101,7 +1136,8 @@ Returns a list of all privileged users currently being monitored. Supports optio
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -1122,7 +1158,8 @@ Returns a list of all privileged users currently being monitored. Supports optio
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1144,7 +1181,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1167,7 +1204,8 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1187,7 +1225,8 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1210,7 +1249,8 @@ Check if the current user has all required permissions for Privilege Monitoring.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async readRiskEngineSettings(
@@ -1227,7 +1267,8 @@ Check if the current user has all required permissions for Privilege Monitoring.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async riskEngineGetPrivileges(
@@ -1244,7 +1285,8 @@ Check if the current user has all required permissions for Privilege Monitoring.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   async runEntityAnalyticsMigrations(
@@ -1261,7 +1303,8 @@ Check if the current user has all required permissions for Privilege Monitoring.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1281,7 +1324,8 @@ Check if the current user has all required permissions for Privilege Monitoring.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1303,7 +1347,7 @@ Check if the current user has all required permissions for Privilege Monitoring.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1321,7 +1365,7 @@ Search Indices for Privileges Monitoring import.
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
     return apiClient.get<SearchPrivilegesIndicesResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1329,7 +1373,8 @@ Search Indices for Privileges Monitoring import.
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -1351,7 +1396,8 @@ Search Indices for Privileges Monitoring import.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1373,7 +1419,7 @@ Search Indices for Privileges Monitoring import.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1402,7 +1448,7 @@ remain on the watchlist.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1430,7 +1476,7 @@ Update an entity source configuration.
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1458,7 +1504,7 @@ Updates the details of an existing monitored privileged user by their document I
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1483,7 +1529,7 @@ Updates the details of an existing monitored privileged user by their document I
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   async updateWatchlistEntitySource(
@@ -1505,7 +1551,7 @@ Updates the details of an existing monitored privileged user by their document I
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1526,7 +1572,8 @@ Updates the details of an existing monitored privileged user by their document I
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -1558,7 +1605,8 @@ Each row will match up to 10,000 entities.
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
 });

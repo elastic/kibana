@@ -14,7 +14,7 @@
  *   version: Bundle (no version)
  */
 
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -48,6 +48,16 @@ export interface ScoutApiRequestOptions {
   headers?: Record<string, string>;
   /** Kibana space id the request targets. Omit or pass 'default' for the default space */
   kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON exports.
+   */
+  responseType?: ApiClientOptions['responseType'];
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
@@ -68,7 +78,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
-      responseType: 'json',
+      body: options.body,
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -90,7 +101,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
   /**
@@ -105,7 +116,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items`;
 
     return apiClient.delete<DeleteEndpointListItemResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -113,7 +124,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -129,7 +141,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items/_find`;
 
     return apiClient.get<FindEndpointListItemsResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -137,7 +149,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -153,7 +166,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint_list/items`;
 
     return apiClient.get<ReadEndpointListItemResponse>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'comma' })}`,
+      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -161,7 +174,8 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
           ...options.headers,
         },
-        responseType: 'json',
+        body: options.body,
+        responseType: options.responseType ?? 'json',
       }
     );
   },
@@ -184,7 +198,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
         ...options.headers,
       },
       body: props.body,
-      responseType: 'json',
+      responseType: options.responseType ?? 'json',
     });
   },
 });
