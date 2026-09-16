@@ -45,21 +45,27 @@ describe('Values', () => {
   });
 
   it('should run onChange function on update', async () => {
+    const user = userEvent.setup();
     const onChangeSpy = jest.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    await userEvent.type(getNumberInput(), '{backspace}7');
+    const input = getNumberInput();
+    await user.clear(input);
+    await user.type(input, '7');
 
-    expect(getNumberInput()).toHaveValue(7);
+    expect(input).toHaveValue(7);
     expect(onChangeSpy).toHaveBeenCalledTimes(1);
     expect(onChangeSpy).toHaveBeenCalledWith(7);
   });
 
   it('should not run onChange function on update when value is out of 1-10000 range', async () => {
+    const user = userEvent.setup();
     const onChangeSpy = jest.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    await userEvent.type(getNumberInput(), '{backspace}10007');
+    const input = getNumberInput();
+    await user.clear(input);
+    await user.type(input, '10007');
 
-    expect(getNumberInput()).toHaveValue(10007);
+    expect(input).toHaveValue(10007);
     expect(onChangeSpy).toHaveBeenCalledWith(10000);
   });
 
