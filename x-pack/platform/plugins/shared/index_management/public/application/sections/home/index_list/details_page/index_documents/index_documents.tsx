@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { DocumentList } from './document_list';
@@ -66,6 +73,21 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="refresh"
+            size="s"
+            onClick={onRefresh}
+            isLoading={isLoading}
+            isDisabled={isLoading}
+            data-test-subj="indexDetailsDataPreviewRefreshButton"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.data.preview.refreshButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
