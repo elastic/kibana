@@ -34,8 +34,13 @@ const buildActions = () => {
   return { queryClient, actions, get };
 };
 
+const cachedConversation = {
+  id: conversationId,
+  agent_id: 'agent-1',
+  rounds: [],
+} as unknown as Conversation;
 const conversationWithRound = (round = createNewRound({ userMessage: 'hello' })) =>
-  ({ id: conversationId, agent_id: 'agent-1', rounds: [round] } as Conversation);
+  ({ ...cachedConversation, rounds: [round] } as Conversation);
 
 const promptId = 'prompt-1';
 const questions = [
@@ -69,7 +74,7 @@ describe('createConversationActions execution lifecycle', () => {
 
   it('onExecutionStarted does not fetch a conversation that is already cached', () => {
     const { queryClient, actions, get } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, conversationWithRound());
+    queryClient.setQueryData<Conversation>(queryKey, cachedConversation);
 
     actions.onExecutionStarted();
 
@@ -88,7 +93,7 @@ describe('createConversationActions execution lifecycle', () => {
 
   it('refetchConversation cancels an older in-flight fetch and returns a fresh response', async () => {
     const { queryClient, actions, get } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, conversationWithRound());
+    queryClient.setQueryData<Conversation>(queryKey, cachedConversation);
     let finishOlder: (value: unknown) => void = () => {};
     get
       .mockImplementationOnce(() => new Promise((resolve) => (finishOlder = resolve)))
@@ -108,11 +113,11 @@ describe('createConversationActions execution lifecycle', () => {
 
   it('refetchConversation rejects on failure and leaves the cached conversation untouched', async () => {
     const { queryClient, actions, get } = buildActions();
-    queryClient.setQueryData<Conversation>(queryKey, conversationWithRound());
+    queryClient.setQueryData<Conversation>(queryKey, { ...cachedConversation, title: 'kept' });
     get.mockRejectedValue(new Error('boom'));
 
     await expect(actions.refetchConversation()).rejects.toThrow('boom');
-    expect(queryClient.getQueryData<Conversation>(queryKey)?.rounds).toHaveLength(1);
+    expect(queryClient.getQueryData<Conversation>(queryKey)?.title).toBe('kept');
   });
 });
 
