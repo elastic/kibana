@@ -5,16 +5,16 @@ responses:
       application/json:
         examples:
           getAgentAccessControlResponseExample:
-            description: "Example response for a caller who can manage access control — the agent has two grantees."
+            description: "Example response for a caller who can manage access control — the agent has two grantees keyed on their Kibana user profile uid."
             value:
               access_control:
                 access_mode: private
                 entries:
                   - type: user
-                    name: alice
+                    id: u_alice_profile_uid
                     role: editor
                   - type: user
-                    name: bob
+                    id: u_bob_profile_uid
                     role: user
               permissions:
                 update_access_control: true
@@ -25,7 +25,7 @@ responses:
                 access_mode: private
                 entries:
                   - type: user
-                    name: bob
+                    id: u_bob_profile_uid
                     role: user
               permissions:
                 update_access_control: false

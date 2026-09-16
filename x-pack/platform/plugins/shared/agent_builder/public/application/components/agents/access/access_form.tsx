@@ -19,7 +19,9 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
+  getAccessControlEntryKey,
   type AgentAccessControlEntry,
   AgentAccessControlRole,
   type AgentDefinition,
@@ -27,6 +29,7 @@ import {
 import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import {
   accessFlyoutNoPeople,
   accessFlyoutPeopleHelp,
@@ -85,6 +88,9 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
   );
 };
 
+const sameEntry = (a: AgentAccessControlEntry, b: AgentAccessControlEntry): boolean =>
+  getAccessControlEntryKey(a) === getAccessControlEntryKey(b);
+
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
@@ -94,33 +100,43 @@ export const AccessForm: React.FC<AccessFormProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const accessControlMode = agent.access_control?.access_mode;
+  const profileByUid = useAccessControlEntryProfiles(entries);
 
   const defaultRole = useMemo(() => {
     const allowed = selectableRolesForAccessControlMode(accessControlMode);
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const handleAdd = (entry: AgentAccessControlEntry) => {
-    onChange([...entries, entry]);
+  const excludedUsernames = useMemo(
+    () =>
+      entries.flatMap((entry) => {
+        const username =
+          entry.id !== undefined ? profileByUid.get(entry.id)?.user.username : entry.name;
+        return username !== undefined ? [username] : [];
+      }),
+    [entries, profileByUid]
+  );
+
+  const handleAdd = (profile: UserProfileWithAvatar) => {
+    const nextEntry: AgentAccessControlEntry = {
+      type: 'user',
+      id: profile.uid,
+      role: defaultRole,
+    };
+    onChange([...entries, nextEntry]);
   };
 
   const handleChangeRole = (target: AgentAccessControlEntry, role: AgentAccessControlRole) => {
-    onChange(
-      entries.map((e) => (e.type === target.type && e.name === target.name ? { ...e, role } : e))
-    );
+    onChange(entries.map((e) => (sameEntry(e, target) ? { ...e, role } : e)));
   };
 
   const handleRemove = (target: AgentAccessControlEntry) => {
-    onChange(entries.filter((e) => !(e.type === target.type && e.name === target.name)));
+    onChange(entries.filter((e) => !sameEntry(e, target)));
   };
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
-      <UserPicker
-        excludedUsernames={entries.map((u) => u.name)}
-        isDisabled={isDisabled}
-        onAdd={(username) => handleAdd({ type: 'user', name: username, role: defaultRole })}
-      />
+      <UserPicker excludedUsernames={excludedUsernames} isDisabled={isDisabled} onAdd={handleAdd} />
       {entries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
@@ -149,8 +165,9 @@ export const AccessForm: React.FC<AccessFormProps> = ({
               )}
               {entries.map((entry) => (
                 <PrincipalRow
-                  key={`user:${entry.name}`}
+                  key={getAccessControlEntryKey(entry)}
                   entry={entry}
+                  profile={entry.id !== undefined ? profileByUid.get(entry.id) : undefined}
                   accessControlMode={accessControlMode}
                   isDisabled={isDisabled}
                   onChangeRole={(role) => handleChangeRole(entry, role)}

@@ -26,7 +26,7 @@ import { accessFlyoutAddPeoplePlaceholder } from './access_i18n';
 interface UserPickerProps {
   /** Usernames already added to the ACL (excluded from the dropdown). */
   excludedUsernames: string[];
-  onAdd: (username: string) => void;
+  onAdd: (profile: UserProfileWithAvatar) => void;
   isDisabled?: boolean;
 }
 
@@ -51,8 +51,8 @@ const hiddenOptionIndicatorCss = css`
 
 const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   label: getUserDisplayName(profile.user),
-  value: profile.user.username,
-  key: profile.user.username,
+  value: profile.uid,
+  key: profile.uid,
   profile,
 });
 
@@ -70,9 +70,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({ excludedUsernames, onAdd
 
   const onChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      const next = selected[0]?.value;
-      if (next) {
-        onAdd(next);
+      const selectedUid = selected[0]?.value;
+      if (!selectedUid) return;
+      const selectedProfile = (selected[0] as UserOption | undefined)?.profile;
+      if (selectedProfile) {
+        onAdd(selectedProfile);
         setSearchValue('');
       }
     },
