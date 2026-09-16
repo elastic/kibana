@@ -266,7 +266,7 @@ describe('enable()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name', undefined);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       {
