@@ -26,6 +26,7 @@ export const useSorting = ({
   dataView,
   isPlainRecord,
   isSortEnabled,
+  isInteractive,
   isInMemorySortEnabled,
   isSummaryOnlyColumn,
   onSort,
@@ -37,6 +38,7 @@ export const useSorting = ({
   dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
+  isInteractive: boolean;
   isInMemorySortEnabled: boolean;
   isSummaryOnlyColumn: boolean;
   onSort: ((sort: SortOrder[]) => void) | undefined;
@@ -93,11 +95,8 @@ export const useSorting = ({
   }, [comparators, rows]);
 
   const sorting = useMemo<EuiDataGridProps['sorting']>(() => {
-    if (!isSortEnabled) {
-      return {
-        columns: sortingColumns,
-        onSort: () => {},
-      };
+    if (!isInteractive || !isSortEnabled) {
+      return undefined;
     }
 
     // in ES|QL mode, sorting is disabled when in Document view
@@ -113,7 +112,7 @@ export const useSorting = ({
         onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
-  }, [isSortEnabled, isPlainRecord, isSummaryOnlyColumn, sortingColumns, onSort]);
+  }, [isInteractive, isSortEnabled, isPlainRecord, isSummaryOnlyColumn, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
 };

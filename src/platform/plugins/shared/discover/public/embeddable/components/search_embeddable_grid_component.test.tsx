@@ -75,7 +75,7 @@ const createSavedSearch = (isEsql: boolean): SavedSearch => {
   };
 };
 
-const createApi = (savedSearch: SavedSearch) => {
+const createApi = (savedSearch: SavedSearch, viewMode: 'view' | 'print' = 'view') => {
   return {
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     savedSearch$: new BehaviorSubject(savedSearch),
@@ -88,6 +88,9 @@ const createApi = (savedSearch: SavedSearch) => {
     description$: new BehaviorSubject<string | undefined>(undefined),
     defaultTitle$: new BehaviorSubject<string | undefined>('Test'),
     defaultDescription$: new BehaviorSubject<string | undefined>(undefined),
+    parentApi: {
+      viewMode$: new BehaviorSubject(viewMode),
+    },
   } as unknown as SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -102,9 +105,15 @@ describe('SearchEmbeddableGridComponent', () => {
     jest.clearAllMocks();
   });
 
-  const renderComponent = ({ isEsql }: { isEsql: boolean }) => {
+  const renderComponent = ({
+    isEsql,
+    isPrintMode = false,
+  }: {
+    isEsql: boolean;
+    isPrintMode?: boolean;
+  }) => {
     const savedSearch = createSavedSearch(isEsql);
-    const api = createApi(savedSearch);
+    const api = createApi(savedSearch, isPrintMode ? 'print' : 'view');
     const stateManager = createStateManager();
     const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
@@ -178,5 +187,16 @@ describe('SearchEmbeddableGridComponent', () => {
       onResize({ columnId: '_source', width: undefined });
       expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
+  });
+
+  it('passes print mode to the embeddable grid', async () => {
+    renderComponent({ isEsql: false, isPrintMode: true });
+
+    await waitFor(() => {
+      expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+    });
+
+    const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+    expect(lastCallProps?.isPrintMode).toBe(true);
   });
 });
