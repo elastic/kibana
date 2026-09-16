@@ -79,7 +79,7 @@ export function ensurePnpmAvailable(log) {
 }
 
 /**
- * Read the pinned pnpm version from package.json "engines" (e.g. "~12.4.1" -> "12.4.1").
+ * Read the pinned pnpm version from package.json "engines" (e.g. "~12.4.2" -> "12.4.2").
  * @returns {string}
  */
 function getRequiredPnpmVersion() {
