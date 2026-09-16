@@ -47,7 +47,12 @@ export const ruleAttachmentDataSchema = ruleResponseSchema
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),
-    metadata: shape.metadata.strip(),
+    metadata: shape.metadata
+      .extend({
+        // signature_id is server-generated, so it is absent on proposed (not-yet-saved) rules.
+        signature_id: opt(shape.metadata.shape.signature_id),
+      })
+      .strip(),
   })
   .strip();
 

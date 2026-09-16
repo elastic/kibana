@@ -135,6 +135,7 @@ const baseRule: RuleApiResponse = {
   version: 1,
   metadata: {
     name: 'Test Events Rule',
+    signature_id: 'test-sig-id',
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },
