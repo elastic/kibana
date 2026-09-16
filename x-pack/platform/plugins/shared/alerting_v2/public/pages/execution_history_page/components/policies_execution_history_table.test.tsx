@@ -207,14 +207,14 @@ describe('PoliciesExecutionHistoryTable', () => {
       items: [
         buildItem({
           outcome: 'dispatch_failed',
-          failure_reason: 'no_connector',
-          error: { message: 'Connector missing' },
+          failure_reason: 'workflow_not_found',
+          error: { message: 'Workflow not found' },
         }),
       ],
     });
 
     expect(screen.getByText('Failed')).toBeInTheDocument();
-    expect(screen.getByText('no_connector')).toBeInTheDocument();
+    expect(screen.getByText('workflow_not_found')).toBeInTheDocument();
   });
 
   it('shows the noItemsMessage when there are no items', () => {

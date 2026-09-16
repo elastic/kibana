@@ -111,7 +111,9 @@ const PolicyTimestampCell = ({
   row,
   dateTimeFormat,
 }: DataGridCellValueElementProps & { dateTimeFormat: string }) => (
-  <>{moment(row.flattened[POLICY_EXECUTION_FIELDS.dispatchedAt] as string).format(dateTimeFormat)}</>
+  <>
+    {moment(row.flattened[POLICY_EXECUTION_FIELDS.dispatchedAt] as string).format(dateTimeFormat)}
+  </>
 );
 
 const PolicyNameCell = ({

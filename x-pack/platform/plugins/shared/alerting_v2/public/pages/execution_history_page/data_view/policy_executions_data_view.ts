@@ -78,8 +78,7 @@ const POLICY_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   },
 };
 
-export const usePolicyExecutionsDataView = () =>
-  useAdHocDataView(POLICY_EXECUTIONS_DATA_VIEW_SPEC);
+export const usePolicyExecutionsDataView = () => useAdHocDataView(POLICY_EXECUTIONS_DATA_VIEW_SPEC);
 
 // Extra flattened values consumed by cell renderers but not shown as their own column: the outcome
 // cell's failure tooltip (`errorMessage`, `failureReason`) and the rules cell's true total
