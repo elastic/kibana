@@ -11,6 +11,7 @@ import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
+  FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
@@ -96,7 +97,6 @@ import {
 const withApm = withApmDecorator('RulesClient');
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 20;
 
 /**
  * Max concurrent `bulkUpdateSchedules` calls when rotating executor task API
@@ -780,7 +780,7 @@ export class RulesClient {
   @withApm
   public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
-    const perPage = params.perPage ?? DEFAULT_PER_PAGE;
+    const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
     const search = buildSoSearch(params.search);
     const sortField = mapSortField(params.sortField);

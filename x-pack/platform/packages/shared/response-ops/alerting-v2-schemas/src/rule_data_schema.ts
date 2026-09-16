@@ -403,6 +403,12 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
+    // Only type-agnostic structures belong here. How large a `data` value may be
+    // depends on the artifact type, which this schema deliberately does not know:
+    // registered types are bounded by their own `dataSchema` (applied server-side,
+    // where the artifact-type registry is available). Unregistered types pass
+    // through with a limit of MAX_ARTIFACT_DATA_LENGTH so a disabled or rolled-back
+    // plugin cannot fail writes.
     if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
@@ -745,7 +751,7 @@ export const findRulesRequestSchema = z
       .describe('The page number to return. Defaults to 1.'),
     per_page: queryIntSchema({ min: 1, max: 1000 })
       .optional()
-      .describe('The number of rules to return per page. Defaults to 20.'),
+      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}`),
     filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
     sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
     sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
